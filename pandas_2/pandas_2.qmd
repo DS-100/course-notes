@@ -1,0 +1,237 @@
+---
+title: Pandas II
+execute:
+  echo: true
+format:
+  html:
+    code-fold: true
+    code-tools: true
+    toc: true
+    toc-title: Pandas II
+    page-layout: full
+    theme:
+      - cosmo
+      - cerulean
+jupyter: python3
+---
+
+Last time, we introduced the Pandas library as a toolkit for processing data. We learned the DataFrame and Series data structures, familiarized ourselves with the basic syntax for manipulating tabular data, and began writing our first lines of Pandas code.
+
+
+In this lecture, we'll start to dive into some advanced Pandas syntax. You may find it helpful to follow along with a notebook of your own as we walk through these new pieces of code.
+
+We'll start by loading the `babynames` dataset.
+
+```{python}
+import pandas as pd
+import urllib.request
+import os.path
+import zipfile
+
+data_url = "https://www.ssa.gov/oact/babynames/state/namesbystate.zip"
+local_filename = "babynamesbystate.zip"
+if not os.path.exists(local_filename): # if the data exists don't download again
+    with urllib.request.urlopen(data_url) as resp, open(local_filename, 'wb') as f:
+        f.write(resp.read())
+
+zf = zipfile.ZipFile(local_filename, 'r')
+
+ca_name = 'CA.TXT'
+field_names = ['State', 'Sex', 'Year', 'Name', 'Count']
+with zf.open(ca_name) as fh:
+    babynames = pd.read_csv(fh, header=None, names=field_names)
+
+babynames.head()
+```
+
+## Sorting With a Custom Key
+
+In the last lecture, we learned how to sort a DataFrame by the values in one or more of its columns using [`.sort_values`](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.sort_values.html). Pandas automatically sorted values in order according to numeric value (for number data) or alphabetical order (for string data). 
+
+```{python}
+#| code-fold: false
+# Sort names by reverse-alphabetical order
+# Recall that `.head(5)` displays the first five rows in the DataFrame
+babynames.sort_values("Name", ascending=False).head(5) 
+```
+
+This offers us a lot of functionality, but what if we need to sort by some other metric? For example, what if we wanted to find the longest names in the DataFrame?
+
+We can do this by specifying the `key` parameter of `.sort_values`. The `key` parameter is assigned to a function of our choice. This function is then applied to each value in the specified column. Pandas will, finally, sort the DataFrame by the values outputted by the function.
+
+```{python}
+#| code-fold: false
+# Here, a lambda function is applied to find the length of each value, `x`, in the "Name" column
+babynames.sort_values("Name", key = lambda x: x.str.len(), ascending=False).head(5)
+```
+
+## Adding and Removing Columns
+
+To add a new column to a DataFrame, we use a syntax similar to that used when accessing an existing column. Specify the name of the new column by writing `dataframe["new_column"]`, then assign this to a Series or Array containing the values that will populate this column.
+
+```{python}
+#| code-fold: false
+# Add a column named "Length" that includes the length of each name
+babynames["Length"] = babynames["Name"].str.len()
+babynames.head(5)
+```
+
+In the example above, we made use of an in-built function given to us by the `str` accessor. What if we had wanted to generate the values in our new column using a function of our own making?
+
+We can do this using the Series [`.map`](https://pandas.pydata.org/docs/reference/api/pandas.Series.map.html) method. `.map` takes in a function as input, and will apply this function to each value of a Series. 
+
+For example, say we wanted to find the number of occurrences of the sequence "dr" or "ea" in each name. 
+
+```{python}
+#| code-fold: false
+# First, define a function to count the number of times "dr" or "ea" appear in each name
+def dr_ea_count(string):
+    return string.count("dr") + string.count("ea")
+
+# Then, use `map` to apply `dr_ea_count` to each name in the "Name" column
+babynames["dr_ea_count"] = babynames["Name"].map(dr_ea_count)
+
+# Sort the DataFrame by the new "dr_ea_count" column so we can see our handiwork
+babynames.sort_values(by = "dr_ea_count", ascending = False).head(5)
+```
+
+If we want to remove a column or row of a DataFrame, we can call the [`.drop`](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.drop.html) method. Use the `axis` parameter to specify whether a column or row should be dropped. Unless otherwise specified, Pandas will assume that we are dropping a row by default. 
+
+```{python}
+#| code-fold: false
+# Drop the row of the DataFrame with label 2
+babynames = babynames.drop(2, axis="rows")
+
+# Drop our "dr_ea_count" and "length" columns from the DataFrame
+babynames = babynames.drop(["dr_ea_count", "Length"], axis="columns")
+babynames.head(5)
+```
+
+Notice that we reassigned `babynames` to the result of `babynames.drop(...)`. This is a subtle, but important point: Pandas table operations **do not occur in-place**. Calling `dataframe.drop(...)` will output a *copy* of `dataframe` with the row/column of interest removed, without modifying the original `dataframe` table. 
+
+In other words, if we simply call:
+
+```{python}
+#| code-fold: false
+# This creates a copy of `babynames` and removes the row with label 3...
+babynames.drop(3, axis="rows")
+
+# ...but the original `babynames` is unchanged! 
+# Notice that the row with label 3 is still present
+babynames.head(5)
+```
+
+Our original `babynames` DataFrame will remain unmodified.
+
+## Aggregating Data with GroupBy
+
+Up until this point, we have been working with individual rows of DataFrames. As Data Scientists, we often wish to investigate trends across a larger *subset* of our data. For example, we may want to compute some summary statistic (the mean, median, sum, etc.) for a group of rows in our DataFrame. To do this, we'll use Pandas GroupBy objects.
+
+Let's say we wanted to aggregate all rows in `babynames` for a given year. 
+
+```{python}
+#| code-fold: false
+babynames.groupby("Year")
+```
+
+What does this strange output mean? Calling [`.groupby`](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.groupby.html) has generated a GroupBy object. You can imagine this as a set of "mini" sub-DataFrames, where each subframe contains all of the rows from `babynames` that correspond to a particular year. 
+
+The diagram below shows a simplified view of `babynames` to help illustrate this idea.
+
+<img src="images/gb.png" alt='gb' width='600'>
+
+We can't work with a GroupBy object directly – that is why you saw that strange output earlier, rather than a standard view of a DataFrame. To actually manipulate values within these "mini" DataFrames, we'll need to call an *aggregation method*. This is a method that tells Pandas how to aggregate the values within the GroupBy object. Once the aggregation is applied, Pandas will return a normal (now grouped) DataFrame.
+
+The first aggregation method we'll consider is `.agg`. The `.agg` method takes in a function as its argument; this function is then applied to each column of a "mini" grouped DataFrame. We end up with a new DataFrame with one aggregated row per subframe. Let's see this in action by finding the `sum` of all counts for each year in `babynames` – this is equivalent to finding the number of babies born in each year. 
+
+```{python}
+#| code-fold: false
+babynames.groupby("Year").agg(sum).head(5)
+```
+
+We can relate this back to the diagram we used above. Remember that the diagram uses a simplified version of `babynames`, which is why we see smaller values for the summed counts.
+
+<img src="images/agg.png" alt='agg' width='800'>
+
+Calling `.agg` has condensed each subframe back into a single row. This gives us our final output: a DataFrame that is now indexed by `"Year"`, with a single row for each unique year in the original `babynames` DataFrame.
+
+You may be wondering: where did the `"State"`, `"Sex"`, and `"Name"` columns go? Logically, it doesn't make sense to `sum` the string data in these columns (how would we add "Mary" + "Ann"?). Because of this, Pandas will simply omit these columns when it performs the aggregation on the DataFrame. Since this happens implicitly, without the user specifying that these columns should be ignored, it's easy to run into troubling situations where columns are removed without the programmer noticing. It is better coding practice to select *only* the columns we care about before performing the aggregation.
+
+```{python}
+#| code-fold: false
+# Same result, but now we explicitly tell Pandas to only consider the "Count" column when summing
+babynames.groupby("Year")[["Count"]].agg(sum).head(5)
+```
+
+There is a whole host of aggregation methods we can use other than `.agg`. Some useful options are:
+
+* [`.max`](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.core.groupby.GroupBy.max.html): creates a new DataFrame with the maximum value of each group
+* [`.mean`](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.core.groupby.GroupBy.mean.html): creates a new DataFrame with the mean value of each group
+* [`.size`](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.core.groupby.GroupBy.size.html): creates a new Series with the number of entries in each group
+* [`.filter`](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.core.groupby.DataFrameGroupBy.filter.html): creates a copy of the original DataFrame, keeping only the rows from subframes that obey a provided condition
+
+## Aggregating Data with Pivot Tables
+
+We know now that `.groupby` gives us the ability to group and aggregate data across our DataFrame. The examples above formed groups using just one column in the DataFrame. It's possible to group by multiple columns at once by passing in a list of columns names to `.groupby`. 
+
+Let's find the total number of baby names associated with each sex for each year in `babynames`. To do this, we'll group by *both* the `"Year"` and `"Sex"` columns.
+
+```{python}
+#| code-fold: false
+# Find the total number of baby names associated with each sex for each year in the data
+babynames.groupby(["Year", "Sex"])[["Count"]].agg(sum).head(6)
+```
+
+Notice that both `"Year"` and `"Sex"` serve as the index of the DataFrame (they are both rendered in bold). We've created a *multindex* where two different index values, the year and sex, are used to uniquely identify each row. 
+
+This isn't the most intuitive way of representing this data – and, because multindexes have multiple dimensions in their index, they can often be difficult to use. 
+
+Another strategy to aggregate across two columns is to create a pivot table. You saw these back in Data 8. One set of values is used to create the index of the table; another set is used to define the column names. The values contained in each cell of the table correspond to the aggregated data for each index-column pair.
+
+The best way to understand pivot tables is to see one in action. Let's return to our original goal of summing the total number of names associated with each combination of year and sex. We'll call the Pandas [`.pivot_table`](linklinklink.com) method to create a new table.
+
+```{python}
+#| code-fold: false
+# The `pivot_table` method is used to generate a Pandas pivot table
+babynames.pivot_table(index = "Year", columns = "Sex", values = "Count", aggfunc = sum).head(5)
+```
+
+Looks a lot better! Now, our DataFrame is structured with clear index-column combinations. Each entry in the pivot table represents the summed count of names for a given combination of `"Year"` and `"Sex"`.
+
+Let's take a closer look at the code implemented above. 
+
+* `index = "Year"` specifies the column name in the original DataFrame that should be used as the index of the pivot table
+* `columns = "Sex"` specifies the column name in the original DataFrame that should be used to generate the columns of the pivot table
+* `values = "Count"` indicates what values from the original DataFrame should be used to populate the entry for each index-column combination
+* `aggfunc = sum` tells Pandas what function to use when aggregating the data specified by `values`. Here, we are `sum`ming the name counts for each pair of `"Year"` and `"Sex"`
+
+## Joining Tables 
+
+When working on Data Science projects, we're unlikely to have absolutely all the data we want contained in a single DataFrame – a real-world Data Scientist needs to grapple with data coming from multiple sources. If we have access to multiple datasets with related information, we can join two or more tables into a single DataFrame. 
+
+To put this into practice, we'll revisit the `elections` dataset from last lecture.
+
+```{python}
+elections = pd.read_csv("data/elections.csv")
+elections.head(5)
+```
+
+Say we want to understand the 2023 popularity of the names of each presidential candidate. To do this, we'll need the combined data of `babynames` *and* `elections`. 
+
+We'll start by creating a new column containing the first name of each presidential candidate. This will help us join each name in `elections` to the corresponding name data in `babynames`. 
+
+```{python}
+#| code-fold: false
+# This `str` operation splits each candidate's full name at each 
+# blank space, then takes just the candidiate's first name
+elections["First Name"] = elections["Candidate"].str.split().str[0]
+elections.head(5)
+```
+
+Now, we're ready to join the two tables. [`pd.merge`](linklinklink.com) is the Pandas method used to join DataFrames together. The `left` and `right` parameters are used to specify the DataFrames to be joined. The `left_on` and `right_on` parameters are assigned to the string names of the columns to be used when performing the join. These two `on` parameters tell Pandas what values should act as pairing keys to determine which rows to merge across the DataFrames. 
+
+```{python}
+#| code-fold: false
+pd.merge(left = elections, right = babynames, left_on = "First Name", right_on = "Name")
+```
+
