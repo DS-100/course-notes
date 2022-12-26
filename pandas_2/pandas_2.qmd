@@ -12,13 +12,21 @@ format:
     theme:
       - cosmo
       - cerulean
+    callout-icon: false
 jupyter: python3
 ---
 
-Last time, we introduced the Pandas library as a toolkit for processing data. We learned the DataFrame and Series data structures, familiarized ourselves with the basic syntax for manipulating tabular data, and began writing our first lines of Pandas code.
+::: {.callout-note collapse="true"}
+## Learning Outcomes
+* Build familiarity with advanced `pandas` syntax
+* Recognize situations where aggregation is useful and identify the correct technique for performing an aggregation
+* Understand the real-world need for joining and perform a simple merge
+:::
+
+Last time, we introduced the `pandas` library as a toolkit for processing data. We learned the DataFrame and Series data structures, familiarized ourselves with the basic syntax for manipulating tabular data, and began writing our first lines of `pandas` code.
 
 
-In this lecture, we'll start to dive into some advanced Pandas syntax. You may find it helpful to follow along with a notebook of your own as we walk through these new pieces of code.
+In this lecture, we'll start to dive into some advanced `pandas` syntax. You may find it helpful to follow along with a notebook of your own as we walk through these new pieces of code.
 
 We'll start by loading the `babynames` dataset.
 
@@ -46,7 +54,7 @@ babynames.head()
 
 ## Sorting With a Custom Key
 
-In the last lecture, we learned how to sort a DataFrame by the values in one or more of its columns using [`.sort_values`](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.sort_values.html). Pandas automatically sorted values in order according to numeric value (for number data) or alphabetical order (for string data). 
+In the last lecture, we learned how to sort a DataFrame by the values in one or more of its columns using [`.sort_values`](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.sort_values.html). `pandas` automatically sorted values in order according to numeric value (for number data) or alphabetical order (for string data). 
 
 ```{python}
 #| code-fold: false
@@ -57,7 +65,7 @@ babynames.sort_values("Name", ascending=False).head(5)
 
 This offers us a lot of functionality, but what if we need to sort by some other metric? For example, what if we wanted to find the longest names in the DataFrame?
 
-We can do this by specifying the `key` parameter of `.sort_values`. The `key` parameter is assigned to a function of our choice. This function is then applied to each value in the specified column. Pandas will, finally, sort the DataFrame by the values outputted by the function.
+We can do this by specifying the `key` parameter of `.sort_values`. The `key` parameter is assigned to a function of our choice. This function is then applied to each value in the specified column. `pandas` will, finally, sort the DataFrame by the values outputted by the function.
 
 ```{python}
 #| code-fold: false
@@ -95,7 +103,7 @@ babynames["dr_ea_count"] = babynames["Name"].map(dr_ea_count)
 babynames.sort_values(by = "dr_ea_count", ascending = False).head(5)
 ```
 
-If we want to remove a column or row of a DataFrame, we can call the [`.drop`](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.drop.html) method. Use the `axis` parameter to specify whether a column or row should be dropped. Unless otherwise specified, Pandas will assume that we are dropping a row by default. 
+If we want to remove a column or row of a DataFrame, we can call the [`.drop`](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.drop.html) method. Use the `axis` parameter to specify whether a column or row should be dropped. Unless otherwise specified, `pandas` will assume that we are dropping a row by default. 
 
 ```{python}
 #| code-fold: false
@@ -107,7 +115,7 @@ babynames = babynames.drop(["dr_ea_count", "Length"], axis="columns")
 babynames.head(5)
 ```
 
-Notice that we reassigned `babynames` to the result of `babynames.drop(...)`. This is a subtle, but important point: Pandas table operations **do not occur in-place**. Calling `dataframe.drop(...)` will output a *copy* of `dataframe` with the row/column of interest removed, without modifying the original `dataframe` table. 
+Notice that we reassigned `babynames` to the result of `babynames.drop(...)`. This is a subtle, but important point: `pandas` table operations **do not occur in-place**. Calling `dataframe.drop(...)` will output a *copy* of `dataframe` with the row/column of interest removed, without modifying the original `dataframe` table. 
 
 In other words, if we simply call:
 
@@ -125,7 +133,7 @@ Our original `babynames` DataFrame will remain unmodified.
 
 ## Aggregating Data with GroupBy
 
-Up until this point, we have been working with individual rows of DataFrames. As Data Scientists, we often wish to investigate trends across a larger *subset* of our data. For example, we may want to compute some summary statistic (the mean, median, sum, etc.) for a group of rows in our DataFrame. To do this, we'll use Pandas GroupBy objects.
+Up until this point, we have been working with individual rows of DataFrames. As data scientists, we often wish to investigate trends across a larger *subset* of our data. For example, we may want to compute some summary statistic (the mean, median, sum, etc.) for a group of rows in our DataFrame. To do this, we'll use `pandas` `GroupBy` objects.
 
 Let's say we wanted to aggregate all rows in `babynames` for a given year. 
 
@@ -134,13 +142,13 @@ Let's say we wanted to aggregate all rows in `babynames` for a given year.
 babynames.groupby("Year")
 ```
 
-What does this strange output mean? Calling [`.groupby`](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.groupby.html) has generated a GroupBy object. You can imagine this as a set of "mini" sub-DataFrames, where each subframe contains all of the rows from `babynames` that correspond to a particular year. 
+What does this strange output mean? Calling [`.groupby`](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.groupby.html) has generated a `GroupBy` object. You can imagine this as a set of "mini" sub-DataFrames, where each subframe contains all of the rows from `babynames` that correspond to a particular year. 
 
 The diagram below shows a simplified view of `babynames` to help illustrate this idea.
 
-<img src="images/gb.png" alt='gb' width='600'>
+![Creating a GroupBy object](gb.png)
 
-We can't work with a GroupBy object directly – that is why you saw that strange output earlier, rather than a standard view of a DataFrame. To actually manipulate values within these "mini" DataFrames, we'll need to call an *aggregation method*. This is a method that tells Pandas how to aggregate the values within the GroupBy object. Once the aggregation is applied, Pandas will return a normal (now grouped) DataFrame.
+We can't work with a `GroupBy` object directly – that is why you saw that strange output earlier, rather than a standard view of a DataFrame. To actually manipulate values within these "mini" DataFrames, we'll need to call an *aggregation method*. This is a method that tells `pandas` how to aggregate the values within the `GroupBy` object. Once the aggregation is applied, `pandas` will return a normal (now grouped) DataFrame.
 
 The first aggregation method we'll consider is `.agg`. The `.agg` method takes in a function as its argument; this function is then applied to each column of a "mini" grouped DataFrame. We end up with a new DataFrame with one aggregated row per subframe. Let's see this in action by finding the `sum` of all counts for each year in `babynames` – this is equivalent to finding the number of babies born in each year. 
 
@@ -151,11 +159,11 @@ babynames.groupby("Year").agg(sum).head(5)
 
 We can relate this back to the diagram we used above. Remember that the diagram uses a simplified version of `babynames`, which is why we see smaller values for the summed counts.
 
-<img src="images/agg.png" alt='agg' width='800'>
+![Performing an aggregation](agg.png)
 
 Calling `.agg` has condensed each subframe back into a single row. This gives us our final output: a DataFrame that is now indexed by `"Year"`, with a single row for each unique year in the original `babynames` DataFrame.
 
-You may be wondering: where did the `"State"`, `"Sex"`, and `"Name"` columns go? Logically, it doesn't make sense to `sum` the string data in these columns (how would we add "Mary" + "Ann"?). Because of this, Pandas will simply omit these columns when it performs the aggregation on the DataFrame. Since this happens implicitly, without the user specifying that these columns should be ignored, it's easy to run into troubling situations where columns are removed without the programmer noticing. It is better coding practice to select *only* the columns we care about before performing the aggregation.
+You may be wondering: where did the `"State"`, `"Sex"`, and `"Name"` columns go? Logically, it doesn't make sense to `sum` the string data in these columns (how would we add "Mary" + "Ann"?). Because of this, `pandas` will simply omit these columns when it performs the aggregation on the DataFrame. Since this happens implicitly, without the user specifying that these columns should be ignored, it's easy to run into troubling situations where columns are removed without the programmer noticing. It is better coding practice to select *only* the columns we care about before performing the aggregation.
 
 ```{python}
 #| code-fold: false
@@ -186,9 +194,9 @@ Notice that both `"Year"` and `"Sex"` serve as the index of the DataFrame (they 
 
 This isn't the most intuitive way of representing this data – and, because multindexes have multiple dimensions in their index, they can often be difficult to use. 
 
-Another strategy to aggregate across two columns is to create a pivot table. You saw these back in Data 8. One set of values is used to create the index of the table; another set is used to define the column names. The values contained in each cell of the table correspond to the aggregated data for each index-column pair.
+Another strategy to aggregate across two columns is to create a pivot table. You saw these back in [Data 8](https://inferentialthinking.com/chapters/08/3/Cross-Classifying_by_More_than_One_Variable.html#pivot-tables-rearranging-the-output-of-group). One set of values is used to create the index of the table; another set is used to define the column names. The values contained in each cell of the table correspond to the aggregated data for each index-column pair.
 
-The best way to understand pivot tables is to see one in action. Let's return to our original goal of summing the total number of names associated with each combination of year and sex. We'll call the Pandas [`.pivot_table`](linklinklink.com) method to create a new table.
+The best way to understand pivot tables is to see one in action. Let's return to our original goal of summing the total number of names associated with each combination of year and sex. We'll call the `pandas` [`.pivot_table`](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.pivot_table.html) method to create a new table.
 
 ```{python}
 #| code-fold: false
@@ -203,16 +211,16 @@ Let's take a closer look at the code implemented above.
 * `index = "Year"` specifies the column name in the original DataFrame that should be used as the index of the pivot table
 * `columns = "Sex"` specifies the column name in the original DataFrame that should be used to generate the columns of the pivot table
 * `values = "Count"` indicates what values from the original DataFrame should be used to populate the entry for each index-column combination
-* `aggfunc = sum` tells Pandas what function to use when aggregating the data specified by `values`. Here, we are `sum`ming the name counts for each pair of `"Year"` and `"Sex"`
+* `aggfunc = sum` tells `pandas` what function to use when aggregating the data specified by `values`. Here, we are `sum`ming the name counts for each pair of `"Year"` and `"Sex"`
 
 ## Joining Tables 
 
-When working on Data Science projects, we're unlikely to have absolutely all the data we want contained in a single DataFrame – a real-world Data Scientist needs to grapple with data coming from multiple sources. If we have access to multiple datasets with related information, we can join two or more tables into a single DataFrame. 
+When working on data science projects, we're unlikely to have absolutely all the data we want contained in a single DataFrame – a real-world data scientist needs to grapple with data coming from multiple sources. If we have access to multiple datasets with related information, we can join two or more tables into a single DataFrame. 
 
 To put this into practice, we'll revisit the `elections` dataset from last lecture.
 
 ```{python}
-elections = pd.read_csv("data/elections.csv")
+elections = pd.read_csv("elections.csv")
 elections.head(5)
 ```
 
@@ -228,7 +236,7 @@ elections["First Name"] = elections["Candidate"].str.split().str[0]
 elections.head(5)
 ```
 
-Now, we're ready to join the two tables. [`pd.merge`](linklinklink.com) is the Pandas method used to join DataFrames together. The `left` and `right` parameters are used to specify the DataFrames to be joined. The `left_on` and `right_on` parameters are assigned to the string names of the columns to be used when performing the join. These two `on` parameters tell Pandas what values should act as pairing keys to determine which rows to merge across the DataFrames. 
+Now, we're ready to join the two tables. [`pd.merge`](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.merge.html) is the `pandas` method used to join DataFrames together. The `left` and `right` parameters are used to specify the DataFrames to be joined. The `left_on` and `right_on` parameters are assigned to the string names of the columns to be used when performing the join. These two `on` parameters tell `pandas` what values should act as pairing keys to determine which rows to merge across the DataFrames. We'll talk more about this idea of a pairing key next lecture.
 
 ```{python}
 #| code-fold: false
