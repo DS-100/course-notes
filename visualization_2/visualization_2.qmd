@@ -15,6 +15,7 @@ jupyter: python3
 
 ## Kernel Density Functions
 
+
 ### KDE Mechanics
 
 In the last lecture, we learned that density curves are smooth, continuous functions that represent a distribution of values. In this section, we'll learn how to construct density curves using Kernel Density Estimation.
@@ -23,7 +24,7 @@ In the last lecture, we learned that density curves are smooth, continuous funct
 
 Kernel Density Estimation involves a technique called **smoothing** - a process applied to a distribution of values that allows us to analyze the more general structure of the dataset.
 
-Many of the visualizations we learned during the last lecture are examples of this. Histograms are smoothed versions of one-dimensional rug plots, and hex plots are smoother alternatives to two-dimensional scatter plots. They remove the detail from individual observations so we can visualize the patterns in our distribution.
+Many of the visualizations we learned during the last lecture are examples of smoothing. Histograms are smoothed versions of one-dimensional rug plots, and hex plots are smoother alternatives to two-dimensional scatter plots. They remove the detail from individual observations so we can visualize the larger properties of our distribution.
 
 #### Kernel Density Estimation
 
@@ -48,7 +49,7 @@ Let's walk through each step to construct this density curve.
 
 ##### Step 1 - Place a Kernel at Each Data Point
 
-To begin generating a density curve, we need to choose a **kernel** and **bandwidth value**. What are these exactly? A kernel is a density curve itself, and the bandwidth is a measure of the kernel's width. Recall that a valid density has an area of 1.
+To begin generating a density curve, we need to choose a kernel and bandwidth value. What are these exactly? A **kernel** is a density curve itself, and the **bandwidth** is a measure of the kernel's width. Recall that a valid density has an area of 1.
 
 At each of our 5 points (depicted in the rug plot on the left), we've placed a Gaussian kernel with a bandwidth parameter of alpha = 1. We'll explore what these are in the next section.
 
@@ -151,7 +152,7 @@ kde_curve = [gaussian_kernel(alpha, x, 0) for x in xs]
 plt.plot(xs, kde_curve);
 ```
 
-If you've taken a probability class, you'll recognize that the mean of this Gaussian kernel is $x_i$ and the standard deviation is $\alpha$.  Increasing $\alpha$ - equivalently, the bandwidth - smoothens the density curve. Larger values of $\alpha$ are typically easier to understand; however, we begin to lose important distributional information as $\alpha$ increases. 
+If you've taken a probability class, you'll recognize that the mean of this Gaussian kernel is $x_i$ and the standard deviation is $\alpha$.  Increasing $\alpha$ - equivalently, the bandwidth - smoothens the density curve. Larger values of $\alpha$ are typically easier to understand; however, we begin to lose important distributional information. 
 
 Here is how adjusting $\alpha$ affects a distribution in some variable from an arbitrary dataset.
 
@@ -237,26 +238,293 @@ The diagram on the right is how the density curve for our 5 point dataset would 
 
 ## Visualization Theory
 
-This section marks a pivot to the second major topic of this lecture - visualization theory. We'll discuss the abstract nature of visualizations, which will help us make informed decisions to construct them.
+This section marks a pivot to the second major topic of this lecture - visualization theory. We'll discuss the abstract nature of visualizations and analyze how they convey information.
 
-Remember, we had two goals for visualizing data. This section is particularly important in motivating
+Remember, we had two goals for visualizing data. This section is particularly important in:
 
-1. Help our understanding of the data and results
+1. Helping us understand the data and results
 2. Communicating our results and conclusions with others
 
 ### Information Channels
 
-There are various channels of information in visualizations - these include encodings, color, and scale, to name a few. In constructing good visuals, we should utilize these channels to convey information that answers our questions.
+Visualizations are able to convey information through various encodings. In the remainder of this lecture, we'll look at the use of color, scale, and depth, to name a few. 
 
-For example, we learned a few ways to picture a distribution: rugplots, KDEs, and histograms. Neither is strictle better than any other; they all convey varying levels of detail, and some may be more advantageous depending on the application.
+TODO Delete: Additionally, some visuals convey more detail than others. We learned how rugplots, KDEs, and histograms are all different representations of a distribution. One such example is in the rugplot.
 
 #### Encodings in Rugplots
 
-One detail that we may have overlooked in our earlier discussion of rugplots is the importance of encodings. Rugplots are effective visuals because they utilize encodings in line thickness to convey frequency. Consider the following diagram:
+One detail that we may have overlooked in our earlier discussion of rugplots is the importance of encodings. Rugplots are effective visuals because they utilize line thickness to encode frequency. Consider the following diagram:
 
 <img src="images/rugplot_encoding.png" alt='rugplot_encoding' width='600'> 
 
-#### Multi-Dimensional Data
+#### Multi-Dimensional Encodings
 
-Encodings are useful in representing complex 
+Encodings are also useful for representing multi-dimensional data. Notice how the following visual highlights four distinct "dimensions" of data:
+
+- X-axis
+- Y-axis
+- Area
+- Color
+
+<img src="images/mutli_dim_encodings.png" alt='multi_dim_encoding' width='400'> 
+
+The human visual perception sytem is only capable of visualizing data in a three-dimensional plane, but as you've seen, we can encode many more channels of information.
+
+### Harnessing the Axes
+
+#### Consider Scale of the Data
+
+However, we should be careful to not misrepresent relationships in our data by manipulating the scale or axes. The visualization below improperly portrays two seemingly independent relationships on the same plot. The authors have clearly changed the scale of the y-axis to mislead their audience.
+
+<img src="images/wrong_scale_viz.png" alt='wrong_scale_viz' width='350'> 
+
+Notice how the downwards-facing line segment contains values in the millions, while the upwards-trending segment only contains values near three hundred thousand. These lines should not be intersecting.
+
+When there is a large difference in the magnitude of the data, it's advised to analyze percentages instead of counts. The following diagrams correctly display the trends in cancer screening and abortion rates. 
+
+:::: {.columns}
+
+
+::: {.column width="30%"}
+<img src="images/good_viz_scale_1.png" alt='good_viz_scale_1' width='345'>
+:::
+
+::: {.column width="20%"}
+<!-- empty column to create gap -->
+:::
+
+::: {.column width="30%"}
+<img src="images/good_viz_scale_2.png" alt='good_viz_scale_2' width='345'>
+:::
+
+::::
+
+#### Reveal the Data
+
+Great visualizations not only consider the scale of the data, but also utilize the axes in a way that best conveys information. For example, data scientists commonly set certain axes limits to highlight parts of the visualization they are most interested in.
+
+:::: {.columns}
+
+
+::: {.column width="30%"}
+<img src="images/unrevealed_viz.png" alt='unrevealed_viz' width='345'>
+:::
+
+::: {.column width="20%"}
+<!-- empty column to create gap -->
+:::
+
+::: {.column width="30%"}
+<img src="images/revealed_viz.png" alt='revealed_viz' width='345'>
+:::
+
+::::
+
+The visualization on the right captures the trend in coronavirus cases during the month March in 2020. From only looking at the visualization on the left, a viewer may incorrectly believe that coronavirus began to skyrocket on March 4^th^, 2020. However, the second illustration tells a different story - cases rose closer to March 21^th^, 2020.
+
+### Harnessing Color
+
+Color is another important feature in visualizations that does more than what meets the eye. 
+
+Last lecture, we used color to encode a categorical variable in our scatter plot. In this section, we will discuss uses of color in novel visualizations like colormaps and heatmaps.
+
+5-8% of the world is red-green color blind, so we have to be very particular about our color scheme. We want to make these as accessible as possible. Choosing a set of colors which work together is evidently a challenging task!
+
+#### Colormaps
+
+Colormaps are mappings from pixel data to color values, and they're often used to highlight distinct parts of an image. Let's investigate a few properties of colormaps.
+
+:::: {.columns}
+
+
+::: {.column width="30%"}
+**Jet Colormap**
+<img src="images/jet_colormap.png" alt='jet_colormap' width='250'>
+:::
+
+::: {.column width="20%"}
+<!-- empty column to create gap -->
+:::
+
+::: {.column width="30%"}
+**Viridis Colormap**
+<img src="images/viridis_colormap.png" alt='viridis_colormap' width='250'>
+:::
+
+::::
+
+The jet colormap is infamous for being misleading. While it seems more vibrant than viridis, the aggressive colors poorly encode numerical data. To understand why, let's analyze the following images.
+
+:::: {.columns}
+
+
+::: {.column width="30%"}
+<img src="images/jet_four_by_four.png" alt='four_by_four_colormap' width='300'>
+:::
+
+::: {.column width="20%"}
+<!-- empty column to create gap -->
+:::
+
+::: {.column width="30%"}
+<img src="images/jet_3_images.png" alt='jet_3_colormap' width='250'>
+:::
+
+::::
+
+The diagram on the left compares how a variety of colormaps represent pixel data that transitions from a high to low intensity. These include the jet colormap (row a) and grayscale (row b). Notice how the grayscale images do the best job in smoothly transitioning between pixel data. The jet colormap is the worst at this - the four images in row (a) look like a conglomeration of individual colors. 
+
+The difference is also evident in the images labeled (a) and (b) on the left side. The grayscale image is better at preserving finer detail in the vertical line strokes. Additionally, grayscale is preferred in x-ray scans for being more neutral. The intensity of dark red color in the jet colormap is frightening and indicates something is wrong.
+
+Why is the jet colormap so much worse? The answer lies in how its color composition is percieved to the human eye.
+
+:::: {.columns}
+
+
+::: {.column width="30%"}
+**Jet Colormap Perception**
+<img src="images/jet_perceptually_uniform.png" alt='jet_perceptually_uniform' width='300'>
+:::
+
+::: {.column width="20%"}
+<!-- empty column to create gap -->
+:::
+
+::: {.column width="30%"}
+**Viridis Colormap Perception**
+<img src="images/viridis_perceptually_uniform.png" alt='viridis_perceptually_uniform' width='336'>
+:::
+
+::::
+
+The jet colormap is largely misleading because it is not perceptually uniform. **Perceptually uniform colormaps** have the property that if the pixel data goes from 0.1 to 0.2, the perceptual change is the same as when the data goes from 0.8 to 0.9.
+
+Notice how the said uniformity is present within the linear trend displayed in the viridis colormap. On the other hand, the jet colormap is largely non-linear - this is precisely why it's considered a worse colormap.
+
+### Harnessing Markings
+
+In our earlier discussion of multi-dimensional encodings, we analyzed a scatter plot with four pseudo-dimensions: the two axes, area, and color. Were these appropriate to use? The following diagram analyzes how well the human eye can distinguish between these "markings".
+
+<img src="images/markings_viz.png" alt='markings_viz' width='300'>
+
+There are a few key takeaways from this diagram
+
+- Lengths are easy to discern. Don't use plots with jiggled baselines - keep everything axis-aligned.
+- Avoid pie charts! Angle judgements are inaccurate.
+- Areas and volumes are hard to distinguish (area charts, word clouds, etc)
+
+### Harnessing Conditioning
+
+Conditioning is the process of comparing data that belong to seperate groups. We've seen this before in overlayed distributions, side-by-side box-plots, and scatter plots with categorical encodings. Here, we'll introduce terminology that formalizes these examples.
+
+Consider an example where we want to analyze income earnings for male and females with varying levels of education. There are multiple ways to compare this data. 
+
+:::: {.columns}
+
+
+::: {.column width="30%"}
+<img src="images/male_female_earnings_barplot.png" alt='jet_perceptually_uniform' width='360'>
+:::
+
+::: {.column width="20%"}
+<!-- empty column to create gap -->
+:::
+
+::: {.column width="30%"}
+<img src="images/male_female_earnings_scatterplot.png" alt='viridis_perceptually_uniform' width='340'>
+:::
+
+::::
+
+The barplot is an example of **juxtaposition**: placing multiple plots side by side, with the same scale. The scatter plot is an example of **superposition**: placing multiple density curves, scatter plots on top of each other. 
+
+Which is better depends on the problem at hand. Here, superposition makes the precise wage difference very clear from a quick glance. But many sophisticated plots convey information that favors the use of juxtaposition. Below is one example.
+
+<img src="images/small_multiples.png" alt='small_multiples' width='600'>
+                                                        
+
+### Harnessing Context
+
+The last component to a great visualization is perhaps the most critical - the use of context. Adding informative titles, axis labels, and descriptive captions are all best practices that we've heard repeatedly in Data 8.
+
+A publication-ready plot (and every Data 100 plot) needs:
+
+- Informative title (takeaway, not description)
+- Axis labels
+- Reference lines, markers, etc
+- Legends, if appropriate
+- Captions that describe data
+
+Captions should be:
+
+- Comprehensive and self-contained
+- Describe what has been graphed
+- Draw attention to important features
+- Describe conclusions drawn from graphs
+
+## Transformations
+
+These last two lectures have covered visualizations in great depth. We looked at various forms of visualizations, plotting libraries, and high-level theory.
+
+Much of this was done to uncover insights in data, which will prove necessary for the modeling process. A strong graphical correlation between two variables hinted an underlying relationship that has reason for further study. However, relying on visual relationships alone is limiting - not all plots show association. The presence of outliers and other statistical anomalies make it hard to interpret data.
+
+**Transformations** are the process of manipulating data to find significant relationships between variables. These are often found by applying mathematical functions to variables that "transform" their range of possible values and highlight some previously hidden associations between data.
+
+#### Transforming a Distribution
+
+When a distribution has a large dynamic range, it can be useful to take the logarithm of the data. For example, computing the logarithm of the ticket prices on the Titanic reduces skeweness and yields a distribution that is more "spread" across the x-axis. While it makes individual observations harder to interpret, the distribution is more favorable for subsequent analysis.
+
+:::: {.columns}
+
+
+::: {.column width="30%"}
+<img src="images/untransformed_titanic.png" alt='untransformed_titanic' width='400'>
+:::
+
+::: {.column width="20%"}
+<!-- empty column to create gap -->
+:::
+
+::: {.column width="30%"}
+<img src="images/transformed_titanic.png" alt='transformed_titanic' width='400'>
+:::
+
+::::
+
+#### Linearizing a Relationship
+
+Transformations are perhaps most useful to **linearize a relationship** between variables. If we find a transformation to make a scatter plot of two variables linear, we can "backtrack" to find the exact relationship between the variables. Linear relationships are particularly simple to interpret, and we'll be doing a lot of linear modeling in Data 100 - starting next lecture!
+
+Say we want to understand the relationship between healthcare and life expectancy. Intuitively there should be a positive correlation, but upon plotting values from a dataset, we find a non-linear relationship that is somewhat hard to understand. However, applying a logarithmic transformation to both variables - healthcare and life expectancy - results in a scatter plot with a linear trend that we can interpret.
+
+:::: {.columns}
+
+
+::: {.column width="30%"}
+<img src="images/untransformed_healthcare_lifeexp.png" alt='untransformed_titanic' width='400'>
+:::
+
+::: {.column width="20%"}
+<!-- empty column to create gap -->
+:::
+
+::: {.column width="30%"}
+<img src="images/transformed_healthcare_lifeexp.png" alt='transformed_titanic' width='400'>
+:::
+
+::::
+
+How can we find the relationship between the original variables? We know that taking a log of both axes gave us a linear relationship, so we can say (roughly) that 
+
+$$\log y= a*\log x + b$$
+
+Solving for $y$ implies a **power** relationship in the original plot.
+
+$$y= e^{a*\log x + b}$$
+$$y= Ce^{a*\log x}$$
+$$y= Cx^{a}$$
+
+How did we know that taking the logarithm of both sides would result in a linear relationship? The **Tukey-Mosteller Bulge Diagram** is helpful here. We can use the direction of the buldge in our original data to find the appropriate transformations that will linearize the relationship. These transformations are found on axes that are nearest to the buldge. The buldge in our earlier example lay in Quadrant 2, so the transformations $\log x$, $\sqrt x$, $y^{2}$, or $y^{3}$ are possible contenders. It's important to note that this diagram is not perfect, and some transformations will work better than others. In our case, $\log x$ and $\log y$ (found in Quadrant 3) were the best.
+
+<img src="images/tukey_mosteller.png" alt='tukey_mosteller' width='400'>
 
