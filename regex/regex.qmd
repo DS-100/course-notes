@@ -1,0 +1,185 @@
+---
+title: Regular Expressions
+format:
+  html:
+    toc: true
+    toc-depth: 5
+    toc-location: right
+    code-fold: false
+    theme:
+      - cosmo
+      - cerulean
+    callout-icon: false
+jupyter: python3
+---
+
+::: {.callout-note collapse="true"}
+## Learning Outcomes
+:::
+
+## Why Work with Text?
+
+Last lecture, we learned of the difference between quantitative and qualitative variable types. The latter includes string data - the primary focus of today's lecture. In this note, we'll discuss the necessary tools to manipulate text: Python string manipulation and regular expressions. 
+
+There are two main reasons for working with text.
+
+1. Canonicalization: Convert data that has multiple formats into a standard form.
+    - By manipulating text, we can join tables with mismatched string labels
+2. Extract information into a new feature.
+    - We can extract data and time features from raw log files
+
+## Python String Methods
+
+First, we'll introduce a few methods useful for string manipulation. The following table includes a number of string operations supported by Python and `pandas`. The Python functions operate on a single string, while their equivalent in `pandas` are  **vectorized** - they operate on a Series of string data.
+
++-----------------------+-----------------+---------------------------+
+| Operation             | Python          | Pandas (Series)           |
++=======================+=================+===========================+
+| Transformation        | - `s.lower(_)`  | - `ser.str.lower(_)`      |
+|                       | - `s.upper(_)`  | - `ser.str.upper(_)`      |
++-----------------------+-----------------+---------------------------+
+| Replacement + Deletion| - `s.replace(_)`| - `ser.str.replace(_)`    |
+|                       |                 |                           |
++-----------------------+-----------------+---------------------------+
+| Split                 | - `s.split(_)`  | - `ser.str.split(_)`      |
+|                       |                 |                           |
++-----------------------+-----------------+---------------------------+
+| Substring             | - `s[1:4]`      | - `ser.str[1:4]`          |
+|                       |                 |                           |
++-----------------------+-----------------+---------------------------+
+| Membership            | - `'_' in s`    | - `ser.str.contains(_)`   |
+|                       |                 |                           |
++-----------------------+-----------------+---------------------------+
+| Length                | - `len(s)`      | - `ser.str.len()`         |
+|                       |                 |                           |
++-----------------------+-----------------+---------------------------+
+
+We'll discuss the differences between Python string functions and `pandas` Series methods in the following section on canonicalization.
+
+### Canonicalization
+Assume we want to merge the given tables.
+
+```{python}
+#| code-fold: true
+import pandas as pd
+
+with open('data/county_and_state.csv') as f:
+    county_and_state = pd.read_csv(f)
+    
+with open('data/county_and_population.csv') as f:
+    county_and_pop = pd.read_csv(f)
+```
+
+```{python}
+display(county_and_state), display(county_and_pop);
+```
+
+Last time, we used a **primary key** and **foreign key** to join two tables. While neither of these keys exist in our DataFrames, the `County` columns look similar enough. Can we convert these columns into one standard, canonical form? 
+
+The following function uses Python string manipulation to convert a single county name into canonical form. It does so by eliminating whitespace, punctuation, and unnecessary text. 
+
+```{python}
+def canonicalize_county(county_name):
+    return (
+        county_name
+            .lower()
+            .replace(' ', '')
+            .replace('&', 'and')
+            .replace('.', '')
+            .replace('county', '')
+            .replace('parish', '')
+    )
+
+canonicalize_county("St. John the Baptist")
+```
+
+We will use the `pandas` `map` function to apply the `canonicalize_county` function to every row in both DataFrames. Then, we can create new columns called `clean_county_python` containing the canonical form.
+
+```{python}
+county_and_pop['clean_county_python'] = county_and_pop['County'].map(canonicalize_county)
+county_and_state['clean_county_python'] = county_and_state['County'].map(canonicalize_county)
+```
+
+```{python}
+display(county_and_state), display(county_and_pop);
+```
+
+Alternatively, we can use `pandas` Series methods to create this standardized column. To do so, we must call the `.str` attribute of our Series prior to calling any methods, like `.lower` and `.replace`. Notice how these method names match their equivalent built-in Python string function.
+
+Chaining multiple Series methods in this manner eliminates the need to use the `map` function.
+
+```{python}
+def canonicalize_county_series(county_series):
+    return (
+        county_series
+            .str.lower()
+            .str.replace(' ', '')
+            .str.replace('&', 'and')
+            .str.replace('.', '')
+            .str.replace('county', '')
+            .str.replace('parish', '')
+    )
+
+county_and_pop['clean_county_pandas'] = canonicalize_county_series(county_and_pop['County'])
+county_and_state['clean_county_pandas'] = canonicalize_county_series(county_and_state['County'])
+```
+
+```{python}
+display(county_and_pop), display(county_and_state);
+```
+
+### Extraction
+
+Extraction explores the idea of obtaining useful information from text data. This will be particularily important in model building, which we'll explore in a few weeks.
+
+Say we want to read some data from a `.txt` file.
+
+```{python}
+with open('data/log.txt', 'r') as f:
+    log_lines = f.readlines()
+```
+
+```{python}
+log_lines
+```
+
+Suppose we want to extract the day, month, year, hour, minutes, seconds, and timezone. Unfortunately, these items are not in a fixed position from the beginning of the string. Slicing by some fixed offset won't work.
+
+Instead, we can use some clever thinking. Notice how the information is contained within a set of brackets, further seperated by characters like `/` and `:`. We can hone in on this region of text, and split the data on these characters. Python's built-in `.split` function makes this easy.
+
+```{python}
+first = log_lines[0] # Only considering the first row of data
+
+pertinent = first.split("[")[1].split(']')[0]
+day, month, rest = pertinent.split('/')
+year, hour, minute, rest = rest.split(':')
+seconds, time_zone = rest.split(' ')
+day, month, year, hour, minute, seconds, time_zone
+```
+
+There are two problems with this code:
+
+1. Python's built-in functions limit us to extract data one row at a time
+    - This can be resolved using a map function or Pandas Series methods.
+2. The code is quite verbose
+    - This is a larger issue that is trickier to solve
+
+In the next section, we'll introduce regular expressions - a tool that solves problem 2).
+
+## Regex Basics
+
+A **regular expression ("regex")** is a sequence of characters that specifies a search pattern. They are written to extract information from text.
+
+The language of regular expressions - **regular language** - aims to replicate **formal language**, which is a way to describe conditions on a set of strings. Regular expressions have a stand-alone syntax
+
+For example, Social Security Numbers (SSNs) are often described by regular expresions.
+
+```{python}
+r"[0-9]{3}-[0-9]{2}-[0-9]{4}" # Regular Expression Syntax
+
+# 3 of any digit, then a dash,
+# then 2 of any digit, then a dash,
+# then 4 of any digit
+```
+
+

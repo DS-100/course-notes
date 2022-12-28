@@ -17,11 +17,11 @@ jupyter: python3
 ## Learning Outcomes
 :::
 
-Data scientists work with data stored in a variety of formats. The primary focus of this class is in understanding tabular data - one of the most commonly used formats used in data science. Tabular data contain large amounts of data that are stored in rows and columns. This note introduces DataFrames, which are one of the most popular ways to represent these data tables. We’ll also introduce `pandas`, the standard Python package for manipulating data in DataFrames.
+Data scientists work with data stored in a variety of formats. The primary focus of this class is in understanding tabular data - one of the most widely used formats in data science. This note introduces DataFrames, which are among the most popular representations of tabular data. We’ll also introduce `pandas`, the standard Python package for manipulating data in DataFrames.
 
 ## DataFrames
 
-In Data 8, you encountered the `Table` class of the `datascience` library. In Data 100, we'll be using the `DataFrame` class of the `pandas` library to represent tabular data.
+In Data 8, you encountered the `Table` class of the `datascience` library. In Data 100, we'll be using the `DataFrame` class of the `pandas` library.
 
 Here is an example of a DataFrame containing election data.
 
@@ -45,7 +45,7 @@ The API (application programming interface) for the DataFrame class is enormous.
 
 ## Slicing in DataFrames
 
-One of the most important tasks in manipulating a DataFrame is extracting a subset of rows and columns. This is called **slicing**. We can do so using three primary methods of the DataFrame class:
+The most fundamental way to manipulate a DataFrame is to extract a subset of rows and columns. This is called **slicing**. We can do so with three primary methods of the DataFrame class:
 
 1. `.loc`
 2. `.iloc`
@@ -53,21 +53,21 @@ One of the most important tasks in manipulating a DataFrame is extracting a subs
 
 ### Indexing with .loc
 
-The `.loc` operator selects rows and columns in a DataFrame by their row and column labels, respectively. The **row label** (commonly referred to as the **index**) is the bold text on the far left of a DataFrame, while the **column label** is the text found at the top of a DataFrame. By default, `pandas` assigns row labels as sequential integers beginning from 0. The column labels in our `elections` DataFrame are the columns `Year`, `Candidate`, `Party`, `Popular Vote`, `Result`, and `%`.
+The `.loc` operator selects rows and columns in a DataFrame by their row and column label(s), respectively. The **row label** (commonly referred to as the **index**) is the bold text on the far left of a DataFrame, while the **column label** is the text found at the top of a DataFrame. By default, row labels in `pandas` are the sequential list of integers beginning from 0. The column labels in our `elections` DataFrame are the column names themselves: `Year`, `Candidate`, `Party`, `Popular Vote`, `Result`, and `%`.
 
-`.loc` lets us specify the row and column labels to select from our DataFrame as the first and second arguments to the function. For example, to select the the row labeled `0` and the column labeled `Candidate` from our `elections` DataFrame we can write:
+`.loc` lets us grab data by specifying the appropriate row and column label(s) where the data exists. The row labels are the first argument to the `.loc` function; the column labels are the second. For example, to select the the row labeled `0` and the column labeled `Candidate` from our `elections` DataFrame we can write:
 
 ```{python}
 elections.loc[0, 'Candidate']
 ```
 
-To select multiple rows and columns, we can use Python slice notation. We can select the first four rows and first four columns.
+To select *multiple* rows and columns, we can use Python slice notation. We can select the first four rows and first four columns.
 
 ```{python}
 elections.loc[0:3, 'Year':'Popular vote']
 ```
 
-Suppose that instead, we wanted every column value for the first four rows in the `elections` DataFrame. The shorthand `:` comes in great use.
+Suppose that instead, we wanted *every* column value for the first four rows in the `elections` DataFrame. The shorthand `:` is useful for this.
 
 ```{python}
 elections.loc[0:3, :]
@@ -168,24 +168,21 @@ type(elections['Candidate'])
 
 A Series is a one dimensional object that represents a single column of data. It has two components - an index and the data. A DataFrame is equivalent to a collection of multiple Series, which all share the same index. Notice how the index of a Series is equivalent to the index (or row labels) of a DataFrame.
 
-![](images/index_comparison_1.png)
+<img src="images/index_comparison_1.png" alt='index_comparison' width='800'>
 
-However, a DataFrame index doesn't have to be an integer, nor does it have to be unique. For example, we can set our index to be the name of presedential candidates. Selecting a new Series from this modified DataFrame yields the following:
+However, a DataFrame index doesn't have to be an integer, nor does it have to be unique. For example, we can set our index to be the name of our presedential candidates. Selecting a new Series from this modified DataFrame yields the following:
 
-```{python}
-elections.set_index("Candidate", inplace=True) # This sets the index of the elections table to the "Candidate" column
-```
+<img src="images/index_comparison_2.png" alt='index_comparison_2' width='800'>
 
-![](images/index_comparison_2.png)
-
-To retrieve the indices of a DataFrame, simple use the `.index` attribute of the DataFrame class.
+To retrieve the indices of a DataFrame, simply use the `.index` attribute of the DataFrame class.
 
 ```{python}
+elections.set_index("Candidate", inplace=True)
 elections.index
 ```
 
 ```{python}
-elections.reset_index(inplace=True) # This resets the index to be the numbers from 0 to 181
+elections.reset_index(inplace=True)
 ```
 
 Earlier, we mentioned that a Series was just a column of data. What if we wanted a single column as a DataFrame? To obtain this, we can pass in a list containing a single column to the `[]` selection operator.
@@ -198,7 +195,7 @@ elections[["Party"]] # ["Party"] is the argument - a list with a single element
 
 Conditional selection allows us to select a subset of rows in a DataFrame if they follow some specified condition.
 
-To understand how to use conditional selection, we must look at another input to the `.loc` and `[]` operators - a boolean array. This boolean array must have a length equal to the number of rows in the DataFrame. It will then return all rows with a corresponding `True` value in the array.
+To understand how to use conditional selection, we must look at another input to the `.loc` and `[]` operators - a boolean array. This boolean array must have a length equal to the number of rows in the DataFrame. It will return all rows in the position of the corresponding `True` value in the array.
 
 Here, we will select all even-indexed rows in the first 10 rows of our DataFrame.
 
@@ -233,7 +230,7 @@ Rows 121, 130, 143, 161, 167, and 174 evaluate to `True` and are thus returned i
 print(logical_operator.loc[[121, 130, 143, 161, 167, 174]])
 ```
 
-Passing a Series as an argument to `elections[]` has the same affect as using in a boolean array. In fact, the `[]` selection operator can take a boolean Series, array, and list as arguments. These three are used interchangeably thoughout the course.
+Passing a Series as an argument to `elections[]` has the same affect as using a boolean array. In fact, the `[]` selection operator can take a boolean Series, array, and list as arguments. These three are used interchangeably thoughout the course.
 
 Similarly, we can use `.loc` to achieve similar results.
 
@@ -243,7 +240,7 @@ elections.loc[elections['Party'] == "Independent"]
 
 Boolean conditions can be combined using various operators that allow us to filter results by multiple conditions. Some examples include the `&` (and) operator and `|` (or) operator.
 
-**Note**: When using logical operators, pay careful attention to surround each condition with a set of paranthesis `()`. If you forget, your code will throw an error.
+**Note**: When combining multiple conditions with logical operators, be sure to surround each condition with a set of paranthesis `()`. If you forget, your code will throw an error.
 
 For example, if we want to return data on all presidential candidates affiliated with the Independent Party before the 21^st^ century, we can do so:
 
@@ -254,7 +251,7 @@ elections[(elections['Party'] == "Independent") \
 
 ## Handy Utility Functions
 
-There are a large number of operations supported by `pandas` Series and DataFrames that allow us to efficiently manipulate data . In this section, we'll cover a few.
+There are a large number of operations supported by `pandas` that allow us to efficiently manipulate data . In this section, we'll cover a few.
 
 1. `.head` and `.tail`
 2. `.shape` and `.size`
@@ -309,7 +306,7 @@ elections.sample(3)
 
 #### .value_counts
 
-`.value_counts()` is called on a column and returns a Series containing the total count of every unique value.
+`.value_counts()` is called on a column and returns a Series containing the total count of each unique value.
 
 ```{python}
 #| fig-cap: This code tells us how many times each candidate ran for president of the United States.
@@ -318,7 +315,7 @@ elections['Candidate'].value_counts()
 
 #### .unique
 
-`.unique()` is called on a Series and returns an array with the unique values contained in that Series.
+`.unique()` is called on a Series and returns an array with the unique values of that Series.
 
 ```{python}
 # For brevity, we have limited the results to 5 candidates 
@@ -327,7 +324,7 @@ elections['Candidate'].unique()[:5]
 
 #### .sort_values
 
-`.sort_values()` returns the Series it was called on back in sorted order. Numerical values are in sorted magnitude, while text is sorted in alphabetical order. You may specify optional arguments to sort in ascending or descending order.
+`.sort_values()` returns a sorted version of the Series it was called on. Numerical values are in sorted magnitude, while text is sorted in alphabetical order. You may specify optional arguments to sort in ascending or descending order.
 
 ```{python}
 elections['Candidate'].sort_values()

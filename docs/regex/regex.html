@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.280">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Data 100 - Regular Expressions</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-sidebar docked">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title">Regular Expressions</h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="../index.html" class="sidebar-logo-link">
+      <img src="../data100_logo.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Principles and Techniques of Data Science</a> 
+    </div>
+      </div>
+      <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pandas_1/pandas_1.html" class="sidebar-item-text sidebar-link">Pandas I</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pandas_2/pandas_2.html" class="sidebar-item-text sidebar-link">Pandas II</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../eda/eda.html" class="sidebar-item-text sidebar-link">Data Cleaning and EDA</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../visualization_1/visualization_1.html" class="sidebar-item-text sidebar-link">Visualization I</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../visualization_2/visualization_2.html" class="sidebar-item-text sidebar-link">Visualization II</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../intro_to_modeling/intro_to_modeling.html" class="sidebar-item-text sidebar-link">Introduction to Modeling</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../constant_model_loss_transformations/loss_transformations.html" class="sidebar-item-text sidebar-link">Constant Model, Loss, and Transformations</a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#why-work-with-text" id="toc-why-work-with-text" class="nav-link active" data-scroll-target="#why-work-with-text">Why Work with Text?</a></li>
+  <li><a href="#python-string-methods" id="toc-python-string-methods" class="nav-link" data-scroll-target="#python-string-methods">Python String Methods</a>
+  <ul>
+  <li><a href="#canonicalization" id="toc-canonicalization" class="nav-link" data-scroll-target="#canonicalization">Canonicalization</a></li>
+  <li><a href="#extraction" id="toc-extraction" class="nav-link" data-scroll-target="#extraction">Extraction</a></li>
+  </ul></li>
+  <li><a href="#regex-basics" id="toc-regex-basics" class="nav-link" data-scroll-target="#regex-basics">Regex Basics</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">Regular Expressions</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<div class="callout-note callout callout-style-default no-icon callout-captioned">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Learning Outcomes
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+
+</div>
+</div>
+</div>
+<section id="why-work-with-text" class="level2">
+<h2 class="anchored" data-anchor-id="why-work-with-text">Why Work with Text?</h2>
+<p>Last lecture, we learned of the difference between quantitative and qualitative variable types. The latter includes string data - the primary focus of today’s lecture. In this note, we’ll discuss the necessary tools to manipulate text: Python string manipulation and regular expressions.</p>
+<p>There are two main reasons for working with text.</p>
+<ol type="1">
+<li>Canonicalization: Convert data that has multiple formats into a standard form.
+<ul>
+<li>By manipulating text, we can join tables with mismatched string labels</li>
+</ul></li>
+<li>Extract information into a new feature.
+<ul>
+<li>We can extract data and time features from raw log files</li>
+</ul></li>
+</ol>
+</section>
+<section id="python-string-methods" class="level2">
+<h2 class="anchored" data-anchor-id="python-string-methods">Python String Methods</h2>
+<p>First, we’ll introduce a few methods useful for string manipulation. The following table includes a number of string operations supported by Python and <code>pandas</code>. The Python functions operate on a single string, while their equivalent in <code>pandas</code> are <strong>vectorized</strong> - they operate on a Series of string data.</p>
+<table class="table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 25%">
+<col style="width: 38%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Operation</th>
+<th>Python</th>
+<th>Pandas (Series)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Transformation</td>
+<td><ul>
+<li><code>s.lower(_)</code></li>
+<li><code>s.upper(_)</code></li>
+</ul></td>
+<td><ul>
+<li><code>ser.str.lower(_)</code></li>
+<li><code>ser.str.upper(_)</code></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td>Replacement + Deletion</td>
+<td><ul>
+<li><code>s.replace(_)</code></li>
+</ul></td>
+<td><ul>
+<li><code>ser.str.replace(_)</code></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td>Split</td>
+<td><ul>
+<li><code>s.split(_)</code></li>
+</ul></td>
+<td><ul>
+<li><code>ser.str.split(_)</code></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td>Substring</td>
+<td><ul>
+<li><code>s[1:4]</code></li>
+</ul></td>
+<td><ul>
+<li><code>ser.str[1:4]</code></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td>Membership</td>
+<td><ul>
+<li><code>'_' in s</code></li>
+</ul></td>
+<td><ul>
+<li><code>ser.str.contains(_)</code></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td>Length</td>
+<td><ul>
+<li><code>len(s)</code></li>
+</ul></td>
+<td><ul>
+<li><code>ser.str.len()</code></li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+<p>We’ll discuss the differences between Python string functions and <code>pandas</code> Series methods in the following section on canonicalization.</p>
+<section id="canonicalization" class="level3">
+<h3 class="anchored" data-anchor-id="canonicalization">Canonicalization</h3>
+<p>Assume we want to merge the given tables.</p>
+<div class="cell" data-execution_count="1">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">'data/county_and_state.csv'</span>) <span class="im">as</span> f:</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    county_and_state <span class="op">=</span> pd.read_csv(f)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">'data/county_and_population.csv'</span>) <span class="im">as</span> f:</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    county_and_pop <span class="op">=</span> pd.read_csv(f)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>display(county_and_state), display(county_and_pop)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>County</th>
+      <th>State</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>De Witt County</td>
+      <td>IL</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Lac qui Parle County</td>
+      <td>MN</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Lewis and Clark County</td>
+      <td>MT</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>St John the Baptist Parish</td>
+      <td>LS</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>County</th>
+      <th>Population</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>DeWitt</td>
+      <td>16798</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Lac Qui Parle</td>
+      <td>8067</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Lewis &amp; Clark</td>
+      <td>55716</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>St. John the Baptist</td>
+      <td>43044</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Last time, we used a <strong>primary key</strong> and <strong>foreign key</strong> to join two tables. While neither of these keys exist in our DataFrames, the <code>County</code> columns look similar enough. Can we convert these columns into one standard, canonical form?</p>
+<p>The following function uses Python string manipulation to convert a single county name into canonical form. It does so by eliminating whitespace, punctuation, and unnecessary text.</p>
+<div class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> canonicalize_county(county_name):</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        county_name</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>            .lower()</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>            .replace(<span class="st">' '</span>, <span class="st">''</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>            .replace(<span class="st">'&amp;'</span>, <span class="st">'and'</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>            .replace(<span class="st">'.'</span>, <span class="st">''</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>            .replace(<span class="st">'county'</span>, <span class="st">''</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>            .replace(<span class="st">'parish'</span>, <span class="st">''</span>)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>canonicalize_county(<span class="st">"St. John the Baptist"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<pre><code>'stjohnthebaptist'</code></pre>
+</div>
+</div>
+<p>We will use the <code>pandas</code> <code>map</code> function to apply the <code>canonicalize_county</code> function to every row in both DataFrames. Then, we can create new columns called <code>clean_county_python</code> containing the canonical form.</p>
+<div class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>county_and_pop[<span class="st">'clean_county_python'</span>] <span class="op">=</span> county_and_pop[<span class="st">'County'</span>].<span class="bu">map</span>(canonicalize_county)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>county_and_state[<span class="st">'clean_county_python'</span>] <span class="op">=</span> county_and_state[<span class="st">'County'</span>].<span class="bu">map</span>(canonicalize_county)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>display(county_and_state), display(county_and_pop)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>County</th>
+      <th>State</th>
+      <th>clean_county_python</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>De Witt County</td>
+      <td>IL</td>
+      <td>dewitt</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Lac qui Parle County</td>
+      <td>MN</td>
+      <td>lacquiparle</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Lewis and Clark County</td>
+      <td>MT</td>
+      <td>lewisandclark</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>St John the Baptist Parish</td>
+      <td>LS</td>
+      <td>stjohnthebaptist</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>County</th>
+      <th>Population</th>
+      <th>clean_county_python</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>DeWitt</td>
+      <td>16798</td>
+      <td>dewitt</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Lac Qui Parle</td>
+      <td>8067</td>
+      <td>lacquiparle</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Lewis &amp; Clark</td>
+      <td>55716</td>
+      <td>lewisandclark</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>St. John the Baptist</td>
+      <td>43044</td>
+      <td>stjohnthebaptist</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Alternatively, we can use <code>pandas</code> Series methods to create this standardized column. To do so, we must call the <code>.str</code> attribute of our Series prior to calling any methods, like <code>.lower</code> and <code>.replace</code>. Notice how these method names match their equivalent built-in Python string function.</p>
+<p>Chaining multiple Series methods in this manner eliminates the need to use the <code>map</code> function.</p>
+<div class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> canonicalize_county_series(county_series):</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        county_series</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>            .<span class="bu">str</span>.lower()</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>            .<span class="bu">str</span>.replace(<span class="st">' '</span>, <span class="st">''</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>            .<span class="bu">str</span>.replace(<span class="st">'&amp;'</span>, <span class="st">'and'</span>)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>            .<span class="bu">str</span>.replace(<span class="st">'.'</span>, <span class="st">''</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>            .<span class="bu">str</span>.replace(<span class="st">'county'</span>, <span class="st">''</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>            .<span class="bu">str</span>.replace(<span class="st">'parish'</span>, <span class="st">''</span>)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>county_and_pop[<span class="st">'clean_county_pandas'</span>] <span class="op">=</span> canonicalize_county_series(county_and_pop[<span class="st">'County'</span>])</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>county_and_state[<span class="st">'clean_county_pandas'</span>] <span class="op">=</span> canonicalize_county_series(county_and_state[<span class="st">'County'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>display(county_and_pop), display(county_and_state)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>County</th>
+      <th>Population</th>
+      <th>clean_county_python</th>
+      <th>clean_county_pandas</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>DeWitt</td>
+      <td>16798</td>
+      <td>dewitt</td>
+      <td>dewitt</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Lac Qui Parle</td>
+      <td>8067</td>
+      <td>lacquiparle</td>
+      <td>lacquiparle</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Lewis &amp; Clark</td>
+      <td>55716</td>
+      <td>lewisandclark</td>
+      <td>lewisandclark</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>St. John the Baptist</td>
+      <td>43044</td>
+      <td>stjohnthebaptist</td>
+      <td>stjohnthebaptist</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>County</th>
+      <th>State</th>
+      <th>clean_county_python</th>
+      <th>clean_county_pandas</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>De Witt County</td>
+      <td>IL</td>
+      <td>dewitt</td>
+      <td>dewitt</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Lac qui Parle County</td>
+      <td>MN</td>
+      <td>lacquiparle</td>
+      <td>lacquiparle</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Lewis and Clark County</td>
+      <td>MT</td>
+      <td>lewisandclark</td>
+      <td>lewisandclark</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>St John the Baptist Parish</td>
+      <td>LS</td>
+      <td>stjohnthebaptist</td>
+      <td>stjohnthebaptist</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+<section id="extraction" class="level3">
+<h3 class="anchored" data-anchor-id="extraction">Extraction</h3>
+<p>Extraction explores the idea of obtaining useful information from text data. This will be particularily important in model building, which we’ll explore in a few weeks.</p>
+<p>Say we want to read some data from a <code>.txt</code> file.</p>
+<div class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">'data/log.txt'</span>, <span class="st">'r'</span>) <span class="im">as</span> f:</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    log_lines <span class="op">=</span> f.readlines()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>log_lines</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
+<pre><code>['169.237.46.168 - - [26/Jan/2014:10:47:58 -0800] "GET /stat141/Winter04/ HTTP/1.1" 200 2585 "http://anson.ucdavis.edu/courses/"\n',
+ '193.205.203.3 - - [2/Feb/2005:17:23:6 -0800] "GET /stat141/Notes/dim.html HTTP/1.0" 404 302 "http://eeyore.ucdavis.edu/stat141/Notes/session.html"\n',
+ '169.237.46.240 - "" [3/Feb/2006:10:18:37 -0800] "GET /stat141/homework/Solutions/hw1Sol.pdf HTTP/1.1"\n']</code></pre>
+</div>
+</div>
+<p>Suppose we want to extract the day, month, year, hour, minutes, seconds, and timezone. Unfortunately, these items are not in a fixed position from the beginning of the string. Slicing by some fixed offset won’t work.</p>
+<p>Instead, we can use some clever thinking. Notice how the information is contained within a set of brackets, further seperated by characters like <code>/</code> and <code>:</code>. We can hone in on this region of text, and split the data on these characters. Python’s built-in <code>.split</code> function makes this easy.</p>
+<div class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>first <span class="op">=</span> log_lines[<span class="dv">0</span>] <span class="co"># Only considering the first row of data</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>pertinent <span class="op">=</span> first.split(<span class="st">"["</span>)[<span class="dv">1</span>].split(<span class="st">']'</span>)[<span class="dv">0</span>]</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>day, month, rest <span class="op">=</span> pertinent.split(<span class="st">'/'</span>)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>year, hour, minute, rest <span class="op">=</span> rest.split(<span class="st">':'</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>seconds, time_zone <span class="op">=</span> rest.split(<span class="st">' '</span>)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>day, month, year, hour, minute, seconds, time_zone</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="10">
+<pre><code>('26', 'Jan', '2014', '10', '47', '58', '-0800')</code></pre>
+</div>
+</div>
+<p>There are two problems with this code:</p>
+<ol type="1">
+<li>Python’s built-in functions limit us to extract data one row at a time
+<ul>
+<li>This can be resolved using a map function or Pandas Series methods.</li>
+</ul></li>
+<li>The code is quite verbose
+<ul>
+<li>This is a larger issue that is trickier to solve</li>
+</ul></li>
+</ol>
+<p>In the next section, we’ll introduce regular expressions - a tool that solves problem 2).</p>
+</section>
+</section>
+<section id="regex-basics" class="level2">
+<h2 class="anchored" data-anchor-id="regex-basics">Regex Basics</h2>
+<p>A <strong>regular expression (“regex”)</strong> is a sequence of characters that specifies a search pattern. They are written to extract information from text.</p>
+<p>The language of regular expressions - <strong>regular language</strong> - aims to replicate <strong>formal language</strong>, which is a way to describe conditions on a set of strings. Regular expressions have a stand-alone syntax</p>
+<p>For example, Social Security Numbers (SSNs) are often described by regular expresions.</p>
+<div class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">r"[0-9]{3}-[0-9]{2}-[0-9]{4}"</span> <span class="co"># Regular Expression Syntax</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 3 of any digit, then a dash,</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># then 2 of any digit, then a dash,</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co"># then 4 of any digit</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="11">
+<pre><code>'[0-9]{3}-[0-9]{2}-[0-9]{4}'</code></pre>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
