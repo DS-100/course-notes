@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.280">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Data 100 - Gradient Descent</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+        <script type="text/javascript">
+        window.PlotlyConfig = {MathJaxConfig: 'local'};
+        if (window.MathJax && window.MathJax.Hub && window.MathJax.Hub.Config) {window.MathJax.Hub.Config({SVG: {font: "STIX-Web"}});}
+        if (typeof require !== 'undefined') {
+        require.undef("plotly");
+        requirejs.config({
+            paths: {
+                'plotly': ['https://cdn.plot.ly/plotly-2.16.1.min']
+            }
+        });
+        require(['plotly'], function(Plotly) {
+            window._Plotly = Plotly;
+        });
+        }
+        </script>
+        
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-sidebar docked">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title">Gradient Descent</h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="../index.html" class="sidebar-logo-link">
+      <img src="../data100_logo.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Principles and Techniques of Data Science</a> 
+    </div>
+      </div>
+      <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pandas_1/pandas_1.html" class="sidebar-item-text sidebar-link">Pandas I</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pandas_2/pandas_2.html" class="sidebar-item-text sidebar-link">Pandas II</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../eda/eda.html" class="sidebar-item-text sidebar-link">Data Cleaning and EDA</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../regex/regex.html" class="sidebar-item-text sidebar-link">Regular Expressions</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../visualization_1/visualization_1.html" class="sidebar-item-text sidebar-link">Visualization I</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../visualization_2/visualization_2.html" class="sidebar-item-text sidebar-link">Visualization II</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../intro_to_modeling/intro_to_modeling.html" class="sidebar-item-text sidebar-link">Introduction to Modeling</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../constant_model_loss_transformations/loss_transformations.html" class="sidebar-item-text sidebar-link">Constant Model, Loss, and Transformations</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../gradient_descent/gradient_descent.html" class="sidebar-item-text sidebar-link active">Gradient Descent</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../feature_engineering/feature_engineering.html" class="sidebar-item-text sidebar-link">Feature Engineering</a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Gradient Descent</h2>
+   
+  <ul>
+  <li><a href="#implementing-derived-formulas-in-code" id="toc-implementing-derived-formulas-in-code" class="nav-link active" data-scroll-target="#implementing-derived-formulas-in-code">Implementing Derived Formulas in Code</a></li>
+  <li><a href="#sklearn" id="toc-sklearn" class="nav-link" data-scroll-target="#sklearn"><code>sklearn</code></a></li>
+  <li><a href="#gradient-descent" id="toc-gradient-descent" class="nav-link" data-scroll-target="#gradient-descent">Gradient Descent</a>
+  <ul>
+  <li><a href="#minimizing-a-1d-function" id="toc-minimizing-a-1d-function" class="nav-link" data-scroll-target="#minimizing-a-1d-function">Minimizing a 1D Function</a></li>
+  <li><a href="#formalizing-gradient-descent" id="toc-formalizing-gradient-descent" class="nav-link" data-scroll-target="#formalizing-gradient-descent">Formalizing Gradient Descent</a></li>
+  <li><a href="#a-word-on-covexity" id="toc-a-word-on-covexity" class="nav-link" data-scroll-target="#a-word-on-covexity">A Word on Covexity</a></li>
+  <li><a href="#multidimensional-gradient-descent" id="toc-multidimensional-gradient-descent" class="nav-link" data-scroll-target="#multidimensional-gradient-descent">Multidimensional Gradient Descent</a></li>
+  <li><a href="#batch-mini-batch-and-stochastic-descent" id="toc-batch-mini-batch-and-stochastic-descent" class="nav-link" data-scroll-target="#batch-mini-batch-and-stochastic-descent">Batch, Mini-Batch, and Stochastic Descent</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content column-body" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title d-none d-lg-block">Gradient Descent</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<div class="callout-note callout callout-style-default no-icon callout-captioned">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Learning Outcomes
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li>Understand the standard workflow for fitting models in <code>sklearn</code></li>
+<li>Describe the conceptual basis for gradient descent</li>
+<li>Compute the gradient descent update on a provided dataset</li>
+</ul>
+</div>
+</div>
+</div>
+<p>At this point, we’ve grown quite familiar with the modeling process. We’ve introduced the concept of loss, used it to fit several types of models, and, most recently, extended our analysis to multiple regression. Along the way, we’ve forged our way through the mathematics of deriving the optimal model parameters in all of its gory detail. It’s time to make our lives a little easier – let’s implement the modeling process in code!</p>
+<p>In this lecture, we’ll explore three techniques for model fitting:</p>
+<ol type="1">
+<li>Translating our derived formulas for regression to Python</li>
+<li>Using the <code>sklearn</code> Python package</li>
+<li>Applying gradient descent for numerical optimization</li>
+</ol>
+<section id="implementing-derived-formulas-in-code" class="level2">
+<h2 class="anchored" data-anchor-id="implementing-derived-formulas-in-code">Implementing Derived Formulas in Code</h2>
+<p>Throughout this lecture, we’ll refer to the <code>tips</code> dataset.</p>
+<div class="cell" data-execution_count="1">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>tips <span class="op">=</span> sns.load_dataset(<span class="st">"tips"</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>tips.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="1">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>total_bill</th>
+      <th>tip</th>
+      <th>sex</th>
+      <th>smoker</th>
+      <th>day</th>
+      <th>time</th>
+      <th>size</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>16.99</td>
+      <td>1.01</td>
+      <td>Female</td>
+      <td>No</td>
+      <td>Sun</td>
+      <td>Dinner</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>10.34</td>
+      <td>1.66</td>
+      <td>Male</td>
+      <td>No</td>
+      <td>Sun</td>
+      <td>Dinner</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>21.01</td>
+      <td>3.50</td>
+      <td>Male</td>
+      <td>No</td>
+      <td>Sun</td>
+      <td>Dinner</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>23.68</td>
+      <td>3.31</td>
+      <td>Male</td>
+      <td>No</td>
+      <td>Sun</td>
+      <td>Dinner</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>24.59</td>
+      <td>3.61</td>
+      <td>Female</td>
+      <td>No</td>
+      <td>Sun</td>
+      <td>Dinner</td>
+      <td>4</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Our goal will be to predict the value of the <code>"tip"</code> for a particular meal given its <code>"total_bill"</code> and <code>"size"</code>. We’ll also add a bias column of all ones to represent the intercept term of our models.</p>
+<div class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Add a bias column of all ones to `tips`</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>tips[<span class="st">"bias"</span>] <span class="op">=</span> np.ones(<span class="bu">len</span>(tips), dtype<span class="op">=</span><span class="bu">int</span>) </span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the design matrix, X...</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> tips[[<span class="st">"bias"</span>, <span class="st">"total_bill"</span>, <span class="st">"size"</span>]]</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># ...as well as the target variable, y</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>Y <span class="op">=</span> tips[[<span class="st">"tip"</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>In the previous lecture, we expressed multiple linear regression using matrix notation.</p>
+<p><span class="math display">\[\hat{\mathbb{Y}} = \mathbb{X}\theta\]</span></p>
+<p>We used a geometric approach to derive the following expression for the optimal model parameters under MSE error:</p>
+<p><span class="math display">\[\hat{\theta} = (\mathbb{X}^T \mathbb{X})^{-1}\mathbb{X}^T \mathbb{Y}\]</span></p>
+<p>That’s a whole lot of matrix manipulation. How do we implement it in Python?</p>
+<p>There are three operations we need to perform here: multiplying matrices, taking transposes, and finding inverses.</p>
+<ul>
+<li>To perform matrix multiplication, use the <code>@</code> operator</li>
+<li>To take a transpose, call the <code>.T</code> attribute of an array or DataFrame</li>
+<li>To compute an inverse, use <code>numpy</code>’s in-built method <code>np.linalg.inv</code></li>
+</ul>
+<p>Because the methods above were designed for use with <code>numpy</code> arrays, we’ll first convert <code>X</code> and <code>Y</code> to their <code>numpy</code> representations. Then, we can compute the optimal model parameters.</p>
+<div class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>X, Y <span class="op">=</span> X.to_numpy(), Y.to_numpy()</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>theta_hat <span class="op">=</span> np.linalg.inv(X.T <span class="op">@</span> X) <span class="op">@</span> X.T <span class="op">@</span> Y</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>theta_hat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<pre><code>array([[0.66894474],
+       [0.09271334],
+       [0.19259779]])</code></pre>
+</div>
+</div>
+<p>To make predictions using our newly-fitted model coefficients, matrix-multiply <code>X</code> and <code>theta_hat</code>.</p>
+<div class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>y_hat <span class="op">=</span> X <span class="op">@</span> theta_hat</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Show just the first 5 predictions to save space on the page</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>y_hat[:<span class="dv">5</span>, :]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<pre><code>array([[2.62933992],
+       [2.20539403],
+       [3.19464533],
+       [3.24959215],
+       [3.71915687]])</code></pre>
+</div>
+</div>
+</section>
+<section id="sklearn" class="level2">
+<h2 class="anchored" data-anchor-id="sklearn"><code>sklearn</code></h2>
+<p>We’ve already saved a lot of time (and avoided tedious calculations) by translating our derived formulas into code. However, we still had to go through the process of writing out the linear algebra ourselves.</p>
+<p>To make life <em>even easier</em>, we can turn to the <code>sklearn</code> Python library. <code>sklearn</code> is a robust library of machine learning tools used extensively in research and industry. It gives us a wide variety of in-built modeling frameworks and methods, so we’ll keep returning to <code>sklearn</code> techniques as we progress through Data 100.</p>
+<p>Regardless of the specific type of model being implemented, <code>sklearn</code> follows a standard set of steps for creating a model.</p>
+<ol type="1">
+<li>Create a model object. This generates a new instance of the model class. You can think of it as making a new copy of a standard “template” for a model. In pseudocode, this looks like: <code>my_model = ModelName()</code></li>
+<li>Fit the model to the <code>X</code> design matrix and <code>Y</code> target vector. This calculates the optimal model parameters “behind the scenes” without us explicitly working through the calculations ourselves. The fitted parameters are then stored within the model for use in future predictions: <code>my_model.fit(X, Y)</code></li>
+<li>Use the fitted model to make predictions on the <code>X</code> input data. The model will output an array of new <code>Y</code> predictions: <code>my_model.predict(X)</code></li>
+</ol>
+<p>Let’s put this into action with our multiple regression task. First, initialize an instance of the <code>LinearRegression</code> class.</p>
+<div class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LinearRegression</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> LinearRegression()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Next, fit the model instance to the design matrix <code>X</code> and target vector <code>Y</code> by calling <code>.fit</code>.</p>
+<div class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>model.fit(X, Y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<pre><code>LinearRegression()</code></pre>
+</div>
+</div>
+<p>And, lastly, generate predictions for <span class="math inline">\(\hat{Y}\)</span> using the <code>.predict</code> method.</p>
+<div class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Like before, show just the first 5 predictions</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>model.predict(X)[:<span class="dv">5</span>, :]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="7">
+<pre><code>array([[2.62933992],
+       [2.20539403],
+       [3.19464533],
+       [3.24959215],
+       [3.71915687]])</code></pre>
+</div>
+</div>
+<p>We’ve generated the exact same predictions as before, but without any need for manipulating matrices ourselves!</p>
+</section>
+<section id="gradient-descent" class="level2">
+<h2 class="anchored" data-anchor-id="gradient-descent">Gradient Descent</h2>
+<p>At this point, we’re fairly comfortable with fitting a regression model under MSE risk (indeed, we’ve done it three times now!). It’s important to remember, however, that the results we’ve found previously apply to one very specific case: the equations we used above are only relevant to a linear regression model using MSE as the cost function. In reality, we’ll be working with a wide range of model types and objective functions, not all of which are as straightforward as the scenario we’ve discussed previously. This means that we need some more generalizable way of fitting a model to minimize loss.</p>
+<p>To do this, we’ll introduce the technique of <strong>gradient descent</strong>.</p>
+<section id="minimizing-a-1d-function" class="level3">
+<h3 class="anchored" data-anchor-id="minimizing-a-1d-function">Minimizing a 1D Function</h3>
+<p>Let’s shift our focus away from MSE to consider some new, arbitrary cost function. You can think of this function as outputting the empirical risk associated with some parameter <code>theta</code>.</p>
+<p><img src="images/arbitrary.png" alt="arbitrary" width="600"></p>
+<p>Looking at the function across this domain, it is clear that the function’s minimum value occurs around <span class="math inline">\(\theta = 5.3\)</span>. Let’s pretend for a moment that we <em>couldn’t</em> see the full view of the cost function. How would we guess the value of <span class="math inline">\(\theta\)</span> that minimizes the function?</p>
+<p>It turns out that the first derivative of the function can give us a clue. In the plot below, the dotted line indicates the value of the derivative of each value of <span class="math inline">\(\theta\)</span>. The derivative is negative where it is red and positive where it is green.</p>
+<p><img src="images/df.png" alt="gb" width="600"></p>
+<p>Say we make a guess for the minimizing value of <span class="math inline">\(\theta\)</span>. If this guess “undershoots” the true minimizing value – our guess for <span class="math inline">\(\theta\)</span> is <em>lower</em> than the <span class="math inline">\(\hat{\theta}\)</span> that truly minimizes the function – the derivative will be negative in value. If this guess “overshoots” the true minimizing value, the derivative will be positive in value.</p>
+<p><img src="images/step.png" alt="step" width="600"></p>
+<p>We can use this pattern to help formulate our next guess for the optimal <span class="math inline">\(\hat{\theta}\)</span>. Consider the case where we’ve undershot <span class="math inline">\(\theta\)</span> by guessing too low of a value. We’ll want our next guess to be greater in value than the previous guess – that is, we want to shift our guess to the right. You can think of this as following the slope “downhill” to the function’s minimum value.</p>
+<p><img src="images/neg_step.png" alt="neg_step" width="600"></p>
+<p>If we’ve overshot <span class="math inline">\(\hat{\theta}\)</span> by guessing too high of a value, we’ll want our next guess to be lower in value – we want to shift our guess for <span class="math inline">\(\hat{\theta}\)</span> to the left.</p>
+<p><img src="images/pos_step.png" alt="pos_step" width="600"></p>
+</section>
+<section id="formalizing-gradient-descent" class="level3">
+<h3 class="anchored" data-anchor-id="formalizing-gradient-descent">Formalizing Gradient Descent</h3>
+<p>These observations lead us to the <strong>gradient descent update rule</strong>: <span class="math display">\[\theta^{(t+1)} = \theta^{(t)} - \alpha \frac{dL}{d\theta}\]</span></p>
+<p>Begin with our guess for <span class="math inline">\(\hat{\theta}\)</span> at timestep <span class="math inline">\(t\)</span>. To find our guess for <span class="math inline">\(\hat{\theta}\)</span> at the next timestep, <span class="math inline">\(t+1\)</span>, subtract a multiple of the objective function’s derivative, <span class="math inline">\(\frac{dL}{d\theta}\)</span>. We’ve replaced the generic function <span class="math inline">\(f\)</span> with <span class="math inline">\(L\)</span> to indicate that we are minimizing loss.</p>
+<ul>
+<li>If our guess <span class="math inline">\(\theta^{(t)}\)</span> was too low (undershooting <span class="math inline">\(\hat{\theta}\)</span>), <span class="math inline">\(\frac{dL}{d\theta}\)</span> will be negative. Subtracting a negative number from <span class="math inline">\(\theta^{(t)}\)</span> will <em>increase</em> the value of the next guess, <span class="math inline">\(\theta^{(t+1)}\)</span>. The guess will shift to the right.</li>
+<li>If our guess <span class="math inline">\(\theta^{(t)}\)</span> was too high (overshooting <span class="math inline">\(\hat{\theta}\)</span>), <span class="math inline">\(\frac{dL}{d\theta}\)</span> will be positive. Subtracting a positive number from <span class="math inline">\(\theta^{(t)}\)</span> will <em>decrease</em> the value of the next guess, <span class="math inline">\(\theta^{(t+1)}\)</span>. The guess will shift to the left.</li>
+</ul>
+<p>Put together, this captures the same behavior we reasoned through above. We repeatedly update our guess for the optimal <span class="math inline">\(\theta\)</span> until we’ve completed a set number of updates, or until each additional update iteration does not change the value of <span class="math inline">\(\theta\)</span>. In this second case, we say that gradient descent has <strong>converged</strong> on a solution.</p>
+<p>The <span class="math inline">\(\alpha\)</span> term in the update rule is known as the <strong>learning rate</strong>. It represents the size of each gradient descent update step – in other words, how “far” should we step to the left or right with each updated guess? A high value of <span class="math inline">\(\alpha\)</span> will lead to large differences in value between consecutive guesses for <span class="math inline">\(\hat{\theta}\)</span>; a low value of <span class="math inline">\(\alpha\)</span> will result in smaller differences in value between consecutive guesses.</p>
+</section>
+<section id="a-word-on-covexity" class="level3">
+<h3 class="anchored" data-anchor-id="a-word-on-covexity">A Word on Covexity</h3>
+<p>In our analysis above, we focused our attention on the global minimum of the loss function. You may be wondering: what about the local minimum just to the left?</p>
+<p>If we had chosen a different starting guess for <span class="math inline">\(\theta\)</span>, or a different value for the learning rate <span class="math inline">\(\alpha\)</span>, we may have converged on the local minimum, rather than on the true optimum value of loss.</p>
+<p><img src="images/local.png" alt="local" width="600"></p>
+<p>If the loss function is <strong>convex</strong>, gradient descent is guaranteed to find the global minimum of the objective function. Formally, a function <span class="math inline">\(f\)</span> is convex if: <span class="math display">\[tf(a) + (1-t)f(b) \geq f(ta + (1-t)b)\]</span></p>
+<p>To put this into words: if you drew a line between any two points on the curve, all values on the curve must be <em>on or below</em> the line. Importantly, any local minimum of a convex function is also its global minimum.</p>
+<p><img src="images/convex.png" alt="convex" width="600"></p>
+<p>In summary, non-convex loss functions can cause problems with optimization. This means that our choice of loss function is an key factor in our modeling process. It turns out that MSE <em>is</em> convex, which is a major reason why it is such a popular choice of loss function.</p>
+</section>
+<section id="multidimensional-gradient-descent" class="level3">
+<h3 class="anchored" data-anchor-id="multidimensional-gradient-descent">Multidimensional Gradient Descent</h3>
+<p>We’re in good shape now: we’ve developed a technique to find the minimum value of a more complex objective function.</p>
+<p>The function we worked with above was one-dimensional – we were only minimizing the function with respect to a single parameter, <span class="math inline">\(\theta\)</span>. However, as we’ve seen before, we often need to optimize a cost function with respect to several parameters (for example, when selecting the best model parameters for multiple linear regression). We’ll need to extend our gradient descent rule to <em>multidimensional</em> objective functions.</p>
+<p>To put this in more concrete terms, let’s return to the familiar case of simple linear regression with MSE loss. <span class="math display">\[\text{MSE}(\theta_0,\:\theta_1) = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 = \frac{1}{n} \sum_{i=1}^{n} (y_i - \theta_0 - \theta_1 x)^2\]</span></p>
+<p>Now, loss is expressed in terms of <em>two</em> parameters, <span class="math inline">\(\theta_0\)</span> and <span class="math inline">\(\theta_1\)</span>. Rather than a one-dimensional loss function as we had above, we are now dealing with a two-dimensional <strong>loss surface</strong>.</p>
+<div class="cell" data-execution_count="8">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># This code is for illustration purposes only</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co"># It contains a lot of syntax you have not seen</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> plotly.graph_objects <span class="im">as</span> go</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>uvalues <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">10</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>vvalues <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="fl">0.2</span>, <span class="dv">10</span>)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>(u,v) <span class="op">=</span> np.meshgrid(uvalues, vvalues)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>thetas <span class="op">=</span> np.vstack((u.flatten(),v.flatten()))</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> tips[[<span class="st">"bias"</span>, <span class="st">"total_bill"</span>]].to_numpy()</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>Y <span class="op">=</span> tips[<span class="st">"tip"</span>].to_numpy()</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mse_loss_single_arg(theta):</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> mse_loss(theta, X, Y)</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mse_loss(theta, X, y_obs):</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    y_hat <span class="op">=</span> X <span class="op">@</span> theta</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.mean((y_hat <span class="op">-</span> Y) <span class="op">**</span> <span class="dv">2</span>)    </span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>MSE <span class="op">=</span> np.array([mse_loss_single_arg(t) <span class="cf">for</span> t <span class="kw">in</span> thetas.T])</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>loss_surface <span class="op">=</span> go.Surface(x<span class="op">=</span>u, y<span class="op">=</span>v, z<span class="op">=</span>np.reshape(MSE, u.shape))</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>ind <span class="op">=</span> np.argmin(MSE)</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>optimal_point <span class="op">=</span> go.Scatter3d(name <span class="op">=</span> <span class="st">"Optimal Point"</span>,</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> [thetas.T[ind,<span class="dv">0</span>]], y <span class="op">=</span> [thetas.T[ind,<span class="dv">1</span>]], </span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>    z <span class="op">=</span> [MSE[ind]],</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>    marker<span class="op">=</span><span class="bu">dict</span>(size<span class="op">=</span><span class="dv">10</span>, color<span class="op">=</span><span class="st">"red"</span>))</span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> go.Figure(data<span class="op">=</span>[loss_surface, optimal_point])</span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>fig.update_layout(scene <span class="op">=</span> <span class="bu">dict</span>(</span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>    xaxis_title <span class="op">=</span> <span class="st">"theta0"</span>,</span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>    yaxis_title <span class="op">=</span> <span class="st">"theta1"</span>,</span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>    zaxis_title <span class="op">=</span> <span class="st">"MSE"</span>))</span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>fig.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+
+<div>                            <div id="79903fe6-e4f9-454d-b9b9-114c607e2a24" class="plotly-graph-div" style="height:525px; width:100%;"></div>            <script type="text/javascript">                require(["plotly"], function(Plotly) {                    window.PLOTLYENV=window.PLOTLYENV || {};                                    if (document.getElementById("79903fe6-e4f9-454d-b9b9-114c607e2a24")) {                    Plotly.newPlot(                        "79903fe6-e4f9-454d-b9b9-114c607e2a24",                        [{"x":[[0.0,0.2222222222222222,0.4444444444444444,0.6666666666666666,0.8888888888888888,1.1111111111111112,1.3333333333333333,1.5555555555555554,1.7777777777777777,2.0],[0.0,0.2222222222222222,0.4444444444444444,0.6666666666666666,0.8888888888888888,1.1111111111111112,1.3333333333333333,1.5555555555555554,1.7777777777777777,2.0],[0.0,0.2222222222222222,0.4444444444444444,0.6666666666666666,0.8888888888888888,1.1111111111111112,1.3333333333333333,1.5555555555555554,1.7777777777777777,2.0],[0.0,0.2222222222222222,0.4444444444444444,0.6666666666666666,0.8888888888888888,1.1111111111111112,1.3333333333333333,1.5555555555555554,1.7777777777777777,2.0],[0.0,0.2222222222222222,0.4444444444444444,0.6666666666666666,0.8888888888888888,1.1111111111111112,1.3333333333333333,1.5555555555555554,1.7777777777777777,2.0],[0.0,0.2222222222222222,0.4444444444444444,0.6666666666666666,0.8888888888888888,1.1111111111111112,1.3333333333333333,1.5555555555555554,1.7777777777777777,2.0],[0.0,0.2222222222222222,0.4444444444444444,0.6666666666666666,0.8888888888888888,1.1111111111111112,1.3333333333333333,1.5555555555555554,1.7777777777777777,2.0],[0.0,0.2222222222222222,0.4444444444444444,0.6666666666666666,0.8888888888888888,1.1111111111111112,1.3333333333333333,1.5555555555555554,1.7777777777777777,2.0],[0.0,0.2222222222222222,0.4444444444444444,0.6666666666666666,0.8888888888888888,1.1111111111111112,1.3333333333333333,1.5555555555555554,1.7777777777777777,2.0],[0.0,0.2222222222222222,0.4444444444444444,0.6666666666666666,0.8888888888888888,1.1111111111111112,1.3333333333333333,1.5555555555555554,1.7777777777777777,2.0]],"y":[[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],[0.022222222222222223,0.022222222222222223,0.022222222222222223,0.022222222222222223,0.022222222222222223,0.022222222222222223,0.022222222222222223,0.022222222222222223,0.022222222222222223,0.022222222222222223],[0.044444444444444446,0.044444444444444446,0.044444444444444446,0.044444444444444446,0.044444444444444446,0.044444444444444446,0.044444444444444446,0.044444444444444446,0.044444444444444446,0.044444444444444446],[0.06666666666666667,0.06666666666666667,0.06666666666666667,0.06666666666666667,0.06666666666666667,0.06666666666666667,0.06666666666666667,0.06666666666666667,0.06666666666666667,0.06666666666666667],[0.08888888888888889,0.08888888888888889,0.08888888888888889,0.08888888888888889,0.08888888888888889,0.08888888888888889,0.08888888888888889,0.08888888888888889,0.08888888888888889,0.08888888888888889],[0.11111111111111112,0.11111111111111112,0.11111111111111112,0.11111111111111112,0.11111111111111112,0.11111111111111112,0.11111111111111112,0.11111111111111112,0.11111111111111112,0.11111111111111112],[0.13333333333333333,0.13333333333333333,0.13333333333333333,0.13333333333333333,0.13333333333333333,0.13333333333333333,0.13333333333333333,0.13333333333333333,0.13333333333333333,0.13333333333333333],[0.15555555555555556,0.15555555555555556,0.15555555555555556,0.15555555555555556,0.15555555555555556,0.15555555555555556,0.15555555555555556,0.15555555555555556,0.15555555555555556,0.15555555555555556],[0.17777777777777778,0.17777777777777778,0.17777777777777778,0.17777777777777778,0.17777777777777778,0.17777777777777778,0.17777777777777778,0.17777777777777778,0.17777777777777778,0.17777777777777778],[0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2]],"z":[[10.896283606557375,9.61309801659583,8.428677858733051,7.3430231329690345,6.3561338393037845,5.4680099777373,4.678651548269581,3.988058550900628,3.3962309856304396,2.9031688524590162],[8.123556369763206,7.035787497065371,6.046784056466302,5.156546047965999,4.365073471564461,3.6723663272616873,3.0784246150576804,2.5832483349524393,2.1868374869459624,1.8891920710382517],[5.815433238615665,4.923081083181542,4.129494359846185,3.434673068609593,2.838617209471767,2.3413267824327058,1.9428017874924104,1.6430422246508807,1.442048093908116,1.3398193952641166],[3.9719142131147542,3.2749787749443433,2.6768087688726983,2.177404194899818,1.7767650530257035,1.474891343250354,1.2717830655737705,1.1674402199959524,1.1618628065168994,1.255050825136612],[2.592999293260474,2.0914805723537744,1.6887272835458407,1.384739426836673,1.1795170022262702,1.0730600097146326,1.0653684493017608,1.1564423209876544,1.346281624772313,1.6348863606557378],[1.678688479052823,1.372586475409836,1.1652499038656143,1.056678764420158,1.046873057073467,1.1358327818255416,1.3235579386763814,1.6100485276259866,1.9953045486743575,2.479326001821494],[1.2289817704918033,1.118296484112528,1.1063766298320177,1.1932222076502732,1.378833217567294,1.66320965958308,2.046351533697632,2.5282588399109494,3.108931578223032,3.7883697486338797],[1.2438791675774135,1.32861059846185,1.5121074614450516,1.7943697565270191,2.175397483707751,2.65519064298725,3.2337492343655123,3.9110732578425416,4.687162713418336,5.562017601092896],[1.7233806703096541,2.0035288184578026,2.3824423987047156,2.8601214110503954,3.4365658554948397,4.1117757320380495,4.885751040680025,5.758491781420764,6.729997954260271,7.8002695591985445],[2.667486278688525,3.1430511441003843,3.717381441611011,4.390477171220401,5.162338332928559,6.032964926735478,7.002356952641167,8.070514410645618,9.237437300748836,10.50312562295082]],"type":"surface"},{"marker":{"color":"red","size":10},"name":"Optimal Point","x":[0.8888888888888888],"y":[0.11111111111111112],"z":[1.046873057073467],"type":"scatter3d"}],                        {"template":{"data":{"histogram2dcontour":[{"type":"histogram2dcontour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"choropleth":[{"type":"choropleth","colorbar":{"outlinewidth":0,"ticks":""}}],"histogram2d":[{"type":"histogram2d","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmap":[{"type":"heatmap","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmapgl":[{"type":"heatmapgl","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"contourcarpet":[{"type":"contourcarpet","colorbar":{"outlinewidth":0,"ticks":""}}],"contour":[{"type":"contour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"surface":[{"type":"surface","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"mesh3d":[{"type":"mesh3d","colorbar":{"outlinewidth":0,"ticks":""}}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"parcoords":[{"type":"parcoords","line":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolargl":[{"type":"scatterpolargl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"scattergeo":[{"type":"scattergeo","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolar":[{"type":"scatterpolar","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"scattergl":[{"type":"scattergl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatter3d":[{"type":"scatter3d","line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermapbox":[{"type":"scattermapbox","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterternary":[{"type":"scatterternary","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattercarpet":[{"type":"scattercarpet","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"pie":[{"automargin":true,"type":"pie"}]},"layout":{"autotypenumbers":"strict","colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"hovermode":"closest","hoverlabel":{"align":"left"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"bgcolor":"#E5ECF6","angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"ternary":{"bgcolor":"#E5ECF6","aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]]},"xaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"yaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"geo":{"bgcolor":"white","landcolor":"#E5ECF6","subunitcolor":"white","showland":true,"showlakes":true,"lakecolor":"white"},"title":{"x":0.05},"mapbox":{"style":"light"}}},"scene":{"xaxis":{"title":{"text":"theta0"}},"yaxis":{"title":{"text":"theta1"}},"zaxis":{"title":{"text":"MSE"}}}},                        {"responsive": true}                    ).then(function(){
+                            
+var gd = document.getElementById('79903fe6-e4f9-454d-b9b9-114c607e2a24');
+var x = new MutationObserver(function (mutations, observer) {{
+        var display = window.getComputedStyle(gd).display;
+        if (!display || display === 'none') {{
+            console.log([gd, 'removed!']);
+            Plotly.purge(gd);
+            observer.disconnect();
+        }}
+}});
+
+// Listen for the removal of the full notebook cells
+var notebookContainer = gd.closest('#notebook-container');
+if (notebookContainer) {{
+    x.observe(notebookContainer, {childList: true});
+}}
+
+// Listen for the clearing of the current output cell
+var outputEl = gd.closest('.output');
+if (outputEl) {{
+    x.observe(outputEl, {childList: true});
+}}
+
+                        })                };                });            </script>        </div>
+</div>
+</div>
+<p>Though our objective function looks a little different, we can use the same principles as we did earlier to locate the optimal model parameters. Notice how the minimum value of MSE, marked by the red dot in the plot above, occurs in the “valley” of the loss surface. Like before, we want our guesses for the best pair of <span class="math inline">\((\theta_0,\:\theta_1)\)</span> to move “downhill” towards this minimum point.</p>
+<p>The difference now is that we need to update guesses for <em>both</em> <span class="math inline">\(\theta_0\)</span> and <span class="math inline">\(\theta_1\)</span>: <span class="math display">\[\theta_0^{(t+1)} = \theta_0^{(t)} - \alpha \frac{dL}{d\theta_0} \qquad \qquad \theta_1^{(t+1)} = \theta_1^{(t)} - \alpha \frac{dL}{d\theta_1}\]</span></p>
+<p>We can tidy this statement up by using vector notation: <span class="math display">\[\begin{bmatrix}
+           \theta_{0}^{(t+1)} \\
+           \theta_{1}^{(t+1)} \\
+         \end{bmatrix}
+=
+\begin{bmatrix}
+           \theta_{0}^{(t)} \\
+           \theta_{1}^{(t)} \\
+         \end{bmatrix}
+- \alpha
+\begin{bmatrix}
+           \frac{dL}{d\theta_{0}} \\
+           \frac{dL}{d\theta_{1}} \\
+         \end{bmatrix}
+\]</span></p>
+<p>To save ourselves from writing out long column vectors, we’ll introduce some new notation. <span class="math inline">\(\vec{\theta}^{(t)}\)</span> is a column vector of guesses for each model parameter <span class="math inline">\(\theta_i\)</span> at timestep <span class="math inline">\(t\)</span>. We call <span class="math inline">\(\nabla_{\vec{\theta}} L\)</span> the <strong>gradient vector.</strong> In plain English, it means “take the derivative of loss, <span class="math inline">\(L\)</span>, with respect to each model parameter in <span class="math inline">\(\vec{\theta}\)</span>.”</p>
+<p><span class="math display">\[\vec{\theta}^{(t+1)}
+= \vec{\theta}^{(t)} - \alpha \nabla_{\vec{\theta}} L
+\]</span></p>
+</section>
+<section id="batch-mini-batch-and-stochastic-descent" class="level3">
+<h3 class="anchored" data-anchor-id="batch-mini-batch-and-stochastic-descent">Batch, Mini-Batch, and Stochastic Descent</h3>
+<p>Formally, the algorithm we derived above is called <strong>batch gradient descent.</strong> For each iteration of the algorithm, the derivative of loss is computed across the entire batch of available data. While this update rule works well in theory, it is not practical in all circumstances. For large datasets (with perhaps billions of data points), finding the gradient across all the data is incredibly computationally taxing.</p>
+<p><strong>Mini-batch gradient descent</strong> tries to address this issue. In mini-batch descent, only a subset of the data is used to compute an estimate of the gradient. For example, we might consider only 10% of the total data at each gradient descent update step. At the next iteration, a different 10% of the data is sampled to perform the following update. Once the entire dataset has been used, the process is repeated. Each complete “pass” through the data is known as a <strong>training epoch</strong>.</p>
+<p>In the extreme case, we might choose a batch size of only one data point – that is, a single data point is used to estimate the gradient of loss with each update step. This is known as <strong>stochastic gradient descent</strong>.</p>
+<p>Batch gradient descent is a deterministic technique – because the entire dataset is used at each update iteration, the algorithm will always advance towards the minimum of the loss surface. In contrast, both mini-batch and stochastic gradient descent involve an element of randomness. Since only a subset of the full data is used to update the guess for <span class="math inline">\(\vec{\theta}\)</span> at each iteration, there’s a chance the algorithm will not progress towards the true minimum of loss with each update. Over the longer term, these stochastic techniques should still converge towards the optimal solution.</p>
+<p>The diagrams below represent a “bird’s eye view” of a loss surface from above. Notice that batch gradient descent takes a direct path towards the optimal <span class="math inline">\(\hat{\theta}\)</span>. Stochastic gradient descent, in contrast, “hops around” on its path to the minimum point on the loss surface. This reflects the randomness of the sampling process at each update step.</p>
+<p><img src="images/stochastic.png" alt="stochastic" width="600"></p>
+
+
+<!-- -->
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<pre class="markdown" data-shortcodes="false"><code>---
+title: Gradient Descent
+execute:
+  echo: true
+format:
+  html:
+    code-fold: true
+    code-tools: true
+    toc: true
+    toc-title: Gradient Descent
+    page-layout: full
+    theme:
+      - cosmo
+      - cerulean
+    callout-icon: false
+jupyter: python3
+---
+
+::: {.callout-note collapse="true"}
+## Learning Outcomes
+* Understand the standard workflow for fitting models in `sklearn`
+* Describe the conceptual basis for gradient descent
+* Compute the gradient descent update on a provided dataset
+:::
+
+At this point, we've grown quite familiar with the modeling process. We've introduced the concept of loss, used it to fit several types of models, and, most recently, extended our analysis to multiple regression. Along the way, we've forged our way through the mathematics of deriving the optimal model parameters in all of its gory detail. It's time to make our lives a little easier – let's implement the modeling process in code!
+
+In this lecture, we'll explore three techniques for model fitting:
+
+1. Translating our derived formulas for regression to Python
+2. Using the `sklearn` Python package
+3. Applying gradient descent for numerical optimization
+
+## Implementing Derived Formulas in Code
+
+Throughout this lecture, we'll refer to the `tips` dataset. 
+
+quarto-executable-code-5450563D
+
+```python
+import pandas as pd
+import seaborn as sns
+import numpy as np
+
+tips = sns.load_dataset("tips")
+tips.head(5)
+```
+
+Our goal will be to predict the value of the `"tip"` for a particular meal given its `"total_bill"` and `"size"`. We'll also add a bias column of all ones to represent the intercept term of our models.
+
+quarto-executable-code-5450563D
+
+```python
+#| code-fold: false
+# Add a bias column of all ones to `tips`
+tips["bias"] = np.ones(len(tips), dtype=int) 
+
+# Define the design matrix, X...
+X = tips[["bias", "total_bill", "size"]]
+
+# ...as well as the target variable, y
+Y = tips[["tip"]]
+```
+
+In the previous lecture, we expressed multiple linear regression using matrix notation.
+
+$$\hat{\mathbb{Y}} = \mathbb{X}\theta$$
+
+We used a geometric approach to derive the following expression for the optimal model parameters under MSE error:
+
+$$\hat{\theta} = (\mathbb{X}^T \mathbb{X})^{-1}\mathbb{X}^T \mathbb{Y}$$
+
+That's a whole lot of matrix manipulation. How do we implement it in Python?
+
+There are three operations we need to perform here: multiplying matrices, taking transposes, and finding inverses. 
+
+* To perform matrix multiplication, use the `@` operator
+* To take a transpose, call the `.T` attribute of an array or DataFrame
+* To compute an inverse, use `numpy`'s in-built method `np.linalg.inv`
+
+Because the methods above were designed for use with `numpy` arrays, we'll first convert `X` and `Y` to their `numpy` representations. Then, we can compute the optimal model parameters.
+
+quarto-executable-code-5450563D
+
+```python
+#| code-fold: false
+X, Y = X.to_numpy(), Y.to_numpy()
+
+theta_hat = np.linalg.inv(X.T @ X) @ X.T @ Y
+theta_hat
+```
+
+To make predictions using our newly-fitted model coefficients, matrix-multiply `X` and `theta_hat`.
+
+quarto-executable-code-5450563D
+
+```python
+#| code-fold: false
+y_hat = X @ theta_hat
+
+# Show just the first 5 predictions to save space on the page
+y_hat[:5, :]
+```
+
+## `sklearn`
+
+We've already saved a lot of time (and avoided tedious calculations) by translating our derived formulas into code. However, we still had to go through the process of writing out the linear algebra ourselves. 
+
+To make life *even easier*, we can turn to the `sklearn` Python library. `sklearn` is a robust library of machine learning tools used extensively in research and industry. It gives us a wide variety of in-built modeling frameworks and methods, so we'll keep returning to `sklearn` techniques as we progress through Data 100. 
+
+Regardless of the specific type of model being implemented, `sklearn` follows a standard set of steps for creating a model. 
+
+1. Create a model object. This generates a new instance of the model class. You can think of it as making a new copy of a standard "template" for a model. In pseudocode, this looks like:
+    ```
+    my_model = ModelName()
+    ```
+2. Fit the model to the `X` design matrix and `Y` target vector. This calculates the optimal model parameters "behind the scenes" without us explicitly working through the calculations ourselves. The fitted parameters are then stored within the model for use in future predictions:
+    ```
+    my_model.fit(X, Y)
+    ```
+3. Use the fitted model to make predictions on the `X` input data. The model will output an array of new `Y` predictions:
+    ```
+    my_model.predict(X)
+    ```
+
+Let's put this into action with our multiple regression task. First, initialize an instance of the `LinearRegression` class.
+
+quarto-executable-code-5450563D
+
+```python
+#| code-fold: false
+from sklearn.linear_model import LinearRegression
+
+model = LinearRegression()
+```
+
+Next, fit the model instance to the design matrix `X` and target vector `Y` by calling `.fit`.
+
+quarto-executable-code-5450563D
+
+```python
+#| code-fold: false
+model.fit(X, Y)
+```
+
+And, lastly, generate predictions for $\hat{Y}$ using the `.predict` method.
+
+quarto-executable-code-5450563D
+
+```python
+#| code-fold: false
+# Like before, show just the first 5 predictions
+model.predict(X)[:5, :]
+```
+
+We've generated the exact same predictions as before, but without any need for manipulating matrices ourselves!
+
+## Gradient Descent
+
+At this point, we're fairly comfortable with fitting a regression model under MSE risk (indeed, we've done it three times now!). It's important to remember, however, that the results we've found previously apply to one very specific case: the equations we used above are only relevant to a linear regression model using MSE as the cost function. In reality, we'll be working with a wide range of model types and objective functions, not all of which are as straightforward as the scenario we've discussed previously. This means that we need some more generalizable way of fitting a model to minimize loss. 
+
+To do this, we'll introduce the technique of **gradient descent**.
+
+### Minimizing a 1D Function
+
+Let's shift our focus away from MSE to consider some new, arbitrary cost function. You can think of this function as outputting the empirical risk associated with some parameter `theta`. 
+
+&lt;img src="images/arbitrary.png" alt='arbitrary' width='600'&gt;
+
+Looking at the function across this domain, it is clear that the function's minimum value occurs around $\theta = 5.3$. Let's pretend for a moment that we *couldn't* see the full view of the cost function. How would we guess the value of $\theta$ that minimizes the function? 
+
+It turns out that the first derivative of the function can give us a clue. In the plot below, the dotted line indicates the value of the derivative of each value of $\theta$. The derivative is negative where it is red and positive where it is green.
+
+&lt;img src="images/df.png" alt='gb' width='600'&gt;
+
+Say we make a guess for the minimizing value of $\theta$. If this guess "undershoots" the true minimizing value – our guess for $\theta$ is *lower* than the $\hat{\theta}$ that truly minimizes the function – the derivative will be negative in value. If this guess "overshoots" the true minimizing value, the derivative will be positive in value.
+
+&lt;img src="images/step.png" alt='step' width='600'&gt;
+
+We can use this pattern to help formulate our next guess for the optimal $\hat{\theta}$. Consider the case where we've undershot $\theta$ by guessing too low of a value. We'll want our next guess to be greater in value than the previous guess – that is, we want to shift our guess to the right. You can think of this as following the slope "downhill" to the function's minimum value.
+
+&lt;img src="images/neg_step.png" alt='neg_step' width='600'&gt;
+
+If we've overshot $\hat{\theta}$ by guessing too high of a value, we'll want our next guess to be lower in value – we want to shift our guess for $\hat{\theta}$ to the left. 
+
+&lt;img src="images/pos_step.png" alt='pos_step' width='600'&gt;
+
+### Formalizing Gradient Descent
+
+These observations lead us to the **gradient descent update rule**:
+$$\theta^{(t+1)} = \theta^{(t)} - \alpha \frac{dL}{d\theta}$$
+
+Begin with our guess for $\hat{\theta}$ at timestep $t$. To find our guess for $\hat{\theta}$ at the next timestep, $t+1$, subtract a multiple of the objective function's derivative, $\frac{dL}{d\theta}$. We've replaced the generic function $f$ with $L$ to indicate that we are minimizing loss.
+
+* If our guess $\theta^{(t)}$ was too low (undershooting $\hat{\theta}$), $\frac{dL}{d\theta}$ will be negative. Subtracting a negative number from $\theta^{(t)}$ will *increase* the value of the next guess, $\theta^{(t+1)}$. The guess will shift to the right.
+* If our guess $\theta^{(t)}$ was too high (overshooting $\hat{\theta}$), $\frac{dL}{d\theta}$ will be positive. Subtracting a positive number from $\theta^{(t)}$ will *decrease* the value of the next guess, $\theta^{(t+1)}$. The guess will shift to the left.
+
+Put together, this captures the same behavior we reasoned through above. We repeatedly update our guess for the optimal $\theta$ until we've completed a set number of updates, or until each additional update iteration does not change the value of $\theta$. In this second case, we say that gradient descent has **converged** on a solution. 
+
+The $\alpha$ term in the update rule is known as the **learning rate**. It represents the size of each gradient descent update step – in other words, how "far" should we step to the left or right with each updated guess? A high value of $\alpha$ will lead to large differences in value between consecutive guesses for $\hat{\theta}$; a low value of $\alpha$ will result in smaller differences in value between consecutive guesses. 
+
+### A Word on Covexity
+In our analysis above, we focused our attention on the global minimum of the loss function. You may be wondering: what about the local minimum just to the left? 
+
+If we had chosen a different starting guess for $\theta$, or a different value for the learning rate $\alpha$, we may have converged on the local minimum, rather than on the true optimum value of loss. 
+
+&lt;img src="images/local.png" alt='local' width='600'&gt;
+
+If the loss function is **convex**, gradient descent is guaranteed to find the global minimum of the objective function. Formally, a function $f$ is convex if:
+$$tf(a) + (1-t)f(b) \geq f(ta + (1-t)b)$$
+
+To put this into words: if you drew a line between any two points on the curve, all values on the curve must be *on or below* the line. Importantly, any local minimum of a convex function is also its global minimum. 
+
+&lt;img src="images/convex.png" alt='convex' width='600'&gt;
+
+In summary, non-convex loss functions can cause problems with optimization. This means that our choice of loss function is an key factor in our modeling process. It turns out that MSE *is* convex, which is a major reason why it is such a popular choice of loss function.
+
+### Multidimensional Gradient Descent
+We're in good shape now: we've developed a technique to find the minimum value of a more complex objective function. 
+
+The function we worked with above was one-dimensional – we were only minimizing the function with respect to a single parameter, $\theta$. However, as we've seen before, we often need to optimize a cost function with respect to several parameters (for example, when selecting the best model parameters for multiple linear regression). We'll need to extend our gradient descent rule to *multidimensional* objective functions.
+
+To put this in more concrete terms, let's return to the familiar case of simple linear regression with MSE loss.
+$$\text{MSE}(\theta_0,\:\theta_1) = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 = \frac{1}{n} \sum_{i=1}^{n} (y_i - \theta_0 - \theta_1 x)^2$$
+
+Now, loss is expressed in terms of *two* parameters, $\theta_0$ and $\theta_1$. Rather than a one-dimensional loss function as we had above, we are now dealing with a two-dimensional **loss surface**.
+
+quarto-executable-code-5450563D
+
+```python
+# This code is for illustration purposes only
+# It contains a lot of syntax you have not seen
+import plotly.graph_objects as go
+
+uvalues = np.linspace(0, 2, 10)
+vvalues = np.linspace(0, 0.2, 10)
+(u,v) = np.meshgrid(uvalues, vvalues)
+thetas = np.vstack((u.flatten(),v.flatten()))
+
+X = tips[["bias", "total_bill"]].to_numpy()
+Y = tips["tip"].to_numpy()
+
+def mse_loss_single_arg(theta):
+    return mse_loss(theta, X, Y)
+
+def mse_loss(theta, X, y_obs):
+    y_hat = X @ theta
+    return np.mean((y_hat - Y) ** 2)    
+
+MSE = np.array([mse_loss_single_arg(t) for t in thetas.T])
+
+loss_surface = go.Surface(x=u, y=v, z=np.reshape(MSE, u.shape))
+
+ind = np.argmin(MSE)
+optimal_point = go.Scatter3d(name = "Optimal Point",
+    x = [thetas.T[ind,0]], y = [thetas.T[ind,1]], 
+    z = [MSE[ind]],
+    marker=dict(size=10, color="red"))
+
+fig = go.Figure(data=[loss_surface, optimal_point])
+fig.update_layout(scene = dict(
+    xaxis_title = "theta0",
+    yaxis_title = "theta1",
+    zaxis_title = "MSE"))
+fig.show()
+```
+
+Though our objective function looks a little different, we can use the same principles as we did earlier to locate the optimal model parameters. Notice how the minimum value of MSE, marked by the red dot in the plot above, occurs in the "valley" of the loss surface. Like before, we want our guesses for the best pair of $(\theta_0,\:\theta_1)$ to move "downhill" towards this minimum point. 
+
+The difference now is that we need to update guesses for *both* $\theta_0$ and $\theta_1$:
+$$\theta_0^{(t+1)} = \theta_0^{(t)} - \alpha \frac{dL}{d\theta_0} \qquad \qquad \theta_1^{(t+1)} = \theta_1^{(t)} - \alpha \frac{dL}{d\theta_1}$$
+
+We can tidy this statement up by using vector notation:
+$$\begin{bmatrix}
+           \theta_{0}^{(t+1)} \\
+           \theta_{1}^{(t+1)} \\
+         \end{bmatrix}
+=
+\begin{bmatrix}
+           \theta_{0}^{(t)} \\
+           \theta_{1}^{(t)} \\
+         \end{bmatrix}
+- \alpha
+\begin{bmatrix}
+           \frac{dL}{d\theta_{0}} \\
+           \frac{dL}{d\theta_{1}} \\
+         \end{bmatrix}
+$$
+
+To save ourselves from writing out long column vectors, we'll introduce some new notation. $\vec{\theta}^{(t)}$ is a column vector of guesses for each model parameter $\theta_i$ at timestep $t$. We call $\nabla_{\vec{\theta}} L$ the **gradient vector.** In plain English, it means "take the derivative of loss, $L$, with respect to each model parameter in $\vec{\theta}$."
+
+$$\vec{\theta}^{(t+1)}
+= \vec{\theta}^{(t)} - \alpha \nabla_{\vec{\theta}} L
+$$
+
+### Batch, Mini-Batch, and Stochastic Descent
+
+Formally, the algorithm we derived above is called **batch gradient descent.** For each iteration of the algorithm, the derivative of loss is computed across the entire batch of available data. While this update rule works well in theory, it is not practical in all circumstances. For large datasets (with perhaps billions of data points), finding the gradient across all the data is incredibly computationally taxing. 
+
+**Mini-batch gradient descent** tries to address this issue. In mini-batch descent, only a subset of the data is used to compute an estimate of the gradient. For example, we might consider only 10% of the total data at each gradient descent update step. At the next iteration, a different 10% of the data is sampled to perform the following update. Once the entire dataset has been used, the process is repeated. Each complete "pass" through the data is known as a **training epoch**.
+
+In the extreme case, we might choose a batch size of only one data point – that is, a single data point is used to estimate the gradient of loss with each update step. This is known as **stochastic gradient descent**.
+
+Batch gradient descent is a deterministic technique – because the entire dataset is used at each update iteration, the algorithm will always advance towards the minimum of the loss surface. In contrast, both mini-batch and stochastic gradient descent involve an element of randomness. Since only a subset of the full data is used to update the guess for $\vec{\theta}$ at each iteration, there's a chance the algorithm will not progress towards the true minimum of loss with each update. Over the longer term, these stochastic techniques should still converge towards the optimal solution. 
+
+The diagrams below represent a "bird's eye view" of a loss surface from above. Notice that batch gradient descent takes a direct path towards the optimal $\hat{\theta}$. Stochastic gradient descent, in contrast, "hops around" on its path to the minimum point on the loss surface. This reflects the randomness of the sampling process at each update step.
+
+&lt;img src="images/stochastic.png" alt='stochastic' width='600'&gt;
+</code></pre>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+</body></html>

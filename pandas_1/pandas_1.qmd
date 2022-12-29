@@ -45,7 +45,7 @@ The API (application programming interface) for the DataFrame class is enormous.
 
 ## Slicing in DataFrames
 
-The most fundamental way to manipulate a DataFrame is to extract a subset of rows and columns. This is called **slicing**. We can do so with three primary methods of the DataFrame class:
+The most fundamental way to manipulate a DataFrame is to extract a subset of rows and columns. This is called **slicing**. We will do so with three primary methods of the DataFrame class:
 
 1. `.loc`
 2. `.iloc`
@@ -53,7 +53,7 @@ The most fundamental way to manipulate a DataFrame is to extract a subset of row
 
 ### Indexing with .loc
 
-The `.loc` operator selects rows and columns in a DataFrame by their row and column label(s), respectively. The **row label** (commonly referred to as the **index**) is the bold text on the far left of a DataFrame, while the **column label** is the text found at the top of a DataFrame. By default, row labels in `pandas` are the sequential list of integers beginning from 0. The column labels in our `elections` DataFrame are the column names themselves: `Year`, `Candidate`, `Party`, `Popular Vote`, `Result`, and `%`.
+The `.loc` operator selects rows and columns in a DataFrame by their row and column label(s), respectively. The **row label** (commonly referred to as the **index**) is the bold text on the far *left* of a DataFrame, while the **column label** is the text found at the *top* of a DataFrame. By default, row labels in `pandas` are the sequential list of integers beginning from 0. The column labels in our `elections` DataFrame are the column names themselves: `Year`, `Candidate`, `Party`, `Popular Vote`, `Result`, and `%`.
 
 `.loc` lets us grab data by specifying the appropriate row and column label(s) where the data exists. The row labels are the first argument to the `.loc` function; the column labels are the second. For example, to select the the row labeled `0` and the column labeled `Candidate` from our `elections` DataFrame we can write:
 
@@ -73,7 +73,7 @@ Suppose that instead, we wanted *every* column value for the first four rows in 
 elections.loc[0:3, :]
 ```
 
-There are a couple of things we should note. Unlike conventional Python, Pandas allows us to slice string values (in our example, the column labels). Secondly, slicing with `.loc` is inclusive. Notice how our resulting DataFrame includes every row and column between and including the slice labels we specified.
+There are a couple of things we should note. Unlike conventional Python, Pandas allows us to slice string values (in our example, the column labels). Secondly, slicing with `.loc` is *inclusive*. Notice how our resulting DataFrame includes every row and column between and including the slice labels we specified.
 
 Equivalently, we can use a list to obtain multiple rows and columns in our `elections` DataFrame. 
 
@@ -89,9 +89,9 @@ elections.loc[[0, 1, 2, 3], :]
 
 ### Indexing with .iloc
 
-Slicing with `.iloc` works similarily to `.loc`, although `.iloc` uses the integer positions of rows and columns rather the labels. The arguments for the `.iloc` function also behave similarly - single values, lists, indices, and any combination of these are permitted. 
+Slicing with `.iloc` works similarily to `.loc`, although `.iloc` uses the integer positions of rows and columns rather the labels. The arguments to the `.iloc` function also behave similarly - single values, lists, indices, and any combination of these are permitted. 
 
-We can begin reproducing our results from above. Let's begin by selecting for the first presedential candidate in our `elections` DataFrame:
+Let's begin reproducing our results from above. We'll begin by selecting for the first presedential candidate in our `elections` DataFrame:
 
 ```{python}
 # elections.loc[0, "Candidate"] - Previous approach
@@ -107,7 +107,7 @@ However, when we select for the first four rows and columns using `.iloc`, we no
 elections.iloc[0:4, 0:4]
 ```
 
-Slicing is no longer inclusive in `.iloc` - it's exclusive! Sad to say, this is one of Pandas syntatical subtleties. Don't worry, you'll get used to with practice.
+Slicing is no longer inclusive in `.iloc` - it's *exclusive*. This is one of Pandas syntatical subtleties; you'll get used to with practice.
 
 List behavior works just as expected.
 
@@ -126,7 +126,7 @@ The `[]` selection operator is the most baffling of all, yet it is the commonly 
 2. A list of column labels
 3. A single column label
 
-That is, `[]` is context dependent. Let's see some examples.
+That is, `[]` is *context dependent*. Let's see some examples.
 
 #### A slice of row numbers
 
@@ -152,7 +152,7 @@ Lastly, if we only want the `Candidate` column.
 elections["Candidate"]
 ```
 
-The output looks quite different - it's no longer a DataFrame! This is a **Series**. We'll talk about what a Series is in the next section.
+The output looks quite different - it's no longer a DataFrame! This is a *Series*. We'll talk about what a Series is in the next section.
 
 ## DataFrames, Series, and Indices
 
@@ -166,23 +166,26 @@ type(elections)
 type(elections['Candidate'])
 ```
 
-A Series is a one dimensional object that represents a single column of data. It has two components - an index and the data. A DataFrame is equivalent to a collection of multiple Series, which all share the same index. Notice how the index of a Series is equivalent to the index (or row labels) of a DataFrame.
+A **Series** is a one dimensional object that represents a single column of data. It has two components - an index and the data. A DataFrame is equivalent to a collection of multiple Series, which all share the same index. Notice how the index of a Series is equivalent to the index (or row labels) of a DataFrame.
 
-<img src="images/index_comparison_1.png" alt='index_comparison' width='800'>
+![](images/index_comparison_1.png)
 
 However, a DataFrame index doesn't have to be an integer, nor does it have to be unique. For example, we can set our index to be the name of our presedential candidates. Selecting a new Series from this modified DataFrame yields the following:
 
-<img src="images/index_comparison_2.png" alt='index_comparison_2' width='800'>
+```{python}
+elections.set_index("Candidate", inplace=True)
+```
+
+![](images/index_comparison_2.png)
 
 To retrieve the indices of a DataFrame, simply use the `.index` attribute of the DataFrame class.
 
 ```{python}
-elections.set_index("Candidate", inplace=True)
 elections.index
 ```
 
 ```{python}
-elections.reset_index(inplace=True)
+elections.reset_index(inplace=True) # This resets the index
 ```
 
 Earlier, we mentioned that a Series was just a column of data. What if we wanted a single column as a DataFrame? To obtain this, we can pass in a list containing a single column to the `[]` selection operator.
@@ -195,9 +198,9 @@ elections[["Party"]] # ["Party"] is the argument - a list with a single element
 
 Conditional selection allows us to select a subset of rows in a DataFrame if they follow some specified condition.
 
-To understand how to use conditional selection, we must look at another input to the `.loc` and `[]` operators - a boolean array. This boolean array must have a length equal to the number of rows in the DataFrame. It will return all rows in the position of the corresponding `True` value in the array.
+To understand how to use conditional selection, we must look at another input of the `.loc` and `[]` methods - a boolean array. This boolean array must have a length equal to the number of rows in the DataFrame. It will return all rows in the position of a corresponding `True` value in the array.
 
-Here, we will select all even-indexed rows in the first 10 rows of our DataFrame.
+Here, we will select all *even-indexed* rows in the first 10 rows of our DataFrame.
 
 ```{python}
 # Why is :9 is the correct slice to select the first 10 rows?
@@ -315,7 +318,7 @@ elections['Candidate'].value_counts()
 
 #### .unique
 
-`.unique()` is called on a Series and returns an array with the unique values of that Series.
+`.unique()` is called on a Series and returns an array with its unique values.
 
 ```{python}
 # For brevity, we have limited the results to 5 candidates 

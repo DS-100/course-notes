@@ -1,0 +1,293 @@
+---
+title: Gradient Descent
+execute:
+  echo: true
+format:
+  html:
+    code-fold: true
+    code-tools: true
+    toc: true
+    toc-title: Gradient Descent
+    page-layout: full
+    theme:
+      - cosmo
+      - cerulean
+    callout-icon: false
+jupyter: python3
+---
+
+::: {.callout-note collapse="true"}
+## Learning Outcomes
+* Understand the standard workflow for fitting models in `sklearn`
+* Describe the conceptual basis for gradient descent
+* Compute the gradient descent update on a provided dataset
+:::
+
+At this point, we've grown quite familiar with the modeling process. We've introduced the concept of loss, used it to fit several types of models, and, most recently, extended our analysis to multiple regression. Along the way, we've forged our way through the mathematics of deriving the optimal model parameters in all of its gory detail. It's time to make our lives a little easier – let's implement the modeling process in code!
+
+In this lecture, we'll explore three techniques for model fitting:
+
+1. Translating our derived formulas for regression to Python
+2. Using the `sklearn` Python package
+3. Applying gradient descent for numerical optimization
+
+## Implementing Derived Formulas in Code
+
+Throughout this lecture, we'll refer to the `tips` dataset. 
+
+```{python}
+import pandas as pd
+import seaborn as sns
+import numpy as np
+
+tips = sns.load_dataset("tips")
+tips.head(5)
+```
+
+Our goal will be to predict the value of the `"tip"` for a particular meal given its `"total_bill"` and `"size"`. We'll also add a bias column of all ones to represent the intercept term of our models.
+
+```{python}
+#| code-fold: false
+# Add a bias column of all ones to `tips`
+tips["bias"] = np.ones(len(tips), dtype=int) 
+
+# Define the design matrix, X...
+X = tips[["bias", "total_bill", "size"]]
+
+# ...as well as the target variable, y
+Y = tips[["tip"]]
+```
+
+In the previous lecture, we expressed multiple linear regression using matrix notation.
+
+$$\hat{\mathbb{Y}} = \mathbb{X}\theta$$
+
+We used a geometric approach to derive the following expression for the optimal model parameters under MSE error:
+
+$$\hat{\theta} = (\mathbb{X}^T \mathbb{X})^{-1}\mathbb{X}^T \mathbb{Y}$$
+
+That's a whole lot of matrix manipulation. How do we implement it in Python?
+
+There are three operations we need to perform here: multiplying matrices, taking transposes, and finding inverses. 
+
+* To perform matrix multiplication, use the `@` operator
+* To take a transpose, call the `.T` attribute of an array or DataFrame
+* To compute an inverse, use `numpy`'s in-built method `np.linalg.inv`
+
+Because the methods above were designed for use with `numpy` arrays, we'll first convert `X` and `Y` to their `numpy` representations. Then, we can compute the optimal model parameters.
+
+```{python}
+#| code-fold: false
+X, Y = X.to_numpy(), Y.to_numpy()
+
+theta_hat = np.linalg.inv(X.T @ X) @ X.T @ Y
+theta_hat
+```
+
+To make predictions using our newly-fitted model coefficients, matrix-multiply `X` and `theta_hat`.
+
+```{python}
+#| code-fold: false
+y_hat = X @ theta_hat
+
+# Show just the first 5 predictions to save space on the page
+y_hat[:5, :]
+```
+
+## `sklearn`
+
+We've already saved a lot of time (and avoided tedious calculations) by translating our derived formulas into code. However, we still had to go through the process of writing out the linear algebra ourselves. 
+
+To make life *even easier*, we can turn to the `sklearn` Python library. `sklearn` is a robust library of machine learning tools used extensively in research and industry. It gives us a wide variety of in-built modeling frameworks and methods, so we'll keep returning to `sklearn` techniques as we progress through Data 100. 
+
+Regardless of the specific type of model being implemented, `sklearn` follows a standard set of steps for creating a model. 
+
+1. Create a model object. This generates a new instance of the model class. You can think of it as making a new copy of a standard "template" for a model. In pseudocode, this looks like:
+    ```
+    my_model = ModelName()
+    ```
+2. Fit the model to the `X` design matrix and `Y` target vector. This calculates the optimal model parameters "behind the scenes" without us explicitly working through the calculations ourselves. The fitted parameters are then stored within the model for use in future predictions:
+    ```
+    my_model.fit(X, Y)
+    ```
+3. Use the fitted model to make predictions on the `X` input data. The model will output an array of new `Y` predictions:
+    ```
+    my_model.predict(X)
+    ```
+
+Let's put this into action with our multiple regression task. First, initialize an instance of the `LinearRegression` class.
+
+```{python}
+#| code-fold: false
+from sklearn.linear_model import LinearRegression
+
+model = LinearRegression()
+```
+
+Next, fit the model instance to the design matrix `X` and target vector `Y` by calling `.fit`.
+
+```{python}
+#| code-fold: false
+model.fit(X, Y)
+```
+
+And, lastly, generate predictions for $\hat{Y}$ using the `.predict` method.
+
+```{python}
+#| code-fold: false
+# Like before, show just the first 5 predictions
+model.predict(X)[:5, :]
+```
+
+We've generated the exact same predictions as before, but without any need for manipulating matrices ourselves!
+
+## Gradient Descent
+
+At this point, we're fairly comfortable with fitting a regression model under MSE risk (indeed, we've done it three times now!). It's important to remember, however, that the results we've found previously apply to one very specific case: the equations we used above are only relevant to a linear regression model using MSE as the cost function. In reality, we'll be working with a wide range of model types and objective functions, not all of which are as straightforward as the scenario we've discussed previously. This means that we need some more generalizable way of fitting a model to minimize loss. 
+
+To do this, we'll introduce the technique of **gradient descent**.
+
+### Minimizing a 1D Function
+
+Let's shift our focus away from MSE to consider some new, arbitrary cost function. You can think of this function as outputting the empirical risk associated with some parameter `theta`. 
+
+<img src="images/arbitrary.png" alt='arbitrary' width='600'>
+
+Looking at the function across this domain, it is clear that the function's minimum value occurs around $\theta = 5.3$. Let's pretend for a moment that we *couldn't* see the full view of the cost function. How would we guess the value of $\theta$ that minimizes the function? 
+
+It turns out that the first derivative of the function can give us a clue. In the plot below, the dotted line indicates the value of the derivative of each value of $\theta$. The derivative is negative where it is red and positive where it is green.
+
+<img src="images/df.png" alt='gb' width='600'>
+
+Say we make a guess for the minimizing value of $\theta$. If this guess "undershoots" the true minimizing value – our guess for $\theta$ is *lower* than the $\hat{\theta}$ that truly minimizes the function – the derivative will be negative in value. If this guess "overshoots" the true minimizing value, the derivative will be positive in value.
+
+<img src="images/step.png" alt='step' width='600'>
+
+We can use this pattern to help formulate our next guess for the optimal $\hat{\theta}$. Consider the case where we've undershot $\theta$ by guessing too low of a value. We'll want our next guess to be greater in value than the previous guess – that is, we want to shift our guess to the right. You can think of this as following the slope "downhill" to the function's minimum value.
+
+<img src="images/neg_step.png" alt='neg_step' width='600'>
+
+If we've overshot $\hat{\theta}$ by guessing too high of a value, we'll want our next guess to be lower in value – we want to shift our guess for $\hat{\theta}$ to the left. 
+
+<img src="images/pos_step.png" alt='pos_step' width='600'>
+
+### Formalizing Gradient Descent
+
+These observations lead us to the **gradient descent update rule**:
+$$\theta^{(t+1)} = \theta^{(t)} - \alpha \frac{dL}{d\theta}$$
+
+Begin with our guess for $\hat{\theta}$ at timestep $t$. To find our guess for $\hat{\theta}$ at the next timestep, $t+1$, subtract a multiple of the objective function's derivative, $\frac{dL}{d\theta}$. We've replaced the generic function $f$ with $L$ to indicate that we are minimizing loss.
+
+* If our guess $\theta^{(t)}$ was too low (undershooting $\hat{\theta}$), $\frac{dL}{d\theta}$ will be negative. Subtracting a negative number from $\theta^{(t)}$ will *increase* the value of the next guess, $\theta^{(t+1)}$. The guess will shift to the right.
+* If our guess $\theta^{(t)}$ was too high (overshooting $\hat{\theta}$), $\frac{dL}{d\theta}$ will be positive. Subtracting a positive number from $\theta^{(t)}$ will *decrease* the value of the next guess, $\theta^{(t+1)}$. The guess will shift to the left.
+
+Put together, this captures the same behavior we reasoned through above. We repeatedly update our guess for the optimal $\theta$ until we've completed a set number of updates, or until each additional update iteration does not change the value of $\theta$. In this second case, we say that gradient descent has **converged** on a solution. 
+
+The $\alpha$ term in the update rule is known as the **learning rate**. It represents the size of each gradient descent update step – in other words, how "far" should we step to the left or right with each updated guess? A high value of $\alpha$ will lead to large differences in value between consecutive guesses for $\hat{\theta}$; a low value of $\alpha$ will result in smaller differences in value between consecutive guesses. 
+
+### A Word on Covexity
+In our analysis above, we focused our attention on the global minimum of the loss function. You may be wondering: what about the local minimum just to the left? 
+
+If we had chosen a different starting guess for $\theta$, or a different value for the learning rate $\alpha$, we may have converged on the local minimum, rather than on the true optimum value of loss. 
+
+<img src="images/local.png" alt='local' width='600'>
+
+If the loss function is **convex**, gradient descent is guaranteed to find the global minimum of the objective function. Formally, a function $f$ is convex if:
+$$tf(a) + (1-t)f(b) \geq f(ta + (1-t)b)$$
+
+To put this into words: if you drew a line between any two points on the curve, all values on the curve must be *on or below* the line. Importantly, any local minimum of a convex function is also its global minimum. 
+
+<img src="images/convex.png" alt='convex' width='600'>
+
+In summary, non-convex loss functions can cause problems with optimization. This means that our choice of loss function is an key factor in our modeling process. It turns out that MSE *is* convex, which is a major reason why it is such a popular choice of loss function.
+
+### Multidimensional Gradient Descent
+We're in good shape now: we've developed a technique to find the minimum value of a more complex objective function. 
+
+The function we worked with above was one-dimensional – we were only minimizing the function with respect to a single parameter, $\theta$. However, as we've seen before, we often need to optimize a cost function with respect to several parameters (for example, when selecting the best model parameters for multiple linear regression). We'll need to extend our gradient descent rule to *multidimensional* objective functions.
+
+To put this in more concrete terms, let's return to the familiar case of simple linear regression with MSE loss.
+$$\text{MSE}(\theta_0,\:\theta_1) = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 = \frac{1}{n} \sum_{i=1}^{n} (y_i - \theta_0 - \theta_1 x)^2$$
+
+Now, loss is expressed in terms of *two* parameters, $\theta_0$ and $\theta_1$. Rather than a one-dimensional loss function as we had above, we are now dealing with a two-dimensional **loss surface**.
+
+```{python}
+# This code is for illustration purposes only
+# It contains a lot of syntax you have not seen
+import plotly.graph_objects as go
+
+uvalues = np.linspace(0, 2, 10)
+vvalues = np.linspace(0, 0.2, 10)
+(u,v) = np.meshgrid(uvalues, vvalues)
+thetas = np.vstack((u.flatten(),v.flatten()))
+
+X = tips[["bias", "total_bill"]].to_numpy()
+Y = tips["tip"].to_numpy()
+
+def mse_loss_single_arg(theta):
+    return mse_loss(theta, X, Y)
+
+def mse_loss(theta, X, y_obs):
+    y_hat = X @ theta
+    return np.mean((y_hat - Y) ** 2)    
+
+MSE = np.array([mse_loss_single_arg(t) for t in thetas.T])
+
+loss_surface = go.Surface(x=u, y=v, z=np.reshape(MSE, u.shape))
+
+ind = np.argmin(MSE)
+optimal_point = go.Scatter3d(name = "Optimal Point",
+    x = [thetas.T[ind,0]], y = [thetas.T[ind,1]], 
+    z = [MSE[ind]],
+    marker=dict(size=10, color="red"))
+
+fig = go.Figure(data=[loss_surface, optimal_point])
+fig.update_layout(scene = dict(
+    xaxis_title = "theta0",
+    yaxis_title = "theta1",
+    zaxis_title = "MSE"))
+fig.show()
+```
+
+Though our objective function looks a little different, we can use the same principles as we did earlier to locate the optimal model parameters. Notice how the minimum value of MSE, marked by the red dot in the plot above, occurs in the "valley" of the loss surface. Like before, we want our guesses for the best pair of $(\theta_0,\:\theta_1)$ to move "downhill" towards this minimum point. 
+
+The difference now is that we need to update guesses for *both* $\theta_0$ and $\theta_1$:
+$$\theta_0^{(t+1)} = \theta_0^{(t)} - \alpha \frac{dL}{d\theta_0} \qquad \qquad \theta_1^{(t+1)} = \theta_1^{(t)} - \alpha \frac{dL}{d\theta_1}$$
+
+We can tidy this statement up by using vector notation:
+$$\begin{bmatrix}
+           \theta_{0}^{(t+1)} \\
+           \theta_{1}^{(t+1)} \\
+         \end{bmatrix}
+=
+\begin{bmatrix}
+           \theta_{0}^{(t)} \\
+           \theta_{1}^{(t)} \\
+         \end{bmatrix}
+- \alpha
+\begin{bmatrix}
+           \frac{dL}{d\theta_{0}} \\
+           \frac{dL}{d\theta_{1}} \\
+         \end{bmatrix}
+$$
+
+To save ourselves from writing out long column vectors, we'll introduce some new notation. $\vec{\theta}^{(t)}$ is a column vector of guesses for each model parameter $\theta_i$ at timestep $t$. We call $\nabla_{\vec{\theta}} L$ the **gradient vector.** In plain English, it means "take the derivative of loss, $L$, with respect to each model parameter in $\vec{\theta}$."
+
+$$\vec{\theta}^{(t+1)}
+= \vec{\theta}^{(t)} - \alpha \nabla_{\vec{\theta}} L
+$$
+
+### Batch, Mini-Batch, and Stochastic Descent
+
+Formally, the algorithm we derived above is called **batch gradient descent.** For each iteration of the algorithm, the derivative of loss is computed across the entire batch of available data. While this update rule works well in theory, it is not practical in all circumstances. For large datasets (with perhaps billions of data points), finding the gradient across all the data is incredibly computationally taxing. 
+
+**Mini-batch gradient descent** tries to address this issue. In mini-batch descent, only a subset of the data is used to compute an estimate of the gradient. For example, we might consider only 10% of the total data at each gradient descent update step. At the next iteration, a different 10% of the data is sampled to perform the following update. Once the entire dataset has been used, the process is repeated. Each complete "pass" through the data is known as a **training epoch**.
+
+In the extreme case, we might choose a batch size of only one data point – that is, a single data point is used to estimate the gradient of loss with each update step. This is known as **stochastic gradient descent**.
+
+Batch gradient descent is a deterministic technique – because the entire dataset is used at each update iteration, the algorithm will always advance towards the minimum of the loss surface. In contrast, both mini-batch and stochastic gradient descent involve an element of randomness. Since only a subset of the full data is used to update the guess for $\vec{\theta}$ at each iteration, there's a chance the algorithm will not progress towards the true minimum of loss with each update. Over the longer term, these stochastic techniques should still converge towards the optimal solution. 
+
+The diagrams below represent a "bird's eye view" of a loss surface from above. Notice that batch gradient descent takes a direct path towards the optimal $\hat{\theta}$. Stochastic gradient descent, in contrast, "hops around" on its path to the minimum point on the loss surface. This reflects the randomness of the sampling process at each update step.
+
+<img src="images/stochastic.png" alt='stochastic' width='600'>
+
