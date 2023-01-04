@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.280">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Data 100 - Logistic Regression I</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-sidebar docked">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title">Logistic Regression I</h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="../index.html" class="sidebar-logo-link">
+      <img src="../data100_logo.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Principles and Techniques of Data Science</a> 
+    </div>
+      </div>
+      <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pandas_1/pandas_1.html" class="sidebar-item-text sidebar-link">Pandas I</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pandas_2/pandas_2.html" class="sidebar-item-text sidebar-link">Pandas II</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../eda/eda.html" class="sidebar-item-text sidebar-link">Data Cleaning and EDA</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../regex/regex.html" class="sidebar-item-text sidebar-link">Regular Expressions</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../visualization_1/visualization_1.html" class="sidebar-item-text sidebar-link">Visualization I</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../visualization_2/visualization_2.html" class="sidebar-item-text sidebar-link">Visualization II</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../intro_to_modeling/intro_to_modeling.html" class="sidebar-item-text sidebar-link">Introduction to Modeling</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../constant_model_loss_transformations/loss_transformations.html" class="sidebar-item-text sidebar-link">Constant Model, Loss, and Transformations</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ols/ols.html" class="sidebar-item-text sidebar-link">Ordinary Least Squares</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../gradient_descent/gradient_descent.html" class="sidebar-item-text sidebar-link">Gradient Descent</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../feature_engineering/feature_engineering.html" class="sidebar-item-text sidebar-link">Feature Engineering</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../cv_regularization/cv_reg.html" class="sidebar-item-text sidebar-link">Cross Validation and Regularization</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  probability_1/probability I.ioynb
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../logistic_regression_1/logistic_reg_1.html" class="sidebar-item-text sidebar-link active">Logistic Regression I</a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#regression-vs.-classification" id="toc-regression-vs.-classification" class="nav-link active" data-scroll-target="#regression-vs.-classification">Regression vs.&nbsp;Classification</a></li>
+  <li><a href="#intuition-the-coin-flip" id="toc-intuition-the-coin-flip" class="nav-link" data-scroll-target="#intuition-the-coin-flip">Intuition: The Coin Flip</a>
+  <ul>
+  <li><a href="#likelihood-of-data" id="toc-likelihood-of-data" class="nav-link" data-scroll-target="#likelihood-of-data">Likelihood of Data</a></li>
+  </ul></li>
+  <li><a href="#deriving-the-logistic-regression-model" id="toc-deriving-the-logistic-regression-model" class="nav-link" data-scroll-target="#deriving-the-logistic-regression-model">Deriving the Logistic Regression Model</a>
+  <ul>
+  <li><a href="#the-graph-of-averages" id="toc-the-graph-of-averages" class="nav-link" data-scroll-target="#the-graph-of-averages">The Graph of Averages</a></li>
+  <li><a href="#transforming-the-graph-of-averages" id="toc-transforming-the-graph-of-averages" class="nav-link" data-scroll-target="#transforming-the-graph-of-averages">Transforming the Graph of Averages</a>
+  <ul>
+  <li><a href="#transform-p-until-it-looks-linear" id="toc-transform-p-until-it-looks-linear" class="nav-link" data-scroll-target="#transform-p-until-it-looks-linear">1. Transform <span class="math inline">\(p\)</span> until it looks linear</a></li>
+  <li><a href="#use-algebra-to-invert-all-transformations" id="toc-use-algebra-to-invert-all-transformations" class="nav-link" data-scroll-target="#use-algebra-to-invert-all-transformations">2. Use algebra to invert all transformations</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#the-logistic-regression-model" id="toc-the-logistic-regression-model" class="nav-link" data-scroll-target="#the-logistic-regression-model">The Logistic Regression Model</a>
+  <ul>
+  <li><a href="#the-logistic-function" id="toc-the-logistic-function" class="nav-link" data-scroll-target="#the-logistic-function">The Logistic Function</a></li>
+  <li><a href="#example-calcualtion" id="toc-example-calcualtion" class="nav-link" data-scroll-target="#example-calcualtion">Example Calcualtion</a></li>
+  <li><a href="#parameter-interpretation" id="toc-parameter-interpretation" class="nav-link" data-scroll-target="#parameter-interpretation">Parameter Interpretation</a></li>
+  <li><a href="#comparison-to-linear-regression" id="toc-comparison-to-linear-regression" class="nav-link" data-scroll-target="#comparison-to-linear-regression">Comparison to Linear Regression</a>
+  <ul>
+  <li><a href="#linear-regression" id="toc-linear-regression" class="nav-link" data-scroll-target="#linear-regression">Linear Regression</a></li>
+  <li><a href="#logistic-regression" id="toc-logistic-regression" class="nav-link" data-scroll-target="#logistic-regression">Logistic Regression</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#parameter-estimation" id="toc-parameter-estimation" class="nav-link" data-scroll-target="#parameter-estimation">Parameter Estimation</a>
+  <ul>
+  <li><a href="#pitfalls-of-squared-error-loss" id="toc-pitfalls-of-squared-error-loss" class="nav-link" data-scroll-target="#pitfalls-of-squared-error-loss">Pitfalls of Squared Error Loss</a>
+  <ul>
+  <li><a href="#non-convex" id="toc-non-convex" class="nav-link" data-scroll-target="#non-convex">1. Non-convex</a></li>
+  <li><a href="#bounded" id="toc-bounded" class="nav-link" data-scroll-target="#bounded">2. Bounded</a></li>
+  <li><a href="#conceptually-questionable" id="toc-conceptually-questionable" class="nav-link" data-scroll-target="#conceptually-questionable">3. Conceptually Questionable</a></li>
+  </ul></li>
+  <li><a href="#cross-entropy-loss" id="toc-cross-entropy-loss" class="nav-link" data-scroll-target="#cross-entropy-loss">Cross-Entropy Loss</a>
+  <ul>
+  <li><a href="#convex" id="toc-convex" class="nav-link" data-scroll-target="#convex">1. Convex</a></li>
+  <li><a href="#strong-error-penalization" id="toc-strong-error-penalization" class="nav-link" data-scroll-target="#strong-error-penalization">2. Strong Error Penalization</a></li>
+  <li><a href="#conceptually-sound" id="toc-conceptually-sound" class="nav-link" data-scroll-target="#conceptually-sound">3. Conceptually Sound</a></li>
+  </ul></li>
+  <li><a href="#maximum-likelihood-estimation" id="toc-maximum-likelihood-estimation" class="nav-link" data-scroll-target="#maximum-likelihood-estimation">Maximum Likelihood Estimation</a></li>
+  </ul></li>
+  <li><a href="#parting-note" id="toc-parting-note" class="nav-link" data-scroll-target="#parting-note">Parting Note</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">Logistic Regression I</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<p>Up until now, we’ve focused on modeling regression problems - that is, predicting a <em>numerical</em> quantity from a given dataset. We explored the following workflow in the context of linear regression:</p>
+<ol type="1">
+<li>Choose a model</li>
+<li>Choose a loss function</li>
+<li>Fit the model</li>
+<li>Evaluate model performance</li>
+</ol>
+<p>In this lecture, we will look at an entirely new modeling problem in <strong>classification</strong>, which involves predicting a <em>categorical</em> variable. We will discuss how to modify the steps in our existing modeling framework to meet the needs of this new machine learning problem.</p>
+<section id="regression-vs.-classification" class="level2">
+<h2 class="anchored" data-anchor-id="regression-vs.-classification">Regression vs.&nbsp;Classification</h2>
+<p>You may have seen this diagram which outlines the taxonomy of machine learning.</p>
+<p><img src="images/ml_taxonomy.png" class="img-fluid"></p>
+<p><br> Regression and classification are both <strong>supervised learning</strong> problems, meaning they consist of models that learn from data where the <span class="math inline">\(y\)</span> observations are known. You’ve likely seen examples of classification models before - for example, the k-nearest neighbors algorithm from Data 8. This lecture will focus on another such model known as <strong>Logistic Regression</strong>.</p>
+<p>More generally, a classification problem aims to <em>categorize</em> data. Today, we will focus on <strong>binary classification</strong>, a classification problem where data may only belong to one of two groups. One such example is the result of a coin toss. Many of the principles we’ll learn today can extended to three or more groups - called <strong>multiclass classification</strong>. In the next few lectures, we will learn about models designed specifically for these problems.</p>
+</section>
+<section id="intuition-the-coin-flip" class="level2">
+<h2 class="anchored" data-anchor-id="intuition-the-coin-flip">Intuition: The Coin Flip</h2>
+<p>To build some intuition for logistic regression, let’s look at an introductory example to classification: the coin flip. Suppose we observe some outcomes of a coin flip (1 = Heads, 0 = Tails).</p>
+<div class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>flips <span class="op">=</span> [<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>]</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>flips</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<pre><code>[0, 0, 1, 1, 1, 1, 0, 0, 0, 0]</code></pre>
+</div>
+</div>
+<p>For the next flip, would you predict heads or tails?</p>
+<p>A reasonable model is to assume all flips are IID (independent and identitically distributed). In other words, each flip has the same probability of returning a 1 (or heads). Let’s define a parameter <span class="math inline">\(\theta\)</span>, the probability that the next flip is a heads. We will use this parameter to inform our decision for <span class="math inline">\(\hat y\)</span>, or our 0 – 1 prediction of the next flip. If <span class="math inline">\(\theta \ge 0.5, \hat y = 1, \text{else } \hat y = 0\)</span>.</p>
+<p>You may be inclined to say <span class="math inline">\(0.5\)</span> is the best choice for <span class="math inline">\(\theta\)</span>. However, notice that we made no assumption about the coin itself. The coin may be biased, so we should make our decision based only on the data. We know that exactly <span class="math inline">\(\frac{4}{10}\)</span> of the flips were heads, so we should think <span class="math inline">\(\hat \theta = 0.4\)</span>. In the next section, we will mathematically prove why this is the best possible estimate.</p>
+<section id="likelihood-of-data" class="level3">
+<h3 class="anchored" data-anchor-id="likelihood-of-data">Likelihood of Data</h3>
+<p>Let’s call the result of the coin flip a random variable <span class="math inline">\(Y\)</span>. This is a Bernoulli random variable with two outcomes. <span class="math inline">\(Y\)</span> has the following distribution:</p>
+<p><span class="math display">\[P(Y = y) = \begin{cases}
+        1, \text{with probability }  \theta\\
+        0, \text{with probability }  1 - \theta
+    \end{cases} \]</span></p>
+<p><span class="math inline">\(\theta\)</span> is unknown to us. But we can find the <span class="math inline">\(\theta\)</span> that makes the data we observed the most <em>likely</em>, by looking towards the <strong>likelihood</strong> of the data. The likelihood is proportional to the probability of observing the data.</p>
+<p>The probability of observing 4 Heads and 6 Tails follows the Binomial Distribution.</p>
+<p><span class="math display">\[\binom{10}{4} (\theta)^4 (1-\theta)^6\]</span></p>
+<p>The likelihood is proportional to the probability above. To find it, simply multiply the probabilities of obtaining each coin flip.</p>
+<p><span class="math display">\[(\theta)^{4} (1-\theta)^6\]</span></p>
+<p>The technique known as <strong>maximum likelihood estimation</strong> finds the <span class="math inline">\(\theta\)</span> that maximizes the above likelihood. You can find this maximum by taking the derivative of the likelihood, but we’ll provide a more intuitive graphical solution.</p>
+<div class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>theta <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">100</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>plt.plot(theta, theta<span class="op">**</span><span class="dv">4</span> <span class="op">*</span> (<span class="dv">1</span><span class="op">-</span>theta)<span class="op">**</span><span class="dv">6</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="logistic_reg_1_files/figure-html/cell-3-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>You can see this function is maximized at the value <span class="math inline">\(0.4\)</span>. Thus, <span class="math inline">\(\hat\theta = 0.4\)</span>. We will revisit these methods in our derivation of the logistic regression model.</p>
+</section>
+</section>
+<section id="deriving-the-logistic-regression-model" class="level2">
+<h2 class="anchored" data-anchor-id="deriving-the-logistic-regression-model">Deriving the Logistic Regression Model</h2>
+<p>This section will focus on deriving the logistic regression model in the context of a breast cancer study. Our goal will be to use the mean radius of a tumor to predict whether a cancer is malignant (<span class="math inline">\(y = 1\)</span>) or not (<span class="math inline">\(y = 0\)</span>). Data from the study is plotted below, along with the overlayed least squares model that minimizes MSE.</p>
+<p><img src="images/radius_vs_malig.png" alt="radius_vs_malig" width="500"></p>
+<p>The least squares approach is technically a <em>valid</em> model, but it is not <em>good</em>. The linear model’s predictions <span class="math inline">\(\hat y\)</span> can be outside of the label range {<span class="math inline">\(0\)</span>, <span class="math inline">\(1\)</span>}, which doesn’t make sense. It is also sensitive to outliers – that is, if we found a data point far from these two clusters, the least squares line would be significantly worse.</p>
+<p>Instead, what if used a non-linear model that was a better fit of our data, and bounded <span class="math inline">\(\hat y\)</span> between [<span class="math inline">\(0\)</span>, <span class="math inline">\(1\)</span>]? We can look to the Data 8 Graph of Averages to formulate this model.</p>
+<!-- This way, we'd be able classify data as such: $\hat y \ge 0.5$ corresponds to class $1$, and $\hat y < 0.5$ corresponds to class $0$. This is similar to our coin flip example.-->
+<section id="the-graph-of-averages" class="level3">
+<h3 class="anchored" data-anchor-id="the-graph-of-averages">The Graph of Averages</h3>
+<p>The Graph of Averages says</p>
+<ul>
+<li>For each input <span class="math inline">\(x\)</span>, compute the average value of <span class="math inline">\(y\)</span> for all nearby <span class="math inline">\(x\)</span>, and predict that.
+<ul>
+<li>“nearby” is a loose definition; we’ll say for example the nearest 5 points</li>
+</ul></li>
+</ul>
+<p>Here, <span class="math inline">\(x\)</span> is <code>mean radius</code> and <span class="math inline">\(y\)</span> is <code>malignant</code>. By the definition of an average, the prediction for a given <span class="math inline">\(x\)</span> is thus:</p>
+<p><span class="math display">\[\hat y = \frac{\text{Sum of Nearby ``Malignant" Values}}{\text{Number of Points in Bin}}\]</span></p>
+<p>You’ll notice that <span class="math inline">\(\hat y\)</span> is the proportion of malignant tumors in some point <span class="math inline">\(x\)</span>’s bin. In a similar light, we can think of <span class="math inline">\(\hat y\)</span> as the probability that point <span class="math inline">\(x\)</span> belongs to the malignant class (derived from it’s nearest neighbors). That is, <span class="math inline">\(\hat y = P(Y = 1|x)\)</span>. This notation reads “given a tumor with a mean radius of <span class="math inline">\(x\)</span>, it is malignant with probability <span class="math inline">\(\hat y\)</span>”.</p>
+<p>You may recognize some similarities between <span class="math inline">\(\hat y\)</span> and <span class="math inline">\(\hat \theta\)</span> from our earlier coin toss example. <span class="math inline">\(\hat y\)</span> is a proportion of malignant tumors in a bin, whereas <span class="math inline">\(\hat \theta\)</span> was a proportion of heads in 10 coin tosses. Both also represent probabilities of some new point belonging to class <span class="math inline">\(1\)</span>.</p>
+<p>Notice how the Graph of Averages is a much better fit of the data.</p>
+<p><img src="images/average_y.png" alt="average_y" width="500"></p>
+<p>Unfortunately, the Graph of Averages begins to degenerate as we add more features. The exact reason is out of scope, but this model becomes harder to use in higher dimensions. Instead, we use <strong>logistic Regression</strong>: a probabilistic model that tries to model the Graph of Averages.</p>
+<p>As a recap of what we’ve discussed so far:</p>
+<ul>
+<li>We want to fit this “S” shaped curve as best as possible</li>
+<li>This curve models the probability of belonging to class <span class="math inline">\(1\)</span>
+<ul>
+<li><span class="math inline">\(P(Y = 1|x)\)</span></li>
+</ul></li>
+</ul>
+</section>
+<section id="transforming-the-graph-of-averages" class="level3">
+<h3 class="anchored" data-anchor-id="transforming-the-graph-of-averages">Transforming the Graph of Averages</h3>
+<p>Our goal here is to find a mathematical function that models the Graph of Averages, or <span class="math inline">\(P(Y = 1|x)\)</span>. For shorthand, let’s call this function <span class="math inline">\(p\)</span>. We will</p>
+<ol type="1">
+<li>Transform <span class="math inline">\(p\)</span> until it looks linear.</li>
+<li>Then, use algebra to invert all transformations.</li>
+</ol>
+<p><strong>Note</strong>: <span class="math inline">\(P(Y = 1|x)\)</span> and <span class="math inline">\(p\)</span> are used interchangeably throughout the rest of the note.</p>
+<section id="transform-p-until-it-looks-linear" class="level4">
+<h4 class="anchored" data-anchor-id="transform-p-until-it-looks-linear">1. Transform <span class="math inline">\(p\)</span> until it looks linear</h4>
+<p>To transform this “S” shaped curve, we will define a quantity called the odds ratio. The <strong>odds of an event</strong> is the probability the event happens divided by the probability that it doesn’t happen. Remember, <span class="math inline">\(p\)</span> is shorthand for our event <span class="math inline">\(P(Y = 1|x)\)</span>.</p>
+<p><span class="math display">\[\text{odds}(p) = \frac{p}{1 - p}\]</span></p>
+<p>Here, we’ve applied the odds ratio to our Graph of Averages. The result is an exponential relationship.</p>
+<p><img src="images/odds.png" alt="odds" width="500"></p>
+<p>Applying a logarithmic transformation to the y-axis will linearize the data. We know this from the Tukey-Mosteller Buldge Diagram.</p>
+<p><span class="math display">\[\text{log-odds}(p) = \text{log}(\frac{p}{1-p})\]</span></p>
+<p><img src="images/log_odds.png" alt="log_odds" width="500"></p>
+<p>We have a roughly linear relationship! Specifically, this is linear in our features <span class="math inline">\(x\)</span> and parameters <span class="math inline">\(\theta\)</span>. In our one dimensional feature space, <span class="math inline">\(x\)</span> is the <code>mean radius</code> and <span class="math inline">\(\theta\)</span> some constant.</p>
+<p><span class="math display">\[\text{log}(\frac{p}{1-p}) = x^T\theta\]</span></p>
+</section>
+<section id="use-algebra-to-invert-all-transformations" class="level4">
+<h4 class="anchored" data-anchor-id="use-algebra-to-invert-all-transformations">2. Use algebra to invert all transformations</h4>
+<p>Remember our original goal was to model the Graph of Averages, which we called <span class="math inline">\(p\)</span>. Here, we will algebraically solve for <span class="math inline">\(p\)</span>.</p>
+<p><span class="math display">\[\text{log}(\frac{p}{1-p}) = x^T\theta\]</span> <span class="math display">\[\frac{p}{1-p} = e^{x^T\theta}\]</span> <span class="math display">\[p = e^{x^T\theta} - pe^{x^T\theta}\]</span> <span class="math display">\[p = \frac{e^{x^T\theta}}{1 + e^{x^T\theta}}\]</span> <span class="math display">\[p = \frac{1}{1 + e^{-x^T\theta}}\]</span></p>
+</section>
+</section>
+</section>
+<section id="the-logistic-regression-model" class="level2">
+<h2 class="anchored" data-anchor-id="the-logistic-regression-model">The Logistic Regression Model</h2>
+<p>The last line in this derivation is the <strong>logistic regression model</strong>. It models the Graph of Averages quite well.</p>
+<p><span class="math display">\[P(Y = 1|x) = \frac{1}{1 + e^{-x^T\theta}}\]</span></p>
+<p><img src="images/logistic_vs_emperical.png" alt="logistic_vs_emperical" width="500"></p>
+<section id="the-logistic-function" class="level3">
+<h3 class="anchored" data-anchor-id="the-logistic-function">The Logistic Function</h3>
+<p>While it may look daunting, the logistic regression model is just a composition of two simpler functions. One of these we know well from OLS – the linear model <span class="math inline">\(x^T\theta\)</span>. The second is the <strong>logistic function</strong> – commonly referred to as the <strong>sigmoid function</strong>.</p>
+<p><span class="math display">\[\sigma(t) = \frac{1}{1 + e^{-t}}\]</span></p>
+<p><img src="images/logistic_func.png" alt="logistic_func" width="500"></p>
+<p>This logistic function has various properties, although we won’t prove any of them.</p>
+<ol type="1">
+<li>Definition: <span class="math inline">\(\sigma(t) = \frac{1}{1 + e^{-t}} = \frac{e^t}{1 + e^{t}}\)</span></li>
+<li>Reflection/Symmetry: <span class="math inline">\(1 - \sigma(t) = \frac{e^{-t}}{1 + e^{-t}} = \sigma(-t)\)</span></li>
+<li>Inverse: <span class="math inline">\(t = \sigma^{-1}(p) = \log(\frac{p}{1-p})\)</span></li>
+<li>Domain: <span class="math inline">\(-\infty &lt; t &lt; \infty\)</span></li>
+<li>Range: <span class="math inline">\(0 &lt; \sigma(t) &lt; 1\)</span></li>
+</ol>
+<p>You’ll notice the logistic regression model is just the logistic function evaluated on the linear model <span class="math inline">\(x^T\theta\)</span>. The logistic function squashes the result of <span class="math inline">\(x^T\theta\)</span> to a probability between <span class="math inline">\(0\)</span> and <span class="math inline">\(1\)</span>. Larger values of <span class="math inline">\(x^T\theta\)</span> will be mapped to probabilities closer to <span class="math inline">\(1\)</span>, and vice versa. Putting it all together, we have:</p>
+<p><span class="math display">\[P(Y = 1|x) = \sigma(x^T\theta) = \frac{1}{1 + e^{-x^T\theta}}\]</span></p>
+</section>
+<section id="example-calcualtion" class="level3">
+<h3 class="anchored" data-anchor-id="example-calcualtion">Example Calcualtion</h3>
+<p>Suppose we want to predict the probability that a tumor is malignant, given it’s mean radius and mean smoothness. Assume that we fit a logistic regression model (with no intercept), and somehow estimate the optimal parameters: <span class="math inline">\(\hat \theta = [0.1, -0.5]\)</span>.</p>
+<p>Say we encounter a new breast tumor with data: <span class="math inline">\(x = [15, 1]\)</span>. We want to answer two questions:</p>
+<ol type="1">
+<li>What is the probability that this tumor is malignant?</li>
+<li>Should we predict the tumor is malignant or benign?</li>
+</ol>
+<p><span class="math display">\[P(Y = 1|x) = \sigma(x^T\hat\theta)\]</span> <span class="math display">\[= \sigma(0.1 * 15 + (-0.5) * 1) = \sigma(1)\]</span> <span class="math display">\[= \frac{1}{1 + e^{-1}}\]</span> <span class="math display">\[\approx 0.7311\]</span></p>
+<p>Because the tumor has a <span class="math inline">\(73\%\)</span> chance of being malignant, we should predict <span class="math inline">\(\hat y = 1\)</span>.</p>
+</section>
+<section id="parameter-interpretation" class="level3">
+<h3 class="anchored" data-anchor-id="parameter-interpretation">Parameter Interpretation</h3>
+<p>In our derivation of logistic regression, we showed that <span class="math inline">\(\frac{p}{1-p} = e^{x^T\theta}\)</span>. Equivalently, <span class="math display">\[\frac{P(Y=1|x)}{P(Y=0|x)} = e^{x^T\theta}\]</span></p>
+<p>Imagine our linear component has just a single feature, along with an intercept term.</p>
+<p><span class="math display">\[\frac{P(Y=1|x)}{P(Y=0|x)} = e^{\theta_0 + \theta_1 x}\]</span></p>
+<p>What happens when you increase <span class="math inline">\(x\)</span> by one unit?</p>
+<ul>
+<li>Odds is multiplied by <span class="math inline">\(e^{\theta_1}\)</span></li>
+<li>If <span class="math inline">\(\theta_1 &gt; 0\)</span>, then odds increase.</li>
+<li>If <span class="math inline">\(\theta_1 &lt; 0\)</span>, then odds decrease.</li>
+</ul>
+<p>Rememer, the odds ratio can be interpreted as the “number of successes for each failure.” When odds increase, the proportion of successes likewise increases.</p>
+</section>
+<section id="comparison-to-linear-regression" class="level3">
+<h3 class="anchored" data-anchor-id="comparison-to-linear-regression">Comparison to Linear Regression</h3>
+<section id="linear-regression" class="level4">
+<h4 class="anchored" data-anchor-id="linear-regression">Linear Regression</h4>
+<p><img src="images/linear_regression.png" alt="linear_regression" width="800"></p>
+</section>
+<section id="logistic-regression" class="level4">
+<h4 class="anchored" data-anchor-id="logistic-regression">Logistic Regression</h4>
+<p><img src="images/logistic_regression.png" alt="logistic_regression" width="800"></p>
+</section>
+</section>
+</section>
+<section id="parameter-estimation" class="level2">
+<h2 class="anchored" data-anchor-id="parameter-estimation">Parameter Estimation</h2>
+<p>Having derived the logistic regression model, the next step is to estimate the optimal parameters <span class="math inline">\(\hat\theta\)</span>.</p>
+<section id="pitfalls-of-squared-error-loss" class="level3">
+<h3 class="anchored" data-anchor-id="pitfalls-of-squared-error-loss">Pitfalls of Squared Error Loss</h3>
+<p>In linear regression, we found these optimal parameters by minimizing a cost function. The same applies to logistic regression. Let’s begin by evaluating the MSE loss function on the logistic regression model.</p>
+<p><span class="math display">\[L(\theta) = \frac{1}{n}\sum_{i=1}^{n} (y_i - \sigma(x_i^T\theta))^2\]</span></p>
+<p>However, there are 3 flaws with this approach.</p>
+<section id="non-convex" class="level4">
+<h4 class="anchored" data-anchor-id="non-convex">1. Non-convex</h4>
+<p>The MSE loss surface for logistic regression is non-convex. In the following example, you can see the function rises above the secant line, a clear violation of convexity.</p>
+<p><img src="images/mse_secant_line.png" alt="mse_secant_line" width="500"></p>
+<p>Depending on the initialization points, gradient descent may find multiple non-optimal solutions.</p>
+</section>
+<section id="bounded" class="level4">
+<h4 class="anchored" data-anchor-id="bounded">2. Bounded</h4>
+<p>A good loss function should penalize incorrect predictions; the MSE doesn’t do this. Consider the following scenario.</p>
+<ul>
+<li>The predicted probability that some tumor is malignant is <span class="math inline">\(0.99\)</span> (<span class="math inline">\(\hat y = 0.99\)</span>). However, this tumor is truly benign (<span class="math inline">\(y = 0\)</span>). The loss incurred by this misprediction is only <span class="math inline">\((0 - 0.99)^2 = 0.98\)</span>.</li>
+</ul>
+<p>In fact, loss is always bounded <span class="math inline">\(&lt; 1\)</span>.</p>
+</section>
+<section id="conceptually-questionable" class="level4">
+<h4 class="anchored" data-anchor-id="conceptually-questionable">3. Conceptually Questionable</h4>
+<p>The MSE loss function itself is conceptually questionable.</p>
+<ul>
+<li><span class="math inline">\(y\)</span> is a class label</li>
+<li><span class="math inline">\(\hat y\)</span> is a probability</li>
+</ul>
+<p>Why are we squaring the difference of a class label and probability?</p>
+</section>
+</section>
+<section id="cross-entropy-loss" class="level3">
+<h3 class="anchored" data-anchor-id="cross-entropy-loss">Cross-Entropy Loss</h3>
+<p>This section will introduce a more intuitive loss function - cross-entropy loss. The <strong>cross-entropy loss</strong> is defined as</p>
+<p><span class="math display">\[L(\theta) = -(y\text{ log}(p) + (1-y)\text{log}(1-p))\]</span></p>
+<p><span class="math display">\[\text{where } p = \sigma(x^T\theta)\]</span></p>
+<p>The average risk over an entire dataset is</p>
+<p><span class="math display">\[R(\theta) = -\frac{1}{n} \sum_{i=1}^{n}(y_i\text{ log}(p) + (1-y_i)\text{log}(1-p))\]</span></p>
+<p>Cross-entropy loss addresses the 3 pitfalls of squared loss.</p>
+<ol type="1">
+<li>Convex. No local minima for logistic regression</li>
+<li>A good measure of model error. Strongly penalizes bad predictions.</li>
+<li>Conceptually sound.</li>
+</ol>
+<section id="convex" class="level4">
+<h4 class="anchored" data-anchor-id="convex">1. Convex</h4>
+<p>To prove that cross-entropy loss is <em>always</em> convex, we’ll need to take its derivative, which becomes difficult and out of scope. Instead, in Data 100, we will show a proof by picture.</p>
+<p>Plotted below is the cross-entropy loss function applied to the same toy dataset as before. As you’ll notice, this is a convex function - any line connecting two points lies entirely <em>above</em> the function.</p>
+<p><img src="images/cle-convex.png" alt="cle-convex" width="500"></p>
+</section>
+<section id="strong-error-penalization" class="level4">
+<h4 class="anchored" data-anchor-id="strong-error-penalization">2. Strong Error Penalization</h4>
+<p>To understand why cross-entropy loss has strong penalization, we need to take a step back. Let’s decompose the loss function into two components.</p>
+<p><span class="math display">\[L(\theta) = -(y\text{ log}(p) + (1-y)\text{log}(1-p))\]</span></p>
+<ol type="1">
+<li><span class="math inline">\(-(1-y)\text{ log}(1 - p)\)</span>
+<ul>
+<li>For <span class="math inline">\(y = 0\)</span>, only this term stays in cross-entropy loss</li>
+<li>See the plot on the bottom left.
+<ul>
+<li><span class="math inline">\(p \rightarrow 0\)</span>: zero loss</li>
+<li><span class="math inline">\(p \rightarrow 1\)</span>: infinite loss</li>
+</ul></li>
+</ul></li>
+<li><span class="math inline">\(- y\text{ log}(p)\)</span>
+<ul>
+<li>For <span class="math inline">\(y = 1\)</span>, only this term stays in cross-entropy loss</li>
+<li>See the plot on the bottom right. Notice how error increases exponentially as <span class="math inline">\(p \rightarrow 0\)</span>.
+<ul>
+<li><span class="math inline">\(p \rightarrow 0\)</span>: infinite loss</li>
+<li><span class="math inline">\(p \rightarrow 1\)</span>: zero loss</li>
+</ul></li>
+</ul></li>
+</ol>
+<div class="columns">
+<div class="column" style="width:30%;">
+<p><img src="images/cle-loss-y_is_0.png" alt="cle-loss-y_is_0" width="400"></p>
+</div><div class="column" style="width:20%;">
+
+</div><div class="column" style="width:30%;">
+<p><img src="images/cle-loss-y_is_1.png" alt="cle-loss-y_is_1" width="400"></p>
+</div>
+</div>
+</section>
+<section id="conceptually-sound" class="level4">
+<h4 class="anchored" data-anchor-id="conceptually-sound">3. Conceptually Sound</h4>
+<p>To understand why cross-entropy loss makes a great intuitive loss function, we will look towards maximum likelihood estimation in the next section.</p>
+</section>
+</section>
+<section id="maximum-likelihood-estimation" class="level3">
+<h3 class="anchored" data-anchor-id="maximum-likelihood-estimation">Maximum Likelihood Estimation</h3>
+<p><strong>Preface</strong>: This section will not be directly tested, but it is immensely helpful in your understanding of cross-entropy loss.</p>
+<p>In our earlier coin toss example, we had data on 10 coin flips, and wanted to estimate <span class="math inline">\(\hat \theta\)</span>, the probability of a heads.</p>
+<div class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>flips</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<pre><code>[0, 0, 1, 1, 1, 1, 0, 0, 0, 0]</code></pre>
+</div>
+</div>
+<p><span class="math inline">\(\hat \theta = 0.4\)</span> is the most intuitive two reasons:</p>
+<ol type="1">
+<li>It is the frequency of heads in our data</li>
+<li>It maximizes the <strong>likelihood</strong> of our data</li>
+</ol>
+<p><span class="math display">\[\hat \theta = \text{argmax}_\theta (\theta^4(1-\theta)^6)\]</span></p>
+<p>More generally, we can apply this notion of likelihood to any random binary sample. For example, we can find the likelihood of the data observed in our breast cancer study. We will show how the likelihood is intrinsically related to cross-entropy loss.</p>
+<p>As a quick refresher on likelihood:</p>
+<p>For some Bernoulli(<span class="math inline">\(p\)</span>) random variable <span class="math inline">\(Y\)</span> the probability distribution, or likelihood is:</p>
+<p><span class="math display">\[P(Y = y) = \begin{cases}
+        1, \text{with probability }  p\\
+        0, \text{with probability }  1 - p
+    \end{cases} \]</span></p>
+<p>Equivalently, this can be written in a compact way:</p>
+<p><span class="math display">\[P(Y=y) = p^y(1-p)^{1-y}\]</span></p>
+<ul>
+<li>When <span class="math inline">\(y = 1\)</span>, this reads <span class="math inline">\(P(Y=y) = p\)</span></li>
+<li>When <span class="math inline">\(y = 0\)</span>, this reads <span class="math inline">\(P(Y=y) = (1-p)\)</span></li>
+</ul>
+<p>In our example, a Bernoulli random variable is analagous to a single data point, or tumor. All together, our breast cancer study consist of multiple IID Bernoulli(<span class="math inline">\(p\)</span>) random variables. To find the likelihood of independent events in succession, simply multiply their likelihoods.</p>
+<p><span class="math display">\[\prod_{i=1}^{n} p^{y_i} (1-p)^{1-y_i}\]</span></p>
+<p>As with the coin example, we want to find the parameter <span class="math inline">\(p\)</span> that maximizes this likelihood - this technique is known as <strong>maximum likelihood estimation</strong>. Earlier, we gave an intuitive graphical solution, but let’s take the derivative of the likelihood to find this maximum.</p>
+<p>From a first glance, this derivative will be complicated! We will have to use the product rule, followed by the chain rule. Instead, we can make an observation that simplifies the problem.</p>
+<p>Finding the <span class="math inline">\(p\)</span> that maximizes <span class="math display">\[\prod_{i=1}^{n} p^{y_i} (1-p)^{1-y_i}\]</span> is equivalent to the <span class="math inline">\(p\)</span> that maximizes <span class="math display">\[\text{log}(\prod_{i=1}^{n} p^{y_i} (1-p)^{1-y_i})\]</span></p>
+<p>This is because <span class="math inline">\(\text{log}\)</span> is a strictly <em>increasing</em> function. It won’t change the maximum or minimum of the function it was applied to. From <span class="math inline">\(\text{log}\)</span> properties, <span class="math inline">\(\text{log}(a*b)\)</span> = <span class="math inline">\(\text{log}(a) + \text{log}(b)\)</span>. We can apply this to our equation above to get:</p>
+<p><span class="math display">\[\text{argmax}_p \sum_{i=1}^{n} \text{log}(p^{y_i} (1-p)^{1-y_i})\]</span></p>
+<p><span class="math display">\[= \text{argmax}_p \sum_{i=1}^{n} \text{log}(p^{y_i}) + \text{log}((1-p)^{1-y_i})\]</span></p>
+<p><span class="math display">\[= \text{argmax}_p \sum_{i=1}^{n} y_i\text{log}(p) + (1-y_i)\text{log}(1-p)\]</span></p>
+<p>We can add a constant factor of <span class="math inline">\(\frac{1}{n}\)</span> out front. It won’t affect the <span class="math inline">\(p\)</span> that maximizes our likelihood.</p>
+<p><span class="math display">\[=\text{argmax}_p  \frac{1}{n} \sum_{i=1}^{n} y_i\text{log}(p) + (1-y_i)\text{log}(1-p)\]</span></p>
+<p>One last “trick” we can do is change this to a minimization problem by negating the result. This works because we are dealing with a <em>concave</em> function, which can be made <em>convex</em>.</p>
+<p><span class="math display">\[= \text{argmin}_p -\frac{1}{n} \sum_{i=1}^{n} y_i\text{log}(p) + (1-y_i)\text{log}(1-p)\]</span></p>
+<p>This is exactly our average cross-entropy loss minimization problem from before!</p>
+<p>Why did we do all this complicated math? We have shown that <em>minimizing</em> cross-entropy loss is equivalent to maximizing the likelihood of the training data.</p>
+<ul>
+<li>By minimizing cross-entropy loss, we are choosing the model parameters that are “most likely” for the data we observed.</li>
+</ul>
+</section>
+</section>
+<section id="parting-note" class="level2">
+<h2 class="anchored" data-anchor-id="parting-note">Parting Note</h2>
+<p>You will study MLE further in probability and ML classes. But now you know it exists. It turns out that many of the model + loss combinations we’ve seen can be motivated using MLE (OLS, Ridge Regression, etc.)</p>
+<p>The two important takeways from this lecture were</p>
+<ol type="1">
+<li>Formulating the Logistic Regression Model</li>
+<li>Motivating the Cross-Entropy Loss</li>
+</ol>
+<p>In the next lecture, we will learn how to evaluate the strength of logistic regression models.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
