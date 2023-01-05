@@ -15,6 +15,9 @@ jupyter: python3
 
 ::: {.callout-note collapse="true"}
 ## Learning Outcomes
+- Understand Python string manipulation, Pandas Series methods
+- Parse and create regex, with a reference table
+- Use vocabulary (closure, metacharater, groups, etc.) to describe regex metacharacters
 :::
 
 ## Why Work with Text?
@@ -26,7 +29,7 @@ There are two main reasons for working with text.
 1. Canonicalization: Convert data that has multiple formats into a standard form.
     - By manipulating text, we can join tables with mismatched string labels
 2. Extract information into a new feature.
-    - We can extract data and time features from raw log files
+    - For example, we can extract date and time features from text
 
 ## Python String Methods
 
@@ -74,7 +77,9 @@ with open('data/county_and_population.csv') as f:
 display(county_and_state), display(county_and_pop);
 ```
 
-Last time, we used a **primary key** and **foreign key** to join two tables. While neither of these keys exist in our DataFrames, the `County` columns look similar enough. Can we convert these columns into one standard, canonical form? 
+Last time, we used a **primary key** and **foreign key** to join two tables. While neither of these keys exist in our DataFrames, the `County` columns look similar enough. Can we convert these columns into one standard, canonical form to merge the two tables? 
+
+#### Canonicalization with Python String Manipulation
 
 The following function uses Python string manipulation to convert a single county name into canonical form. It does so by eliminating whitespace, punctuation, and unnecessary text. 
 
@@ -93,7 +98,7 @@ def canonicalize_county(county_name):
 canonicalize_county("St. John the Baptist")
 ```
 
-We will use the `pandas` `map` function to apply the `canonicalize_county` function to every row in both DataFrames. Then, we can create new columns called `clean_county_python` containing the canonical form.
+We will use the `pandas` `map` function to apply the `canonicalize_county` function to every row in both DataFrames. In doing so, we'll create a new column in each called `clean_county_python` with the canonical form.
 
 ```{python}
 county_and_pop['clean_county_python'] = county_and_pop['County'].map(canonicalize_county)
@@ -104,9 +109,11 @@ county_and_state['clean_county_python'] = county_and_state['County'].map(canonic
 display(county_and_state), display(county_and_pop);
 ```
 
-Alternatively, we can use `pandas` Series methods to create this standardized column. To do so, we must call the `.str` attribute of our Series prior to calling any methods, like `.lower` and `.replace`. Notice how these method names match their equivalent built-in Python string function.
+#### Canonicalization with Pandas Series Methods
 
-Chaining multiple Series methods in this manner eliminates the need to use the `map` function.
+Alternatively, we can use `pandas` Series methods to create this standardized column. To do so, we must call the `.str` attribute of our Series object prior to calling any methods, like `.lower` and `.replace`. Notice how these method names match their equivalent built-in Python string functions.
+
+Chaining multiple Series methods in this manner eliminates the need to use the `map` function (as this code is vectorized).
 
 ```{python}
 def canonicalize_county_series(county_series):
@@ -143,9 +150,9 @@ with open('data/log.txt', 'r') as f:
 log_lines
 ```
 
-Suppose we want to extract the day, month, year, hour, minutes, seconds, and timezone. Unfortunately, these items are not in a fixed position from the beginning of the string. Slicing by some fixed offset won't work.
+Suppose we want to extract the day, month, year, hour, minutes, seconds, and timezone. Unfortunately, these items are not in a fixed position from the beginning of the string, so slicing by some fixed offset won't work.
 
-Instead, we can use some clever thinking. Notice how the relevant information is contained within a set of brackets, seperated by `/` and `:`. We can hone in on this region of text, and split the data on these characters. Python's built-in `.split` function makes this easy.
+Instead, we can use some clever thinking. Notice how the relevant information is contained within a set of brackets, further seperated by `/` and `:`. We can hone in on this region of text, and split the data on these characters. Python's built-in `.split` function makes this easy.
 
 ```{python}
 first = log_lines[0] # Only considering the first row of data
@@ -159,18 +166,16 @@ day, month, year, hour, minute, seconds, time_zone
 
 There are two problems with this code:
 
-1. Python's built-in functions limit us to extract data one row at a time
+1. Python's built-in functions limit us to extract data one record at a time
     - This can be resolved using a map function or Pandas Series methods.
 2. The code is quite verbose
     - This is a larger issue that is trickier to solve
 
-In the next section, we'll introduce regular expressions - a tool that solves problem 2).
+In the next section, we'll introduce regular expressions - a tool that solves problem 2.
 
 ## Regex Basics
 
-A **regular expression ("regex")** is a sequence of characters that specifies a search pattern. They are written to extract specific information from text.
-
-The language of regular expressions - **regular language** - aims to replicate **formal language**, which is a way to describe conditions on a set of strings. Regular expressions are essentially part of a smaller programming language embedded in Python, made available through the `re` module. As such, they have a stand-alone syntax and methods for various capabilities.
+A **regular expression ("regex")** is a sequence of characters that specifies a search pattern. They are written to extract specific information from text. Regular expressions are essentially part of a smaller programming language embedded in Python, made available through the `re` module. As such, they have a stand-alone syntax and methods for various capabilities.
 
 Regular expressions are useful in many applications beyond data science. For example, Social Security Numbers (SSNs) are often validated with regular expresions.
 
@@ -211,10 +216,10 @@ There are four basic operations with regular expressions.
 | (zero or more)        |                 |                | ABBBBBBA    | ABABA             |
 +-----------------------+-----------------+----------------+-------------+-------------------+
 | `Group`: `()` <br />  | 1               | A(A|B)AAB      | AAAAB       | every other string|
-| (parenthesis)         |                 | <br />         | ABAAB       | <br />            |
+| (parenthesis)         |                 | <br />         | ABAAB <br />| <br />            |
 |                       |                 | <br />         | <br />      | <br />            |
 |                       |                 | <br />         | <br />      | <br />            |
-|                       |                 | (AB)*A         | A           | AA <br />         |
+|                       |                 | (AB)*A         | A <br />    | AA <br />         |
 |                       |                 |                | ABABABABA   | ABBA              |
 +-----------------------+-----------------+----------------+-------------+-------------------+
 
@@ -234,10 +239,10 @@ Notice how these metacharacter operations are ordered. Rather than being literal
 **Answer 2**: `m(uu(uu)*|oo(oo)*)n`
 
 - The leading `m` and trailing `n` ensures that only strings beginning with `m` and ending with `n` are matched.
-- Notice how the outer capture group surrounds the `|`. This ensures.
+- Notice how the outer capture group surrounds the `|`. 
     - Consider the regex `m(uu(uu)*)|(oo(oo)*)n`. This incorrectly matches `muu` and `oooon`. 
-        - Each OR clause is everything to the left and right of `|`. The incorrect solution matches only half of the string, and ignores either `m` or `n`
-        - A set of paranthesis must surround `|`. That way, each OR clause is everything to the left and right of `|` **within** the group.
+        - Each OR clause is everything to the left and right of `|`. The incorrect solution matches only half of the string, and ignores either the beginning `m` or trailing `n`.
+        - A set of paranthesis must surround `|`. That way, each OR clause is everything to the left and right of `|` **within** the group. This ensures both the beginning `m` *and* trailing `n` are matched.
 
 ## Regex Expanded
 
@@ -249,8 +254,8 @@ Provided below are more complex regular expression functions.
 | `Any Character`: `.` <br />                    | .U.U.U.         | CUMULUS <br /> | SUCCUBUS         |
 | (except newline)                               |                 | JUGULUM        | TUMULTUOUS       |            
 +------------------------------------------------+-----------------+----------------+------------------+
-| `Character Class`: `[]`                        | [A-Za-z][a-z]*  | word <br />    | camelCase        |
-|                                                |                 | Capitalized    | 4illegal         |                   
+| `Character Class`: `[]` <br />                 | [A-Za-z][a-z]*  | word <br />    | camelCase        |
+| (match one character in `[]`)                  |                 | Capitalized    | 4illegal         |                   
 +------------------------------------------------+-----------------+----------------+------------------+
 | `Repeated "a" Times`: `{a}`<br />              | j[aeiou]{3}hn   | jaoehn <br />  | jhn <br />       |
 |                                                |                 | jooohn         | jaeiouhn         |
@@ -267,6 +272,14 @@ Provided below are more complex regular expression functions.
 |                                                |                 | john           |                  |
 |                                                |                 |                |                  | 
 +------------------------------------------------+-----------------+----------------+------------------+
+
+A character class matches a single character in it's class. These characters can be hardcoded -- in the case of `[aeiou]` -- or shorthand can be specified to mean a range of characters. Examples include:
+
+1. `[A-Z]`: Any capitalized letter
+2. `[a-z]`: Any lowercase letter
+3. `[0-9]`: Any single digit
+4. `[A-Za-z]`: Any capitalized of lowercase letter
+5. `[A-Za-z0-9]`: Any capitalized or lowercase letter or single digit
 
 #### Examples
 
@@ -315,10 +328,10 @@ Here are a few more convenient regular expressions.
 |                                                | `\s+` <br />    | `whitespace`   | `non-whitespace` |
 +------------------------------------------------+-----------------+----------------+------------------+
 | `character class negation`: `[^]`              | [^a-z]+.        | PEPPERS3982    | porch <br />     |
-| (everything except the given characters)       |                 | 17211!↑å       | CLAMS            |                   
+| (everything except the given characters)       |                 | 17211!↑å       | CLAmS            |                   
 +------------------------------------------------+-----------------+----------------+------------------+
-| `escape character`: `\` <br />                 | cow\.com        | jaoehn <br />  | jhn <br />       |
-|  (match the literal next character)            |                 | jooohn         | jaeiouhn         |
+| `escape character`: `\` <br />                 | cow\\.com       | cow.com        | cowscom          |
+|  (match the literal next character)            |                 |                |                  |
 +------------------------------------------------+-----------------+----------------+------------------+
 | `beginning of line`: `^`                       | ^ark            | ark two        | dark             | 
 |                                                |                 | ark o ark      |                  |
@@ -360,7 +373,7 @@ log_lines[0]
 
 #### Canonicalization with Regex
 
-Earlier in this note, we examined the process of canonicalization using Python string manipulation and `pandas` Series methods. However, this approach had a major flaw: our code was unnecessarily verbose. Equipped with our knowledge of regular expressions, let's fix this.
+Earlier in this note, we examined the process of canonicalization using Python string manipulation and `pandas` Series methods. However, we mentioned this approach had a major flaw: our code was unnecessarily verbose. Equipped with our knowledge of regular expressions, let's fix this.
 
 To do so, we need to understand a few functions in the `re` module. The first of these is the substitute function: `re.sub(pattern, rep1, text)`. It behaves similarily to Python's built-in `.replace` function, and returns text with all instances of `pattern` replaced by `rep1`. 
 

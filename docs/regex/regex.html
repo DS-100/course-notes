@@ -243,7 +243,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#why-work-with-text" id="toc-why-work-with-text" class="nav-link active" data-scroll-target="#why-work-with-text">Why Work with Text?</a></li>
   <li><a href="#python-string-methods" id="toc-python-string-methods" class="nav-link" data-scroll-target="#python-string-methods">Python String Methods</a>
   <ul>
-  <li><a href="#canonicalization" id="toc-canonicalization" class="nav-link" data-scroll-target="#canonicalization">Canonicalization</a></li>
+  <li><a href="#canonicalization" id="toc-canonicalization" class="nav-link" data-scroll-target="#canonicalization">Canonicalization</a>
+  <ul>
+  <li><a href="#canonicalization-with-python-string-manipulation" id="toc-canonicalization-with-python-string-manipulation" class="nav-link" data-scroll-target="#canonicalization-with-python-string-manipulation">Canonicalization with Python String Manipulation</a></li>
+  <li><a href="#canonicalization-with-pandas-series-methods" id="toc-canonicalization-with-pandas-series-methods" class="nav-link" data-scroll-target="#canonicalization-with-pandas-series-methods">Canonicalization with Pandas Series Methods</a></li>
+  </ul></li>
   <li><a href="#extraction" id="toc-extraction" class="nav-link" data-scroll-target="#extraction">Extraction</a></li>
   </ul></li>
   <li><a href="#regex-basics" id="toc-regex-basics" class="nav-link" data-scroll-target="#regex-basics">Regex Basics</a>
@@ -315,7 +319,11 @@ Learning Outcomes
 </div>
 <div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-
+<ul>
+<li>Understand Python string manipulation, Pandas Series methods</li>
+<li>Parse and create regex, with a reference table</li>
+<li>Use vocabulary (closure, metacharater, groups, etc.) to describe regex metacharacters</li>
+</ul>
 </div>
 </div>
 </div>
@@ -330,7 +338,7 @@ Learning Outcomes
 </ul></li>
 <li>Extract information into a new feature.
 <ul>
-<li>We can extract data and time features from raw log files</li>
+<li>For example, we can extract date and time features from text</li>
 </ul></li>
 </ol>
 </section>
@@ -502,7 +510,9 @@ Learning Outcomes
 </div>
 </div>
 </div>
-<p>Last time, we used a <strong>primary key</strong> and <strong>foreign key</strong> to join two tables. While neither of these keys exist in our DataFrames, the <code>County</code> columns look similar enough. Can we convert these columns into one standard, canonical form?</p>
+<p>Last time, we used a <strong>primary key</strong> and <strong>foreign key</strong> to join two tables. While neither of these keys exist in our DataFrames, the <code>County</code> columns look similar enough. Can we convert these columns into one standard, canonical form to merge the two tables?</p>
+<section id="canonicalization-with-python-string-manipulation" class="level4">
+<h4 class="anchored" data-anchor-id="canonicalization-with-python-string-manipulation">Canonicalization with Python String Manipulation</h4>
 <p>The following function uses Python string manipulation to convert a single county name into canonical form. It does so by eliminating whitespace, punctuation, and unnecessary text.</p>
 <div class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> canonicalize_county(county_name):</span>
@@ -521,7 +531,7 @@ Learning Outcomes
 <pre><code>'stjohnthebaptist'</code></pre>
 </div>
 </div>
-<p>We will use the <code>pandas</code> <code>map</code> function to apply the <code>canonicalize_county</code> function to every row in both DataFrames. Then, we can create new columns called <code>clean_county_python</code> containing the canonical form.</p>
+<p>We will use the <code>pandas</code> <code>map</code> function to apply the <code>canonicalize_county</code> function to every row in both DataFrames. In doing so, we’ll create a new column in each called <code>clean_county_python</code> with the canonical form.</p>
 <div class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>county_and_pop[<span class="st">'clean_county_python'</span>] <span class="op">=</span> county_and_pop[<span class="st">'County'</span>].<span class="bu">map</span>(canonicalize_county)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>county_and_state[<span class="st">'clean_county_python'</span>] <span class="op">=</span> county_and_state[<span class="st">'County'</span>].<span class="bu">map</span>(canonicalize_county)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -613,8 +623,11 @@ Learning Outcomes
 </div>
 </div>
 </div>
-<p>Alternatively, we can use <code>pandas</code> Series methods to create this standardized column. To do so, we must call the <code>.str</code> attribute of our Series prior to calling any methods, like <code>.lower</code> and <code>.replace</code>. Notice how these method names match their equivalent built-in Python string function.</p>
-<p>Chaining multiple Series methods in this manner eliminates the need to use the <code>map</code> function.</p>
+</section>
+<section id="canonicalization-with-pandas-series-methods" class="level4">
+<h4 class="anchored" data-anchor-id="canonicalization-with-pandas-series-methods">Canonicalization with Pandas Series Methods</h4>
+<p>Alternatively, we can use <code>pandas</code> Series methods to create this standardized column. To do so, we must call the <code>.str</code> attribute of our Series object prior to calling any methods, like <code>.lower</code> and <code>.replace</code>. Notice how these method names match their equivalent built-in Python string functions.</p>
+<p>Chaining multiple Series methods in this manner eliminates the need to use the <code>map</code> function (as this code is vectorized).</p>
 <div class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> canonicalize_county_series(county_series):</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (</span>
@@ -728,6 +741,7 @@ Learning Outcomes
 </div>
 </div>
 </section>
+</section>
 <section id="extraction" class="level3">
 <h3 class="anchored" data-anchor-id="extraction">Extraction</h3>
 <p>Extraction explores the idea of obtaining useful information from text data. This will be particularily important in model building, which we’ll study in a few weeks.</p>
@@ -744,8 +758,8 @@ Learning Outcomes
  '169.237.46.240 - "" [3/Feb/2006:10:18:37 -0800] "GET /stat141/homework/Solutions/hw1Sol.pdf HTTP/1.1"\n']</code></pre>
 </div>
 </div>
-<p>Suppose we want to extract the day, month, year, hour, minutes, seconds, and timezone. Unfortunately, these items are not in a fixed position from the beginning of the string. Slicing by some fixed offset won’t work.</p>
-<p>Instead, we can use some clever thinking. Notice how the relevant information is contained within a set of brackets, seperated by <code>/</code> and <code>:</code>. We can hone in on this region of text, and split the data on these characters. Python’s built-in <code>.split</code> function makes this easy.</p>
+<p>Suppose we want to extract the day, month, year, hour, minutes, seconds, and timezone. Unfortunately, these items are not in a fixed position from the beginning of the string, so slicing by some fixed offset won’t work.</p>
+<p>Instead, we can use some clever thinking. Notice how the relevant information is contained within a set of brackets, further seperated by <code>/</code> and <code>:</code>. We can hone in on this region of text, and split the data on these characters. Python’s built-in <code>.split</code> function makes this easy.</p>
 <div class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>first <span class="op">=</span> log_lines[<span class="dv">0</span>] <span class="co"># Only considering the first row of data</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -760,7 +774,7 @@ Learning Outcomes
 </div>
 <p>There are two problems with this code:</p>
 <ol type="1">
-<li>Python’s built-in functions limit us to extract data one row at a time
+<li>Python’s built-in functions limit us to extract data one record at a time
 <ul>
 <li>This can be resolved using a map function or Pandas Series methods.</li>
 </ul></li>
@@ -769,13 +783,12 @@ Learning Outcomes
 <li>This is a larger issue that is trickier to solve</li>
 </ul></li>
 </ol>
-<p>In the next section, we’ll introduce regular expressions - a tool that solves problem 2).</p>
+<p>In the next section, we’ll introduce regular expressions - a tool that solves problem 2.</p>
 </section>
 </section>
 <section id="regex-basics" class="level2">
 <h2 class="anchored" data-anchor-id="regex-basics">Regex Basics</h2>
-<p>A <strong>regular expression (“regex”)</strong> is a sequence of characters that specifies a search pattern. They are written to extract specific information from text.</p>
-<p>The language of regular expressions - <strong>regular language</strong> - aims to replicate <strong>formal language</strong>, which is a way to describe conditions on a set of strings. Regular expressions are essentially part of a smaller programming language embedded in Python, made available through the <code>re</code> module. As such, they have a stand-alone syntax and methods for various capabilities.</p>
+<p>A <strong>regular expression (“regex”)</strong> is a sequence of characters that specifies a search pattern. They are written to extract specific information from text. Regular expressions are essentially part of a smaller programming language embedded in Python, made available through the <code>re</code> module. As such, they have a stand-alone syntax and methods for various capabilities.</p>
 <p>Regular expressions are useful in many applications beyond data science. For example, Social Security Numbers (SSNs) are often validated with regular expresions.</p>
 <div class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">r"[0-9]{3}-[0-9]{2}-[0-9]{4}"</span> <span class="co"># Regular Expression Syntax</span></span>
@@ -847,7 +860,7 @@ Learning Outcomes
 <td><code>Group</code>: <code>()</code> <br> (parenthesis)</td>
 <td>1</td>
 <td>A(A|B)AAB <br> <br> <br> (AB)*A</td>
-<td>AAAAB ABAAB <br> <br> A ABABABABA</td>
+<td>AAAAB ABAAB <br> <br> <br> A <br> ABABABABA</td>
 <td>every other string <br> <br> <br> AA <br> ABBA</td>
 </tr>
 </tbody>
@@ -865,12 +878,12 @@ Learning Outcomes
 <p><strong>Answer 2</strong>: <code>m(uu(uu)*|oo(oo)*)n</code></p>
 <ul>
 <li>The leading <code>m</code> and trailing <code>n</code> ensures that only strings beginning with <code>m</code> and ending with <code>n</code> are matched.</li>
-<li>Notice how the outer capture group surrounds the <code>|</code>. This ensures.
+<li>Notice how the outer capture group surrounds the <code>|</code>.
 <ul>
 <li>Consider the regex <code>m(uu(uu)*)|(oo(oo)*)n</code>. This incorrectly matches <code>muu</code> and <code>oooon</code>.
 <ul>
-<li>Each OR clause is everything to the left and right of <code>|</code>. The incorrect solution matches only half of the string, and ignores either <code>m</code> or <code>n</code></li>
-<li>A set of paranthesis must surround <code>|</code>. That way, each OR clause is everything to the left and right of <code>|</code> <strong>within</strong> the group.</li>
+<li>Each OR clause is everything to the left and right of <code>|</code>. The incorrect solution matches only half of the string, and ignores either the beginning <code>m</code> or trailing <code>n</code>.</li>
+<li>A set of paranthesis must surround <code>|</code>. That way, each OR clause is everything to the left and right of <code>|</code> <strong>within</strong> the group. This ensures both the beginning <code>m</code> <em>and</em> trailing <code>n</code> are matched.</li>
 </ul></li>
 </ul></li>
 </ul>
@@ -903,7 +916,7 @@ Learning Outcomes
 <td>SUCCUBUS TUMULTUOUS</td>
 </tr>
 <tr class="even">
-<td><code>Character Class</code>: <code>[]</code></td>
+<td><code>Character Class</code>: <code>[]</code> <br> (match one character in <code>[]</code>)</td>
 <td>[A-Za-z][a-z]*</td>
 <td>word <br> Capitalized</td>
 <td>camelCase 4illegal</td>
@@ -934,6 +947,14 @@ Learning Outcomes
 </tr>
 </tbody>
 </table>
+<p>A character class matches a single character in it’s class. These characters can be hardcoded – in the case of <code>[aeiou]</code> – or shorthand can be specified to mean a range of characters. Examples include:</p>
+<ol type="1">
+<li><code>[A-Z]</code>: Any capitalized letter</li>
+<li><code>[a-z]</code>: Any lowercase letter</li>
+<li><code>[0-9]</code>: Any single digit</li>
+<li><code>[A-Za-z]</code>: Any capitalized of lowercase letter</li>
+<li><code>[A-Za-z0-9]</code>: Any capitalized or lowercase letter or single digit</li>
+</ol>
 <section id="examples-1" class="level4">
 <h4 class="anchored" data-anchor-id="examples-1">Examples</h4>
 <p>Let’s analyze a few examples of complex regular expressions.</p>
@@ -1028,13 +1049,13 @@ Learning Outcomes
 <td><code>character class negation</code>: <code>[^]</code> (everything except the given characters)</td>
 <td>[^a-z]+.</td>
 <td>PEPPERS3982 17211!↑å</td>
-<td>porch <br> CLAMS</td>
+<td>porch <br> CLAmS</td>
 </tr>
 <tr class="odd">
 <td><code>escape character</code>: <code>\</code> <br> (match the literal next character)</td>
+<td>cow\.com</td>
 <td>cow.com</td>
-<td>jaoehn <br> jooohn</td>
-<td>jhn <br> jaeiouhn</td>
+<td>cowscom</td>
 </tr>
 <tr class="even">
 <td><code>beginning of line</code>: <code>^</code></td>
@@ -1087,7 +1108,7 @@ Learning Outcomes
 <h3 class="anchored" data-anchor-id="canonicalization-1">Canonicalization</h3>
 <section id="canonicalization-with-regex" class="level4">
 <h4 class="anchored" data-anchor-id="canonicalization-with-regex">Canonicalization with Regex</h4>
-<p>Earlier in this note, we examined the process of canonicalization using Python string manipulation and <code>pandas</code> Series methods. However, this approach had a major flaw: our code was unnecessarily verbose. Equipped with our knowledge of regular expressions, let’s fix this.</p>
+<p>Earlier in this note, we examined the process of canonicalization using Python string manipulation and <code>pandas</code> Series methods. However, we mentioned this approach had a major flaw: our code was unnecessarily verbose. Equipped with our knowledge of regular expressions, let’s fix this.</p>
 <p>To do so, we need to understand a few functions in the <code>re</code> module. The first of these is the substitute function: <code>re.sub(pattern, rep1, text)</code>. It behaves similarily to Python’s built-in <code>.replace</code> function, and returns text with all instances of <code>pattern</code> replaced by <code>rep1</code>.</p>
 <p>The regular expression here removes text surrounded by <code>&lt;&gt;</code> (also known as HTML tags).</p>
 <div class="cell" data-execution_count="13">
