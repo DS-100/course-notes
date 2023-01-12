@@ -1,0 +1,377 @@
+---
+title: SQL I
+execute:
+  echo: true
+format:
+  html:
+    code-fold: true
+    code-tools: true
+    toc: true
+    toc-title: SQL I
+    page-layout: full
+    theme:
+      - cosmo
+      - cerulean
+    callout-icon: false
+jupyter: python3
+---
+
+::: {.callout-note collapse="true"}
+## Learning Outcomes
+* Identify situations where a database may be preferred over a CSV file
+* Write basic SQL queries using `SELECT`, `FROM`, `WHERE`, `ORDER BY`, `LIMIT`, and `OFFSET`
+* Perform aggregations using `GROUP BY` and `HAVING`
+:::
+
+In the first ten weeks of the course, we made our way through the entire data science lifecycle: we learned how to load and explore a dataset, formulate questions, and use the tools of prediction and inference to come up with answers. For the remaining weeks of the semester, we are going to make a second pass through the lifecycle, this time doing so with a different set of tools, ideas, and abstractions. 
+
+## Databases
+With this goal in mind, let's go back to the very beginning of the lifecycle. We first started our work in data analysis by looking at the `pandas` library, which offered us powerful tools to manipulate tabular data stored in (primarily) CSV files. CSVs work well when analyzing relatively small datasets that don't need to be shared across many users. In research and industry, however, data scientists often need to access enormous bodies of data that cannot be easily stored in a CSV format. Collaborating with others when working with CSVs can also be tricky – a real-world data scientist may run into problems when multiple users try to make modifications, or, even worse, security issues with who should and should not have access to the data. 
+
+A **database** is a large, organized collection of data. Databases are administered by **Database Management Systems (DBMS)**, which are software systems that store, manage, and facilitate access to one or more databases. Databases help mitigate many of the issues that come with using CSVs for data storage: they provide reliable storage that can survive system crashes or disk failures, are optimized to compute on data that does not fit into memory, and contain special data structures to improve performance. Using databases rather than CSVs offers further benefits from the standpoint of data management. A DBMS can apply settings that configure how data is organized, block certain data anomalies (for example, enforcing non-negative weights or ages), and determine who is allowed access to the data. It can also ensure safe concurrent operations where multiple users reading and writing to the database will not lead to fatal errors.
+
+As you may have guessed, we can't use our usual `pandas` methods to work with data in a database. Instead, we'll turn to Structured Query Language.
+
+## Structured Query Language and Database Schema
+
+**Structured Query Language**, or **SQL** (commonly pronounced "sequel," though this is the subject of [fierce debate](https://patorjk.com/blog/2012/01/26/pronouncing-sql-s-q-l-or-sequel/)), is a special programming language designed to communicate with databases. You may have encountered it in classes like CS 61A or Data C88 before. Unlike Python, it is a **declarative programming language** – this means that rather than writing the exact logic needed to complete a task, a piece of SQL code "declares" what the desired final output should be and leaves the program to determine what logic should be implemented. 
+
+It is important to reiterate that SQL is an entirely different language from Python. However, Python *does* have special engines that allow us to run SQL code in a Jupyter notebook. While this is typically not how SQL is used outside of an educational setting, we will be using this workflow to illustrate how SQL queries are constructed using the tools we've already worked with this semester. You will learn more about how to run SQL queries in Jupyter during lab. The syntax below will seem unfamiliar to you; for now, just focus on understanding the output displayed. We will clarify the SQL code in a bit.
+
+To start, we'll look at a database called `dragon.db`.
+
+```{python}
+# Load the SQL Alchemy Python library
+import sqlalchemy
+import pandas as pd
+
+# Create a SQL Alchemy connection to the database
+engine = sqlalchemy.create_engine("sqlite:///data/dragons.db")
+connection = engine.connect()
+
+# Query information from the database
+query = """
+SELECT * 
+FROM sqlite_master
+WHERE type="table";
+"""
+
+pd.read_sql(query, engine)
+```
+
+The summary above displays information about the database. The database contains four tables, named `sqlite_sequence`, `Dragon`, `Dish`, and `Scene`. The rightmost column above lists the command that was used to construct each table. 
+
+Let's look more closely at the command used to create the `Dragon` table (the second entry above). 
+
+    CREATE TABLE Dragon (name TEXT PRIMARY KEY,
+                         year INTEGER CHECK (year >= 2000),
+                         cute INTEGER)
+
+The statement `CREATE TABLE` is used to specify the **schema** of the table – a description of what logic is used to organize the table. Schema follow a set format:
+
+* `ColName`: the name of a column
+* `DataType`: the type of data to be stored in a column. Some of the most common SQL data types are `INT` (integers), `REAL` (single-precision floating point numbers), `TEXT` (strings), `BLOB` (arbitrary data, such as audio/video files), and `DATETIME` (a date and time).
+* `Constraint`: some restriction on the data to be stored in the column. Common constraints are `CHECK` (data must obey a certain condition), `PRIMARY KEY` (designate a column as the table's primary key), `NOT NULL` (data cannot be null), and `DEFAULT` (a default fill value if no specific entry is given).
+
+We see that `Dragon` contains five columns. The first of these, `"name"`, contains text data. It is designated as the **primary key** of the table; that is, the data contained in `"name"` uniquely identifies each entry in the table. The `"year"` column contains integer data, with the constraint that year values must be greater than or equal to 2000. The final column, `"cute"`, contains integer data with no restrictions on allowable values. 
+
+We can verify this by viewing `Dragon` itself.
+
+```{python}
+query = """
+SELECT *
+FROM Dragon;
+"""
+
+pd.read_sql(query, engine)
+```
+
+Database tables (also referred to as **relations**) are structured much like DataFrames in `pandas`. Each row, sometimes called a **tuple**, represents a single record in the dataset. Each column, sometimes called an **attribute** or **field**, describes some feature of the record. 
+
+## `SELECT`ing From Tables
+
+To extract and manipulate data stored in a SQL table, we will need to familiarize ourselves with the syntax to write pieces of SQL code, which we call **queries**. 
+
+The basic unit of a SQL query is the `SELECT` statement. `SELECT` specifies what columns we would like to extract from a given table. We use `FROM` to tell SQL the table from which we want to `SELECT` our data. 
+
+```{python}
+#| code-fold: false
+query = """
+SELECT *
+FROM Dragon;
+"""
+
+pd.read_sql(query, engine)
+```
+
+In SQL, `*` means "everything." The query above grabs *all* the columns in `Dragon` and displays them in the outputted table. We can also specify a specific subset of columns to be `SELECT`ed.
+
+```{python}
+#| code-fold: false
+query = """
+SELECT name, cute
+FROM Dragon;
+"""
+
+pd.read_sql(query, engine)
+```
+
+And just like that, we've already written two SQL queries. There are a few points of note in the queries above. Firstly, notice that every "verb" is written in uppercase. It is convention to write SQL operations in capital letters, but your code will run just fine even if you choose to keep things in lowercase. Second, the query above separates each statement with a new line. SQL queries are not impacted by whitespace within the query; this means that SQL code is typically written with a new line after each statement to make things more readable. The semicolon (`;`) indicates the end of a query. There are some "flavors" of SQL in which a query will not run if no semicolon is present; in Data 100, however, the SQL version we will use works with or without an ending semicolon. Queries in these notes will end with semicolons to build up good habits.
+
+The `AS` keyword allows us to give a column a new name after it has been `SELECT`ed. The general syntax is:
+
+    SELECT column_name_in_database_table AS new_name_in_output_table
+
+```{python}
+#| code-fold: false
+query = """
+SELECT name, cute AS cuteness
+FROM Dragon;
+"""
+
+pd.read_sql(query, engine)
+```
+
+To `SELECT` only the *unique* values in a column, we use the `DISTINCT` keyword. This will cause any any duplicate entries in a column to be removed. If we want to find only the unique years in `Dragon`, without any repeats, we would write:
+
+```{python}
+#| code-fold: false
+query = """
+SELECT DISTINCT year
+FROM Dragon;
+"""
+
+pd.read_sql(query, engine)
+```
+
+**Every** SQL query must include both a `SELECT` and `FROM` statement. Intuitively, this makes sense – we know that we'll want to extract some piece of information from the table; to do so, we also need to indicate what table we want to consider. 
+
+It is important to note that SQL enforces a strict "order of operations" – SQL clauses must *always* follow the same sequence. For example, the `SELECT` statement must always precede `FROM`. This means that any SQL query will follow the same structure. 
+
+    SELECT columns
+    FROM table
+    [additional clauses]
+    
+The additional clauses that we use depend on the specific task trying to be achieved. We may refine our query to filter on a certain condition, aggregate a particular column, or join several tables together. We will spend the rest of this lecture outlining some useful clauses to build up our understanding of the order of operations.
+
+## Applying `WHERE` Conditions
+
+The `WHERE` keyword is used to select only some rows of a table, filtered on a given Boolean condition. 
+
+```{python}
+#| code-fold: false
+query = """
+SELECT *
+FROM Dragon
+WHERE cute > 0;
+"""
+
+pd.read_sql(query, engine)
+```
+
+We can add complexity to the `WHERE` condition using the keywords `AND`, `OR`, and `NOT`, much like we would in Python.
+
+```{python}
+#| code-fold: false
+query = """
+SELECT *
+FROM Dragon
+WHERE cute > 0 OR NOT name = "drogon";
+"""
+
+pd.read_sql(query, engine)
+```
+
+## Sorting and Restricting Output
+    
+What if we want the output table to appear in a certain order? The `ORDER BY` keyword behaves similarly to `.sort_values()` in `pandas`. 
+
+```{python}
+#| code-fold: false
+query = """
+SELECT *
+FROM Dragon
+ORDER BY cute;
+"""
+
+pd.read_sql(query, engine)
+```
+
+By default, `ORDER BY` will display results in ascending order (with the lowest values at the top of the table). To sort in descending order, we use the `DESC` keyword after specifying the column to be used for ordering.
+
+```{python}
+#| code-fold: false
+query = """
+SELECT *
+FROM Dragon
+ORDER BY cute DESC;
+"""
+
+pd.read_sql(query, engine)
+```
+
+We can also tell SQL to `ORDER BY` two columns at once. This will sort the table by the first listed column, then use the values in the second listed column to break any ties.
+
+```{python}
+#| code-fold: false
+query = """
+SELECT *
+FROM Dragon
+ORDER BY name, cute;
+"""
+
+pd.read_sql(query, engine)
+```
+
+In many instances, we are only concerned with a certain number of rows in the output table (for example, wanting to find the top two cutest dragons). The `LIMIT` keyword often follows `ORDER BY` to restrict the output to a specified number of rows. It serves a function similar to that of `.head()` in `pandas`.
+
+```{python}
+#| code-fold: false
+query = """
+SELECT *
+FROM Dragon
+ORDER BY cute DESC
+LIMIT 2;
+"""
+
+pd.read_sql(query, engine)
+```
+
+The `OFFSET` keyword indicates the index at which `LIMIT` should start. In other words, we can use `OFFSET` to shift where the `LIMIT`ing begins by a specified number of rows. For example, we might care about the dragons that are ranked #2 and #3 in cuteness. 
+
+```{python}
+#| code-fold: false
+query = """
+SELECT *
+FROM Dragon
+ORDER BY cute DESC
+LIMIT 2
+OFFSET 1;
+"""
+
+pd.read_sql(query, engine)
+```
+
+Let's summarize what we've learned so far. We know that `SELECT` and `FROM` are the fundamental building blocks of any SQL query. We can augment these two keywords with additional clauses to refine the data in our output table. 
+
+Any clauses that we include must follow a strict ordering within the query:
+
+    SELECT columns
+    FROM table
+    WHERE condition
+    ORDER BY columns_for_ordering
+    LIMIT number_of_rows
+    OFFSET number_of_rows
+
+## Aggregating with `GROUP BY`
+
+At this point, we've seen that SQL offers much of the same functionality that was given to us by `pandas`. We can extract data from a table, filter it, and reorder it to suit our needs.
+
+In `pandas`, much of our analysis work relied heavily on being able to use `.groupby()` to aggregate across the rows of our dataset. SQL's answer to this task is the (very conveniently named) `GROUP BY` clause. While the outputs of `GROUP BY` are similar to those of `.groupby()` – in both cases, we obtain an output table where some column has been used for grouping – the syntax and logic used to group data in SQL are fairly different to the `pandas` implementation.
+
+To illustrate `GROUP BY`, we will consider the `Title` table from the `imdbmini` database used in lab and homework.
+
+```{python}
+# Create a SQL Alchemy connection to the `imdbmini` database
+engine = sqlalchemy.create_engine("sqlite:///data/imdbmini.db")
+connection = engine.connect()
+
+# Query information from the database
+query = """
+SELECT * 
+FROM Title
+LIMIT 5
+"""
+
+pd.read_sql(query, engine)
+```
+
+Say we wanted to count the number of records there are of each `titleType`. To accomplish this, we would write the following code.
+
+```{python}
+#| code-fold: false
+query = """
+SELECT titleType, COUNT(titleType)
+FROM Title
+GROUP BY titleType
+"""
+
+pd.read_sql(query, engine)
+```
+
+What is going on here? The statement `GROUP BY titleType` tells SQL to group the data based on the value contained in the `titleType` column (whether a record is a movie, tvSeries, tvEpisode, or something else). `COUNT(titleType)` counts the number of records there are of each `titleType` and displays the result in the output table.
+
+You may be wondering: why does `COUNT(titleType)` come before the command to `GROUP BY titleType`? Don't we need to form groups before we can count the number of entries in each?
+
+Remember that SQL is a *declarative* programming language – a SQL programmer simply states what end result they would like to see, and leaves the task of figuring out *how* to obtain this result to SQL itself. This means that SQL queries sometimes don't follow what a reader sees as a "logical" sequence of thought. Instead, SQL requires that we follow its set order of operations when constructing queries. So long as we follow this ordering, SQL will handle the underlying logic.
+
+In practical terms: our goal with this query was to output the count of each `titleType`. To communicate this to SQL, we say that we want to `SELECT` the `COUNT` of each `titleType` group. 
+
+Let's put this into action one more time. Now, let's find the minimum `startYear` of each `titleType`.
+
+```{python}
+#| code-fold: false
+query = """
+SELECT titleType, MIN(startYear)
+FROM Title
+GROUP BY titleType
+"""
+
+pd.read_sql(query, engine)
+```
+
+There are many aggregation functions that can be used to aggregate the data contained in each group. Some common examples are:
+
+* `COUNT`: count the number of rows associated with each group
+* `MIN`: find the minimum value of each group
+* `MAX`: find the maximum value of each group
+* `SUM`: sum across all records in each group
+
+We can easily compute multiple aggregations, all at once (a task that was very tricky in `pandas`).
+
+```{python}
+#| code-fold: false
+query = """
+SELECT titleType, MIN(startYear), MAX(startYear), SUM(runtimeMinutes)
+FROM Title
+GROUP BY titleType
+"""
+
+pd.read_sql(query, engine)
+```
+
+### Filtering with `HAVING`
+
+Often, we will only be interested in groups that share a certain characteristic. For example, we might only want to work with `titleTypes` that have at least 25 records in the table. 
+
+When working with `pandas`, we used the `.filter()` method of `GroupBy` objects to filter out entire groups of data based on a given condition. In SQL, we can achieve something similar by using the `HAVING` clause. `HAVING` checks to see if *all data across a group* satisfies a certain condition. If this condition is met, the group is kept in the outputted data. If not, the group is excluded from the output.
+
+```{python}
+#| code-fold: false
+query = """
+SELECT titleType, COUNT(titleType)
+FROM Title
+GROUP BY titleType
+HAVING COUNT(titleType) >= 25
+"""
+
+pd.read_sql(query, engine)
+```
+
+Notice that `short`, `tvMovie`, `tvSpecial`, and `videoGame` have all been excluded from the output table.
+
+It can be helpful to read `HAVING` clauses this way: "give me all titleType groups *having* a count of at least 25."
+
+You may ask: why couldn't we have just used a `WHERE` clause here? It is important to remember that `WHERE` applies a condition to *individual* rows. We could, for example, use `WHERE` to filter rows that have particular values of `startYear` or `runtimeMinutes`. `WHERE` cannot, however, apply a condition *across* a group of many rows. Because `WHERE` only considers one row at a time, we would not be able to use it to filter on, say, the maximum `startYear` across *all* rows in a group, or the sum of all `runtimeMinutes` across an *entire* group of records. `HAVING` allows us to apply a condition based on some aggregate value of a collection of grouped rows. 
+
+With these definitions of `GROUP BY` and `HAVING` in hand, let's update our SQL order of operations. Remember: *every* SQL query must list clauses in this order. 
+
+    SELECT columns
+    FROM table
+    WHERE condition
+    GROUP BY columns_for_grouping
+    HAVING group_condition
+    ORDER BY columns_for_ordering
+    LIMIT number_of_rows
+    OFFSET number_of_rows
+
