@@ -1,0 +1,1818 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.280">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Principles and Techniques of Data Science - 3&nbsp; Pandas II</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../pandas_1/pandas_1.html" rel="prev">
+<link href="../data100_logo.png" rel="icon" type="image/png">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Pandas II</span></h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="../index.html" class="sidebar-logo-link">
+      <img src="../data100_logo.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Principles and Techniques of Data Science</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/DS-100/course-notes" title="Source Code" class="sidebar-tool px-1"><i class="bi bi-github"></i></a>
+    <a href="../Principles-and-Techniques-of-Data-Science.pdf" title="Download PDF" class="sidebar-tool px-1"><i class="bi bi-file-pdf"></i></a>
+</div>
+    </div>
+      </div>
+      <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">Welcome</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../intro_lec/introduction.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pandas_1/pandas_1.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Pandas I</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pandas_2/pandas_2.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Pandas II</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Pandas II</h2>
+   
+  <ul>
+  <li><a href="#sorting-with-a-custom-key" id="toc-sorting-with-a-custom-key" class="nav-link active" data-scroll-target="#sorting-with-a-custom-key"><span class="toc-section-number">3.1</span>  Sorting With a Custom Key</a></li>
+  <li><a href="#adding-and-removing-columns" id="toc-adding-and-removing-columns" class="nav-link" data-scroll-target="#adding-and-removing-columns"><span class="toc-section-number">3.2</span>  Adding and Removing Columns</a></li>
+  <li><a href="#aggregating-data-with-groupby" id="toc-aggregating-data-with-groupby" class="nav-link" data-scroll-target="#aggregating-data-with-groupby"><span class="toc-section-number">3.3</span>  Aggregating Data with GroupBy</a></li>
+  <li><a href="#aggregating-data-with-pivot-tables" id="toc-aggregating-data-with-pivot-tables" class="nav-link" data-scroll-target="#aggregating-data-with-pivot-tables"><span class="toc-section-number">3.4</span>  Aggregating Data with Pivot Tables</a></li>
+  <li><a href="#joining-tables" id="toc-joining-tables" class="nav-link" data-scroll-target="#joining-tables"><span class="toc-section-number">3.5</span>  Joining Tables</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content column-body" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title d-none d-lg-block"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Pandas II</span></h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<div class="callout-note callout callout-style-default no-icon callout-captioned">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Learning Outcomes
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li>Build familiarity with advanced <code>pandas</code> syntax</li>
+<li>Recognize situations where aggregation is useful and identify the correct technique for performing an aggregation</li>
+<li>Understand the real-world need for joining and perform a simple merge</li>
+</ul>
+</div>
+</div>
+</div>
+<p>Last time, we introduced the <code>pandas</code> library as a toolkit for processing data. We learned the DataFrame and Series data structures, familiarized ourselves with the basic syntax for manipulating tabular data, and began writing our first lines of <code>pandas</code> code.</p>
+<p>In this lecture, we’ll start to dive into some advanced <code>pandas</code> syntax. You may find it helpful to follow along with a notebook of your own as we walk through these new pieces of code.</p>
+<p>We’ll start by loading the <code>babynames</code> dataset.</p>
+<div class="cell" data-execution_count="1">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> urllib.request</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os.path</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> zipfile</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>data_url <span class="op">=</span> <span class="st">"https://www.ssa.gov/oact/babynames/state/namesbystate.zip"</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>local_filename <span class="op">=</span> <span class="st">"babynamesbystate.zip"</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">not</span> os.path.exists(local_filename): <span class="co"># if the data exists don't download again</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> urllib.request.urlopen(data_url) <span class="im">as</span> resp, <span class="bu">open</span>(local_filename, <span class="st">'wb'</span>) <span class="im">as</span> f:</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        f.write(resp.read())</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>zf <span class="op">=</span> zipfile.ZipFile(local_filename, <span class="st">'r'</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>ca_name <span class="op">=</span> <span class="st">'CA.TXT'</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>field_names <span class="op">=</span> [<span class="st">'State'</span>, <span class="st">'Sex'</span>, <span class="st">'Year'</span>, <span class="st">'Name'</span>, <span class="st">'Count'</span>]</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> zf.<span class="bu">open</span>(ca_name) <span class="im">as</span> fh:</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    babynames <span class="op">=</span> pd.read_csv(fh, header<span class="op">=</span><span class="va">None</span>, names<span class="op">=</span>field_names)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>babynames.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="1">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>State</th>
+      <th>Sex</th>
+      <th>Year</th>
+      <th>Name</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Mary</td>
+      <td>295</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Helen</td>
+      <td>239</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Dorothy</td>
+      <td>220</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Margaret</td>
+      <td>163</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Frances</td>
+      <td>134</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<section id="sorting-with-a-custom-key" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="sorting-with-a-custom-key"><span class="header-section-number">3.1</span> Sorting With a Custom Key</h2>
+<p>In the last lecture, we learned how to sort a DataFrame by the values in one or more of its columns using <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.sort_values.html"><code>.sort_values</code></a>. <code>pandas</code> automatically sorted values in order according to numeric value (for number data) or alphabetical order (for string data).</p>
+<div class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Sort names by reverse-alphabetical order</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Recall that `.head(5)` displays the first five rows in the DataFrame</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>babynames.sort_values(<span class="st">"Name"</span>, ascending<span class="op">=</span><span class="va">False</span>).head(<span class="dv">5</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>State</th>
+      <th>Sex</th>
+      <th>Year</th>
+      <th>Name</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>400761</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>2021</td>
+      <td>Zyrus</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>197519</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>2011</td>
+      <td>Zyrah</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>232144</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>2020</td>
+      <td>Zyrah</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>217415</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>2016</td>
+      <td>Zyrah</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>220674</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>2017</td>
+      <td>Zyrah</td>
+      <td>6</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<p>This offers us a lot of functionality, but what if we need to sort by some other metric? For example, what if we wanted to find the longest names in the DataFrame?</p>
+<p>We can do this by specifying the <code>key</code> parameter of <code>.sort_values</code>. The <code>key</code> parameter is assigned to a function of our choice. This function is then applied to each value in the specified column. <code>pandas</code> will, finally, sort the DataFrame by the values outputted by the function.</p>
+<div class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Here, a lambda function is applied to find the length of each value, `x`, in the "Name" column</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>babynames.sort_values(<span class="st">"Name"</span>, key <span class="op">=</span> <span class="kw">lambda</span> x: x.<span class="bu">str</span>.<span class="bu">len</span>(), ascending<span class="op">=</span><span class="va">False</span>).head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>State</th>
+      <th>Sex</th>
+      <th>Year</th>
+      <th>Name</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>313143</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>1989</td>
+      <td>Franciscojavier</td>
+      <td>6</td>
+    </tr>
+    <tr>
+      <th>333732</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>1997</td>
+      <td>Ryanchristopher</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>330421</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>1996</td>
+      <td>Franciscojavier</td>
+      <td>8</td>
+    </tr>
+    <tr>
+      <th>323615</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>1993</td>
+      <td>Johnchristopher</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>310235</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>1988</td>
+      <td>Franciscojavier</td>
+      <td>10</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+<section id="adding-and-removing-columns" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="adding-and-removing-columns"><span class="header-section-number">3.2</span> Adding and Removing Columns</h2>
+<p>To add a new column to a DataFrame, we use a syntax similar to that used when accessing an existing column. Specify the name of the new column by writing <code>dataframe["new_column"]</code>, then assign this to a Series or Array containing the values that will populate this column.</p>
+<div class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Add a column named "Length" that includes the length of each name</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>babynames[<span class="st">"Length"</span>] <span class="op">=</span> babynames[<span class="st">"Name"</span>].<span class="bu">str</span>.<span class="bu">len</span>()</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>babynames.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="4">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>State</th>
+      <th>Sex</th>
+      <th>Year</th>
+      <th>Name</th>
+      <th>Count</th>
+      <th>Length</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Mary</td>
+      <td>295</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Helen</td>
+      <td>239</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Dorothy</td>
+      <td>220</td>
+      <td>7</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Margaret</td>
+      <td>163</td>
+      <td>8</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Frances</td>
+      <td>134</td>
+      <td>7</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<p>In the example above, we made use of an in-built function given to us by the <code>str</code> accessor. What if we had wanted to generate the values in our new column using a function of our own making?</p>
+<p>We can do this using the Series <a href="https://pandas.pydata.org/docs/reference/api/pandas.Series.map.html"><code>.map</code></a> method. <code>.map</code> takes in a function as input, and will apply this function to each value of a Series.</p>
+<p>For example, say we wanted to find the number of occurrences of the sequence “dr” or “ea” in each name.</p>
+<div class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># First, define a function to count the number of times "dr" or "ea" appear in each name</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> dr_ea_count(string):</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> string.count(<span class="st">"dr"</span>) <span class="op">+</span> string.count(<span class="st">"ea"</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Then, use `map` to apply `dr_ea_count` to each name in the "Name" column</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>babynames[<span class="st">"dr_ea_count"</span>] <span class="op">=</span> babynames[<span class="st">"Name"</span>].<span class="bu">map</span>(dr_ea_count)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Sort the DataFrame by the new "dr_ea_count" column so we can see our handiwork</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>babynames.sort_values(by <span class="op">=</span> <span class="st">"dr_ea_count"</span>, ascending <span class="op">=</span> <span class="va">False</span>).head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="5">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>State</th>
+      <th>Sex</th>
+      <th>Year</th>
+      <th>Name</th>
+      <th>Count</th>
+      <th>Length</th>
+      <th>dr_ea_count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>101969</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1986</td>
+      <td>Deandrea</td>
+      <td>6</td>
+      <td>8</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>115950</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1990</td>
+      <td>Deandrea</td>
+      <td>5</td>
+      <td>8</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>131022</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1994</td>
+      <td>Leandrea</td>
+      <td>5</td>
+      <td>8</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>304390</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>1985</td>
+      <td>Deandrea</td>
+      <td>6</td>
+      <td>8</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>108723</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1988</td>
+      <td>Deandrea</td>
+      <td>5</td>
+      <td>8</td>
+      <td>3</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<p>If we want to remove a column or row of a DataFrame, we can call the <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.drop.html"><code>.drop</code></a> method. Use the <code>axis</code> parameter to specify whether a column or row should be dropped. Unless otherwise specified, <code>pandas</code> will assume that we are dropping a row by default.</p>
+<div class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Drop the row of the DataFrame with label 2</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>babynames <span class="op">=</span> babynames.drop(<span class="dv">2</span>, axis<span class="op">=</span><span class="st">"rows"</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Drop our "dr_ea_count" and "length" columns from the DataFrame</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>babynames <span class="op">=</span> babynames.drop([<span class="st">"dr_ea_count"</span>, <span class="st">"Length"</span>], axis<span class="op">=</span><span class="st">"columns"</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>babynames.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>State</th>
+      <th>Sex</th>
+      <th>Year</th>
+      <th>Name</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Mary</td>
+      <td>295</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Helen</td>
+      <td>239</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Margaret</td>
+      <td>163</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Frances</td>
+      <td>134</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Ruth</td>
+      <td>128</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Notice that we reassigned <code>babynames</code> to the result of <code>babynames.drop(...)</code>. This is a subtle, but important point: <code>pandas</code> table operations <strong>do not occur in-place</strong>. Calling <code>dataframe.drop(...)</code> will output a <em>copy</em> of <code>dataframe</code> with the row/column of interest removed, without modifying the original <code>dataframe</code> table.</p>
+<p>In other words, if we simply call:</p>
+<div class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># This creates a copy of `babynames` and removes the row with label 3...</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>babynames.drop(<span class="dv">3</span>, axis<span class="op">=</span><span class="st">"rows"</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># ...but the original `babynames` is unchanged! </span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Notice that the row with label 3 is still present</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>babynames.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="7">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>State</th>
+      <th>Sex</th>
+      <th>Year</th>
+      <th>Name</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Mary</td>
+      <td>295</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Helen</td>
+      <td>239</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Margaret</td>
+      <td>163</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Frances</td>
+      <td>134</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Ruth</td>
+      <td>128</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Our original <code>babynames</code> DataFrame will remain unmodified.</p>
+</section>
+<section id="aggregating-data-with-groupby" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="aggregating-data-with-groupby"><span class="header-section-number">3.3</span> Aggregating Data with GroupBy</h2>
+<p>Up until this point, we have been working with individual rows of DataFrames. As data scientists, we often wish to investigate trends across a larger <em>subset</em> of our data. For example, we may want to compute some summary statistic (the mean, median, sum, etc.) for a group of rows in our DataFrame. To do this, we’ll use <code>pandas</code> <code>GroupBy</code> objects.</p>
+<p>Let’s say we wanted to aggregate all rows in <code>babynames</code> for a given year.</p>
+<div class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>babynames.groupby(<span class="st">"Year"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<pre><code>&lt;pandas.core.groupby.generic.DataFrameGroupBy object at 0x7fd0c4b10c40&gt;</code></pre>
+</div>
+</div>
+<p>What does this strange output mean? Calling <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.groupby.html"><code>.groupby</code></a> has generated a <code>GroupBy</code> object. You can imagine this as a set of “mini” sub-DataFrames, where each subframe contains all of the rows from <code>babynames</code> that correspond to a particular year.</p>
+<p>The diagram below shows a simplified view of <code>babynames</code> to help illustrate this idea.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="gb.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Creating a GroupBy object</figcaption><p></p>
+</figure>
+</div>
+<p>We can’t work with a <code>GroupBy</code> object directly – that is why you saw that strange output earlier, rather than a standard view of a DataFrame. To actually manipulate values within these “mini” DataFrames, we’ll need to call an <em>aggregation method</em>. This is a method that tells <code>pandas</code> how to aggregate the values within the <code>GroupBy</code> object. Once the aggregation is applied, <code>pandas</code> will return a normal (now grouped) DataFrame.</p>
+<p>The first aggregation method we’ll consider is <code>.agg</code>. The <code>.agg</code> method takes in a function as its argument; this function is then applied to each column of a “mini” grouped DataFrame. We end up with a new DataFrame with one aggregated row per subframe. Let’s see this in action by finding the <code>sum</code> of all counts for each year in <code>babynames</code> – this is equivalent to finding the number of babies born in each year.</p>
+<div class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>babynames.groupby(<span class="st">"Year"</span>).agg(<span class="bu">sum</span>).head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Count</th>
+    </tr>
+    <tr>
+      <th>Year</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1910</th>
+      <td>8943</td>
+    </tr>
+    <tr>
+      <th>1911</th>
+      <td>9983</td>
+    </tr>
+    <tr>
+      <th>1912</th>
+      <td>17946</td>
+    </tr>
+    <tr>
+      <th>1913</th>
+      <td>22094</td>
+    </tr>
+    <tr>
+      <th>1914</th>
+      <td>26926</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<p>We can relate this back to the diagram we used above. Remember that the diagram uses a simplified version of <code>babynames</code>, which is why we see smaller values for the summed counts.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/agg.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Performing an aggregation</figcaption><p></p>
+</figure>
+</div>
+<p>Calling <code>.agg</code> has condensed each subframe back into a single row. This gives us our final output: a DataFrame that is now indexed by <code>"Year"</code>, with a single row for each unique year in the original <code>babynames</code> DataFrame.</p>
+<p>You may be wondering: where did the <code>"State"</code>, <code>"Sex"</code>, and <code>"Name"</code> columns go? Logically, it doesn’t make sense to <code>sum</code> the string data in these columns (how would we add “Mary” + “Ann”?). Because of this, <code>pandas</code> will simply omit these columns when it performs the aggregation on the DataFrame. Since this happens implicitly, without the user specifying that these columns should be ignored, it’s easy to run into troubling situations where columns are removed without the programmer noticing. It is better coding practice to select <em>only</em> the columns we care about before performing the aggregation.</p>
+<div class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Same result, but now we explicitly tell Pandas to only consider the "Count" column when summing</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>babynames.groupby(<span class="st">"Year"</span>)[[<span class="st">"Count"</span>]].agg(<span class="bu">sum</span>).head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="10">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Count</th>
+    </tr>
+    <tr>
+      <th>Year</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1910</th>
+      <td>8943</td>
+    </tr>
+    <tr>
+      <th>1911</th>
+      <td>9983</td>
+    </tr>
+    <tr>
+      <th>1912</th>
+      <td>17946</td>
+    </tr>
+    <tr>
+      <th>1913</th>
+      <td>22094</td>
+    </tr>
+    <tr>
+      <th>1914</th>
+      <td>26926</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<p>There is a whole host of aggregation methods we can use other than <code>.agg</code>. Some useful options are:</p>
+<ul>
+<li><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.core.groupby.GroupBy.max.html"><code>.max</code></a>: creates a new DataFrame with the maximum value of each group</li>
+<li><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.core.groupby.GroupBy.mean.html"><code>.mean</code></a>: creates a new DataFrame with the mean value of each group</li>
+<li><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.core.groupby.GroupBy.size.html"><code>.size</code></a>: creates a new Series with the number of entries in each group</li>
+<li><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.core.groupby.DataFrameGroupBy.filter.html"><code>.filter</code></a>: creates a copy of the original DataFrame, keeping only the rows from subframes that obey a provided condition</li>
+</ul>
+</section>
+<section id="aggregating-data-with-pivot-tables" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="aggregating-data-with-pivot-tables"><span class="header-section-number">3.4</span> Aggregating Data with Pivot Tables</h2>
+<p>We know now that <code>.groupby</code> gives us the ability to group and aggregate data across our DataFrame. The examples above formed groups using just one column in the DataFrame. It’s possible to group by multiple columns at once by passing in a list of columns names to <code>.groupby</code>.</p>
+<p>Let’s find the total number of baby names associated with each sex for each year in <code>babynames</code>. To do this, we’ll group by <em>both</em> the <code>"Year"</code> and <code>"Sex"</code> columns.</p>
+<div class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Find the total number of baby names associated with each sex for each year in the data</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>babynames.groupby([<span class="st">"Year"</span>, <span class="st">"Sex"</span>])[[<span class="st">"Count"</span>]].agg(<span class="bu">sum</span>).head(<span class="dv">6</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="11">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th></th>
+      <th>Count</th>
+    </tr>
+    <tr>
+      <th>Year</th>
+      <th>Sex</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th rowspan="2" valign="top">1910</th>
+      <th>F</th>
+      <td>5730</td>
+    </tr>
+    <tr>
+      <th>M</th>
+      <td>3213</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">1911</th>
+      <th>F</th>
+      <td>6602</td>
+    </tr>
+    <tr>
+      <th>M</th>
+      <td>3381</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">1912</th>
+      <th>F</th>
+      <td>9804</td>
+    </tr>
+    <tr>
+      <th>M</th>
+      <td>8142</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Notice that both <code>"Year"</code> and <code>"Sex"</code> serve as the index of the DataFrame (they are both rendered in bold). We’ve created a <em>multindex</em> where two different index values, the year and sex, are used to uniquely identify each row.</p>
+<p>This isn’t the most intuitive way of representing this data – and, because multindexes have multiple dimensions in their index, they can often be difficult to use.</p>
+<p>Another strategy to aggregate across two columns is to create a pivot table. You saw these back in <a href="https://inferentialthinking.com/chapters/08/3/Cross-Classifying_by_More_than_One_Variable.html#pivot-tables-rearranging-the-output-of-group">Data 8</a>. One set of values is used to create the index of the table; another set is used to define the column names. The values contained in each cell of the table correspond to the aggregated data for each index-column pair.</p>
+<p>The best way to understand pivot tables is to see one in action. Let’s return to our original goal of summing the total number of names associated with each combination of year and sex. We’ll call the <code>pandas</code> <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.pivot_table.html"><code>.pivot_table</code></a> method to create a new table.</p>
+<div class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The `pivot_table` method is used to generate a Pandas pivot table</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>babynames.pivot_table(index <span class="op">=</span> <span class="st">"Year"</span>, columns <span class="op">=</span> <span class="st">"Sex"</span>, values <span class="op">=</span> <span class="st">"Count"</span>, aggfunc <span class="op">=</span> <span class="bu">sum</span>).head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th>Sex</th>
+      <th>F</th>
+      <th>M</th>
+    </tr>
+    <tr>
+      <th>Year</th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1910</th>
+      <td>5730</td>
+      <td>3213</td>
+    </tr>
+    <tr>
+      <th>1911</th>
+      <td>6602</td>
+      <td>3381</td>
+    </tr>
+    <tr>
+      <th>1912</th>
+      <td>9804</td>
+      <td>8142</td>
+    </tr>
+    <tr>
+      <th>1913</th>
+      <td>11860</td>
+      <td>10234</td>
+    </tr>
+    <tr>
+      <th>1914</th>
+      <td>13815</td>
+      <td>13111</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Looks a lot better! Now, our DataFrame is structured with clear index-column combinations. Each entry in the pivot table represents the summed count of names for a given combination of <code>"Year"</code> and <code>"Sex"</code>.</p>
+<p>Let’s take a closer look at the code implemented above.</p>
+<ul>
+<li><code>index = "Year"</code> specifies the column name in the original DataFrame that should be used as the index of the pivot table</li>
+<li><code>columns = "Sex"</code> specifies the column name in the original DataFrame that should be used to generate the columns of the pivot table</li>
+<li><code>values = "Count"</code> indicates what values from the original DataFrame should be used to populate the entry for each index-column combination</li>
+<li><code>aggfunc = sum</code> tells <code>pandas</code> what function to use when aggregating the data specified by <code>values</code>. Here, we are <code>sum</code>ming the name counts for each pair of <code>"Year"</code> and <code>"Sex"</code></li>
+</ul>
+</section>
+<section id="joining-tables" class="level2" data-number="3.5">
+<h2 data-number="3.5" class="anchored" data-anchor-id="joining-tables"><span class="header-section-number">3.5</span> Joining Tables</h2>
+<p>When working on data science projects, we’re unlikely to have absolutely all the data we want contained in a single DataFrame – a real-world data scientist needs to grapple with data coming from multiple sources. If we have access to multiple datasets with related information, we can join two or more tables into a single DataFrame.</p>
+<p>To put this into practice, we’ll revisit the <code>elections</code> dataset from last lecture.</p>
+<div class="cell" data-execution_count="13">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>elections <span class="op">=</span> pd.read_csv(<span class="st">"data/elections.csv"</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>elections.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="13">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Year</th>
+      <th>Candidate</th>
+      <th>Party</th>
+      <th>Popular vote</th>
+      <th>Result</th>
+      <th>%</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1824</td>
+      <td>Andrew Jackson</td>
+      <td>Democratic-Republican</td>
+      <td>151271</td>
+      <td>loss</td>
+      <td>57.210122</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1824</td>
+      <td>John Quincy Adams</td>
+      <td>Democratic-Republican</td>
+      <td>113142</td>
+      <td>win</td>
+      <td>42.789878</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>1828</td>
+      <td>Andrew Jackson</td>
+      <td>Democratic</td>
+      <td>642806</td>
+      <td>win</td>
+      <td>56.203927</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>1828</td>
+      <td>John Quincy Adams</td>
+      <td>National Republican</td>
+      <td>500897</td>
+      <td>loss</td>
+      <td>43.796073</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>1832</td>
+      <td>Andrew Jackson</td>
+      <td>Democratic</td>
+      <td>702735</td>
+      <td>win</td>
+      <td>54.574789</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Say we want to understand the 2023 popularity of the names of each presidential candidate. To do this, we’ll need the combined data of <code>babynames</code> <em>and</em> <code>elections</code>.</p>
+<p>We’ll start by creating a new column containing the first name of each presidential candidate. This will help us join each name in <code>elections</code> to the corresponding name data in <code>babynames</code>.</p>
+<div class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># This `str` operation splits each candidate's full name at each </span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co"># blank space, then takes just the candidiate's first name</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>elections[<span class="st">"First Name"</span>] <span class="op">=</span> elections[<span class="st">"Candidate"</span>].<span class="bu">str</span>.split().<span class="bu">str</span>[<span class="dv">0</span>]</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>elections.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="14">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Year</th>
+      <th>Candidate</th>
+      <th>Party</th>
+      <th>Popular vote</th>
+      <th>Result</th>
+      <th>%</th>
+      <th>First Name</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1824</td>
+      <td>Andrew Jackson</td>
+      <td>Democratic-Republican</td>
+      <td>151271</td>
+      <td>loss</td>
+      <td>57.210122</td>
+      <td>Andrew</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1824</td>
+      <td>John Quincy Adams</td>
+      <td>Democratic-Republican</td>
+      <td>113142</td>
+      <td>win</td>
+      <td>42.789878</td>
+      <td>John</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>1828</td>
+      <td>Andrew Jackson</td>
+      <td>Democratic</td>
+      <td>642806</td>
+      <td>win</td>
+      <td>56.203927</td>
+      <td>Andrew</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>1828</td>
+      <td>John Quincy Adams</td>
+      <td>National Republican</td>
+      <td>500897</td>
+      <td>loss</td>
+      <td>43.796073</td>
+      <td>John</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>1832</td>
+      <td>Andrew Jackson</td>
+      <td>Democratic</td>
+      <td>702735</td>
+      <td>win</td>
+      <td>54.574789</td>
+      <td>Andrew</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Now, we’re ready to join the two tables. <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.merge.html"><code>pd.merge</code></a> is the <code>pandas</code> method used to join DataFrames together. The <code>left</code> and <code>right</code> parameters are used to specify the DataFrames to be joined. The <code>left_on</code> and <code>right_on</code> parameters are assigned to the string names of the columns to be used when performing the join. These two <code>on</code> parameters tell <code>pandas</code> what values should act as pairing keys to determine which rows to merge across the DataFrames. We’ll talk more about this idea of a pairing key next lecture.</p>
+<div class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>pd.merge(left <span class="op">=</span> elections, right <span class="op">=</span> babynames, left_on <span class="op">=</span> <span class="st">"First Name"</span>, right_on <span class="op">=</span> <span class="st">"Name"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="15">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Year_x</th>
+      <th>Candidate</th>
+      <th>Party</th>
+      <th>Popular vote</th>
+      <th>Result</th>
+      <th>%</th>
+      <th>First Name</th>
+      <th>State</th>
+      <th>Sex</th>
+      <th>Year_y</th>
+      <th>Name</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1824</td>
+      <td>Andrew Jackson</td>
+      <td>Democratic-Republican</td>
+      <td>151271</td>
+      <td>loss</td>
+      <td>57.210122</td>
+      <td>Andrew</td>
+      <td>CA</td>
+      <td>F</td>
+      <td>1963</td>
+      <td>Andrew</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1824</td>
+      <td>Andrew Jackson</td>
+      <td>Democratic-Republican</td>
+      <td>151271</td>
+      <td>loss</td>
+      <td>57.210122</td>
+      <td>Andrew</td>
+      <td>CA</td>
+      <td>F</td>
+      <td>1968</td>
+      <td>Andrew</td>
+      <td>7</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>1824</td>
+      <td>Andrew Jackson</td>
+      <td>Democratic-Republican</td>
+      <td>151271</td>
+      <td>loss</td>
+      <td>57.210122</td>
+      <td>Andrew</td>
+      <td>CA</td>
+      <td>F</td>
+      <td>1970</td>
+      <td>Andrew</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>1824</td>
+      <td>Andrew Jackson</td>
+      <td>Democratic-Republican</td>
+      <td>151271</td>
+      <td>loss</td>
+      <td>57.210122</td>
+      <td>Andrew</td>
+      <td>CA</td>
+      <td>F</td>
+      <td>1971</td>
+      <td>Andrew</td>
+      <td>13</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>1824</td>
+      <td>Andrew Jackson</td>
+      <td>Democratic-Republican</td>
+      <td>151271</td>
+      <td>loss</td>
+      <td>57.210122</td>
+      <td>Andrew</td>
+      <td>CA</td>
+      <td>F</td>
+      <td>1974</td>
+      <td>Andrew</td>
+      <td>7</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>21780</th>
+      <td>2020</td>
+      <td>Jo Jorgensen</td>
+      <td>Libertarian</td>
+      <td>1865724</td>
+      <td>loss</td>
+      <td>1.177979</td>
+      <td>Jo</td>
+      <td>CA</td>
+      <td>F</td>
+      <td>1996</td>
+      <td>Jo</td>
+      <td>8</td>
+    </tr>
+    <tr>
+      <th>21781</th>
+      <td>2020</td>
+      <td>Jo Jorgensen</td>
+      <td>Libertarian</td>
+      <td>1865724</td>
+      <td>loss</td>
+      <td>1.177979</td>
+      <td>Jo</td>
+      <td>CA</td>
+      <td>F</td>
+      <td>1999</td>
+      <td>Jo</td>
+      <td>6</td>
+    </tr>
+    <tr>
+      <th>21782</th>
+      <td>2020</td>
+      <td>Jo Jorgensen</td>
+      <td>Libertarian</td>
+      <td>1865724</td>
+      <td>loss</td>
+      <td>1.177979</td>
+      <td>Jo</td>
+      <td>CA</td>
+      <td>F</td>
+      <td>2016</td>
+      <td>Jo</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>21783</th>
+      <td>2020</td>
+      <td>Jo Jorgensen</td>
+      <td>Libertarian</td>
+      <td>1865724</td>
+      <td>loss</td>
+      <td>1.177979</td>
+      <td>Jo</td>
+      <td>CA</td>
+      <td>M</td>
+      <td>1934</td>
+      <td>Jo</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>21784</th>
+      <td>2020</td>
+      <td>Jo Jorgensen</td>
+      <td>Libertarian</td>
+      <td>1865724</td>
+      <td>loss</td>
+      <td>1.177979</td>
+      <td>Jo</td>
+      <td>CA</td>
+      <td>M</td>
+      <td>1985</td>
+      <td>Jo</td>
+      <td>5</td>
+    </tr>
+  </tbody>
+</table>
+<p>21785 rows × 12 columns</p>
+</div>
+</div>
+</div>
+
+
+<!-- -->
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation column-body">
+  <div class="nav-page nav-page-previous">
+      <a href="../pandas_1/pandas_1.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Pandas I</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb17" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> Pandas II</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="an">execute:</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co">  echo: true</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="co">    code-fold: true</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools: true</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="co">    toc: true</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="co">    toc-title: Pandas II</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="co">    page-layout: full</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="co">    theme:</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="co">      - cosmo</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a><span class="co">      - cerulean</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a><span class="co">    callout-icon: false</span></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a><span class="an">jupyter:</span><span class="co"> python3</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true"}</span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a><span class="fu">## Learning Outcomes</span></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Build familiarity with advanced <span class="in">`pandas`</span> syntax</span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Recognize situations where aggregation is useful and identify the correct technique for performing an aggregation</span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Understand the real-world need for joining and perform a simple merge</span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>Last time, we introduced the <span class="in">`pandas`</span> library as a toolkit for processing data. We learned the DataFrame and Series data structures, familiarized ourselves with the basic syntax for manipulating tabular data, and began writing our first lines of <span class="in">`pandas`</span> code.</span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a>In this lecture, we'll start to dive into some advanced <span class="in">`pandas`</span> syntax. You may find it helpful to follow along with a notebook of your own as we walk through these new pieces of code.</span>
+<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a>We'll start by loading the <span class="in">`babynames`</span> dataset.</span>
+<span id="cb17-32"><a href="#cb17-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-35"><a href="#cb17-35" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb17-36"><a href="#cb17-36" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb17-37"><a href="#cb17-37" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> urllib.request</span>
+<span id="cb17-38"><a href="#cb17-38" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os.path</span>
+<span id="cb17-39"><a href="#cb17-39" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> zipfile</span>
+<span id="cb17-40"><a href="#cb17-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-41"><a href="#cb17-41" aria-hidden="true" tabindex="-1"></a>data_url <span class="op">=</span> <span class="st">"https://www.ssa.gov/oact/babynames/state/namesbystate.zip"</span></span>
+<span id="cb17-42"><a href="#cb17-42" aria-hidden="true" tabindex="-1"></a>local_filename <span class="op">=</span> <span class="st">"babynamesbystate.zip"</span></span>
+<span id="cb17-43"><a href="#cb17-43" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">not</span> os.path.exists(local_filename): <span class="co"># if the data exists don't download again</span></span>
+<span id="cb17-44"><a href="#cb17-44" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> urllib.request.urlopen(data_url) <span class="im">as</span> resp, <span class="bu">open</span>(local_filename, <span class="st">'wb'</span>) <span class="im">as</span> f:</span>
+<span id="cb17-45"><a href="#cb17-45" aria-hidden="true" tabindex="-1"></a>        f.write(resp.read())</span>
+<span id="cb17-46"><a href="#cb17-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-47"><a href="#cb17-47" aria-hidden="true" tabindex="-1"></a>zf <span class="op">=</span> zipfile.ZipFile(local_filename, <span class="st">'r'</span>)</span>
+<span id="cb17-48"><a href="#cb17-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-49"><a href="#cb17-49" aria-hidden="true" tabindex="-1"></a>ca_name <span class="op">=</span> <span class="st">'CA.TXT'</span></span>
+<span id="cb17-50"><a href="#cb17-50" aria-hidden="true" tabindex="-1"></a>field_names <span class="op">=</span> [<span class="st">'State'</span>, <span class="st">'Sex'</span>, <span class="st">'Year'</span>, <span class="st">'Name'</span>, <span class="st">'Count'</span>]</span>
+<span id="cb17-51"><a href="#cb17-51" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> zf.<span class="bu">open</span>(ca_name) <span class="im">as</span> fh:</span>
+<span id="cb17-52"><a href="#cb17-52" aria-hidden="true" tabindex="-1"></a>    babynames <span class="op">=</span> pd.read_csv(fh, header<span class="op">=</span><span class="va">None</span>, names<span class="op">=</span>field_names)</span>
+<span id="cb17-53"><a href="#cb17-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-54"><a href="#cb17-54" aria-hidden="true" tabindex="-1"></a>babynames.head()</span>
+<span id="cb17-55"><a href="#cb17-55" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb17-56"><a href="#cb17-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-57"><a href="#cb17-57" aria-hidden="true" tabindex="-1"></a><span class="fu">## Sorting With a Custom Key</span></span>
+<span id="cb17-58"><a href="#cb17-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-59"><a href="#cb17-59" aria-hidden="true" tabindex="-1"></a>In the last lecture, we learned how to sort a DataFrame by the values in one or more of its columns using <span class="co">[</span><span class="ot">`.sort_values`</span><span class="co">](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.sort_values.html)</span>. <span class="in">`pandas`</span> automatically sorted values in order according to numeric value (for number data) or alphabetical order (for string data). </span>
+<span id="cb17-60"><a href="#cb17-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-63"><a href="#cb17-63" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb17-64"><a href="#cb17-64" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: false</span></span>
+<span id="cb17-65"><a href="#cb17-65" aria-hidden="true" tabindex="-1"></a><span class="co"># Sort names by reverse-alphabetical order</span></span>
+<span id="cb17-66"><a href="#cb17-66" aria-hidden="true" tabindex="-1"></a><span class="co"># Recall that `.head(5)` displays the first five rows in the DataFrame</span></span>
+<span id="cb17-67"><a href="#cb17-67" aria-hidden="true" tabindex="-1"></a>babynames.sort_values(<span class="st">"Name"</span>, ascending<span class="op">=</span><span class="va">False</span>).head(<span class="dv">5</span>) </span>
+<span id="cb17-68"><a href="#cb17-68" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb17-69"><a href="#cb17-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-70"><a href="#cb17-70" aria-hidden="true" tabindex="-1"></a>This offers us a lot of functionality, but what if we need to sort by some other metric? For example, what if we wanted to find the longest names in the DataFrame?</span>
+<span id="cb17-71"><a href="#cb17-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-72"><a href="#cb17-72" aria-hidden="true" tabindex="-1"></a>We can do this by specifying the <span class="in">`key`</span> parameter of <span class="in">`.sort_values`</span>. The <span class="in">`key`</span> parameter is assigned to a function of our choice. This function is then applied to each value in the specified column. <span class="in">`pandas`</span> will, finally, sort the DataFrame by the values outputted by the function.</span>
+<span id="cb17-73"><a href="#cb17-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-76"><a href="#cb17-76" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb17-77"><a href="#cb17-77" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: false</span></span>
+<span id="cb17-78"><a href="#cb17-78" aria-hidden="true" tabindex="-1"></a><span class="co"># Here, a lambda function is applied to find the length of each value, `x`, in the "Name" column</span></span>
+<span id="cb17-79"><a href="#cb17-79" aria-hidden="true" tabindex="-1"></a>babynames.sort_values(<span class="st">"Name"</span>, key <span class="op">=</span> <span class="kw">lambda</span> x: x.<span class="bu">str</span>.<span class="bu">len</span>(), ascending<span class="op">=</span><span class="va">False</span>).head(<span class="dv">5</span>)</span>
+<span id="cb17-80"><a href="#cb17-80" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb17-81"><a href="#cb17-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-82"><a href="#cb17-82" aria-hidden="true" tabindex="-1"></a><span class="fu">## Adding and Removing Columns</span></span>
+<span id="cb17-83"><a href="#cb17-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-84"><a href="#cb17-84" aria-hidden="true" tabindex="-1"></a>To add a new column to a DataFrame, we use a syntax similar to that used when accessing an existing column. Specify the name of the new column by writing <span class="in">`dataframe["new_column"]`</span>, then assign this to a Series or Array containing the values that will populate this column.</span>
+<span id="cb17-85"><a href="#cb17-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-88"><a href="#cb17-88" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb17-89"><a href="#cb17-89" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: false</span></span>
+<span id="cb17-90"><a href="#cb17-90" aria-hidden="true" tabindex="-1"></a><span class="co"># Add a column named "Length" that includes the length of each name</span></span>
+<span id="cb17-91"><a href="#cb17-91" aria-hidden="true" tabindex="-1"></a>babynames[<span class="st">"Length"</span>] <span class="op">=</span> babynames[<span class="st">"Name"</span>].<span class="bu">str</span>.<span class="bu">len</span>()</span>
+<span id="cb17-92"><a href="#cb17-92" aria-hidden="true" tabindex="-1"></a>babynames.head(<span class="dv">5</span>)</span>
+<span id="cb17-93"><a href="#cb17-93" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb17-94"><a href="#cb17-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-95"><a href="#cb17-95" aria-hidden="true" tabindex="-1"></a>In the example above, we made use of an in-built function given to us by the <span class="in">`str`</span> accessor. What if we had wanted to generate the values in our new column using a function of our own making?</span>
+<span id="cb17-96"><a href="#cb17-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-97"><a href="#cb17-97" aria-hidden="true" tabindex="-1"></a>We can do this using the Series <span class="co">[</span><span class="ot">`.map`</span><span class="co">](https://pandas.pydata.org/docs/reference/api/pandas.Series.map.html)</span> method. <span class="in">`.map`</span> takes in a function as input, and will apply this function to each value of a Series. </span>
+<span id="cb17-98"><a href="#cb17-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-99"><a href="#cb17-99" aria-hidden="true" tabindex="-1"></a>For example, say we wanted to find the number of occurrences of the sequence "dr" or "ea" in each name. </span>
+<span id="cb17-100"><a href="#cb17-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-103"><a href="#cb17-103" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb17-104"><a href="#cb17-104" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: false</span></span>
+<span id="cb17-105"><a href="#cb17-105" aria-hidden="true" tabindex="-1"></a><span class="co"># First, define a function to count the number of times "dr" or "ea" appear in each name</span></span>
+<span id="cb17-106"><a href="#cb17-106" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> dr_ea_count(string):</span>
+<span id="cb17-107"><a href="#cb17-107" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> string.count(<span class="st">"dr"</span>) <span class="op">+</span> string.count(<span class="st">"ea"</span>)</span>
+<span id="cb17-108"><a href="#cb17-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-109"><a href="#cb17-109" aria-hidden="true" tabindex="-1"></a><span class="co"># Then, use `map` to apply `dr_ea_count` to each name in the "Name" column</span></span>
+<span id="cb17-110"><a href="#cb17-110" aria-hidden="true" tabindex="-1"></a>babynames[<span class="st">"dr_ea_count"</span>] <span class="op">=</span> babynames[<span class="st">"Name"</span>].<span class="bu">map</span>(dr_ea_count)</span>
+<span id="cb17-111"><a href="#cb17-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-112"><a href="#cb17-112" aria-hidden="true" tabindex="-1"></a><span class="co"># Sort the DataFrame by the new "dr_ea_count" column so we can see our handiwork</span></span>
+<span id="cb17-113"><a href="#cb17-113" aria-hidden="true" tabindex="-1"></a>babynames.sort_values(by <span class="op">=</span> <span class="st">"dr_ea_count"</span>, ascending <span class="op">=</span> <span class="va">False</span>).head(<span class="dv">5</span>)</span>
+<span id="cb17-114"><a href="#cb17-114" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb17-115"><a href="#cb17-115" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-116"><a href="#cb17-116" aria-hidden="true" tabindex="-1"></a>If we want to remove a column or row of a DataFrame, we can call the <span class="co">[</span><span class="ot">`.drop`</span><span class="co">](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.drop.html)</span> method. Use the <span class="in">`axis`</span> parameter to specify whether a column or row should be dropped. Unless otherwise specified, <span class="in">`pandas`</span> will assume that we are dropping a row by default. </span>
+<span id="cb17-117"><a href="#cb17-117" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-120"><a href="#cb17-120" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb17-121"><a href="#cb17-121" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: false</span></span>
+<span id="cb17-122"><a href="#cb17-122" aria-hidden="true" tabindex="-1"></a><span class="co"># Drop the row of the DataFrame with label 2</span></span>
+<span id="cb17-123"><a href="#cb17-123" aria-hidden="true" tabindex="-1"></a>babynames <span class="op">=</span> babynames.drop(<span class="dv">2</span>, axis<span class="op">=</span><span class="st">"rows"</span>)</span>
+<span id="cb17-124"><a href="#cb17-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-125"><a href="#cb17-125" aria-hidden="true" tabindex="-1"></a><span class="co"># Drop our "dr_ea_count" and "length" columns from the DataFrame</span></span>
+<span id="cb17-126"><a href="#cb17-126" aria-hidden="true" tabindex="-1"></a>babynames <span class="op">=</span> babynames.drop([<span class="st">"dr_ea_count"</span>, <span class="st">"Length"</span>], axis<span class="op">=</span><span class="st">"columns"</span>)</span>
+<span id="cb17-127"><a href="#cb17-127" aria-hidden="true" tabindex="-1"></a>babynames.head(<span class="dv">5</span>)</span>
+<span id="cb17-128"><a href="#cb17-128" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb17-129"><a href="#cb17-129" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-130"><a href="#cb17-130" aria-hidden="true" tabindex="-1"></a>Notice that we reassigned <span class="in">`babynames`</span> to the result of <span class="in">`babynames.drop(...)`</span>. This is a subtle, but important point: <span class="in">`pandas`</span> table operations **do not occur in-place**. Calling <span class="in">`dataframe.drop(...)`</span> will output a *copy* of <span class="in">`dataframe`</span> with the row/column of interest removed, without modifying the original <span class="in">`dataframe`</span> table. </span>
+<span id="cb17-131"><a href="#cb17-131" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-132"><a href="#cb17-132" aria-hidden="true" tabindex="-1"></a>In other words, if we simply call:</span>
+<span id="cb17-133"><a href="#cb17-133" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-136"><a href="#cb17-136" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb17-137"><a href="#cb17-137" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: false</span></span>
+<span id="cb17-138"><a href="#cb17-138" aria-hidden="true" tabindex="-1"></a><span class="co"># This creates a copy of `babynames` and removes the row with label 3...</span></span>
+<span id="cb17-139"><a href="#cb17-139" aria-hidden="true" tabindex="-1"></a>babynames.drop(<span class="dv">3</span>, axis<span class="op">=</span><span class="st">"rows"</span>)</span>
+<span id="cb17-140"><a href="#cb17-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-141"><a href="#cb17-141" aria-hidden="true" tabindex="-1"></a><span class="co"># ...but the original `babynames` is unchanged! </span></span>
+<span id="cb17-142"><a href="#cb17-142" aria-hidden="true" tabindex="-1"></a><span class="co"># Notice that the row with label 3 is still present</span></span>
+<span id="cb17-143"><a href="#cb17-143" aria-hidden="true" tabindex="-1"></a>babynames.head(<span class="dv">5</span>)</span>
+<span id="cb17-144"><a href="#cb17-144" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb17-145"><a href="#cb17-145" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-146"><a href="#cb17-146" aria-hidden="true" tabindex="-1"></a>Our original <span class="in">`babynames`</span> DataFrame will remain unmodified.</span>
+<span id="cb17-147"><a href="#cb17-147" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-148"><a href="#cb17-148" aria-hidden="true" tabindex="-1"></a><span class="fu">## Aggregating Data with GroupBy</span></span>
+<span id="cb17-149"><a href="#cb17-149" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-150"><a href="#cb17-150" aria-hidden="true" tabindex="-1"></a>Up until this point, we have been working with individual rows of DataFrames. As data scientists, we often wish to investigate trends across a larger *subset* of our data. For example, we may want to compute some summary statistic (the mean, median, sum, etc.) for a group of rows in our DataFrame. To do this, we'll use <span class="in">`pandas`</span> <span class="in">`GroupBy`</span> objects.</span>
+<span id="cb17-151"><a href="#cb17-151" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-152"><a href="#cb17-152" aria-hidden="true" tabindex="-1"></a>Let's say we wanted to aggregate all rows in <span class="in">`babynames`</span> for a given year. </span>
+<span id="cb17-153"><a href="#cb17-153" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-156"><a href="#cb17-156" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb17-157"><a href="#cb17-157" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: false</span></span>
+<span id="cb17-158"><a href="#cb17-158" aria-hidden="true" tabindex="-1"></a>babynames.groupby(<span class="st">"Year"</span>)</span>
+<span id="cb17-159"><a href="#cb17-159" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb17-160"><a href="#cb17-160" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-161"><a href="#cb17-161" aria-hidden="true" tabindex="-1"></a>What does this strange output mean? Calling <span class="co">[</span><span class="ot">`.groupby`</span><span class="co">](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.groupby.html)</span> has generated a <span class="in">`GroupBy`</span> object. You can imagine this as a set of "mini" sub-DataFrames, where each subframe contains all of the rows from <span class="in">`babynames`</span> that correspond to a particular year. </span>
+<span id="cb17-162"><a href="#cb17-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-163"><a href="#cb17-163" aria-hidden="true" tabindex="-1"></a>The diagram below shows a simplified view of <span class="in">`babynames`</span> to help illustrate this idea.</span>
+<span id="cb17-164"><a href="#cb17-164" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-165"><a href="#cb17-165" aria-hidden="true" tabindex="-1"></a><span class="al">![Creating a GroupBy object](gb.png)</span></span>
+<span id="cb17-166"><a href="#cb17-166" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-167"><a href="#cb17-167" aria-hidden="true" tabindex="-1"></a>We can't work with a <span class="in">`GroupBy`</span> object directly – that is why you saw that strange output earlier, rather than a standard view of a DataFrame. To actually manipulate values within these "mini" DataFrames, we'll need to call an *aggregation method*. This is a method that tells <span class="in">`pandas`</span> how to aggregate the values within the <span class="in">`GroupBy`</span> object. Once the aggregation is applied, <span class="in">`pandas`</span> will return a normal (now grouped) DataFrame.</span>
+<span id="cb17-168"><a href="#cb17-168" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-169"><a href="#cb17-169" aria-hidden="true" tabindex="-1"></a>The first aggregation method we'll consider is <span class="in">`.agg`</span>. The <span class="in">`.agg`</span> method takes in a function as its argument; this function is then applied to each column of a "mini" grouped DataFrame. We end up with a new DataFrame with one aggregated row per subframe. Let's see this in action by finding the <span class="in">`sum`</span> of all counts for each year in <span class="in">`babynames`</span> – this is equivalent to finding the number of babies born in each year. </span>
+<span id="cb17-170"><a href="#cb17-170" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-173"><a href="#cb17-173" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb17-174"><a href="#cb17-174" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: false</span></span>
+<span id="cb17-175"><a href="#cb17-175" aria-hidden="true" tabindex="-1"></a>babynames.groupby(<span class="st">"Year"</span>).agg(<span class="bu">sum</span>).head(<span class="dv">5</span>)</span>
+<span id="cb17-176"><a href="#cb17-176" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb17-177"><a href="#cb17-177" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-178"><a href="#cb17-178" aria-hidden="true" tabindex="-1"></a>We can relate this back to the diagram we used above. Remember that the diagram uses a simplified version of <span class="in">`babynames`</span>, which is why we see smaller values for the summed counts.</span>
+<span id="cb17-179"><a href="#cb17-179" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-180"><a href="#cb17-180" aria-hidden="true" tabindex="-1"></a><span class="al">![Performing an aggregation](images/agg.png)</span></span>
+<span id="cb17-181"><a href="#cb17-181" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-182"><a href="#cb17-182" aria-hidden="true" tabindex="-1"></a>Calling <span class="in">`.agg`</span> has condensed each subframe back into a single row. This gives us our final output: a DataFrame that is now indexed by <span class="in">`"Year"`</span>, with a single row for each unique year in the original <span class="in">`babynames`</span> DataFrame.</span>
+<span id="cb17-183"><a href="#cb17-183" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-184"><a href="#cb17-184" aria-hidden="true" tabindex="-1"></a>You may be wondering: where did the <span class="in">`"State"`</span>, <span class="in">`"Sex"`</span>, and <span class="in">`"Name"`</span> columns go? Logically, it doesn't make sense to <span class="in">`sum`</span> the string data in these columns (how would we add "Mary" + "Ann"?). Because of this, <span class="in">`pandas`</span> will simply omit these columns when it performs the aggregation on the DataFrame. Since this happens implicitly, without the user specifying that these columns should be ignored, it's easy to run into troubling situations where columns are removed without the programmer noticing. It is better coding practice to select *only* the columns we care about before performing the aggregation.</span>
+<span id="cb17-185"><a href="#cb17-185" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-188"><a href="#cb17-188" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb17-189"><a href="#cb17-189" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: false</span></span>
+<span id="cb17-190"><a href="#cb17-190" aria-hidden="true" tabindex="-1"></a><span class="co"># Same result, but now we explicitly tell Pandas to only consider the "Count" column when summing</span></span>
+<span id="cb17-191"><a href="#cb17-191" aria-hidden="true" tabindex="-1"></a>babynames.groupby(<span class="st">"Year"</span>)[[<span class="st">"Count"</span>]].agg(<span class="bu">sum</span>).head(<span class="dv">5</span>)</span>
+<span id="cb17-192"><a href="#cb17-192" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb17-193"><a href="#cb17-193" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-194"><a href="#cb17-194" aria-hidden="true" tabindex="-1"></a>There is a whole host of aggregation methods we can use other than <span class="in">`.agg`</span>. Some useful options are:</span>
+<span id="cb17-195"><a href="#cb17-195" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-196"><a href="#cb17-196" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span><span class="co">[</span><span class="ot">`.max`</span><span class="co">](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.core.groupby.GroupBy.max.html)</span>: creates a new DataFrame with the maximum value of each group</span>
+<span id="cb17-197"><a href="#cb17-197" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span><span class="co">[</span><span class="ot">`.mean`</span><span class="co">](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.core.groupby.GroupBy.mean.html)</span>: creates a new DataFrame with the mean value of each group</span>
+<span id="cb17-198"><a href="#cb17-198" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span><span class="co">[</span><span class="ot">`.size`</span><span class="co">](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.core.groupby.GroupBy.size.html)</span>: creates a new Series with the number of entries in each group</span>
+<span id="cb17-199"><a href="#cb17-199" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span><span class="co">[</span><span class="ot">`.filter`</span><span class="co">](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.core.groupby.DataFrameGroupBy.filter.html)</span>: creates a copy of the original DataFrame, keeping only the rows from subframes that obey a provided condition</span>
+<span id="cb17-200"><a href="#cb17-200" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-201"><a href="#cb17-201" aria-hidden="true" tabindex="-1"></a><span class="fu">## Aggregating Data with Pivot Tables</span></span>
+<span id="cb17-202"><a href="#cb17-202" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-203"><a href="#cb17-203" aria-hidden="true" tabindex="-1"></a>We know now that <span class="in">`.groupby`</span> gives us the ability to group and aggregate data across our DataFrame. The examples above formed groups using just one column in the DataFrame. It's possible to group by multiple columns at once by passing in a list of columns names to <span class="in">`.groupby`</span>. </span>
+<span id="cb17-204"><a href="#cb17-204" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-205"><a href="#cb17-205" aria-hidden="true" tabindex="-1"></a>Let's find the total number of baby names associated with each sex for each year in <span class="in">`babynames`</span>. To do this, we'll group by *both* the <span class="in">`"Year"`</span> and <span class="in">`"Sex"`</span> columns.</span>
+<span id="cb17-206"><a href="#cb17-206" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-209"><a href="#cb17-209" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb17-210"><a href="#cb17-210" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: false</span></span>
+<span id="cb17-211"><a href="#cb17-211" aria-hidden="true" tabindex="-1"></a><span class="co"># Find the total number of baby names associated with each sex for each year in the data</span></span>
+<span id="cb17-212"><a href="#cb17-212" aria-hidden="true" tabindex="-1"></a>babynames.groupby([<span class="st">"Year"</span>, <span class="st">"Sex"</span>])[[<span class="st">"Count"</span>]].agg(<span class="bu">sum</span>).head(<span class="dv">6</span>)</span>
+<span id="cb17-213"><a href="#cb17-213" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb17-214"><a href="#cb17-214" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-215"><a href="#cb17-215" aria-hidden="true" tabindex="-1"></a>Notice that both <span class="in">`"Year"`</span> and <span class="in">`"Sex"`</span> serve as the index of the DataFrame (they are both rendered in bold). We've created a *multindex* where two different index values, the year and sex, are used to uniquely identify each row. </span>
+<span id="cb17-216"><a href="#cb17-216" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-217"><a href="#cb17-217" aria-hidden="true" tabindex="-1"></a>This isn't the most intuitive way of representing this data – and, because multindexes have multiple dimensions in their index, they can often be difficult to use. </span>
+<span id="cb17-218"><a href="#cb17-218" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-219"><a href="#cb17-219" aria-hidden="true" tabindex="-1"></a>Another strategy to aggregate across two columns is to create a pivot table. You saw these back in <span class="co">[</span><span class="ot">Data 8</span><span class="co">](https://inferentialthinking.com/chapters/08/3/Cross-Classifying_by_More_than_One_Variable.html#pivot-tables-rearranging-the-output-of-group)</span>. One set of values is used to create the index of the table; another set is used to define the column names. The values contained in each cell of the table correspond to the aggregated data for each index-column pair.</span>
+<span id="cb17-220"><a href="#cb17-220" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-221"><a href="#cb17-221" aria-hidden="true" tabindex="-1"></a>The best way to understand pivot tables is to see one in action. Let's return to our original goal of summing the total number of names associated with each combination of year and sex. We'll call the <span class="in">`pandas`</span> <span class="co">[</span><span class="ot">`.pivot_table`</span><span class="co">](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.pivot_table.html)</span> method to create a new table.</span>
+<span id="cb17-222"><a href="#cb17-222" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-225"><a href="#cb17-225" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb17-226"><a href="#cb17-226" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: false</span></span>
+<span id="cb17-227"><a href="#cb17-227" aria-hidden="true" tabindex="-1"></a><span class="co"># The `pivot_table` method is used to generate a Pandas pivot table</span></span>
+<span id="cb17-228"><a href="#cb17-228" aria-hidden="true" tabindex="-1"></a>babynames.pivot_table(index <span class="op">=</span> <span class="st">"Year"</span>, columns <span class="op">=</span> <span class="st">"Sex"</span>, values <span class="op">=</span> <span class="st">"Count"</span>, aggfunc <span class="op">=</span> <span class="bu">sum</span>).head(<span class="dv">5</span>)</span>
+<span id="cb17-229"><a href="#cb17-229" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb17-230"><a href="#cb17-230" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-231"><a href="#cb17-231" aria-hidden="true" tabindex="-1"></a>Looks a lot better! Now, our DataFrame is structured with clear index-column combinations. Each entry in the pivot table represents the summed count of names for a given combination of <span class="in">`"Year"`</span> and <span class="in">`"Sex"`</span>.</span>
+<span id="cb17-232"><a href="#cb17-232" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-233"><a href="#cb17-233" aria-hidden="true" tabindex="-1"></a>Let's take a closer look at the code implemented above. </span>
+<span id="cb17-234"><a href="#cb17-234" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-235"><a href="#cb17-235" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span><span class="in">`index = "Year"`</span> specifies the column name in the original DataFrame that should be used as the index of the pivot table</span>
+<span id="cb17-236"><a href="#cb17-236" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span><span class="in">`columns = "Sex"`</span> specifies the column name in the original DataFrame that should be used to generate the columns of the pivot table</span>
+<span id="cb17-237"><a href="#cb17-237" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span><span class="in">`values = "Count"`</span> indicates what values from the original DataFrame should be used to populate the entry for each index-column combination</span>
+<span id="cb17-238"><a href="#cb17-238" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span><span class="in">`aggfunc = sum`</span> tells <span class="in">`pandas`</span> what function to use when aggregating the data specified by <span class="in">`values`</span>. Here, we are <span class="in">`sum`</span>ming the name counts for each pair of <span class="in">`"Year"`</span> and <span class="in">`"Sex"`</span></span>
+<span id="cb17-239"><a href="#cb17-239" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-240"><a href="#cb17-240" aria-hidden="true" tabindex="-1"></a><span class="fu">## Joining Tables </span></span>
+<span id="cb17-241"><a href="#cb17-241" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-242"><a href="#cb17-242" aria-hidden="true" tabindex="-1"></a>When working on data science projects, we're unlikely to have absolutely all the data we want contained in a single DataFrame – a real-world data scientist needs to grapple with data coming from multiple sources. If we have access to multiple datasets with related information, we can join two or more tables into a single DataFrame. </span>
+<span id="cb17-243"><a href="#cb17-243" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-244"><a href="#cb17-244" aria-hidden="true" tabindex="-1"></a>To put this into practice, we'll revisit the <span class="in">`elections`</span> dataset from last lecture.</span>
+<span id="cb17-245"><a href="#cb17-245" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-248"><a href="#cb17-248" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb17-249"><a href="#cb17-249" aria-hidden="true" tabindex="-1"></a>elections <span class="op">=</span> pd.read_csv(<span class="st">"data/elections.csv"</span>)</span>
+<span id="cb17-250"><a href="#cb17-250" aria-hidden="true" tabindex="-1"></a>elections.head(<span class="dv">5</span>)</span>
+<span id="cb17-251"><a href="#cb17-251" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb17-252"><a href="#cb17-252" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-253"><a href="#cb17-253" aria-hidden="true" tabindex="-1"></a>Say we want to understand the 2023 popularity of the names of each presidential candidate. To do this, we'll need the combined data of <span class="in">`babynames`</span> *and* <span class="in">`elections`</span>. </span>
+<span id="cb17-254"><a href="#cb17-254" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-255"><a href="#cb17-255" aria-hidden="true" tabindex="-1"></a>We'll start by creating a new column containing the first name of each presidential candidate. This will help us join each name in <span class="in">`elections`</span> to the corresponding name data in <span class="in">`babynames`</span>. </span>
+<span id="cb17-256"><a href="#cb17-256" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-259"><a href="#cb17-259" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb17-260"><a href="#cb17-260" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: false</span></span>
+<span id="cb17-261"><a href="#cb17-261" aria-hidden="true" tabindex="-1"></a><span class="co"># This `str` operation splits each candidate's full name at each </span></span>
+<span id="cb17-262"><a href="#cb17-262" aria-hidden="true" tabindex="-1"></a><span class="co"># blank space, then takes just the candidiate's first name</span></span>
+<span id="cb17-263"><a href="#cb17-263" aria-hidden="true" tabindex="-1"></a>elections[<span class="st">"First Name"</span>] <span class="op">=</span> elections[<span class="st">"Candidate"</span>].<span class="bu">str</span>.split().<span class="bu">str</span>[<span class="dv">0</span>]</span>
+<span id="cb17-264"><a href="#cb17-264" aria-hidden="true" tabindex="-1"></a>elections.head(<span class="dv">5</span>)</span>
+<span id="cb17-265"><a href="#cb17-265" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb17-266"><a href="#cb17-266" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-267"><a href="#cb17-267" aria-hidden="true" tabindex="-1"></a>Now, we're ready to join the two tables. <span class="co">[</span><span class="ot">`pd.merge`</span><span class="co">](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.merge.html)</span> is the <span class="in">`pandas`</span> method used to join DataFrames together. The <span class="in">`left`</span> and <span class="in">`right`</span> parameters are used to specify the DataFrames to be joined. The <span class="in">`left_on`</span> and <span class="in">`right_on`</span> parameters are assigned to the string names of the columns to be used when performing the join. These two <span class="in">`on`</span> parameters tell <span class="in">`pandas`</span> what values should act as pairing keys to determine which rows to merge across the DataFrames. We'll talk more about this idea of a pairing key next lecture.</span>
+<span id="cb17-268"><a href="#cb17-268" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-271"><a href="#cb17-271" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb17-272"><a href="#cb17-272" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: false</span></span>
+<span id="cb17-273"><a href="#cb17-273" aria-hidden="true" tabindex="-1"></a>pd.merge(left <span class="op">=</span> elections, right <span class="op">=</span> babynames, left_on <span class="op">=</span> <span class="st">"First Name"</span>, right_on <span class="op">=</span> <span class="st">"Name"</span>)</span>
+<span id="cb17-274"><a href="#cb17-274" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+</body></html>
