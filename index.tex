@@ -213,7 +213,7 @@
 
 \begin{document}
 \maketitle
-\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[frame hidden, boxrule=0pt, interior hidden, sharp corners, borderline west={3pt}{0pt}{shadecolor}, enhanced, breakable]}{\end{tcolorbox}}\fi
+\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[sharp corners, enhanced, interior hidden, borderline west={3pt}{0pt}{shadecolor}, frame hidden, breakable, boxrule=0pt]}{\end{tcolorbox}}\fi
 
 \renewcommand*\contentsname{Table of contents}
 {
@@ -248,7 +248,7 @@ data100.instructors@berkeley.edu
 \hypertarget{introduction}{%
 \chapter{Introduction}\label{introduction}}
 
-\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, arc=.35mm, colback=white, colframe=quarto-callout-note-color-frame, rightrule=.15mm, bottomrule=.15mm, toprule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Note}, colbacktitle=quarto-callout-note-color!10!white, breakable, bottomtitle=1mm, left=2mm, coltitle=black, opacityback=0, titlerule=0mm, leftrule=.75mm, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, breakable, rightrule=.15mm, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, toptitle=1mm, arc=.35mm, opacityback=0, toprule=.15mm, bottomtitle=1mm, left=2mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Note}, bottomrule=.15mm, opacitybacktitle=0.6, titlerule=0mm, colback=white]
 
 \begin{itemize}
 \tightlist
@@ -484,7 +484,7 @@ data analysis: \texttt{pandas}.
 \hypertarget{pandas-i}{%
 \chapter{Pandas I}\label{pandas-i}}
 
-\begin{tcolorbox}[enhanced jigsaw, toptitle=1mm, arc=.35mm, colback=white, colframe=quarto-callout-note-color-frame, rightrule=.15mm, bottomrule=.15mm, toprule=.15mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Note}, colbacktitle=quarto-callout-note-color!10!white, breakable, bottomtitle=1mm, left=2mm, coltitle=black, opacityback=0, titlerule=0mm, leftrule=.75mm, opacitybacktitle=0.6]
+\begin{tcolorbox}[enhanced jigsaw, coltitle=black, breakable, rightrule=.15mm, colframe=quarto-callout-note-color-frame, colbacktitle=quarto-callout-note-color!10!white, leftrule=.75mm, toptitle=1mm, arc=.35mm, opacityback=0, toprule=.15mm, bottomtitle=1mm, left=2mm, title=\textcolor{quarto-callout-note-color}{\faInfo}\hspace{0.5em}{Note}, bottomrule=.15mm, opacitybacktitle=0.6, titlerule=0mm, colback=white]
 
 \begin{itemize}
 \tightlist
@@ -499,20 +499,288 @@ data analysis: \texttt{pandas}.
 \end{tcolorbox}
 
 Data scientists work with data stored in a variety of formats. The
-primary focus of this class is in understanding tabular data - one of
+primary focus of this class is in understanding tabular data -- one of
 the most widely used formats in data science. This note introduces
 DataFrames, which are among the most popular representations of tabular
 data. We'll also introduce \texttt{pandas}, the standard Python package
 for manipulating data in DataFrames.
 
+\hypertarget{introduction-to-exploratory-data-analysis}{%
+\section{Introduction to Exploratory Data
+Analysis}\label{introduction-to-exploratory-data-analysis}}
+
+Imagine you have collected or have been given a box of data. What do you
+do next?
+
+The first step is to clean your data (\textbf{data cleaning}). Data
+scientists have coined the term \textbf{exploratory data analysis (EDA)}
+to describe the process of transforming raw data to insightful
+observations.
+
+EDA is an \emph{open-ended} analysis of transforming, visualizing, and
+summarizing patterns in data. In order to conduct EDA, we first need to
+familiarize ourselves with an important programming tool:
+\texttt{pandas}.
+
+\hypertarget{introduction-to-pandas}{%
+\section{Introduction to Pandas}\label{introduction-to-pandas}}
+
+\texttt{pandas} is a data analysis library to make data cleaning and
+analysis fast and convenient in Python.
+
+The library adopts many coding idioms from \texttt{NumPy}. The biggest
+difference is that \texttt{pandas} is designed for working with tabular
+data, one of the most common data formats (and the primary focus of Data
+100).
+
+Before writing code, we must import \texttt{pandas} into our Python
+environment.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# \textasciigrave{}pd\textasciigrave{} is the conventional alias for Pandas, as \textasciigrave{}np\textasciigrave{} is for NumPy}
+\ImportTok{import}\NormalTok{ pandas }\ImportTok{as}\NormalTok{ pd}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{series-dataframes-and-indices}{%
+\section{Series, DataFrames, and
+Indices}\label{series-dataframes-and-indices}}
+
+There are three fundamental data structures in \texttt{pandas}:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Series}: 1D labeled array data. It's best thought of as
+  columnar data
+\item
+  \textbf{DataFrame}: 2D tabular data with rows and columns
+\item
+  \textbf{Index}: A sequence of row/column labels
+\end{enumerate}
+
+DataFrames, Series, and Indices can be represented visually in the
+following diagram.
+
+\includegraphics{pandas_1/images/df_series_index.png}
+
+Notice how the \textbf{DataFrame} is a two dimensional object -- it
+contains both rows and columns. The \textbf{Series} above is a singular
+column of this DataFrame, namely the \texttt{Candidate} column. Both
+contain an \textbf{Index}, or a shared list of row labels (the integers
+from 0 to 5, inclusive).
+
+\hypertarget{series}{%
+\subsection{Series}\label{series}}
+
+A Series represents a column of a DataFrame; however, more generally, it
+can be any 1-dimensional array-like object containing values of the same
+type with associated data labels, called its index.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ pandas }\ImportTok{as}\NormalTok{ pd}
+
+\NormalTok{s }\OperatorTok{=}\NormalTok{ pd.Series([}\OperatorTok{{-}}\DecValTok{1}\NormalTok{, }\DecValTok{10}\NormalTok{, }\DecValTok{2}\NormalTok{])}
+\NormalTok{s}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{lr}
+\toprule
+{} &   0 \\
+\midrule
+0 &  -1 \\
+1 &  10 \\
+2 &   2 \\
+\bottomrule
+\end{tabular}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{s.array }\CommentTok{\# Data contained within the Series}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+<PandasArray>
+[-1, 10, 2]
+Length: 3, dtype: int64
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{s.index }\CommentTok{\# The Index of the Series}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+RangeIndex(start=0, stop=3, step=1)
+\end{verbatim}
+
+By default, row indices in \texttt{pandas} are the sequential list of
+integers beginning from 0. Optionally, we can specify a list of desired
+indices.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{s }\OperatorTok{=}\NormalTok{ pd.Series([}\OperatorTok{{-}}\DecValTok{1}\NormalTok{, }\DecValTok{10}\NormalTok{, }\DecValTok{2}\NormalTok{], index }\OperatorTok{=}\NormalTok{ [}\StringTok{"a"}\NormalTok{, }\StringTok{"b"}\NormalTok{, }\StringTok{"c"}\NormalTok{])}
+\NormalTok{s}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{lr}
+\toprule
+{} &   0 \\
+\midrule
+a &  -1 \\
+b &  10 \\
+c &   2 \\
+\bottomrule
+\end{tabular}
+
+A Series index can also be changed after initialization.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{s.index }\OperatorTok{=}\NormalTok{ [}\StringTok{"first"}\NormalTok{, }\StringTok{"second"}\NormalTok{, }\StringTok{"third"}\NormalTok{]}
+\NormalTok{s}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{lr}
+\toprule
+{} &   0 \\
+\midrule
+first  &  -1 \\
+second &  10 \\
+third  &   2 \\
+\bottomrule
+\end{tabular}
+
+\hypertarget{selection-in-series}{%
+\subsubsection{Selection in Series}\label{selection-in-series}}
+
+Just like with an array, we can select a single value or a set of values
+in a Series using:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  A single index label
+\item
+  A list of index labels
+\item
+  A filtering condition
+\end{enumerate}
+
+Let's define the following series \texttt{ser}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ser }\OperatorTok{=}\NormalTok{ pd.Series([}\DecValTok{4}\NormalTok{, }\OperatorTok{{-}}\DecValTok{2}\NormalTok{, }\DecValTok{0}\NormalTok{, }\DecValTok{6}\NormalTok{], index }\OperatorTok{=}\NormalTok{ [}\StringTok{"a"}\NormalTok{, }\StringTok{"b"}\NormalTok{, }\StringTok{"c"}\NormalTok{, }\StringTok{"d"}\NormalTok{])}
+\NormalTok{ser}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{lr}
+\toprule
+{} &  0 \\
+\midrule
+a &  4 \\
+b & -2 \\
+c &  0 \\
+d &  6 \\
+\bottomrule
+\end{tabular}
+
+\hypertarget{a-single-index-label}{%
+\paragraph{A Single Index Label}\label{a-single-index-label}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ser[}\StringTok{"a"}\NormalTok{] }\CommentTok{\# Notice how the return value is a single array element}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+4
+\end{verbatim}
+
+\hypertarget{a-list-of-index-labels}{%
+\paragraph{A List of Index Labels}\label{a-list-of-index-labels}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ser[[}\StringTok{"a"}\NormalTok{, }\StringTok{"c"}\NormalTok{]] }\CommentTok{\# Notice how the return value is another Series}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{lr}
+\toprule
+{} &  0 \\
+\midrule
+a &  4 \\
+c &  0 \\
+\bottomrule
+\end{tabular}
+
+\hypertarget{a-filtering-condition}{%
+\paragraph{A Filtering Condition}\label{a-filtering-condition}}
+
+Perhaps the most interesting (and useful) method to select data from a
+Series is with a filtering condition.
+
+To do so, we must first apply a vectorized boolean operation to all the
+elements in a Series.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ser }\OperatorTok{\textgreater{}} \DecValTok{0} \CommentTok{\# Vectorized boolean condition}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{ll}
+\toprule
+{} &      0 \\
+\midrule
+a &   True \\
+b &  False \\
+c &  False \\
+d &   True \\
+\bottomrule
+\end{tabular}
+
+Upon ``indexing'' in our Series with this condition, \texttt{pandas}
+selects only the rows with \texttt{True} values.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ser[ser }\OperatorTok{\textgreater{}} \DecValTok{0}\NormalTok{] }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{lr}
+\toprule
+{} &  0 \\
+\midrule
+a &  4 \\
+d &  6 \\
+\bottomrule
+\end{tabular}
+
 \hypertarget{dataframes}{%
-\section{DataFrames}\label{dataframes}}
+\subsection{DataFrames}\label{dataframes}}
 
 In Data 8, you encountered the \texttt{Table} class of the
-\texttt{datascience} library. In Data 100, we'll be using the
-\texttt{DataFrame} class of the \texttt{pandas} library.
+\texttt{datascience} library that represented tabular 2D data. In Data
+100, we'll be using the \texttt{DataFrame} class of the \texttt{pandas}
+library.
 
-Here is an example of a DataFrame containing election data.
+Here is an example of a DataFrame that contains election data.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -728,18 +996,189 @@ Let's dissect the code above.
    \texttt{pd.read\_csv("elections.csv")}
 \end{enumerate}
 
-This code stores our DataFrame object into the \texttt{elections}
+This code stores our DataFrame object in the \texttt{elections}
 variable. Upon inspection, our \texttt{elections} DataFrame has 182 rows
-and 6 columns. Each row represents a single record - in our example, a
-presedential candidate from some particular year. Each column represents
-a single attribute, or feature of the record.
+and 6 columns (\texttt{Year}, \texttt{Candidate}, \texttt{Party},
+\texttt{Popular\ Vote}, \texttt{Result}, \texttt{\%}). Each row
+represents a single record - in our example, a presedential candidate
+from some particular year. Each column represents a single attribute, or
+feature of the record.
 
-The API (application programming interface) for the DataFrame class is
-enormous. In the next section, we'll discuss several methods of the
-DataFrame API that allow us to extract subsets of data.
+In the example above, we constructed a DataFrame object using data from
+a CSV file. As we'll explore in the next section, we can create a
+DataFrame with data of our own.
+
+\hypertarget{creating-a-dataframe}{%
+\subsubsection{Creating a DataFrame}\label{creating-a-dataframe}}
+
+There are many ways to create a DataFrame. Here, we will cover the most
+popular approaches.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Using a list and column names
+\item
+  From a dictionary
+\item
+  From a Series
+\end{enumerate}
+
+\hypertarget{using-a-list-and-column-names}{%
+\paragraph{Using a List and Column
+Names}\label{using-a-list-and-column-names}}
+
+Consider the following examples.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df\_list }\OperatorTok{=}\NormalTok{ pd.DataFrame([}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{, }\DecValTok{3}\NormalTok{], columns}\OperatorTok{=}\NormalTok{[}\StringTok{"Numbers"}\NormalTok{])}
+\NormalTok{df\_list}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{lr}
+\toprule
+{} &  Numbers \\
+\midrule
+0 &        1 \\
+1 &        2 \\
+2 &        3 \\
+\bottomrule
+\end{tabular}
+
+The first code cell creates a DataFrame with a single column
+\texttt{Numbers}, while the second creates a DataFrame with an
+additional column \texttt{Description}. Notice how a 2D list of values
+is required to initialize the second DataFrame -- each nested list
+represents a single row of data.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df\_list }\OperatorTok{=}\NormalTok{ pd.DataFrame([[}\DecValTok{1}\NormalTok{, }\StringTok{"one"}\NormalTok{], [}\DecValTok{2}\NormalTok{, }\StringTok{"two"}\NormalTok{]], columns }\OperatorTok{=}\NormalTok{ [}\StringTok{"Number"}\NormalTok{, }\StringTok{"Description"}\NormalTok{])}
+\NormalTok{df\_list}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{lrl}
+\toprule
+{} &  Number & Description \\
+\midrule
+0 &       1 &         one \\
+1 &       2 &         two \\
+\bottomrule
+\end{tabular}
+
+\hypertarget{from-a-dictionary}{%
+\paragraph{From a Dictionary}\label{from-a-dictionary}}
+
+A second (and perhaps the most common) way to create a DataFrame is by
+using a dictionary. The dictionary keys represent the column names, and
+the dictionary values represent the column values.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df\_dict }\OperatorTok{=}\NormalTok{ pd.DataFrame(\{}\StringTok{"Fruit"}\NormalTok{: [}\StringTok{"Strawberry"}\NormalTok{, }\StringTok{"Orange"}\NormalTok{], }\StringTok{"Price"}\NormalTok{: [}\FloatTok{5.49}\NormalTok{, }\FloatTok{3.99}\NormalTok{]\})}
+\NormalTok{df\_dict}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{llr}
+\toprule
+{} &       Fruit &  Price \\
+\midrule
+0 &  Strawberry &   5.49 \\
+1 &      Orange &   3.99 \\
+\bottomrule
+\end{tabular}
+
+\hypertarget{from-a-series}{%
+\paragraph{From a Series}\label{from-a-series}}
+
+Earlier, we showed how a Series was just a column of a DataFrame. It
+follows then, that a DataFrame is equivalent to a collection of multiple
+Series, which all share the same index.
+
+In fact, we can initialize a DataFrame by combining multiple Series.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Notice how our indices, or row labels, are the same}
+
+\NormalTok{s\_a }\OperatorTok{=}\NormalTok{ pd.Series([}\StringTok{"a1"}\NormalTok{, }\StringTok{"a2"}\NormalTok{, }\StringTok{"a3"}\NormalTok{], index }\OperatorTok{=}\NormalTok{ [}\StringTok{"r1"}\NormalTok{, }\StringTok{"r2"}\NormalTok{, }\StringTok{"r3"}\NormalTok{])}
+\NormalTok{s\_b }\OperatorTok{=}\NormalTok{ pd.Series([}\StringTok{"b1"}\NormalTok{, }\StringTok{"b2"}\NormalTok{, }\StringTok{"b3"}\NormalTok{], index }\OperatorTok{=}\NormalTok{ [}\StringTok{"r1"}\NormalTok{, }\StringTok{"r2"}\NormalTok{, }\StringTok{"r3"}\NormalTok{])}
+
+\NormalTok{pd.DataFrame(\{}\StringTok{"A{-}column"}\NormalTok{: s\_a, }\StringTok{"B{-}column"}\NormalTok{: s\_b\})}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{lll}
+\toprule
+{} & A-column & B-column \\
+\midrule
+r1 &       a1 &       b1 \\
+r2 &       a2 &       b2 \\
+r3 &       a3 &       b3 \\
+\bottomrule
+\end{tabular}
+
+\hypertarget{indices}{%
+\subsection{Indices}\label{indices}}
+
+The major takeaway: we can think of a \textbf{DataFrame} as a collection
+of \textbf{Series} that all share the same \textbf{Index}.
+
+On a more technical note, an Index doesn't have to be an integer, nor
+does it have to be unique. In our \texttt{elections} Dataframe, we can
+set our index to be the name of our presedential candidates. Selecting a
+new Series from this modified DataFrame yields the following:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# This sets the index to the "Candidate" column}
+\NormalTok{elections.set\_index(}\StringTok{"Candidate"}\NormalTok{, inplace}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{pandas_1/images/index_comparison_2.png}
+
+To retrieve the indices of a DataFrame, simply use the \texttt{.index}
+attribute of the DataFrame class.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{elections.index}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Index(['Andrew Jackson', 'John Quincy Adams', 'Andrew Jackson',
+       'John Quincy Adams', 'Andrew Jackson', 'Henry Clay', 'William Wirt',
+       'Hugh Lawson White', 'Martin Van Buren', 'William Henry Harrison',
+       ...
+       'Darrell Castle', 'Donald Trump', 'Evan McMullin', 'Gary Johnson',
+       'Hillary Clinton', 'Jill Stein', 'Joseph Biden', 'Donald Trump',
+       'Jo Jorgensen', 'Howard Hawkins'],
+      dtype='object', name='Candidate', length=182)
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# This resets the index to be the default list of integers}
+\NormalTok{elections.reset\_index(inplace}\OperatorTok{=}\VariableTok{True}\NormalTok{) }
+\end{Highlighting}
+\end{Shaded}
 
 \hypertarget{slicing-in-dataframes}{%
 \section{Slicing in DataFrames}\label{slicing-in-dataframes}}
+
+Now that we've learned how to create DataFrames, let's dive deeper into
+their capabilities.
+
+The API (application programming interface) for the DataFrame class is
+enormous. In this section, we'll discuss several methods of the
+DataFrame API that allow us to extract subsets of data.
 
 The most fundamental way to manipulate a DataFrame is to extract a
 subset of rows and columns. This is called \textbf{slicing}. We will do
@@ -757,17 +1196,13 @@ so with three primary methods of the DataFrame class:
 \end{enumerate}
 
 \hypertarget{indexing-with-.loc}{%
-\subsection{Indexing with .loc}\label{indexing-with-.loc}}
+\subsubsection{Indexing with .loc}\label{indexing-with-.loc}}
 
 The \texttt{.loc} operator selects rows and columns in a DataFrame by
 their row and column label(s), respectively. The \textbf{row label}
 (commonly referred to as the \textbf{index}) is the bold text on the far
 \emph{left} of a DataFrame, while the \textbf{column label} is the text
-found at the \emph{top} of a DataFrame. By default, row labels in
-\texttt{pandas} are the sequential list of integers beginning from 0.
-The column labels in our \texttt{elections} DataFrame are the column
-names themselves: \texttt{Year}, \texttt{Candidate}, \texttt{Party},
-\texttt{Popular\ Vote}, \texttt{Result}, and \texttt{\%}.
+found at the \emph{top} of a DataFrame.
 
 \texttt{.loc} lets us grab data by specifying the appropriate row and
 column label(s) where the data exists. The row labels are the first
@@ -795,14 +1230,14 @@ notation. We can select the first four rows and first four columns.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{tabular}{lrllr}
+\begin{tabular}{lrlr}
 \toprule
-{} &  Year &          Candidate &                  Party &  Popular vote \\
+{} &  Year &                  Party &  Popular vote \\
 \midrule
-0 &  1824 &     Andrew Jackson &  Democratic-Republican &        151271 \\
-1 &  1824 &  John Quincy Adams &  Democratic-Republican &        113142 \\
-2 &  1828 &     Andrew Jackson &             Democratic &        642806 \\
-3 &  1828 &  John Quincy Adams &    National Republican &        500897 \\
+0 &  1824 &  Democratic-Republican &        151271 \\
+1 &  1824 &  Democratic-Republican &        113142 \\
+2 &  1828 &             Democratic &        642806 \\
+3 &  1828 &    National Republican &        500897 \\
 \bottomrule
 \end{tabular}
 
@@ -816,14 +1251,14 @@ is useful for this.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{tabular}{lrllrlr}
+\begin{tabular}{llrlrlr}
 \toprule
-{} &  Year &          Candidate &                  Party &  Popular vote & Result &          \% \\
+{} &          Candidate &  Year &                  Party &  Popular vote & Result &          \% \\
 \midrule
-0 &  1824 &     Andrew Jackson &  Democratic-Republican &        151271 &   loss &  57.210122 \\
-1 &  1824 &  John Quincy Adams &  Democratic-Republican &        113142 &    win &  42.789878 \\
-2 &  1828 &     Andrew Jackson &             Democratic &        642806 &    win &  56.203927 \\
-3 &  1828 &  John Quincy Adams &    National Republican &        500897 &   loss &  43.796073 \\
+0 &     Andrew Jackson &  1824 &  Democratic-Republican &        151271 &   loss &  57.210122 \\
+1 &  John Quincy Adams &  1824 &  Democratic-Republican &        113142 &    win &  42.789878 \\
+2 &     Andrew Jackson &  1828 &             Democratic &        642806 &    win &  56.203927 \\
+3 &  John Quincy Adams &  1828 &    National Republican &        500897 &   loss &  43.796073 \\
 \bottomrule
 \end{tabular}
 
@@ -861,19 +1296,19 @@ Lastly, we can interchange list and slicing notation.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{tabular}{lrllrlr}
+\begin{tabular}{llrlrlr}
 \toprule
-{} &  Year &          Candidate &                  Party &  Popular vote & Result &          \% \\
+{} &          Candidate &  Year &                  Party &  Popular vote & Result &          \% \\
 \midrule
-0 &  1824 &     Andrew Jackson &  Democratic-Republican &        151271 &   loss &  57.210122 \\
-1 &  1824 &  John Quincy Adams &  Democratic-Republican &        113142 &    win &  42.789878 \\
-2 &  1828 &     Andrew Jackson &             Democratic &        642806 &    win &  56.203927 \\
-3 &  1828 &  John Quincy Adams &    National Republican &        500897 &   loss &  43.796073 \\
+0 &     Andrew Jackson &  1824 &  Democratic-Republican &        151271 &   loss &  57.210122 \\
+1 &  John Quincy Adams &  1824 &  Democratic-Republican &        113142 &    win &  42.789878 \\
+2 &     Andrew Jackson &  1828 &             Democratic &        642806 &    win &  56.203927 \\
+3 &  John Quincy Adams &  1828 &    National Republican &        500897 &   loss &  43.796073 \\
 \bottomrule
 \end{tabular}
 
 \hypertarget{indexing-with-.iloc}{%
-\subsection{Indexing with .iloc}\label{indexing-with-.iloc}}
+\subsubsection{Indexing with .iloc}\label{indexing-with-.iloc}}
 
 Slicing with \texttt{.iloc} works similarily to \texttt{.loc}, although
 \texttt{.iloc} uses the integer positions of rows and columns rather the
@@ -893,7 +1328,7 @@ DataFrame:
 \end{Shaded}
 
 \begin{verbatim}
-'Andrew Jackson'
+1824
 \end{verbatim}
 
 Notice how the first argument to both \texttt{.loc} and \texttt{.iloc}
@@ -912,14 +1347,14 @@ However, when we select for the first four rows and columns using
 \end{Highlighting}
 \end{Shaded}
 
-\begin{tabular}{lrllr}
+\begin{tabular}{llrlr}
 \toprule
-{} &  Year &          Candidate &                  Party &  Popular vote \\
+{} &          Candidate &  Year &                  Party &  Popular vote \\
 \midrule
-0 &  1824 &     Andrew Jackson &  Democratic-Republican &        151271 \\
-1 &  1824 &  John Quincy Adams &  Democratic-Republican &        113142 \\
-2 &  1828 &     Andrew Jackson &             Democratic &        642806 \\
-3 &  1828 &  John Quincy Adams &    National Republican &        500897 \\
+0 &     Andrew Jackson &  1824 &  Democratic-Republican &        151271 \\
+1 &  John Quincy Adams &  1824 &  Democratic-Republican &        113142 \\
+2 &     Andrew Jackson &  1828 &             Democratic &        642806 \\
+3 &  John Quincy Adams &  1828 &    National Republican &        500897 \\
 \bottomrule
 \end{tabular}
 
@@ -936,14 +1371,14 @@ List behavior works just as expected.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{tabular}{lrllr}
+\begin{tabular}{llrlr}
 \toprule
-{} &  Year &          Candidate &                  Party &  Popular vote \\
+{} &          Candidate &  Year &                  Party &  Popular vote \\
 \midrule
-0 &  1824 &     Andrew Jackson &  Democratic-Republican &        151271 \\
-1 &  1824 &  John Quincy Adams &  Democratic-Republican &        113142 \\
-2 &  1828 &     Andrew Jackson &             Democratic &        642806 \\
-3 &  1828 &  John Quincy Adams &    National Republican &        500897 \\
+0 &     Andrew Jackson &  1824 &  Democratic-Republican &        151271 \\
+1 &  John Quincy Adams &  1824 &  Democratic-Republican &        113142 \\
+2 &     Andrew Jackson &  1828 &             Democratic &        642806 \\
+3 &  John Quincy Adams &  1828 &    National Republican &        500897 \\
 \bottomrule
 \end{tabular}
 
@@ -953,7 +1388,7 @@ You can imagine \texttt{.iloc} may return incorrect values when applied
 to a dataset where the ordering of data can change.
 
 \hypertarget{indexing-with}{%
-\subsection{Indexing with {[}{]}}\label{indexing-with}}
+\subsubsection{Indexing with {[}{]}}\label{indexing-with}}
 
 The \texttt{{[}{]}} selection operator is the most baffling of all, yet
 it is the commonly used. It only takes a single argument, which may be
@@ -974,7 +1409,7 @@ That is, \texttt{{[}{]}} is \emph{context dependent}. Let's see some
 examples.
 
 \hypertarget{a-slice-of-row-numbers}{%
-\subsubsection{A slice of row numbers}\label{a-slice-of-row-numbers}}
+\paragraph{A slice of row numbers}\label{a-slice-of-row-numbers}}
 
 Say we wanted the first four rows of our \texttt{elections} DataFrame.
 
@@ -984,19 +1419,19 @@ Say we wanted the first four rows of our \texttt{elections} DataFrame.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{tabular}{lrllrlr}
+\begin{tabular}{llrlrlr}
 \toprule
-{} &  Year &          Candidate &                  Party &  Popular vote & Result &          \% \\
+{} &          Candidate &  Year &                  Party &  Popular vote & Result &          \% \\
 \midrule
-0 &  1824 &     Andrew Jackson &  Democratic-Republican &        151271 &   loss &  57.210122 \\
-1 &  1824 &  John Quincy Adams &  Democratic-Republican &        113142 &    win &  42.789878 \\
-2 &  1828 &     Andrew Jackson &             Democratic &        642806 &    win &  56.203927 \\
-3 &  1828 &  John Quincy Adams &    National Republican &        500897 &   loss &  43.796073 \\
+0 &     Andrew Jackson &  1824 &  Democratic-Republican &        151271 &   loss &  57.210122 \\
+1 &  John Quincy Adams &  1824 &  Democratic-Republican &        113142 &    win &  42.789878 \\
+2 &     Andrew Jackson &  1828 &             Democratic &        642806 &    win &  56.203927 \\
+3 &  John Quincy Adams &  1828 &    National Republican &        500897 &   loss &  43.796073 \\
 \bottomrule
 \end{tabular}
 
 \hypertarget{a-list-of-column-labels}{%
-\subsubsection{A list of column labels}\label{a-list-of-column-labels}}
+\paragraph{A list of column labels}\label{a-list-of-column-labels}}
 
 Suppose we now want the first four columns.
 
@@ -1196,7 +1631,7 @@ Suppose we now want the first four columns.
 \end{tabular}
 
 \hypertarget{a-single-column-label}{%
-\subsubsection{A single column label}\label{a-single-column-label}}
+\paragraph{A single column label}\label{a-single-column-label}}
 
 Lastly, if we only want the \texttt{Candidate} column.
 
@@ -1395,1141 +1830,12 @@ Lastly, if we only want the \texttt{Candidate} column.
 \bottomrule
 \end{tabular}
 
-The output looks quite different - it's no longer a DataFrame! This is a
-\emph{Series}. We'll talk about what a Series is in the next section.
-
-\hypertarget{dataframes-series-and-indices}{%
-\section{DataFrames, Series, and
-Indices}\label{dataframes-series-and-indices}}
-
-We saw that selecting a single column from a DataFrame using the
-\texttt{{[}{]}} operator outputted a new data format, called a Series.
-Let's verify this claim.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\BuiltInTok{type}\NormalTok{(elections)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-pandas.core.frame.DataFrame
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\BuiltInTok{type}\NormalTok{(elections[}\StringTok{\textquotesingle{}Candidate\textquotesingle{}}\NormalTok{])}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-pandas.core.series.Series
-\end{verbatim}
-
-A \textbf{Series} is a one dimensional object that represents a single
-column of data. It has two components - an index and the data. A
-DataFrame is equivalent to a collection of multiple Series, which all
-share the same index. Notice how the index of a Series is equivalent to
-the index (or row labels) of a DataFrame.
-
-\includegraphics{pandas_1/images/index_comparison_1.png}
-
-However, a DataFrame index doesn't have to be an integer, nor does it
-have to be unique. For example, we can set our index to be the name of
-our presedential candidates. Selecting a new Series from this modified
-DataFrame yields the following:
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{elections.set\_index(}\StringTok{"Candidate"}\NormalTok{, inplace}\OperatorTok{=}\VariableTok{True}\NormalTok{) }\CommentTok{\# This sets the index to the "Candidate" column}
-\end{Highlighting}
-\end{Shaded}
-
-\includegraphics{pandas_1/images/index_comparison_2.png}
-
-To retrieve the indices of a DataFrame, simply use the \texttt{.index}
-attribute of the DataFrame class.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{elections.index}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-Index(['Andrew Jackson', 'John Quincy Adams', 'Andrew Jackson',
-       'John Quincy Adams', 'Andrew Jackson', 'Henry Clay', 'William Wirt',
-       'Hugh Lawson White', 'Martin Van Buren', 'William Henry Harrison',
-       ...
-       'Darrell Castle', 'Donald Trump', 'Evan McMullin', 'Gary Johnson',
-       'Hillary Clinton', 'Jill Stein', 'Joseph Biden', 'Donald Trump',
-       'Jo Jorgensen', 'Howard Hawkins'],
-      dtype='object', name='Candidate', length=182)
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{elections.reset\_index(inplace}\OperatorTok{=}\VariableTok{True}\NormalTok{) }\CommentTok{\# This resets the index}
-\end{Highlighting}
-\end{Shaded}
-
-Earlier, we mentioned that a Series was just a column of data. What if
-we wanted a single column as a DataFrame? To obtain this, we can pass in
-a list containing a single column to the \texttt{{[}{]}} selection
-operator.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{elections[[}\StringTok{"Party"}\NormalTok{]] }\CommentTok{\# ["Party"] is the argument {-} a list with a single element}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{tabular}{ll}
-\toprule
-{} &                  Party \\
-\midrule
-0   &  Democratic-Republican \\
-1   &  Democratic-Republican \\
-2   &             Democratic \\
-3   &    National Republican \\
-4   &             Democratic \\
-5   &    National Republican \\
-6   &           Anti-Masonic \\
-7   &                   Whig \\
-8   &             Democratic \\
-9   &                   Whig \\
-10  &             Democratic \\
-11  &                   Whig \\
-12  &                   Whig \\
-13  &             Democratic \\
-14  &             Democratic \\
-15  &              Free Soil \\
-16  &                   Whig \\
-17  &             Democratic \\
-18  &              Free Soil \\
-19  &                   Whig \\
-20  &             Democratic \\
-21  &             Republican \\
-22  &               American \\
-23  &             Republican \\
-24  &   Constitutional Union \\
-25  &    Southern Democratic \\
-26  &    Northern Democratic \\
-27  &         National Union \\
-28  &             Democratic \\
-29  &             Democratic \\
-30  &             Republican \\
-31  &     Liberal Republican \\
-32  &             Republican \\
-33  &             Republican \\
-34  &             Democratic \\
-35  &              Greenback \\
-36  &             Republican \\
-37  &             Democratic \\
-38  &          Anti-Monopoly \\
-39  &             Democratic \\
-40  &             Republican \\
-41  &            Prohibition \\
-42  &            Union Labor \\
-43  &             Republican \\
-44  &            Prohibition \\
-45  &             Democratic \\
-46  &             Republican \\
-47  &             Democratic \\
-48  &               Populist \\
-49  &            Prohibition \\
-50  &    National Democratic \\
-51  &            Prohibition \\
-52  &             Democratic \\
-53  &             Republican \\
-54  &            Prohibition \\
-55  &             Democratic \\
-56  &             Republican \\
-57  &             Democratic \\
-58  &              Socialist \\
-59  &            Prohibition \\
-60  &             Republican \\
-61  &               Populist \\
-62  &              Socialist \\
-63  &            Prohibition \\
-64  &             Democratic \\
-65  &             Republican \\
-66  &              Socialist \\
-67  &            Prohibition \\
-68  &            Progressive \\
-69  &             Republican \\
-70  &             Democratic \\
-71  &              Socialist \\
-72  &             Republican \\
-73  &            Prohibition \\
-74  &             Democratic \\
-75  &            Prohibition \\
-76  &              Socialist \\
-77  &             Democratic \\
-78  &           Farmer–Labor \\
-79  &             Republican \\
-80  &             Republican \\
-81  &             Democratic \\
-82  &            Progressive \\
-83  &             Democratic \\
-84  &             Republican \\
-85  &              Socialist \\
-86  &             Democratic \\
-87  &             Republican \\
-88  &              Socialist \\
-89  &              Communist \\
-90  &             Republican \\
-91  &             Democratic \\
-92  &              Socialist \\
-93  &                  Union \\
-94  &             Democratic \\
-95  &              Socialist \\
-96  &             Republican \\
-97  &             Democratic \\
-98  &             Republican \\
-99  &            Prohibition \\
-100 &             Democratic \\
-101 &            Progressive \\
-102 &              Socialist \\
-103 &              Dixiecrat \\
-104 &             Republican \\
-105 &             Democratic \\
-106 &             Republican \\
-107 &            Progressive \\
-108 &             Democratic \\
-109 &             Republican \\
-110 &         States' Rights \\
-111 &             Democratic \\
-112 &             Republican \\
-113 &             Republican \\
-114 &             Democratic \\
-115 &   American Independent \\
-116 &             Democratic \\
-117 &             Republican \\
-118 &             Democratic \\
-119 &   American Independent \\
-120 &             Republican \\
-121 &            Independent \\
-122 &             Republican \\
-123 &             Democratic \\
-124 &   American Independent \\
-125 &            Libertarian \\
-126 &               American \\
-127 &               Citizens \\
-128 &            Libertarian \\
-129 &             Democratic \\
-130 &            Independent \\
-131 &             Republican \\
-132 &            Libertarian \\
-133 &             Republican \\
-134 &             Democratic \\
-135 &             Republican \\
-136 &           New Alliance \\
-137 &             Democratic \\
-138 &            Libertarian \\
-139 &            Libertarian \\
-140 &             Democratic \\
-141 &               Populist \\
-142 &             Republican \\
-143 &            Independent \\
-144 &             Democratic \\
-145 &             Republican \\
-146 &            Libertarian \\
-147 &              Taxpayers \\
-148 &            Natural Law \\
-149 &                  Green \\
-150 &                 Reform \\
-151 &             Democratic \\
-152 &             Republican \\
-153 &            Libertarian \\
-154 &                 Reform \\
-155 &                  Green \\
-156 &                  Green \\
-157 &             Republican \\
-158 &             Democratic \\
-159 &            Libertarian \\
-160 &           Constitution \\
-161 &            Independent \\
-162 &             Democratic \\
-163 &            Libertarian \\
-164 &           Constitution \\
-165 &                  Green \\
-166 &             Republican \\
-167 &            Independent \\
-168 &             Democratic \\
-169 &            Libertarian \\
-170 &                  Green \\
-171 &             Republican \\
-172 &           Constitution \\
-173 &             Republican \\
-174 &            Independent \\
-175 &            Libertarian \\
-176 &             Democratic \\
-177 &                  Green \\
-178 &             Democratic \\
-179 &             Republican \\
-180 &            Libertarian \\
-181 &                  Green \\
-\bottomrule
-\end{tabular}
-
-\hypertarget{conditional-selection}{%
-\section{Conditional Selection}\label{conditional-selection}}
-
-Conditional selection allows us to select a subset of rows in a
-DataFrame if they follow some specified condition.
-
-To understand how to use conditional selection, we must look at another
-input of the \texttt{.loc} and \texttt{{[}{]}} methods - a boolean
-array. This boolean array must have a length equal to the number of rows
-in the DataFrame. It will return all rows in the position of a
-corresponding \texttt{True} value in the array.
-
-Here, we will select all \emph{even-indexed} rows in the first 10 rows
-of our DataFrame.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Why is :9 is the correct slice to select the first 10 rows?}
-\NormalTok{elections\_first\_10\_rows }\OperatorTok{=}\NormalTok{ elections.loc[:}\DecValTok{9}\NormalTok{, :]}
-
-\CommentTok{\# Notice how we have exactly 10 elements in our boolean array argument}
-\NormalTok{elections\_first\_10\_rows[[}\VariableTok{True}\NormalTok{, }\VariableTok{False}\NormalTok{, }\VariableTok{True}\NormalTok{, }\VariableTok{False}\NormalTok{, }\VariableTok{True}\NormalTok{, }\OperatorTok{\textbackslash{}}
-                         \VariableTok{False}\NormalTok{, }\VariableTok{True}\NormalTok{, }\VariableTok{False}\NormalTok{, }\VariableTok{True}\NormalTok{, }\VariableTok{False}\NormalTok{]]}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{tabular}{llrlrlr}
-\toprule
-{} &         Candidate &  Year &                  Party &  Popular vote & Result &          \% \\
-\midrule
-0 &    Andrew Jackson &  1824 &  Democratic-Republican &        151271 &   loss &  57.210122 \\
-2 &    Andrew Jackson &  1828 &             Democratic &        642806 &    win &  56.203927 \\
-4 &    Andrew Jackson &  1832 &             Democratic &        702735 &    win &  54.574789 \\
-6 &      William Wirt &  1832 &           Anti-Masonic &        100715 &   loss &   7.821583 \\
-8 &  Martin Van Buren &  1836 &             Democratic &        763291 &    win &  52.272472 \\
-\bottomrule
-\end{tabular}
-
-Unfortunately, using this method to select multiple rows in a large
-DataFrame is infeasible. Instead, we can provide a logical condition as
-an input to \texttt{.loc} or \texttt{{[}{]}} that returns a boolean
-array with said length.
-
-For example, to return all candidates affilliated with the Independent
-party:
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{logical\_operator }\OperatorTok{=}\NormalTok{ elections[}\StringTok{\textquotesingle{}Party\textquotesingle{}}\NormalTok{] }\OperatorTok{==} \StringTok{"Independent"}
-\NormalTok{elections[logical\_operator]}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{tabular}{llrlrlr}
-\toprule
-{} &         Candidate &  Year &        Party &  Popular vote & Result &          \% \\
-\midrule
-121 &   Eugene McCarthy &  1976 &  Independent &        740460 &   loss &   0.911649 \\
-130 &  John B. Anderson &  1980 &  Independent &       5719850 &   loss &   6.631143 \\
-143 &        Ross Perot &  1992 &  Independent &      19743821 &   loss &  18.956298 \\
-161 &       Ralph Nader &  2004 &  Independent &        465151 &   loss &   0.380663 \\
-167 &       Ralph Nader &  2008 &  Independent &        739034 &   loss &   0.563842 \\
-174 &     Evan McMullin &  2016 &  Independent &        732273 &   loss &   0.539546 \\
-\bottomrule
-\end{tabular}
-
-Here, \texttt{logical\_operator} evaluates to a Series of boolean values
-with length 182.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{logical\_operator}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{tabular}{ll}
-\toprule
-{} &  Party \\
-\midrule
-0   &  False \\
-1   &  False \\
-2   &  False \\
-3   &  False \\
-4   &  False \\
-5   &  False \\
-6   &  False \\
-7   &  False \\
-8   &  False \\
-9   &  False \\
-10  &  False \\
-11  &  False \\
-12  &  False \\
-13  &  False \\
-14  &  False \\
-15  &  False \\
-16  &  False \\
-17  &  False \\
-18  &  False \\
-19  &  False \\
-20  &  False \\
-21  &  False \\
-22  &  False \\
-23  &  False \\
-24  &  False \\
-25  &  False \\
-26  &  False \\
-27  &  False \\
-28  &  False \\
-29  &  False \\
-30  &  False \\
-31  &  False \\
-32  &  False \\
-33  &  False \\
-34  &  False \\
-35  &  False \\
-36  &  False \\
-37  &  False \\
-38  &  False \\
-39  &  False \\
-40  &  False \\
-41  &  False \\
-42  &  False \\
-43  &  False \\
-44  &  False \\
-45  &  False \\
-46  &  False \\
-47  &  False \\
-48  &  False \\
-49  &  False \\
-50  &  False \\
-51  &  False \\
-52  &  False \\
-53  &  False \\
-54  &  False \\
-55  &  False \\
-56  &  False \\
-57  &  False \\
-58  &  False \\
-59  &  False \\
-60  &  False \\
-61  &  False \\
-62  &  False \\
-63  &  False \\
-64  &  False \\
-65  &  False \\
-66  &  False \\
-67  &  False \\
-68  &  False \\
-69  &  False \\
-70  &  False \\
-71  &  False \\
-72  &  False \\
-73  &  False \\
-74  &  False \\
-75  &  False \\
-76  &  False \\
-77  &  False \\
-78  &  False \\
-79  &  False \\
-80  &  False \\
-81  &  False \\
-82  &  False \\
-83  &  False \\
-84  &  False \\
-85  &  False \\
-86  &  False \\
-87  &  False \\
-88  &  False \\
-89  &  False \\
-90  &  False \\
-91  &  False \\
-92  &  False \\
-93  &  False \\
-94  &  False \\
-95  &  False \\
-96  &  False \\
-97  &  False \\
-98  &  False \\
-99  &  False \\
-100 &  False \\
-101 &  False \\
-102 &  False \\
-103 &  False \\
-104 &  False \\
-105 &  False \\
-106 &  False \\
-107 &  False \\
-108 &  False \\
-109 &  False \\
-110 &  False \\
-111 &  False \\
-112 &  False \\
-113 &  False \\
-114 &  False \\
-115 &  False \\
-116 &  False \\
-117 &  False \\
-118 &  False \\
-119 &  False \\
-120 &  False \\
-121 &   True \\
-122 &  False \\
-123 &  False \\
-124 &  False \\
-125 &  False \\
-126 &  False \\
-127 &  False \\
-128 &  False \\
-129 &  False \\
-130 &   True \\
-131 &  False \\
-132 &  False \\
-133 &  False \\
-134 &  False \\
-135 &  False \\
-136 &  False \\
-137 &  False \\
-138 &  False \\
-139 &  False \\
-140 &  False \\
-141 &  False \\
-142 &  False \\
-143 &   True \\
-144 &  False \\
-145 &  False \\
-146 &  False \\
-147 &  False \\
-148 &  False \\
-149 &  False \\
-150 &  False \\
-151 &  False \\
-152 &  False \\
-153 &  False \\
-154 &  False \\
-155 &  False \\
-156 &  False \\
-157 &  False \\
-158 &  False \\
-159 &  False \\
-160 &  False \\
-161 &   True \\
-162 &  False \\
-163 &  False \\
-164 &  False \\
-165 &  False \\
-166 &  False \\
-167 &   True \\
-168 &  False \\
-169 &  False \\
-170 &  False \\
-171 &  False \\
-172 &  False \\
-173 &  False \\
-174 &   True \\
-175 &  False \\
-176 &  False \\
-177 &  False \\
-178 &  False \\
-179 &  False \\
-180 &  False \\
-181 &  False \\
-\bottomrule
-\end{tabular}
-
-Rows 121, 130, 143, 161, 167, and 174 evaluate to \texttt{True} and are
-thus returned in the DataFrame.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\BuiltInTok{print}\NormalTok{(logical\_operator.loc[[}\DecValTok{121}\NormalTok{, }\DecValTok{130}\NormalTok{, }\DecValTok{143}\NormalTok{, }\DecValTok{161}\NormalTok{, }\DecValTok{167}\NormalTok{, }\DecValTok{174}\NormalTok{]])}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-121    True
-130    True
-143    True
-161    True
-167    True
-174    True
-Name: Party, dtype: bool
-\end{verbatim}
-
-Passing a Series as an argument to \texttt{elections{[}{]}} has the same
-affect as using a boolean array. In fact, the \texttt{{[}{]}} selection
-operator can take a boolean Series, array, and list as arguments. These
-three are used interchangeably thoughout the course.
-
-Similarly, we can use \texttt{.loc} to achieve similar results.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{elections.loc[elections[}\StringTok{\textquotesingle{}Party\textquotesingle{}}\NormalTok{] }\OperatorTok{==} \StringTok{"Independent"}\NormalTok{]}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{tabular}{llrlrlr}
-\toprule
-{} &         Candidate &  Year &        Party &  Popular vote & Result &          \% \\
-\midrule
-121 &   Eugene McCarthy &  1976 &  Independent &        740460 &   loss &   0.911649 \\
-130 &  John B. Anderson &  1980 &  Independent &       5719850 &   loss &   6.631143 \\
-143 &        Ross Perot &  1992 &  Independent &      19743821 &   loss &  18.956298 \\
-161 &       Ralph Nader &  2004 &  Independent &        465151 &   loss &   0.380663 \\
-167 &       Ralph Nader &  2008 &  Independent &        739034 &   loss &   0.563842 \\
-174 &     Evan McMullin &  2016 &  Independent &        732273 &   loss &   0.539546 \\
-\bottomrule
-\end{tabular}
-
-Boolean conditions can be combined using various operators that allow us
-to filter results by multiple conditions. Some examples include the
-\texttt{\&} (and) operator and \texttt{\textbar{}} (or) operator.
-
-\textbf{Note}: When combining multiple conditions with logical
-operators, be sure to surround each condition with a set of paranthesis
-\texttt{()}. If you forget, your code will throw an error.
-
-For example, if we want to return data on all presidential candidates
-affiliated with the Independent Party before the 21\textsuperscript{st}
-century, we can do so:
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{elections[(elections[}\StringTok{\textquotesingle{}Party\textquotesingle{}}\NormalTok{] }\OperatorTok{==} \StringTok{"Independent"}\NormalTok{) }\OperatorTok{\textbackslash{}}
-          \OperatorTok{\&}\NormalTok{ (elections[}\StringTok{\textquotesingle{}Year\textquotesingle{}}\NormalTok{] }\OperatorTok{\textless{}} \DecValTok{2000}\NormalTok{)]}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{tabular}{llrlrlr}
-\toprule
-{} &         Candidate &  Year &        Party &  Popular vote & Result &          \% \\
-\midrule
-121 &   Eugene McCarthy &  1976 &  Independent &        740460 &   loss &   0.911649 \\
-130 &  John B. Anderson &  1980 &  Independent &       5719850 &   loss &   6.631143 \\
-143 &        Ross Perot &  1992 &  Independent &      19743821 &   loss &  18.956298 \\
-\bottomrule
-\end{tabular}
-
-\hypertarget{handy-utility-functions}{%
-\section{Handy Utility Functions}\label{handy-utility-functions}}
-
-There are a large number of operations supported by \texttt{pandas} that
-allow us to efficiently manipulate data. In this section, we'll cover a
-few.
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  \texttt{.head} and \texttt{.tail}
-\item
-  \texttt{.shape} and \texttt{.size}
-\item
-  \texttt{.describe}
-\item
-  \texttt{.sample}
-\item
-  \texttt{.value\_counts}
-\item
-  \texttt{.unique}
-\item
-  \texttt{.sort\_values}
-\end{enumerate}
-
-\hypertarget{head-.tail}{%
-\subsubsection{.head / .tail}\label{head-.tail}}
-
-\texttt{.head(n)} and \texttt{.tail(n)} display the first \texttt{n} and
-last \texttt{n} rows of a DataFrame, respectively.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{elections.head(}\DecValTok{3}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{tabular}{llrlrlr}
-\toprule
-{} &          Candidate &  Year &                  Party &  Popular vote & Result &          \% \\
-\midrule
-0 &     Andrew Jackson &  1824 &  Democratic-Republican &        151271 &   loss &  57.210122 \\
-1 &  John Quincy Adams &  1824 &  Democratic-Republican &        113142 &    win &  42.789878 \\
-2 &     Andrew Jackson &  1828 &             Democratic &        642806 &    win &  56.203927 \\
-\bottomrule
-\end{tabular}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{elections.tail(}\DecValTok{3}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{tabular}{llrlrlr}
-\toprule
-{} &       Candidate &  Year &        Party &  Popular vote & Result &          \% \\
-\midrule
-179 &    Donald Trump &  2020 &   Republican &      74216154 &   loss &  46.858542 \\
-180 &    Jo Jorgensen &  2020 &  Libertarian &       1865724 &   loss &   1.177979 \\
-181 &  Howard Hawkins &  2020 &        Green &        405035 &   loss &   0.255731 \\
-\bottomrule
-\end{tabular}
-
-\hypertarget{shape-.size}{%
-\subsubsection{.shape / .size}\label{shape-.size}}
-
-\texttt{.shape} returns a tuple with the number of rows and columns in a
-DataFrame. \texttt{.size} returns the total number of data entries. This
-is the product of the number of rows and columns.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{elections.shape}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-(182, 6)
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{num\_rows, num\_cols }\OperatorTok{=}\NormalTok{ elections.shape}
-\ControlFlowTok{assert}\NormalTok{(elections.size }\OperatorTok{==}\NormalTok{ num\_rows }\OperatorTok{*}\NormalTok{ num\_cols)}
-\NormalTok{elections.size}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-1092
-\end{verbatim}
-
-\hypertarget{describe}{%
-\subsubsection{.describe}\label{describe}}
-
-\texttt{.describe()} returns a DataFrame of useful summary statistics
-for each numerical column.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{elections.describe()}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{tabular}{lrrr}
-\toprule
-{} &         Year &  Popular vote &           \% \\
-\midrule
-count &   182.000000 &  1.820000e+02 &  182.000000 \\
-mean  &  1934.087912 &  1.235364e+07 &   27.470350 \\
-std   &    57.048908 &  1.907715e+07 &   22.968034 \\
-min   &  1824.000000 &  1.007150e+05 &    0.098088 \\
-25\%   &  1889.000000 &  3.876395e+05 &    1.219996 \\
-50\%   &  1936.000000 &  1.709375e+06 &   37.677893 \\
-75\%   &  1988.000000 &  1.897775e+07 &   48.354977 \\
-max   &  2020.000000 &  8.126892e+07 &   61.344703 \\
-\bottomrule
-\end{tabular}
-
-\hypertarget{sample}{%
-\subsubsection{.sample}\label{sample}}
-
-\texttt{.sample(n)} returns a random sample of \texttt{n} rows from the
-given DataFrame.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{elections.sample(}\DecValTok{3}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{tabular}{llrlrlr}
-\toprule
-{} &       Candidate &  Year &       Party &  Popular vote & Result &          \% \\
-\midrule
-36  &  James Garfield &  1880 &  Republican &       4453337 &    win &  48.369234 \\
-69  &    William Taft &  1912 &  Republican &       3486242 &   loss &  23.218466 \\
-134 &  Walter Mondale &  1984 &  Democratic &      37577352 &   loss &  40.729429 \\
-\bottomrule
-\end{tabular}
-
-\hypertarget{value_counts}{%
-\subsubsection{.value\_counts}\label{value_counts}}
-
-\texttt{.value\_counts()} is called on a column and returns a Series
-containing the total count of each unique value.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{elections[}\StringTok{\textquotesingle{}Candidate\textquotesingle{}}\NormalTok{].value\_counts()}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{tabular}{lr}
-\toprule
-{} &  Candidate \\
-\midrule
-Norman Thomas          &          5 \\
-Eugene V. Debs         &          4 \\
-Ralph Nader            &          4 \\
-Franklin Roosevelt     &          4 \\
-Martin Van Buren       &          3 \\
-William Jennings Bryan &          3 \\
-Richard Nixon          &          3 \\
-Grover Cleveland       &          3 \\
-Andrew Jackson         &          3 \\
-William Henry Harrison &          2 \\
-George H. W. Bush      &          2 \\
-Herbert Hoover         &          2 \\
-Dwight Eisenhower      &          2 \\
-William McKinley       &          2 \\
-John Quincy Adams      &          2 \\
-George W. Bush         &          2 \\
-William Taft           &          2 \\
-Eugene W. Chafin       &          2 \\
-Benjamin Harrison      &          2 \\
-Bill Clinton           &          2 \\
-Jill Stein             &          2 \\
-Henry Clay             &          2 \\
-Donald Trump           &          2 \\
-Theodore Roosevelt     &          2 \\
-Gary Johnson           &          2 \\
-Adlai Stevenson        &          2 \\
-Thomas E. Dewey        &          2 \\
-Ulysses Grant          &          2 \\
-Barack Obama           &          2 \\
-Abraham Lincoln        &          2 \\
-Ronald Reagan          &          2 \\
-Woodrow Wilson         &          2 \\
-Ross Perot             &          2 \\
-Jimmy Carter           &          2 \\
-Harry Browne           &          2 \\
-James B. Weaver        &          2 \\
-Claude A. Watson       &          1 \\
-John P. Hale           &          1 \\
-Joseph Biden           &          1 \\
-Stephen A. Douglas     &          1 \\
-Frank Hanly            &          1 \\
-Winfield Scott Hancock &          1 \\
-Michael Dukakis        &          1 \\
-Aaron S. Watkins       &          1 \\
-John G. Schmitz        &          1 \\
-Evan McMullin          &          1 \\
-Strom Thurmond         &          1 \\
-Barry Goldwater        &          1 \\
-Horatio Seymour        &          1 \\
-Winfield Scott         &          1 \\
-James G. Blaine        &          1 \\
-Andre Marrou           &          1 \\
-George B. McClellan    &          1 \\
-Lester Maddox          &          1 \\
-Gerald Ford            &          1 \\
-William Wirt           &          1 \\
-Clinton B. Fisk        &          1 \\
-Harry Truman           &          1 \\
-Bob Dole               &          1 \\
-Lyndon Johnson         &          1 \\
-Silas C. Swallow       &          1 \\
-John Kerry             &          1 \\
-Chuck Baldwin          &          1 \\
-Rutherford Hayes       &          1 \\
-James Buchanan         &          1 \\
-Alson Streeter         &          1 \\
-Thomas E. Watson       &          1 \\
-Ed Clark               &          1 \\
-George McGovern        &          1 \\
-Horace Greeley         &          1 \\
-Charles Evans Hughes   &          1 \\
-Allan L. Benson        &          1 \\
-Samuel J. Tilden       &          1 \\
-John G. Woolley        &          1 \\
-Joshua Levering        &          1 \\
-William Z. Foster      &          1 \\
-William Lemke          &          1 \\
-James Garfield         &          1 \\
-Howard Phillips        &          1 \\
-Bo Gritz               &          1 \\
-Millard Fillmore       &          1 \\
-Michael Badnarik       &          1 \\
-Hugh Lawson White      &          1 \\
-T. Coleman Andrews     &          1 \\
-Ron Paul               &          1 \\
-Cynthia McKinney       &          1 \\
-Eugene McCarthy        &          1 \\
-Jo Jorgensen           &          1 \\
-Warren Harding         &          1 \\
-Walter Mondale         &          1 \\
-James M. Cox           &          1 \\
-Roger MacBride         &          1 \\
-James Polk             &          1 \\
-Hubert Humphrey        &          1 \\
-George Wallace         &          1 \\
-John C. Breckinridge   &          1 \\
-Bob Barr               &          1 \\
-Zachary Taylor         &          1 \\
-Darrell Castle         &          1 \\
-Al Smith               &          1 \\
-Lewis Cass             &          1 \\
-Lenora Fulani          &          1 \\
-Alf Landon             &          1 \\
-Robert La Follette     &          1 \\
-John W. Davis          &          1 \\
-John McCain            &          1 \\
-Henry A. Wallace       &          1 \\
-Vincent Hallinan       &          1 \\
-John Bidwell           &          1 \\
-John B. Anderson       &          1 \\
-Michael Peroutka       &          1 \\
-David Bergland         &          1 \\
-Franklin Pierce        &          1 \\
-Calvin Coolidge        &          1 \\
-Thomas J. Anderson     &          1 \\
-David Cobb             &          1 \\
-Barry Commoner         &          1 \\
-Parley P. Christensen  &          1 \\
-Hillary Clinton        &          1 \\
-Mitt Romney            &          1 \\
-John C. Frémont        &          1 \\
-Pat Buchanan           &          1 \\
-Alton B. Parker        &          1 \\
-Al Gore                &          1 \\
-Wendell Willkie        &          1 \\
-John St. John          &          1 \\
-Howard Hawkins         &          1 \\
-Benjamin Butler        &          1 \\
-John M. Palmer         &          1 \\
-John Hagelin           &          1 \\
-John Bell              &          1 \\
-John Kennedy           &          1 \\
-\bottomrule
-\end{tabular}
-
-This code tells us how many times each candidate ran for president of
-the United States.
-
-\hypertarget{unique}{%
-\subsubsection{.unique}\label{unique}}
-
-\texttt{.unique()} is called on a Series and returns an array with its
-unique values.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# For brevity, we have limited the results to 5 candidates }
-\NormalTok{elections[}\StringTok{\textquotesingle{}Candidate\textquotesingle{}}\NormalTok{].unique()[:}\DecValTok{5}\NormalTok{]}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-array(['Andrew Jackson', 'John Quincy Adams', 'Henry Clay',
-       'William Wirt', 'Hugh Lawson White'], dtype=object)
-\end{verbatim}
-
-\hypertarget{sort_values}{%
-\subsubsection{.sort\_values}\label{sort_values}}
-
-\texttt{.sort\_values()} returns a sorted version of the Series it was
-called on. Numerical values are in sorted magnitude, while text is
-sorted in alphabetical order. You may specify optional arguments to sort
-in ascending or descending order.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{elections[}\StringTok{\textquotesingle{}Candidate\textquotesingle{}}\NormalTok{].sort\_values()}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{tabular}{ll}
-\toprule
-{} &               Candidate \\
-\midrule
-75  &        Aaron S. Watkins \\
-27  &         Abraham Lincoln \\
-23  &         Abraham Lincoln \\
-108 &         Adlai Stevenson \\
-105 &         Adlai Stevenson \\
-151 &                 Al Gore \\
-83  &                Al Smith \\
-90  &              Alf Landon \\
-71  &         Allan L. Benson \\
-42  &          Alson Streeter \\
-57  &         Alton B. Parker \\
-139 &            Andre Marrou \\
-0   &          Andrew Jackson \\
-2   &          Andrew Jackson \\
-4   &          Andrew Jackson \\
-162 &            Barack Obama \\
-168 &            Barack Obama \\
-127 &          Barry Commoner \\
-113 &         Barry Goldwater \\
-38  &         Benjamin Butler \\
-43  &       Benjamin Harrison \\
-46  &       Benjamin Harrison \\
-140 &            Bill Clinton \\
-144 &            Bill Clinton \\
-141 &                Bo Gritz \\
-163 &                Bob Barr \\
-145 &                Bob Dole \\
-80  &         Calvin Coolidge \\
-72  &    Charles Evans Hughes \\
-164 &           Chuck Baldwin \\
-99  &        Claude A. Watson \\
-44  &         Clinton B. Fisk \\
-165 &        Cynthia McKinney \\
-172 &          Darrell Castle \\
-132 &          David Bergland \\
-156 &              David Cobb \\
-179 &            Donald Trump \\
-173 &            Donald Trump \\
-109 &       Dwight Eisenhower \\
-106 &       Dwight Eisenhower \\
-128 &                Ed Clark \\
-121 &         Eugene McCarthy \\
-66  &          Eugene V. Debs \\
-62  &          Eugene V. Debs \\
-58  &          Eugene V. Debs \\
-76  &          Eugene V. Debs \\
-67  &        Eugene W. Chafin \\
-63  &        Eugene W. Chafin \\
-174 &           Evan McMullin \\
-73  &             Frank Hanly \\
-17  &         Franklin Pierce \\
-91  &      Franklin Roosevelt \\
-94  &      Franklin Roosevelt \\
-86  &      Franklin Roosevelt \\
-97  &      Franklin Roosevelt \\
-175 &            Gary Johnson \\
-169 &            Gary Johnson \\
-28  &     George B. McClellan \\
-135 &       George H. W. Bush \\
-142 &       George H. W. Bush \\
-118 &         George McGovern \\
-157 &          George W. Bush \\
-152 &          George W. Bush \\
-115 &          George Wallace \\
-122 &             Gerald Ford \\
-45  &        Grover Cleveland \\
-39  &        Grover Cleveland \\
-47  &        Grover Cleveland \\
-146 &            Harry Browne \\
-153 &            Harry Browne \\
-100 &            Harry Truman \\
-101 &        Henry A. Wallace \\
-12  &              Henry Clay \\
-5   &              Henry Clay \\
-87  &          Herbert Hoover \\
-84  &          Herbert Hoover \\
-176 &         Hillary Clinton \\
-31  &          Horace Greeley \\
-29  &         Horatio Seymour \\
-181 &          Howard Hawkins \\
-147 &         Howard Phillips \\
-116 &         Hubert Humphrey \\
-7   &       Hugh Lawson White \\
-35  &         James B. Weaver \\
-48  &         James B. Weaver \\
-20  &          James Buchanan \\
-40  &         James G. Blaine \\
-36  &          James Garfield \\
-77  &            James M. Cox \\
-13  &              James Polk \\
-177 &              Jill Stein \\
-170 &              Jill Stein \\
-129 &            Jimmy Carter \\
-123 &            Jimmy Carter \\
-180 &            Jo Jorgensen \\
-130 &        John B. Anderson \\
-24  &               John Bell \\
-49  &            John Bidwell \\
-25  &    John C. Breckinridge \\
-21  &         John C. Frémont \\
-119 &         John G. Schmitz \\
-54  &         John G. Woolley \\
-148 &            John Hagelin \\
-111 &            John Kennedy \\
-158 &              John Kerry \\
-50  &          John M. Palmer \\
-166 &             John McCain \\
-18  &            John P. Hale \\
-1   &       John Quincy Adams \\
-3   &       John Quincy Adams \\
-41  &           John St. John \\
-81  &           John W. Davis \\
-178 &            Joseph Biden \\
-51  &         Joshua Levering \\
-136 &           Lenora Fulani \\
-124 &           Lester Maddox \\
-14  &              Lewis Cass \\
-114 &          Lyndon Johnson \\
-15  &        Martin Van Buren \\
-8   &        Martin Van Buren \\
-10  &        Martin Van Buren \\
-159 &        Michael Badnarik \\
-137 &         Michael Dukakis \\
-160 &        Michael Peroutka \\
-22  &        Millard Fillmore \\
-171 &             Mitt Romney \\
-85  &           Norman Thomas \\
-95  &           Norman Thomas \\
-92  &           Norman Thomas \\
-88  &           Norman Thomas \\
-102 &           Norman Thomas \\
-78  &   Parley P. Christensen \\
-154 &            Pat Buchanan \\
-155 &             Ralph Nader \\
-149 &             Ralph Nader \\
-161 &             Ralph Nader \\
-167 &             Ralph Nader \\
-120 &           Richard Nixon \\
-117 &           Richard Nixon \\
-112 &           Richard Nixon \\
-82  &      Robert La Follette \\
-125 &          Roger MacBride \\
-138 &                Ron Paul \\
-131 &           Ronald Reagan \\
-133 &           Ronald Reagan \\
-143 &              Ross Perot \\
-150 &              Ross Perot \\
-33  &        Rutherford Hayes \\
-34  &        Samuel J. Tilden \\
-59  &        Silas C. Swallow \\
-26  &      Stephen A. Douglas \\
-103 &          Strom Thurmond \\
-110 &      T. Coleman Andrews \\
-68  &      Theodore Roosevelt \\
-60  &      Theodore Roosevelt \\
-98  &         Thomas E. Dewey \\
-104 &         Thomas E. Dewey \\
-61  &        Thomas E. Watson \\
-126 &      Thomas J. Anderson \\
-32  &           Ulysses Grant \\
-30  &           Ulysses Grant \\
-107 &        Vincent Hallinan \\
-134 &          Walter Mondale \\
-79  &          Warren Harding \\
-96  &         Wendell Willkie \\
-11  &  William Henry Harrison \\
-9   &  William Henry Harrison \\
-55  &  William Jennings Bryan \\
-52  &  William Jennings Bryan \\
-64  &  William Jennings Bryan \\
-93  &           William Lemke \\
-53  &        William McKinley \\
-56  &        William McKinley \\
-69  &            William Taft \\
-65  &            William Taft \\
-6   &            William Wirt \\
-89  &       William Z. Foster \\
-19  &          Winfield Scott \\
-37  &  Winfield Scott Hancock \\
-74  &          Woodrow Wilson \\
-70  &          Woodrow Wilson \\
-16  &          Zachary Taylor \\
-\bottomrule
-\end{tabular}
+The output looks like a Series! In practice, we'll use \texttt{{[}{]}} a
+lot in this course, especially when selecting for column labels.
+\texttt{{[}{]}} is much more common in real world than \texttt{.loc}.
 
 \hypertarget{parting-note}{%
-\subsection{Parting Note}\label{parting-note}}
+\section{Parting Note}\label{parting-note}}
 
 The \texttt{pandas} library is enormous and contains many useful
 functions. Here is a link to
