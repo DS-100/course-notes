@@ -8,4 +8,4 @@ jupyter: python3
 
 This text was developed for the Spring 2023 Edition of the UC Berkeley course Data 100: Principles and Techniques of Data Science. 
 
-In Spring 2023, we’re creating this all-new set of resources, so notes may be in flux. We appreciate your understanding. If you spot any errors or would like to suggest any changes, please email us. <br /> <br /> **Email**: data100.instructors@berkeley.edu
+As this project in development during the Spring 2023 semester, these course notes may be in flux. We appreciate your understanding. If you spot any errors or would like to suggest any changes, please email us. <br /> <br /> **Email**: data100.instructors@berkeley.edu
