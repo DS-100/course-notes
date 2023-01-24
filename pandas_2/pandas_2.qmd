@@ -28,6 +28,7 @@ In this lecture, we'll start to dive into some advanced `pandas` syntax. You may
 We'll start by loading the `babynames` dataset.
 
 ```{python}
+#| vscode: {languageId: python}
 import pandas as pd
 import numpy as np
 import urllib.request
@@ -60,6 +61,7 @@ To see this in action, let's select all even-indexed rows in the first 10 rows o
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 # Ask yourself: why is :9 is the correct slice to select the first 10 rows?
 babynames_first_10_rows = babynames.loc[:9, :]
 
@@ -71,36 +73,38 @@ We can perform a similar operation using `.loc`.
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 babynames_first_10_rows.loc[[True, False, True, False, True, False, True, False, True, False], :]
 ```
 
 These techniques worked well in this example, but you can imagine how tedious it might be to list out `True`s and `False`s for every row in a larger DataFrame. To make things easier, we can instead provide a logical condition as an input to `.loc` or `[]` that returns a boolean array with the necessary length.
 
-For example, to return all names associated with `F` sex:
+For example, to return all names associated with `M` sex:
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 
 # First, use a logical condition to generate a boolean array
-logical_operator = (babynames["Sex"] == "F")
+logical_operator = (babynames["Sex"] == "M")
 
 # Then, use this boolean array to filter the DataFrame
-babynames[logical_operator]
+babynames[logical_operator].head()
 ```
 
-Here, `logical_operator` evaluates to a Series of boolean values with length 400762.
+Here, `logical_operator` evaluates to a Series of boolean values with length 400762, of which 235791 are `False`.
 
 ```{python}
 #| code-fold: false
-logical_operator
+#| vscode: {languageId: python}
+logical_operator.describe()
 ```
 
-Rows starting at row 0 and ending at row 235790 evaluate to `True` and are thus returned in the DataFrame.
-
+Rows starting at row 235791 and ending at row 400761 evaluate to `True` and are thus returned in the DataFrame.
 
 ```{python}
-#| code-fold: true
-print(logical_operator.loc[logical_operator])
+#| vscode: {languageId: python}
+babynames[logical_operator].tail()
 ```
 
 Passing a Series as an argument to `babynames[]` has the same affect as using a boolean array. In fact, the `[]` selection operator can take a boolean Series, array, and list as arguments. These three are used interchangeably thoughout the course.
@@ -109,31 +113,34 @@ We can also use `.loc` to achieve similar results.
 
 ```{python}
 #| code-fold: false
-babynames.loc[babynames["Sex"] == "F"]
+#| vscode: {languageId: python}
+babynames.loc[babynames["Sex"] == "F"].head()
 ```
 
 Boolean conditions can be combined using various operators that allow us to filter results by multiple conditions. Some examples include the `&` (and) operator and the `|` (or) operator.
 
 **Note:** When combining multiple conditions with logical operators, be sure to surround each condition with a set of parenthesis `()`. If you forget, your code will throw an error.
 
-For example, if we want to return data on all females born before the 21st century, we can write:
+For example, if we want to return data on all females born in the 21st century, we can write:
 
 ```{python}
 #| code-fold: false
-babynames[(babynames["Sex"] == "F") & (babynames["Year"] < 2000)]
+#| vscode: {languageId: python}
+babynames[(babynames["Sex"] == "F") & (babynames["Year"] > 2000)].head()
 ```
 
 Boolean array selection is a useful tool, but can lead to overly verbose code for complex conditions. `Pandas` provide many alternatives: 
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 
 (
     babynames[(babynames["Name"] == "Bella") | 
               (babynames["Name"] == "Alex") |
               (babynames["Name"] == "Ani") |
               (babynames["Name"] == "Lisa")]
-)
+).head()
 # Note: The parentheses surrounding the code make it possible to break the code on to multiple lines for readability
 ```
 
@@ -141,17 +148,19 @@ The `.isin` function can be used to filter dataframes. The method helps in selec
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 
 names = ["Bella", "Alex", "Ani", "Lisa"]
-babynames[babynames["Name"].isin(names)]
+babynames[babynames["Name"].isin(names)].head()
 ```
 
 The function `str.startswith` can be used to define a filter based on string values in a `Series` object. 
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 
-babynames[babynames["Name"].str.startswith("N")]
+babynames[babynames["Name"].str.startswith("N")].head()
 ```
 
 ## Handy Utility Functions
@@ -171,12 +180,14 @@ babynames[babynames["Name"].str.startswith("N")]
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 
 bella_counts = babynames[babynames["Name"] == "Bella"]["Count"]
 ```
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 
 # Average number of babies named Bella each year
 np.mean(bella_counts)
@@ -184,6 +195,7 @@ np.mean(bella_counts)
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 
 # Max number of babies named Bella born on a given year
 max(bella_counts)
@@ -197,12 +209,14 @@ Many functions strictly require the dimensions of the arguments along certain ax
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 
 babynames.shape
 ```
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 
 babynames.size
 ```
@@ -213,6 +227,7 @@ If many statistics are required from a DataFrame (minimum value, maximum value, 
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 
 babynames.describe()
 ```
@@ -221,6 +236,7 @@ A different set of statistics will be reported if `.describe()` is called on a S
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 
 babynames["Sex"].describe()
 ```
@@ -231,18 +247,21 @@ As we will see later in the semester, random processes are at the heart of many 
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 
 babynames.sample()
 ```
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 
 babynames.sample(5).iloc[:, 2:]
 ```
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 
 babynames[babynames["Year"] == 2000].sample(4, replace = True).iloc[:, 2:]
 ```
@@ -253,8 +272,9 @@ When we want to know the distribution of the items in a Series (for example, wha
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 
-babynames["Name"].value_counts()
+babynames["Name"].head().value_counts()
 ```
 
 ### `.unique()`
@@ -265,8 +285,9 @@ If we have a Series with many repeated values, then [`.unique()`](https://pandas
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 
-babynames["Name"].unique()
+babynames["Name"].unique()[:5]
 ```
 
 ### `.sort_values()`
@@ -275,16 +296,18 @@ Ordering a DataFrame can be useful for isolating extreme values. For example, th
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 
-babynames.sort_values(by = "Count", ascending=False)
+babynames.sort_values(by = "Count", ascending=False).head()
 ```
 
 We do not need to explicitly specify the column used for sorting when calling `.value_counts()` on a Series. We can still specify the ordering paradigm – that is, whether values are sorted in ascending or descending order.
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 
-babynames["Name"].sort_values(ascending=True)
+babynames["Name"].sort_values(ascending=True).head()
 ```
 
 #### Sorting With a Custom Key
@@ -293,6 +316,7 @@ Using `.sort_values` can be useful in many situations, but it many not cover all
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 # Sort names by count in year 2021
 # Recall that `.head(5)` displays the first five rows in the DataFrame
 babynames[babynames["Year"] == 2021].sort_values("Count", ascending=False).head()
@@ -304,6 +328,7 @@ We can do this by specifying the `key` parameter of `.sort_values`. The `key` pa
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 # Here, a lambda function is applied to find the length of each value, `x`, in the "Name" column
 babynames.sort_values("Name", key=lambda x: x.str.len(), ascending=False).head(5)
 ```
@@ -314,15 +339,17 @@ To add a new column to a DataFrame, we use a syntax similar to that used when ac
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 # Add a column named "name_lengths" that includes the length of each name
 babynames["name_lengths"] = babynames["Name"].str.len()
 babynames.head(5)
 ```
 
 ```{python}
+#| vscode: {languageId: python}
 # Sort by the temporary column
 babynames = babynames.sort_values(by = "name_lengths", ascending=False)
-babynames
+babynames.head()
 ```
 
 In the example above, we made use of an in-built function given to us by the `str` accessor for getting the length of names. Then we used `name_length` column to sort the dataframe. What if we had wanted to generate the values in our new column using a function of our own making?
@@ -333,6 +360,7 @@ For example, say we wanted to find the number of occurrences of the sequence "dr
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 # First, define a function to count the number of times "dr" or "ea" appear in each name
 def dr_ea_count(string):
     return string.count("dr") + string.count("ea")
@@ -348,6 +376,7 @@ If we want to remove a column or row of a DataFrame, we can call the [`.drop`](h
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 
 # Drop our "dr_ea_count" and "length" columns from the DataFrame
 babynames = babynames.drop(["dr_ea_count", "name_lengths"], axis="columns")
@@ -360,6 +389,7 @@ In other words, if we simply call:
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 # This creates a copy of `babynames` and removes the row with label 3...
 babynames.drop(3, axis="rows")
 
@@ -368,17 +398,15 @@ babynames.drop(3, axis="rows")
 babynames.head(5)
 ```
 
-
 ## Aggregating Data with GroupBy
 
 Up until this point, we have been working with individual rows of DataFrames. As data scientists, we often wish to investigate trends across a larger *subset* of our data. For example, we may want to compute some summary statistic (the mean, median, sum, etc.) for a group of rows in our DataFrame. To do this, we'll use `pandas` `GroupBy` objects.
 
 Let's say we wanted to aggregate all rows in `babynames` for a given year. 
 
-```{python}
-#| code-fold: false
-babynames.groupby("Year")
-```
+`babynames.groupby("Year")`
+
+`<pandas.core.groupby.generic.DataFrameGroupBy object at 0x000001FD34F9E640>`
 
 What does this strange output mean? Calling [`.groupby`](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.groupby.html) has generated a `GroupBy` object. You can imagine this as a set of "mini" sub-DataFrames, where each subframe contains all of the rows from `babynames` that correspond to a particular year. 
 
@@ -392,6 +420,7 @@ The first aggregation method we'll consider is `.agg`. The `.agg` method takes i
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 babynames.groupby("Year").agg(sum).head(5)
 ```
 
@@ -405,6 +434,7 @@ You may be wondering: where did the `"State"`, `"Sex"`, and `"Name"` columns go?
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 # Same result, but now we explicitly tell Pandas to only consider the "Count" column when summing
 babynames.groupby("Year")[["Count"]].agg(sum).head(5)
 ```
