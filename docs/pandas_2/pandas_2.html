@@ -1,0 +1,2468 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.280">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Principles and Techniques of Data Science - 3&nbsp; Pandas II</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../pandas_1/pandas_1.html" rel="prev">
+<link href="../data100_logo.png" rel="icon" type="image/png">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Pandas II</span></h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="../index.html" class="sidebar-logo-link">
+      <img src="../data100_logo.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Principles and Techniques of Data Science</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/DS-100/course-notes" title="Source Code" class="sidebar-tool px-1"><i class="bi bi-github"></i></a>
+    <a href="../Principles-and-Techniques-of-Data-Science.pdf" title="Download PDF" class="sidebar-tool px-1"><i class="bi bi-file-pdf"></i></a>
+</div>
+    </div>
+      </div>
+      <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">Welcome</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../intro_lec/introduction.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pandas_1/pandas_1.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Pandas I</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pandas_2/pandas_2.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Pandas II</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#conditional-selection" id="toc-conditional-selection" class="nav-link active" data-scroll-target="#conditional-selection"><span class="toc-section-number">3.1</span>  Conditional Selection</a></li>
+  <li><a href="#handy-utility-functions" id="toc-handy-utility-functions" class="nav-link" data-scroll-target="#handy-utility-functions"><span class="toc-section-number">3.2</span>  Handy Utility Functions</a>
+  <ul>
+  <li><a href="#numpy" id="toc-numpy" class="nav-link" data-scroll-target="#numpy"><span class="toc-section-number">3.2.1</span>  <code>Numpy</code></a></li>
+  <li><a href="#shape-and-.size" id="toc-shape-and-.size" class="nav-link" data-scroll-target="#shape-and-.size"><span class="toc-section-number">3.2.2</span>  <code>.shape</code> and <code>.size</code></a></li>
+  <li><a href="#describe" id="toc-describe" class="nav-link" data-scroll-target="#describe"><span class="toc-section-number">3.2.3</span>  <code>.describe()</code></a></li>
+  <li><a href="#sample" id="toc-sample" class="nav-link" data-scroll-target="#sample"><span class="toc-section-number">3.2.4</span>  <code>.sample()</code></a></li>
+  <li><a href="#value_counts" id="toc-value_counts" class="nav-link" data-scroll-target="#value_counts"><span class="toc-section-number">3.2.5</span>  <code>.value_counts()</code></a></li>
+  <li><a href="#unique" id="toc-unique" class="nav-link" data-scroll-target="#unique"><span class="toc-section-number">3.2.6</span>  <code>.unique()</code></a></li>
+  <li><a href="#sort_values" id="toc-sort_values" class="nav-link" data-scroll-target="#sort_values"><span class="toc-section-number">3.2.7</span>  <code>.sort_values()</code></a>
+  <ul>
+  <li><a href="#sorting-with-a-custom-key" id="toc-sorting-with-a-custom-key" class="nav-link" data-scroll-target="#sorting-with-a-custom-key"><span class="toc-section-number">3.2.7.1</span>  Sorting With a Custom Key</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#adding-and-removing-columns" id="toc-adding-and-removing-columns" class="nav-link" data-scroll-target="#adding-and-removing-columns"><span class="toc-section-number">3.3</span>  Adding and Removing Columns</a></li>
+  <li><a href="#aggregating-data-with-groupby" id="toc-aggregating-data-with-groupby" class="nav-link" data-scroll-target="#aggregating-data-with-groupby"><span class="toc-section-number">3.4</span>  Aggregating Data with GroupBy</a>
+  <ul>
+  <li><a href="#parting-note" id="toc-parting-note" class="nav-link" data-scroll-target="#parting-note"><span class="toc-section-number">3.4.1</span>  Parting note</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Pandas II</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<div class="callout-note callout callout-style-default no-icon callout-captioned">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Learning Outcomes
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li>Build familiarity with advanced <code>pandas</code> syntax</li>
+<li>Extract data from a DataFrame using conditional selection</li>
+<li>Recognize situations where aggregation is useful and identify the correct technique for performing an aggregation</li>
+</ul>
+</div>
+</div>
+</div>
+<p>Last time, we introduced the <code>pandas</code> library as a toolkit for processing data. We learned the DataFrame and Series data structures, familiarized ourselves with the basic syntax for manipulating tabular data, and began writing our first lines of <code>pandas</code> code.</p>
+<p>In this lecture, we’ll start to dive into some advanced <code>pandas</code> syntax. You may find it helpful to follow along with a notebook of your own as we walk through these new pieces of code.</p>
+<p>We’ll start by loading the <code>babynames</code> dataset.</p>
+<div class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> urllib.request</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os.path</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> zipfile</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>data_url <span class="op">=</span> <span class="st">"https://www.ssa.gov/oact/babynames/state/namesbystate.zip"</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>local_filename <span class="op">=</span> <span class="st">"babynamesbystate.zip"</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">not</span> os.path.exists(local_filename): <span class="co"># if the data exists don't download again</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> urllib.request.urlopen(data_url) <span class="im">as</span> resp, <span class="bu">open</span>(local_filename, <span class="st">'wb'</span>) <span class="im">as</span> f:</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        f.write(resp.read())</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>zf <span class="op">=</span> zipfile.ZipFile(local_filename, <span class="st">'r'</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>ca_name <span class="op">=</span> <span class="st">'CA.TXT'</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>field_names <span class="op">=</span> [<span class="st">'State'</span>, <span class="st">'Sex'</span>, <span class="st">'Year'</span>, <span class="st">'Name'</span>, <span class="st">'Count'</span>]</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> zf.<span class="bu">open</span>(ca_name) <span class="im">as</span> fh:</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    babynames <span class="op">=</span> pd.read_csv(fh, header<span class="op">=</span><span class="va">None</span>, names<span class="op">=</span>field_names)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>babynames.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="36">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>State</th>
+      <th>Sex</th>
+      <th>Year</th>
+      <th>Name</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Mary</td>
+      <td>295</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Helen</td>
+      <td>239</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Dorothy</td>
+      <td>220</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Margaret</td>
+      <td>163</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Frances</td>
+      <td>134</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<section id="conditional-selection" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="conditional-selection"><span class="header-section-number">3.1</span> Conditional Selection</h2>
+<p>Conditional selection allows us to select a subset of rows in a DataFrame if they follow some specified condition.</p>
+<p>To understand how to use conditional selection, we must look at another possible input of the <code>.loc</code> and <code>[]</code> methods – a boolean array, which is simply an array where each element is either <code>True</code> or <code>False</code>. This boolean array must have a length equal to the number of rows in the DataFrame. It will return all rows in the position of a corresponding True value in the array.</p>
+<p>To see this in action, let’s select all even-indexed rows in the first 10 rows of our DataFrame.</p>
+<div class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Ask yourself: why is :9 is the correct slice to select the first 10 rows?</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>babynames_first_10_rows <span class="op">=</span> babynames.loc[:<span class="dv">9</span>, :]</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Notice how we have exactly 10 elements in our boolean array argument</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>babynames_first_10_rows[[<span class="va">True</span>, <span class="va">False</span>, <span class="va">True</span>, <span class="va">False</span>, <span class="va">True</span>, <span class="va">False</span>, <span class="va">True</span>, <span class="va">False</span>, <span class="va">True</span>, <span class="va">False</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="37">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>State</th>
+      <th>Sex</th>
+      <th>Year</th>
+      <th>Name</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Mary</td>
+      <td>295</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Dorothy</td>
+      <td>220</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Frances</td>
+      <td>134</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Evelyn</td>
+      <td>126</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Virginia</td>
+      <td>101</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<p>We can perform a similar operation using <code>.loc</code>.</p>
+<div class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>babynames_first_10_rows.loc[[<span class="va">True</span>, <span class="va">False</span>, <span class="va">True</span>, <span class="va">False</span>, <span class="va">True</span>, <span class="va">False</span>, <span class="va">True</span>, <span class="va">False</span>, <span class="va">True</span>, <span class="va">False</span>], :]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="38">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>State</th>
+      <th>Sex</th>
+      <th>Year</th>
+      <th>Name</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Mary</td>
+      <td>295</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Dorothy</td>
+      <td>220</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Frances</td>
+      <td>134</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Evelyn</td>
+      <td>126</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Virginia</td>
+      <td>101</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<p>These techniques worked well in this example, but you can imagine how tedious it might be to list out <code>True</code>s and <code>False</code>s for every row in a larger DataFrame. To make things easier, we can instead provide a logical condition as an input to <code>.loc</code> or <code>[]</code> that returns a boolean array with the necessary length.</p>
+<p>For example, to return all names associated with <code>F</code> sex:</p>
+<div class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># First, use a logical condition to generate a boolean array</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>logical_operator <span class="op">=</span> (babynames[<span class="st">"Sex"</span>] <span class="op">==</span> <span class="st">"F"</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Then, use this boolean array to filter the DataFrame</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>babynames[logical_operator]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="39">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>State</th>
+      <th>Sex</th>
+      <th>Year</th>
+      <th>Name</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Mary</td>
+      <td>295</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Helen</td>
+      <td>239</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Dorothy</td>
+      <td>220</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Margaret</td>
+      <td>163</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Frances</td>
+      <td>134</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>235786</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>2021</td>
+      <td>Zarahi</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>235787</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>2021</td>
+      <td>Zelia</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>235788</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>2021</td>
+      <td>Zenobia</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>235789</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>2021</td>
+      <td>Zeppelin</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>235790</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>2021</td>
+      <td>Zoraya</td>
+      <td>5</td>
+    </tr>
+  </tbody>
+</table>
+<p>235791 rows × 5 columns</p>
+</div>
+</div>
+</div>
+<p>Here, <code>logical_operator</code> evaluates to a Series of boolean values with length 400762.</p>
+<div class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>logical_operator</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="40">
+<pre><code>0          True
+1          True
+2          True
+3          True
+4          True
+          ...  
+400757    False
+400758    False
+400759    False
+400760    False
+400761    False
+Name: Sex, Length: 400762, dtype: bool</code></pre>
+</div>
+</div>
+<p>Rows starting at row 0 and ending at row 235790 evaluate to <code>True</code> and are thus returned in the DataFrame.</p>
+<div class="cell" data-execution_count="6">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(logical_operator.loc[logical_operator])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>0         True
+1         True
+2         True
+3         True
+4         True
+          ... 
+235786    True
+235787    True
+235788    True
+235789    True
+235790    True
+Name: Sex, Length: 235791, dtype: bool</code></pre>
+</div>
+</div>
+<p>Passing a Series as an argument to <code>babynames[]</code> has the same affect as using a boolean array. In fact, the <code>[]</code> selection operator can take a boolean Series, array, and list as arguments. These three are used interchangeably thoughout the course.</p>
+<p>We can also use <code>.loc</code> to achieve similar results.</p>
+<div class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>babynames.loc[babynames[<span class="st">"Sex"</span>] <span class="op">==</span> <span class="st">"F"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="42">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>State</th>
+      <th>Sex</th>
+      <th>Year</th>
+      <th>Name</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Mary</td>
+      <td>295</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Helen</td>
+      <td>239</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Dorothy</td>
+      <td>220</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Margaret</td>
+      <td>163</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Frances</td>
+      <td>134</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>235786</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>2021</td>
+      <td>Zarahi</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>235787</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>2021</td>
+      <td>Zelia</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>235788</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>2021</td>
+      <td>Zenobia</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>235789</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>2021</td>
+      <td>Zeppelin</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>235790</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>2021</td>
+      <td>Zoraya</td>
+      <td>5</td>
+    </tr>
+  </tbody>
+</table>
+<p>235791 rows × 5 columns</p>
+</div>
+</div>
+</div>
+<p>Boolean conditions can be combined using various operators that allow us to filter results by multiple conditions. Some examples include the <code>&amp;</code> (and) operator and the <code>|</code> (or) operator.</p>
+<p><strong>Note:</strong> When combining multiple conditions with logical operators, be sure to surround each condition with a set of parenthesis <code>()</code>. If you forget, your code will throw an error.</p>
+<p>For example, if we want to return data on all females born before the 21st century, we can write:</p>
+<div class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>babynames[(babynames[<span class="st">"Sex"</span>] <span class="op">==</span> <span class="st">"F"</span>) <span class="op">&amp;</span> (babynames[<span class="st">"Year"</span>] <span class="op">&lt;</span> <span class="dv">2000</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="43">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>State</th>
+      <th>Sex</th>
+      <th>Year</th>
+      <th>Name</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Mary</td>
+      <td>295</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Helen</td>
+      <td>239</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Dorothy</td>
+      <td>220</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Margaret</td>
+      <td>163</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Frances</td>
+      <td>134</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>149044</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1999</td>
+      <td>Zareen</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>149045</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1999</td>
+      <td>Zeinab</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>149046</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1999</td>
+      <td>Zhane</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>149047</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1999</td>
+      <td>Zoha</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>149048</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1999</td>
+      <td>Zoila</td>
+      <td>5</td>
+    </tr>
+  </tbody>
+</table>
+<p>149049 rows × 5 columns</p>
+</div>
+</div>
+</div>
+<p>Boolean array selection is a useful tool, but can lead to overly verbose code for complex conditions. <code>Pandas</code> provide many alternatives:</p>
+<div class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    babynames[(babynames[<span class="st">"Name"</span>] <span class="op">==</span> <span class="st">"Bella"</span>) <span class="op">|</span> </span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>              (babynames[<span class="st">"Name"</span>] <span class="op">==</span> <span class="st">"Alex"</span>) <span class="op">|</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>              (babynames[<span class="st">"Name"</span>] <span class="op">==</span> <span class="st">"Ani"</span>) <span class="op">|</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>              (babynames[<span class="st">"Name"</span>] <span class="op">==</span> <span class="st">"Lisa"</span>)]</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Note: The parentheses surrounding the code make it possible to break the code on to multiple lines for readability</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="44">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>State</th>
+      <th>Sex</th>
+      <th>Year</th>
+      <th>Name</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>6289</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1923</td>
+      <td>Bella</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>7512</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1925</td>
+      <td>Bella</td>
+      <td>8</td>
+    </tr>
+    <tr>
+      <th>12368</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1932</td>
+      <td>Lisa</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>14741</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1936</td>
+      <td>Lisa</td>
+      <td>8</td>
+    </tr>
+    <tr>
+      <th>17084</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1939</td>
+      <td>Lisa</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>386576</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>2017</td>
+      <td>Alex</td>
+      <td>482</td>
+    </tr>
+    <tr>
+      <th>389498</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>2018</td>
+      <td>Alex</td>
+      <td>494</td>
+    </tr>
+    <tr>
+      <th>392360</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>2019</td>
+      <td>Alex</td>
+      <td>436</td>
+    </tr>
+    <tr>
+      <th>395230</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>2020</td>
+      <td>Alex</td>
+      <td>378</td>
+    </tr>
+    <tr>
+      <th>398031</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>2021</td>
+      <td>Alex</td>
+      <td>331</td>
+    </tr>
+  </tbody>
+</table>
+<p>359 rows × 5 columns</p>
+</div>
+</div>
+</div>
+<p>The <code>.isin</code> function can be used to filter dataframes. The method helps in selecting rows with having a particular (or multiple) value in a particular column.</p>
+<div class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>names <span class="op">=</span> [<span class="st">"Bella"</span>, <span class="st">"Alex"</span>, <span class="st">"Ani"</span>, <span class="st">"Lisa"</span>]</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>babynames[babynames[<span class="st">"Name"</span>].isin(names)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="45">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>State</th>
+      <th>Sex</th>
+      <th>Year</th>
+      <th>Name</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>6289</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1923</td>
+      <td>Bella</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>7512</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1925</td>
+      <td>Bella</td>
+      <td>8</td>
+    </tr>
+    <tr>
+      <th>12368</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1932</td>
+      <td>Lisa</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>14741</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1936</td>
+      <td>Lisa</td>
+      <td>8</td>
+    </tr>
+    <tr>
+      <th>17084</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1939</td>
+      <td>Lisa</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>386576</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>2017</td>
+      <td>Alex</td>
+      <td>482</td>
+    </tr>
+    <tr>
+      <th>389498</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>2018</td>
+      <td>Alex</td>
+      <td>494</td>
+    </tr>
+    <tr>
+      <th>392360</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>2019</td>
+      <td>Alex</td>
+      <td>436</td>
+    </tr>
+    <tr>
+      <th>395230</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>2020</td>
+      <td>Alex</td>
+      <td>378</td>
+    </tr>
+    <tr>
+      <th>398031</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>2021</td>
+      <td>Alex</td>
+      <td>331</td>
+    </tr>
+  </tbody>
+</table>
+<p>359 rows × 5 columns</p>
+</div>
+</div>
+</div>
+<p>The function <code>str.startswith</code> can be used to define a filter based on string values in a <code>Series</code> object.</p>
+<div class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>babynames[babynames[<span class="st">"Name"</span>].<span class="bu">str</span>.startswith(<span class="st">"N"</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="46">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>State</th>
+      <th>Sex</th>
+      <th>Year</th>
+      <th>Name</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>76</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Norma</td>
+      <td>23</td>
+    </tr>
+    <tr>
+      <th>83</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Nellie</td>
+      <td>20</td>
+    </tr>
+    <tr>
+      <th>127</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Nina</td>
+      <td>11</td>
+    </tr>
+    <tr>
+      <th>198</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Nora</td>
+      <td>6</td>
+    </tr>
+    <tr>
+      <th>310</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1911</td>
+      <td>Nellie</td>
+      <td>23</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>400648</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>2021</td>
+      <td>Nirvan</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>400649</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>2021</td>
+      <td>Nivin</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>400650</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>2021</td>
+      <td>Nolen</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>400651</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>2021</td>
+      <td>Nomar</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>400652</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>2021</td>
+      <td>Nyles</td>
+      <td>5</td>
+    </tr>
+  </tbody>
+</table>
+<p>11994 rows × 5 columns</p>
+</div>
+</div>
+</div>
+</section>
+<section id="handy-utility-functions" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="handy-utility-functions"><span class="header-section-number">3.2</span> Handy Utility Functions</h2>
+<p><code>pandas</code> contains an extensive library of functions that can help shorten the process of setting and getting information from its data structures. In the following section, we will give overviews of each of the main utility functions that will help us in Data 100.</p>
+<ul>
+<li><code>Numpy</code> and built-in function support</li>
+<li><code>.shape</code></li>
+<li><code>.size</code></li>
+<li><code>.describe()</code></li>
+<li><code>.sample()</code></li>
+<li><code>.value_counts()</code></li>
+<li><code>.unique()</code></li>
+<li><code>.sort_values()</code></li>
+</ul>
+<section id="numpy" class="level3" data-number="3.2.1">
+<h3 data-number="3.2.1" class="anchored" data-anchor-id="numpy"><span class="header-section-number">3.2.1</span> <code>Numpy</code></h3>
+<div class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>bella_counts <span class="op">=</span> babynames[babynames[<span class="st">"Name"</span>] <span class="op">==</span> <span class="st">"Bella"</span>][<span class="st">"Count"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Average number of babies named Bella each year</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>np.mean(bella_counts)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="48">
+<pre><code>270.1860465116279</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Max number of babies named Bella born on a given year</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="bu">max</span>(bella_counts)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="49">
+<pre><code>902</code></pre>
+</div>
+</div>
+</section>
+<section id="shape-and-.size" class="level3" data-number="3.2.2">
+<h3 data-number="3.2.2" class="anchored" data-anchor-id="shape-and-.size"><span class="header-section-number">3.2.2</span> <code>.shape</code> and <code>.size</code></h3>
+<p><code>.shape</code> and <code>.size</code> are attributes of Series and DataFrames that measure the “amount” of data stored in the structure. Calling <code>.shape</code> returns a tuple containing the number of rows and columns present in the DataFrame or Series. <code>.size</code> is used to find the total number of elements in a structure, equivalent to the number of rows times the number of columns.</p>
+<p>Many functions strictly require the dimensions of the arguments along certain axes to match. Calling these dimension-finding functions is much faster than counting all of the items by hand.</p>
+<div class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>babynames.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="50">
+<pre><code>(400762, 5)</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>babynames.size</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="51">
+<pre><code>2003810</code></pre>
+</div>
+</div>
+</section>
+<section id="describe" class="level3" data-number="3.2.3">
+<h3 data-number="3.2.3" class="anchored" data-anchor-id="describe"><span class="header-section-number">3.2.3</span> <code>.describe()</code></h3>
+<p>If many statistics are required from a DataFrame (minimum value, maximum value, mean value, etc.), then <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.describe.html"><code>.describe()</code></a> can be used to compute all of them at once.</p>
+<div class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>babynames.describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="52">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Year</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>count</th>
+      <td>400762.000000</td>
+      <td>400762.000000</td>
+    </tr>
+    <tr>
+      <th>mean</th>
+      <td>1985.131287</td>
+      <td>79.953781</td>
+    </tr>
+    <tr>
+      <th>std</th>
+      <td>26.821004</td>
+      <td>295.414618</td>
+    </tr>
+    <tr>
+      <th>min</th>
+      <td>1910.000000</td>
+      <td>5.000000</td>
+    </tr>
+    <tr>
+      <th>25%</th>
+      <td>1968.000000</td>
+      <td>7.000000</td>
+    </tr>
+    <tr>
+      <th>50%</th>
+      <td>1991.000000</td>
+      <td>13.000000</td>
+    </tr>
+    <tr>
+      <th>75%</th>
+      <td>2007.000000</td>
+      <td>38.000000</td>
+    </tr>
+    <tr>
+      <th>max</th>
+      <td>2021.000000</td>
+      <td>8262.000000</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<p>A different set of statistics will be reported if <code>.describe()</code> is called on a Series.</p>
+<div class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>babynames[<span class="st">"Sex"</span>].describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="53">
+<pre><code>count     400762
+unique         2
+top            F
+freq      235791
+Name: Sex, dtype: object</code></pre>
+</div>
+</div>
+</section>
+<section id="sample" class="level3" data-number="3.2.4">
+<h3 data-number="3.2.4" class="anchored" data-anchor-id="sample"><span class="header-section-number">3.2.4</span> <code>.sample()</code></h3>
+<p>As we will see later in the semester, random processes are at the heart of many data science techniques (for example, train-test splits, bootstrapping, and cross-validation). <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.sample.html"><code>.sample()</code></a> lets us quickly select random entries (a row if called from a DataFrame, or a value if called from a Series).</p>
+<div class="cell" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>babynames.sample()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="54">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>State</th>
+      <th>Sex</th>
+      <th>Year</th>
+      <th>Name</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>18257</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1941</td>
+      <td>Adeline</td>
+      <td>17</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="cell" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>babynames.sample(<span class="dv">5</span>).iloc[:, <span class="dv">2</span>:]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="55">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Year</th>
+      <th>Name</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>109732</th>
+      <td>1989</td>
+      <td>Elissa</td>
+      <td>49</td>
+    </tr>
+    <tr>
+      <th>260675</th>
+      <td>1953</td>
+      <td>Nelson</td>
+      <td>32</td>
+    </tr>
+    <tr>
+      <th>103482</th>
+      <td>1987</td>
+      <td>Dianne</td>
+      <td>32</td>
+    </tr>
+    <tr>
+      <th>210833</th>
+      <td>2015</td>
+      <td>Leylani</td>
+      <td>24</td>
+    </tr>
+    <tr>
+      <th>304084</th>
+      <td>1985</td>
+      <td>Wiley</td>
+      <td>9</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="cell" data-execution_count="21">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>babynames[babynames[<span class="st">"Year"</span>] <span class="op">==</span> <span class="dv">2000</span>].sample(<span class="dv">4</span>, replace <span class="op">=</span> <span class="va">True</span>).iloc[:, <span class="dv">2</span>:]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="56">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Year</th>
+      <th>Name</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>152059</th>
+      <td>2000</td>
+      <td>Janai</td>
+      <td>6</td>
+    </tr>
+    <tr>
+      <th>149473</th>
+      <td>2000</td>
+      <td>Ciara</td>
+      <td>94</td>
+    </tr>
+    <tr>
+      <th>152707</th>
+      <td>2000</td>
+      <td>Roxann</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>149515</th>
+      <td>2000</td>
+      <td>Nikki</td>
+      <td>85</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+<section id="value_counts" class="level3" data-number="3.2.5">
+<h3 data-number="3.2.5" class="anchored" data-anchor-id="value_counts"><span class="header-section-number">3.2.5</span> <code>.value_counts()</code></h3>
+<p>When we want to know the distribution of the items in a Series (for example, what items are most/least common), we use <a href="https://pandas.pydata.org/docs/reference/api/pandas.Series.value_counts.html"><code>.value-counts()</code></a> to get a breakdown of the unique <em>values</em> and their <em>counts</em>. In the example below, we can determine the name with the most years in which at least one person has taken that name by counting the number of times each name appears in the <code>"Name"</code> column of <code>babynames</code>.</p>
+<div class="cell" data-execution_count="22">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>babynames[<span class="st">"Name"</span>].value_counts()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="57">
+<pre><code>Jean         221
+Francis      219
+Guadalupe    216
+Jessie       215
+Marion       213
+            ... 
+Darely         1
+Adiana         1
+Sharone        1
+Simrit         1
+Alexio         1
+Name: Name, Length: 20239, dtype: int64</code></pre>
+</div>
+</div>
+</section>
+<section id="unique" class="level3" data-number="3.2.6">
+<h3 data-number="3.2.6" class="anchored" data-anchor-id="unique"><span class="header-section-number">3.2.6</span> <code>.unique()</code></h3>
+<p>If we have a Series with many repeated values, then <a href="https://pandas.pydata.org/docs/reference/api/pandas.unique.html"><code>.unique()</code></a> can be used to identify only the <em>unique</em> values. Here we can get a list of all the names in <code>babynames</code>.</p>
+<p><strong>Exercise:</strong> what function can we call on the Series below to get the number of unique names?</p>
+<div class="cell" data-execution_count="23">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>babynames[<span class="st">"Name"</span>].unique()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="58">
+<pre><code>array(['Mary', 'Helen', 'Dorothy', ..., 'Zyire', 'Zylo', 'Zyrus'],
+      dtype=object)</code></pre>
+</div>
+</div>
+</section>
+<section id="sort_values" class="level3" data-number="3.2.7">
+<h3 data-number="3.2.7" class="anchored" data-anchor-id="sort_values"><span class="header-section-number">3.2.7</span> <code>.sort_values()</code></h3>
+<p>Ordering a DataFrame can be useful for isolating extreme values. For example, the first 5 entries of a row sorted in descending order (that is, from highest to lowest) are the largest 5 values. <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.sort_values.html"><code>.sort_values</code></a> allows us to order a DataFrame or Series by a specified rule. For DataFrames, we must specify the column by which we want to compare the rows and the function will return such rows. We can choose to either receive the rows in <code>ascending</code> order (default) or <code>descending</code> order.</p>
+<div class="cell" data-execution_count="24">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>babynames.sort_values(by <span class="op">=</span> <span class="st">"Count"</span>, ascending<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="59">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>State</th>
+      <th>Sex</th>
+      <th>Year</th>
+      <th>Name</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>263272</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>1956</td>
+      <td>Michael</td>
+      <td>8262</td>
+    </tr>
+    <tr>
+      <th>264297</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>1957</td>
+      <td>Michael</td>
+      <td>8250</td>
+    </tr>
+    <tr>
+      <th>313644</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>1990</td>
+      <td>Michael</td>
+      <td>8247</td>
+    </tr>
+    <tr>
+      <th>278109</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>1969</td>
+      <td>Michael</td>
+      <td>8244</td>
+    </tr>
+    <tr>
+      <th>279405</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>1970</td>
+      <td>Michael</td>
+      <td>8197</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>159967</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>2002</td>
+      <td>Arista</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>159966</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>2002</td>
+      <td>Arisbeth</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>159965</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>2002</td>
+      <td>Arisa</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>159964</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>2002</td>
+      <td>Arionna</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>400761</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>2021</td>
+      <td>Zyrus</td>
+      <td>5</td>
+    </tr>
+  </tbody>
+</table>
+<p>400762 rows × 5 columns</p>
+</div>
+</div>
+</div>
+<p>We do not need to explicitly specify the column used for sorting when calling <code>.value_counts()</code> on a Series. We can still specify the ordering paradigm – that is, whether values are sorted in ascending or descending order.</p>
+<div class="cell" data-execution_count="25">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>babynames[<span class="st">"Name"</span>].sort_values(ascending<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="60">
+<pre><code>380256      Aadan
+362255      Aadan
+365374      Aadan
+394460    Aadarsh
+366561      Aaden
+           ...   
+232144      Zyrah
+217415      Zyrah
+197519      Zyrah
+220674      Zyrah
+400761      Zyrus
+Name: Name, Length: 400762, dtype: object</code></pre>
+</div>
+</div>
+<section id="sorting-with-a-custom-key" class="level4" data-number="3.2.7.1">
+<h4 data-number="3.2.7.1" class="anchored" data-anchor-id="sorting-with-a-custom-key"><span class="header-section-number">3.2.7.1</span> Sorting With a Custom Key</h4>
+<p>Using <code>.sort_values</code> can be useful in many situations, but it many not cover all use cases. This is because <code>pandas</code> automatically sorts values in order according to numeric value (for number data) or alphabetical order (for string data). The following code finds the top 5 most popular names in California in 2021.</p>
+<div class="cell" data-execution_count="26">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Sort names by count in year 2021</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Recall that `.head(5)` displays the first five rows in the DataFrame</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>babynames[babynames[<span class="st">"Year"</span>] <span class="op">==</span> <span class="dv">2021</span>].sort_values(<span class="st">"Count"</span>, ascending<span class="op">=</span><span class="va">False</span>).head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="61">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>State</th>
+      <th>Sex</th>
+      <th>Year</th>
+      <th>Name</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>397909</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>2021</td>
+      <td>Noah</td>
+      <td>2591</td>
+    </tr>
+    <tr>
+      <th>397910</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>2021</td>
+      <td>Liam</td>
+      <td>2469</td>
+    </tr>
+    <tr>
+      <th>232145</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>2021</td>
+      <td>Olivia</td>
+      <td>2395</td>
+    </tr>
+    <tr>
+      <th>232146</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>2021</td>
+      <td>Emma</td>
+      <td>2171</td>
+    </tr>
+    <tr>
+      <th>397911</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>2021</td>
+      <td>Mateo</td>
+      <td>2108</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<p>This offers us a lot of functionality, but what if we need to sort by some other metric? For example, what if we wanted to find the longest names in the DataFrame?</p>
+<p>We can do this by specifying the <code>key</code> parameter of <code>.sort_values</code>. The <code>key</code> parameter is assigned to a function of our choice. This function is then applied to each value in the specified column. <code>pandas</code> will, finally, sort the DataFrame by the values outputted by the function.</p>
+<div class="cell" data-execution_count="27">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Here, a lambda function is applied to find the length of each value, `x`, in the "Name" column</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>babynames.sort_values(<span class="st">"Name"</span>, key<span class="op">=</span><span class="kw">lambda</span> x: x.<span class="bu">str</span>.<span class="bu">len</span>(), ascending<span class="op">=</span><span class="va">False</span>).head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="62">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>State</th>
+      <th>Sex</th>
+      <th>Year</th>
+      <th>Name</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>313143</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>1989</td>
+      <td>Franciscojavier</td>
+      <td>6</td>
+    </tr>
+    <tr>
+      <th>333732</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>1997</td>
+      <td>Ryanchristopher</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>330421</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>1996</td>
+      <td>Franciscojavier</td>
+      <td>8</td>
+    </tr>
+    <tr>
+      <th>323615</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>1993</td>
+      <td>Johnchristopher</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>310235</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>1988</td>
+      <td>Franciscojavier</td>
+      <td>10</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="adding-and-removing-columns" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="adding-and-removing-columns"><span class="header-section-number">3.3</span> Adding and Removing Columns</h2>
+<p>To add a new column to a DataFrame, we use a syntax similar to that used when accessing an existing column. Specify the name of the new column by writing <code>dataframe["new_column"]</code>, then assign this to a Series or Array containing the values that will populate this column.</p>
+<div class="cell" data-execution_count="28">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Add a column named "name_lengths" that includes the length of each name</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>babynames[<span class="st">"name_lengths"</span>] <span class="op">=</span> babynames[<span class="st">"Name"</span>].<span class="bu">str</span>.<span class="bu">len</span>()</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>babynames.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="63">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>State</th>
+      <th>Sex</th>
+      <th>Year</th>
+      <th>Name</th>
+      <th>Count</th>
+      <th>name_lengths</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Mary</td>
+      <td>295</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Helen</td>
+      <td>239</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Dorothy</td>
+      <td>220</td>
+      <td>7</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Margaret</td>
+      <td>163</td>
+      <td>8</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1910</td>
+      <td>Frances</td>
+      <td>134</td>
+      <td>7</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="cell" data-execution_count="29">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Sort by the temporary column</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>babynames <span class="op">=</span> babynames.sort_values(by <span class="op">=</span> <span class="st">"name_lengths"</span>, ascending<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>babynames</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="64">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>State</th>
+      <th>Sex</th>
+      <th>Year</th>
+      <th>Name</th>
+      <th>Count</th>
+      <th>name_lengths</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>313143</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>1989</td>
+      <td>Franciscojavier</td>
+      <td>6</td>
+      <td>15</td>
+    </tr>
+    <tr>
+      <th>333732</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>1997</td>
+      <td>Ryanchristopher</td>
+      <td>5</td>
+      <td>15</td>
+    </tr>
+    <tr>
+      <th>330421</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>1996</td>
+      <td>Franciscojavier</td>
+      <td>8</td>
+      <td>15</td>
+    </tr>
+    <tr>
+      <th>323615</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>1993</td>
+      <td>Johnchristopher</td>
+      <td>5</td>
+      <td>15</td>
+    </tr>
+    <tr>
+      <th>310235</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>1988</td>
+      <td>Franciscojavier</td>
+      <td>10</td>
+      <td>15</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>240418</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>1922</td>
+      <td>Ed</td>
+      <td>9</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>115159</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1990</td>
+      <td>Vy</td>
+      <td>8</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>85666</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1980</td>
+      <td>Ly</td>
+      <td>5</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>343262</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>2001</td>
+      <td>Jr</td>
+      <td>6</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>385218</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>2016</td>
+      <td>An</td>
+      <td>10</td>
+      <td>2</td>
+    </tr>
+  </tbody>
+</table>
+<p>400762 rows × 6 columns</p>
+</div>
+</div>
+</div>
+<p>In the example above, we made use of an in-built function given to us by the <code>str</code> accessor for getting the length of names. Then we used <code>name_length</code> column to sort the dataframe. What if we had wanted to generate the values in our new column using a function of our own making?</p>
+<p>We can do this using the Series <a href="https://pandas.pydata.org/docs/reference/api/pandas.Series.map.html"><code>.map</code></a> method. <code>.map</code> takes in a function as input, and will apply this function to each value of a Series.</p>
+<p>For example, say we wanted to find the number of occurrences of the sequence “dr” or “ea” in each name.</p>
+<div class="cell" data-execution_count="30">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># First, define a function to count the number of times "dr" or "ea" appear in each name</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> dr_ea_count(string):</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> string.count(<span class="st">"dr"</span>) <span class="op">+</span> string.count(<span class="st">"ea"</span>)</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Then, use `map` to apply `dr_ea_count` to each name in the "Name" column</span></span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>babynames[<span class="st">"dr_ea_count"</span>] <span class="op">=</span> babynames[<span class="st">"Name"</span>].<span class="bu">map</span>(dr_ea_count)</span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Sort the DataFrame by the new "dr_ea_count" column so we can see our handiwork</span></span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>babynames.sort_values(by <span class="op">=</span> <span class="st">"dr_ea_count"</span>, ascending <span class="op">=</span> <span class="va">False</span>).head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="65">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>State</th>
+      <th>Sex</th>
+      <th>Year</th>
+      <th>Name</th>
+      <th>Count</th>
+      <th>name_lengths</th>
+      <th>dr_ea_count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>101969</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1986</td>
+      <td>Deandrea</td>
+      <td>6</td>
+      <td>8</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>304390</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>1985</td>
+      <td>Deandrea</td>
+      <td>6</td>
+      <td>8</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>131022</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1994</td>
+      <td>Leandrea</td>
+      <td>5</td>
+      <td>8</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>115950</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1990</td>
+      <td>Deandrea</td>
+      <td>5</td>
+      <td>8</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>108723</th>
+      <td>CA</td>
+      <td>F</td>
+      <td>1988</td>
+      <td>Deandrea</td>
+      <td>5</td>
+      <td>8</td>
+      <td>3</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<p>If we want to remove a column or row of a DataFrame, we can call the <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.drop.html"><code>.drop</code></a> method. Use the <code>axis</code> parameter to specify whether a column or row should be dropped. Unless otherwise specified, <code>pandas</code> will assume that we are dropping a row by default.</p>
+<div class="cell" data-execution_count="31">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Drop our "dr_ea_count" and "length" columns from the DataFrame</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>babynames <span class="op">=</span> babynames.drop([<span class="st">"dr_ea_count"</span>, <span class="st">"name_lengths"</span>], axis<span class="op">=</span><span class="st">"columns"</span>)</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>babynames.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="66">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>State</th>
+      <th>Sex</th>
+      <th>Year</th>
+      <th>Name</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>313143</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>1989</td>
+      <td>Franciscojavier</td>
+      <td>6</td>
+    </tr>
+    <tr>
+      <th>333732</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>1997</td>
+      <td>Ryanchristopher</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>330421</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>1996</td>
+      <td>Franciscojavier</td>
+      <td>8</td>
+    </tr>
+    <tr>
+      <th>323615</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>1993</td>
+      <td>Johnchristopher</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>310235</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>1988</td>
+      <td>Franciscojavier</td>
+      <td>10</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Notice that we reassigned <code>babynames</code> to the result of <code>babynames.drop(...)</code>. This is a subtle, but important point: <code>pandas</code> table operations <strong>do not occur in-place</strong>. Calling <code>dataframe.drop(...)</code> will output a <em>copy</em> of <code>dataframe</code> with the row/column of interest removed, without modifying the original <code>dataframe</code> table.</p>
+<p>In other words, if we simply call:</p>
+<div class="cell" data-execution_count="32">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># This creates a copy of `babynames` and removes the row with label 3...</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>babynames.drop(<span class="dv">3</span>, axis<span class="op">=</span><span class="st">"rows"</span>)</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a><span class="co"># ...but the original `babynames` is unchanged! </span></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Notice that the row with label 3 is still present</span></span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>babynames.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="67">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>State</th>
+      <th>Sex</th>
+      <th>Year</th>
+      <th>Name</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>313143</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>1989</td>
+      <td>Franciscojavier</td>
+      <td>6</td>
+    </tr>
+    <tr>
+      <th>333732</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>1997</td>
+      <td>Ryanchristopher</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>330421</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>1996</td>
+      <td>Franciscojavier</td>
+      <td>8</td>
+    </tr>
+    <tr>
+      <th>323615</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>1993</td>
+      <td>Johnchristopher</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>310235</th>
+      <td>CA</td>
+      <td>M</td>
+      <td>1988</td>
+      <td>Franciscojavier</td>
+      <td>10</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+<section id="aggregating-data-with-groupby" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="aggregating-data-with-groupby"><span class="header-section-number">3.4</span> Aggregating Data with GroupBy</h2>
+<p>Up until this point, we have been working with individual rows of DataFrames. As data scientists, we often wish to investigate trends across a larger <em>subset</em> of our data. For example, we may want to compute some summary statistic (the mean, median, sum, etc.) for a group of rows in our DataFrame. To do this, we’ll use <code>pandas</code> <code>GroupBy</code> objects.</p>
+<p>Let’s say we wanted to aggregate all rows in <code>babynames</code> for a given year.</p>
+<div class="cell" data-execution_count="33">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>babynames.groupby(<span class="st">"Year"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="68">
+<pre><code>&lt;pandas.core.groupby.generic.DataFrameGroupBy object at 0x7fece10c8220&gt;</code></pre>
+</div>
+</div>
+<p>What does this strange output mean? Calling <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.groupby.html"><code>.groupby</code></a> has generated a <code>GroupBy</code> object. You can imagine this as a set of “mini” sub-DataFrames, where each subframe contains all of the rows from <code>babynames</code> that correspond to a particular year.</p>
+<p>The diagram below shows a simplified view of <code>babynames</code> to help illustrate this idea.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/gb.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Creating a GroupBy object</figcaption><p></p>
+</figure>
+</div>
+<p>We can’t work with a <code>GroupBy</code> object directly – that is why you saw that strange output earlier, rather than a standard view of a DataFrame. To actually manipulate values within these “mini” DataFrames, we’ll need to call an <em>aggregation method</em>. This is a method that tells <code>pandas</code> how to aggregate the values within the <code>GroupBy</code> object. Once the aggregation is applied, <code>pandas</code> will return a normal (now grouped) DataFrame.</p>
+<p>The first aggregation method we’ll consider is <code>.agg</code>. The <code>.agg</code> method takes in a function as its argument; this function is then applied to each column of a “mini” grouped DataFrame. We end up with a new DataFrame with one aggregated row per subframe. Let’s see this in action by finding the <code>sum</code> of all counts for each year in <code>babynames</code> – this is equivalent to finding the number of babies born in each year.</p>
+<div class="cell" data-execution_count="34">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>babynames.groupby(<span class="st">"Year"</span>).agg(<span class="bu">sum</span>).head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="69">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Count</th>
+    </tr>
+    <tr>
+      <th>Year</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1910</th>
+      <td>9163</td>
+    </tr>
+    <tr>
+      <th>1911</th>
+      <td>9983</td>
+    </tr>
+    <tr>
+      <th>1912</th>
+      <td>17946</td>
+    </tr>
+    <tr>
+      <th>1913</th>
+      <td>22094</td>
+    </tr>
+    <tr>
+      <th>1914</th>
+      <td>26926</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<p>We can relate this back to the diagram we used above. Remember that the diagram uses a simplified version of <code>babynames</code>, which is why we see smaller values for the summed counts.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/agg.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Performing an aggregation</figcaption><p></p>
+</figure>
+</div>
+<p>Calling <code>.agg</code> has condensed each subframe back into a single row. This gives us our final output: a DataFrame that is now indexed by <code>"Year"</code>, with a single row for each unique year in the original <code>babynames</code> DataFrame.</p>
+<p>You may be wondering: where did the <code>"State"</code>, <code>"Sex"</code>, and <code>"Name"</code> columns go? Logically, it doesn’t make sense to <code>sum</code> the string data in these columns (how would we add “Mary” + “Ann”?). Because of this, <code>pandas</code> will simply omit these columns when it performs the aggregation on the DataFrame. Since this happens implicitly, without the user specifying that these columns should be ignored, it’s easy to run into troubling situations where columns are removed without the programmer noticing. It is better coding practice to select <em>only</em> the columns we care about before performing the aggregation.</p>
+<div class="cell" data-execution_count="35">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Same result, but now we explicitly tell Pandas to only consider the "Count" column when summing</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>babynames.groupby(<span class="st">"Year"</span>)[[<span class="st">"Count"</span>]].agg(<span class="bu">sum</span>).head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="70">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Count</th>
+    </tr>
+    <tr>
+      <th>Year</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1910</th>
+      <td>9163</td>
+    </tr>
+    <tr>
+      <th>1911</th>
+      <td>9983</td>
+    </tr>
+    <tr>
+      <th>1912</th>
+      <td>17946</td>
+    </tr>
+    <tr>
+      <th>1913</th>
+      <td>22094</td>
+    </tr>
+    <tr>
+      <th>1914</th>
+      <td>26926</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<section id="parting-note" class="level3" data-number="3.4.1">
+<h3 data-number="3.4.1" class="anchored" data-anchor-id="parting-note"><span class="header-section-number">3.4.1</span> Parting note</h3>
+<p>Manipulating <code>DataFrames</code> is a skill that is not mastered in just one day. Due to the flexibility of <code>pandas</code>, there are many different ways to get from a point A to a point B. We recommend trying multiple different ways to solve the same problem to gain even more practice and reach that point of mastery sooner.</p>
+<p>Next, we will start digging deeper into the mechanics behind grouping data.</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../pandas_1/pandas_1.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Pandas I</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>
