@@ -11,8 +11,6 @@ format:
       - cerulean
     callout-icon: false
 jupyter: python3
-execute: 
-  enabled: false
 ---
 
 ::: {.callout-note collapse="true"}
@@ -87,22 +85,21 @@ For example, to return all names associated with `F` sex:
 logical_operator = (babynames["Sex"] == "F")
 
 # Then, use this boolean array to filter the DataFrame
-babynames[logical_operator]
+babynames[logical_operator].head()
 ```
 
 Here, `logical_operator` evaluates to a Series of boolean values with length 400762.
 
 ```{python}
 #| code-fold: false
-logical_operator
+logical_operator.head()
 ```
 
 Rows starting at row 0 and ending at row 235790 evaluate to `True` and are thus returned in the DataFrame.
 
-
 ```{python}
 #| code-fold: true
-print(logical_operator.loc[logical_operator])
+print(logical_operator.loc[logical_operator].head())
 ```
 
 Passing a Series as an argument to `babynames[]` has the same affect as using a boolean array. In fact, the `[]` selection operator can take a boolean Series, array, and list as arguments. These three are used interchangeably thoughout the course.
@@ -111,7 +108,7 @@ We can also use `.loc` to achieve similar results.
 
 ```{python}
 #| code-fold: false
-babynames.loc[babynames["Sex"] == "F"]
+babynames.loc[babynames["Sex"] == "F"].head()
 ```
 
 Boolean conditions can be combined using various operators that allow us to filter results by multiple conditions. Some examples include the `&` (and) operator and the `|` (or) operator.
@@ -122,7 +119,7 @@ For example, if we want to return data on all females born before the 21st centu
 
 ```{python}
 #| code-fold: false
-babynames[(babynames["Sex"] == "F") & (babynames["Year"] < 2000)]
+babynames[(babynames["Sex"] == "F") & (babynames["Year"] < 2000)].head()
 ```
 
 Boolean array selection is a useful tool, but can lead to overly verbose code for complex conditions. `Pandas` provide many alternatives: 
@@ -135,7 +132,7 @@ Boolean array selection is a useful tool, but can lead to overly verbose code fo
               (babynames["Name"] == "Alex") |
               (babynames["Name"] == "Ani") |
               (babynames["Name"] == "Lisa")]
-)
+).head()
 # Note: The parentheses surrounding the code make it possible to break the code on to multiple lines for readability
 ```
 
@@ -145,7 +142,7 @@ The `.isin` function can be used to filter dataframes. The method helps in selec
 #| code-fold: false
 
 names = ["Bella", "Alex", "Ani", "Lisa"]
-babynames[babynames["Name"].isin(names)]
+babynames[babynames["Name"].isin(names)].head()
 ```
 
 The function `str.startswith` can be used to define a filter based on string values in a `Series` object. 
@@ -153,7 +150,7 @@ The function `str.startswith` can be used to define a filter based on string val
 ```{python}
 #| code-fold: false
 
-babynames[babynames["Name"].str.startswith("N")]
+babynames[babynames["Name"].str.startswith("N")].head()
 ```
 
 ## Handy Utility Functions
@@ -256,7 +253,7 @@ When we want to know the distribution of the items in a Series (for example, wha
 ```{python}
 #| code-fold: false
 
-babynames["Name"].value_counts()
+babynames["Name"].value_counts().head()
 ```
 
 ### `.unique()`
@@ -278,7 +275,7 @@ Ordering a DataFrame can be useful for isolating extreme values. For example, th
 ```{python}
 #| code-fold: false
 
-babynames.sort_values(by = "Count", ascending=False)
+babynames.sort_values(by = "Count", ascending=False).head()
 ```
 
 We do not need to explicitly specify the column used for sorting when calling `.value_counts()` on a Series. We can still specify the ordering paradigm – that is, whether values are sorted in ascending or descending order.
@@ -286,7 +283,7 @@ We do not need to explicitly specify the column used for sorting when calling `.
 ```{python}
 #| code-fold: false
 
-babynames["Name"].sort_values(ascending=True)
+babynames["Name"].sort_values(ascending=True).head()
 ```
 
 #### Sorting With a Custom Key
@@ -324,7 +321,7 @@ babynames.head(5)
 ```{python}
 # Sort by the temporary column
 babynames = babynames.sort_values(by = "name_lengths", ascending=False)
-babynames
+babynames.head()
 ```
 
 In the example above, we made use of an in-built function given to us by the `str` accessor for getting the length of names. Then we used `name_length` column to sort the dataframe. What if we had wanted to generate the values in our new column using a function of our own making?
@@ -369,7 +366,6 @@ babynames.drop(3, axis="rows")
 # Notice that the row with label 3 is still present
 babynames.head(5)
 ```
-
 
 ## Aggregating Data with GroupBy
 
