@@ -94,6 +94,7 @@ Let's contextualize this in an example. We will use the familiar `births` datase
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 import pandas as pd
 
 births = pd.read_csv("data/baby.csv")
@@ -105,6 +106,7 @@ We can visualize the distribution of the `Maternal Smoker` column using a bar pl
 #### Plotting in Pandas
 
 ```{python}
+#| vscode: {languageId: python}
 births['Maternal Smoker'].value_counts().plot(kind = 'bar');
 ```
 
@@ -115,8 +117,9 @@ Plotting methods in `pandas` are the least preferred and not supported in Data 1
 #### Plotting in Matplotlib
 
 ```{python}
+#| vscode: {languageId: python}
 import matplotlib.pyplot as plt
-
+import numpy as np
 
 ms = births['Maternal Smoker'].value_counts()
 plt.bar(ms.index, ms)
@@ -131,6 +134,7 @@ However, notice how the x-axis is a range of integers rather than the two catego
 #### Plotting in Seaborn
 
 ```{python}
+#| vscode: {languageId: python}
 import seaborn as sns
 sns.countplot(data = births, x = "Maternal Smoker");
 ```
@@ -141,7 +145,7 @@ For the vast majority of visualizations, `seaborn` is far more concise and aesth
 
 #### Plotting in Plotly
 
-<img src="/visualization_1_files/plotly_viz.png" alt='plotly_viz' width='600'>
+<img src="./images/plotly_viz.png" alt='plotly_viz' width='600'>
 
 `plotly` is one of the most versatile plottling libraries and widely used in industry. However, `plotly` has various dependencies that make it difficult to support in Data 100. Therfore, we have intentionally excluded the code to generate the plot above.
 
@@ -170,6 +174,7 @@ Goal 2: To communicate results/conclusions to others.
 The out-of-the-box plots may not accomplish these goals, and knowing how to critically evaluate plots is an important skill. Let's revisit a plot and try and improve it to achieve the goals.
 
 ```{python}
+#| vscode: {languageId: python}
 births['Maternal Smoker'].value_counts().plot(kind = 'bar');
 ```
 
@@ -199,6 +204,7 @@ Revisiting our example with the `births` DataFrame, let's plot the distribution 
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 births.head(5)
 ```
 
@@ -207,6 +213,7 @@ How should we define our categories for this variable? In the previous example, 
 Under this assumption, let's plot this distribution using the `seaborn.countplot` function.
 
 ```{python}
+#| vscode: {languageId: python}
 sns.countplot(data = births, x = 'Maternal Pregnancy Weight');
 ```
 
@@ -215,12 +222,14 @@ This histogram clearly suffers from overplotting. This is somewhat expected for 
 To combat this problem, statisticians use bins to categorize numerical data. Luckily, `seaborn` provides a helpful plotting function that automatically bins our data.
 
 ```{python}
+#| vscode: {languageId: python}
 sns.histplot(data = births, x = "Maternal Pregnancy Weight");
 ```
 
 This diagram is known as a histogram. While it looks more reasonable, notice how we lose fine-grain information on the distribution of data contained within each bin. We can introduce rug plots to minimize this information loss. An overlaid "rug plot" displays the within-bin distribution of our data, as denoted by the thickness of the colored line on the x-axis.
 
 ```{python}
+#| vscode: {languageId: python}
 sns.histplot(data = births, x = "Maternal Pregnancy Weight");
 sns.rugplot(data = births, x = "Maternal Pregnancy Weight", color = 'red');
 ```
@@ -230,6 +239,7 @@ You may have seen histograms drawn differently - perhaps with an overlaid **dens
 To visualize a density curve, we can set the the `kde = True` argument of the `sns.histplot`. Setting the argument `stat = "density"` normalizes our histogram and displays densities, instead of counts, on the y-axis. You'll notice that the area under the density curve is 1.
 
 ```{python}
+#| vscode: {languageId: python}
 sns.histplot(data = births, x = "Maternal Pregnancy Weight", kde = True, 
              stat = "density")
 sns.rugplot(data = births, x = "Maternal Pregnancy Weight", color = 'red');
@@ -258,6 +268,7 @@ In the case where a distribution has equal-sized right and left tails, it is **s
 Think of the mean as the “balancing point” of the density.
 
 ```{python}
+#| vscode: {languageId: python}
 sns.histplot(data = births, x = 'Maternal Pregnancy Weight');
 df_mean = np.mean(births["Maternal Pregnancy Weight"])
 df_median = np.median(births["Maternal Pregnancy Weight"])
@@ -273,6 +284,7 @@ Outliers disproportionately influce the mean because their magnitude is directly
 Will define outliers more carefully later when we talk about box plots.
 
 ```{python}
+#| vscode: {languageId: python}
 sns.histplot(data = births, x = 'Maternal Pregnancy Weight');
 ## Where do we draw the line of outlier? 
 plt.axvline(df_mean*1.75, color = "red")
@@ -287,12 +299,14 @@ A **mode** of a distribution is a local or global maximum. A distribution with a
 For example, the distribution of birth weights for maternal smokers looks (weakly) multimodal.
 
 ```{python}
+#| vscode: {languageId: python}
 sns.histplot(data = births, x = 'Maternal Pregnancy Weight');
 ```
 
 However, changing the bins reveals that the data is not multimodal.
 
 ```{python}
+#| vscode: {languageId: python}
 sns.histplot(data = births, x = 'Maternal Pregnancy Weight', bins = 20);
 ```
 
@@ -313,6 +327,7 @@ From a goal 1 perspective, this is EDA which tells us there may be something int
 - If we found something truly interesting, we’d have to cautiously write up an argument and create goal 2 level visualizations.
 
 ```{python}
+#| vscode: {languageId: python}
 births_non_maternal_smoker = births[births['Maternal Smoker'] == False]
 births_maternal_smoker = births[births['Maternal Smoker'] == True]
  
@@ -320,6 +335,7 @@ sns.histplot(data = births_maternal_smoker , x= 'Birth Weight',kde = True);
 ```
 
 ```{python}
+#| vscode: {languageId: python}
 sns.histplot(data = births_non_maternal_smoker , x= 'Birth Weight',kde = True);
 ```
 
@@ -355,6 +371,7 @@ Let's visualize a box-plot of the `Birth Weight` column.
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 
 import numpy as np
 
@@ -384,6 +401,7 @@ Here is a helpful visual that summarizes our discussion above.
 Another diagram that is useful in visualizing a variable's distribution is the violin plot. A **violin plot** supplements a box-plot with a smoothed density curve on either side of the plot. These density curves highlight the relative frequency of variable's possible values. If you look closely, you'll be able to discern the quartiles, whiskers, and other hallmark features of the box-plot.
 
 ```{python}
+#| vscode: {languageId: python}
 sns.violinplot(data = births, y = 'Birth Weight');
 ```
 
@@ -394,8 +412,7 @@ Earlier in our discussion of the mode, we visualized two histograms that describ
 In `seaborn`, multiple calls to a plotting library in the same code cell will overlay the plots. For example:
 
 ```{python}
-
-
+#| vscode: {languageId: python}
 sns.histplot(data = births_maternal_smoker, x= 'Birth Weight',
              color = 'orange', label = 'smoker')
 sns.histplot(data = births_non_maternal_smoker, x= 'Birth Weight',
@@ -406,6 +423,7 @@ plt.legend();
 However, notice how this diagram suffers from overplotting. We can fix this with a call to `sns.kdeplot`. This will remove the bins and overlay the histogram with a density curve that better summarizes the distribution.
 
 ```{python}
+#| vscode: {languageId: python}
 sns.kdeplot(data = births_maternal_smoker, x= 'Birth Weight', color = 'orange', label = 'smoker')
 sns.kdeplot(data = births_non_maternal_smoker, x= 'Birth Weight', color = 'blue', label = 'nonsmoker')
 plt.legend();
@@ -414,6 +432,7 @@ plt.legend();
 Unfortunately, we lose critical information in our distribution by removing small details. Therefore, we typically prefer to use box-plots and violin plots when comparing distributions. These are more concise and allow us to compare summary statistics across many distributions.
 
 ```{python}
+#| vscode: {languageId: python}
 sns.violinplot(data=births, x='Maternal Smoker', y='Birth Weight');
 # The following line of code plots a box-plot
 #sns.boxplot(data=births, x='Maternal Smoker', y='Birth Weight');
@@ -424,55 +443,4 @@ Ridge plots show many density curves offset from one another with minimal overla
 - They are useful when the specific shape of each curve is important.
 
 <img src = ".\images\example_ridge.png" alt ="example_ridge.png" ></img>
-
-### Relationships Between Quantitative Variables
-
-Up until now, we've discussed how to visualize single-variable distributions. Going beyond this, we want to understand the relationship between pairs of numerical variables.
-
-#### Scatter Plots
-
-**Scatter plots** are one of the most useful tools in representing the relationship between two quantitative variables. They are particularly important in gauging the strength, or correlation between variables. Knowledge of these relationships can then motivate decisions in our modeling process.
-
-For example, let's plot a scatter plot comparing the `Maternal Pregnancy Weight` and `Birth Weight` colums, using both `matplotlib` and `seaborn`.
-
-```{python}
-# Matplotlib Example
-plt.scatter(births['Maternal Pregnancy Weight'], births['Birth Weight'])
-# For brevity, we have excluded code to label the axes
-```
-
-```{python}
-# Seaborn Example
-sns.scatterplot(data = births, x = "Maternal Pregnancy Weight", y = "Birth Weight",
-                hue = "Maternal Smoker")
-```
-
-This is an example where color is used to add a third dimension to our plot. This is possible with the `hue` paramater in `seaborn`, which adds a categorical column encoding to an existing visualization. This way, we can look for relationships in `Maternal Pregnancy Weight` and `Birth Weight` in both maternal smokers and non-smokers. If we wish to see the relationship's strength more clearly, we can use `sns.lmplot`.
-
-```{python}
-sns.lmplot(data = births, x = "Maternal Pregnancy Weight", y = "Birth Weight", 
-           hue="Maternal Smoker", ci=False);
-```
-
-We can make out a weak, positive relationship in pregnancy weight and birth weight for both maternal smokers and non-smokers (slightly more positive in maternal smokers).
-
-#### Hex Plots and Contour Plots
-
-Unfortunately, our scatter plots above suffered from overplotting, which made them hard to interpret. And with a large number of points, jittering is unlikely to resolve the issue. Instead, we can look to hex plots and contour plots.
-
-**Hex Plots** can be thought of as a two dimensional histogram that shows the joint distribution between two variables. This is particularly useful working with very dense data. 
-
-```{python}
-sns.jointplot(data = births, x = "Maternal Pregnancy Weight", 
-              y = "Birth Weight", kind = 'hex')
-```
-
-The axes are evidently binned into hexagons, which makes the linear relationship easier to decipher. Darker regions generally indicate a higher density of points.
-
-On the other hand, **contour plots** are two dimensional versions of density curves with marginal distributions of each variable on the axes. We've used very similar code here to generate our contour plots, with the addition of the `kind = 'kde'` and `fill = True` arguments.
-
-```{python}
-sns.jointplot(data = births, x = "Maternal Pregnancy Weight", 
-              y = "Birth Weight", kind = 'kde', fill = True)
-```
 
