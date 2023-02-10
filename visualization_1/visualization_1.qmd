@@ -117,6 +117,7 @@ Plotting methods in `pandas` are the least preferred and not supported in Data 1
 ```{python}
 import matplotlib.pyplot as plt
 
+
 ms = births['Maternal Smoker'].value_counts()
 plt.bar(ms.index, ms)
 plt.xlabel("Maternal Smoker")
@@ -148,6 +149,47 @@ By now, you'll have noticed that each of these plotting libraries have a very di
 
 1. [Matplotlib Documentation](https://matplotlib.org/stable/index.html)
 2. [Seaborn Documentation](https://seaborn.pydata.org/)
+
+## Introspection
+
+Plots are a tool you will be using constantly throughout the data science life-cycle. Remember to always keep in mind the 2 goals of data visualization in mind when plotting. 
+
+
+Goal 1: To help your own understanding of your data/results.
+- Key part of exploratory data analysis.
+- Useful throughout modeling as well.
+- Lightweight, iterative and flexible.
+
+Goal 2: To communicate results/conclusions to others.
+- Highly editorial and selective. 
+- Be thoughtful and careful!
+- Fine tuned to achieve a communications goal.
+- Often time-consuming: bridges into design, even art.
+
+
+The out-of-the-box plots may not accomplish these goals, and knowing how to critically evaluate plots is an important skill. Let's revisit a plot and try and improve it to achieve the goals.
+
+```{python}
+births['Maternal Smoker'].value_counts().plot(kind = 'bar');
+```
+
+Example Questions:
+- What colors should we use?
+- How wide should the bars be?
+- Should the legend exist?
+- Should the bars and axes have dark borders?
+
+To accomplish goal 2, here are some ways we can improve plot:
+- Introducing different colors for each bar
+- Including a legend
+- Including a title
+- Labeling the y-axis
+- Using color-blind friendly palettes
+- Reorienting the labels
+- Increase the font size
+ 
+<img src="images/example_smokers.png" alt='example_smokers' width='500'>
+
 
 ### Histograms
 
@@ -213,29 +255,84 @@ If a distribution has a long left tail, it is **skewed left**. In a left-skewed 
 
 In the case where a distribution has equal-sized right and left tails, it is **symmetric**. The mean is approximately **equal** to the median.
 
+Think of the mean as the “balancing point” of the density.
+
+```{python}
+sns.histplot(data = births, x = 'Maternal Pregnancy Weight');
+df_mean = np.mean(births["Maternal Pregnancy Weight"])
+df_median = np.median(births["Maternal Pregnancy Weight"])
+print("The mean is: {} and the median is {}".format(df_mean,df_median))
+```
+
 #### Outliers
 
 Loosely speaking, an **outlier** is defined as a data point that lies an abnormally large distance away from other values. We'll define the statistical measure for this shortly.
 
 Outliers disproportionately influce the mean because their magnitude is directly involved in computing the average. However, the median is largely unaffected - the magnitude of an outlier is irrelevant; we only care that it is some non-zero distance away from the midpoint of the data.
 
+Will define outliers more carefully later when we talk about box plots.
+
+```{python}
+sns.histplot(data = births, x = 'Maternal Pregnancy Weight');
+## Where do we draw the line of outlier? 
+plt.axvline(df_mean*1.75, color = "red")
+```
+
 #### Modes
 
 A **mode** of a distribution is a local or global maximum. A distribution with a single clear maximum is **unimodal**, distributions with two modes are **bimodal**, and those with 3 or more are **multimodal**.
 
-For example, the distribution of birth weights for maternal smokers is (weakly) multimodal.
+- Need to distinguish between **modes** and *random noise*.
+
+For example, the distribution of birth weights for maternal smokers looks (weakly) multimodal.
 
 ```{python}
+sns.histplot(data = births, x = 'Maternal Pregnancy Weight');
+```
+
+However, changing the bins reveals that the data is not multimodal.
+
+```{python}
+sns.histplot(data = births, x = 'Maternal Pregnancy Weight', bins = 20);
+```
+
+#### Density Curves
+
+Instead of a discrete histogram, we can visualize what a continuous distribution corresponding to that same data could look like using a curve.
+- The smooth curve drawn on top of the histogram here is called a density curve.
+
+In lecture 8, we will study how exactly to compute these density curves (using a technique is called Kernel Density Estimation). 
+
+If we plot `birth weights` of babies of *smoking mothers*, we get a histogram that appears bimodal.
+- Density curve reinforces belief in this bimodality.
+
+However, if we plot `birth weights` of babies of *non-smoking mothers*, we get a histogram that appears unimodal.
+
+From a goal 1 perspective, this is EDA which tells us there may be something interesting here worth pursuing.
+- Deeper analysis necessary!
+- If we found something truly interesting, we’d have to cautiously write up an argument and create goal 2 level visualizations.
+
+```{python}
+births_non_maternal_smoker = births[births['Maternal Smoker'] == False]
 births_maternal_smoker = births[births['Maternal Smoker'] == True]
-sns.histplot(data = births_maternal_smoker, x= 'Birth Weight');
+ 
+sns.histplot(data = births_maternal_smoker , x= 'Birth Weight',kde = True);
 ```
-
-On the other hand, the distribution of birth weights for maternal non-smokers is unimodal.
 
 ```{python}
-births_maternal_smoker = births[births['Maternal Smoker'] == False]
-sns.histplot(data = births_maternal_smoker, x= 'Birth Weight');
+sns.histplot(data = births_non_maternal_smoker , x= 'Birth Weight',kde = True);
 ```
+
+#### Histograms and Density
+
+Rather than labeling by counts, we can instead plot the density, as shown below. Density gives us a measure that is invariant to the total number of observed units. The numerical values on the Y-axis for a sample of 100 units would be the same for when we observe a sample of 10000 units instead. We can still calculate the absolute number of observed units using density.
+
+Example: There are 1174 observations total.
+- Total area of this bin should be: 120/1174  = ~10%
+- Density of this bin is therefore: 10% / (115 - 110) = 0.02
+
+<img src="images/example_density.png" alt='example_density.png' width='500'>
+
 
 ### Box Plots and Violin Plots
 
@@ -297,8 +394,7 @@ Earlier in our discussion of the mode, we visualized two histograms that describ
 In `seaborn`, multiple calls to a plotting library in the same code cell will overlay the plots. For example:
 
 ```{python}
-births_maternal_smoker = births[births['Maternal Smoker'] == False]
-births_non_maternal_smoker = births[births['Maternal Smoker'] == True]
+
 
 sns.histplot(data = births_maternal_smoker, x= 'Birth Weight',
              color = 'orange', label = 'smoker')
@@ -322,6 +418,12 @@ sns.violinplot(data=births, x='Maternal Smoker', y='Birth Weight');
 # The following line of code plots a box-plot
 #sns.boxplot(data=births, x='Maternal Smoker', y='Birth Weight');
 ```
+
+#### Ridge Plots
+Ridge plots show many density curves offset from one another with minimal overlap.
+- They are useful when the specific shape of each curve is important.
+
+<img src = ".\images\example_ridge.png" alt ="example_ridge.png" ></img>
 
 ### Relationships Between Quantitative Variables
 
@@ -373,5 +475,4 @@ On the other hand, **contour plots** are two dimensional versions of density cur
 sns.jointplot(data = births, x = "Maternal Pregnancy Weight", 
               y = "Birth Weight", kind = 'kde', fill = True)
 ```
-
 
