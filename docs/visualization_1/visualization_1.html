@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.280">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Principles and Techniques of Data Science - 7&nbsp; Visualization I</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../visualization_2/visualization_2.html" rel="next">
+<link href="../regex/regex.html" rel="prev">
+<link href="../data100_logo.png" rel="icon" type="image/png">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Visualization I</span></h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="../index.html" class="sidebar-logo-link">
+      <img src="../data100_logo.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Principles and Techniques of Data Science</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/DS-100/course-notes" title="Source Code" class="sidebar-tool px-1"><i class="bi bi-github"></i></a>
+    <a href="../Principles-and-Techniques-of-Data-Science.pdf" title="Download PDF" class="sidebar-tool px-1"><i class="bi bi-file-pdf"></i></a>
+</div>
+    </div>
+      </div>
+      <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">Welcome</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../intro_lec/introduction.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pandas_1/pandas_1.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Pandas I</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pandas_2/pandas_2.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Pandas II</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pandas_3/pandas_3.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Pandas III</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../eda/eda.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Data Cleaning and EDA</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../regex/regex.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Regular Expressions</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../visualization_1/visualization_1.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Visualization I</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../visualization_2/visualization_2.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Visualization II</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#visualizations-in-data-8-and-data-100-so-far" id="toc-visualizations-in-data-8-and-data-100-so-far" class="nav-link active" data-scroll-target="#visualizations-in-data-8-and-data-100-so-far"><span class="toc-section-number">7.1</span>  Visualizations in Data 8 and Data 100 (so far)</a></li>
+  <li><a href="#goals-of-visualization" id="toc-goals-of-visualization" class="nav-link" data-scroll-target="#goals-of-visualization"><span class="toc-section-number">7.2</span>  Goals of Visualization</a></li>
+  <li><a href="#an-overview-of-distributions" id="toc-an-overview-of-distributions" class="nav-link" data-scroll-target="#an-overview-of-distributions"><span class="toc-section-number">7.3</span>  An Overview of Distributions</a></li>
+  <li><a href="#bar-plots" id="toc-bar-plots" class="nav-link" data-scroll-target="#bar-plots"><span class="toc-section-number">7.4</span>  Bar Plots</a>
+  <ul>
+  <li><a href="#plotting-in-pandas" id="toc-plotting-in-pandas" class="nav-link" data-scroll-target="#plotting-in-pandas"><span class="toc-section-number">7.4.1</span>  Plotting in Pandas</a></li>
+  <li><a href="#plotting-in-matplotlib" id="toc-plotting-in-matplotlib" class="nav-link" data-scroll-target="#plotting-in-matplotlib"><span class="toc-section-number">7.4.2</span>  Plotting in Matplotlib</a></li>
+  <li><a href="#plotting-in-seaborn" id="toc-plotting-in-seaborn" class="nav-link" data-scroll-target="#plotting-in-seaborn"><span class="toc-section-number">7.4.3</span>  Plotting in Seaborn</a></li>
+  <li><a href="#plotting-in-plotly" id="toc-plotting-in-plotly" class="nav-link" data-scroll-target="#plotting-in-plotly"><span class="toc-section-number">7.4.4</span>  Plotting in Plotly</a></li>
+  </ul></li>
+  <li><a href="#histograms" id="toc-histograms" class="nav-link" data-scroll-target="#histograms"><span class="toc-section-number">7.5</span>  Histograms</a></li>
+  <li><a href="#evaluating-histograms" id="toc-evaluating-histograms" class="nav-link" data-scroll-target="#evaluating-histograms"><span class="toc-section-number">7.6</span>  Evaluating Histograms</a>
+  <ul>
+  <li><a href="#skewness-and-tails" id="toc-skewness-and-tails" class="nav-link" data-scroll-target="#skewness-and-tails"><span class="toc-section-number">7.6.1</span>  Skewness and Tails</a></li>
+  <li><a href="#outliers" id="toc-outliers" class="nav-link" data-scroll-target="#outliers"><span class="toc-section-number">7.6.2</span>  Outliers</a></li>
+  <li><a href="#modes" id="toc-modes" class="nav-link" data-scroll-target="#modes"><span class="toc-section-number">7.6.3</span>  Modes</a></li>
+  </ul></li>
+  <li><a href="#density-curves" id="toc-density-curves" class="nav-link" data-scroll-target="#density-curves"><span class="toc-section-number">7.7</span>  Density Curves</a>
+  <ul>
+  <li><a href="#histograms-and-density" id="toc-histograms-and-density" class="nav-link" data-scroll-target="#histograms-and-density"><span class="toc-section-number">7.7.1</span>  Histograms and Density</a></li>
+  </ul></li>
+  <li><a href="#box-plots-and-violin-plots" id="toc-box-plots-and-violin-plots" class="nav-link" data-scroll-target="#box-plots-and-violin-plots"><span class="toc-section-number">7.8</span>  Box Plots and Violin Plots</a>
+  <ul>
+  <li><a href="#boxplots" id="toc-boxplots" class="nav-link" data-scroll-target="#boxplots"><span class="toc-section-number">7.8.1</span>  Boxplots</a></li>
+  <li><a href="#violin-plots" id="toc-violin-plots" class="nav-link" data-scroll-target="#violin-plots"><span class="toc-section-number">7.8.2</span>  Violin Plots</a></li>
+  </ul></li>
+  <li><a href="#comparing-quantitative-distributions" id="toc-comparing-quantitative-distributions" class="nav-link" data-scroll-target="#comparing-quantitative-distributions"><span class="toc-section-number">7.9</span>  Comparing Quantitative Distributions</a></li>
+  <li><a href="#ridge-plots" id="toc-ridge-plots" class="nav-link" data-scroll-target="#ridge-plots"><span class="toc-section-number">7.10</span>  Ridge Plots</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Visualization I</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<div class="callout-note callout callout-style-default no-icon callout-captioned">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Learning Outcomes
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li>Use <code>matplotlib</code>, <code>seaborn</code>, and <code>plotly</code> to create data visualization.</li>
+<li>Analyze histogram and identify outliers, mode, and skewness.</li>
+<li>Using <code>boxplot</code> and <code>violinplot</code> to compare two distributions.</li>
+<li></li>
+</ul>
+</div>
+</div>
+</div>
+<p>In our journey of the data science lifecycle, we have begun to explore the vast world of exploratory data analysis. More recently, we learned how to pre-process data using various data manipulation techniques. As we work towards understanding our data, there is one key component missing in our arsenal - the ability to visualize and discern relationships in existing data.</p>
+<p>These next two lectures will introduce you to various examples of data visualizations and their underlying theory. In doing so, we’ll motivate their importace in real-world examples with the use of plotting libraries.</p>
+<section id="visualizations-in-data-8-and-data-100-so-far" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="visualizations-in-data-8-and-data-100-so-far"><span class="header-section-number">7.1</span> Visualizations in Data 8 and Data 100 (so far)</h2>
+<p>You’ve likely encountered several forms of data visualizations in your studies. You may remember two such examples from Data 8: line charts and histograms. Each of these served a unique purpose. For example, line charts displayed how numerical quantities changed over time, while histograms were useful in understanding a variable’s distribution.</p>
+<div class="columns">
+<div class="column" style="width:30%;">
+<p><strong>Line Chart</strong></p>
+<p><img src="images/line_chart_viz.png" alt="line_chart_viz" width="300"></p>
+</div><div class="column" style="width:30%;">
+<!-- empty column to create gap -->
+</div><div class="column" style="width:30%;">
+<p><strong>Histogram</strong></p>
+<p><img src="images/histogram_viz.png" alt="histogram_viz" width="300"></p>
+</div>
+</div>
+</section>
+<section id="goals-of-visualization" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="goals-of-visualization"><span class="header-section-number">7.2</span> Goals of Visualization</h2>
+<p>Visualizations are useful for a number of reasons. In Data 100, we consider two areas in particular:</p>
+<ol type="1">
+<li>To broaden your understanding of the data
+<ul>
+<li>Key part in exploratory data analysis.</li>
+<li>Useful in investigating relationships between variables.</li>
+</ul></li>
+<li>To communicate results/conclusions to others
+<ul>
+<li>Visualization theory is especially important here.</li>
+</ul></li>
+</ol>
+<p>One of the most common applications of visualizations is in understanding a distribution of data.</p>
+</section>
+<section id="an-overview-of-distributions" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="an-overview-of-distributions"><span class="header-section-number">7.3</span> An Overview of Distributions</h2>
+<p>A distribution describes the frequency of unique values in a variable. Distributions must satisfy two properties:</p>
+<ol type="1">
+<li>Each data point must belong to only one category.</li>
+<li>The total frequency of all categories must sum to 100%. In other words, their total count should equal the number of values in consideration.</li>
+</ol>
+<div class="columns">
+<div class="column" style="width:30%;">
+<p><strong>Not a Valid Distribution</strong></p>
+<p><img src="images/bad_distro.png" alt="bad_distro" width="300"></p>
+</div><div class="column" style="width:30%;">
+<!-- empty column to create gap -->
+</div><div class="column" style="width:30%;">
+<p><strong>Valid Distribution</strong></p>
+<p><img src="images/good_distro.png" alt="good_distro" width="300"></p>
+</div>
+</div>
+<p>Left Diagram: This is not a valid distribution since individuals can be associated to more than one category and the bar values demonstrate values in minutes and not probability</p>
+<p>Right Diagram: This example satisfies the two properties of distributions, so it is a valid distribution.</p>
+</section>
+<section id="bar-plots" class="level2" data-number="7.4">
+<h2 data-number="7.4" class="anchored" data-anchor-id="bar-plots"><span class="header-section-number">7.4</span> Bar Plots</h2>
+<p>As we saw above, a <strong>bar plot</strong> is one of the most common ways of displaying the distribution of a <strong>qualitative</strong> (categorical) variable. The length of a bar plot encodes the frequency of a category; the width encodes no useful information.</p>
+<p>Let’s contextualize this in an example. We will use the familiar <code>births</code> dataset from Data 8 in our analysis.</p>
+<div class="cell" data-tags="[]" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="1">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>births <span class="op">=</span> pd.read_csv(<span class="st">"data/baby.csv"</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>births.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="1">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Birth Weight</th>
+      <th>Gestational Days</th>
+      <th>Maternal Age</th>
+      <th>Maternal Height</th>
+      <th>Maternal Pregnancy Weight</th>
+      <th>Maternal Smoker</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>120</td>
+      <td>284</td>
+      <td>27</td>
+      <td>62</td>
+      <td>100</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>113</td>
+      <td>282</td>
+      <td>33</td>
+      <td>64</td>
+      <td>135</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>128</td>
+      <td>279</td>
+      <td>28</td>
+      <td>64</td>
+      <td>115</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>108</td>
+      <td>282</td>
+      <td>23</td>
+      <td>67</td>
+      <td>125</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>136</td>
+      <td>286</td>
+      <td>25</td>
+      <td>62</td>
+      <td>93</td>
+      <td>False</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<p>We can visualize the distribution of the <code>Maternal Smoker</code> column using a bar plot. There are a few ways to do this.</p>
+<section id="plotting-in-pandas" class="level3" data-number="7.4.1">
+<h3 data-number="7.4.1" class="anchored" data-anchor-id="plotting-in-pandas"><span class="header-section-number">7.4.1</span> Plotting in Pandas</h3>
+<div class="cell" data-tags="[]" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>births[<span class="st">'Maternal Smoker'</span>].value_counts().plot(kind <span class="op">=</span> <span class="st">'bar'</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="visualization_1_files/figure-html/cell-3-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Recall that <code>.value_counts()</code> returns a <code>Series</code> with the total count of each unique value. We call <code>.plot(kind = 'bar')</code> on this result to visualize these counts as a bar plot.</p>
+<p>Plotting methods in <code>pandas</code> are the least preferred and not supported in Data 100, as their functionality is limited. Instead, future examples will focus on other libaries built specifically for visualizing data. The most well-known library here is <code>matplotlib</code>.</p>
+</section>
+<section id="plotting-in-matplotlib" class="level3" data-number="7.4.2">
+<h3 data-number="7.4.2" class="anchored" data-anchor-id="plotting-in-matplotlib"><span class="header-section-number">7.4.2</span> Plotting in Matplotlib</h3>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>ms <span class="op">=</span> births[<span class="st">'Maternal Smoker'</span>].value_counts()</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>plt.bar(ms.index.astype(<span class="st">'string'</span>), ms)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Maternal Smoker'</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Count'</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="visualization_1_files/figure-html/cell-4-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>While more code is required to achieve the same result, <code>matplotlib</code> is often used over <code>pandas</code> for its ability to plot more complex visualizations, some of which are discussed shortly.</p>
+<p>However, notice how we need to explicitly specify the type of the value for the x-axis to <code>string</code>. In absence of conversion, the x-axis will be a range of integers rather than the two categories, <code>True</code> and <code>False</code>. This is because <code>matplotlib</code> coerces <code>True</code> to a value of 1 and <code>False</code> to 0. Also, note how we needed to label the axes with <code>plt.xlabel</code> and <code>plt.ylabel</code> - <code>matplotlib</code> does not support automatic axis labeling. To get around these inconveniences, we can use a more effecient plotting library, <code>seaborn</code>.</p>
+</section>
+<section id="plotting-in-seaborn" class="level3" data-number="7.4.3">
+<h3 data-number="7.4.3" class="anchored" data-anchor-id="plotting-in-seaborn"><span class="header-section-number">7.4.3</span> Plotting in Seaborn</h3>
+<div class="cell" data-tags="[]" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>sns.countplot(data <span class="op">=</span> births, x <span class="op">=</span> <span class="st">'Maternal Smoker'</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="visualization_1_files/figure-html/cell-5-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p><code>seaborn.countplot</code> both counts and visualizes the number of unique values in a given column. This column is specified by the <code>x</code> argument to <code>sns.countplot</code>, while the <code>DataFrame</code> is specified by the <code>data</code> argument.</p>
+<p>For the vast majority of visualizations, <code>seaborn</code> is far more concise and aesthetically pleasing than <code>matplotlib</code>. However, the color scheme of this particular bar plot is abritrary - it encodes no additional information about the categories themselves. This is not always true; color may signify meaningful detail in other visualizations. We’ll explore this more in-depth during the next lecture.</p>
+</section>
+<section id="plotting-in-plotly" class="level3" data-number="7.4.4">
+<h3 data-number="7.4.4" class="anchored" data-anchor-id="plotting-in-plotly"><span class="header-section-number">7.4.4</span> Plotting in Plotly</h3>
+<p><img src="images/plotly_viz.png" alt="plotly_viz" width="600"></p>
+<p><code>plotly</code> is one of the most versatile plottling libraries and widely used in industry. However, <code>plotly</code> has various dependencies that make it difficult to support in Data 100. Therfore, we have intentionally excluded the code to generate the plot above.</p>
+<p>By now, you’ll have noticed that each of these plotting libraries have a very different syntax. As with <code>pandas</code>, we’ll teach you the important methods in <code>matplotlib</code> and <code>seaborn</code>, but you’ll learn more through documentation.</p>
+<ol type="1">
+<li><a href="https://matplotlib.org/stable/index.html">Matplotlib Documentation</a></li>
+<li><a href="https://seaborn.pydata.org/">Seaborn Documentation</a></li>
+</ol>
+<p>Example Questions: - What colors should we use? - How wide should the bars be? - Should the legend exist? - Should the bars and axes have dark borders?</p>
+<p>To accomplish goal 2, here are some ways we can improve plot: - Introducing different colors for each bar - Including a legend - Including a title - Labeling the y-axis - Using color-blind friendly palettes - Re-orienting the labels - Increase the font size</p>
+</section>
+</section>
+<section id="histograms" class="level2" data-number="7.5">
+<h2 data-number="7.5" class="anchored" data-anchor-id="histograms"><span class="header-section-number">7.5</span> Histograms</h2>
+<p><strong>Histograms</strong> are a natural extension to bar plots; they visualize the distribution of <strong>quantitative</strong> (numerical) data.</p>
+<p>Revisiting our example with the <code>births</code> DataFrame, let’s plot the distribution of the <code>Maternal Pregnancy Weight</code> column.</p>
+<div class="cell" data-execution_count="5">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>births.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="5">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Birth Weight</th>
+      <th>Gestational Days</th>
+      <th>Maternal Age</th>
+      <th>Maternal Height</th>
+      <th>Maternal Pregnancy Weight</th>
+      <th>Maternal Smoker</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>120</td>
+      <td>284</td>
+      <td>27</td>
+      <td>62</td>
+      <td>100</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>113</td>
+      <td>282</td>
+      <td>33</td>
+      <td>64</td>
+      <td>135</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>128</td>
+      <td>279</td>
+      <td>28</td>
+      <td>64</td>
+      <td>115</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>108</td>
+      <td>282</td>
+      <td>23</td>
+      <td>67</td>
+      <td>125</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>136</td>
+      <td>286</td>
+      <td>25</td>
+      <td>62</td>
+      <td>93</td>
+      <td>False</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<p>How should we define our categories for this variable? In the previous example, these were the unique values of the <code>Maternal Smoker</code> column: <code>True</code> and <code>False</code>. If we use similar logic here, our categories are the different numerical weights contained in the <code>Maternal Pregnancy Weight</code> column.</p>
+<p>Under this assumption, let’s plot this distribution using the <code>seaborn.countplot</code> function.</p>
+<div class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>sns.countplot(data <span class="op">=</span> births, x <span class="op">=</span> <span class="st">'Maternal Pregnancy Weight'</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="visualization_1_files/figure-html/cell-7-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>This histogram clearly suffers from <strong>overplotting</strong>. This is somewhat expected for <code>Maternal Pregnancy Weight</code> - it is a quantitative variable that takes on a wide range of values.</p>
+<p>To combat this problem, statisticians use bins to categorize numerical data. Luckily, <code>seaborn</code> provides a helpful plotting function that automatically bins our data.</p>
+<div class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>sns.histplot(data <span class="op">=</span> births, x <span class="op">=</span> <span class="st">'Maternal Pregnancy Weight'</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="visualization_1_files/figure-html/cell-8-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>This diagram is known as a histogram. While it looks more reasonable, notice how we lose fine-grain information on the distribution of data contained within each bin. We can introduce rug plots to minimize this information loss. An overlaid “rug plot” displays the within-bin distribution of our data, as denoted by the thickness of the colored line on the x-axis.</p>
+<div class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>sns.histplot(data <span class="op">=</span> births, x <span class="op">=</span> <span class="st">'Maternal Pregnancy Weight'</span>)<span class="op">;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>sns.rugplot(data <span class="op">=</span> births, x <span class="op">=</span> <span class="st">'Maternal Pregnancy Weight'</span>, color <span class="op">=</span> <span class="st">'red'</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="visualization_1_files/figure-html/cell-9-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>You may have seen histograms drawn differently - perhaps with an overlaid <strong>density curve</strong> and normalized y-axis. We can display both with a few tweaks to our code.</p>
+<p>To visualize a density curve, we can set the the <code>kde = True</code> argument of the <code>sns.histplot</code>. Setting the argument <code>stat = 'density'</code> normalizes our histogram and displays densities, instead of counts, on the y-axis. You’ll notice that the area under the density curve is 1.</p>
+<div class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>sns.histplot(data <span class="op">=</span> births, x <span class="op">=</span> <span class="st">'Maternal Pregnancy Weight'</span>, kde <span class="op">=</span> <span class="va">True</span>, </span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>             stat <span class="op">=</span> <span class="st">'density'</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>sns.rugplot(data <span class="op">=</span> births, x <span class="op">=</span> <span class="st">'Maternal Pregnancy Weight'</span>, color <span class="op">=</span> <span class="st">'red'</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="visualization_1_files/figure-html/cell-10-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+<section id="evaluating-histograms" class="level2" data-number="7.6">
+<h2 data-number="7.6" class="anchored" data-anchor-id="evaluating-histograms"><span class="header-section-number">7.6</span> Evaluating Histograms</h2>
+<p>Histograms allow us to assess a distribution by their shape. There are a few properties of histograms we can analyze:</p>
+<ol type="1">
+<li>Skewness and Tails
+<ul>
+<li>Skewed left vs skewed right</li>
+<li>Left tail vs right tail</li>
+</ul></li>
+<li>Outliers
+<ul>
+<li>Defined arbitrarily for now</li>
+</ul></li>
+<li>Modes
+<ul>
+<li>Most commonly occuring data</li>
+</ul></li>
+</ol>
+<section id="skewness-and-tails" class="level3" data-number="7.6.1">
+<h3 data-number="7.6.1" class="anchored" data-anchor-id="skewness-and-tails"><span class="header-section-number">7.6.1</span> Skewness and Tails</h3>
+<p>If a distribution has a long right tail (such as <code>Maternal Pregancy Weight</code>), it is <strong>skewed right</strong>. In a right-skewed distribution, the few large outliers “pull” the mean to the <strong>right</strong> of the median.</p>
+<p>If a distribution has a long left tail, it is <strong>skewed left</strong>. In a left-skewed distribution, the few small outliers “pull” the mean to the <strong>left</strong> of the median.</p>
+<p>In the case where a distribution has equal-sized right and left tails, it is <strong>symmetric</strong>. The mean is approximately <strong>equal</strong> to the median. Think of mean as the balancing point of the distribution</p>
+<div class="cell" data-tags="[]" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>sns.histplot(data <span class="op">=</span> births, x <span class="op">=</span> <span class="st">'Maternal Pregnancy Weight'</span>)<span class="op">;</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>df_mean <span class="op">=</span> np.mean(births[<span class="st">'Maternal Pregnancy Weight'</span>])</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>df_median <span class="op">=</span> np.median(births[<span class="st">'Maternal Pregnancy Weight'</span>])</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"The mean is: </span><span class="sc">{}</span><span class="st"> and the median is </span><span class="sc">{}</span><span class="st">"</span>.<span class="bu">format</span>(df_mean,df_median))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>The mean is: 128.4787052810903 and the median is 125.0</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="visualization_1_files/figure-html/cell-11-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+<section id="outliers" class="level3" data-number="7.6.2">
+<h3 data-number="7.6.2" class="anchored" data-anchor-id="outliers"><span class="header-section-number">7.6.2</span> Outliers</h3>
+<p>Loosely speaking, an <strong>outlier</strong> is defined as a data point that lies an abnormally large distance away from other values. We’ll define the statistical measure for this shortly.</p>
+<p>Outliers disproportionately influce the mean because their magnitude is directly involved in computing the average. However, the median is largely unaffected - the magnitude of an outlier is irrelevant; we only care that it is some non-zero distance away from the midpoint of the data.</p>
+<div class="cell" data-tags="[]" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>sns.histplot(data <span class="op">=</span> births, x <span class="op">=</span> <span class="st">'Maternal Pregnancy Weight'</span>)<span class="op">;</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co">## Where do we draw the line of outlier? </span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>plt.axvline(df_mean<span class="op">*</span><span class="fl">1.75</span>, color <span class="op">=</span> <span class="st">'red'</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="visualization_1_files/figure-html/cell-12-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+<section id="modes" class="level3" data-number="7.6.3">
+<h3 data-number="7.6.3" class="anchored" data-anchor-id="modes"><span class="header-section-number">7.6.3</span> Modes</h3>
+<p>A <strong>mode</strong> of a distribution is a local or global maximum. A distribution with a single clear maximum is <strong>unimodal</strong>, distributions with two modes are <strong>bimodal</strong>, and those with 3 or more are <strong>multimodal</strong>. You need to distinguish between <strong>modes</strong> and <em>random noise</em>.</p>
+<p>For example, the distribution of birth weights for maternal smokers is (weakly) multimodal.</p>
+<div class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>births_maternal_smoker <span class="op">=</span> births[births[<span class="st">'Maternal Smoker'</span>] <span class="op">==</span> <span class="va">True</span>]</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>sns.histplot(data <span class="op">=</span> births_maternal_smoker, x <span class="op">=</span> <span class="st">'Maternal Pregnancy Weight'</span>)<span class="op">\</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>            .<span class="bu">set</span>(title <span class="op">=</span> <span class="st">'Maternal Smoker histogram'</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="visualization_1_files/figure-html/cell-13-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>On the other hand, the distribution of birth weights for maternal non-smokers is weakly bi-modal.</p>
+<div class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>births_maternal_non_smoker <span class="op">=</span> births[births[<span class="st">'Maternal Smoker'</span>] <span class="op">==</span> <span class="va">False</span>]</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>sns.histplot(data <span class="op">=</span> births_maternal_non_smoker, x <span class="op">=</span> <span class="st">'Maternal Pregnancy Weight'</span>)<span class="op">\</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>            .<span class="bu">set</span>(title <span class="op">=</span> <span class="st">'Maternal Non-Smoker histogram'</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="visualization_1_files/figure-html/cell-14-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>However, changing the bins reveals that the data is not bi-modal.</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>sns.histplot(data <span class="op">=</span> births_maternal_non_smoker, x <span class="op">=</span> <span class="st">'Maternal Pregnancy Weight'</span>,<span class="op">\</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>             bins <span class="op">=</span> <span class="dv">20</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="visualization_1_files/figure-html/cell-15-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+</section>
+<section id="density-curves" class="level2" data-number="7.7">
+<h2 data-number="7.7" class="anchored" data-anchor-id="density-curves"><span class="header-section-number">7.7</span> Density Curves</h2>
+<p>Instead of a discrete histogram, we can visualize what a continuous distribution corresponding to that same data could look like using a curve. - The smooth curve drawn on top of the histogram here is called a density curve.</p>
+<p>In lecture 8, we will study how exactly to compute these density curves (using a technique is called Kernel Density Estimation).</p>
+<p>If we plot <code>birth weights</code> of babies of <em>smoking mothers</em>, we get a histogram that appears bimodal. - Density curve reinforces belief in this bimodality.</p>
+<p>However, if we plot <code>birth weights</code> of babies of <em>non-smoking mothers</em>, we get a histogram that appears unimodal.</p>
+<p>From a goal 1 perspective, this is EDA which tells us there may be something interesting here worth pursuing. - Deeper analysis necessary! - If we found something truly interesting, we’d have to cautiously write up an argument and create goal 2 level visualizations.</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>births_non_maternal_smoker <span class="op">=</span> births[births[<span class="st">'Maternal Smoker'</span>] <span class="op">==</span> <span class="va">False</span>]</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>births_maternal_smoker <span class="op">=</span> births[births[<span class="st">'Maternal Smoker'</span>] <span class="op">==</span> <span class="va">True</span>]</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>sns.histplot(data <span class="op">=</span> births_maternal_smoker , x <span class="op">=</span> <span class="st">'Birth Weight'</span>,<span class="op">\</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>             kde <span class="op">=</span> <span class="va">True</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="visualization_1_files/figure-html/cell-16-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>sns.histplot(data <span class="op">=</span> births_non_maternal_smoker , x <span class="op">=</span> <span class="st">'Birth Weight'</span>,<span class="op">\</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>             kde <span class="op">=</span> <span class="va">True</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="visualization_1_files/figure-html/cell-17-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<section id="histograms-and-density" class="level3" data-number="7.7.1">
+<h3 data-number="7.7.1" class="anchored" data-anchor-id="histograms-and-density"><span class="header-section-number">7.7.1</span> Histograms and Density</h3>
+<p>Rather than labeling by counts, we can instead plot the density, as shown below. Density gives us a measure that is invariant to the total number of observed units. The numerical values on the Y-axis for a sample of 100 units would be the same for when we observe a sample of 10000 units instead. We can still calculate the absolute number of observed units using density.</p>
+<p>Example: There are 1174 observations total. - Total area of this bin should be: 120/1174 = ~10% - Density of this bin is therefore: 10% / (115 - 110) = 0.02</p>
+<p><img src="images/example_density.png" alt="example_density.png" width="500"></p>
+</section>
+</section>
+<section id="box-plots-and-violin-plots" class="level2" data-number="7.8">
+<h2 data-number="7.8" class="anchored" data-anchor-id="box-plots-and-violin-plots"><span class="header-section-number">7.8</span> Box Plots and Violin Plots</h2>
+<section id="boxplots" class="level3" data-number="7.8.1">
+<h3 data-number="7.8.1" class="anchored" data-anchor-id="boxplots"><span class="header-section-number">7.8.1</span> Boxplots</h3>
+<p><strong>Boxplots</strong> are an alternative to histograms that visualize numerical distributions. They are especially useful in graphicaly summarizing several characteristics of a distribution. These include:</p>
+<ol type="1">
+<li>Lower Quartile (<span class="math inline">\(1^{st}\)</span> Quartile)</li>
+<li>Median (<span class="math inline">\(2^{nd}\)</span> Quartile)</li>
+<li>Upper Quartile (<span class="math inline">\(3^{rd}\)</span> Quartile)</li>
+<li>Interquartile Range (IQR)</li>
+<li>Whiskers</li>
+<li>Outliers</li>
+</ol>
+<p>The <strong>lower quartile</strong>, <strong>median</strong>, and <strong>uper quartile</strong> are the <span class="math inline">\(25^{th}\)</span>, <span class="math inline">\(50^{th}\)</span>, and <span class="math inline">\(75^{th}\)</span> percentiles of data, respectively. The <strong>interquartile range</strong> measures the spread of the middle <span class="math inline">\(50\)</span>% of the distribution, calculated as the (<span class="math inline">\(3^{rd}\)</span> Quartile <span class="math inline">\(-\)</span> <span class="math inline">\(1^{st}\)</span> Quartile).</p>
+<p>The <strong>whiskers</strong> of a box-plot are the two points that lie at the [<span class="math inline">\(1^{st}\)</span> Quartile <span class="math inline">\(-\)</span> (<span class="math inline">\(1.5\times\)</span> IQR)], and the [<span class="math inline">\(3^{rd}\)</span> Quartile <span class="math inline">\(+\)</span> (<span class="math inline">\(1.5\times\)</span> IQR)]. They are the lower and upper ranges of “normal” data (the points excluding outliers). Subsequently, the <strong>outliers</strong> are the data points that fall beyond the whiskers, or further than (<span class="math inline">\(1.5 \times\)</span> IQR) from the extreme quartiles.</p>
+<p>Let’s visualize a box-plot of the <code>Birth Weight</code> column.</p>
+<div class="cell" data-execution_count="17">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>sns.boxplot(data <span class="op">=</span> births, y <span class="op">=</span> <span class="st">'Birth Weight'</span>)<span class="op">;</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>bweights <span class="op">=</span> births[<span class="st">'Birth Weight'</span>]</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>q1 <span class="op">=</span> np.percentile(bweights, <span class="dv">25</span>)</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>q2 <span class="op">=</span> np.percentile(bweights, <span class="dv">50</span>)</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>q3 <span class="op">=</span> np.percentile(bweights, <span class="dv">75</span>)</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>iqr <span class="op">=</span> q3 <span class="op">-</span> q1</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>whisk1 <span class="op">=</span> q1 <span class="op">-</span> (<span class="fl">1.5</span> <span class="op">*</span> iqr)</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>whisk2 <span class="op">=</span> q3 <span class="op">+</span> (<span class="fl">1.5</span> <span class="op">*</span> iqr)</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"The first quartile is </span><span class="sc">{}</span><span class="st">"</span>.<span class="bu">format</span>(q1))</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"The second quartile is </span><span class="sc">{}</span><span class="st">"</span>.<span class="bu">format</span>(q2))</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"The third quartile is </span><span class="sc">{}</span><span class="st">"</span>.<span class="bu">format</span>(q3))</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"The interquartile range is </span><span class="sc">{}</span><span class="st">"</span>.<span class="bu">format</span>(iqr))</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"The whiskers are </span><span class="sc">{}</span><span class="st"> and </span><span class="sc">{}</span><span class="st">"</span>.<span class="bu">format</span>(whisk1, whisk2))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>The first quartile is 108.0
+The second quartile is 120.0
+The third quartile is 131.0
+The interquartile range is 23.0
+The whiskers are 73.5 and 165.5</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="visualization_1_files/figure-html/cell-18-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Here is a helpful visual that summarizes our discussion above.</p>
+<p><img src="images/box-plot_vis.png" alt="box-plot_vis" width="500"></p>
+</section>
+<section id="violin-plots" class="level3" data-number="7.8.2">
+<h3 data-number="7.8.2" class="anchored" data-anchor-id="violin-plots"><span class="header-section-number">7.8.2</span> Violin Plots</h3>
+<p>Another diagram that is useful in visualizing a variable’s distribution is the violin plot. A <strong>violin plot</strong> supplements a box-plot with a smoothed density curve on either side of the plot. These density curves highlight the relative frequency of variable’s possible values. If you look closely, you’ll be able to discern the quartiles, whiskers, and other hallmark features of the box-plot.</p>
+<div class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>sns.violinplot(data <span class="op">=</span> births, y <span class="op">=</span> <span class="st">'Birth Weight'</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="visualization_1_files/figure-html/cell-19-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+</section>
+<section id="comparing-quantitative-distributions" class="level2" data-number="7.9">
+<h2 data-number="7.9" class="anchored" data-anchor-id="comparing-quantitative-distributions"><span class="header-section-number">7.9</span> Comparing Quantitative Distributions</h2>
+<p>Earlier in our discussion of the mode, we visualized two histograms that described the distribution of birth weights for maternal smokers and non-smokers. However, comparing these histograms was difficult because they were displayed on seperate plots. Can we overlay the two to tell a more compelling story?</p>
+<p>In <code>seaborn</code>, multiple calls to a plotting library in the same code cell will overlay the plots. For example:</p>
+<div class="cell" data-tags="[]" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>births_maternal_smoker <span class="op">=</span> births[births[<span class="st">'Maternal Smoker'</span>] <span class="op">==</span> <span class="va">False</span>]</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>births_non_maternal_smoker <span class="op">=</span> births[births[<span class="st">'Maternal Smoker'</span>] <span class="op">==</span> <span class="va">True</span>]</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>sns.histplot(data <span class="op">=</span> births_maternal_smoker, x <span class="op">=</span> <span class="st">'Birth Weight'</span>,</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>             color <span class="op">=</span> <span class="st">'orange'</span>, label <span class="op">=</span> <span class="st">'smoker'</span>)</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>sns.histplot(data <span class="op">=</span> births_non_maternal_smoker, x <span class="op">=</span> <span class="st">'Birth Weight'</span>,</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>             color <span class="op">=</span> <span class="st">'blue'</span>, label <span class="op">=</span> <span class="st">'nonsmoker'</span>)</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>plt.legend()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="visualization_1_files/figure-html/cell-20-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>However, notice how this diagram suffers from overplotting. We can fix this with a call to <code>sns.kdeplot</code>. This will remove the bins and overlay the histogram with a density curve that better summarizes the distribution.</p>
+<div class="cell" data-tags="[]" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>sns.kdeplot(data <span class="op">=</span> births_maternal_smoker, x <span class="op">=</span> <span class="st">'Birth Weight'</span>, color <span class="op">=</span> <span class="st">'orange'</span>, label <span class="op">=</span> <span class="st">'smoker'</span>)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>sns.kdeplot(data <span class="op">=</span> births_non_maternal_smoker, x <span class="op">=</span> <span class="st">'Birth Weight'</span>, color <span class="op">=</span> <span class="st">'blue'</span>, label <span class="op">=</span> <span class="st">'nonsmoker'</span>)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>plt.legend()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="visualization_1_files/figure-html/cell-21-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Unfortunately, we lose critical information in our distribution by removing small details. Therefore, we typically prefer to use box-plots and violin plots when comparing distributions. These are more concise and allow us to compare summary statistics across many distributions.</p>
+<div class="cell" data-tags="[]" data-execution_count="21">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>sns.violinplot(data <span class="op">=</span> births, x <span class="op">=</span> <span class="st">'Maternal Smoker'</span>, y <span class="op">=</span> <span class="st">'Birth Weight'</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="visualization_1_files/figure-html/cell-22-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-tags="[]" data-execution_count="22">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>sns.boxplot(data<span class="op">=</span>births, x <span class="op">=</span> <span class="st">'Maternal Smoker'</span>, y <span class="op">=</span> <span class="st">'Birth Weight'</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="visualization_1_files/figure-html/cell-23-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+<section id="ridge-plots" class="level2" data-number="7.10">
+<h2 data-number="7.10" class="anchored" data-anchor-id="ridge-plots"><span class="header-section-number">7.10</span> Ridge Plots</h2>
+<p>Ridge plots show many density curves offset from one another with minimal overlap. They are useful when the specific shape of each curve is important.</p>
+<p><img src="images/example_ridge.png" alt="example_ridge.png"></p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../regex/regex.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Regular Expressions</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../visualization_2/visualization_2.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Visualization II</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>
