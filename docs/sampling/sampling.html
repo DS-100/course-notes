@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.280">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Principles and Techniques of Data Science - 9&nbsp; Sampling</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../visualization_2/visualization_2.html" rel="prev">
+<link href="../data100_logo.png" rel="icon" type="image/png">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Sampling</span></h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="../index.html" class="sidebar-logo-link">
+      <img src="../data100_logo.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Principles and Techniques of Data Science</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/DS-100/course-notes" title="Source Code" class="sidebar-tool px-1"><i class="bi bi-github"></i></a>
+    <a href="../Principles-and-Techniques-of-Data-Science.pdf" title="Download PDF" class="sidebar-tool px-1"><i class="bi bi-file-pdf"></i></a>
+</div>
+    </div>
+      </div>
+      <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">Welcome</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../intro_lec/introduction.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pandas_1/pandas_1.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Pandas I</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pandas_2/pandas_2.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Pandas II</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pandas_3/pandas_3.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Pandas III</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../eda/eda.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Data Cleaning and EDA</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../regex/regex.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Regular Expressions</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../visualization_1/visualization_1.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Visualization I</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../visualization_2/visualization_2.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Visualization II</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sampling/sampling.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Sampling</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#censuses-and-surveys" id="toc-censuses-and-surveys" class="nav-link active" data-scroll-target="#censuses-and-surveys"><span class="toc-section-number">9.1</span>  Censuses and Surveys</a>
+  <ul>
+  <li><a href="#censuses" id="toc-censuses" class="nav-link" data-scroll-target="#censuses"><span class="toc-section-number">9.1.1</span>  Censuses</a>
+  <ul>
+  <li><a href="#u.s.-decennial-census" id="toc-u.s.-decennial-census" class="nav-link" data-scroll-target="#u.s.-decennial-census"><span class="toc-section-number">9.1.1.1</span>  U.S. Decennial Census</a></li>
+  </ul></li>
+  <li><a href="#surveys" id="toc-surveys" class="nav-link" data-scroll-target="#surveys"><span class="toc-section-number">9.1.2</span>  Surveys</a></li>
+  </ul></li>
+  <li><a href="#sampling-definitions" id="toc-sampling-definitions" class="nav-link" data-scroll-target="#sampling-definitions"><span class="toc-section-number">9.2</span>  Sampling: Definitions</a>
+  <ul>
+  <li><a href="#population-sample-and-sampling-frame" id="toc-population-sample-and-sampling-frame" class="nav-link" data-scroll-target="#population-sample-and-sampling-frame"><span class="toc-section-number">9.2.1</span>  Population, Sample, and Sampling Frame</a></li>
+  <li><a href="#other-kinds-of-populations" id="toc-other-kinds-of-populations" class="nav-link" data-scroll-target="#other-kinds-of-populations"><span class="toc-section-number">9.2.2</span>  Other Kinds of Populations</a></li>
+  </ul></li>
+  <li><a href="#bias-a-case-study" id="toc-bias-a-case-study" class="nav-link" data-scroll-target="#bias-a-case-study"><span class="toc-section-number">9.3</span>  Bias: A Case Study</a>
+  <ul>
+  <li><a href="#the-literary-digest-election-prediction" id="toc-the-literary-digest-election-prediction" class="nav-link" data-scroll-target="#the-literary-digest-election-prediction"><span class="toc-section-number">9.3.1</span>  The Literary Digest: Election Prediction</a></li>
+  <li><a href="#the-literary-digest-what-happened" id="toc-the-literary-digest-what-happened" class="nav-link" data-scroll-target="#the-literary-digest-what-happened"><span class="toc-section-number">9.3.2</span>  The Literary Digest: What Happened</a></li>
+  <li><a href="#gallups-poll-election-prediction" id="toc-gallups-poll-election-prediction" class="nav-link" data-scroll-target="#gallups-poll-election-prediction"><span class="toc-section-number">9.3.3</span>  Gallup’s Poll: Election Prediction</a></li>
+  </ul></li>
+  <li><a href="#probability-samples" id="toc-probability-samples" class="nav-link" data-scroll-target="#probability-samples"><span class="toc-section-number">9.4</span>  Probability Samples</a>
+  <ul>
+  <li><a href="#convenience-sample" id="toc-convenience-sample" class="nav-link" data-scroll-target="#convenience-sample"><span class="toc-section-number">9.4.1</span>  Convenience Sample</a></li>
+  <li><a href="#probability-sample" id="toc-probability-sample" class="nav-link" data-scroll-target="#probability-sample"><span class="toc-section-number">9.4.2</span>  Probability Sample</a></li>
+  <li><a href="#common-random-sampling-schemes" id="toc-common-random-sampling-schemes" class="nav-link" data-scroll-target="#common-random-sampling-schemes"><span class="toc-section-number">9.4.3</span>  Common Random Sampling Schemes</a></li>
+  <li><a href="#example-scheme-1-stratified-random-sample" id="toc-example-scheme-1-stratified-random-sample" class="nav-link" data-scroll-target="#example-scheme-1-stratified-random-sample"><span class="toc-section-number">9.4.4</span>  Example Scheme 1: Stratified random sample</a></li>
+  <li><a href="#a-very-common-approximation-for-sampling" id="toc-a-very-common-approximation-for-sampling" class="nav-link" data-scroll-target="#a-very-common-approximation-for-sampling"><span class="toc-section-number">9.4.5</span>  A Very Common Approximation For Sampling</a></li>
+  <li><a href="#up-to-this-point" id="toc-up-to-this-point" class="nav-link" data-scroll-target="#up-to-this-point"><span class="toc-section-number">9.4.6</span>  Up to This Point</a></li>
+  </ul></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="toc-section-number">9.5</span>  Summary</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Sampling</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<div class="callout-note callout callout-style-default no-icon callout-captioned">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Learning Outcomes
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li>Understand how to appropriately collect data to help answer a question.</li>
+</ul>
+</div>
+</div>
+</div>
+<p>In Data Science, understanding characteristics of a population starts with having quality data to investigate. While it is often impossible to collect all the data describing a population, we can overcome this by properly sampling from the population. In this note, we will discuss appropriate techniques for sampling from populations.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/data_life_cycle_sampling.PNG" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Lifecycle diagram</figcaption><p></p>
+</figure>
+</div>
+<section id="censuses-and-surveys" class="level2" data-number="9.1">
+<h2 data-number="9.1" class="anchored" data-anchor-id="censuses-and-surveys"><span class="header-section-number">9.1</span> Censuses and Surveys</h2>
+<section id="censuses" class="level3" data-number="9.1.1">
+<h3 data-number="9.1.1" class="anchored" data-anchor-id="censuses"><span class="header-section-number">9.1.1</span> Censuses</h3>
+<p>In general: a <strong>census</strong> is “an official count or survey of a population, typically recording various details of individuals.”</p>
+<section id="u.s.-decennial-census" class="level4" data-number="9.1.1.1">
+<h4 data-number="9.1.1.1" class="anchored" data-anchor-id="u.s.-decennial-census"><span class="header-section-number">9.1.1.1</span> U.S. Decennial Census</h4>
+<p>Was held in April 2020. Counts every person living in all 50 states, DC, and US territories. (Not just citizens.) Mandated by the Constitution. Participation is required by law. Important uses: - Allocation of Federal funds. - Congressional representation. - Drawing congressional and state legislative districts.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/census_map.PNG" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Census_Map</figcaption><p></p>
+</figure>
+</div>
+</section>
+</section>
+<section id="surveys" class="level3" data-number="9.1.2">
+<h3 data-number="9.1.2" class="anchored" data-anchor-id="surveys"><span class="header-section-number">9.1.2</span> Surveys</h3>
+<p>A <strong>survey</strong> is a set of questions. An example is workers sampling individuals and households.</p>
+<p>What is asked, and how it is asked, can affect: - How the respondent answers. - Whether the respondent answers.</p>
+</section>
+</section>
+<section id="sampling-definitions" class="level2" data-number="9.2">
+<h2 data-number="9.2" class="anchored" data-anchor-id="sampling-definitions"><span class="header-section-number">9.2</span> Sampling: Definitions</h2>
+<p>While censuses are great, it is often difficult and expensive to survey everyone in a population. Thus, we usually survey a subset of the population instead.</p>
+<p>A <strong>sample</strong> is a subset of a population.</p>
+<p>Samples are often used to make inferences about the population:</p>
+<ul>
+<li>How you draw the sample will affect your accuracy.</li>
+<li>Two common sources of error:
+<ul>
+<li><strong>chance error</strong>: random samples can vary from what is expected, in any direction.</li>
+<li><strong>bias</strong>: a systematic error in one direction.</li>
+</ul></li>
+</ul>
+<section id="population-sample-and-sampling-frame" class="level3" data-number="9.2.1">
+<h3 data-number="9.2.1" class="anchored" data-anchor-id="population-sample-and-sampling-frame"><span class="header-section-number">9.2.1</span> Population, Sample, and Sampling Frame</h3>
+<p><strong>Population</strong>: The group that you want to learn something about.</p>
+<p><strong>Sampling Frame</strong>: The list from which the sample is drawn. - If you’re sampling people, the sampling frame is the set of all people that could possibly end up in your sample.</p>
+<p><strong>Sample</strong>: Who you actually end up sampling. - A subset of your sampling frame.</p>
+<p>While ideally these three sets would be exactly the same, in practice they usually aren’t. For example, there may be individuals in your sampling frame (and hence, your sample) that are not in your population!</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/samplingframe.PNG" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Sampling_Frames</figcaption><p></p>
+</figure>
+</div>
+</section>
+<section id="other-kinds-of-populations" class="level3" data-number="9.2.2">
+<h3 data-number="9.2.2" class="anchored" data-anchor-id="other-kinds-of-populations"><span class="header-section-number">9.2.2</span> Other Kinds of Populations</h3>
+<p>The individuals in a population are not always people!</p>
+<p>Could be: - Bacteria in your gut (sampled using DNA sequencing) - Trees of a certain species - Small businesses receiving a microloan - Published results in a journal / field</p>
+<p>In any of these cases we might examine a sample and try to draw an inference about the population it came from. Simplest example: what % have some binary property (like voting intention)?</p>
+</section>
+</section>
+<section id="bias-a-case-study" class="level2" data-number="9.3">
+<h2 data-number="9.3" class="anchored" data-anchor-id="bias-a-case-study"><span class="header-section-number">9.3</span> Bias: A Case Study</h2>
+<p>In 1936, President Franklin D. Roosevelt went up for re-election against Alf Landon. As is usual, polls were conducted in the months leading up to the election to try and predict the outcome.</p>
+<section id="the-literary-digest-election-prediction" class="level3" data-number="9.3.1">
+<h3 data-number="9.3.1" class="anchored" data-anchor-id="the-literary-digest-election-prediction"><span class="header-section-number">9.3.1</span> The Literary Digest: Election Prediction</h3>
+<p>The Literary Digest was a magazine. They had successfully predicted the outcome of 5 general elections coming into 1936.</p>
+<p>They sent out their survey to 10,000,000 individuals, who they found from: - Phone books. - Lists of magazine subscribers. - Lists of country club members.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/electionresults.PNG" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Election_results1</figcaption><p></p>
+</figure>
+</div>
+</section>
+<section id="the-literary-digest-what-happened" class="level3" data-number="9.3.2">
+<h3 data-number="9.3.2" class="anchored" data-anchor-id="the-literary-digest-what-happened"><span class="header-section-number">9.3.2</span> The Literary Digest: What Happened</h3>
+<p>The Literary Digest sample was not representative of the population. The Digest’s <strong>sampling frame</strong> included: - people in the phonebook, subscribed to magazines, and went to country clubs. - These people were more affluent and tended to vote Republican (Landon).</p>
+<p>Only 2.4 million people actually filled out the survey! - 24% response rate (low). - Who knows how the 76% <strong>non-respondents</strong> would have polled?</p>
+</section>
+<section id="gallups-poll-election-prediction" class="level3" data-number="9.3.3">
+<h3 data-number="9.3.3" class="anchored" data-anchor-id="gallups-poll-election-prediction"><span class="header-section-number">9.3.3</span> Gallup’s Poll: Election Prediction</h3>
+<p>George Gallup, a rising statistician, also made predictions about the 1936 elections. His estimate was much closer despite having a smaller <strong>sample size</strong> of “only” 50,000 (still more than necessary).</p>
+<p>George Gallup also predicted what The Literary Digest was going to predict, within 1%, with a sample size of only 3000 people. He predicted the Literary Digest’s <strong>sampling frame</strong> (phonebook, magazine subscribers, country clubs). So he sampled those same individuals!</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/electionresults2.PNG" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Election_Results2</figcaption><p></p>
+</figure>
+</div>
+<p>Samples, while convenient, are subject to chance error and <strong>bias</strong>. Election polling, in particular, can involve many sources of bias: - Who responds to polls? - Do voters tell the truth? - How can we predict turnout?</p>
+</section>
+</section>
+<section id="probability-samples" class="level2" data-number="9.4">
+<h2 data-number="9.4" class="anchored" data-anchor-id="probability-samples"><span class="header-section-number">9.4</span> Probability Samples</h2>
+<p>When sampling, it is essential to focus on the quality of the sample rather than the quantity of the sample. A huge sample size does not fix a bad sampling method.</p>
+<p>Our main goal is to gather a sample that is representative of the population it came from. The most common way to accomplish this is by randomly sampling from the population.</p>
+<section id="convenience-sample" class="level3" data-number="9.4.1">
+<h3 data-number="9.4.1" class="anchored" data-anchor-id="convenience-sample"><span class="header-section-number">9.4.1</span> Convenience Sample</h3>
+<p>A <strong>convenience sample</strong> is whatever you can get ahold of.</p>
+<p>Example: Scientists in New South Wales (AUS) collect specimens from eucalyptus trees to keep in museums, recording <strong>where they came from</strong> in lat / long.</p>
+<p>Can we use this data to map the geographic distribution of eucalyptus trees?</p>
+<p>Warning: - Haphazard sample ≠ random sample. - Many potential sources of bias!</p>
+</section>
+<section id="probability-sample" class="level3" data-number="9.4.2">
+<h3 data-number="9.4.2" class="anchored" data-anchor-id="probability-sample"><span class="header-section-number">9.4.2</span> Probability Sample</h3>
+<p>Why sample at random? <strong>Not</strong> just to eliminate bias!</p>
+<p>Random samples <strong>do not</strong> always produce <strong>unbiased estimates</strong> of population quantities. - Sometimes <strong>close</strong> to unbiased (e.g.&nbsp;sample median for population median) With random samples we can <strong>estimate</strong> the bias and chance error, which helps us quantify uncertainty.</p>
+<p>In a probability sample we know the chance any given set of individuals will be in the sample. All individuals in the population need not have the same chance of being selected.</p>
+<p>The real world is usually more complicated!</p>
+<p>For example: - When Gallup calls, most people don’t answer - We don’t know the probability a given bacterium will get into a microbiome sample - We don’t know journals’ publication process</p>
+<p>If the sampling / measurement process isn’t fully under our control, we try to model it.</p>
+</section>
+<section id="common-random-sampling-schemes" class="level3" data-number="9.4.3">
+<h3 data-number="9.4.3" class="anchored" data-anchor-id="common-random-sampling-schemes"><span class="header-section-number">9.4.3</span> Common Random Sampling Schemes</h3>
+<p>A <strong>random sample with replacement</strong> is a sample drawn <strong>uniformly</strong> at random <strong>with</strong> replacement. - Random doesn’t always mean “uniformly at random,” but in this specific context, it does. - Some individuals in the population might get picked more than once</p>
+<p>A simple random sample (SRS) is a sample drawn uniformly at random without replacement. - Every individual (and subset of individuals) has the same chance of being selected. - Every pair has the same chance as every other pair. - Every triple has the same chance as every other triple. - And so on.</p>
+</section>
+<section id="example-scheme-1-stratified-random-sample" class="level3" data-number="9.4.4">
+<h3 data-number="9.4.4" class="anchored" data-anchor-id="example-scheme-1-stratified-random-sample"><span class="header-section-number">9.4.4</span> Example Scheme 1: Stratified random sample</h3>
+<p>Consider an example such as Gotham City, where about 50% of the population is male-identifying. We are interested in how Gotham City votes (Democratic, Republican) in some election. We want to choose 100 voters for a survey: - By sampling uniformly at random (SRS) from male-identifying individuals in Gotham, we choose exactly 50 individuals - We then uniformly sample (SRS) another 50 from non-male-identifying individuals</p>
+<p>This is a <strong>probability sample</strong> (Consider why we might want to do this?)</p>
+<p>For any group of 100 people: - If there are not exactly 50 male-identifying individuals, the group cannot be chosen - Any other group: chance is of choosing it is 1 / # of such groups</p>
+<p>Replace 50/50 with 80/20 (80 male-identifying, 20 non-male-identifying) - Would it still be a probability sample? - Would the % Dem in the sample be unbiased?</p>
+<p>Challenge: how could we make it unbiased?</p>
+</section>
+<section id="a-very-common-approximation-for-sampling" class="level3" data-number="9.4.5">
+<h3 data-number="9.4.5" class="anchored" data-anchor-id="a-very-common-approximation-for-sampling"><span class="header-section-number">9.4.5</span> A Very Common Approximation For Sampling</h3>
+<p>The following is a very common situation in data science: - We have an enormous population. - We can only afford to sample a relatively small number of individuals. If the population is huge compared to the sample, then random sampling with and without replacement are pretty much the same.</p>
+<p><strong>Example</strong> : Suppose there are 10,000 people in a population. Exactly 7,500 of them like Snack 1; the other 2,500 like Snack 2. What is the probability that in a random sample of 20, all people like Snack 1?</p>
+<p>Method 1: SRS (Random Sample Without Replacement)</p>
+<p><span class="math inline">\(\prod_{k=0}^{19} \dfrac{7500 - k}{10000 - k} \approx 0.003151\)</span></p>
+<p>Method 2: Random Sample with Replacement</p>
+<p><span class="math inline">\((0.75)^{20} \approx 0.003171\)</span></p>
+<p>As seen here, probabilities of sampling with replacement are much easier to compute and lead to a very good approximation when the population size is large!</p>
+</section>
+<section id="up-to-this-point" class="level3" data-number="9.4.6">
+<h3 data-number="9.4.6" class="anchored" data-anchor-id="up-to-this-point"><span class="header-section-number">9.4.6</span> Up to This Point</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/sampling.PNG" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">sampling_diagram</figcaption><p></p>
+</figure>
+</div>
+<p>If a sample was <strong>randomly sampled with replacement</strong> from the population: - It is a probability sample. - We can quantify error and bias (to be covered later). - <strong>Given the population distribution</strong>, we can compute the probability of us getting a <strong>particular sample</strong>.</p>
+<p>Note: In practicality, we almost <strong>never</strong> know the population distribution! But this is a good start.</p>
+<p>ADD PICTURE!!!!</p>
+</section>
+</section>
+<section id="summary" class="level2" data-number="9.5">
+<h2 data-number="9.5" class="anchored" data-anchor-id="summary"><span class="header-section-number">9.5</span> Summary</h2>
+<p>Understanding the sampling process is what lets us go from describing the data to understanding the world</p>
+<p>Without knowing / assuming something about how the data were collected: - There is no connection between the sample and the population. - The data set doesn’t tell us about the world behind the data.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../visualization_2/visualization_2.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Visualization II</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>
