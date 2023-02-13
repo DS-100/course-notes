@@ -280,7 +280,7 @@ Up until now, we've discussed how to visualize single-variable distributions. Go
 
 **Scatter plots** are one of the most useful tools in representing the relationship between two quantitative variables. They are particularly important in gauging the strength, or correlation between variables. Knowledge of these relationships can then motivate decisions in our modeling process.
 
-For example, let's plot a scatter plot comparing the `Maternal Pregnancy Weight` and `Birth Weight` colums, using both `matplotlib` and `seaborn`.
+For example, let's plot a scatter plot comparing the `Maternal Height` and `Birth Weight` colums, using both `matplotlib` and `seaborn`.
 
 ```{python}
 import pandas as pd
@@ -288,25 +288,40 @@ births = pd.read_csv("data/baby.csv")
 births.head(5)
 
 # Matplotlib Example
-plt.scatter(births['Maternal Pregnancy Weight'], births['Birth Weight'])
-plt.xlabel('Maternal Pregnancy Weight')
+plt.scatter(births['Maternal Height'], births['Birth Weight'])
+plt.xlabel('Maternal Height')
 plt.ylabel('Birth Weight');
 ```
 
 ```{python}
 # Seaborn Example
-sns.scatterplot(data = births, x = 'Maternal Pregnancy Weight', y = 'Birth Weight',
+sns.scatterplot(data = births, x = 'Maternal Height', y = 'Birth Weight',
                 hue = 'Maternal Smoker')
 ```
 
-This is an example where color is used to add a third dimension to our plot. This is possible with the `hue` paramater in `seaborn`, which adds a categorical column encoding to an existing visualization. This way, we can look for relationships in `Maternal Pregnancy Weight` and `Birth Weight` in both maternal smokers and non-smokers. If we wish to see the relationship's strength more clearly, we can use `sns.lmplot`.
+This is an example where color is used to add a third dimension to our plot. This is possible with the `hue` paramater in `seaborn`, which adds a categorical column encoding to an existing visualization. This way, we can look for relationships in `Maternal Height` and `Birth Weight` in both maternal smokers and non-smokers. If we wish to see the relationship's strength more clearly, we can use `sns.lmplot`.
 
 ```{python}
-sns.lmplot(data = births, x = 'Maternal Pregnancy Weight', y = 'Birth Weight', 
+sns.lmplot(data = births, x = 'Maternal Height', y = 'Birth Weight', 
            hue = 'Maternal Smoker', ci = False);
 ```
 
-We can make out a weak, positive relationship in pregnancy weight and birth weight for both maternal smokers and non-smokers (slightly more positive in maternal smokers).
+We can make out a weak, positive relationship in the mother's height and birth weight for both maternal smokers and non-smokers (the baseline is slightly lower in maternal smokers).
+
+### Overplotting
+
+As you may have noticed, the scatterplots of `Maternal Height` vs. `Birth Weight` have many densely plotted areas. Many of the points are on top of one other! This makes it difficult to tell exactly how many babies are plotted in each the more densely populated regions of the graph. This can arise when the tools used for measuring data have low granularity, many different values are rounded to the same value, or if the ranges of the two variables differ greatly in scale.  
+
+We can overcome this by introducing a small amount of uniform random noise to our data. This is called *jittering*. Let's see what happens when we introduce noise to the `Maternal Height`.
+
+```{python}
+births["Maternal Height (jittered)"] = births["Maternal Height"] + np.random.uniform(-0.2, 0.2, len(births))
+sns.lmplot(data = births, x = 'Maternal Height (jittered)', y = 'Birth Weight', 
+           hue = 'Maternal Smoker', ci = False);
+```
+
+This plot more clearly shows that most of the data is clustered tightly around the point (62.5,120) and gradually becomes more loose further away from the center. It is much easier for us and others to see how the data is distributed. In conclusion, *jittering* helps us better understand our own data (Goal 1) and communicate results to others (Goal 2).  
+
 
 #### Hex Plots and Contour Plots
 
@@ -639,5 +654,4 @@ Captions should be:
 - Describe what has been graphed
 - Draw attention to important features
 - Describe conclusions drawn from graphs
-
 
