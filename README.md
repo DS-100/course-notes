@@ -1,5 +1,59 @@
 # course-notes
 
+# Quick Reference
+
+To edit existing notes:
+
+1. **Run Jupyter** lab locally: `jupyter lab`
+1. **Make content changes** to the Jupyter notebook in each course notes folder, e.g., `<course-notes-title>/<fname>.ipynb`
+
+1. **Convert** to Quarto markdown.
+
+    1. Open Terminal, `cd` into `<course-notes-title>` folder
+    1. Convert to `.qmd` inside the directory: `quarto convert <fname>.ipynb`
+        1. (The `convert` command works both ways; if folders only have a `.qmd` file, run `quarto convert <fname>.qmd` to generate a notebook)
+        1. If you don't see updates on `<fname>.qmd`, hit the refresh button in the directory tree.
+        1. This command takes a while. Some common errors include trying to print out giant dataframes; make sure you call `df.head()` instead of relying on the default DataFrame display.
+        1. If all else fails, quit and relaunch your Jupyter session.
+
+1. **Render** the HTML for the GitHub pages `docs` folder.
+
+    1. Open Terminal, `cd` to the top-level `course-notes` directory.
+    1. Render HTML pages: `quarto render`.
+
+1. **Check** HTML. `quarto preview`.
+
+1. **Commit and push**.
+
+    1. Before publishing, push to `dev`. 
+    1. For publishing, merge to `main`. The "orange" indicator for your commit on the GitHub indicates that GitHub pages is currently integrating your changes; once it turns green, then your commit will be reflected on the webpage.
+
+To make a new set of course notes:
+
+1. Create the following **folder structure**:
+
+    ```
+    new-course-notes-title
+    |_ data
+    |_ images
+    |_ notes-title.ipynb
+    ```
+1. In the new notebook, copy the **document-level YAML** setup from a publication-ready notebook (more below).
+
+    1. Set it as a Raw cell.
+    1. Update the `title` of your notebook in the YAML.
+    1. Then edit your notebook.
+
+1. **Convert** to Quarto markdown.
+
+1. **Edit** top-level `_quarto.yml` file with the path to the new `notes-title.qmd` file. This links your new course notes in the webpage sidebar.
+
+1. **Render** changes into `docs` and **check** HTML. If the title of your course notes is incorrect, double-check the title in your document-level YAML.
+
+1. **Commit and push**.
+  
+
+
 # Guide to Quarto Installation & Use
 ## Quarto Set-Up
 
