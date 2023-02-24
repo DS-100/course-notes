@@ -18,7 +18,7 @@ jupyter: python3
 
 ::: {.callout-note collapse="true"}
 ## Learning Outcomes
-* Understand and carry out the four-step modeling process
+* Understand what models are and how to carry out the four-step modeling process
 * Define the concept of loss and gain familiarity with L1 and L2 loss
 * Fit a model using minimization techniques
 :::
@@ -26,6 +26,181 @@ jupyter: python3
 Up until this point in the semester, we've focused on analyzing datasets. We've looked into the early stages of the data science lifecycle, focusing on the programming tools, visualization techniques, and data cleaning methods needed for data analysis.
 
 This lecture marks a shift in focus. We will move away from examining datasets to actually *using* our data to better understand the world. Specifically, the next sequence of lectures will explore predictive modeling: generating models to make some prediction about the world around us. In this lecture, we'll introduce the conceptual framework for setting up a modeling task. In the next few lectures, we'll put this framework into practice by implementing several kinds of models.
+
+## What is a Model?
+
+A model is an **idealized representation** of a system. A system is a set of principles or procedures according to which something functions. We live in a world full of systems: the procedure of turning on a light happens according to a specific set of rules dictating the flow of electricity. The truth behind how any event occurs are usually complex, and many times the specifics are unknown. The workings of the world can be viewed is its own giant procedure. Models seek to simplify the world and distill them it into workable pieces.  
+
+Example:
+We model the fall of an object on Earth as subject to a constant acceleration of $9.81 \frac{m}{s^2}$  due to gravity.
+
+- While this describes the behavior of our system, it is merely an approximation.
+- It doesn’t account for the effects of air resistance, local variations in gravity, etc.
+- In practice, it’s accurate enough to be useful!
+
+### Reasons for building models
+
+Often times, (1) we care about creating models that are simple and interpretable, allowing us to understand what the relationships between our variables are. Other times, (2) we care more about making extremely accurate predictions, at the cost of having an uninterpretable model. These are sometimes called black-box models, and are common in fields like deep learning.
+
+
+1. To understand complex phenomena occurring in the world we live in.
+
+    - What factors play a role in the growth of COVID-19?
+    - How do an object’s velocity and acceleration impact how far it travels? (Physics: $d = d_0 + vt + \frac{1}{2}at^2$) 
+
+2. To make accurate predictions about unseen data.
+
+    - Can we predict if an email is spam or not?
+    - Can we generate a one-sentence summary of this 10-page long article?  
+
+
+### Common Types of Models
+
+In general, models can be split into two categories:
+
+Note: These specific models are not in the scope of Data 100 and exist to serve as motivation.
+
+1. Deterministic physical (mechanistic) models: Laws that govern how the world works.
+
+    - [Kepler's Third Law of Planetary Motion (1619)](https://en.wikipedia.org/wiki/Kepler%27s_laws_of_planetary_motion#Third_law): The ratio of the square of an object's orbital period with the cube of the semi-major axis of its orbit is the same for all objects orbiting the same primary.
+        - $T^2 \propto R^3$
+
+    - [Newton's Laws: motion and gravitation (1687)](https://en.wikipedia.org/wiki/Newton%27s_laws_of_motion): Newton’s second law of motion models the relationship between the mass of an object and the force required to accelerate it.
+        - $F = ma$
+        - $F_g = G \frac{m_1 m_2}{r^2}$
+
+2. Probabilistic models: models that attempt to understand how random processes evolve. These are more general and can be used describe many phenomena in the real world. These models commonly make simplifying assumption about the nature of the world.
+
+    - [Poisson Process models](https://en.wikipedia.org/wiki/Poisson_point_process): Used to model random events that can happen with some probability at any point in time and are strictly increasing in count, such as the arrival of customers at a store. 
+
+
+## Simple Linear Regression 
+
+The **regression line** is the unique straight line that minimizes the **mean squared error** of estimation among all straight lines. As with any straight line, it can be defined by a slope and a y-intercept:
+
+- slope: $r \cdot \frac{\text{Standard Deviation of y}}{\text{Standard Deviation of x}}$
+- y-intercept: $\text{average of y} - \text{slope}\cdot\text{average of x}$
+
+
+```{python}
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+# Set random seed for consistency 
+np.random.seed(43)
+plt.style.use('default') 
+
+#Generate random noise for plotting
+x = np.linspace(-3, 3, 100)
+y = x * 0.5 - 1 + np.random.randn(100) * 0.3
+
+#plot regression line
+sns.regplot(x=x,y=y);
+```
+
+### Definitions
+
+For a random variable x:
+
+ - Mean: $\bar{x}$ 
+ - Standard Deviation: $\sigma_x$
+ - Predicted value: $\hat{x}$
+
+#### Standard Units
+A random variable is represented in standard units if the following are true:
+
+1. 0 in standard units is the mean ($\bar{x}$) in the original variable's units.
+2. An increase of 1 standard unit is an increase of 1 standard deviation($\sigma_x$) in the original variable's units
+
+#### Correlation
+
+The correlation ($r$) is the average of the product of $x$ and $y$, both measured in *standard units*. Correlation measures the strength of a linear association between two variables.
+
+
+1. $r = \frac{1}{n} \sum_1^n (\frac{x_i - \bar{x}}{\sigma_x})(\frac{y_i - \bar{y}}{\sigma_y})$
+2. Correlations are between -1 and 1: $|r| < 1$
+
+```{python}
+
+def plot_and_get_corr(ax, x, y, title):
+    ax.set_xlim(-3, 3)
+    ax.set_ylim(-3, 3)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.scatter(x, y, alpha = 0.73)
+    r = np.corrcoef(x, y)[0, 1]
+    ax.set_title(title + " (corr: {})".format(r.round(2)))
+    return r
+
+fig, axs = plt.subplots(2, 2, figsize = (10, 10))
+
+# Just noise
+x1, y1 = np.random.randn(2, 100)
+corr1 = plot_and_get_corr(axs[0, 0], x1, y1, title = "noise")
+
+# Strong linear
+x2 = np.linspace(-3, 3, 100)
+y2 = x2 * 0.5 - 1 + np.random.randn(100) * 0.3
+corr2 = plot_and_get_corr(axs[0, 1], x2, y2, title = "strong linear")
+
+# Unequal spread
+x3 = np.linspace(-3, 3, 100)
+y3 = - x3/3 + np.random.randn(100)*(x3)/2.5
+corr3 = plot_and_get_corr(axs[1, 0], x3, y3, title = "strong linear")
+extent = axs[1, 0].get_window_extent().transformed(fig.dpi_scale_trans.inverted())
+
+# Strong non-linear
+x4 = np.linspace(-3, 3, 100)
+y4 = 2*np.sin(x3 - 1.5) + np.random.randn(100) * 0.3
+corr4 = plot_and_get_corr(axs[1, 1], x4, y4, title = "strong non-linear")
+
+plt.show()
+```
+
+### Alternate Form
+When the variables $y$ and $x$ are measured in *standard units*, the regression line for predicting $y$ based on $x$ has slope $r$ and passes through the origin.
+
+- $\hat{y}_{su} = r \cdot x_{su} $
+- Both measured in standard units
+
+
+<img src = "./images/reg_line_su.png">
+
+
+In the original units, this becomes
+
+- $\frac{\hat{y} - \bar{y}}{\sigma_y} = r \cdot \frac{x - \bar{x}}{\sigma_x}$
+
+<img src = "./images/reg_line_ou.png">
+
+### Derivation
+
+Starting from the top, we have our claimed form of the regression line and we want to show that its equivalent to the optimal linear regression line: $\hat{y} = \hat{a} + \hat{b}x$
+
+Recall: 
+
+- $\hat{b}$: $r \cdot \frac{\text{Standard Deviation of y}}{\text{Standard Deviation of x}}$
+- $\hat{a}$: $\text{average of y} - \text{slope}\cdot\text{average of x}$
+
+Proof: 
+
+$$\frac{\hat{y} - \bar{y}}{\sigma_y} = r \cdot \frac{x - \bar{x}}{\sigma_x}$$
+
+Multiply by $\sigma_y$ and add $\bar{y}$ on both sides.
+
+$$\hat{y} = \sigma_y \cdot r \cdot \frac{x - \bar{x}}{\sigma_x} + \bar{y}$$
+
+Distribute coefficient $\sigma_{y}\cdot r$ to the $\frac{x - \bar{x}}{\sigma_x}$ term
+
+$$\hat{y} = (\frac{r\sigma_y}{\sigma_x} ) \cdot x + (\bar{y} - (\frac{r\sigma_y}{\sigma_x} ) \bar{x})$$
+
+We now see that we have a line that matches our claim:
+
+- slope: $r\cdot\frac{\text{SD of x}}{\text{SD of y}} = r\cdot\frac{\sigma_x}{\sigma_y}$
+- intercept: $\bar{y} - \text{slope}\cdot x$
+
+
 
 ## The Modeling Process
 
@@ -71,7 +246,7 @@ The parameters of the SLR model are $\theta_0$, also called the intercept term, 
 In Data 8, you learned that the best SLR model parameters are:
 $$\hat{\theta}_0 = \bar{y} - \hat{\theta}_1\bar{x} \qquad \qquad \hat{\theta}_1 = r \frac{\sigma_y}{\sigma_x}$$
 
-A quick word on notation:
+A quick reminder on notation:
 
 * $\bar{y}$ and $\bar{x}$ indicate the mean value of $y$ and $x$, respectively
 * $\sigma_y$ and $\sigma_x$ indicate the standard deviations of $y$ and $x$
@@ -157,7 +332,7 @@ $$\begin{align}
 
 Next, plug in $\hat{y}_i = \hat{\theta}_0 + \hat{\theta}_1 x_i = \bar{y} + \hat{\theta}_1(x_i - \bar{x})$:
 $$\begin{align}
-\frac{1}{n} \sum_{i=1}^n (y_i - \bar{y} - \hat{\theta}_1(x_i - \bar{x}))(x_i - \bar{x}) &= 0 \\
+\frac{1}{n} \sum_{i=1}^n (y_i - \bar{y} - \hat{\theta}_1(x - \bar{x}))(x_i - \bar{x}) &= 0 \\
 \frac{1}{n} \sum_{i=1}^n (y_i - \bar{y})(x_i - \bar{x}) = \hat{\theta}_1 \times \frac{1}{n} \sum_{i=1}^n (x_i - \bar{x})^2
 \end{align}$$
 
@@ -177,18 +352,23 @@ At this point, we've:
 * Defined our loss function
 * Fit the model to identify the best model parameters
 
-This leaves us with one final question – how "good" are the predictions made by this "best" fitted model? 
+Now, what are some ways to determine if our model was a good fit to our data? We will delve into this more in the next chapter, but there are three main ways for evaluating a model.
 
-One way we might want to evaluate our model's performance is by computing summary statistics. If the mean and standard deviation of our predictions are close to those of the original observed $y_i$s, we might be inclined to say that our model has done well. A large magnitude for the correlation coefficient between the feature and response variables might also support this conclusion. However, we should be cautious with this approach. To see why, we'll consider a classic dataset called **Anscombe's quartet.**
+1. Statistics:
 
-<img src="images/quartet.png" alt='quartet' width='600'>
+    * Plot original data
+    * Compute column means
+    * Compute standard deviations
+    * If we want to fit a linear model, compute correlation (r)
 
-It turns out that the four sets of points shown here all have identical means, standard deviations, and correlation coefficients. However, it only makes sense to model the first of these four sets of data using SLR! It is important to visualize your data *before* starting to model to confirm that your choice of model makes sense for the data. 
+2. Performance metrics:
 
-Another way of evaluating model performance is by using performance metrics. A common choice of metric is the **Root Mean Squared Error**, or RMSE. The RMSE is simply the square root of MSE. Taking the square root converts the value back into the original, non-squared units of $y_i$, which is useful for understanding the model's performance. A low RMSE indicates more "accurate" predictions – that there is lower average loss across the dataset.
-$$\text{RMSE} = \sqrt{\frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2}$$
+    * Root Mean Square Error (RMSE). It is the square root of MSE, which is the average loss that we've been minimizing to determine optimal model parameters. 
+    * RMSE is in the same units as $y$.
+    * A lower RMSE indicates more "accurate" predictions (lower "average loss" across data)
 
-We may also wish to visualize the model's **residuals**, defined as the difference between the observed and predicted $y_i$ value ($e_i = y_i - \hat{y}_i$). This gives a high-level view of how "off" each prediction is from the true observed value. Recall that you explored this concept in [Data 8](https://inferentialthinking.com/chapters/15/5/Visual_Diagnostics.html?highlight=heteroscedasticity#detecting-heteroscedasticity): a good regression fit should display no clear pattern in its plot of residuals. The residual plots for Anscombe's quartet are displayed below. Note how only the first plot shows no clear pattern to the magnitude of residuals. This is an indication that SLR is not the best choice of model for the remaining three sets of points.
+3. Visualization:
 
-<img src="images/residual.png" alt='residual' width='600'>
+    * Look at a residual plot of $e_i = y_i - \hat{y_i}$ to visualize the difference between actual and predicted $y$ values.
+
 
