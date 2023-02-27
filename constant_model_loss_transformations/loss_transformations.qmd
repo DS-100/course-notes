@@ -74,27 +74,27 @@ This time, we will consider the constant model with L1 (absolute loss) as the lo
 
 To fit the model and find the optimal parameter value $\hat{\theta}$, follow the usual process of differentiating the cost function with respect to $\theta$, setting the derivative equal to zero, and solving for $\theta$. Writing this out in longhand:
 
-$$\begin{align}
-R(\theta) &= \frac{1}{n}\sum^{n}_{i=1} |y_i - \theta| \\
-\frac{d}{d\theta} R(\theta) &= \frac{d}{d\theta} \left(\frac{1}{n} \sum^{n}_{i=1} |y_i - \theta| \right) \\
-\frac{d}{d\theta} R(\theta) &= \frac{1}{n} \sum^{n}_{i=1} \frac{d}{d\theta} |y_i - \theta|
-\end{align}$$
+$$
+R(\theta) = \frac{1}{n}\sum^{n}_{i=1} |y_i - \theta| \\
+\frac{d}{d\theta} R(\theta) = \frac{d}{d\theta} \left(\frac{1}{n} \sum^{n}_{i=1} |y_i - \theta| \right) \\
+\frac{d}{d\theta} R(\theta) = \frac{1}{n} \sum^{n}_{i=1} \frac{d}{d\theta} |y_i - \theta|
+$$
 
 Here, we seem to have run into a problem: the derivative of an absolute value is undefined when the argument is 0 (i.e. when $y_i = \theta$). For now, we'll ignore this issue. It turns out that disregarding this case doesn't influence our final result.
 
 To perform the derivative, consider two cases. When $\theta$ is *less than* $y_i$, the term $y_i - \theta$ will be positive and the absolute value has no impact. When $\theta$ is *greater than* $y_i$, the term $y_i - \theta$ will be negative. Applying the absolute value will convert this to a positive value, which we can express by saying $-(y_i - \theta) = \theta - y_i$. 
 
-$$|y_i - \theta| = \begin{cases} y_i - \theta && \text{if}\:\theta \lt y_i \\ \theta - y_i && \text{if}\:\theta \gt y_i \end{cases}$$
+$$|y_i - \theta| = \begin{cases} y_i - \theta \quad \text{ if: } \theta < y_i \\ \theta - y_i \quad \text{if: }\theta > y_i \end{cases}$$
 
 Taking derivatives:
 
-$$\frac{d}{d\theta} |y_i - \theta| = \begin{cases} \frac{d}{d\theta} (y_i - \theta) = -1 && \text{if}\:\theta \lt y_i \\ \frac{d}{d\theta} (\theta - y_i) = 1 && \text{if}\:\theta \gt y_i \end{cases}$$
+$$\frac{d}{d\theta} |y_i - \theta| = \begin{cases} \frac{d}{d\theta} (y_i - \theta) = -1 \quad \text{if: }\theta < y_i \\ \frac{d}{d\theta} (\theta - y_i) = 1 \quad \text{if: }\theta > y_i \end{cases}$$
 
 This means that we obtain a different value for the derivative for datapoints where $\theta < y_i$ and where $\theta > y_i$. We can summarize this by saying:
 
-$$\begin{align} \frac{d}{d\theta} R(\theta) &= \frac{1}{n} \sum^{n}_{i=1} \frac{d}{d\theta} |y_i - \theta| \\
-&= \frac{1}{n} \left[\sum_{\theta < y_i} (-1) + \sum_{\theta > y_i} (+1) \right]
-\end{align}$$
+$$\frac{d}{d\theta} R(\theta) = \frac{1}{n} \sum^{n}_{i=1} \frac{d}{d\theta} |y_i - \theta| \\
+= \frac{1}{n} \left[\sum_{\theta < y_i} (-1) + \sum_{\theta > y_i} (+1) \right]
+$$
 
 To finish finding the best value of $\theta$, set this derivative equal to zero and solve for $\theta$. You'll do this in Homework 5 to show that $\hat{\theta} = \text{median}(y)$.
 
@@ -146,6 +146,25 @@ drinks_with_additional_observation
 When we again visualize the cost functions, we find that the MAE now plots a horizontal line between 22 and 29. This means that there are *infinitely* many optimal values for the model parameter: any value $\hat{\theta} \in [22, 29]$ will minimize the MAE. In contrast, the MSE still has a single best value for $\hat{\theta}$. In other words, the MSE has a **unique** solution for $\hat{\theta}$; the MAE is not guaranteed to have a single unique solution.
 
 <img src="images/compare_loss.png" alt='compare_loss' width='600'>
+
+## Evaluating Models
+
+This leaves us with one final question – how "good" are the predictions made by this "best" fitted model? 
+
+One way we might want to evaluate our model's performance is by computing summary statistics. If the mean and standard deviation of our predictions are close to those of the original observed $y_i$s, we might be inclined to say that our model has done well. A large magnitude for the correlation coefficient between the feature and response variables might also support this conclusion. However, we should be cautious with this approach. To see why, we'll consider a classic dataset called **Anscombe's quartet.**
+
+<img src="images/quartet.png" alt='quartet' width='600'>
+
+It turns out that the four sets of points shown here all have identical means, standard deviations, and correlation coefficients. However, it only makes sense to model the first of these four sets of data using SLR! It is important to visualize your data *before* starting to model to confirm that your choice of model makes sense for the data. 
+
+Another way of evaluating model performance is by using performance metrics. A common choice of metric is the **Root Mean Squared Error**, or RMSE. The RMSE is simply the square root of MSE. Taking the square root converts the value back into the original, non-squared units of $y_i$, which is useful for understanding the model's performance. A low RMSE indicates more "accurate" predictions – that there is lower average loss across the dataset.
+$$\text{RMSE} = \sqrt{\frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2}$$
+
+We may also wish to visualize the model's **residuals**, defined as the difference between the observed and predicted $y_i$ value ($e_i = y_i - \hat{y}_i$). This gives a high-level view of how "off" each prediction is from the true observed value. Recall that you explored this concept in [Data 8](https://inferentialthinking.com/chapters/15/5/Visual_Diagnostics.html?highlight=heteroscedasticity#detecting-heteroscedasticity): a good regression fit should display no clear pattern in its plot of residuals. The residual plots for Anscombe's quartet are displayed below. Note how only the first plot shows no clear pattern to the magnitude of residuals. This is an indication that SLR is not the best choice of model for the remaining three sets of points.
+
+<img src="images/residual.png" alt='residual' width='600'>
+
+
 
 ## Linear Transformations
 
@@ -208,16 +227,16 @@ plt.subplots_adjust(wspace=0.3);
 
 Our SLR fit looks a lot better! We now have a new target variable: the SLR model is now trying to predict the *log* of `"Age"`, rather than the untransformed `"Age"`. In other words, we are applying the transformation $z_i = \log{(y_i)}$. The SLR model becomes:
 
-$$\hat{\log{(y_i)}} = \theta_0 + \theta_1 x_i$$
+$$\log{\hat{(y_i)}} = \theta_0 + \theta_1 x_i$$
 $$\hat{z}_i = \theta_0 + \theta_1 x_i$$
 
 It turns out that this linearized relationship can help us understand the underlying relationship between $x_i$ and $y_i$. If we rearrange the relationship above, we find:
-$$\begin{align}
-\log{(y_i)} &= \theta_0 + \theta_1 x_i \\
-y_i &= e^{\theta_0 + \theta_1 x_i} \\
-y_i &= (e^{\theta_0})e^{\theta_1 x_i} \\
-y_i &= C e^{k x_i}
-\end{align}$$
+$$
+\log{(y_i)} = \theta_0 + \theta_1 x_i \\
+y_i = e^{\theta_0 + \theta_1 x_i} \\
+y_i = (e^{\theta_0})e^{\theta_1 x_i} \\
+y_i = C e^{k x_i}
+$$
 
 For some constants $C$ and $k$.
 
