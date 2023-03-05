@@ -96,6 +96,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <script src="feature_engineering_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="feature_engineering_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="feature_engineering_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
@@ -109,8 +112,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <h2 id="toc-title">Feature Engineering</h2>
    
   <ul>
-  <li><a href="#feature-functions" id="toc-feature-functions" class="nav-link active" data-scroll-target="#feature-functions">Feature Functions</a></li>
+  <li><a href="#feature-engineering" id="toc-feature-engineering" class="nav-link active" data-scroll-target="#feature-engineering">Feature Engineering</a></li>
+  <li><a href="#feature-functions" id="toc-feature-functions" class="nav-link" data-scroll-target="#feature-functions">Feature Functions</a></li>
   <li><a href="#one-hot-encoding" id="toc-one-hot-encoding" class="nav-link" data-scroll-target="#one-hot-encoding">One Hot Encoding</a></li>
+  <li><a href="#higher-order-polynomial-example" id="toc-higher-order-polynomial-example" class="nav-link" data-scroll-target="#higher-order-polynomial-example">Higher-order Polynomial Example</a></li>
   <li><a href="#variance-and-training-error" id="toc-variance-and-training-error" class="nav-link" data-scroll-target="#variance-and-training-error">Variance and Training Error</a></li>
   <li><a href="#overfitting" id="toc-overfitting" class="nav-link" data-scroll-target="#overfitting">Overfitting</a></li>
   </ul>
@@ -157,16 +162,114 @@ Learning Outcomes
 </div>
 <p>At this point in the course, we’ve equipped ourselves with some powerful techniques to build and optimize models. We’ve explored how to develop models of multiple variables, as well as how to fit these models to maximize their performance.</p>
 <p>All of this was done with one major caveat: the regression models we’ve worked with so far are all <strong>linear in the input variables</strong>. We’ve assumed that our predictions should be some combination of linear variables. While this works well in some cases, the real world isn’t always so straightforward. In today’s lecture, we’ll learn an important method to address this issue – and consider some new problems that can arise when we do so.</p>
+<section id="feature-engineering" class="level2">
+<h2 class="anchored" data-anchor-id="feature-engineering">Feature Engineering</h2>
+<p>Feature Engineering is the process of <em>transforming</em> the raw features into <em>more informative features</em> that can be used in modeling or EDA tasks.</p>
+<p>Feature engineering allows you to: Capture domain knowledge (e.g.&nbsp;periodicity or relationships between features). Express non-linear relationships using simple linear models. Encode non-numeric features to be used as inputs to models. Example: Using the country of origin of a car as an input to modeling its efficiency.</p>
+<p>Why doesn’t sklearn doesn’t have SquareRegression /PolynomialRegression.</p>
+<ul>
+<li>We can translate these into linear models with features that are polynomials of x.</li>
+<li>Feature engineering saves <code>sklearn</code> a lot of redundancy in their library.</li>
+<li>Linear models have really nice properties.</li>
+</ul>
+</section>
 <section id="feature-functions" class="level2">
 <h2 class="anchored" data-anchor-id="feature-functions">Feature Functions</h2>
-<p>Let’s take a moment to remind ourselves where this linearity comes from. Consider the following dataset on vehicles:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<p>A feature function takes our original d dimensional input, <span class="math inline">\(\mathbb{X}\)</span>, and transforms it into a <span class="math inline">\(d'\)</span> dimensional input <span class="math inline">\(\Phi\)</span>.</p>
+<p>For example, when we add the squared term of an existing column, we are effectively using kind of feature function, taking a <span class="math inline">\(n \times 1\)</span> matrix, <span class="math inline">\([hp]\)</span>, and turning it into an <span class="math inline">\(n \times 2\)</span> matrix <span class="math inline">\([hp,hp^2]\)</span></p>
+<p>As number of features grows, we can capture arbitrarily complex relationships.</p>
+<p>Let’s take a moment to dig further in to remind ourselves where this linearity comes from. Consider the following dataset on vehicles:</p>
+<div class="cell" data-execution_count="1">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>vehicles <span class="op">=</span> sns.load_dataset(<span class="st">"mpg"</span>).rename(columns<span class="op">=</span>{<span class="st">"horsepower"</span>:<span class="st">"hp"</span>}).dropna()</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>vehicles.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
+<div class="cell-output cell-output-display" data-execution_count="1">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>mpg</th>
+      <th>cylinders</th>
+      <th>displacement</th>
+      <th>hp</th>
+      <th>weight</th>
+      <th>acceleration</th>
+      <th>model_year</th>
+      <th>origin</th>
+      <th>name</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>18.0</td>
+      <td>8</td>
+      <td>307.0</td>
+      <td>130.0</td>
+      <td>3504</td>
+      <td>12.0</td>
+      <td>70</td>
+      <td>usa</td>
+      <td>chevrolet chevelle malibu</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>15.0</td>
+      <td>8</td>
+      <td>350.0</td>
+      <td>165.0</td>
+      <td>3693</td>
+      <td>11.5</td>
+      <td>70</td>
+      <td>usa</td>
+      <td>buick skylark 320</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>18.0</td>
+      <td>8</td>
+      <td>318.0</td>
+      <td>150.0</td>
+      <td>3436</td>
+      <td>11.0</td>
+      <td>70</td>
+      <td>usa</td>
+      <td>plymouth satellite</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>16.0</td>
+      <td>8</td>
+      <td>304.0</td>
+      <td>150.0</td>
+      <td>3433</td>
+      <td>12.0</td>
+      <td>70</td>
+      <td>usa</td>
+      <td>amc rebel sst</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>17.0</td>
+      <td>8</td>
+      <td>302.0</td>
+      <td>140.0</td>
+      <td>3449</td>
+      <td>10.5</td>
+      <td>70</td>
+      <td>usa</td>
+      <td>ford torino</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
 </div>
 <p>Suppose we wish to develop a model to predict a vehicle’s fuel efficiency (<code>"mpg"</code>) as a function of its horsepower (<code>"hp"</code>). Glancing at the plot below, we see that the relationship between <code>"mpg"</code> and <code>"hp"</code> is non-linear – an SLR fit doesn’t capture the relationship between the two variables.</p>
 <p><img src="images/degree_1.png" alt="degree_1" width="600"></p>
@@ -189,7 +292,7 @@ Learning Outcomes
 <p>Feature engineering opens up a whole new set of possibilities for designing better performing models. As you will see in lab and homework, feature engineering is one of the most important parts of the entire modeling process.</p>
 <p>A particularly powerful use of feature engineering is to allow us to perform regression on non-numeric features. <strong>One hot encoding</strong> is a feature engineering technique that generates numeric features from categorical data, allowing us to use our usual methods to fit a regression model on the data.</p>
 <p>To illustrate how this works, we’ll refer back to the <code>tips</code> data from last lecture. Consider the <code>"day"</code> column of the dataset:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell" data-execution_count="2">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
@@ -197,12 +300,48 @@ Learning Outcomes
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>tips <span class="op">=</span> sns.load_dataset(<span class="st">"tips"</span>).sample(<span class="dv">100</span>)</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>tips[[<span class="st">"day"</span>]].head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
+<div class="cell-output cell-output-display" data-execution_count="2">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>day</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>54</th>
+      <td>Sun</td>
+    </tr>
+    <tr>
+      <th>46</th>
+      <td>Sun</td>
+    </tr>
+    <tr>
+      <th>86</th>
+      <td>Thur</td>
+    </tr>
+    <tr>
+      <th>199</th>
+      <td>Thur</td>
+    </tr>
+    <tr>
+      <th>106</th>
+      <td>Sat</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
 </div>
 <p>At first glance, it doesn’t seem possible to fit a regression model to this data – we can’t directly perform any mathematical operations on the entry “Thur”.</p>
 <p>To resolve this, we instead create a new table with a feature for each unique value in the original <code>"day"</code> column. We then iterate through the <code>"day"</code> column. For each entry in <code>"day"</code> we fill the corresponding feature in the new table with 1. All other features are set to 0.</p>
 <p><img src="images/ohe.png" alt="ohe" width="600"></p>
 <p>This can be implemented in code using <code>pd.get_dummies</code> to generate the one hot encoding, then calling <code>pd.concat</code> to combine these new features with the original DataFrame.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Perform the one hot encoding</span></span>
@@ -211,8 +350,242 @@ Learning Outcomes
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine with original features</span></span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>tips <span class="op">=</span> pd.concat([tips, ohe], axis<span class="op">=</span><span class="dv">1</span>)</span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>tips.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>total_bill</th>
+      <th>tip</th>
+      <th>sex</th>
+      <th>smoker</th>
+      <th>day</th>
+      <th>time</th>
+      <th>size</th>
+      <th>Thur</th>
+      <th>Fri</th>
+      <th>Sat</th>
+      <th>Sun</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>54</th>
+      <td>25.56</td>
+      <td>4.34</td>
+      <td>Male</td>
+      <td>No</td>
+      <td>Sun</td>
+      <td>Dinner</td>
+      <td>4</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>46</th>
+      <td>22.23</td>
+      <td>5.00</td>
+      <td>Male</td>
+      <td>No</td>
+      <td>Sun</td>
+      <td>Dinner</td>
+      <td>2</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>86</th>
+      <td>13.03</td>
+      <td>2.00</td>
+      <td>Male</td>
+      <td>No</td>
+      <td>Thur</td>
+      <td>Lunch</td>
+      <td>2</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>199</th>
+      <td>13.51</td>
+      <td>2.00</td>
+      <td>Male</td>
+      <td>Yes</td>
+      <td>Thur</td>
+      <td>Lunch</td>
+      <td>2</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>106</th>
+      <td>20.49</td>
+      <td>4.06</td>
+      <td>Male</td>
+      <td>Yes</td>
+      <td>Sat</td>
+      <td>Dinner</td>
+      <td>2</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
 </div>
 <p>Now, the data is ready to fit a model.</p>
+</section>
+<section id="higher-order-polynomial-example" class="level2">
+<h2 class="anchored" data-anchor-id="higher-order-polynomial-example">Higher-order Polynomial Example</h2>
+<p>Let’s return to where we started today: Creating higher-order polynomial features for the mpg dataset.</p>
+<p>What happens if we add a feature corresponding to the horsepower cubed? -Will we get better results? -What will the model look like?</p>
+<p>Let’s try it out:</p>
+<div class="cell" data-execution_count="41">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.pipeline <span class="im">import</span> Pipeline</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> PolynomialFeatures</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> mean_squared_error</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LinearRegression</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>vehicle_data <span class="op">=</span> sns.load_dataset(<span class="st">"mpg"</span>)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>vehicle_data <span class="op">=</span> vehicle_data.rename(columns <span class="op">=</span> {<span class="st">"horsepower"</span>: <span class="st">"hp"</span>})</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>vehicle_data <span class="op">=</span> vehicle_data.dropna()</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_MSE_for_degree_k_model(k):</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    pipelined_model <span class="op">=</span> Pipeline([</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        (<span class="st">'poly_transform'</span>, PolynomialFeatures(degree <span class="op">=</span> k)),</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>        (<span class="st">'regression'</span>, LinearRegression(fit_intercept <span class="op">=</span> <span class="va">True</span>))    </span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    ])</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    pipelined_model.fit(vehicle_data[[<span class="st">"hp"</span>]], vehicle_data[<span class="st">"mpg"</span>])</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> mean_squared_error(pipelined_model.predict(vehicle_data[[<span class="st">"hp"</span>]]), vehicle_data[<span class="st">"mpg"</span>])</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>ks <span class="op">=</span> np.array(<span class="bu">range</span>(<span class="dv">0</span>, <span class="dv">7</span>))</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>MSEs <span class="op">=</span> [get_MSE_for_degree_k_model(k) <span class="cf">for</span> k <span class="kw">in</span> ks]</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>MSEs_and_k <span class="op">=</span> pd.DataFrame({<span class="st">"k"</span>: ks, <span class="st">"MSE"</span>: MSEs})</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>MSEs_and_k.set_index(<span class="st">"k"</span>)</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_degree_k_model(k):</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    pipelined_model <span class="op">=</span> Pipeline([</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>        (<span class="st">'poly_transform'</span>, PolynomialFeatures(degree <span class="op">=</span> k)),</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>        (<span class="st">'regression'</span>, LinearRegression(fit_intercept <span class="op">=</span> <span class="va">True</span>))    </span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    ])</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>    pipelined_model.fit(vehicle_data[[<span class="st">"hp"</span>]], vehicle_data[<span class="st">"mpg"</span>])</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>    fig,ax <span class="op">=</span> plt.subplots()</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>    ax.scatter(x<span class="op">=</span>vehicle_data[<span class="st">'hp'</span>], y <span class="op">=</span> vehicle_data[<span class="st">'mpg'</span>])</span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>    x_range <span class="op">=</span> np.linspace(<span class="dv">45</span>, <span class="dv">210</span>, <span class="dv">100</span>)</span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>    ax.plot(x_range, pipelined_model.predict(x_range.reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)), color <span class="op">=</span> <span class="st">"red"</span>)</span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>    ax.set_xlabel(<span class="st">"hp"</span>)</span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>    ax.set_ylabel(<span class="st">"mpg"</span>)</span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> fig</span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>We can plot each polynomial separately and analyze their performance.</p>
+<div class="cell" data-execution_count="55">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>plot_degree_k_model(<span class="dv">1</span>)<span class="op">;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(MSEs_and_k.loc[<span class="dv">1</span>,:])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>k       1.000000
+MSE    23.943663
+Name: 1, dtype: float64</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="feature_engineering_files/figure-html/cell-6-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Not that good, there seems to be a pattern in our errors.</p>
+<div class="cell" data-execution_count="54">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>plot_degree_k_model(<span class="dv">2</span>)<span class="op">;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(MSEs_and_k.loc[<span class="dv">2</span>,:])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>k       2.000000
+MSE    18.984769
+Name: 2, dtype: float64</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="feature_engineering_files/figure-html/cell-7-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<p>This plot seems to match our data much more consistently across <code>hp</code> values</p>
+<div class="cell" data-execution_count="53">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>plot_degree_k_model(<span class="dv">3</span>)<span class="op">;</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(MSEs_and_k.loc[<span class="dv">3</span>,:])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>k       3.00000
+MSE    18.94499
+Name: 3, dtype: float64</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="feature_engineering_files/figure-html/cell-8-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<p>With a cubic term, we observe a small improvement in MSE.</p>
+<p>Qualitatively, the curve looks quite similar. Only slightly better prediction power, but what happens if we add even higher order features?</p>
+<div class="cell" data-execution_count="58">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>plot_degree_k_model(<span class="dv">4</span>)<span class="op">;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(MSEs_and_k.loc[<span class="dv">4</span>,:])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>k       4.000000
+MSE    18.876333
+Name: 4, dtype: float64</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="feature_engineering_files/figure-html/cell-9-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-execution_count="59">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>plot_degree_k_model(<span class="dv">5</span>)<span class="op">;</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(MSEs_and_k.loc[<span class="dv">5</span>,:])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>k       5.000000
+MSE    18.426969
+Name: 5, dtype: float64</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="feature_engineering_files/figure-html/cell-10-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<p>It seems we have hit a plateau ever since we reached 18mpg. However, it is still improving bit by bit. This trend will continue as we add more and more terms to our model. However, there ain’t no free lunch. This decreasing of the MSE is coming at a major cost!</p>
 </section>
 <section id="variance-and-training-error" class="level2">
 <h2 class="anchored" data-anchor-id="variance-and-training-error">Variance and Training Error</h2>

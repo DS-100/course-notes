@@ -14,7 +14,7 @@ format:
       - cosmo
       - cerulean
     callout-icon: false
-jupyter: python3
+jupyter: myenv
 ---
 
 ::: {.callout-note collapse="true"}
@@ -28,9 +28,34 @@ At this point in the course, we've equipped ourselves with some powerful techniq
 
 All of this was done with one major caveat: the regression models we've worked with so far are all **linear in the input variables**. We've assumed that our predictions should be some combination of linear variables. While this works well in some cases, the real world isn't always so straightforward. In today's lecture, we'll learn an important method to address this issue – and consider some new problems that can arise when we do so.
 
+## Feature Engineering
+
+Feature Engineering is the process of *transforming* the raw features into *more informative features* that can be used in modeling or EDA tasks.
+
+Feature engineering allows you to:
+Capture domain knowledge (e.g. periodicity or relationships between features).
+Express non-linear relationships using simple linear models.
+Encode non-numeric features to be used as inputs to models.
+Example: Using the country of origin of a car as an input to modeling its efficiency.
+
+
+Why doesn’t sklearn doesn’t have SquareRegression /PolynomialRegression.
+
+- We can translate these into linear models with features that are polynomials of x.
+- Feature engineering saves `sklearn` a lot of redundancy in their library.
+- Linear models have really nice properties.
+
+
+
 ## Feature Functions
 
-Let's take a moment to remind ourselves where this linearity comes from. Consider the following dataset on vehicles:
+A feature function takes our original d dimensional input, $\mathbb{X}$, and transforms it into a $d'$ dimensional input $\Phi$.
+
+For example, when we add the squared term of an existing column, we are effectively using kind of feature function, taking a $n \times 1$ matrix, $[hp]$, and turning it into an $n \times 2$ matrix $[hp,hp^2]$ 
+
+As number of features grows, we can capture arbitrarily complex relationships.
+
+Let's take a moment to dig further in to remind ourselves where this linearity comes from. Consider the following dataset on vehicles:
 
 ```{python}
 import seaborn as sns
@@ -104,6 +129,105 @@ tips.head(5)
 
 Now, the data is ready to fit a model.
 
+## Higher-order Polynomial Example
+
+Let’s return to where we started today: Creating higher-order polynomial features for the mpg dataset.
+
+What happens if we add a feature corresponding to the horsepower cubed?
+ -Will we get better results?
+ -What will the model look like?
+
+Let’s try it out:
+
+```{python}
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.metrics import mean_squared_error
+from sklearn.linear_model import LinearRegression
+import matplotlib.pyplot as plt
+
+
+vehicle_data = sns.load_dataset("mpg")
+vehicle_data = vehicle_data.rename(columns = {"horsepower": "hp"})
+vehicle_data = vehicle_data.dropna()
+
+
+def get_MSE_for_degree_k_model(k):
+    pipelined_model = Pipeline([
+        ('poly_transform', PolynomialFeatures(degree = k)),
+        ('regression', LinearRegression(fit_intercept = True))    
+    ])
+    pipelined_model.fit(vehicle_data[["hp"]], vehicle_data["mpg"])
+    return mean_squared_error(pipelined_model.predict(vehicle_data[["hp"]]), vehicle_data["mpg"])
+
+ks = np.array(range(0, 7))
+MSEs = [get_MSE_for_degree_k_model(k) for k in ks]
+MSEs_and_k = pd.DataFrame({"k": ks, "MSE": MSEs})
+MSEs_and_k.set_index("k")
+
+
+
+
+def plot_degree_k_model(k):
+    pipelined_model = Pipeline([
+        ('poly_transform', PolynomialFeatures(degree = k)),
+        ('regression', LinearRegression(fit_intercept = True))    
+    ])
+    pipelined_model.fit(vehicle_data[["hp"]], vehicle_data["mpg"])
+    
+    fig,ax = plt.subplots()
+
+    ax.scatter(x=vehicle_data['hp'], y = vehicle_data['mpg'])
+    
+    x_range = np.linspace(45, 210, 100)
+
+    ax.plot(x_range, pipelined_model.predict(x_range.reshape(-1, 1)), color = "red")
+    ax.set_xlabel("hp")
+    ax.set_ylabel("mpg")
+    return fig
+
+```
+
+We can plot each polynomial separately and analyze their performance.
+
+```{python}
+plot_degree_k_model(1);
+print(MSEs_and_k.loc[1,:])
+```
+
+Not that good, there seems to be a pattern in our errors.
+
+```{python}
+plot_degree_k_model(2);
+print(MSEs_and_k.loc[2,:])
+```
+
+This plot seems to match our data much more consistently across `hp` values
+
+```{python}
+plot_degree_k_model(3);
+print(MSEs_and_k.loc[3,:])
+```
+
+With a cubic term, we observe a small improvement in MSE.
+
+Qualitatively, the curve looks quite similar. Only slightly better prediction power, but what happens if we add even higher order features?
+
+
+
+```{python}
+plot_degree_k_model(4);
+print(MSEs_and_k.loc[4,:])
+```
+
+```{python}
+plot_degree_k_model(5);
+print(MSEs_and_k.loc[5,:])
+```
+
+It seems we have hit a plateau ever since we reached 18mpg. However, it is still improving bit by bit. This trend will continue as we add more and more terms to our model. However, there ain't no free lunch. This decreasing of the MSE is coming at a major cost!
+
+
 ## Variance and Training Error
 
 We've seen now that feature engineering allows us to build all sorts of features to improve the performance of the model. In particular, we saw that designing a more complex feature (squaring `"hp"` in the `vehicles` data previously) substantially improved the model's ability to capture non-linear relationships. To take full advantage of this, we might be inclined to design increasingly complex features. Consider the following three models, each of different order (the maximum exponent power of each model):
@@ -151,4 +275,5 @@ The phenomenon above is called **overfitting**. The model effectively just memor
 The takeaway here: we need to strike a balance in the complexity of our models. A model that is too simple won't be able to capture the key relationships between our variables of interest; a model that is too complex runs the risk of overfitting. 
 
 This begs the question: how do we control the complexity of a model? Stay tuned for the next lecture.
+
 
