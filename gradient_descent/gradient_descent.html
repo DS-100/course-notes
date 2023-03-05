@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.313">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Gradient Descent</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="gradient_descent_files/libs/clipboard/clipboard.min.js"></script>
+<script src="gradient_descent_files/libs/quarto-html/quarto.js"></script>
+<script src="gradient_descent_files/libs/quarto-html/popper.min.js"></script>
+<script src="gradient_descent_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="gradient_descent_files/libs/quarto-html/anchor.min.js"></script>
+<link href="gradient_descent_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="gradient_descent_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="gradient_descent_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="gradient_descent_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="gradient_descent_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-full">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Gradient Descent</h2>
+   
+  <ul>
+  <li><a href="#implementing-derived-formulas-in-code" id="toc-implementing-derived-formulas-in-code" class="nav-link active" data-scroll-target="#implementing-derived-formulas-in-code">Implementing Derived Formulas in Code</a></li>
+  <li><a href="#simple-linear-regression-slr" id="toc-simple-linear-regression-slr" class="nav-link" data-scroll-target="#simple-linear-regression-slr">Simple Linear Regression (SLR)</a>
+  <ul class="collapse">
+  <li><a href="#slr-w-derived-analytical-formulas" id="toc-slr-w-derived-analytical-formulas" class="nav-link" data-scroll-target="#slr-w-derived-analytical-formulas">SLR w/ Derived Analytical Formulas</a></li>
+  <li><a href="#slr-analytical-approach-performance" id="toc-slr-analytical-approach-performance" class="nav-link" data-scroll-target="#slr-analytical-approach-performance">SLR Analytical Approach Performance</a></li>
+  <li><a href="#slr-w-sklearn" id="toc-slr-w-sklearn" class="nav-link" data-scroll-target="#slr-w-sklearn">SLR w/ <code>sklearn</code></a></li>
+  <li><a href="#slr-sklearn-performance" id="toc-slr-sklearn-performance" class="nav-link" data-scroll-target="#slr-sklearn-performance">SLR <code>sklearn</code> Performance</a></li>
+  </ul></li>
+  <li><a href="#multiple-linear-regression-ols" id="toc-multiple-linear-regression-ols" class="nav-link" data-scroll-target="#multiple-linear-regression-ols">Multiple Linear Regression (OLS)</a>
+  <ul class="collapse">
+  <li><a href="#ols-w-derived-analytical-formulas" id="toc-ols-w-derived-analytical-formulas" class="nav-link" data-scroll-target="#ols-w-derived-analytical-formulas">OLS w/ Derived Analytical Formulas</a></li>
+  <li><a href="#ols-w-sklearn" id="toc-ols-w-sklearn" class="nav-link" data-scroll-target="#ols-w-sklearn">OLS w/ <code>sklearn</code></a></li>
+  <li><a href="#visualizing-our-2d-linear-model-predictions" id="toc-visualizing-our-2d-linear-model-predictions" class="nav-link" data-scroll-target="#visualizing-our-2d-linear-model-predictions">Visualizing Our 2D Linear Model Predictions</a></li>
+  </ul></li>
+  <li><a href="#gradient-descent" id="toc-gradient-descent" class="nav-link" data-scroll-target="#gradient-descent">Gradient Descent</a>
+  <ul class="collapse">
+  <li><a href="#minimizing-a-1d-function" id="toc-minimizing-a-1d-function" class="nav-link" data-scroll-target="#minimizing-a-1d-function">Minimizing a 1D Function</a></li>
+  <li><a href="#digging-into-gradient-descent" id="toc-digging-into-gradient-descent" class="nav-link" data-scroll-target="#digging-into-gradient-descent">Digging into Gradient Descent</a></li>
+  <li><a href="#formalizing-gradient-descent" id="toc-formalizing-gradient-descent" class="nav-link" data-scroll-target="#formalizing-gradient-descent">Formalizing Gradient Descent</a></li>
+  <li><a href="#loss-terminology" id="toc-loss-terminology" class="nav-link" data-scroll-target="#loss-terminology">Loss Terminology</a></li>
+  <li><a href="#application-of-1d-gradient-descent" id="toc-application-of-1d-gradient-descent" class="nav-link" data-scroll-target="#application-of-1d-gradient-descent">Application of 1D Gradient Descent</a></li>
+  <li><a href="#creating-an-explicit-mse-function" id="toc-creating-an-explicit-mse-function" class="nav-link" data-scroll-target="#creating-an-explicit-mse-function">Creating an Explicit MSE Function</a></li>
+  <li><a href="#plotting-the-mse-function" id="toc-plotting-the-mse-function" class="nav-link" data-scroll-target="#plotting-the-mse-function">Plotting the MSE Function</a></li>
+  <li><a href="#gradient-notation" id="toc-gradient-notation" class="nav-link" data-scroll-target="#gradient-notation">Gradient Notation</a></li>
+  <li><a href="#multidimensional-gradient-descent" id="toc-multidimensional-gradient-descent" class="nav-link" data-scroll-target="#multidimensional-gradient-descent">Multidimensional Gradient Descent</a></li>
+  <li><a href="#we-have-multidimensional-gradient-descent-at-home" id="toc-we-have-multidimensional-gradient-descent-at-home" class="nav-link" data-scroll-target="#we-have-multidimensional-gradient-descent-at-home">We have <code>Multidimensional Gradient Descent</code> at home</a></li>
+  <li><a href="#mini-batch-and-stochastic-descent" id="toc-mini-batch-and-stochastic-descent" class="nav-link" data-scroll-target="#mini-batch-and-stochastic-descent">(Mini-)Batch, and Stochastic Descent</a></li>
+  <li><a href="#a-word-on-covexity" id="toc-a-word-on-covexity" class="nav-link" data-scroll-target="#a-word-on-covexity">A Word on Covexity</a></li>
+  </ul></li>
+  </ul>
+</nav>
+</div>
+<main class="content column-page-left" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Gradient Descent</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li></ul></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<div class="callout-note callout callout-style-default no-icon callout-captioned">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Learning Outcomes
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li>Understand the standard workflow for fitting models in <code>sklearn</code></li>
+<li>Describe the conceptual basis for gradient descent</li>
+<li>Compute the gradient descent update on a provided dataset</li>
+</ul>
+</div>
+</div>
+</div>
+<p>At this point, we’ve grown quite familiar with the modeling process. We’ve introduced the concept of loss, used it to fit several types of models, and, most recently, extended our analysis to multiple regression. Along the way, we’ve forged our way through the mathematics of deriving the optimal model parameters in all of its gory detail. It’s time to make our lives a little easier – let’s implement the modeling process in code!</p>
+<p>In this lecture, we’ll explore three techniques for model fitting:</p>
+<ol type="1">
+<li>Translating our derived formulas for regression to Python</li>
+<li>Using the <code>sklearn</code> Python package</li>
+<li>Applying gradient descent for numerical optimization</li>
+</ol>
+<section id="implementing-derived-formulas-in-code" class="level2">
+<h2 class="anchored" data-anchor-id="implementing-derived-formulas-in-code">Implementing Derived Formulas in Code</h2>
+<p>Throughout this lecture, we’ll refer to the <code>penguins</code> dataset.</p>
+<div class="cell" data-execution_count="106">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>penguins <span class="op">=</span> sns.load_dataset(<span class="st">"penguins"</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>penguins <span class="op">=</span> penguins[penguins[<span class="st">"species"</span>] <span class="op">==</span> <span class="st">"Adelie"</span>].dropna()</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>penguins.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="106">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>species</th>
+      <th>island</th>
+      <th>bill_length_mm</th>
+      <th>bill_depth_mm</th>
+      <th>flipper_length_mm</th>
+      <th>body_mass_g</th>
+      <th>sex</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Adelie</td>
+      <td>Torgersen</td>
+      <td>39.1</td>
+      <td>18.7</td>
+      <td>181.0</td>
+      <td>3750.0</td>
+      <td>Male</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Adelie</td>
+      <td>Torgersen</td>
+      <td>39.5</td>
+      <td>17.4</td>
+      <td>186.0</td>
+      <td>3800.0</td>
+      <td>Female</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Adelie</td>
+      <td>Torgersen</td>
+      <td>40.3</td>
+      <td>18.0</td>
+      <td>195.0</td>
+      <td>3250.0</td>
+      <td>Female</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Adelie</td>
+      <td>Torgersen</td>
+      <td>36.7</td>
+      <td>19.3</td>
+      <td>193.0</td>
+      <td>3450.0</td>
+      <td>Female</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>Adelie</td>
+      <td>Torgersen</td>
+      <td>39.3</td>
+      <td>20.6</td>
+      <td>190.0</td>
+      <td>3650.0</td>
+      <td>Male</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Suppose our goal is to predict the value of the <code>'bill depth'</code> for a particular penguin given its <code>'flipper length'</code>.</p>
+<div class="cell" data-execution_count="107">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the design matrix, X...</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> penguins[[<span class="st">"flipper_length_mm"</span>]]</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># ...as well as the target variable, y</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> penguins[[<span class="st">"bill_depth_mm"</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="simple-linear-regression-slr" class="level2">
+<h2 class="anchored" data-anchor-id="simple-linear-regression-slr">Simple Linear Regression (SLR)</h2>
+<p>In the SLR framework we learned last week, this means we are saying our model for <code>bill depth</code>, <span class="math inline">\(y\)</span>, is a linear function of <code>flipper length</code>, <span class="math inline">\(x\)</span>:</p>
+<p><span class="math display">\[\hat{y} = \theta_0 + \theta_1 x\]</span></p>
+<p>Let’s do some EDA first.</p>
+<div class="cell" data-execution_count="108">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"flipper length (mm)"</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"bill depth (mm)"</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>plt.scatter(data <span class="op">=</span> penguins, x <span class="op">=</span> <span class="st">"flipper_length_mm"</span>, y <span class="op">=</span> <span class="st">"bill_depth_mm"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="108">
+<pre><code>&lt;matplotlib.collections.PathCollection at 0x1fc16ecb550&gt;</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="gradient_descent_files/figure-html/cell-4-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Based on our EDA, there is a linear relationship, though it is somewhat weak.</p>
+<section id="slr-w-derived-analytical-formulas" class="level3">
+<h3 class="anchored" data-anchor-id="slr-w-derived-analytical-formulas">SLR w/ Derived Analytical Formulas</h3>
+<p>Let <span class="math inline">\(\hat{\theta}_0\)</span> and <span class="math inline">\(\hat{\theta}_1\)</span> be the choices that minimize the Mean Squared Error.</p>
+<p>One approach to compute <span class="math inline">\(\hat{\theta}_0\)</span> and <span class="math inline">\(\hat{\theta}_1\)</span> is analytically, using the equations we derived in a previous lecture:</p>
+<p><span class="math display">\[\hat{\theta}_0 = \bar{y} - \hat{\theta}_1 \bar{x}\]</span></p>
+<p><span class="math display">\[\hat{\theta}_1 = r \frac{\sigma_y}{\sigma_x}\]</span></p>
+<p><span class="math display">\[r = \frac{1}{n} \sum_{i=1}^{n}\left( \frac{x_i - x}{\sigma_x} \right) \left( \frac{y_i - y}{\sigma_y} \right) \]</span></p>
+<p>Let’s implement these using the base numpy library, which provides many important functions such as <code>.mean</code> and <code>.std</code> .</p>
+<div class="cell" data-execution_count="109">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> penguins[<span class="st">"flipper_length_mm"</span>]</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> penguins[<span class="st">"bill_depth_mm"</span>]</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>x_bar, sigma_x <span class="op">=</span> np.mean(x), np.std(x)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>y_bar, sigma_y <span class="op">=</span> np.mean(y), np.std(y)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> np.<span class="bu">sum</span>((x <span class="op">-</span> x_bar) <span class="op">/</span> sigma_x <span class="op">*</span> (y <span class="op">-</span> y_bar) <span class="op">/</span> sigma_y) <span class="op">/</span> <span class="bu">len</span>(x)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>theta1_hat <span class="op">=</span> r <span class="op">*</span> sigma_y <span class="op">/</span> sigma_x</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>theta0_hat <span class="op">=</span> y_bar <span class="op">-</span> theta1_hat <span class="op">*</span> x_bar</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"bias parameter: </span><span class="sc">{</span>theta0_hat<span class="sc">}</span><span class="ss">, </span><span class="ch">\n</span><span class="ss">slope parameter: </span><span class="sc">{</span>theta1_hat<span class="sc">}</span><span class="ss">"</span>.<span class="bu">format</span>(theta0_hat,theta1_hat))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>bias parameter: 7.297305899612297, 
+slope parameter: 0.058126223695067675</code></pre>
+</div>
+</div>
+</section>
+<section id="slr-analytical-approach-performance" class="level3">
+<h3 class="anchored" data-anchor-id="slr-analytical-approach-performance">SLR Analytical Approach Performance</h3>
+<p>Let’s first assess how “good” this model is using a performance metric. For this exercise, let’s use the MSE. As a review:</p>
+<p><strong>Mean Squared Error</strong>: We can compute this explicitly by averaging the square of the residuals <span class="math inline">\(e_i\)</span>:</p>
+<p><span class="math display">\[\large MSE  = \sum_{i=1}^n (y_i - \hat{y}_i)^2 = \frac{1}{n}\sum_{i=1}^n (e_i)^2 = \frac{1}{n}\]</span></p>
+<div class="cell" data-execution_count="110">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># using our estimated parameter values to create a column containing our </span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># SLR predictions and errors</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>penguins[<span class="st">"analytical_preds_slr"</span>] <span class="op">=</span> theta0_hat <span class="op">+</span> theta1_hat <span class="op">*</span> penguins[<span class="st">"flipper_length_mm"</span>]</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>penguins[<span class="st">"residual"</span>] <span class="op">=</span> penguins[<span class="st">"bill_depth_mm"</span>] <span class="op">-</span> penguins[<span class="st">"analytical_preds_slr"</span>]</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>                                          </span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>penguins</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"MSE: "</span>, np.mean(penguins[<span class="st">"residual"</span>]<span class="op">**</span><span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>MSE:  1.3338778799806363</code></pre>
+</div>
+</div>
+<p>Let’s plot plot our results.</p>
+<div class="cell" data-execution_count="111">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>sns.scatterplot(data <span class="op">=</span> penguins, x <span class="op">=</span> <span class="st">"flipper_length_mm"</span>, y <span class="op">=</span> <span class="st">"bill_depth_mm"</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>plt.plot(penguins[<span class="st">"flipper_length_mm"</span>], penguins[<span class="st">"analytical_preds_slr"</span>], <span class="st">'r'</span>) <span class="co"># a line</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>plt.legend([<span class="vs">r'$\hat</span><span class="sc">{y}</span><span class="vs">$'</span>, <span class="st">'$y$'</span>])<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="gradient_descent_files/figure-html/cell-7-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+<section id="slr-w-sklearn" class="level3">
+<h3 class="anchored" data-anchor-id="slr-w-sklearn">SLR w/ <code>sklearn</code></h3>
+<p>We’ve already saved a lot of time (and avoided tedious calculations) by translating our derived formulas into code. However, we still had to go through the process of writing out the linear algebra ourselves.</p>
+<p>To make life <em>even easier</em>, we can turn to the <code>sklearn</code> Python library. <code>sklearn</code> is a robust library of machine learning tools used extensively in research and industry. It gives us a wide variety of in-built modeling frameworks and methods, so we’ll keep returning to <code>sklearn</code> techniques as we progress through Data 100.</p>
+<p>Regardless of the specific type of model being implemented, <code>sklearn</code> follows a standard set of steps for creating a model.</p>
+<ol type="1">
+<li><p>Create a model object. This generates a new instance of the model class. You can think of it as making a new copy of a standard “template” for a model. In pseudocode, this looks like: <code>my_model = ModelName()</code></p></li>
+<li><p>Fit the model to the <code>X</code> design matrix and <code>Y</code> target vector. This calculates the optimal model parameters “behind the scenes” without us explicitly working through the calculations ourselves. The fitted parameters are then stored within the model for use in future predictions: <code>my_model.fit(X, Y)</code></p></li>
+<li><p>Analyze the fitted parameters using <code>.coef_</code> or <code>.intercept_</code>, or use the fitted model to make predictions on the <code>X</code> input data using <code>.predict</code>.</p>
+<pre><code>my_model.coef_
+
+my_model.intercept_
+
+my_model.predict(X)</code></pre></li>
+</ol>
+<p>Let’s put this into action with our multiple regression task. First, initialize an instance of the <code>LinearRegression</code> class.</p>
+<div class="cell" data-execution_count="112">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LinearRegression</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> LinearRegression()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Next, fit the model instance to the design matrix <code>X</code> and target vector <code>Y</code> by calling <code>.fit</code>.</p>
+<div class="cell" data-execution_count="113">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>model.fit(X, y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="113">
+<pre><code>LinearRegression()</code></pre>
+</div>
+</div>
+<p>And, lastly, generate predictions for <span class="math inline">\(\hat{Y}\)</span> using the <code>.predict</code> method. Here are the first 5 penguins in our dataset. How close are our analytical solution’s predictions to our <code>sklearn</code> model’s predictions?</p>
+<div class="cell" data-execution_count="114">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Like before, show just the first 5 predictions. The output of predict is usually a np.array</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>penguins[<span class="st">"sklearn_preds_slr"</span>] <span class="op">=</span> model.predict(X)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>analytical_5 <span class="op">=</span> penguins[<span class="st">"sklearn_preds_slr"</span>][:<span class="dv">5</span>].to_numpy()</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Analytical solution: "</span>, analytical_5)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>sklearn_5 <span class="op">=</span> penguins[<span class="st">"analytical_preds_slr"</span>][:<span class="dv">5</span>].to_numpy()</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Sklearn solution: "</span>, sklearn_5)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Analytical solution:  [17.81815239 18.10878351 18.63191952 18.51566707 18.3412884 ]
+Sklearn solution:  [17.81815239 18.10878351 18.63191952 18.51566707 18.3412884 ]</code></pre>
+</div>
+</div>
+<p>You can also use the model to predict what the <code>bill depth</code> of a hypothetical penguin with <code>flipper length</code> of 185mm would have.</p>
+<div class="cell" data-execution_count="115">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># this produces a warning since we</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co"># did not specify what X this refers</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co"># to, but since we only </span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># have one input it is negligible</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>model.predict([[<span class="dv">185</span>]]) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>c:\Users\phanm\anaconda3\lib\site-packages\sklearn\base.py:450: UserWarning: X does not have valid feature names, but LinearRegression was fitted with feature names
+  warnings.warn(</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="115">
+<pre><code>array([18.05065728])</code></pre>
+</div>
+</div>
+<p>We can also check if the fitted parameters,<span class="math inline">\(\hat{\theta}_0,\hat{\theta}_1\)</span>, themselves are similar to our analytical solution. Note that since we can have at most 1 intercept in a SLR or OLS model, so we always get back a <code>scalar</code> value from <code>.intercept</code>. However, when OLS can have multiple coefficient values, so <code>.coef</code> returns an array.</p>
+<div class="cell" data-execution_count="116">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>theta0 <span class="op">=</span> model.intercept_      <span class="co"># this a scalar</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"analytical bias term: "</span>, theta0_hat)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"sklearn bias term: "</span>, theta0)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>theta1 <span class="op">=</span> model.coef_           <span class="co"># this an array</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"analytical coefficient terms: "</span>, theta1_hat)</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"sklearn coefficient terms: "</span>, theta1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>analytical bias term:  7.297305899612297
+sklearn bias term:  7.297305899612306
+analytical coefficient terms:  0.058126223695067675
+sklearn coefficient terms:  [0.05812622]</code></pre>
+</div>
+</div>
+</section>
+<section id="slr-sklearn-performance" class="level3">
+<h3 class="anchored" data-anchor-id="slr-sklearn-performance">SLR <code>sklearn</code> Performance</h3>
+<p>The <code>sklearn</code> package also provides a function that computes the MSE from a list of observations and predictions. This avoids us having to manually compute MSE by first computing residuals.</p>
+<p><a href="https://scikit-learn.org/stable/modules/generated/sklearn.metrics.mean_squared_error.html">documentation</a></p>
+<div class="cell" data-execution_count="122">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> mean_squared_error</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>MSE_sklearn <span class="op">=</span> mean_squared_error(penguins[<span class="st">"bill_depth_mm"</span>], penguins[<span class="st">"sklearn_preds_slr"</span>])</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"MSE: "</span>, MSE_sklearn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>MSE:  1.3338778799806374</code></pre>
+</div>
+</div>
+<p>We’ve generated the exact same predictions and error as before, but without any need for manipulating matrices ourselves!</p>
+</section>
+</section>
+<section id="multiple-linear-regression-ols" class="level2">
+<h2 class="anchored" data-anchor-id="multiple-linear-regression-ols">Multiple Linear Regression (OLS)</h2>
+<p>In the previous lecture, we expressed multiple linear regression using matrix notation.</p>
+<p><span class="math display">\[\hat{\mathbb{Y}} = \mathbb{X}\theta\]</span></p>
+<section id="ols-w-derived-analytical-formulas" class="level3">
+<h3 class="anchored" data-anchor-id="ols-w-derived-analytical-formulas">OLS w/ Derived Analytical Formulas</h3>
+<p>We used a geometric approach to derive the following expression for the optimal model parameters under MSE error:</p>
+<p><span class="math display">\[\hat{\theta} = (\mathbb{X}^T \mathbb{X})^{-1}\mathbb{X}^T \mathbb{Y}\]</span></p>
+<p>That’s a whole lot of matrix manipulation. How do we implement it in Python?</p>
+<p>There are three operations we need to perform here: multiplying matrices, taking transposes, and finding inverses.</p>
+<ul>
+<li>To perform matrix multiplication, use the <code>@</code> operator</li>
+<li>To take a transpose, call the <code>.T</code> attribute of an array or DataFrame</li>
+<li>To compute an inverse, use <code>numpy</code>’s in-built method <code>np.linalg.inv</code></li>
+</ul>
+<div class="cell" data-execution_count="136">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> penguins[[<span class="st">"flipper_length_mm"</span>, <span class="st">"body_mass_g"</span>]].copy()</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>X[<span class="st">"bias"</span>] <span class="op">=</span> np.ones(<span class="bu">len</span>(X))</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> penguins[<span class="st">"bill_depth_mm"</span>]</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>theta_hat <span class="op">=</span> np.linalg.inv(X.T <span class="op">@</span> X) <span class="op">@</span> X.T <span class="op">@</span> y</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>theta_hat  </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="136">
+<pre><code>0     0.009828
+1     0.001477
+2    11.002995
+dtype: float64</code></pre>
+</div>
+</div>
+<p>Note that since we added “bias” last, <code>theta_hat[2]</code> is our estimated value for the <span class="math inline">\(\theta_0\)</span>. To make predictions using our newly-fitted model coefficients, matrix-multiply <code>X</code> and <code>theta_hat</code>.</p>
+<div class="cell" data-execution_count="137">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>y_hat <span class="op">=</span> X.to_numpy() <span class="op">@</span> theta_hat</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Show just the first 5 predictions to save space on the page</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>y_hat[:<span class="dv">5</span>]</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>penguins[<span class="st">"analytical_preds_ols"</span>] <span class="op">=</span> y_hat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Note, this technique doesn’t work if our X is <strong>not invertible</strong>.</p>
+</section>
+<section id="ols-w-sklearn" class="level3">
+<h3 class="anchored" data-anchor-id="ols-w-sklearn">OLS w/ <code>sklearn</code></h3>
+<p>We can actually compute the optimal parameters very easily using sklearn, using the exact code that we wrote earlier. Note: sklearn does NOT use the normal equations. Instead it uses gradient descent, a technique we will learn about soon, which can minimize ANY function, not just the MSE.</p>
+<div class="cell" data-execution_count="138">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># creating our design matrix.</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Note:</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="co">#  - no bias term needed here bc of sklearn automatically includes one</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="co">#  - to remove the intercept term, set the fit_intercept = true in LinearRegression constructor.</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>X_2d <span class="op">=</span> penguins[[<span class="st">"flipper_length_mm"</span>, <span class="st">"body_mass_g"</span>]]</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> penguins[<span class="st">"bill_depth_mm"</span>]</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>model_2d <span class="op">=</span> LinearRegression() <span class="co"># note fit_intercept=True by default</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>model_2d.fit(X_2d, y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="138">
+<pre><code>LinearRegression()</code></pre>
+</div>
+</div>
+<p>Now we again have a model with which we can use to make predictions. For example, we can ask our model about a penguin’s bill depth if they have 185-mm flipper length and 3750 g body mass.</p>
+<div class="cell" data-execution_count="139">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>penguins[<span class="st">"sklearn_predictions_ols"</span>] <span class="op">=</span> model_2d.predict(X_2d)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>model_2d.predict([[<span class="dv">185</span>, <span class="dv">3750</span>]]) </span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="co"># since we have a 2d data matrix, we maintain the same </span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="co"># row-column expectation for our inputs. </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>c:\Users\phanm\anaconda3\lib\site-packages\sklearn\base.py:450: UserWarning: X does not have valid feature names, but LinearRegression was fitted with feature names
+  warnings.warn(</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="139">
+<pre><code>array([18.36187501])</code></pre>
+</div>
+</div>
+<p>Just like with SLR, we cam also extract the coefficient estimates using <code>.coef_</code> and <code>.intercept</code>. The reason why <code>.intercept</code> returns an array should now be more clear.</p>
+<div class="cell" data-execution_count="145">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"(sklearn) theta0: </span><span class="sc">{</span>model_2d<span class="sc">.</span>intercept_<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"(analytical) theta0 </span><span class="sc">{</span>theta_hat[<span class="dv">2</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"(sklearn) theta1: </span><span class="sc">{</span>model_2d<span class="sc">.</span>coef_[<span class="dv">0</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"(analytical) theta1 </span><span class="sc">{</span>theta_hat[<span class="dv">0</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"(sklearn) theta2: </span><span class="sc">{</span>model_2d<span class="sc">.</span>coef_[<span class="dv">1</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"(analytical) theta2 </span><span class="sc">{</span>theta_hat[<span class="dv">1</span>]<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>(sklearn) theta0: 11.002995277447068
+(analytical) theta0 11.002995277447535
+(sklearn) theta1: 0.009828486885248712
+(analytical) theta1 0.0098284868852512
+(sklearn) theta2: 0.0014774959083212896
+(analytical) theta2 0.0014774959083213644</code></pre>
+</div>
+</div>
+</section>
+<section id="visualizing-our-2d-linear-model-predictions" class="level3">
+<h3 class="anchored" data-anchor-id="visualizing-our-2d-linear-model-predictions">Visualizing Our 2D Linear Model Predictions</h3>
+<p>When we have two axis with which we can change an input, moving along this input plan creates a 2d plane with which we can get model outputs for. For example, for every single penguin with a <code>flipper length</code> , we also must specify a <code>body mass</code>. These two values in combination will help us predict the <code>bill depth</code>. Thus, we see that the predictions all lie in a 2d-plane. In higher dimensions, they all lie in a “hyperplane”.</p>
+<div class="cell" data-execution_count="148">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> mpl_toolkits.mplot3d <span class="im">import</span> Axes3D  <span class="co"># noqa: F401 unused import</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> plt.figure()</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> fig.add_subplot(<span class="dv">111</span>, projection<span class="op">=</span><span class="st">'3d'</span>)</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>ax.scatter(penguins[<span class="st">"flipper_length_mm"</span>], penguins[<span class="st">"body_mass_g"</span>], penguins[<span class="st">"bill_depth_mm"</span>])</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'flipper_length_mm'</span>)</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'body_mass_g'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="148">
+<pre><code>Text(0.5, 0.5, 'body_mass_g')</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="gradient_descent_files/figure-html/cell-19-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-execution_count="149">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> plt.figure()</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> fig.add_subplot(<span class="dv">111</span>, projection<span class="op">=</span><span class="st">'3d'</span>)</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>ax.scatter(penguins[<span class="st">"flipper_length_mm"</span>], penguins[<span class="st">"body_mass_g"</span>], penguins[<span class="st">"bill_depth_mm"</span>])</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>xx, yy <span class="op">=</span> np.meshgrid(<span class="bu">range</span>(<span class="dv">170</span>, <span class="dv">220</span>, <span class="dv">10</span>), <span class="bu">range</span>(<span class="dv">2500</span>, <span class="dv">4500</span>, <span class="dv">100</span>))</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>zz <span class="op">=</span> ( <span class="fl">11.0029</span> <span class="op">+</span> <span class="fl">0.00982</span> <span class="op">*</span> xx <span class="op">+</span> <span class="fl">0.001477</span> <span class="op">*</span> yy) <span class="co"># thetas_using_sklearn</span></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>ax.plot_surface(xx, yy, zz, alpha<span class="op">=</span><span class="fl">0.2</span>)</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'flipper_length_mm'</span>)</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'body_mass_g'</span>)</span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>plt.gcf().savefig(<span class="st">"plane.png"</span>, dpi <span class="op">=</span> <span class="dv">300</span>, bbox_inches <span class="op">=</span> <span class="st">"tight"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="gradient_descent_files/figure-html/cell-20-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+</section>
+<section id="gradient-descent" class="level2">
+<h2 class="anchored" data-anchor-id="gradient-descent">Gradient Descent</h2>
+<p>At this point, we’re fairly comfortable with fitting a regression model under MSE risk (indeed, we’ve done it three times now!). It’s important to remember, however, that the results we’ve found previously apply to one very specific case: the equations we used above are only relevant to a linear regression model using MSE as the cost function. In reality, we’ll be working with a wide range of model types and objective functions, not all of which are as straightforward as the scenario we’ve discussed previously. This means that we need some more generalizable way of fitting a model to minimize loss.</p>
+<p>To do this, we’ll introduce the technique of <strong>gradient descent</strong>.</p>
+<section id="minimizing-a-1d-function" class="level3">
+<h3 class="anchored" data-anchor-id="minimizing-a-1d-function">Minimizing a 1D Function</h3>
+<p>Let’s shift our focus away from MSE to consider some new, arbitrary cost function. You can think of this function as outputting the empirical risk associated with some parameter <code>theta</code>.</p>
+<p><img src="images/arbitrary.png" alt="arbitrary" width="600"></p>
+<section id="the-naive-approach-guess-and-check" class="level4">
+<h4 class="anchored" data-anchor-id="the-naive-approach-guess-and-check">The Naive Approach: Guess and Check</h4>
+<p>Above, we saw that the minimum is somewhere around 5.3ish. Let’s see if we can figure out how to find the exact minimum algorithmically from scratch. One way very slow and terrible way would be manual guess-and-check.</p>
+<div class="cell" data-execution_count="171">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> arbitrary(x):</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (x<span class="op">**</span><span class="dv">4</span> <span class="op">-</span> <span class="dv">15</span><span class="op">*</span>x<span class="op">**</span><span class="dv">3</span> <span class="op">+</span> <span class="dv">80</span><span class="op">*</span>x<span class="op">**</span><span class="dv">2</span> <span class="op">-</span> <span class="dv">180</span><span class="op">*</span>x <span class="op">+</span> <span class="dv">144</span>)<span class="op">/</span><span class="dv">10</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> simple_minimize(f, xs):</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Takes in a function f and a set of values xs. </span></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculates the value of the function f at all values x in xs</span></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Takes the minimum value of f(x) and returns the corresponding value x </span></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> [f(x) <span class="cf">for</span> x <span class="kw">in</span> xs]  </span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> xs[np.argmin(y)]</span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>simple_minimize(arbitrary, np.linspace(<span class="dv">1</span>, <span class="dv">7</span>, <span class="dv">20</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="171">
+<pre><code>5.421052631578947</code></pre>
+</div>
+</div>
+</section>
+<section id="scipy.optimize.minimize" class="level4">
+<h4 class="anchored" data-anchor-id="scipy.optimize.minimize">Scipy.optimize.minimize</h4>
+<p>One way to minimize this mathematical function is to use the <code>scipy.optimize.minimize</code> function. It takes a function and a starting guess and tries to find the minimum.</p>
+<div class="cell" data-execution_count="175">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.optimize <span class="im">import</span> minimize</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a><span class="co"># takes a function f and a starting point x0 and returns a readout </span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a><span class="co"># with the optimal input value of x which minimizes f</span></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>minimize(arbitrary, x0 <span class="op">=</span> <span class="fl">3.5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="175">
+<pre><code>      fun: -0.13827491292966557
+ hess_inv: array([[0.73848255]])
+      jac: array([6.48573041e-06])
+  message: 'Optimization terminated successfully.'
+     nfev: 20
+      nit: 3
+     njev: 10
+   status: 0
+  success: True
+        x: array([2.39275266])</code></pre>
+</div>
+</div>
+<p>Our choice of start point can affect the outcome. For example if we start to the left, we get stuck in the local minimum on the left side.</p>
+<div class="cell" data-execution_count="173">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>minimize(arbitrary, x0 <span class="op">=</span> <span class="dv">1</span>)</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="co">#here we see the optimal value is different from before</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="173">
+<pre><code>      fun: -0.13827491294422317
+ hess_inv: array([[0.74751575]])
+      jac: array([-3.7997961e-07])
+  message: 'Optimization terminated successfully.'
+     nfev: 16
+      nit: 7
+     njev: 8
+   status: 0
+  success: True
+        x: array([2.3927478])</code></pre>
+</div>
+</div>
+<p><code>scipy.optimize.minimize</code> is great. It may also seem a bit magical. How could you write a function that can find the minimum of any mathematical function? There are a number of ways to do this, which we’ll explore in today’s lecture, eventually arriving at the important idea of <strong>gradient descent</strong>, which is the principle that <code>scipy.optimize.minimize</code> uses.</p>
+<p>It turns out that under the hood, the <code>fit</code> method for <code>LinearRegression</code> models uses gradient descent. Gradient descent is also how much of machine learning works, including even advanced neural network models.</p>
+<p>In Data 100, the gradient descent process will usually be invisible to us, hidden beneath an abstraction layer. However, to be good data scientists, it’s important that we know the basic principles beyond the optimization functions that harness to find optimal parmaeters.</p>
+</section>
+</section>
+<section id="digging-into-gradient-descent" class="level3">
+<h3 class="anchored" data-anchor-id="digging-into-gradient-descent">Digging into Gradient Descent</h3>
+<p>Looking at the function across this domain, it is clear that the function’s minimum value occurs around <span class="math inline">\(\theta = 5.3\)</span>. Let’s pretend for a moment that we <em>couldn’t</em> see the full view of the cost function. How would we guess the value of <span class="math inline">\(\theta\)</span> that minimizes the function?</p>
+<p>It turns out that the first derivative of the function can give us a clue. In the plots below, the line indicates the value of the derivative of each value of <span class="math inline">\(\theta\)</span>. The derivative is negative where it is red and positive where it is green.</p>
+<p>Say we make a guess for the minimizing value of <span class="math inline">\(\theta\)</span>. Remember that we read plots from left to right, and assume that our starting <span class="math inline">\(\theta\)</span> value is to the left of the optimal <span class="math inline">\(\hat{\theta}\)</span>. If the guess “undershoots” the true minimizing value – our guess for <span class="math inline">\(\theta\)</span> is not quite at the value of the <span class="math inline">\(\hat{\theta}\)</span> that truly minimizes the function – the derivative will be <strong>negative</strong> in value. This means that if we increase <span class="math inline">\(\theta\)</span> (move further to the right), then we <strong>can decrease</strong> our loss function further. If this guess “overshoots” the true minimizing value, the derivative will be positive in value, implying the converse.</p>
+<p><img src="images/step.png" alt="step" width="600"></p>
+<p>We can use this pattern to help formulate our next guess for the optimal <span class="math inline">\(\hat{\theta}\)</span>. Consider the case where we’ve undershot <span class="math inline">\(\theta\)</span> by guessing too low of a value. We’ll want our next guess to be greater in value than the previous guess – that is, we want to shift our guess to the right. You can think of this as following the slope “downhill” to the function’s minimum value.</p>
+<p><img src="images/neg_step.png" alt="neg_step" width="600"></p>
+<p>If we’ve overshot <span class="math inline">\(\hat{\theta}\)</span> by guessing too high of a value, we’ll want our next guess to be lower in value – we want to shift our guess for <span class="math inline">\(\hat{\theta}\)</span> to the left.</p>
+<p><img src="images/pos_step.png" alt="pos_step" width="600"></p>
+</section>
+<section id="formalizing-gradient-descent" class="level3">
+<h3 class="anchored" data-anchor-id="formalizing-gradient-descent">Formalizing Gradient Descent</h3>
+<p>These observations lead us to the <strong>gradient descent update rule</strong>: <span class="math display">\[\theta^{(t+1)} = \theta^{(t)} - \alpha \frac{dL}{d\theta}\]</span></p>
+<p>Begin with our guess for <span class="math inline">\(\hat{\theta}\)</span> at timestep <span class="math inline">\(t\)</span>. To find our guess for <span class="math inline">\(\hat{\theta}\)</span> at the next timestep, <span class="math inline">\(t+1\)</span>, subtract a multiple of the objective function’s derivative, <span class="math inline">\(\frac{dL}{d\theta}\)</span>. We’ve replaced the generic function <span class="math inline">\(f\)</span> with <span class="math inline">\(L\)</span> to indicate that we are minimizing loss.</p>
+<ul>
+<li>If our guess <span class="math inline">\(\theta^{(t)}\)</span> was too low (undershooting <span class="math inline">\(\hat{\theta}\)</span>), <span class="math inline">\(\frac{dL}{d\theta}\)</span> will be negative. Subtracting a negative number from <span class="math inline">\(\theta^{(t)}\)</span> will <em>increase</em> the value of the next guess, <span class="math inline">\(\theta^{(t+1)}\)</span>. The guess will shift to the right.</li>
+<li>If our guess <span class="math inline">\(\theta^{(t)}\)</span> was too high (overshooting <span class="math inline">\(\hat{\theta}\)</span>), <span class="math inline">\(\frac{dL}{d\theta}\)</span> will be positive. Subtracting a positive number from <span class="math inline">\(\theta^{(t)}\)</span> will <em>decrease</em> the value of the next guess, <span class="math inline">\(\theta^{(t+1)}\)</span>. The guess will shift to the left.</li>
+</ul>
+<p>Put together, this captures the same behavior we reasoned through above. We repeatedly update our guess for the optimal <span class="math inline">\(\theta\)</span> until we’ve completed a set number of updates, or until each additional update iteration does not change the value of <span class="math inline">\(\theta\)</span>. In this second case, we say that gradient descent has <strong>converged</strong> on a solution.</p>
+<p>The <span class="math inline">\(\alpha\)</span> term in the update rule is known as the <strong>learning rate</strong>. It represents the size of each gradient descent update step – in other words, how “far” should we step to the left or right with each updated guess? A high value of <span class="math inline">\(\alpha\)</span> will lead to large differences in value between consecutive guesses for <span class="math inline">\(\hat{\theta}\)</span>; a low value of <span class="math inline">\(\alpha\)</span> will result in smaller differences in value between consecutive guesses. This is the first example of a <strong>hyperparameter</strong>, a parameter that is hand picked by the data scientist that changes the model’s behavior, in the course.</p>
+<div class="cell" data-execution_count="162">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># define the derivative of the arbitrary function we want to minimize</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> derivative_arbitrary(x):</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (<span class="dv">4</span><span class="op">*</span>x<span class="op">**</span><span class="dv">3</span> <span class="op">-</span> <span class="dv">45</span><span class="op">*</span>x<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> <span class="dv">160</span><span class="op">*</span>x <span class="op">-</span> <span class="dv">180</span>)<span class="op">/</span><span class="dv">10</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gradient_descent(df, initial_guess, alpha, n):</span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Performs n steps of gradient descent on df using learning rate alpha starting</span></span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a><span class="co">       from initial_guess. Returns a numpy array of all guesses over time."""</span></span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>    guesses <span class="op">=</span> [initial_guess]</span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>    current_guess <span class="op">=</span> initial_guess</span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="bu">len</span>(guesses) <span class="op">&lt;</span> n:</span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a>        current_guess <span class="op">=</span> current_guess <span class="op">-</span> alpha <span class="op">*</span> df(current_guess)</span>
+<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a>        guesses.append(current_guess)</span>
+<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb42-14"><a href="#cb42-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.array(guesses)</span>
+<span id="cb42-15"><a href="#cb42-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-16"><a href="#cb42-16" aria-hidden="true" tabindex="-1"></a><span class="co"># calling our function gives us the path that gradient descent takes for 20 steps </span></span>
+<span id="cb42-17"><a href="#cb42-17" aria-hidden="true" tabindex="-1"></a><span class="co"># with a learning rate of 0.3 starting at theta = 4</span></span>
+<span id="cb42-18"><a href="#cb42-18" aria-hidden="true" tabindex="-1"></a>trajectory <span class="op">=</span> gradient_descent(derivative_arbitrary, <span class="dv">4</span>, <span class="fl">0.3</span>, <span class="dv">20</span>)</span>
+<span id="cb42-19"><a href="#cb42-19" aria-hidden="true" tabindex="-1"></a>trajectory</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="162">
+<pre><code>array([4.        , 4.12      , 4.26729664, 4.44272584, 4.64092624,
+       4.8461837 , 5.03211854, 5.17201478, 5.25648449, 5.29791149,
+       5.31542718, 5.3222606 , 5.32483298, 5.32578765, 5.32614004,
+       5.32626985, 5.32631764, 5.32633523, 5.3263417 , 5.32634408])</code></pre>
+</div>
+</div>
+<p>Above, we’ve simply run our algorithm a fixed number of times. More sophisticated implementations will stop based on a variety of different stopping criteria, e.g.&nbsp;error getting too small, error getting too large, etc. We will not discuss these in our course.</p>
+</section>
+<section id="loss-terminology" class="level3">
+<h3 class="anchored" data-anchor-id="loss-terminology">Loss Terminology</h3>
+<p>We use the word “loss” in two different (but very related) contexts in this course.</p>
+<ul>
+<li><p>In general, loss is the cost function that measures how far off model’s prediction(s) is(are) from the actual value(s).</p>
+<ul>
+<li>Per-datapoint loss is a cost function that measures the cost of <span class="math inline">\(y\)</span> vs <span class="math inline">\(\hat{y}\)</span> for a particular datapoint.</li>
+<li>Loss (without any adjectives) is generally a cost function measured across all datapoints. Often times, <em>empirical risk</em> is <em>average per-datapoint loss</em>.</li>
+</ul></li>
+<li><p>We prioritize using the latter term, because we don’t particularly look at a given datapoint’s loss when optimizing a model.</p>
+<ul>
+<li>In other words, the dataset-level loss is the objective function that we’d like to minimize using gradient descent.</li>
+<li>We achieve this minimization by using <strong>per-datapoint</strong> loss values.</li>
+</ul></li>
+</ul>
+</section>
+<section id="application-of-1d-gradient-descent" class="level3">
+<h3 class="anchored" data-anchor-id="application-of-1d-gradient-descent">Application of 1D Gradient Descent</h3>
+<p>We’ve seen how to find the optimal parameters for a 1D linear model for the penguin dataset:</p>
+<ul>
+<li>Using the derived equations from Data 8.</li>
+<li>Using <code>sklearn</code>.
+<ul>
+<li>Uses gradient descent under the hood!</li>
+</ul></li>
+</ul>
+<p>In real practice in this course, we’ll usually use <code>sklearn</code>. But for now, let’s see how we can do the gradient descent ourselves.</p>
+<p>Let’s consider a case where we have a linear model with no offset.</p>
+<p><span class="math display">\[\hat{y} = \theta_1 x\]</span></p>
+<p>We want to find the parameter <span class="math inline">\(\theta_1\)</span> such that the L2 loss is minimized. In sklearn, this is easy. To avoid fitting an intercept, we set <code>fit_intercept</code> to false.</p>
+<div class="cell" data-execution_count="164">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> LinearRegression(fit_intercept <span class="op">=</span> <span class="va">False</span>)</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> sns.load_dataset(<span class="st">"tips"</span>)</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>model.fit(df[[<span class="st">"total_bill"</span>]], df[<span class="st">"tip"</span>])</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>model.coef_ <span class="co"># the optimal tip percentage is 14.37%</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="164">
+<pre><code>array([0.1437319])</code></pre>
+</div>
+</div>
+</section>
+<section id="creating-an-explicit-mse-function" class="level3">
+<h3 class="anchored" data-anchor-id="creating-an-explicit-mse-function">Creating an Explicit MSE Function</h3>
+<p>To employ gradient descent and do this ourselves, we need to define a function upon which we can use gradient descent. Suppose we select the L2 loss as our loss function. In this case, our goal will be to minimize the mean squared error.</p>
+<p>Let’s start by writing a function that computes the MSE for a given choice of <span class="math inline">\(\theta_1\)</span> on our dataset.</p>
+<div class="cell" data-execution_count="168">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mse_single_arg(theta1):</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Returns the MSE on our data for the given theta1"""</span></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> df[<span class="st">"total_bill"</span>]</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>    y_obs <span class="op">=</span> df[<span class="st">"tip"</span>]</span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>    y_hat <span class="op">=</span> theta1 <span class="op">*</span> x</span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.mean((y_hat <span class="op">-</span> y_obs) <span class="op">**</span> <span class="dv">2</span>)</span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>mse_single_arg(<span class="fl">0.1437</span>)</span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a><span class="co"># The minimum loss value that we can achieve is 1.178 dollars on average away from the truth</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="168">
+<pre><code>1.1781165940051928</code></pre>
+</div>
+</div>
+</section>
+<section id="plotting-the-mse-function" class="level3">
+<h3 class="anchored" data-anchor-id="plotting-the-mse-function">Plotting the MSE Function</h3>
+<p>Since we only have 1 parameter, we can simply cross reference our results with a simnple plot. We do not want to always do this since some functions can have thousands of inputs, making them difficult to plot. We can plot the MSE as a function of <code>theta1</code>. It turns out to look pretty smooth, and quite similar to a parabola.</p>
+<div class="cell" data-execution_count="169">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>theta1s <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="fl">0.2</span>, <span class="dv">200</span>)</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> df[<span class="st">"total_bill"</span>]</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>y_obs <span class="op">=</span> df[<span class="st">"tip"</span>]</span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>MSEs <span class="op">=</span> [mse_single_arg(theta1) <span class="cf">for</span> theta1 <span class="kw">in</span> theta1s]</span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>plt.plot(theta1s, MSEs)</span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="vs">r"Choice for $\theta_1$"</span>)</span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="vs">r"MSE"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="gradient_descent_files/figure-html/cell-27-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>The minimum appears to be around <span class="math inline">\(\theta_1 = 0.14\)</span>. We can once again check this naively.</p>
+<div class="cell" data-execution_count="176">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>simple_minimize(mse_single_arg, np.linspace(<span class="dv">0</span>, <span class="fl">0.2</span>, <span class="dv">21</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="176">
+<pre><code>0.14</code></pre>
+</div>
+</div>
+<p>As before, what we’re doing is computing all the starred values below and then returning the <span class="math inline">\(\theta_1\)</span> that goes with the minimum value.</p>
+<div class="cell" data-execution_count="177">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>theta1s <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="fl">0.2</span>, <span class="dv">200</span>)</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>sparse_theta1s <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="fl">0.2</span>, <span class="dv">21</span>)</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>loss <span class="op">=</span> [mse_single_arg(theta1) <span class="cf">for</span> theta1 <span class="kw">in</span> theta1s]</span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>sparse_loss <span class="op">=</span> [mse_single_arg(theta1) <span class="cf">for</span> theta1 <span class="kw">in</span> sparse_theta1s]</span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>plt.plot(theta1s, loss)</span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a>plt.plot(sparse_theta1s, sparse_loss, <span class="st">'r*'</span>)</span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="vs">r"Choice for $\theta_1$"</span>)</span>
+<span id="cb51-10"><a href="#cb51-10" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="vs">r"MSE"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="gradient_descent_files/figure-html/cell-29-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<section id="using-scipy.optimize.minimize" class="level4">
+<h4 class="anchored" data-anchor-id="using-scipy.optimize.minimize">Using Scipy.Optimize.minimize</h4>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> scipy.optimize</span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.optimize <span class="im">import</span> minimize</span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>minimize(mse_single_arg, x0 <span class="op">=</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="using-our-gradient-descent-function" class="level4">
+<h4 class="anchored" data-anchor-id="using-our-gradient-descent-function">Using Our Gradient Descent Function</h4>
+<p>Another approach is to use our 1D gradient descent algorithm from earlier. This is the exact same function as earlier. We can run it for 100 steps and see where it ultimately ends up.</p>
+<div class="cell" data-execution_count="179">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mse_loss_derivative_single_arg(theta_1):</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Returns the derivative of the MSE on our data for the given theta1"""</span></span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> df[<span class="st">"total_bill"</span>]</span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>    y_obs <span class="op">=</span> df[<span class="st">"tip"</span>]</span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>    y_hat <span class="op">=</span> theta_1 <span class="op">*</span> x</span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.mean(<span class="dv">2</span> <span class="op">*</span> (y_hat <span class="op">-</span> y_obs) <span class="op">*</span> x)</span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a>gradient_descent(mse_loss_derivative_single_arg, <span class="fl">0.05</span>, <span class="fl">0.0001</span>, <span class="dv">100</span>)[<span class="op">-</span><span class="dv">5</span>:]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="179">
+<pre><code>array([0.14372404, 0.14372478, 0.14372545, 0.14372605, 0.1437266 ])</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="gradient-notation" class="level3">
+<h3 class="anchored" data-anchor-id="gradient-notation">Gradient Notation</h3>
+<p>Consider the 2D function: <span class="math display">\[f(\theta_0, \theta_1) = 8\theta_0^2 + 3\theta_0\theta_1\]</span></p>
+<p>For a function of 2 variables, <span class="math inline">\(f(\theta_0, \theta_1)\)</span> we define the gradient as $_f = + $, where <span class="math inline">\(\vec{i}\)</span> and <span class="math inline">\(\vec{j}\)</span> are the unit vectors in the <span class="math inline">\(\theta_0\)</span> and <span class="math inline">\(\theta_1\)</span> directions.</p>
+<p><span class="math display">\[\frac{\partial f}{\partial \theta_0} = 16\theta_0 + 3\theta_1\]</span></p>
+<p><span class="math display">\[\frac{\partial f}{\partial \theta_1} = 3\theta_0\]</span></p>
+<p><span class="math display">\[\nabla_\theta f =  (16\theta_0 + 3\theta_1)\vec{i} + (3\theta_0)\vec{j}\]</span></p>
+<p>We can also write it in column vector notation.</p>
+<p><span class="math display">\[\nabla_\theta f =  \begin{bmatrix} \frac{\partial f}{\partial \theta_0} \\ \frac{\partial f}{\partial \theta_1} \\... \end{bmatrix}\]</span></p>
+<p>EX: <span class="math inline">\(\nabla_\theta f = \begin{bmatrix}16\theta_0 + 3\theta_1 \\ 3\theta_0\end{bmatrix}\)</span></p>
+<p>You should read these gradients as:</p>
+<ul>
+<li><span class="math inline">\(\frac{\partial f}{\partial \theta_0}\)</span> : If I nudge the 1st model weight, what happens to loss?</li>
+<li><span class="math inline">\(\frac{\partial f}{\partial \theta_1}\)</span> :If I nudge the 2nd model weight, what happens to loss?</li>
+<li>etc.</li>
+</ul>
+</section>
+<section id="multidimensional-gradient-descent" class="level3">
+<h3 class="anchored" data-anchor-id="multidimensional-gradient-descent">Multidimensional Gradient Descent</h3>
+<p>We’re in good shape now: we’ve developed a technique to find the minimum value of a more complex objective function.</p>
+<p>The function we worked with above was one-dimensional – we were only minimizing the function with respect to a single parameter, <span class="math inline">\(\theta\)</span>. However, as we’ve seen before, we often need to optimize a cost function with respect to several parameters (for example, when selecting the best model parameters for multiple linear regression). We’ll need to extend our gradient descent rule to <em>multidimensional</em> objective functions.</p>
+<p>Now suppose we improve our model so that we want to predict the tip from the total_bill plus a constant offset, in other words:</p>
+<p><span class="math display">\[\textrm{tip} = \theta_0 + \theta_1 \textrm{bill}\]</span></p>
+<p>To put this in more concrete terms what this means, let’s return to the familiar case of simple linear regression with MSE loss. <span class="math display">\[\text{MSE}(\theta_0,\:\theta_1) = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 = \frac{1}{n} \sum_{i=1}^{n} (y_i - \theta_0 - \theta_1 x)^2\]</span></p>
+<p>Now, loss is expressed in terms of <em>two</em> parameters, <span class="math inline">\(\theta_0\)</span> and <span class="math inline">\(\theta_1\)</span>. Rather than a one-dimensional loss function as we had above, we are now dealing with a two-dimensional <strong>loss surface</strong>.</p>
+<div class="cell" data-execution_count="160">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="co"># This code is for illustration purposes only</span></span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a><span class="co"># It contains a lot of syntax you have not seen</span></span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> plotly.graph_objects <span class="im">as</span> go</span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> LinearRegression(fit_intercept <span class="op">=</span> <span class="va">False</span>)</span>
+<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> sns.load_dataset(<span class="st">"tips"</span>)</span>
+<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"bias"</span>] <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb55-8"><a href="#cb55-8" aria-hidden="true" tabindex="-1"></a>model.fit(df[[<span class="st">"bias"</span>,<span class="st">"total_bill"</span>]], df[<span class="st">"tip"</span>])</span>
+<span id="cb55-9"><a href="#cb55-9" aria-hidden="true" tabindex="-1"></a>model.coef_</span>
+<span id="cb55-10"><a href="#cb55-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-11"><a href="#cb55-11" aria-hidden="true" tabindex="-1"></a>uvalues <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">10</span>)</span>
+<span id="cb55-12"><a href="#cb55-12" aria-hidden="true" tabindex="-1"></a>vvalues <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="fl">0.2</span>, <span class="dv">10</span>)</span>
+<span id="cb55-13"><a href="#cb55-13" aria-hidden="true" tabindex="-1"></a>(u,v) <span class="op">=</span> np.meshgrid(uvalues, vvalues)</span>
+<span id="cb55-14"><a href="#cb55-14" aria-hidden="true" tabindex="-1"></a>thetas <span class="op">=</span> np.vstack((u.flatten(),v.flatten()))</span>
+<span id="cb55-15"><a href="#cb55-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-16"><a href="#cb55-16" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> df[[<span class="st">"bias"</span>,<span class="st">"total_bill"</span>]].to_numpy()</span>
+<span id="cb55-17"><a href="#cb55-17" aria-hidden="true" tabindex="-1"></a>Y <span class="op">=</span> df[<span class="st">"tip"</span>].to_numpy()</span>
+<span id="cb55-18"><a href="#cb55-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-19"><a href="#cb55-19" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mse_loss_single_arg(theta):</span>
+<span id="cb55-20"><a href="#cb55-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> mse_loss(theta, X, Y)</span>
+<span id="cb55-21"><a href="#cb55-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-22"><a href="#cb55-22" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mse_loss(theta, X, y_obs):</span>
+<span id="cb55-23"><a href="#cb55-23" aria-hidden="true" tabindex="-1"></a>    y_hat <span class="op">=</span> X <span class="op">@</span> theta</span>
+<span id="cb55-24"><a href="#cb55-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.mean((y_hat <span class="op">-</span> Y) <span class="op">**</span> <span class="dv">2</span>)    </span>
+<span id="cb55-25"><a href="#cb55-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-26"><a href="#cb55-26" aria-hidden="true" tabindex="-1"></a>MSE <span class="op">=</span> np.array([mse_loss_single_arg(t) <span class="cf">for</span> t <span class="kw">in</span> thetas.T])</span>
+<span id="cb55-27"><a href="#cb55-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-28"><a href="#cb55-28" aria-hidden="true" tabindex="-1"></a>loss_surface <span class="op">=</span> go.Surface(x<span class="op">=</span>u, y<span class="op">=</span>v, z<span class="op">=</span>np.reshape(MSE, u.shape))</span>
+<span id="cb55-29"><a href="#cb55-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-30"><a href="#cb55-30" aria-hidden="true" tabindex="-1"></a>ind <span class="op">=</span> np.argmin(MSE)</span>
+<span id="cb55-31"><a href="#cb55-31" aria-hidden="true" tabindex="-1"></a>optimal_point <span class="op">=</span> go.Scatter3d(name <span class="op">=</span> <span class="st">"Optimal Point"</span>,</span>
+<span id="cb55-32"><a href="#cb55-32" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> [thetas.T[ind,<span class="dv">0</span>]], y <span class="op">=</span> [thetas.T[ind,<span class="dv">1</span>]], </span>
+<span id="cb55-33"><a href="#cb55-33" aria-hidden="true" tabindex="-1"></a>    z <span class="op">=</span> [MSE[ind]],</span>
+<span id="cb55-34"><a href="#cb55-34" aria-hidden="true" tabindex="-1"></a>    marker<span class="op">=</span><span class="bu">dict</span>(size<span class="op">=</span><span class="dv">10</span>, color<span class="op">=</span><span class="st">"red"</span>))</span>
+<span id="cb55-35"><a href="#cb55-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-36"><a href="#cb55-36" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> go.Figure(data<span class="op">=</span>[loss_surface, optimal_point])</span>
+<span id="cb55-37"><a href="#cb55-37" aria-hidden="true" tabindex="-1"></a>fig.update_layout(scene <span class="op">=</span> <span class="bu">dict</span>(</span>
+<span id="cb55-38"><a href="#cb55-38" aria-hidden="true" tabindex="-1"></a>    xaxis_title <span class="op">=</span> <span class="st">"theta0"</span>,</span>
+<span id="cb55-39"><a href="#cb55-39" aria-hidden="true" tabindex="-1"></a>    yaxis_title <span class="op">=</span> <span class="st">"theta1"</span>,</span>
+<span id="cb55-40"><a href="#cb55-40" aria-hidden="true" tabindex="-1"></a>    zaxis_title <span class="op">=</span> <span class="st">"MSE"</span>))</span>
+<span id="cb55-41"><a href="#cb55-41" aria-hidden="true" tabindex="-1"></a>fig.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<pre><code>Unable to display output for mime type(s): application/vnd.plotly.v1+json</code></pre>
+</div>
+</div>
+<p>Though our objective function looks a little different, we can use the same principles as we did earlier to locate the optimal model parameters. Notice how the minimum value of MSE, marked by the red dot in the plot above, occurs in the “valley” of the loss surface. Like before, we want our guesses for the best pair of <span class="math inline">\((\theta_0,\:\theta_1)\)</span> to move “downhill” towards this minimum point.</p>
+<p>The difference now is that we need to update guesses for <em>both</em> <span class="math inline">\(\theta_0\)</span> and <span class="math inline">\(\theta_1\)</span>: <span class="math display">\[\theta_0^{(t+1)} = \theta_0^{(t)} - \alpha \frac{dL}{d\theta_0} \qquad \qquad \theta_1^{(t+1)} = \theta_1^{(t)} - \alpha \frac{dL}{d\theta_1}\]</span></p>
+<p>We can tidy this statement up by using vector notation: <span class="math display">\[\begin{bmatrix}
+           \theta_{0}^{(t+1)} \\
+           \theta_{1}^{(t+1)} \\
+         \end{bmatrix}
+=
+\begin{bmatrix}
+           \theta_{0}^{(t)} \\
+           \theta_{1}^{(t)} \\
+         \end{bmatrix}
+- \alpha
+\begin{bmatrix}
+           \frac{dL}{d\theta_{0}} \\
+           \frac{dL}{d\theta_{1}} \\
+         \end{bmatrix}
+\]</span></p>
+<p>To save ourselves from writing out long column vectors, we’ll introduce some new notation. <span class="math inline">\(\vec{\theta}^{(t)}\)</span> is a column vector of guesses for each model parameter <span class="math inline">\(\theta_i\)</span> at timestep <span class="math inline">\(t\)</span>. We call <span class="math inline">\(\nabla_{\vec{\theta}} L\)</span> the <strong>gradient vector.</strong> In plain English, it means “take the derivative of loss, <span class="math inline">\(L\)</span>, with respect to each model parameter in <span class="math inline">\(\vec{\theta}\)</span>.”</p>
+<p><span class="math display">\[\vec{\theta}^{(t+1)}
+= \vec{\theta}^{(t)} - \alpha \nabla_{\vec{\theta}} L
+\]</span></p>
+</section>
+<section id="we-have-multidimensional-gradient-descent-at-home" class="level3">
+<h3 class="anchored" data-anchor-id="we-have-multidimensional-gradient-descent-at-home">We have <code>Multidimensional Gradient Descent</code> at home</h3>
+<p>First, we need to be able to easily determine the gradient for any pair of values, <span class="math inline">\(\theta_0, \theta_1\)</span>.</p>
+<div class="cell" data-execution_count="187">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>tips_with_bias <span class="op">=</span> df.copy()</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>tips_with_bias[<span class="st">"bias"</span>] <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> tips_with_bias[[<span class="st">"bias"</span>, <span class="st">"total_bill"</span>]]</span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>X.head(<span class="dv">5</span>)</span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mse_gradient(theta, X, y_obs):</span>
+<span id="cb57-7"><a href="#cb57-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Returns the gradient of the MSE on our data for the given theta"""</span>    </span>
+<span id="cb57-8"><a href="#cb57-8" aria-hidden="true" tabindex="-1"></a>    x0 <span class="op">=</span> X.iloc[:, <span class="dv">0</span>]</span>
+<span id="cb57-9"><a href="#cb57-9" aria-hidden="true" tabindex="-1"></a>    x1 <span class="op">=</span> X.iloc[:, <span class="dv">1</span>]</span>
+<span id="cb57-10"><a href="#cb57-10" aria-hidden="true" tabindex="-1"></a>    dth0 <span class="op">=</span> np.mean(<span class="op">-</span><span class="dv">2</span> <span class="op">*</span> (y_obs <span class="op">-</span> theta[<span class="dv">0</span>]<span class="op">*</span>x0 <span class="op">-</span> theta[<span class="dv">1</span>]<span class="op">*</span>x1) <span class="op">*</span> x0)</span>
+<span id="cb57-11"><a href="#cb57-11" aria-hidden="true" tabindex="-1"></a>    dth1 <span class="op">=</span> np.mean(<span class="op">-</span><span class="dv">2</span> <span class="op">*</span> (y_obs <span class="op">-</span> theta[<span class="dv">0</span>]<span class="op">*</span>x0 <span class="op">-</span> theta[<span class="dv">1</span>]<span class="op">*</span>x1) <span class="op">*</span> x1)</span>
+<span id="cb57-12"><a href="#cb57-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.array([dth0, dth1])</span>
+<span id="cb57-13"><a href="#cb57-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-14"><a href="#cb57-14" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mse_gradient_single_arg(theta):</span>
+<span id="cb57-15"><a href="#cb57-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Returns the gradient of the MSE on our data for the given theta"""</span></span>
+<span id="cb57-16"><a href="#cb57-16" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> tips_with_bias[[<span class="st">"bias"</span>, <span class="st">"total_bill"</span>]]</span>
+<span id="cb57-17"><a href="#cb57-17" aria-hidden="true" tabindex="-1"></a>    y_obs <span class="op">=</span> tips_with_bias[<span class="st">"tip"</span>]</span>
+<span id="cb57-18"><a href="#cb57-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> mse_gradient(theta, X, y_obs)</span>
+<span id="cb57-19"><a href="#cb57-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-20"><a href="#cb57-20" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> tips_with_bias[[<span class="st">"bias"</span>, <span class="st">"total_bill"</span>]]</span>
+<span id="cb57-21"><a href="#cb57-21" aria-hidden="true" tabindex="-1"></a>y_obs <span class="op">=</span> tips_with_bias[<span class="st">"tip"</span>]</span>
+<span id="cb57-22"><a href="#cb57-22" aria-hidden="true" tabindex="-1"></a>ex1_mse <span class="op">=</span> mse_gradient(np.array([<span class="dv">0</span>, <span class="dv">0</span>]), X, y_obs)</span>
+<span id="cb57-23"><a href="#cb57-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-24"><a href="#cb57-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Gradient for values theta0 = 0 and theta1 = 0 : </span><span class="sc">{</span>ex1_mse<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Gradient for values theta0 = 0 and theta1 = 0 : [  -5.99655738 -135.22631803]</code></pre>
+</div>
+</div>
+<p>Using our previously previously defined <code>gradient_descent</code> function, we can see if our intuition extends to higher dimensions.</p>
+<div class="cell" data-execution_count="188">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="co">#print out the last 10 guesses our algorithm outputs to save space</span></span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>guesses <span class="op">=</span> gradient_descent(mse_gradient_single_arg, np.array([<span class="dv">0</span>, <span class="dv">0</span>]), <span class="fl">0.001</span>, <span class="dv">10000</span>)[<span class="op">-</span><span class="dv">10</span>:]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="mini-batch-and-stochastic-descent" class="level3">
+<h3 class="anchored" data-anchor-id="mini-batch-and-stochastic-descent">(Mini-)Batch, and Stochastic Descent</h3>
+<p>Formally, the algorithm we derived above is called <strong>batch gradient descent.</strong> For each iteration of the algorithm, the derivative of loss is computed across the entire batch of available data. While this update rule works well in theory, it is not practical in all circumstances. For large datasets (with perhaps billions of data points), finding the gradient across all the data is incredibly computationally taxing.</p>
+<p><strong>Mini-batch gradient descent</strong> tries to address this issue. In mini-batch descent, only a subset of the data is used to compute an estimate of the gradient. For example, we might consider only 10% of the total data at each gradient descent update step. At the next iteration, a different 10% of the data is sampled to perform the following update. Once the entire dataset has been used, the process is repeated. Each complete “pass” through the data is known as a <strong>training epoch</strong>.</p>
+<p>In the extreme case, we might choose a batch size of only 1 data point – that is, a single data point is used to estimate the gradient of loss with each update step. This is known as <strong>stochastic gradient descent</strong>.</p>
+<p>Batch gradient descent is a deterministic technique – because the entire dataset is used at each update iteration, the algorithm will always advance towards the minimum of the loss surface. In contrast, both mini-batch and stochastic gradient descent involve an element of randomness. Since only a subset of the full data is used to update the guess for <span class="math inline">\(\vec{\theta}\)</span> at each iteration, there’s a chance the algorithm will not progress towards the true minimum of loss with each update. Over the longer term, these stochastic techniques should still converge towards the optimal solution.</p>
+<p>The diagrams below represent a “bird’s eye view” of a loss surface from above. Notice that batch gradient descent takes a direct path towards the optimal <span class="math inline">\(\hat{\theta}\)</span>. Stochastic gradient descent, in contrast, “hops around” on its path to the minimum point on the loss surface. This reflects the randomness of the sampling process at each update step.</p>
+<p><img src="images/stochastic.png" alt="stochastic" width="600"></p>
+</section>
+<section id="a-word-on-covexity" class="level3">
+<h3 class="anchored" data-anchor-id="a-word-on-covexity">A Word on Covexity</h3>
+<p>In our analysis above, we focused our attention on the global minimum of the loss function. You may be wondering: what about the local minimum just to the left?</p>
+<p>If we had chosen a different starting guess for <span class="math inline">\(\theta\)</span>, or a different value for the learning rate <span class="math inline">\(\alpha\)</span>, we may have converged on the local minimum, rather than on the true optimum value of loss.</p>
+<p><img src="images/local.png" alt="local" width="600"></p>
+<p>If the loss function is <strong>convex</strong>, gradient descent is guaranteed to find the global minimum of the objective function. Formally, a function <span class="math inline">\(f\)</span> is convex if: <span class="math display">\[tf(a) + (1-t)f(b) \geq f(ta + (1-t)b)\]</span></p>
+<p>To put this into words: if you drew a line between any two points on the curve, all values on the curve must be <em>on or below</em> the line. Importantly, any local minimum of a convex function is also its global minimum.</p>
+<p><img src="images/convex.png" alt="convex" width="600"></p>
+<p>In summary, non-convex loss functions can cause problems with optimization. This means that our choice of loss function is an key factor in our modeling process. It turns out that MSE <em>is</em> convex, which is a major reason why it is such a popular choice of loss function.</p>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
