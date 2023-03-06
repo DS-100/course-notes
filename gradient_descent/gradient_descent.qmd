@@ -13,7 +13,7 @@ format:
       - cosmo
       - cerulean
     callout-icon: false
-jupyter: myenv
+jupyter: python3
 ---
 
 ::: {.callout-note collapse="true"}
@@ -31,7 +31,7 @@ In this lecture, we'll explore three techniques for model fitting:
 2. Using the `sklearn` Python package
 3. Applying gradient descent for numerical optimization
 
-## Implementing Derived Formulas in Code
+## `sklearn`: Implementing Derived Formulas in Code
 
 Throughout this lecture, we'll refer to the `penguins` dataset. 
 
@@ -57,7 +57,7 @@ X = penguins[["flipper_length_mm"]]
 y = penguins[["bill_depth_mm"]]
 ```
 
-## Simple Linear Regression (SLR)
+### Simple Linear Regression (SLR)
 
 In the SLR framework we learned last week, this means we are saying our model for `bill depth`, $y$, is a linear function of `flipper length`, $x$:  
 
@@ -75,7 +75,7 @@ plt.scatter(data = penguins, x = "flipper_length_mm", y = "bill_depth_mm")
 
 Based on our EDA, there is a linear relationship, though it is somewhat weak.
 
-### SLR w/ Derived Analytical Formulas
+#### SLR w/ Derived Analytical Formulas
 
 Let $\hat{\theta}_0$ and $\hat{\theta}_1$ be the choices that minimize the Mean Squared Error.
 
@@ -107,7 +107,7 @@ print(f"bias parameter: {theta0_hat}, \nslope parameter: {theta1_hat}".format(th
 
 
 
-### SLR Analytical Approach Performance
+#### SLR Analytical Approach Performance
 
 Let's first assess how "good"  this model is using a performance metric. For this exercise, let's use the MSE. As a review:
 
@@ -135,7 +135,7 @@ plt.plot(penguins["flipper_length_mm"], penguins["analytical_preds_slr"], 'r') #
 plt.legend([r'$\hat{y}$', '$y$']);
 ```
 
-### SLR w/ `sklearn`
+#### SLR w/ `sklearn`
 
 We've already saved a lot of time (and avoided tedious calculations) by translating our derived formulas into code. However, we still had to go through the process of writing out the linear algebra ourselves. 
 
@@ -215,7 +215,7 @@ print("analytical coefficient terms: ", theta1_hat)
 print("sklearn coefficient terms: ", theta1)
 ```
 
-### SLR `sklearn` Performance
+#### SLR `sklearn` Performance
 
 The `sklearn` package also provides a function that computes the MSE from a list of observations and predictions. This avoids us having to manually compute MSE by first computing residuals.
 
@@ -229,16 +229,16 @@ print("MSE: ", MSE_sklearn)
 
 We've generated the exact same predictions and error as before, but without any need for manipulating matrices ourselves!  
 
-## Multiple Linear Regression (OLS)
+### Multiple Linear Regression
 
 
 In the previous lecture, we expressed multiple linear regression using matrix notation.
 
 $$\hat{\mathbb{Y}} = \mathbb{X}\theta$$
 
-### OLS w/ Derived Analytical Formulas
+#### OLS w/ Derived Analytical Formulas
 
-We used a geometric approach to derive the following expression for the optimal model parameters under MSE error:
+We used a geometric approach to derive the following expression for the optimal model parameters under MSE error, also called Ordinary Least Squares (OLS):
 
 $$\hat{\theta} = (\mathbb{X}^T \mathbb{X})^{-1}\mathbb{X}^T \mathbb{Y}$$
 
@@ -276,7 +276,7 @@ penguins["analytical_preds_ols"] = y_hat
 
 Note, this technique doesn't work if our X is **not invertible**. 
 
-### OLS w/ `sklearn`
+#### OLS w/ `sklearn`
 
 We can actually compute the optimal parameters very easily using sklearn, using the exact code that we wrote earlier. Note: sklearn does NOT use the normal equations. Instead it uses  gradient descent, a technique we will learn about soon, which can minimize ANY function, not just the MSE.
 
@@ -312,7 +312,7 @@ print(f"(sklearn) theta2: {model_2d.coef_[1]}")
 print(f"(analytical) theta2 {theta_hat[1]}")
 ```
 
-### Visualizing Our 2D Linear Model Predictions
+#### Visualizing Our 2D Linear Model Predictions
 
 When we have two axis with which we can change an input, moving along this input plan creates a 2d plane with which we can get model outputs for. For example, for every single penguin with a `flipper length` , we also must specify a `body mass`. These two values in combination will help us predict the `bill depth`. Thus, we see that the predictions all lie in a 2d-plane. In higher dimensions, they all lie in a "hyperplane". 
 
@@ -336,6 +336,20 @@ plt.xlabel('flipper_length_mm')
 plt.ylabel('body_mass_g')
 plt.gcf().savefig("plane.png", dpi = 300, bbox_inches = "tight")
 ```
+
+### Loss Terminology
+
+We use the word "loss" in two different (but very related) contexts in this course.
+
+- In general, loss is the cost function that measures how far off model's prediction(s) is(are) from the actual value(s).
+
+    - Per-datapoint loss is a cost function that measures the cost of $y$ vs $\hat{y}$ for a particular datapoint. 
+    - Loss (without any adjectives) is generally a cost function measured across all datapoints. Often times, *empirical risk* is *average per-datapoint loss*.
+
+- We prioritize using the latter term, because we don't particularly look at a given datapoint's loss when optimizing a model.
+    
+    - In other words, the dataset-level loss is the objective function that we'd like to minimize using gradient descent.
+    - We achieve this minimization by using **per-datapoint** loss values.
 
 
 ## Gradient Descent
@@ -414,19 +428,21 @@ If we've overshot $\hat{\theta}$ by guessing too high of a value, we'll want our
 
 <img src="images/pos_step.png" alt='pos_step' width='600'>
 
-### Formalizing Gradient Descent
+## Gradient Descent in 1 Dimension
 
 These observations lead us to the **gradient descent update rule**:
-$$\theta^{(t+1)} = \theta^{(t)} - \alpha \frac{dL}{d\theta}$$
+$$\theta^{(t+1)} = \theta^{(t)} - \alpha \frac{d}{d\theta}L(\theta^{(t)})$$
 
-Begin with our guess for $\hat{\theta}$ at timestep $t$. To find our guess for $\hat{\theta}$ at the next timestep, $t+1$, subtract a multiple of the objective function's derivative, $\frac{dL}{d\theta}$. We've replaced the generic function $f$ with $L$ to indicate that we are minimizing loss.
+Begin with our guess for $\hat{\theta}$ at timestep $t$. To find our guess for $\hat{\theta}$ at the next timestep, $t+1$, subtract the objective function's derivative evaluted at $\theta^{(t)}$, $\frac{d}{d\theta} L(\theta^{(t)})$, scaled by a positive value $\alpha$. We've replaced the generic function $f$ with $L$ to indicate that we are minimizing loss.
 
-* If our guess $\theta^{(t)}$ was too low (undershooting $\hat{\theta}$), $\frac{dL}{d\theta}$ will be negative. Subtracting a negative number from $\theta^{(t)}$ will *increase* the value of the next guess, $\theta^{(t+1)}$. The guess will shift to the right.
-* If our guess $\theta^{(t)}$ was too high (overshooting $\hat{\theta}$), $\frac{dL}{d\theta}$ will be positive. Subtracting a positive number from $\theta^{(t)}$ will *decrease* the value of the next guess, $\theta^{(t+1)}$. The guess will shift to the left.
+Supposing that any local minima is a global minimum (see **convexity** at the end of this page):
+
+* If our guess $\theta^{(t)}$ is to the left of $\hat{\theta}$ (undershooting), the first derivative will be negative. Subtracting a negative number from $\theta^{(t)}$ will *increase* the value of the next guess, $\theta^{(t+1)}$ and move our loss function down. The guess will shift to the right.
+* If our guess $\theta^{(t)}$ was too high (overshooting $\hat{\theta}$), the first derivative will be positive. Subtracting a positive number from $\theta^{(t)}$ will *decrease* the value of the next guess, $\theta^{(t+1)}$ and move our loss function down. The guess will shift to the left.
 
 Put together, this captures the same behavior we reasoned through above. We repeatedly update our guess for the optimal $\theta$ until we've completed a set number of updates, or until each additional update iteration does not change the value of $\theta$. In this second case, we say that gradient descent has **converged** on a solution. 
 
-The $\alpha$ term in the update rule is known as the **learning rate**. It represents the size of each gradient descent update step – in other words, how "far" should we step to the left or right with each updated guess? A high value of $\alpha$ will lead to large differences in value between consecutive guesses for $\hat{\theta}$; a low value of $\alpha$ will result in smaller differences in value between consecutive guesses. This is the first example of a **hyperparameter**, a parameter that is hand picked by the data scientist that changes the model's behavior, in the course.
+The $\alpha$ term in the update rule is known as the **learning rate**. It is a positive value represents the size of each gradient descent update step – in other words, how "far" should we step to the left or right with each updated guess? A high value of $\alpha$ will lead to large differences in value between consecutive guesses for $\hat{\theta}$; a low value of $\alpha$ will result in smaller differences in value between consecutive guesses. This is the first example of a **hyperparameter**, a parameter that is hand picked by the data scientist that changes the model's behavior, in the course.
 
 ```{python}
 # define the derivative of the arbitrary function we want to minimize
@@ -451,20 +467,6 @@ trajectory
 ```
 
 Above, we've simply run our algorithm a fixed number of times. More sophisticated implementations will stop based on a variety of different stopping criteria, e.g. error getting too small, error getting too large, etc. We will not discuss these in our course.
-
-### Loss Terminology
-
-We use the word "loss" in two different (but very related) contexts in this course.
-
-- In general, loss is the cost function that measures how far off model's prediction(s) is(are) from the actual value(s).
-
-    - Per-datapoint loss is a cost function that measures the cost of $y$ vs $\hat{y}$ for a particular datapoint. 
-    - Loss (without any adjectives) is generally a cost function measured across all datapoints. Often times, *empirical risk* is *average per-datapoint loss*.
-
-- We prioritize using the latter term, because we don't particularly look at a given datapoint's loss when optimizing a model.
-    
-    - In other words, the dataset-level loss is the objective function that we'd like to minimize using gradient descent.
-    - We achieve this minimization by using **per-datapoint** loss values.
 
 ### Application of 1D Gradient Descent
 
@@ -568,32 +570,7 @@ def mse_loss_derivative_single_arg(theta_1):
 gradient_descent(mse_loss_derivative_single_arg, 0.05, 0.0001, 100)[-5:]
 ```
 
-### Gradient Notation
-
-Consider the 2D function: $$f(\theta_0, \theta_1) = 8\theta_0^2 + 3\theta_0\theta_1$$
-
-For a function of 2 variables, $f(\theta_0, \theta_1)$ we define the gradient as $\nabla_\theta f = \frac{\partial f}{\partial \theta_0} \vec{i} +  \frac{\partial f}{\partial \theta_1} \vec{j} $, where $\vec{i}$ and $\vec{j}$ are the unit vectors in the $\theta_0$ and $\theta_1$ directions.
-
-$$\frac{\partial f}{\partial \theta_0} = 16\theta_0 + 3\theta_1$$
-
-$$\frac{\partial f}{\partial \theta_1} = 3\theta_0$$
-
-$$\nabla_\theta f =  (16\theta_0 + 3\theta_1)\vec{i} + (3\theta_0)\vec{j}$$
-
-We can also write it in column vector notation. 
-
-$$\nabla_\theta f =  \begin{bmatrix} \frac{\partial f}{\partial \theta_0} \\ \frac{\partial f}{\partial \theta_1} \\... \end{bmatrix}$$
-
-EX: $\nabla_\theta f =  \begin{bmatrix}16\theta_0 + 3\theta_1 \\ 3\theta_0\end{bmatrix}$
-
-You should read these gradients as:
-
-- $\frac{\partial f}{\partial \theta_0}$ : If I nudge the 1st model weight, what happens to loss?
--  $\frac{\partial f}{\partial \theta_1}$ :If I nudge the 2nd model weight, what happens to loss?
-- etc.
-
-
-### Multidimensional Gradient Descent
+## Multidimensional Gradient Descent
 We're in good shape now: we've developed a technique to find the minimum value of a more complex objective function. 
 
 The function we worked with above was one-dimensional – we were only minimizing the function with respect to a single parameter, $\theta$. However, as we've seen before, we often need to optimize a cost function with respect to several parameters (for example, when selecting the best model parameters for multiple linear regression). We'll need to extend our gradient descent rule to *multidimensional* objective functions.
@@ -653,8 +630,8 @@ fig.show()
 
 Though our objective function looks a little different, we can use the same principles as we did earlier to locate the optimal model parameters. Notice how the minimum value of MSE, marked by the red dot in the plot above, occurs in the "valley" of the loss surface. Like before, we want our guesses for the best pair of $(\theta_0,\:\theta_1)$ to move "downhill" towards this minimum point. 
 
-The difference now is that we need to update guesses for *both* $\theta_0$ and $\theta_1$:
-$$\theta_0^{(t+1)} = \theta_0^{(t)} - \alpha \frac{dL}{d\theta_0} \qquad \qquad \theta_1^{(t+1)} = \theta_1^{(t)} - \alpha \frac{dL}{d\theta_1}$$
+The difference now is that we need to update guesses for *both* $\theta_0$ and $\theta_1$ that minimize a loss function $L(\theta, \mathbb{X}, \mathbb{Y})$:
+$$\theta_0^{(t+1)} = \theta_0^{(t)} - \alpha \frac{\partial L}{\partial \theta_0}\Bigm\vert_{\theta=\theta^{(t)}} \qquad \qquad \theta_1^{(t+1)} = \theta_1^{(t)} - \alpha \frac{\partial L}{\partial \theta_1}\Bigm\vert_{\theta=\theta^{(t)}}$$
 
 We can tidy this statement up by using vector notation:
 $$\begin{bmatrix}
@@ -668,18 +645,42 @@ $$\begin{bmatrix}
          \end{bmatrix}
 - \alpha
 \begin{bmatrix}
-           \frac{dL}{d\theta_{0}} \\
-           \frac{dL}{d\theta_{1}} \\
+           \frac{\partial L}{\partial \theta_{0}}\Bigm\vert_{\theta=\theta^{(t)}} \\
+           \frac{\partial L}{\partial \theta_{1}}\Bigm\vert_{\theta=\theta^{(t)}} \\
          \end{bmatrix}
 $$
 
-To save ourselves from writing out long column vectors, we'll introduce some new notation. $\vec{\theta}^{(t)}$ is a column vector of guesses for each model parameter $\theta_i$ at timestep $t$. We call $\nabla_{\vec{\theta}} L$ the **gradient vector.** In plain English, it means "take the derivative of loss, $L$, with respect to each model parameter in $\vec{\theta}$."
+To save ourselves from writing out long column vectors, we'll introduce some new notation. $\vec{\theta}^{(t)}$ is a column vector of guesses for each model parameter $\theta_i$ at timestep $t$. We call $\nabla_{\vec{\theta}} L$ the **gradient vector.** In plain English, it means "take the derivative of loss, $L(\theta, \mathbb{X}, \mathbb{Y})$, with respect to each model parameter in $\vec{\theta}$, and evaluate it at the given $\theta = \theta^{(t)}$."
 
 $$\vec{\theta}^{(t+1)}
-= \vec{\theta}^{(t)} - \alpha \nabla_{\vec{\theta}} L
+= \vec{\theta}^{(t)} - \alpha \nabla_{\vec{\theta}} L(\theta^{(t)}, \mathbb{X}, \mathbb{Y})
 $$
 
-### We have `Multidimensional Gradient Descent` at home
+### Gradient Notation
+
+Consider the 2D function: $$f(\theta_0, \theta_1) = 8\theta_0^2 + 3\theta_0\theta_1$$
+
+For a function of 2 variables, $f(\theta_0, \theta_1)$ we define the gradient as $\nabla_\theta f = \frac{\partial f}{\partial \theta_0} \vec{i} +  \frac{\partial f}{\partial \theta_1} \vec{j} $, where $\vec{i}$ and $\vec{j}$ are the unit vectors in the $\theta_0$ and $\theta_1$ directions.
+
+$$\frac{\partial f}{\partial \theta_0} = 16\theta_0 + 3\theta_1$$
+
+$$\frac{\partial f}{\partial \theta_1} = 3\theta_0$$
+
+$$\nabla_\theta f =  (16\theta_0 + 3\theta_1)\vec{i} + (3\theta_0)\vec{j}$$
+
+We can also write it in column vector notation. 
+
+$$\nabla_\theta f =  \begin{bmatrix} \frac{\partial f}{\partial \theta_0} \\ \frac{\partial f}{\partial \theta_1} \\... \end{bmatrix}$$
+
+EX: $\nabla_\theta f =  \begin{bmatrix}16\theta_0 + 3\theta_1 \\ 3\theta_0\end{bmatrix}$
+
+You should read these gradients as:
+
+- $\frac{\partial f}{\partial \theta_0}$ : If I nudge the 1st model weight, what happens to loss?
+-  $\frac{\partial f}{\partial \theta_1}$ :If I nudge the 2nd model weight, what happens to loss?
+- etc.
+
+### Visualizing Gradient Descent
 
 First, we need to be able to easily determine the gradient for any pair of values, $\theta_0, \theta_1$.
 
@@ -718,11 +719,11 @@ guesses = gradient_descent(mse_gradient_single_arg, np.array([0, 0]), 0.001, 100
 ```
 
 
-### (Mini-)Batch, and Stochastic Descent
+## Mini-Batch Gradient Decsent and Stochastic Gradient Descent
 
 Formally, the algorithm we derived above is called **batch gradient descent.** For each iteration of the algorithm, the derivative of loss is computed across the entire batch of available data. While this update rule works well in theory, it is not practical in all circumstances. For large datasets (with perhaps billions of data points), finding the gradient across all the data is incredibly computationally taxing. 
 
-**Mini-batch gradient descent** tries to address this issue. In mini-batch descent, only a subset of the data is used to compute an estimate of the gradient. For example, we might consider only 10% of the total data at each gradient descent update step. At the next iteration, a different 10% of the data is sampled to perform the following update. Once the entire dataset has been used, the process is repeated. Each complete "pass" through the data is known as a **training epoch**.
+**Mini-batch gradient descent** tries to address this issue. In mini-batch descent, only a subset of the data is used to compute an estimate of the gradient. For example, we might consider only 10% of the total data at each gradient descent update step. At the next iteration, a different 10% of the data is sampled to perform the following update. Once the entire dataset has been used, the process is repeated. Each complete "pass" through the data is known as a **training epoch**. In practice, we choose the mini-batch size to be $32$.
 
 In the extreme case, we might choose a batch size of only 1 data point – that is, a single data point is used to estimate the gradient of loss with each update step. This is known as **stochastic gradient descent**.
 
@@ -732,7 +733,7 @@ The diagrams below represent a "bird's eye view" of a loss surface from above. N
 
 <img src="images/stochastic.png" alt='stochastic' width='600'>
 
-### A Word on Covexity
+## Convexity
 In our analysis above, we focused our attention on the global minimum of the loss function. You may be wondering: what about the local minimum just to the left? 
 
 If we had chosen a different starting guess for $\theta$, or a different value for the learning rate $\alpha$, we may have converged on the local minimum, rather than on the true optimum value of loss. 

@@ -20,6 +20,7 @@ To edit existing notes:
 
     1. Open Terminal, `cd` to the top-level `course-notes` directory.
     1. Render HTML pages: `quarto render`.
+        1. To render just a single HTML page **for preview only**, run `quarto render <fname>.qmd <fname>.ipynb` in a particular directory.
 
 1. **Check** HTML. `quarto preview`.
 
