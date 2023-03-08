@@ -28,9 +28,34 @@ At this point in the course, we've equipped ourselves with some powerful techniq
 
 All of this was done with one major caveat: the regression models we've worked with so far are all **linear in the input variables**. We've assumed that our predictions should be some combination of linear variables. While this works well in some cases, the real world isn't always so straightforward. In today's lecture, we'll learn an important method to address this issue – and consider some new problems that can arise when we do so.
 
+## Feature Engineering
+
+Feature Engineering is the process of *transforming* the raw features into *more informative features* that can be used in modeling or EDA tasks.
+
+Feature engineering allows you to:
+Capture domain knowledge (e.g. periodicity or relationships between features).
+Express non-linear relationships using simple linear models.
+Encode non-numeric features to be used as inputs to models.
+Example: Using the country of origin of a car as an input to modeling its efficiency.
+
+
+Why doesn’t sklearn doesn’t have SquareRegression /PolynomialRegression.
+
+- We can translate these into linear models with features that are polynomials of x.
+- Feature engineering saves `sklearn` a lot of redundancy in their library.
+- Linear models have really nice properties.
+
+
+
 ## Feature Functions
 
-Let's take a moment to remind ourselves where this linearity comes from. Consider the following dataset on vehicles:
+A feature function takes our original d dimensional input, $\mathbb{X}$, and transforms it into a $d'$ dimensional input $\Phi$.
+
+For example, when we add the squared term of an existing column, we are effectively using kind of feature function, taking a $n \times 1$ matrix, $[hp]$, and turning it into an $n \times 2$ matrix $[hp,hp^2]$ 
+
+As number of features grows, we can capture arbitrarily complex relationships.
+
+Let's take a moment to dig further in to remind ourselves where this linearity comes from. Consider the following dataset on vehicles:
 
 ```{python}
 import seaborn as sns
@@ -78,8 +103,8 @@ To illustrate how this works, we'll refer back to the `tips` data from last lect
 ```{python}
 import numpy as np
 np.random.seed(1337)
-tips = sns.load_dataset("tips").sample(100)
-tips[["day"]].head(5)
+tips_df = sns.load_dataset("tips").sample(100)
+tips_df[["day"]].head(5)
 ```
 
    At first glance, it doesn't seem possible to fit a regression model to this data – we can't directly perform any mathematical operations on the entry "Thur". 
@@ -88,21 +113,96 @@ To resolve this, we instead create a new table with a feature for each unique va
 
 <img src="images/ohe.png" alt='ohe' width='600'>
 
-This can be implemented in code using `pd.get_dummies` to generate the one hot encoding, then calling `pd.concat` to combine these new features with the original DataFrame.
+This can be implemented in code using `sklearn`'s `OneHotEncoder()` to generate the one hot encoding, then calling `pd.concat` to combine these new features with the original DataFrame.
 
 ```{python}
 #| code-fold: false
 import pandas as pd
+from sklearn.preprocessing import OneHotEncoder
 
 # Perform the one hot encoding
-ohe = pd.get_dummies(tips["day"])
+oh_enc = OneHotEncoder()
+oh_enc.fit(tips_df[['day']])
+ohe_data = oh_enc.transform(tips_df[['day']]).toarray()
+
 
 # Combine with original features
-tips = pd.concat([tips, ohe], axis=1)
-tips.head(5)
+data_w_ohe = (tips_df
+              .join(
+                  pd.DataFrame(ohe_data, columns=oh_enc.get_feature_names_out(), index=tips_df.index))
+             )
+data_w_ohe
 ```
 
-Now, the data is ready to fit a model.
+Now, the "day" feature (or rather, the four new boolean features that represent day) can be used to fit a model.
+
+## Higher-order Polynomial Example
+
+Let’s return to where we started today: Creating higher-order polynomial features for the mpg dataset.
+
+What happens if we add a feature corresponding to the horsepower, *cubed*? or to the fourth power? the fifth power?
+
+* Will we get better results?
+* What will the model look like?
+
+Let’s try it out. The below code plots polynomial models fit to the mpg dataset, from order 0 (the constant model) to order 5 (polynomial features through horsepower to the fifth power).
+
+```{python}
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.metrics import mean_squared_error
+from sklearn.linear_model import LinearRegression
+import matplotlib.pyplot as plt
+
+
+vehicle_data = sns.load_dataset("mpg")
+vehicle_data = vehicle_data.rename(columns = {"horsepower": "hp"})
+vehicle_data = vehicle_data.dropna()
+
+
+def get_MSE_for_degree_k_model(k):
+    pipelined_model = Pipeline([
+        ('poly_transform', PolynomialFeatures(degree = k)),
+        ('regression', LinearRegression(fit_intercept = True))    
+    ])
+    pipelined_model.fit(vehicle_data[["hp"]], vehicle_data["mpg"])
+    return mean_squared_error(pipelined_model.predict(vehicle_data[["hp"]]), vehicle_data["mpg"])
+
+ks = np.array(range(0, 7))
+MSEs = [get_MSE_for_degree_k_model(k) for k in ks]
+MSEs_and_k = pd.DataFrame({"k": ks, "MSE": MSEs})
+MSEs_and_k.set_index("k")
+
+def plot_degree_k_model(k, MSEs_and_k, axs):
+    pipelined_model = Pipeline([
+        ('poly_transform', PolynomialFeatures(degree = k)),
+        ('regression', LinearRegression(fit_intercept = True))    
+    ])
+    pipelined_model.fit(vehicle_data[["hp"]], vehicle_data["mpg"])
+    
+    row = k // 3
+    col = k % 3
+    ax = axs[row, col]
+    
+    sns.scatterplot(data=vehicle_data, x='hp', y='mpg', ax=ax)
+    
+    x_range = np.linspace(45, 210, 100).reshape(-1, 1)
+    ax.plot(x_range, pipelined_model.predict(pd.DataFrame(x_range, columns=['hp'])), c='orange', linewidth=2)
+    
+    ax.set_ylim((0, 50))
+    mse_str = f"MSE: {MSEs_and_k.loc[k, 'MSE']:.4}\norder: {k}"
+    ax.text(150, 30, mse_str, dict(size=13))
+
+fig = plt.figure(figsize=(10, 4))
+axs = fig.subplots(nrows=2, ncols=3)
+
+for k in range(6):
+    plot_degree_k_model(k, MSEs_and_k, axs)
+fig.tight_layout()
+```
+
+With constant and linear models, there seems to be a clear pattern in prediction error. With a quadratic model (order 2), the plot seems to match our data much more consistently across different `hp` values. For higher order polynomials, we observe a small improvement in MSE, but not much beyond 18.98. The MSE will continue to marginally decrease as we add more and more terms to our model. However, there ain't no free lunch. This decreasing of the MSE is coming at a major cost!
+
 
 ## Variance and Training Error
 
@@ -130,6 +230,8 @@ The sensitivity of the model to the data used to train it is called the **model 
 
 <img src="images/bvt.png" alt='bvt' width='500'>
 
+We will further explore this tradeoff (and more precisely define model variance) in future lectures.
+
 ## Overfitting
 
 We can see that there is a clear "trade-off" that comes from the complexity of our model. As model complexity increases, the model's error on the training data decreases. At the same time, the model's variance tends to increase.
@@ -151,4 +253,5 @@ The phenomenon above is called **overfitting**. The model effectively just memor
 The takeaway here: we need to strike a balance in the complexity of our models. A model that is too simple won't be able to capture the key relationships between our variables of interest; a model that is too complex runs the risk of overfitting. 
 
 This begs the question: how do we control the complexity of a model? Stay tuned for the next lecture.
+
 
