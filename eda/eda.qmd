@@ -43,6 +43,7 @@ In the past two `pandas` lectures, we briefly touched on the idea of file format
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 import pandas as pd
 pd.read_csv("data/elections.csv").head(5)
 ```
@@ -51,6 +52,7 @@ CSVs, which stand for **Comma-Separated Values**, are a common tabular data form
 
 ```{python}
 #| echo: false
+#| vscode: {languageId: python}
 with open("data/elections.csv", "r") as table:
     i = 0
     for row in table:
@@ -66,6 +68,7 @@ Another common file type is the **TSV (Tab-Separated Values)**. In a TSV, record
 
 ```{python}
 #| echo: false
+#| vscode: {languageId: python}
 with open("data/elections.txt", "r") as table:
     i = 0
     for row in table:
@@ -79,6 +82,7 @@ with open("data/elections.txt", "r") as table:
 
 ```{python}
 #| echo: false
+#| vscode: {languageId: python}
 with open("data/elections.json", "r") as table:
     i = 0
     for row in table:
@@ -112,6 +116,7 @@ The **primary key** is the column or set of columns in a table that determine th
 
 ```{python}
 #| echo: false
+#| vscode: {languageId: python}
 pd.DataFrame({"Cal ID":[3034619471, 3035619472, 3025619473, 3046789372], \
              "Name":["Oski", "Ollie", "Orrie", "Ollie"], \
              "Major":["Data Science", "Computer Science", "Data Science", "Economics"]})
@@ -121,6 +126,7 @@ The **foreign key** is the column or set of columns in a table that reference pr
 
 ```{python}
 #| echo: false
+#| vscode: {languageId: python}
 pd.DataFrame({"OH Request":[1, 2, 3, 4], \
              "Cal ID":[3034619471, 3035619472, 3025619473, 3035619472], \
              "Question":["HW 2 Q1", "HW 2 Q3", "Lab 3 Q4", "HW 2 Q7"]})
@@ -130,7 +136,7 @@ pd.DataFrame({"OH Request":[1, 2, 3, 4], \
 
 After understanding the structure of the dataset, the next task is to determine what exactly the data represents. We'll do so by considering the data's granularity, scope, and temporality.
 
-The **granularity** of a dataset is the level of detail included in the data. To determine the data's granularity, ask: what does each row in the dataset represent? Fine-grained data contains a high level of detail, with a single row representing a small individual unit. For example, each record may represent one person. Coarse-grained data is encoded such that a single row represents a large individual unit – for example, each record may represent a group of people.
+The **granularity** of a dataset is what a single row represents. You can also think of it as the level of detail included in the data. To determine the data's granularity, ask: what does each row in the dataset represent? Fine-grained data contains a high level of detail, with a single row representing a small individual unit. For example, each record may represent one person. Coarse-grained data is encoded such that a single row represents a large individual unit – for example, each record may represent a group of people.
 
 The **scope** of a dataset is the subset of the population covered by the data. If we were investigating student performance in Data Science courses, a dataset with narrow scope might encompass all students enrolled in Data 100; a dataset with expansive scope might encompass all students in California. 
 
@@ -180,6 +186,7 @@ We can then explore the CSV (which is a text file, and does not contain binary-e
 3. Next, let's try using the Python file object. Let's check out the first three lines:
 
 ```{python}
+#| vscode: {languageId: python}
 with open("data/cdc_tuberculosis.csv", "r") as f:
     i = 0
     for row in f:
@@ -196,6 +203,7 @@ You may recall that all line breaks in text files are encoded as the special new
 If you're curious, we can use the `repr()` function to return the raw string with all special characters:
 
 ```{python}
+#| vscode: {languageId: python}
 with open("data/cdc_tuberculosis.csv", "r") as f:
     i = 0
     for row in f:
@@ -208,6 +216,7 @@ with open("data/cdc_tuberculosis.csv", "r") as f:
 4. Finally, let's see the tried-and-true Data 100 approach: pandas.
 
 ```{python}
+#| vscode: {languageId: python}
 tb_df = pd.read_csv("data/cdc_tuberculosis.csv")
 tb_df.head()
 ```
@@ -220,6 +229,7 @@ Congratulations -- you're ready to wrangle your data. Because of how things are 
 A reasonable first step is to identify the row with the right header. The `pd.read_csv()` function ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html)) has the convenient `header` parameter:
 
 ```{python}
+#| vscode: {languageId: python}
 tb_df = pd.read_csv("data/cdc_tuberculosis.csv", header=1) # row index
 tb_df.head(5)
 ```
@@ -229,6 +239,7 @@ Wait...but now we can't differentiate betwen the "Number of TB cases" and "TB in
 We can do this manually with `df.rename()` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.rename.html?highlight=rename#pandas.DataFrame.rename)):
 
 ```{python}
+#| vscode: {languageId: python}
 rename_dict = {'2019': 'TB cases 2019',
                '2020': 'TB cases 2020',
                '2021': 'TB cases 2021',
@@ -250,12 +261,14 @@ Okay, EDA step two. How was the rollup record aggregated?
 Let's check if Total TB cases is the sum of all state TB cases. If we sum over all rows, we should get **2x** the total cases in each of our TB cases by year (why?).
 
 ```{python}
+#| vscode: {languageId: python}
 tb_df.sum(axis=0)
 ```
 
 Whoa, what's going on? Check out the column types:
 
 ```{python}
+#| vscode: {languageId: python}
 tb_df.dtypes
 ```
 
@@ -265,6 +278,7 @@ Looks like those commas are causing all TB cases to be read as the `object` data
 Fortunately `read_csv` also has a `thousands` parameter (https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html):
 
 ```{python}
+#| vscode: {languageId: python}
 # improve readability: chaining method calls with outer parentheses/line breaks
 tb_df = (
     pd.read_csv("data/cdc_tuberculosis.csv", header=1, thousands=',')
@@ -274,6 +288,7 @@ tb_df.head(5)
 ```
 
 ```{python}
+#| vscode: {languageId: python}
 tb_df.sum()
 ```
 
@@ -282,6 +297,7 @@ The Total TB cases look right. Phew!
 Let's just look at the records with **state-level granularity**:
 
 ```{python}
+#| vscode: {languageId: python}
 state_tb_df = tb_df[1:]
 state_tb_df.head(5)
 ```
@@ -296,6 +312,7 @@ There are a few new methods here:
 * `df.drop_na()` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.dropna.html)) will be explained in more detail next time.
 
 ```{python}
+#| vscode: {languageId: python}
 # 2010s census data
 census_2010s_df = pd.read_csv("data/nst-est2019-01.csv", header=3, thousands=",")
 census_2010s_df = (
@@ -329,6 +346,7 @@ or use iPython magic which will intelligently import code when files change:
 ```
 
 ```{python}
+#| vscode: {languageId: python}
 # census 2020s data
 census_2020s_df = pd.read_csv("data/NST-EST2022-POP.csv", header=3, thousands=",")
 census_2020s_df = (
@@ -349,6 +367,7 @@ census_2020s_df.head(5)
 Time to `merge`! Here we use the DataFrame method `df1.merge(right=df2, ...)` on DataFrame `df1` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.merge.html)). Contrast this with the function `pd.merge(left=df1, right=df2, ...)` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.merge.html?highlight=pandas%20merge#pandas.merge)). Feel free to use either.
 
 ```{python}
+#| vscode: {languageId: python}
 # merge TB dataframe with two US census dataframes
 tb_census_df = (
     tb_df
@@ -363,6 +382,7 @@ tb_census_df.head(5)
 This is a little unwieldy. We could either drop the unneeded columns now, or just merge on smaller census DataFrames. Let's do the latter.
 
 ```{python}
+#| vscode: {languageId: python}
 # try merging again, but cleaner this time
 tb_census_df = (
     tb_df
@@ -391,6 +411,7 @@ $$= \frac{\text{TB cases in population}}{\text{population}} \times 100000$$
 Let's try this for 2019:
 
 ```{python}
+#| vscode: {languageId: python}
 tb_census_df["recompute incidence 2019"] = tb_census_df["TB cases 2019"]/tb_census_df["2019"]*100000
 tb_census_df.head(5)
 ```
@@ -400,6 +421,7 @@ Awesome!!!
 Let's use a for-loop and Python format strings to compute TB incidence for all years. Python f-strings are just used for the purposes of this demo, but they're handy to know when you explore data beyond this course ([Python documentation](https://docs.python.org/3/tutorial/inputoutput.html)).
 
 ```{python}
+#| vscode: {languageId: python}
 # recompute incidence for all years
 for year in [2019, 2020, 2021]:
     tb_census_df[f"recompute incidence {year}"] = tb_census_df[f"TB cases {year}"]/tb_census_df[f"{year}"]*100000
@@ -409,6 +431,7 @@ tb_census_df.head(5)
 These numbers look pretty close!!! There are a few errors in the hundredths place, particularly in 2021. It may be useful to further explore reasons behind this discrepancy. 
 
 ```{python}
+#| vscode: {languageId: python}
 tb_census_df.describe()
 ```
 
@@ -429,16 +452,19 @@ Let's get exploring!
 Before we keep exploring, we'll set all indexes to more meaningful values, instead of just numbers that pertained to some row at some point. This will make our cleaning slightly easier.
 
 ```{python}
+#| vscode: {languageId: python}
 tb_df = tb_df.set_index("U.S. jurisdiction")
 tb_df.head(5)
 ```
 
 ```{python}
+#| vscode: {languageId: python}
 census_2010s_df = census_2010s_df.set_index("Geographic Area")
 census_2010s_df.head(5)
 ```
 
 ```{python}
+#| vscode: {languageId: python}
 census_2020s_df = census_2020s_df.set_index("Geographic Area")
 census_2020s_df.head(5)
 ```
@@ -446,6 +472,7 @@ census_2020s_df.head(5)
 It turns out that our merge above only kept state records, even though our original `tb_df` had the "Total" rolled record:
 
 ```{python}
+#| vscode: {languageId: python}
 tb_df.head()
 ```
 
@@ -454,6 +481,7 @@ Recall that merge by default does an **inner** merge by default, meaning that it
 The rolled records in our census dataframes have different `Geographic Area` fields, which was the key we merged on:
 
 ```{python}
+#| vscode: {languageId: python}
 census_2010s_df.head(5)
 ```
 
@@ -462,12 +490,14 @@ The Census DataFrame has several rolled records. The aggregate record we are loo
 One straightforward way to get the right merge is to rename the value itself. Because we now have the Geographic Area index, we'll use `df.rename()` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.rename.html)):
 
 ```{python}
+#| vscode: {languageId: python}
 # rename rolled record for 2010s
 census_2010s_df.rename(index={'United States':'Total'}, inplace=True)
 census_2010s_df.head(5)
 ```
 
 ```{python}
+#| vscode: {languageId: python}
 # same, but for 2020s rename rolled record
 census_2020s_df.rename(index={'United States':'Total'}, inplace=True)
 census_2020s_df.head(5)
@@ -478,6 +508,7 @@ census_2020s_df.head(5)
 Next let's rerun our merge. Note the different chaining, because we are now merging on indexes (`df.merge()` [documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.merge.html)).
 
 ```{python}
+#| vscode: {languageId: python}
 tb_census_df = (
     tb_df
     .merge(right=census_2010s_df[["2019"]],
@@ -493,6 +524,7 @@ tb_census_df.head(5)
 Finally, let's recompute our incidences:
 
 ```{python}
+#| vscode: {languageId: python}
 # recompute incidence for all years
 for year in [2019, 2020, 2021]:
     tb_census_df[f"recompute incidence {year}"] = tb_census_df[f"TB cases {year}"]/tb_census_df[f"{year}"]*100000
@@ -510,18 +542,21 @@ $\text{percent change} = \frac{B - A}{A} \times 100$.
 
 ```{python}
 #| tags: []
+#| vscode: {languageId: python}
 incidence_2020 = tb_census_df.loc['Total', 'recompute incidence 2020']
 incidence_2020
 ```
 
 ```{python}
 #| tags: []
+#| vscode: {languageId: python}
 incidence_2021 = tb_census_df.loc['Total', 'recompute incidence 2021']
 incidence_2021
 ```
 
 ```{python}
 #| tags: []
+#| vscode: {languageId: python}
 difference = (incidence_2021 - incidence_2020)/incidence_2020 * 100
 difference
 ```
