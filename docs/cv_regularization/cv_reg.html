@@ -398,8 +398,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>Suppose we’re researchers building a state of the art regression model. We choose a model with the lowest validation error and want to report this out to the world. Unfortunately, our validation error may be biased; that is, not representative of error on real-world data. This is because during our hyperparameter search, we were implicitly “learning” from our validation data by tuning our model to achieve better results. Before reporting our results, we should run our model on a special <strong>test set</strong> that we’ve never seen or used for any purpose whatsoever.</p>
 <p>A test set can be something that we generate ourselves, or it can be a common dataset whose true values are unknown. In the case of the former, we can split our our available data into 3 partitions: the training set, testing set, and validation set. The exact amount of data allocated to each partition varies, but a common split is 80% train, 10% test, 10% validation.</p>
 <p>Below is an implementation of extracting a training, testing and validation set using <code>sklearn.train_test_split</code> on a data matrix <code>X</code> and an array of observations <code>y</code>.</p>
-<p><code>X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1)</code></p>
-<p><code>X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.11)</code></p>
+<p><code>X_train_valid, X_test, y_train_valid, y_test = train_test_split(X, y, test_size=0.1)</code></p>
+<p><code>X_train, X_val, y_train, y_val = train_test_split(X_train_valid, y_train_valid, test_size=0.11)</code></p>
 <p>As a recap:</p>
 <ul>
 <li>Training set used to pick parameters.</li>
@@ -471,11 +471,11 @@ such that <span class="math inline">\(\sum_{j=1}^{d} \theta_j^{2} \le Q\)</span>
 <section id="implementation-of-ridge-regression" class="level4" data-number="15.2.1.4">
 <h4 data-number="15.2.1.4" class="anchored" data-anchor-id="implementation-of-ridge-regression"><span class="header-section-number">15.2.1.4</span> Implementation of Ridge Regression</h4>
 <p>Of course, <code>sklearn</code> has a built-in implementation of Ridge Regression. Simply import the <code>Ridge</code> class of the <code>sklearn.linear_model</code> library.</p>
-<div class="cell" data-execution_count="1">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> Ridge</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We will various Ridge Regression models on the familiar <code>vehicles</code> DataFrame from last lecture. This will help solidfy some of the theoretical concepts discussed earlier.</p>
-<div class="cell" data-execution_count="2">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="2">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -483,7 +483,7 @@ such that <span class="math inline">\(\sum_{j=1}^{d} \theta_j^{2} \le Q\)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>vehicles_mpg <span class="op">=</span> pd.read_csv(<span class="st">"data/vehicle_mpg.csv"</span>, index_col<span class="op">=</span><span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div class="cell" data-execution_count="3">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>vehicles.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
 
@@ -577,7 +577,7 @@ such that <span class="math inline">\(\sum_{j=1}^{d} \theta_j^{2} \le Q\)</span>
 </div>
 </div>
 <p>Here, we fit an extremeley regularized model without an intercept. Note the small coefficient values.</p>
-<div class="cell" data-execution_count="4">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>ridge_model_large_reg <span class="op">=</span> Ridge(alpha <span class="op">=</span> <span class="dv">10000</span>)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>ridge_model_large_reg.fit(vehicles, vehicles_mpg)</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>ridge_model_large_reg.coef_</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -590,7 +590,7 @@ such that <span class="math inline">\(\sum_{j=1}^{d} \theta_j^{2} \le Q\)</span>
 </div>
 <p>Note how Ridge Regression effectively <strong>spreads a small weight across many features</strong>.</p>
 <p>When we apply very little regularization, our coefficients increase in size. Notice how they are identical to the coefficients retrieved from the <code>LinearRegression</code> model. This indicates the radius <span class="math inline">\(Q\)</span> of the L2 norm ball is massive and encompasses the unregularized optimal solution. Once again, we see that <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(Q\)</span> are inversely related.</p>
-<div class="cell" data-execution_count="5">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>ridge_model_small_reg <span class="op">=</span> Ridge(alpha <span class="op">=</span> <span class="dv">10</span><span class="op">**-</span><span class="dv">5</span>)</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>ridge_model_small_reg.fit(vehicles, vehicles_mpg)</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>ridge_model_small_reg.coef_</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -601,7 +601,7 @@ such that <span class="math inline">\(\sum_{j=1}^{d} \theta_j^{2} \le Q\)</span>
          3.16084838e-02]])</code></pre>
 </div>
 </div>
-<div class="cell" data-execution_count="6">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LinearRegression</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>linear_model <span class="op">=</span> LinearRegression()</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>linear_model.fit(vehicles, vehicles_mpg)</span>
@@ -647,7 +647,7 @@ such that <span class="math inline">\(\sum_{j=1}^{d} |\theta_j| \le Q\)</span>
 <section id="implementation-of-lasso-regression" class="level4" data-number="15.2.3.3">
 <h4 data-number="15.2.3.3" class="anchored" data-anchor-id="implementation-of-lasso-regression"><span class="header-section-number">15.2.3.3</span> Implementation of Lasso Regression</h4>
 <p>Lasso Regression is great at reducing complexity by eliminating the least important features in a model. It does so by setting their respective feature weights to <span class="math inline">\(0\)</span>. See the following example.</p>
-<div class="cell" data-execution_count="7">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> Lasso</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>lasso_model <span class="op">=</span> Lasso(alpha <span class="op">=</span> <span class="dv">1</span>)</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
