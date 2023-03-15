@@ -13,7 +13,7 @@ format:
 jupyter: python3
 ---
 
-We ended last lecture with a question: how do we control the complexity of our model? To answer this, we must know precisely when our model begins to overfit. The key to this lies in evaluating the model on unseen data using a process called Cross-Validation. A second point this note will address is how to combat overfitting -- namely, through a technique known as regularization.
+Consider the question: how do we control the complexity of our model? To answer this, we must know precisely when our model begins to overfit. The key to this lies in evaluating the model on unseen data using a process called Cross-Validation. A second point this note will address is how to combat overfitting -- namely, through a technique known as regularization.
 
 ## Cross Validation
 
@@ -101,7 +101,21 @@ For `k` = 5, we have the following partitions. At each iteration, we train a mod
 
 ![](images/kfold.png)
 
-Note that the value of the hyperparameter is fixed during this process. By doing so, we can be confident in the hyperparameter's performance on the *entire* dataset. To compare multiple choices of a hyperparameter, say `m`, we run k-fold cross validation `m` times. The smallest of the `m` resulting errors corresponds to the best hyperparameter value.
+Note that the value of the hyperparameter is fixed during this process. By doing so, we can be confident in the hyperparameter's performance on the *entire* dataset. To compare multiple choices of a hyperparameter --say `m` choices of hyperparameter-- we run k-fold cross validation `m` times. The smallest of the `m` resulting errors corresponds to the best hyperparameter value.
+
+#### Hyperparameter Selection Example
+
+K-fold cross validation can aid in choosing the best hyperparameter values in respect to our model and loss function.
+
+Consider an example where we run k-fold cross validation with `k` = 3. We are implementing a model that depends on a hyperparameter $\alpha$, and we are searching for an $\alpha$ that minimizes our loss function. We have narrowed down our hyperparameters such that $\alpha = [0.01, 0.1, 1, 10]$.
+
+![](images/cv_hyperparam_selection.png)
+
+The losses of the model are shown per `k` fold of training data (arrows are pointing to the loss value) for each value of $\alpha$. The average loss over the k-fold cross validation is displayed to the right of all the k-fold losses.
+
+To determine the best $\alpha$ value, we must compare the average loss over the k-folds of training data. $\alpha = 0.01$ yields us an average loss of $5$, $\alpha = 0.1$ yields us an average loss of $4.67$, $\alpha = 1$ yields us an average loss of $7$, and $\alpha = 10$ yields us an average loss of $10.67$.
+
+Thus, we would select $\alpha = 0.1$ as our hyperparameter value as it results in the lowest average loss over the k-folds of training data out of our possible $\alpha$ values.
 
 #### Picking K
 
@@ -122,9 +136,9 @@ A test set can be something that we generate ourselves, or it can be a common da
 
 Below is an implementation of extracting a training, testing and validation set using `sklearn.train_test_split` on a data matrix `X` and an array of observations `y`.
 
-`X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1)`
+`X_train_valid, X_test, y_train_valid, y_test = train_test_split(X, y, test_size=0.1)`
 
-`X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.11)`
+`X_train, X_val, y_train, y_val = train_test_split(X_train_valid, y_train_valid, test_size=0.11)`
 
 As a recap:
 
@@ -225,6 +239,7 @@ This solution exists even if there is linear dependence in the columns of the da
 Of course, `sklearn` has a built-in implementation of Ridge Regression. Simply import the `Ridge` class of the `sklearn.linear_model` library.
 
 ```{python}
+#| vscode: {languageId: python}
 from sklearn.linear_model import Ridge
 ```
 
@@ -232,6 +247,7 @@ We will various Ridge Regression models on the familiar `vehicles` DataFrame fro
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 
 import pandas as pd
 vehicles = pd.read_csv("data/vehicle_data.csv", index_col=0)
@@ -239,12 +255,14 @@ vehicles_mpg = pd.read_csv("data/vehicle_mpg.csv", index_col=0)
 ```
 
 ```{python}
+#| vscode: {languageId: python}
 vehicles.head(5)
 ```
 
 Here, we fit an extremeley regularized model without an intercept. Note the small coefficient values.
 
 ```{python}
+#| vscode: {languageId: python}
 ridge_model_large_reg = Ridge(alpha = 10000)
 ridge_model_large_reg.fit(vehicles, vehicles_mpg)
 ridge_model_large_reg.coef_
@@ -255,12 +273,14 @@ Note how Ridge Regression effectively **spreads a small weight across many featu
 When we apply very little regularization, our coefficients increase in size. Notice how they are identical to the coefficients retrieved from the `LinearRegression` model. This indicates the radius $Q$ of the L2 norm ball is massive and encompasses the unregularized optimal solution. Once again, we see that $\alpha$ and $Q$ are inversely related.
 
 ```{python}
+#| vscode: {languageId: python}
 ridge_model_small_reg = Ridge(alpha = 10**-5)
 ridge_model_small_reg.fit(vehicles, vehicles_mpg)
 ridge_model_small_reg.coef_
 ```
 
 ```{python}
+#| vscode: {languageId: python}
 from sklearn.linear_model import LinearRegression
 linear_model = LinearRegression()
 linear_model.fit(vehicles, vehicles_mpg)
@@ -281,7 +301,7 @@ You’ll do this on lab 8 using the “StandardScaler” transformer. The result
 
 ### L1 Regularization
 
-**L1 Regularization**, commonly referred to as **Lasso Regression**, is an alternate regularization technique that limits the the *absolute* sum of $\theta_i$ coefficients. 
+**L1 Regularization**, commonly referred to as **Lasso Regression**, is an alternate regularization technique that limits the sum of *absolute* $\theta_i$ coefficients. 
 
 #### The Constrained Form
 
@@ -310,6 +330,7 @@ So why use Lasso Regression? As we'll see shortly, it is great at implicit **fea
 Lasso Regression is great at reducing complexity by eliminating the least important features in a model. It does so by setting their respective feature weights to $0$. See the following example.
 
 ```{python}
+#| vscode: {languageId: python}
 from sklearn.linear_model import Lasso
 lasso_model = Lasso(alpha = 1)
 
@@ -321,6 +342,10 @@ lasso_model.coef_
 Notice how we standardized our data first. Lasso Regression then set the coefficients of our squared features to $0$ -- presumably, these are the least important predictors of `mpg`.
 
 ### Summary of Regularization Methods
+A summary of our regression models is shwon below:
+
+![](images/reg_models_sum.png)
+
 
 Understanding the distinction between Ridge Regression and Lasso Regression is important. We've provided a helpful visual that summarizes the key differences.
 
@@ -329,5 +354,4 @@ Understanding the distinction between Ridge Regression and Lasso Regression is i
 This diagram displays the L1 and L2 constrained solution for various orientations of the OLS loss surface. Notice how the L1 (Lasso) solution almost always lies on some axis, or edge of the diamond. Graphically, this makes sense; the edges of the diamond are the farthest from the origin, and usually closest to the global optimum. When this happens, only one feature has a non-zero coefficient; this "feature selection" argument extends quite nicely to multiple features in higher dimensional space.
 
 The L2 (Ridge) solution, however, typically has an optimal solution in some quadrant of the graph. Every point on the circumference of the L2 norm ball is equidistant from the origin, and thus similar in distance to the global optimum. As such, this technique of regularization is great at distributing a small weight across both features.
-
 
