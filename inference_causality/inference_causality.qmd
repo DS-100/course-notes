@@ -126,7 +126,7 @@ eggs.head(5)
 
 Our goal will be to predict the weight of a newborn plover chick, which we assume follows the true relationship below.
 
-$$\text{bird\_weight} = \theta_0 + \theta_1 \text{egg_weight} + \theta_2 \text{egg_length} + \theta_3 \text{egg_breadth} + \epsilon$$
+$$\text{bird_weight} = \theta_0 + \theta_1 \text{egg_weight} + \theta_2 \text{egg_length} + \theta_3 \text{egg_breadth} + \epsilon$$
 
 
 Say we wish to determine if the `egg_weight` impacts the `bird_weight` of a chick – we want to infer if $\theta_1$ is equal to 0.
@@ -274,7 +274,7 @@ The take-home point is that we need to be careful with what features we select f
 
 Let us now consider a more interpretable model: we instead assume a true relationship using only egg weight:
 
-$$f_{\theta}(x) = \theta_0 + \theta_1 \text{egg_weight} + \epsilon$$
+$$f_\theta(x) = \theta_0 + \theta_1 \text{egg_weight} + \epsilon$$
 
 ```{python}
 X_int = eggs[["egg_weight"]]
@@ -351,6 +351,7 @@ A model with highly correlated variables prevents us from interpreting how the v
 
 Keep the following in mind:
 All inference assumes that the regression model holds.
+
 * If the model doesn’t hold, the inference might not be valid.
 * If the [assumptions of the bootstrap](https://inferentialthinking.com/chapters/13/3/Confidence_Intervals.html?highlight=p%20value%20confidence%20interval#care-in-using-the-bootstrap-percentile-method) don’t hold…
     * Sample size n is large
@@ -366,6 +367,7 @@ What does $\theta_{j}$ mean in our regression?
 * Holding other variables fixed, how much should our prediction change with $X_{j}$?
 
 For simple linear regression, this boils down to the correlation coefficient
+
 * Does having more $x$ predict more $y$ (and by how much)?
 
 **Examples**:
@@ -380,6 +382,7 @@ These sound like causal questions, but they are not!
 ### Prediction vs Causation
 
 Questions about **correlation / prediction**:
+
 * Are homes with granite countertops worth more money?
 * Is college GPA higher for students who win a certain scholarship?
 * Are breastfed babies less likely to develop asthma?
@@ -387,6 +390,7 @@ Questions about **correlation / prediction**:
 * Are people who smoke more likely to get cancer? 
 
 Questions about **causality**:
+
 * How much do granite countertops **raise** the value of a house?
 * Does getting the scholarship **improve** students’ GPAs?
 * Does breastfeeding **protect** babies against asthma?
@@ -394,13 +398,16 @@ Questions about **causality**:
 * Does smoking **cause** cancer?
 
 Causal questions are about the **effects** of **interventions** (not just passive observation)
-* Regression coefficients sometimes called “effects” – can be deceptive!
+
+- Regression coefficients sometimes called “effects” – can be deceptive!
 
 Only one of these questions can be answered using the data alone:
-* **Predictive question:** Are breastfed babies healthier?
-* **Causal question:** Does breastfeeding improve babies’ health?
+
+- **Predictive question:** Are breastfed babies healthier?
+- **Causal question:** Does breastfeeding improve babies’ health?
 
 Possible explanations for why breastfed babies are healthier on average:
+
 1. **Causal effect:** breastfeeding makes babies healthier
 2. **Reverse causality:** healthier babies more likely to successfully breastfeed
 3. **Common cause:** healthier / richer parents have healthier babies and are more likely to breastfeed
@@ -408,8 +415,9 @@ Possible explanations for why breastfed babies are healthier on average:
 We cannot tell which explanations are true (or to what extent) just by observing ($x$,$y$) pairs
 
 Causal questions implicitly involve **counterfactuals**:
-* **Would** the **same** breastfed babies have been less healthy **if** they hadn’t been breastfed?
-* Explanation 1 implies they would be, explanations 2 and 3 do not
+
+- **Would** the **same** breastfed babies have been less healthy **if** they hadn’t been breastfed?
+- Explanation 1 implies they would be, explanations 2 and 3 do not
 
 ### Confounders
 
@@ -428,32 +436,38 @@ Confounders generally cause problems
 Let us define some terms that will help us understand causal effects.
 
 In prediction, we had two kinds of variables
-* **Response** ($Y$): what we are trying to predict
-* **Predictors** ($X$): inputs to our prediction
+
+- **Response** ($Y$): what we are trying to predict
+- **Predictors** ($X$): inputs to our prediction
 
 More kinds of variables in causal inference
-* **Response** ($Y$): the outcome of interest
-* **Treatment** ($T$): the variable we might intervene on
-* **Covariate** ($X$): other variables we measured that may affect $T$ and/or $Y$
+
+- **Response** ($Y$): the outcome of interest
+- **Treatment** ($T$): the variable we might intervene on
+- **Covariate** ($X$): other variables we measured that may affect $T$ and/or $Y$
 
 For this lecture, $T$ is a **binary (0/1)** variable:
-* $T=1$ is usually called treatment, and $T=0$ is usually called control
-* e.g., breastfed or not, smoker or not
+
+- $T=1$ is usually called treatment, and $T=0$ is usually called control
+- e.g., breastfed or not, smoker or not
 
 ### Neyman-Rubin Causal Model
 
 Causal questions are about **counterfactuals**:
-* What would have happened if T were different?
-* What will happen if we set T differently in the future?
+
+- What would have happened if T were different?
+- What will happen if we set T differently in the future?
 
 We assume every individual has two **potential outcomes**
-* $Y_{i}(1)$: value of $y_{i}$ if $T_{i} = 1$ (**treated outcome**)
-* $Y_{i}(0)$: value of $y_{i}$ if $T_{i} = 0$ (**control outcome**)
+
+- $Y_{i}(1)$: value of $y_{i}$ if $T_{i} = 1$ (**treated outcome**)
+- $Y_{i}(0)$: value of $y_{i}$ if $T_{i} = 0$ (**control outcome**)
 
 For each individual in the data set, we observe:
-* Covariates $x_{i}$
-* Treatment $T_{i}$
-* Response $y_{i} = Y_{i}(T_{i})$
+
+- Covariates $x_{i}$
+- Treatment $T_{i}$
+- Response $y_{i} = Y_{i}(T_{i})$
 
 We will assume ($x_{i}$, $T_{i}$, $y_{i} = Y_{i}(T_{i})$) tuples iid for $i = 1,..., n$
 
@@ -512,7 +526,8 @@ Observational Study:
 ## Covariate Adjustment
 
 What to do about confounders?
-* **Ignorability assumption:** all important confounders are in the data set! 
+
+- **Ignorability assumption:** all important confounders are in the data set! 
 
 **One idea:** come up with a model that includes them, such as:
 
@@ -521,37 +536,42 @@ $$Y_{i}(t) = \theta_{0} + \theta_{1}x_{1} + ... + \theta_{p}x_{p} + \tau{t} + \e
 **Question:** what is the $ATE$ in this model? $\tau$
 
 Approach can work but is **fragile**. Breaks if:
-* important covariates are missing or true dependence on $x$ is nonlinear
-* Sometimes pejoratively called **“casual inference”**
+
+- Important covariates are missing or true dependence on $x$ is nonlinear
+- Sometimes pejoratively called **“casual inference”**
 
 <img src="images/ignorability.png" alt='ignorability' width='600'>
 
 ### Covariate adjustment without parametric assumptions
 
 What to do about confounders?
-* **Ignorability assumption:** all possible confounders are in the data set! 
+
+- **Ignorability assumption:** all possible confounders are in the data set! 
 
 **One idea:** come up with a model that includes them, such as:
 
-$$Y_{i}(t) = f_{\theta}(x, t) + \epsilon $$
+$$Y_{i}(t) = f_{\theta}(x, t) + \epsilon$$
 
 Then:
 
 $$ATE = \frac{1}{n}\sum_{i=1}^{n}{f_{\theta}(x_i, 1) - f_{\theta}(x_i, 0)}$$
 
 With enough data, we may be able to learn $f_{\theta}$ very accurately
-* Very difficult if x is high-dimensional / functional form is highly nonlinear
-* Need additional assumption: **overlap**
+
+- Very difficult if x is high-dimensional / functional form is highly nonlinear
+- Need additional assumption: **overlap**
 
 ### Other Methods
 
 Causal inference is hard, and covariate adjustment is often not the best approach
 
 Many other methods doing some combination of:
-* Modeling treatment T as a function of covariates x
-* Modeling the outcome y as a function of x, T
 
-What if we don’t believe in ignorability? Other methods look for a 
-* Favorite example: **regression discontinuity**
+- Modeling treatment T as a function of covariates x
+- Modeling the outcome y as a function of x, T
+
+What if we don’t believe in ignorability? Other methods look for a
+
+- Favorite example: **regression discontinuity**
 
 
