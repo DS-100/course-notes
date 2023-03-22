@@ -14,7 +14,7 @@ format:
       - cosmo
       - cerulean
     callout-icon: false
-jupyter: python3
+jupyter: myenv
 ---
 
 ::: {.callout-note collapse="true"}
@@ -37,7 +37,6 @@ In this lecture, we'll explore three techniques for model fitting:
 Throughout this lecture, we'll refer to the `penguins` dataset. 
 
 ```{python}
-#| vscode: {languageId: python}
 import pandas as pd
 import seaborn as sns
 import numpy as np
@@ -51,7 +50,6 @@ Suppose our goal is to predict the value of the `'bill depth'` for a particular 
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 
 # Define the design matrix, X...
 X = penguins[["flipper_length_mm"]]
@@ -69,12 +67,11 @@ $$\hat{y} = \theta_0 + \theta_1 x$$
 Let's do some EDA first.
 
 ```{python}
-#| vscode: {languageId: python}
 import matplotlib.pyplot as plt
 
 plt.xlabel("flipper length (mm)")
 plt.ylabel("bill depth (mm)")
-plt.scatter(data = penguins, x = "flipper_length_mm", y = "bill_depth_mm")
+plt.scatter(data = penguins, x = "flipper_length_mm", y = "bill_depth_mm");
 ```
 
 Based on our EDA, there is a linear relationship, though it is somewhat weak.
@@ -95,7 +92,6 @@ $$r = \frac{1}{n} \sum_{i=1}^{n}\left( \frac{x_i - x}{\sigma_x} \right) \left( \
 Let's implement these using the base numpy library, which provides many important functions such as `.mean` and `.std` .
 
 ```{python}
-#| vscode: {languageId: python}
 x = penguins["flipper_length_mm"]
 y = penguins["bill_depth_mm"]
 
@@ -119,7 +115,6 @@ Let's first assess how "good"  this model is using a performance metric. For thi
 $$\large MSE  = \sum_{i=1}^n (y_i - \hat{y}_i)^2 = \frac{1}{n}\sum_{i=1}^n (e_i)^2 = \frac{1}{n}$$
 
 ```{python}
-#| vscode: {languageId: python}
 # using our estimated parameter values to create a column containing our 
 # SLR predictions and errors
 penguins["analytical_preds_slr"] = theta0_hat + theta1_hat * penguins["flipper_length_mm"]
@@ -134,7 +129,6 @@ print("MSE: ", np.mean(penguins["residual"]**2))
 Let's plot plot our results.
 
 ```{python}
-#| vscode: {languageId: python}
 sns.scatterplot(data = penguins, x = "flipper_length_mm", y = "bill_depth_mm")
 plt.plot(penguins["flipper_length_mm"], penguins["analytical_preds_slr"], 'r') # a line
 plt.legend([r'$\hat{y}$', '$y$']);
@@ -170,7 +164,6 @@ Let's put this into action with our multiple regression task. First, initialize 
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 from sklearn.linear_model import LinearRegression
 
 model = LinearRegression()
@@ -180,7 +173,6 @@ Next, fit the model instance to the design matrix `X` and target vector `Y` by c
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 model.fit(X, y)
 ```
 
@@ -188,7 +180,6 @@ And, lastly, generate predictions for $\hat{Y}$ using the `.predict` method. Her
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 # Like before, show just the first 5 predictions. The output of predict is usually a np.array
 penguins["sklearn_preds_slr"] = model.predict(X)
 sklearn_5 = penguins["sklearn_preds_slr"][:5].to_numpy()
@@ -200,7 +191,6 @@ print("Analytical solution: ", analytical_5)
 You can also use the model to predict what the `bill depth` of a hypothetical penguin with `flipper length` of 185mm would have.
 
 ```{python}
-#| vscode: {languageId: python}
 # this produces a warning since we
 # did not specify what X this refers
 # to, but since we only 
@@ -212,7 +202,6 @@ model.predict([[185]])
 We can also check if the fitted parameters,$\hat{\theta}_0,\hat{\theta}_1$, themselves are similar to our analytical solution. Note that since we can have at most 1 intercept in a SLR or OLS model, so we always get back a `scalar` value from `.intercept`. However, when OLS can have multiple coefficient values, so `.coef` returns an array.
 
 ```{python}
-#| vscode: {languageId: python}
 theta0 = model.intercept_      # this a scalar
 print("analytical bias term: ", theta0_hat)
 print("sklearn bias term: ", theta0)
@@ -230,7 +219,6 @@ The `sklearn` package also provides a function that computes the MSE from a list
 [documentation](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.mean_squared_error.html)
 
 ```{python}
-#| vscode: {languageId: python}
 from sklearn.metrics import mean_squared_error
 MSE_sklearn = mean_squared_error(penguins["bill_depth_mm"], penguins["sklearn_preds_slr"])
 print("MSE: ", MSE_sklearn)
@@ -261,7 +249,6 @@ There are three operations we need to perform here: multiplying matrices, taking
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 X = penguins[["flipper_length_mm", "body_mass_g"]].copy()
 
 X["bias"] = np.ones(len(X))
@@ -276,7 +263,6 @@ Note that since we added "bias" last, `theta_hat[2]` is our estimated value for 
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 y_hat = X.to_numpy() @ theta_hat
 
 # Show just the first 5 predictions to save space on the page
@@ -291,7 +277,6 @@ Note, this technique doesn't work if our X is **not invertible**.
 We can actually compute the optimal parameters very easily using sklearn, using the exact code that we wrote earlier. Note: sklearn does NOT use the normal equations. Instead it uses  gradient descent, a technique we will learn about soon, which can minimize ANY function, not just the MSE.
 
 ```{python}
-#| vscode: {languageId: python}
 # creating our design matrix.
 # Note:
 #  - no bias term needed here bc of sklearn automatically includes one
@@ -306,7 +291,6 @@ model_2d.fit(X_2d, y)
 Now we again have a model with which we can use to make predictions. For example, we can ask our model about a penguin's bill depth if they have 185-mm flipper length and 3750 g body mass.
 
 ```{python}
-#| vscode: {languageId: python}
 penguins["sklearn_predictions_ols"] = model_2d.predict(X_2d)
 model_2d.predict([[185, 3750]]) 
 # since we have a 2d data matrix, we maintain the same 
@@ -316,7 +300,6 @@ model_2d.predict([[185, 3750]])
 Just like with SLR, we cam also extract the coefficient estimates using `.coef_` and `.intercept`. The reason why `.intercept` returns an array should now be more clear.
 
 ```{python}
-#| vscode: {languageId: python}
 print(f"(sklearn) theta0: {model_2d.intercept_}")
 print(f"(analytical) theta0 {theta_hat[2]}")
 print(f"(sklearn) theta1: {model_2d.coef_[0]}")
@@ -330,7 +313,6 @@ print(f"(analytical) theta2 {theta_hat[1]}")
 When we have two axis with which we can change an input, moving along this input plan creates a 2d plane with which we can get model outputs for. For example, for every single penguin with a `flipper length` , we also must specify a `body mass`. These two values in combination will help us predict the `bill depth`. Thus, we see that the predictions all lie in a 2d-plane. In higher dimensions, they all lie in a "hyperplane". 
 
 ```{python}
-#| vscode: {languageId: python}
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
@@ -340,7 +322,6 @@ plt.ylabel('body_mass_g')
 ```
 
 ```{python}
-#| vscode: {languageId: python}
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 ax.scatter(penguins["flipper_length_mm"], penguins["body_mass_g"], penguins["bill_depth_mm"])
@@ -384,7 +365,6 @@ Let's shift our focus away from MSE to consider some new, arbitrary cost functio
 Above, we saw that the minimum is somewhere around 5.3ish. Let's see if we can figure out how to find the exact minimum algorithmically from scratch. One way very slow and terrible way would be manual guess-and-check.
 
 ```{python}
-#| vscode: {languageId: python}
 def arbitrary(x):
     return (x**4 - 15*x**3 + 80*x**2 - 180*x + 144)/10
 
@@ -403,7 +383,6 @@ simple_minimize(arbitrary, np.linspace(1, 7, 20))
 One way to minimize this mathematical function is to use the `scipy.optimize.minimize` function. It takes a function and a starting guess and tries to find the minimum.
 
 ```{python}
-#| vscode: {languageId: python}
 from scipy.optimize import minimize
 
 # takes a function f and a starting point x0 and returns a readout 
@@ -414,7 +393,6 @@ minimize(arbitrary, x0 = 3.5)
 Our choice of start point can affect the outcome. For example if we start to the left, we get stuck in the local minimum on the left side.
 
 ```{python}
-#| vscode: {languageId: python}
 minimize(arbitrary, x0 = 1)
 
 #here we see the optimal value is different from before
@@ -463,7 +441,6 @@ Put together, this captures the same behavior we reasoned through above. We repe
 The $\alpha$ term in the update rule is known as the **learning rate**. It is a positive value represents the size of each gradient descent update step – in other words, how "far" should we step to the left or right with each updated guess? A high value of $\alpha$ will lead to large differences in value between consecutive guesses for $\hat{\theta}$; a low value of $\alpha$ will result in smaller differences in value between consecutive guesses. This is the first example of a **hyperparameter**, a parameter that is hand picked by the data scientist that changes the model's behavior, in the course.
 
 ```{python}
-#| vscode: {languageId: python}
 # define the derivative of the arbitrary function we want to minimize
 def derivative_arbitrary(x):
     return (4*x**3 - 45*x**2 + 160*x - 180)/10
@@ -504,7 +481,6 @@ $$\hat{y} = \theta_1 x$$
 We want to find the parameter $\theta_1$ such that the L2 loss is minimized. In sklearn, this is easy. To avoid fitting an intercept, we set `fit_intercept` to false.
 
 ```{python}
-#| vscode: {languageId: python}
 model = LinearRegression(fit_intercept = False)
 df = sns.load_dataset("tips")
 model.fit(df[["total_bill"]], df["tip"])
@@ -518,7 +494,6 @@ To employ gradient descent and do this ourselves, we need to define a function u
 Let's start by writing a function that computes the MSE for a given choice of $\theta_1$ on our dataset.
 
 ```{python}
-#| vscode: {languageId: python}
 def mse_single_arg(theta1):
     """Returns the MSE on our data for the given theta1"""
     x = df["total_bill"]
@@ -535,7 +510,6 @@ mse_single_arg(0.1437)
 Since we only have 1 parameter, we can simply cross reference our results with a simnple plot. We do not want to always do this since some functions can have thousands of inputs, making them difficult to plot. We can plot the MSE as a function of `theta1`. It turns out to look pretty smooth, and quite similar to a parabola.
 
 ```{python}
-#| vscode: {languageId: python}
 theta1s = np.linspace(0, 0.2, 200)
 x = df["total_bill"]
 y_obs = df["tip"]
@@ -550,14 +524,12 @@ plt.ylabel(r"MSE");
 The minimum appears to be around $\theta_1 = 0.14$. We can once again check this naively.
 
 ```{python}
-#| vscode: {languageId: python}
 simple_minimize(mse_single_arg, np.linspace(0, 0.2, 21))
 ```
 
 As before, what we're doing is computing all the starred values below and then returning the $\theta_1$ that goes with the minimum value.
 
 ```{python}
-#| vscode: {languageId: python}
 theta1s = np.linspace(0, 0.2, 200)
 sparse_theta1s = np.linspace(0, 0.2, 21)
 
@@ -573,7 +545,6 @@ plt.ylabel(r"MSE");
 #### Using Scipy.Optimize.minimize
 
 ```{python}
-#| vscode: {languageId: python}
 import scipy.optimize
 from scipy.optimize import minimize
 minimize(mse_single_arg, x0 = 0)
@@ -584,7 +555,6 @@ minimize(mse_single_arg, x0 = 0)
 Another approach is to use our 1D gradient descent algorithm from earlier. This is the exact same function as earlier. We can run it for 100 steps and see where it ultimately ends up.
 
 ```{python}
-#| vscode: {languageId: python}
 def mse_loss_derivative_single_arg(theta_1):
     """Returns the derivative of the MSE on our data for the given theta1"""
     x = df["total_bill"]
@@ -611,7 +581,6 @@ $$\text{MSE}(\theta_0,\:\theta_1) = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)
 Now, loss is expressed in terms of *two* parameters, $\theta_0$ and $\theta_1$. Rather than a one-dimensional loss function as we had above, we are now dealing with a two-dimensional **loss surface**.
 
 ```{python}
-#| vscode: {languageId: python}
 # This code is for illustration purposes only
 # It contains a lot of syntax you have not seen
 import plotly.graph_objects as go
@@ -712,7 +681,6 @@ You should read these gradients as:
 First, we need to be able to easily determine the gradient for any pair of values, $\theta_0, \theta_1$.
 
 ```{python}
-#| vscode: {languageId: python}
 tips_with_bias = df.copy()
 tips_with_bias["bias"] = 1
 X = tips_with_bias[["bias", "total_bill"]]
@@ -742,7 +710,6 @@ print(f"Gradient for values theta0 = 0 and theta1 = 0 : {ex1_mse}")
 Using our previously previously defined `gradient_descent` function, we can see if our intuition extends to higher dimensions. 
 
 ```{python}
-#| vscode: {languageId: python}
 #print out the last 10 guesses our algorithm outputs to save space
 guesses = gradient_descent(mse_gradient_single_arg, np.array([0, 0]), 0.001, 10000)[-10:]
 ```

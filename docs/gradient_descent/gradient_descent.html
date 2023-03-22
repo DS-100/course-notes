@@ -379,7 +379,7 @@ Learning Outcomes
 <section id="sklearn-implementing-derived-formulas-in-code" class="level2" data-number="13.1">
 <h2 data-number="13.1" class="anchored" data-anchor-id="sklearn-implementing-derived-formulas-in-code"><span class="header-section-number">13.1</span> <code>sklearn</code>: Implementing Derived Formulas in Code</h2>
 <p>Throughout this lecture, we’ll refer to the <code>penguins</code> dataset.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="1">
+<div class="cell" data-execution_count="1">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -464,7 +464,7 @@ Learning Outcomes
 </div>
 </div>
 <p>Suppose our goal is to predict the value of the <code>'bill depth'</code> for a particular penguin given its <code>'flipper length'</code>.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="2">
+<div class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the design matrix, X...</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> penguins[[<span class="st">"flipper_length_mm"</span>]]</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -476,20 +476,17 @@ Learning Outcomes
 <p>In the SLR framework we learned last week, this means we are saying our model for <code>bill depth</code>, <span class="math inline">\(y\)</span>, is a linear function of <code>flipper length</code>, <span class="math inline">\(x\)</span>:</p>
 <p><span class="math display">\[\hat{y} = \theta_0 + \theta_1 x\]</span></p>
 <p>Let’s do some EDA first.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="3">
+<div class="cell" data-execution_count="3">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"flipper length (mm)"</span>)</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"bill depth (mm)"</span>)</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>plt.scatter(data <span class="op">=</span> penguins, x <span class="op">=</span> <span class="st">"flipper_length_mm"</span>, y <span class="op">=</span> <span class="st">"bill_depth_mm"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>plt.scatter(data <span class="op">=</span> penguins, x <span class="op">=</span> <span class="st">"flipper_length_mm"</span>, y <span class="op">=</span> <span class="st">"bill_depth_mm"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="3">
-<pre><code>&lt;matplotlib.collections.PathCollection at 0x19566590550&gt;</code></pre>
-</div>
 <div class="cell-output cell-output-display">
-<p><img src="gradient_descent_files/figure-html/cell-4-output-2.png" width="585" height="422"></p>
+<p><img src="gradient_descent_files/figure-html/cell-4-output-1.png" width="585" height="422"></p>
 </div>
 </div>
 <p>Based on our EDA, there is a linear relationship, though it is somewhat weak.</p>
@@ -501,21 +498,21 @@ Learning Outcomes
 <p><span class="math display">\[\hat{\theta}_1 = r \frac{\sigma_y}{\sigma_x}\]</span></p>
 <p><span class="math display">\[r = \frac{1}{n} \sum_{i=1}^{n}\left( \frac{x_i - x}{\sigma_x} \right) \left( \frac{y_i - y}{\sigma_y} \right) \]</span></p>
 <p>Let’s implement these using the base numpy library, which provides many important functions such as <code>.mean</code> and <code>.std</code> .</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="4">
+<div class="cell" data-execution_count="4">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> penguins[<span class="st">"flipper_length_mm"</span>]</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> penguins[<span class="st">"bill_depth_mm"</span>]</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>x_bar, sigma_x <span class="op">=</span> np.mean(x), np.std(x)</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>y_bar, sigma_y <span class="op">=</span> np.mean(y), np.std(y)</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> np.<span class="bu">sum</span>((x <span class="op">-</span> x_bar) <span class="op">/</span> sigma_x <span class="op">*</span> (y <span class="op">-</span> y_bar) <span class="op">/</span> sigma_y) <span class="op">/</span> <span class="bu">len</span>(x)</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>theta1_hat <span class="op">=</span> r <span class="op">*</span> sigma_y <span class="op">/</span> sigma_x</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>theta0_hat <span class="op">=</span> y_bar <span class="op">-</span> theta1_hat <span class="op">*</span> x_bar</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"bias parameter: </span><span class="sc">{</span>theta0_hat<span class="sc">}</span><span class="ss">, </span><span class="ch">\n</span><span class="ss">slope parameter: </span><span class="sc">{</span>theta1_hat<span class="sc">}</span><span class="ss">"</span>.<span class="bu">format</span>(theta0_hat,theta1_hat))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> penguins[<span class="st">"flipper_length_mm"</span>]</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> penguins[<span class="st">"bill_depth_mm"</span>]</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>x_bar, sigma_x <span class="op">=</span> np.mean(x), np.std(x)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>y_bar, sigma_y <span class="op">=</span> np.mean(y), np.std(y)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> np.<span class="bu">sum</span>((x <span class="op">-</span> x_bar) <span class="op">/</span> sigma_x <span class="op">*</span> (y <span class="op">-</span> y_bar) <span class="op">/</span> sigma_y) <span class="op">/</span> <span class="bu">len</span>(x)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>theta1_hat <span class="op">=</span> r <span class="op">*</span> sigma_y <span class="op">/</span> sigma_x</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>theta0_hat <span class="op">=</span> y_bar <span class="op">-</span> theta1_hat <span class="op">*</span> x_bar</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"bias parameter: </span><span class="sc">{</span>theta0_hat<span class="sc">}</span><span class="ss">, </span><span class="ch">\n</span><span class="ss">slope parameter: </span><span class="sc">{</span>theta1_hat<span class="sc">}</span><span class="ss">"</span>.<span class="bu">format</span>(theta0_hat,theta1_hat))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>bias parameter: 7.297305899612297, 
@@ -528,30 +525,30 @@ slope parameter: 0.058126223695067675</code></pre>
 <p>Let’s first assess how “good” this model is using a performance metric. For this exercise, let’s use the MSE. As a review:</p>
 <p><strong>Mean Squared Error</strong>: We can compute this explicitly by averaging the square of the residuals <span class="math inline">\(e_i\)</span>:</p>
 <p><span class="math display">\[\large MSE  = \sum_{i=1}^n (y_i - \hat{y}_i)^2 = \frac{1}{n}\sum_{i=1}^n (e_i)^2 = \frac{1}{n}\]</span></p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="5">
+<div class="cell" data-execution_count="5">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># using our estimated parameter values to create a column containing our </span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># SLR predictions and errors</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>penguins[<span class="st">"analytical_preds_slr"</span>] <span class="op">=</span> theta0_hat <span class="op">+</span> theta1_hat <span class="op">*</span> penguins[<span class="st">"flipper_length_mm"</span>]</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>penguins[<span class="st">"residual"</span>] <span class="op">=</span> penguins[<span class="st">"bill_depth_mm"</span>] <span class="op">-</span> penguins[<span class="st">"analytical_preds_slr"</span>]</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>                                          </span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>penguins</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"MSE: "</span>, np.mean(penguins[<span class="st">"residual"</span>]<span class="op">**</span><span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># using our estimated parameter values to create a column containing our </span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># SLR predictions and errors</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>penguins[<span class="st">"analytical_preds_slr"</span>] <span class="op">=</span> theta0_hat <span class="op">+</span> theta1_hat <span class="op">*</span> penguins[<span class="st">"flipper_length_mm"</span>]</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>penguins[<span class="st">"residual"</span>] <span class="op">=</span> penguins[<span class="st">"bill_depth_mm"</span>] <span class="op">-</span> penguins[<span class="st">"analytical_preds_slr"</span>]</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>                                          </span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>penguins</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"MSE: "</span>, np.mean(penguins[<span class="st">"residual"</span>]<span class="op">**</span><span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>MSE:  1.3338778799806363</code></pre>
 </div>
 </div>
 <p>Let’s plot plot our results.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="6">
+<div class="cell" data-execution_count="6">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>sns.scatterplot(data <span class="op">=</span> penguins, x <span class="op">=</span> <span class="st">"flipper_length_mm"</span>, y <span class="op">=</span> <span class="st">"bill_depth_mm"</span>)</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>plt.plot(penguins[<span class="st">"flipper_length_mm"</span>], penguins[<span class="st">"analytical_preds_slr"</span>], <span class="st">'r'</span>) <span class="co"># a line</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>plt.legend([<span class="vs">r'$\hat</span><span class="sc">{y}</span><span class="vs">$'</span>, <span class="st">'$y$'</span>])<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>sns.scatterplot(data <span class="op">=</span> penguins, x <span class="op">=</span> <span class="st">"flipper_length_mm"</span>, y <span class="op">=</span> <span class="st">"bill_depth_mm"</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>plt.plot(penguins[<span class="st">"flipper_length_mm"</span>], penguins[<span class="st">"analytical_preds_slr"</span>], <span class="st">'r'</span>) <span class="co"># a line</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>plt.legend([<span class="vs">r'$\hat</span><span class="sc">{y}</span><span class="vs">$'</span>, <span class="st">'$y$'</span>])<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <p><img src="gradient_descent_files/figure-html/cell-7-output-1.png" width="585" height="422"></p>
@@ -574,58 +571,58 @@ my_model.intercept_
 my_model.predict(X)</code></pre></li>
 </ol>
 <p>Let’s put this into action with our multiple regression task. First, initialize an instance of the <code>LinearRegression</code> class.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LinearRegression</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> LinearRegression()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LinearRegression</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> LinearRegression()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Next, fit the model instance to the design matrix <code>X</code> and target vector <code>Y</code> by calling <code>.fit</code>.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="8">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>model.fit(X, y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>model.fit(X, y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="8">
 <pre><code>LinearRegression()</code></pre>
 </div>
 </div>
 <p>And, lastly, generate predictions for <span class="math inline">\(\hat{Y}\)</span> using the <code>.predict</code> method. Here are the first 5 penguins in our dataset. How close are our analytical solution’s predictions to our <code>sklearn</code> model’s predictions?</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Like before, show just the first 5 predictions. The output of predict is usually a np.array</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>penguins[<span class="st">"sklearn_preds_slr"</span>] <span class="op">=</span> model.predict(X)</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>sklearn_5 <span class="op">=</span> penguins[<span class="st">"sklearn_preds_slr"</span>][:<span class="dv">5</span>].to_numpy()</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Sklearn solution: "</span>, sklearn_5)</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>analytical_5 <span class="op">=</span> penguins[<span class="st">"analytical_preds_slr"</span>][:<span class="dv">5</span>].to_numpy()</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Analytical solution: "</span>, analytical_5)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Like before, show just the first 5 predictions. The output of predict is usually a np.array</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>penguins[<span class="st">"sklearn_preds_slr"</span>] <span class="op">=</span> model.predict(X)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>sklearn_5 <span class="op">=</span> penguins[<span class="st">"sklearn_preds_slr"</span>][:<span class="dv">5</span>].to_numpy()</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Sklearn solution: "</span>, sklearn_5)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>analytical_5 <span class="op">=</span> penguins[<span class="st">"analytical_preds_slr"</span>][:<span class="dv">5</span>].to_numpy()</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Analytical solution: "</span>, analytical_5)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Sklearn solution:  [17.81815239 18.10878351 18.63191952 18.51566707 18.3412884 ]
 Analytical solution:  [17.81815239 18.10878351 18.63191952 18.51566707 18.3412884 ]</code></pre>
 </div>
 </div>
 <p>You can also use the model to predict what the <code>bill depth</code> of a hypothetical penguin with <code>flipper length</code> of 185mm would have.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="10">
+<div class="cell" data-execution_count="10">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># this produces a warning since we</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co"># did not specify what X this refers</span></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co"># to, but since we only </span></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># have one input it is negligible</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>model.predict([[<span class="dv">185</span>]]) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># this produces a warning since we</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co"># did not specify what X this refers</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co"># to, but since we only </span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co"># have one input it is negligible</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>model.predict([[<span class="dv">185</span>]]) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="10">
 <pre><code>array([18.05065728])</code></pre>
 </div>
 </div>
 <p>We can also check if the fitted parameters,<span class="math inline">\(\hat{\theta}_0,\hat{\theta}_1\)</span>, themselves are similar to our analytical solution. Note that since we can have at most 1 intercept in a SLR or OLS model, so we always get back a <code>scalar</code> value from <code>.intercept</code>. However, when OLS can have multiple coefficient values, so <code>.coef</code> returns an array.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="11">
+<div class="cell" data-execution_count="11">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>theta0 <span class="op">=</span> model.intercept_      <span class="co"># this a scalar</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"analytical bias term: "</span>, theta0_hat)</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"sklearn bias term: "</span>, theta0)</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>theta1 <span class="op">=</span> model.coef_           <span class="co"># this an array</span></span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"analytical coefficient terms: "</span>, theta1_hat)</span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"sklearn coefficient terms: "</span>, theta1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>theta0 <span class="op">=</span> model.intercept_      <span class="co"># this a scalar</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"analytical bias term: "</span>, theta0_hat)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"sklearn bias term: "</span>, theta0)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>theta1 <span class="op">=</span> model.coef_           <span class="co"># this an array</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"analytical coefficient terms: "</span>, theta1_hat)</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"sklearn coefficient terms: "</span>, theta1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>analytical bias term:  7.297305899612297
@@ -639,12 +636,12 @@ sklearn coefficient terms:  [0.05812622]</code></pre>
 <h4 data-number="13.1.1.4" class="anchored" data-anchor-id="slr-sklearn-performance"><span class="header-section-number">13.1.1.4</span> SLR <code>sklearn</code> Performance</h4>
 <p>The <code>sklearn</code> package also provides a function that computes the MSE from a list of observations and predictions. This avoids us having to manually compute MSE by first computing residuals.</p>
 <p><a href="https://scikit-learn.org/stable/modules/generated/sklearn.metrics.mean_squared_error.html">documentation</a></p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="12">
+<div class="cell" data-execution_count="12">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> mean_squared_error</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>MSE_sklearn <span class="op">=</span> mean_squared_error(penguins[<span class="st">"bill_depth_mm"</span>], penguins[<span class="st">"sklearn_preds_slr"</span>])</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"MSE: "</span>, MSE_sklearn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> mean_squared_error</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>MSE_sklearn <span class="op">=</span> mean_squared_error(penguins[<span class="st">"bill_depth_mm"</span>], penguins[<span class="st">"sklearn_preds_slr"</span>])</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"MSE: "</span>, MSE_sklearn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>MSE:  1.3338778799806374</code></pre>
@@ -668,15 +665,15 @@ sklearn coefficient terms:  [0.05812622]</code></pre>
 <li>To take a transpose, call the <code>.T</code> attribute of an array or DataFrame</li>
 <li>To compute an inverse, use <code>numpy</code>’s in-built method <code>np.linalg.inv</code></li>
 </ul>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="13">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> penguins[[<span class="st">"flipper_length_mm"</span>, <span class="st">"body_mass_g"</span>]].copy()</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>X[<span class="st">"bias"</span>] <span class="op">=</span> np.ones(<span class="bu">len</span>(X))</span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> penguins[<span class="st">"bill_depth_mm"</span>]</span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>theta_hat <span class="op">=</span> np.linalg.inv(X.T <span class="op">@</span> X) <span class="op">@</span> X.T <span class="op">@</span> y</span>
-<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>theta_hat  </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> penguins[[<span class="st">"flipper_length_mm"</span>, <span class="st">"body_mass_g"</span>]].copy()</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>X[<span class="st">"bias"</span>] <span class="op">=</span> np.ones(<span class="bu">len</span>(X))</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> penguins[<span class="st">"bill_depth_mm"</span>]</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>theta_hat <span class="op">=</span> np.linalg.inv(X.T <span class="op">@</span> X) <span class="op">@</span> X.T <span class="op">@</span> y</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>theta_hat  </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="13">
 <pre><code>0     0.009828
 1     0.001477
@@ -685,58 +682,58 @@ dtype: float64</code></pre>
 </div>
 </div>
 <p>Note that since we added “bias” last, <code>theta_hat[2]</code> is our estimated value for the <span class="math inline">\(\theta_0\)</span>. To make predictions using our newly-fitted model coefficients, matrix-multiply <code>X</code> and <code>theta_hat</code>.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="14">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>y_hat <span class="op">=</span> X.to_numpy() <span class="op">@</span> theta_hat</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Show just the first 5 predictions to save space on the page</span></span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>y_hat[:<span class="dv">5</span>]</span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>penguins[<span class="st">"analytical_preds_ols"</span>] <span class="op">=</span> y_hat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>y_hat <span class="op">=</span> X.to_numpy() <span class="op">@</span> theta_hat</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Show just the first 5 predictions to save space on the page</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>y_hat[:<span class="dv">5</span>]</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>penguins[<span class="st">"analytical_preds_ols"</span>] <span class="op">=</span> y_hat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Note, this technique doesn’t work if our X is <strong>not invertible</strong>.</p>
 </section>
 <section id="ols-w-sklearn" class="level4" data-number="13.1.2.2">
 <h4 data-number="13.1.2.2" class="anchored" data-anchor-id="ols-w-sklearn"><span class="header-section-number">13.1.2.2</span> OLS w/ <code>sklearn</code></h4>
 <p>We can actually compute the optimal parameters very easily using sklearn, using the exact code that we wrote earlier. Note: sklearn does NOT use the normal equations. Instead it uses gradient descent, a technique we will learn about soon, which can minimize ANY function, not just the MSE.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="15">
+<div class="cell" data-execution_count="15">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># creating our design matrix.</span></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Note:</span></span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="co">#  - no bias term needed here bc of sklearn automatically includes one</span></span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="co">#  - to remove the intercept term, set the fit_intercept = true in LinearRegression constructor.</span></span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>X_2d <span class="op">=</span> penguins[[<span class="st">"flipper_length_mm"</span>, <span class="st">"body_mass_g"</span>]]</span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> penguins[<span class="st">"bill_depth_mm"</span>]</span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>model_2d <span class="op">=</span> LinearRegression() <span class="co"># note fit_intercept=True by default</span></span>
-<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>model_2d.fit(X_2d, y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># creating our design matrix.</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Note:</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="co">#  - no bias term needed here bc of sklearn automatically includes one</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="co">#  - to remove the intercept term, set the fit_intercept = true in LinearRegression constructor.</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>X_2d <span class="op">=</span> penguins[[<span class="st">"flipper_length_mm"</span>, <span class="st">"body_mass_g"</span>]]</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> penguins[<span class="st">"bill_depth_mm"</span>]</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>model_2d <span class="op">=</span> LinearRegression() <span class="co"># note fit_intercept=True by default</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>model_2d.fit(X_2d, y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="15">
 <pre><code>LinearRegression()</code></pre>
 </div>
 </div>
 <p>Now we again have a model with which we can use to make predictions. For example, we can ask our model about a penguin’s bill depth if they have 185-mm flipper length and 3750 g body mass.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="16">
+<div class="cell" data-execution_count="16">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>penguins[<span class="st">"sklearn_predictions_ols"</span>] <span class="op">=</span> model_2d.predict(X_2d)</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>model_2d.predict([[<span class="dv">185</span>, <span class="dv">3750</span>]]) </span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="co"># since we have a 2d data matrix, we maintain the same </span></span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="co"># row-column expectation for our inputs. </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>penguins[<span class="st">"sklearn_predictions_ols"</span>] <span class="op">=</span> model_2d.predict(X_2d)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>model_2d.predict([[<span class="dv">185</span>, <span class="dv">3750</span>]]) </span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="co"># since we have a 2d data matrix, we maintain the same </span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="co"># row-column expectation for our inputs. </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="16">
 <pre><code>array([18.36187501])</code></pre>
 </div>
 </div>
 <p>Just like with SLR, we cam also extract the coefficient estimates using <code>.coef_</code> and <code>.intercept</code>. The reason why <code>.intercept</code> returns an array should now be more clear.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="17">
+<div class="cell" data-execution_count="17">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"(sklearn) theta0: </span><span class="sc">{</span>model_2d<span class="sc">.</span>intercept_<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"(analytical) theta0 </span><span class="sc">{</span>theta_hat[<span class="dv">2</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"(sklearn) theta1: </span><span class="sc">{</span>model_2d<span class="sc">.</span>coef_[<span class="dv">0</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"(analytical) theta1 </span><span class="sc">{</span>theta_hat[<span class="dv">0</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"(sklearn) theta2: </span><span class="sc">{</span>model_2d<span class="sc">.</span>coef_[<span class="dv">1</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"(analytical) theta2 </span><span class="sc">{</span>theta_hat[<span class="dv">1</span>]<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"(sklearn) theta0: </span><span class="sc">{</span>model_2d<span class="sc">.</span>intercept_<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"(analytical) theta0 </span><span class="sc">{</span>theta_hat[<span class="dv">2</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"(sklearn) theta1: </span><span class="sc">{</span>model_2d<span class="sc">.</span>coef_[<span class="dv">0</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"(analytical) theta1 </span><span class="sc">{</span>theta_hat[<span class="dv">0</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"(sklearn) theta2: </span><span class="sc">{</span>model_2d<span class="sc">.</span>coef_[<span class="dv">1</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"(analytical) theta2 </span><span class="sc">{</span>theta_hat[<span class="dv">1</span>]<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(sklearn) theta0: 11.002995277447068
@@ -751,15 +748,15 @@ dtype: float64</code></pre>
 <section id="visualizing-our-2d-linear-model-predictions" class="level4" data-number="13.1.2.3">
 <h4 data-number="13.1.2.3" class="anchored" data-anchor-id="visualizing-our-2d-linear-model-predictions"><span class="header-section-number">13.1.2.3</span> Visualizing Our 2D Linear Model Predictions</h4>
 <p>When we have two axis with which we can change an input, moving along this input plan creates a 2d plane with which we can get model outputs for. For example, for every single penguin with a <code>flipper length</code> , we also must specify a <code>body mass</code>. These two values in combination will help us predict the <code>bill depth</code>. Thus, we see that the predictions all lie in a 2d-plane. In higher dimensions, they all lie in a “hyperplane”.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="18">
+<div class="cell" data-execution_count="18">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> mpl_toolkits.mplot3d <span class="im">import</span> Axes3D  <span class="co"># noqa: F401 unused import</span></span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> plt.figure()</span>
-<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> fig.add_subplot(<span class="dv">111</span>, projection<span class="op">=</span><span class="st">'3d'</span>)</span>
-<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>ax.scatter(penguins[<span class="st">"flipper_length_mm"</span>], penguins[<span class="st">"body_mass_g"</span>], penguins[<span class="st">"bill_depth_mm"</span>])</span>
-<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'flipper_length_mm'</span>)</span>
-<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'body_mass_g'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> mpl_toolkits.mplot3d <span class="im">import</span> Axes3D  <span class="co"># noqa: F401 unused import</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> plt.figure()</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> fig.add_subplot(<span class="dv">111</span>, projection<span class="op">=</span><span class="st">'3d'</span>)</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>ax.scatter(penguins[<span class="st">"flipper_length_mm"</span>], penguins[<span class="st">"body_mass_g"</span>], penguins[<span class="st">"bill_depth_mm"</span>])</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'flipper_length_mm'</span>)</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'body_mass_g'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="18">
 <pre><code>Text(0.5, 0.5, 'body_mass_g')</code></pre>
@@ -768,18 +765,18 @@ dtype: float64</code></pre>
 <p><img src="gradient_descent_files/figure-html/cell-19-output-2.png" width="398" height="397"></p>
 </div>
 </div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="19">
+<div class="cell" data-execution_count="19">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> plt.figure()</span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> fig.add_subplot(<span class="dv">111</span>, projection<span class="op">=</span><span class="st">'3d'</span>)</span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>ax.scatter(penguins[<span class="st">"flipper_length_mm"</span>], penguins[<span class="st">"body_mass_g"</span>], penguins[<span class="st">"bill_depth_mm"</span>])</span>
-<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>xx, yy <span class="op">=</span> np.meshgrid(<span class="bu">range</span>(<span class="dv">170</span>, <span class="dv">220</span>, <span class="dv">10</span>), <span class="bu">range</span>(<span class="dv">2500</span>, <span class="dv">4500</span>, <span class="dv">100</span>))</span>
-<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>zz <span class="op">=</span> ( <span class="fl">11.0029</span> <span class="op">+</span> <span class="fl">0.00982</span> <span class="op">*</span> xx <span class="op">+</span> <span class="fl">0.001477</span> <span class="op">*</span> yy) <span class="co"># thetas_using_sklearn</span></span>
-<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>ax.plot_surface(xx, yy, zz, alpha<span class="op">=</span><span class="fl">0.2</span>)</span>
-<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'flipper_length_mm'</span>)</span>
-<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'body_mass_g'</span>)</span>
-<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>plt.gcf().savefig(<span class="st">"plane.png"</span>, dpi <span class="op">=</span> <span class="dv">300</span>, bbox_inches <span class="op">=</span> <span class="st">"tight"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> plt.figure()</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> fig.add_subplot(<span class="dv">111</span>, projection<span class="op">=</span><span class="st">'3d'</span>)</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>ax.scatter(penguins[<span class="st">"flipper_length_mm"</span>], penguins[<span class="st">"body_mass_g"</span>], penguins[<span class="st">"bill_depth_mm"</span>])</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>xx, yy <span class="op">=</span> np.meshgrid(<span class="bu">range</span>(<span class="dv">170</span>, <span class="dv">220</span>, <span class="dv">10</span>), <span class="bu">range</span>(<span class="dv">2500</span>, <span class="dv">4500</span>, <span class="dv">100</span>))</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>zz <span class="op">=</span> ( <span class="fl">11.0029</span> <span class="op">+</span> <span class="fl">0.00982</span> <span class="op">*</span> xx <span class="op">+</span> <span class="fl">0.001477</span> <span class="op">*</span> yy) <span class="co"># thetas_using_sklearn</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>ax.plot_surface(xx, yy, zz, alpha<span class="op">=</span><span class="fl">0.2</span>)</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'flipper_length_mm'</span>)</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'body_mass_g'</span>)</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>plt.gcf().savefig(<span class="st">"plane.png"</span>, dpi <span class="op">=</span> <span class="dv">300</span>, bbox_inches <span class="op">=</span> <span class="st">"tight"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <p><img src="gradient_descent_files/figure-html/cell-20-output-1.png" width="398" height="397"></p>
@@ -815,20 +812,20 @@ dtype: float64</code></pre>
 <section id="the-naive-approach-guess-and-check" class="level4" data-number="13.2.1.1">
 <h4 data-number="13.2.1.1" class="anchored" data-anchor-id="the-naive-approach-guess-and-check"><span class="header-section-number">13.2.1.1</span> The Naive Approach: Guess and Check</h4>
 <p>Above, we saw that the minimum is somewhere around 5.3ish. Let’s see if we can figure out how to find the exact minimum algorithmically from scratch. One way very slow and terrible way would be manual guess-and-check.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="20">
+<div class="cell" data-execution_count="20">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> arbitrary(x):</span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (x<span class="op">**</span><span class="dv">4</span> <span class="op">-</span> <span class="dv">15</span><span class="op">*</span>x<span class="op">**</span><span class="dv">3</span> <span class="op">+</span> <span class="dv">80</span><span class="op">*</span>x<span class="op">**</span><span class="dv">2</span> <span class="op">-</span> <span class="dv">180</span><span class="op">*</span>x <span class="op">+</span> <span class="dv">144</span>)<span class="op">/</span><span class="dv">10</span></span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> simple_minimize(f, xs):</span>
-<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Takes in a function f and a set of values xs. </span></span>
-<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculates the value of the function f at all values x in xs</span></span>
-<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Takes the minimum value of f(x) and returns the corresponding value x </span></span>
-<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> [f(x) <span class="cf">for</span> x <span class="kw">in</span> xs]  </span>
-<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> xs[np.argmin(y)]</span>
-<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>simple_minimize(arbitrary, np.linspace(<span class="dv">1</span>, <span class="dv">7</span>, <span class="dv">20</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> arbitrary(x):</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (x<span class="op">**</span><span class="dv">4</span> <span class="op">-</span> <span class="dv">15</span><span class="op">*</span>x<span class="op">**</span><span class="dv">3</span> <span class="op">+</span> <span class="dv">80</span><span class="op">*</span>x<span class="op">**</span><span class="dv">2</span> <span class="op">-</span> <span class="dv">180</span><span class="op">*</span>x <span class="op">+</span> <span class="dv">144</span>)<span class="op">/</span><span class="dv">10</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> simple_minimize(f, xs):</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Takes in a function f and a set of values xs. </span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculates the value of the function f at all values x in xs</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Takes the minimum value of f(x) and returns the corresponding value x </span></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> [f(x) <span class="cf">for</span> x <span class="kw">in</span> xs]  </span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> xs[np.argmin(y)]</span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>simple_minimize(arbitrary, np.linspace(<span class="dv">1</span>, <span class="dv">7</span>, <span class="dv">20</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="20">
 <pre><code>5.421052631578947</code></pre>
@@ -838,14 +835,14 @@ dtype: float64</code></pre>
 <section id="scipy.optimize.minimize" class="level4" data-number="13.2.1.2">
 <h4 data-number="13.2.1.2" class="anchored" data-anchor-id="scipy.optimize.minimize"><span class="header-section-number">13.2.1.2</span> Scipy.optimize.minimize</h4>
 <p>One way to minimize this mathematical function is to use the <code>scipy.optimize.minimize</code> function. It takes a function and a starting guess and tries to find the minimum.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="21">
+<div class="cell" data-execution_count="21">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.optimize <span class="im">import</span> minimize</span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="co"># takes a function f and a starting point x0 and returns a readout </span></span>
-<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="co"># with the optimal input value of x which minimizes f</span></span>
-<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>minimize(arbitrary, x0 <span class="op">=</span> <span class="fl">3.5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.optimize <span class="im">import</span> minimize</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="co"># takes a function f and a starting point x0 and returns a readout </span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="co"># with the optimal input value of x which minimizes f</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>minimize(arbitrary, x0 <span class="op">=</span> <span class="fl">3.5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="21">
 <pre><code>      fun: -0.13827491292966557
@@ -861,12 +858,12 @@ dtype: float64</code></pre>
 </div>
 </div>
 <p>Our choice of start point can affect the outcome. For example if we start to the left, we get stuck in the local minimum on the left side.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="22">
+<div class="cell" data-execution_count="22">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>minimize(arbitrary, x0 <span class="op">=</span> <span class="dv">1</span>)</span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a><span class="co">#here we see the optimal value is different from before</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>minimize(arbitrary, x0 <span class="op">=</span> <span class="dv">1</span>)</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="co">#here we see the optimal value is different from before</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="22">
 <pre><code>      fun: -0.13827491294422317
@@ -909,28 +906,28 @@ dtype: float64</code></pre>
 </ul>
 <p>Put together, this captures the same behavior we reasoned through above. We repeatedly update our guess for the optimal <span class="math inline">\(\theta\)</span> until we’ve completed a set number of updates, or until each additional update iteration does not change the value of <span class="math inline">\(\theta\)</span>. In this second case, we say that gradient descent has <strong>converged</strong> on a solution.</p>
 <p>The <span class="math inline">\(\alpha\)</span> term in the update rule is known as the <strong>learning rate</strong>. It is a positive value represents the size of each gradient descent update step – in other words, how “far” should we step to the left or right with each updated guess? A high value of <span class="math inline">\(\alpha\)</span> will lead to large differences in value between consecutive guesses for <span class="math inline">\(\hat{\theta}\)</span>; a low value of <span class="math inline">\(\alpha\)</span> will result in smaller differences in value between consecutive guesses. This is the first example of a <strong>hyperparameter</strong>, a parameter that is hand picked by the data scientist that changes the model’s behavior, in the course.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="23">
+<div class="cell" data-execution_count="23">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># define the derivative of the arbitrary function we want to minimize</span></span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> derivative_arbitrary(x):</span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (<span class="dv">4</span><span class="op">*</span>x<span class="op">**</span><span class="dv">3</span> <span class="op">-</span> <span class="dv">45</span><span class="op">*</span>x<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> <span class="dv">160</span><span class="op">*</span>x <span class="op">-</span> <span class="dv">180</span>)<span class="op">/</span><span class="dv">10</span></span>
-<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gradient_descent(df, initial_guess, alpha, n):</span>
-<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Performs n steps of gradient descent on df using learning rate alpha starting</span></span>
-<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a><span class="co">       from initial_guess. Returns a numpy array of all guesses over time."""</span></span>
-<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>    guesses <span class="op">=</span> [initial_guess]</span>
-<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>    current_guess <span class="op">=</span> initial_guess</span>
-<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="bu">len</span>(guesses) <span class="op">&lt;</span> n:</span>
-<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>        current_guess <span class="op">=</span> current_guess <span class="op">-</span> alpha <span class="op">*</span> df(current_guess)</span>
-<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a>        guesses.append(current_guess)</span>
-<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.array(guesses)</span>
-<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a><span class="co"># calling our function gives us the path that gradient descent takes for 20 steps </span></span>
-<span id="cb40-17"><a href="#cb40-17" aria-hidden="true" tabindex="-1"></a><span class="co"># with a learning rate of 0.3 starting at theta = 4</span></span>
-<span id="cb40-18"><a href="#cb40-18" aria-hidden="true" tabindex="-1"></a>trajectory <span class="op">=</span> gradient_descent(derivative_arbitrary, <span class="dv">4</span>, <span class="fl">0.3</span>, <span class="dv">20</span>)</span>
-<span id="cb40-19"><a href="#cb40-19" aria-hidden="true" tabindex="-1"></a>trajectory</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># define the derivative of the arbitrary function we want to minimize</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> derivative_arbitrary(x):</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (<span class="dv">4</span><span class="op">*</span>x<span class="op">**</span><span class="dv">3</span> <span class="op">-</span> <span class="dv">45</span><span class="op">*</span>x<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> <span class="dv">160</span><span class="op">*</span>x <span class="op">-</span> <span class="dv">180</span>)<span class="op">/</span><span class="dv">10</span></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gradient_descent(df, initial_guess, alpha, n):</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Performs n steps of gradient descent on df using learning rate alpha starting</span></span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a><span class="co">       from initial_guess. Returns a numpy array of all guesses over time."""</span></span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>    guesses <span class="op">=</span> [initial_guess]</span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>    current_guess <span class="op">=</span> initial_guess</span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="bu">len</span>(guesses) <span class="op">&lt;</span> n:</span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>        current_guess <span class="op">=</span> current_guess <span class="op">-</span> alpha <span class="op">*</span> df(current_guess)</span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>        guesses.append(current_guess)</span>
+<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.array(guesses)</span>
+<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a><span class="co"># calling our function gives us the path that gradient descent takes for 20 steps </span></span>
+<span id="cb39-17"><a href="#cb39-17" aria-hidden="true" tabindex="-1"></a><span class="co"># with a learning rate of 0.3 starting at theta = 4</span></span>
+<span id="cb39-18"><a href="#cb39-18" aria-hidden="true" tabindex="-1"></a>trajectory <span class="op">=</span> gradient_descent(derivative_arbitrary, <span class="dv">4</span>, <span class="fl">0.3</span>, <span class="dv">20</span>)</span>
+<span id="cb39-19"><a href="#cb39-19" aria-hidden="true" tabindex="-1"></a>trajectory</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="23">
 <pre><code>array([4.        , 4.12      , 4.26729664, 4.44272584, 4.64092624,
@@ -954,13 +951,13 @@ dtype: float64</code></pre>
 <p>Let’s consider a case where we have a linear model with no offset.</p>
 <p><span class="math display">\[\hat{y} = \theta_1 x\]</span></p>
 <p>We want to find the parameter <span class="math inline">\(\theta_1\)</span> such that the L2 loss is minimized. In sklearn, this is easy. To avoid fitting an intercept, we set <code>fit_intercept</code> to false.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="24">
+<div class="cell" data-execution_count="24">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> LinearRegression(fit_intercept <span class="op">=</span> <span class="va">False</span>)</span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> sns.load_dataset(<span class="st">"tips"</span>)</span>
-<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>model.fit(df[[<span class="st">"total_bill"</span>]], df[<span class="st">"tip"</span>])</span>
-<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>model.coef_ <span class="co"># the optimal tip percentage is 14.37%</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> LinearRegression(fit_intercept <span class="op">=</span> <span class="va">False</span>)</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> sns.load_dataset(<span class="st">"tips"</span>)</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>model.fit(df[[<span class="st">"total_bill"</span>]], df[<span class="st">"tip"</span>])</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>model.coef_ <span class="co"># the optimal tip percentage is 14.37%</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="24">
 <pre><code>array([0.1437319])</code></pre>
@@ -971,18 +968,18 @@ dtype: float64</code></pre>
 <h3 data-number="13.3.2" class="anchored" data-anchor-id="creating-an-explicit-mse-function"><span class="header-section-number">13.3.2</span> Creating an Explicit MSE Function</h3>
 <p>To employ gradient descent and do this ourselves, we need to define a function upon which we can use gradient descent. Suppose we select the L2 loss as our loss function. In this case, our goal will be to minimize the mean squared error.</p>
 <p>Let’s start by writing a function that computes the MSE for a given choice of <span class="math inline">\(\theta_1\)</span> on our dataset.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="25">
+<div class="cell" data-execution_count="25">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mse_single_arg(theta1):</span>
-<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Returns the MSE on our data for the given theta1"""</span></span>
-<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> df[<span class="st">"total_bill"</span>]</span>
-<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>    y_obs <span class="op">=</span> df[<span class="st">"tip"</span>]</span>
-<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>    y_hat <span class="op">=</span> theta1 <span class="op">*</span> x</span>
-<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.mean((y_hat <span class="op">-</span> y_obs) <span class="op">**</span> <span class="dv">2</span>)</span>
-<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>mse_single_arg(<span class="fl">0.1437</span>)</span>
-<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a><span class="co"># The minimum loss value that we can achieve is 1.178 dollars on average away from the truth</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mse_single_arg(theta1):</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Returns the MSE on our data for the given theta1"""</span></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> df[<span class="st">"total_bill"</span>]</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>    y_obs <span class="op">=</span> df[<span class="st">"tip"</span>]</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>    y_hat <span class="op">=</span> theta1 <span class="op">*</span> x</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.mean((y_hat <span class="op">-</span> y_obs) <span class="op">**</span> <span class="dv">2</span>)</span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>mse_single_arg(<span class="fl">0.1437</span>)</span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a><span class="co"># The minimum loss value that we can achieve is 1.178 dollars on average away from the truth</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="25">
 <pre><code>1.1781165940051928</code></pre>
@@ -992,47 +989,47 @@ dtype: float64</code></pre>
 <section id="plotting-the-mse-function" class="level3" data-number="13.3.3">
 <h3 data-number="13.3.3" class="anchored" data-anchor-id="plotting-the-mse-function"><span class="header-section-number">13.3.3</span> Plotting the MSE Function</h3>
 <p>Since we only have 1 parameter, we can simply cross reference our results with a simnple plot. We do not want to always do this since some functions can have thousands of inputs, making them difficult to plot. We can plot the MSE as a function of <code>theta1</code>. It turns out to look pretty smooth, and quite similar to a parabola.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="26">
+<div class="cell" data-execution_count="26">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>theta1s <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="fl">0.2</span>, <span class="dv">200</span>)</span>
-<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> df[<span class="st">"total_bill"</span>]</span>
-<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>y_obs <span class="op">=</span> df[<span class="st">"tip"</span>]</span>
-<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>MSEs <span class="op">=</span> [mse_single_arg(theta1) <span class="cf">for</span> theta1 <span class="kw">in</span> theta1s]</span>
-<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>plt.plot(theta1s, MSEs)</span>
-<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="vs">r"Choice for $\theta_1$"</span>)</span>
-<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="vs">r"MSE"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>theta1s <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="fl">0.2</span>, <span class="dv">200</span>)</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> df[<span class="st">"total_bill"</span>]</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>y_obs <span class="op">=</span> df[<span class="st">"tip"</span>]</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>MSEs <span class="op">=</span> [mse_single_arg(theta1) <span class="cf">for</span> theta1 <span class="kw">in</span> theta1s]</span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>plt.plot(theta1s, MSEs)</span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="vs">r"Choice for $\theta_1$"</span>)</span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="vs">r"MSE"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <p><img src="gradient_descent_files/figure-html/cell-27-output-1.png" width="585" height="424"></p>
 </div>
 </div>
 <p>The minimum appears to be around <span class="math inline">\(\theta_1 = 0.14\)</span>. We can once again check this naively.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="27">
+<div class="cell" data-execution_count="27">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>simple_minimize(mse_single_arg, np.linspace(<span class="dv">0</span>, <span class="fl">0.2</span>, <span class="dv">21</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>simple_minimize(mse_single_arg, np.linspace(<span class="dv">0</span>, <span class="fl">0.2</span>, <span class="dv">21</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="27">
 <pre><code>0.14</code></pre>
 </div>
 </div>
 <p>As before, what we’re doing is computing all the starred values below and then returning the <span class="math inline">\(\theta_1\)</span> that goes with the minimum value.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="28">
+<div class="cell" data-execution_count="28">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>theta1s <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="fl">0.2</span>, <span class="dv">200</span>)</span>
-<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>sparse_theta1s <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="fl">0.2</span>, <span class="dv">21</span>)</span>
-<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>loss <span class="op">=</span> [mse_single_arg(theta1) <span class="cf">for</span> theta1 <span class="kw">in</span> theta1s]</span>
-<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>sparse_loss <span class="op">=</span> [mse_single_arg(theta1) <span class="cf">for</span> theta1 <span class="kw">in</span> sparse_theta1s]</span>
-<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>plt.plot(theta1s, loss)</span>
-<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>plt.plot(sparse_theta1s, sparse_loss, <span class="st">'r*'</span>)</span>
-<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="vs">r"Choice for $\theta_1$"</span>)</span>
-<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="vs">r"MSE"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>theta1s <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="fl">0.2</span>, <span class="dv">200</span>)</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>sparse_theta1s <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="fl">0.2</span>, <span class="dv">21</span>)</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>loss <span class="op">=</span> [mse_single_arg(theta1) <span class="cf">for</span> theta1 <span class="kw">in</span> theta1s]</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>sparse_loss <span class="op">=</span> [mse_single_arg(theta1) <span class="cf">for</span> theta1 <span class="kw">in</span> sparse_theta1s]</span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>plt.plot(theta1s, loss)</span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>plt.plot(sparse_theta1s, sparse_loss, <span class="st">'r*'</span>)</span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="vs">r"Choice for $\theta_1$"</span>)</span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="vs">r"MSE"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <p><img src="gradient_descent_files/figure-html/cell-29-output-1.png" width="585" height="424"></p>
@@ -1040,12 +1037,12 @@ dtype: float64</code></pre>
 </div>
 <section id="using-scipy.optimize.minimize" class="level4" data-number="13.3.3.1">
 <h4 data-number="13.3.3.1" class="anchored" data-anchor-id="using-scipy.optimize.minimize"><span class="header-section-number">13.3.3.1</span> Using Scipy.Optimize.minimize</h4>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="29">
+<div class="cell" data-execution_count="29">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> scipy.optimize</span>
-<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.optimize <span class="im">import</span> minimize</span>
-<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>minimize(mse_single_arg, x0 <span class="op">=</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> scipy.optimize</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.optimize <span class="im">import</span> minimize</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>minimize(mse_single_arg, x0 <span class="op">=</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="29">
 <pre><code>      fun: 1.1781161154513213
@@ -1064,18 +1061,18 @@ dtype: float64</code></pre>
 <section id="using-our-gradient-descent-function" class="level4" data-number="13.3.3.2">
 <h4 data-number="13.3.3.2" class="anchored" data-anchor-id="using-our-gradient-descent-function"><span class="header-section-number">13.3.3.2</span> Using Our Gradient Descent Function</h4>
 <p>Another approach is to use our 1D gradient descent algorithm from earlier. This is the exact same function as earlier. We can run it for 100 steps and see where it ultimately ends up.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="30">
+<div class="cell" data-execution_count="30">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mse_loss_derivative_single_arg(theta_1):</span>
-<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Returns the derivative of the MSE on our data for the given theta1"""</span></span>
-<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> df[<span class="st">"total_bill"</span>]</span>
-<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>    y_obs <span class="op">=</span> df[<span class="st">"tip"</span>]</span>
-<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>    y_hat <span class="op">=</span> theta_1 <span class="op">*</span> x</span>
-<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.mean(<span class="dv">2</span> <span class="op">*</span> (y_hat <span class="op">-</span> y_obs) <span class="op">*</span> x)</span>
-<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a>gradient_descent(mse_loss_derivative_single_arg, <span class="fl">0.05</span>, <span class="fl">0.0001</span>, <span class="dv">100</span>)[<span class="op">-</span><span class="dv">5</span>:]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mse_loss_derivative_single_arg(theta_1):</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Returns the derivative of the MSE on our data for the given theta1"""</span></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> df[<span class="st">"total_bill"</span>]</span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>    y_obs <span class="op">=</span> df[<span class="st">"tip"</span>]</span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>    y_hat <span class="op">=</span> theta_1 <span class="op">*</span> x</span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.mean(<span class="dv">2</span> <span class="op">*</span> (y_hat <span class="op">-</span> y_obs) <span class="op">*</span> x)</span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>gradient_descent(mse_loss_derivative_single_arg, <span class="fl">0.05</span>, <span class="fl">0.0001</span>, <span class="dv">100</span>)[<span class="op">-</span><span class="dv">5</span>:]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="30">
 <pre><code>array([0.14372404, 0.14372478, 0.14372545, 0.14372605, 0.1437266 ])</code></pre>
@@ -1092,56 +1089,56 @@ dtype: float64</code></pre>
 <p><span class="math display">\[\textrm{tip} = \theta_0 + \theta_1 \textrm{bill}\]</span></p>
 <p>To put this in more concrete terms what this means, let’s return to the familiar case of simple linear regression with MSE loss. <span class="math display">\[\text{MSE}(\theta_0,\:\theta_1) = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 = \frac{1}{n} \sum_{i=1}^{n} (y_i - \theta_0 - \theta_1 x)^2\]</span></p>
 <p>Now, loss is expressed in terms of <em>two</em> parameters, <span class="math inline">\(\theta_0\)</span> and <span class="math inline">\(\theta_1\)</span>. Rather than a one-dimensional loss function as we had above, we are now dealing with a two-dimensional <strong>loss surface</strong>.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="31">
+<div class="cell" data-execution_count="31">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="co"># This code is for illustration purposes only</span></span>
-<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a><span class="co"># It contains a lot of syntax you have not seen</span></span>
-<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> plotly.graph_objects <span class="im">as</span> go</span>
-<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> LinearRegression(fit_intercept <span class="op">=</span> <span class="va">False</span>)</span>
-<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> sns.load_dataset(<span class="st">"tips"</span>)</span>
-<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"bias"</span>] <span class="op">=</span> <span class="dv">1</span></span>
-<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a>model.fit(df[[<span class="st">"bias"</span>,<span class="st">"total_bill"</span>]], df[<span class="st">"tip"</span>])</span>
-<span id="cb54-9"><a href="#cb54-9" aria-hidden="true" tabindex="-1"></a>model.coef_</span>
-<span id="cb54-10"><a href="#cb54-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-11"><a href="#cb54-11" aria-hidden="true" tabindex="-1"></a>uvalues <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">10</span>)</span>
-<span id="cb54-12"><a href="#cb54-12" aria-hidden="true" tabindex="-1"></a>vvalues <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="fl">0.2</span>, <span class="dv">10</span>)</span>
-<span id="cb54-13"><a href="#cb54-13" aria-hidden="true" tabindex="-1"></a>(u,v) <span class="op">=</span> np.meshgrid(uvalues, vvalues)</span>
-<span id="cb54-14"><a href="#cb54-14" aria-hidden="true" tabindex="-1"></a>thetas <span class="op">=</span> np.vstack((u.flatten(),v.flatten()))</span>
-<span id="cb54-15"><a href="#cb54-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-16"><a href="#cb54-16" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> df[[<span class="st">"bias"</span>,<span class="st">"total_bill"</span>]].to_numpy()</span>
-<span id="cb54-17"><a href="#cb54-17" aria-hidden="true" tabindex="-1"></a>Y <span class="op">=</span> df[<span class="st">"tip"</span>].to_numpy()</span>
-<span id="cb54-18"><a href="#cb54-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-19"><a href="#cb54-19" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mse_loss_single_arg(theta):</span>
-<span id="cb54-20"><a href="#cb54-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> mse_loss(theta, X, Y)</span>
-<span id="cb54-21"><a href="#cb54-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-22"><a href="#cb54-22" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mse_loss(theta, X, y_obs):</span>
-<span id="cb54-23"><a href="#cb54-23" aria-hidden="true" tabindex="-1"></a>    y_hat <span class="op">=</span> X <span class="op">@</span> theta</span>
-<span id="cb54-24"><a href="#cb54-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.mean((y_hat <span class="op">-</span> Y) <span class="op">**</span> <span class="dv">2</span>)    </span>
-<span id="cb54-25"><a href="#cb54-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-26"><a href="#cb54-26" aria-hidden="true" tabindex="-1"></a>MSE <span class="op">=</span> np.array([mse_loss_single_arg(t) <span class="cf">for</span> t <span class="kw">in</span> thetas.T])</span>
-<span id="cb54-27"><a href="#cb54-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-28"><a href="#cb54-28" aria-hidden="true" tabindex="-1"></a>loss_surface <span class="op">=</span> go.Surface(x<span class="op">=</span>u, y<span class="op">=</span>v, z<span class="op">=</span>np.reshape(MSE, u.shape))</span>
-<span id="cb54-29"><a href="#cb54-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-30"><a href="#cb54-30" aria-hidden="true" tabindex="-1"></a>ind <span class="op">=</span> np.argmin(MSE)</span>
-<span id="cb54-31"><a href="#cb54-31" aria-hidden="true" tabindex="-1"></a>optimal_point <span class="op">=</span> go.Scatter3d(name <span class="op">=</span> <span class="st">"Optimal Point"</span>,</span>
-<span id="cb54-32"><a href="#cb54-32" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> [thetas.T[ind,<span class="dv">0</span>]], y <span class="op">=</span> [thetas.T[ind,<span class="dv">1</span>]], </span>
-<span id="cb54-33"><a href="#cb54-33" aria-hidden="true" tabindex="-1"></a>    z <span class="op">=</span> [MSE[ind]],</span>
-<span id="cb54-34"><a href="#cb54-34" aria-hidden="true" tabindex="-1"></a>    marker<span class="op">=</span><span class="bu">dict</span>(size<span class="op">=</span><span class="dv">10</span>, color<span class="op">=</span><span class="st">"red"</span>))</span>
-<span id="cb54-35"><a href="#cb54-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-36"><a href="#cb54-36" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> go.Figure(data<span class="op">=</span>[loss_surface, optimal_point])</span>
-<span id="cb54-37"><a href="#cb54-37" aria-hidden="true" tabindex="-1"></a>fig.update_layout(scene <span class="op">=</span> <span class="bu">dict</span>(</span>
-<span id="cb54-38"><a href="#cb54-38" aria-hidden="true" tabindex="-1"></a>    xaxis_title <span class="op">=</span> <span class="st">"theta0"</span>,</span>
-<span id="cb54-39"><a href="#cb54-39" aria-hidden="true" tabindex="-1"></a>    yaxis_title <span class="op">=</span> <span class="st">"theta1"</span>,</span>
-<span id="cb54-40"><a href="#cb54-40" aria-hidden="true" tabindex="-1"></a>    zaxis_title <span class="op">=</span> <span class="st">"MSE"</span>))</span>
-<span id="cb54-41"><a href="#cb54-41" aria-hidden="true" tabindex="-1"></a>fig.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="co"># This code is for illustration purposes only</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a><span class="co"># It contains a lot of syntax you have not seen</span></span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> plotly.graph_objects <span class="im">as</span> go</span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> LinearRegression(fit_intercept <span class="op">=</span> <span class="va">False</span>)</span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> sns.load_dataset(<span class="st">"tips"</span>)</span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"bias"</span>] <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a>model.fit(df[[<span class="st">"bias"</span>,<span class="st">"total_bill"</span>]], df[<span class="st">"tip"</span>])</span>
+<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a>model.coef_</span>
+<span id="cb53-10"><a href="#cb53-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-11"><a href="#cb53-11" aria-hidden="true" tabindex="-1"></a>uvalues <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">10</span>)</span>
+<span id="cb53-12"><a href="#cb53-12" aria-hidden="true" tabindex="-1"></a>vvalues <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="fl">0.2</span>, <span class="dv">10</span>)</span>
+<span id="cb53-13"><a href="#cb53-13" aria-hidden="true" tabindex="-1"></a>(u,v) <span class="op">=</span> np.meshgrid(uvalues, vvalues)</span>
+<span id="cb53-14"><a href="#cb53-14" aria-hidden="true" tabindex="-1"></a>thetas <span class="op">=</span> np.vstack((u.flatten(),v.flatten()))</span>
+<span id="cb53-15"><a href="#cb53-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-16"><a href="#cb53-16" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> df[[<span class="st">"bias"</span>,<span class="st">"total_bill"</span>]].to_numpy()</span>
+<span id="cb53-17"><a href="#cb53-17" aria-hidden="true" tabindex="-1"></a>Y <span class="op">=</span> df[<span class="st">"tip"</span>].to_numpy()</span>
+<span id="cb53-18"><a href="#cb53-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-19"><a href="#cb53-19" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mse_loss_single_arg(theta):</span>
+<span id="cb53-20"><a href="#cb53-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> mse_loss(theta, X, Y)</span>
+<span id="cb53-21"><a href="#cb53-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-22"><a href="#cb53-22" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mse_loss(theta, X, y_obs):</span>
+<span id="cb53-23"><a href="#cb53-23" aria-hidden="true" tabindex="-1"></a>    y_hat <span class="op">=</span> X <span class="op">@</span> theta</span>
+<span id="cb53-24"><a href="#cb53-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.mean((y_hat <span class="op">-</span> Y) <span class="op">**</span> <span class="dv">2</span>)    </span>
+<span id="cb53-25"><a href="#cb53-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-26"><a href="#cb53-26" aria-hidden="true" tabindex="-1"></a>MSE <span class="op">=</span> np.array([mse_loss_single_arg(t) <span class="cf">for</span> t <span class="kw">in</span> thetas.T])</span>
+<span id="cb53-27"><a href="#cb53-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-28"><a href="#cb53-28" aria-hidden="true" tabindex="-1"></a>loss_surface <span class="op">=</span> go.Surface(x<span class="op">=</span>u, y<span class="op">=</span>v, z<span class="op">=</span>np.reshape(MSE, u.shape))</span>
+<span id="cb53-29"><a href="#cb53-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-30"><a href="#cb53-30" aria-hidden="true" tabindex="-1"></a>ind <span class="op">=</span> np.argmin(MSE)</span>
+<span id="cb53-31"><a href="#cb53-31" aria-hidden="true" tabindex="-1"></a>optimal_point <span class="op">=</span> go.Scatter3d(name <span class="op">=</span> <span class="st">"Optimal Point"</span>,</span>
+<span id="cb53-32"><a href="#cb53-32" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> [thetas.T[ind,<span class="dv">0</span>]], y <span class="op">=</span> [thetas.T[ind,<span class="dv">1</span>]], </span>
+<span id="cb53-33"><a href="#cb53-33" aria-hidden="true" tabindex="-1"></a>    z <span class="op">=</span> [MSE[ind]],</span>
+<span id="cb53-34"><a href="#cb53-34" aria-hidden="true" tabindex="-1"></a>    marker<span class="op">=</span><span class="bu">dict</span>(size<span class="op">=</span><span class="dv">10</span>, color<span class="op">=</span><span class="st">"red"</span>))</span>
+<span id="cb53-35"><a href="#cb53-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-36"><a href="#cb53-36" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> go.Figure(data<span class="op">=</span>[loss_surface, optimal_point])</span>
+<span id="cb53-37"><a href="#cb53-37" aria-hidden="true" tabindex="-1"></a>fig.update_layout(scene <span class="op">=</span> <span class="bu">dict</span>(</span>
+<span id="cb53-38"><a href="#cb53-38" aria-hidden="true" tabindex="-1"></a>    xaxis_title <span class="op">=</span> <span class="st">"theta0"</span>,</span>
+<span id="cb53-39"><a href="#cb53-39" aria-hidden="true" tabindex="-1"></a>    yaxis_title <span class="op">=</span> <span class="st">"theta1"</span>,</span>
+<span id="cb53-40"><a href="#cb53-40" aria-hidden="true" tabindex="-1"></a>    zaxis_title <span class="op">=</span> <span class="st">"MSE"</span>))</span>
+<span id="cb53-41"><a href="#cb53-41" aria-hidden="true" tabindex="-1"></a>fig.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 
-<div>                            <div id="45539fbc-f5cc-407e-950b-75c70ade5cf7" class="plotly-graph-div" style="height:525px; width:100%;"></div>            <script type="text/javascript">                require(["plotly"], function(Plotly) {                    window.PLOTLYENV=window.PLOTLYENV || {};                                    if (document.getElementById("45539fbc-f5cc-407e-950b-75c70ade5cf7")) {                    Plotly.newPlot(                        "45539fbc-f5cc-407e-950b-75c70ade5cf7",                        [{"x":[[0.0,0.2222222222222222,0.4444444444444444,0.6666666666666666,0.8888888888888888,1.1111111111111112,1.3333333333333333,1.5555555555555554,1.7777777777777777,2.0],[0.0,0.2222222222222222,0.4444444444444444,0.6666666666666666,0.8888888888888888,1.1111111111111112,1.3333333333333333,1.5555555555555554,1.7777777777777777,2.0],[0.0,0.2222222222222222,0.4444444444444444,0.6666666666666666,0.8888888888888888,1.1111111111111112,1.3333333333333333,1.5555555555555554,1.7777777777777777,2.0],[0.0,0.2222222222222222,0.4444444444444444,0.6666666666666666,0.8888888888888888,1.1111111111111112,1.3333333333333333,1.5555555555555554,1.7777777777777777,2.0],[0.0,0.2222222222222222,0.4444444444444444,0.6666666666666666,0.8888888888888888,1.1111111111111112,1.3333333333333333,1.5555555555555554,1.7777777777777777,2.0],[0.0,0.2222222222222222,0.4444444444444444,0.6666666666666666,0.8888888888888888,1.1111111111111112,1.3333333333333333,1.5555555555555554,1.7777777777777777,2.0],[0.0,0.2222222222222222,0.4444444444444444,0.6666666666666666,0.8888888888888888,1.1111111111111112,1.3333333333333333,1.5555555555555554,1.7777777777777777,2.0],[0.0,0.2222222222222222,0.4444444444444444,0.6666666666666666,0.8888888888888888,1.1111111111111112,1.3333333333333333,1.5555555555555554,1.7777777777777777,2.0],[0.0,0.2222222222222222,0.4444444444444444,0.6666666666666666,0.8888888888888888,1.1111111111111112,1.3333333333333333,1.5555555555555554,1.7777777777777777,2.0],[0.0,0.2222222222222222,0.4444444444444444,0.6666666666666666,0.8888888888888888,1.1111111111111112,1.3333333333333333,1.5555555555555554,1.7777777777777777,2.0]],"y":[[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],[0.022222222222222223,0.022222222222222223,0.022222222222222223,0.022222222222222223,0.022222222222222223,0.022222222222222223,0.022222222222222223,0.022222222222222223,0.022222222222222223,0.022222222222222223],[0.044444444444444446,0.044444444444444446,0.044444444444444446,0.044444444444444446,0.044444444444444446,0.044444444444444446,0.044444444444444446,0.044444444444444446,0.044444444444444446,0.044444444444444446],[0.06666666666666667,0.06666666666666667,0.06666666666666667,0.06666666666666667,0.06666666666666667,0.06666666666666667,0.06666666666666667,0.06666666666666667,0.06666666666666667,0.06666666666666667],[0.08888888888888889,0.08888888888888889,0.08888888888888889,0.08888888888888889,0.08888888888888889,0.08888888888888889,0.08888888888888889,0.08888888888888889,0.08888888888888889,0.08888888888888889],[0.11111111111111112,0.11111111111111112,0.11111111111111112,0.11111111111111112,0.11111111111111112,0.11111111111111112,0.11111111111111112,0.11111111111111112,0.11111111111111112,0.11111111111111112],[0.13333333333333333,0.13333333333333333,0.13333333333333333,0.13333333333333333,0.13333333333333333,0.13333333333333333,0.13333333333333333,0.13333333333333333,0.13333333333333333,0.13333333333333333],[0.15555555555555556,0.15555555555555556,0.15555555555555556,0.15555555555555556,0.15555555555555556,0.15555555555555556,0.15555555555555556,0.15555555555555556,0.15555555555555556,0.15555555555555556],[0.17777777777777778,0.17777777777777778,0.17777777777777778,0.17777777777777778,0.17777777777777778,0.17777777777777778,0.17777777777777778,0.17777777777777778,0.17777777777777778,0.17777777777777778],[0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2]],"z":[[10.896283606557375,9.61309801659583,8.428677858733051,7.3430231329690345,6.3561338393037845,5.4680099777373,4.678651548269581,3.988058550900628,3.3962309856304396,2.9031688524590162],[8.123556369763206,7.035787497065371,6.046784056466302,5.156546047965999,4.365073471564461,3.6723663272616873,3.0784246150576804,2.5832483349524393,2.1868374869459624,1.8891920710382517],[5.815433238615665,4.923081083181542,4.129494359846185,3.434673068609593,2.838617209471767,2.3413267824327058,1.9428017874924104,1.6430422246508807,1.442048093908116,1.3398193952641166],[3.9719142131147542,3.2749787749443433,2.6768087688726983,2.177404194899818,1.7767650530257035,1.474891343250354,1.2717830655737705,1.1674402199959524,1.1618628065168994,1.255050825136612],[2.592999293260474,2.0914805723537744,1.6887272835458407,1.384739426836673,1.1795170022262702,1.0730600097146326,1.0653684493017608,1.1564423209876544,1.346281624772313,1.6348863606557378],[1.678688479052823,1.372586475409836,1.1652499038656143,1.056678764420158,1.046873057073467,1.1358327818255416,1.3235579386763814,1.6100485276259866,1.9953045486743575,2.479326001821494],[1.2289817704918033,1.118296484112528,1.1063766298320177,1.1932222076502732,1.378833217567294,1.66320965958308,2.046351533697632,2.5282588399109494,3.108931578223032,3.7883697486338797],[1.2438791675774135,1.32861059846185,1.5121074614450516,1.7943697565270191,2.175397483707751,2.65519064298725,3.2337492343655123,3.9110732578425416,4.687162713418336,5.562017601092896],[1.7233806703096541,2.0035288184578026,2.3824423987047156,2.8601214110503954,3.4365658554948397,4.1117757320380495,4.885751040680025,5.758491781420764,6.729997954260271,7.8002695591985445],[2.667486278688525,3.1430511441003843,3.717381441611011,4.390477171220401,5.162338332928559,6.032964926735478,7.002356952641167,8.070514410645618,9.237437300748836,10.50312562295082]],"type":"surface"},{"marker":{"color":"red","size":10},"name":"Optimal Point","x":[0.8888888888888888],"y":[0.11111111111111112],"z":[1.046873057073467],"type":"scatter3d"}],                        {"template":{"data":{"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"heatmapgl":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmapgl"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermapbox"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"geo":{"bgcolor":"white","lakecolor":"white","landcolor":"#E5ECF6","showlakes":true,"showland":true,"subunitcolor":"white"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"light"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"bgcolor":"#E5ECF6","radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","gridwidth":2,"linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white"},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","gridwidth":2,"linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white"},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","gridwidth":2,"linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white"}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"ternary":{"aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"bgcolor":"#E5ECF6","caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"title":{"x":0.05},"xaxis":{"automargin":true,"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","zerolinewidth":2}}},"scene":{"xaxis":{"title":{"text":"theta0"}},"yaxis":{"title":{"text":"theta1"}},"zaxis":{"title":{"text":"MSE"}}}},                        {"responsive": true}                    ).then(function(){
+<div>                            <div id="a8df2dc4-bf1c-4318-ba39-62555979f035" class="plotly-graph-div" style="height:525px; width:100%;"></div>            <script type="text/javascript">                require(["plotly"], function(Plotly) {                    window.PLOTLYENV=window.PLOTLYENV || {};                                    if (document.getElementById("a8df2dc4-bf1c-4318-ba39-62555979f035")) {                    Plotly.newPlot(                        "a8df2dc4-bf1c-4318-ba39-62555979f035",                        [{"x":[[0.0,0.2222222222222222,0.4444444444444444,0.6666666666666666,0.8888888888888888,1.1111111111111112,1.3333333333333333,1.5555555555555554,1.7777777777777777,2.0],[0.0,0.2222222222222222,0.4444444444444444,0.6666666666666666,0.8888888888888888,1.1111111111111112,1.3333333333333333,1.5555555555555554,1.7777777777777777,2.0],[0.0,0.2222222222222222,0.4444444444444444,0.6666666666666666,0.8888888888888888,1.1111111111111112,1.3333333333333333,1.5555555555555554,1.7777777777777777,2.0],[0.0,0.2222222222222222,0.4444444444444444,0.6666666666666666,0.8888888888888888,1.1111111111111112,1.3333333333333333,1.5555555555555554,1.7777777777777777,2.0],[0.0,0.2222222222222222,0.4444444444444444,0.6666666666666666,0.8888888888888888,1.1111111111111112,1.3333333333333333,1.5555555555555554,1.7777777777777777,2.0],[0.0,0.2222222222222222,0.4444444444444444,0.6666666666666666,0.8888888888888888,1.1111111111111112,1.3333333333333333,1.5555555555555554,1.7777777777777777,2.0],[0.0,0.2222222222222222,0.4444444444444444,0.6666666666666666,0.8888888888888888,1.1111111111111112,1.3333333333333333,1.5555555555555554,1.7777777777777777,2.0],[0.0,0.2222222222222222,0.4444444444444444,0.6666666666666666,0.8888888888888888,1.1111111111111112,1.3333333333333333,1.5555555555555554,1.7777777777777777,2.0],[0.0,0.2222222222222222,0.4444444444444444,0.6666666666666666,0.8888888888888888,1.1111111111111112,1.3333333333333333,1.5555555555555554,1.7777777777777777,2.0],[0.0,0.2222222222222222,0.4444444444444444,0.6666666666666666,0.8888888888888888,1.1111111111111112,1.3333333333333333,1.5555555555555554,1.7777777777777777,2.0]],"y":[[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],[0.022222222222222223,0.022222222222222223,0.022222222222222223,0.022222222222222223,0.022222222222222223,0.022222222222222223,0.022222222222222223,0.022222222222222223,0.022222222222222223,0.022222222222222223],[0.044444444444444446,0.044444444444444446,0.044444444444444446,0.044444444444444446,0.044444444444444446,0.044444444444444446,0.044444444444444446,0.044444444444444446,0.044444444444444446,0.044444444444444446],[0.06666666666666667,0.06666666666666667,0.06666666666666667,0.06666666666666667,0.06666666666666667,0.06666666666666667,0.06666666666666667,0.06666666666666667,0.06666666666666667,0.06666666666666667],[0.08888888888888889,0.08888888888888889,0.08888888888888889,0.08888888888888889,0.08888888888888889,0.08888888888888889,0.08888888888888889,0.08888888888888889,0.08888888888888889,0.08888888888888889],[0.11111111111111112,0.11111111111111112,0.11111111111111112,0.11111111111111112,0.11111111111111112,0.11111111111111112,0.11111111111111112,0.11111111111111112,0.11111111111111112,0.11111111111111112],[0.13333333333333333,0.13333333333333333,0.13333333333333333,0.13333333333333333,0.13333333333333333,0.13333333333333333,0.13333333333333333,0.13333333333333333,0.13333333333333333,0.13333333333333333],[0.15555555555555556,0.15555555555555556,0.15555555555555556,0.15555555555555556,0.15555555555555556,0.15555555555555556,0.15555555555555556,0.15555555555555556,0.15555555555555556,0.15555555555555556],[0.17777777777777778,0.17777777777777778,0.17777777777777778,0.17777777777777778,0.17777777777777778,0.17777777777777778,0.17777777777777778,0.17777777777777778,0.17777777777777778,0.17777777777777778],[0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2]],"z":[[10.896283606557375,9.61309801659583,8.428677858733051,7.3430231329690345,6.3561338393037845,5.4680099777373,4.678651548269581,3.988058550900628,3.3962309856304396,2.9031688524590162],[8.123556369763206,7.035787497065371,6.046784056466302,5.156546047965999,4.365073471564461,3.6723663272616873,3.0784246150576804,2.5832483349524393,2.1868374869459624,1.8891920710382517],[5.815433238615665,4.923081083181542,4.129494359846185,3.434673068609593,2.838617209471767,2.3413267824327058,1.9428017874924104,1.6430422246508807,1.442048093908116,1.3398193952641166],[3.9719142131147542,3.2749787749443433,2.6768087688726983,2.177404194899818,1.7767650530257035,1.474891343250354,1.2717830655737705,1.1674402199959524,1.1618628065168994,1.255050825136612],[2.592999293260474,2.0914805723537744,1.6887272835458407,1.384739426836673,1.1795170022262702,1.0730600097146326,1.0653684493017608,1.1564423209876544,1.346281624772313,1.6348863606557378],[1.678688479052823,1.372586475409836,1.1652499038656143,1.056678764420158,1.046873057073467,1.1358327818255416,1.3235579386763814,1.6100485276259866,1.9953045486743575,2.479326001821494],[1.2289817704918033,1.118296484112528,1.1063766298320177,1.1932222076502732,1.378833217567294,1.66320965958308,2.046351533697632,2.5282588399109494,3.108931578223032,3.7883697486338797],[1.2438791675774135,1.32861059846185,1.5121074614450516,1.7943697565270191,2.175397483707751,2.65519064298725,3.2337492343655123,3.9110732578425416,4.687162713418336,5.562017601092896],[1.7233806703096541,2.0035288184578026,2.3824423987047156,2.8601214110503954,3.4365658554948397,4.1117757320380495,4.885751040680025,5.758491781420764,6.729997954260271,7.8002695591985445],[2.667486278688525,3.1430511441003843,3.717381441611011,4.390477171220401,5.162338332928559,6.032964926735478,7.002356952641167,8.070514410645618,9.237437300748836,10.50312562295082]],"type":"surface"},{"marker":{"color":"red","size":10},"name":"Optimal Point","x":[0.8888888888888888],"y":[0.11111111111111112],"z":[1.046873057073467],"type":"scatter3d"}],                        {"template":{"data":{"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"heatmapgl":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmapgl"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermapbox"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"geo":{"bgcolor":"white","lakecolor":"white","landcolor":"#E5ECF6","showlakes":true,"showland":true,"subunitcolor":"white"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"light"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"bgcolor":"#E5ECF6","radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","gridwidth":2,"linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white"},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","gridwidth":2,"linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white"},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","gridwidth":2,"linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white"}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"ternary":{"aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"bgcolor":"#E5ECF6","caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"title":{"x":0.05},"xaxis":{"automargin":true,"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","zerolinewidth":2}}},"scene":{"xaxis":{"title":{"text":"theta0"}},"yaxis":{"title":{"text":"theta1"}},"zaxis":{"title":{"text":"MSE"}}}},                        {"responsive": true}                    ).then(function(){
                             
-var gd = document.getElementById('45539fbc-f5cc-407e-950b-75c70ade5cf7');
+var gd = document.getElementById('a8df2dc4-bf1c-4318-ba39-62555979f035');
 var x = new MutationObserver(function (mutations, observer) {{
         var display = window.getComputedStyle(gd).display;
         if (!display || display === 'none') {{
@@ -1207,44 +1204,44 @@ if (outputEl) {{
 <section id="visualizing-gradient-descent" class="level3" data-number="13.4.2">
 <h3 data-number="13.4.2" class="anchored" data-anchor-id="visualizing-gradient-descent"><span class="header-section-number">13.4.2</span> Visualizing Gradient Descent</h3>
 <p>First, we need to be able to easily determine the gradient for any pair of values, <span class="math inline">\(\theta_0, \theta_1\)</span>.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="32">
+<div class="cell" data-execution_count="32">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>tips_with_bias <span class="op">=</span> df.copy()</span>
-<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>tips_with_bias[<span class="st">"bias"</span>] <span class="op">=</span> <span class="dv">1</span></span>
-<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> tips_with_bias[[<span class="st">"bias"</span>, <span class="st">"total_bill"</span>]]</span>
-<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>X.head(<span class="dv">5</span>)</span>
-<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mse_gradient(theta, X, y_obs):</span>
-<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Returns the gradient of the MSE on our data for the given theta"""</span>    </span>
-<span id="cb55-8"><a href="#cb55-8" aria-hidden="true" tabindex="-1"></a>    x0 <span class="op">=</span> X.iloc[:, <span class="dv">0</span>]</span>
-<span id="cb55-9"><a href="#cb55-9" aria-hidden="true" tabindex="-1"></a>    x1 <span class="op">=</span> X.iloc[:, <span class="dv">1</span>]</span>
-<span id="cb55-10"><a href="#cb55-10" aria-hidden="true" tabindex="-1"></a>    dth0 <span class="op">=</span> np.mean(<span class="op">-</span><span class="dv">2</span> <span class="op">*</span> (y_obs <span class="op">-</span> theta[<span class="dv">0</span>]<span class="op">*</span>x0 <span class="op">-</span> theta[<span class="dv">1</span>]<span class="op">*</span>x1) <span class="op">*</span> x0)</span>
-<span id="cb55-11"><a href="#cb55-11" aria-hidden="true" tabindex="-1"></a>    dth1 <span class="op">=</span> np.mean(<span class="op">-</span><span class="dv">2</span> <span class="op">*</span> (y_obs <span class="op">-</span> theta[<span class="dv">0</span>]<span class="op">*</span>x0 <span class="op">-</span> theta[<span class="dv">1</span>]<span class="op">*</span>x1) <span class="op">*</span> x1)</span>
-<span id="cb55-12"><a href="#cb55-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.array([dth0, dth1])</span>
-<span id="cb55-13"><a href="#cb55-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb55-14"><a href="#cb55-14" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mse_gradient_single_arg(theta):</span>
-<span id="cb55-15"><a href="#cb55-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Returns the gradient of the MSE on our data for the given theta"""</span></span>
-<span id="cb55-16"><a href="#cb55-16" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> tips_with_bias[[<span class="st">"bias"</span>, <span class="st">"total_bill"</span>]]</span>
-<span id="cb55-17"><a href="#cb55-17" aria-hidden="true" tabindex="-1"></a>    y_obs <span class="op">=</span> tips_with_bias[<span class="st">"tip"</span>]</span>
-<span id="cb55-18"><a href="#cb55-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> mse_gradient(theta, X, y_obs)</span>
-<span id="cb55-19"><a href="#cb55-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb55-20"><a href="#cb55-20" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> tips_with_bias[[<span class="st">"bias"</span>, <span class="st">"total_bill"</span>]]</span>
-<span id="cb55-21"><a href="#cb55-21" aria-hidden="true" tabindex="-1"></a>y_obs <span class="op">=</span> tips_with_bias[<span class="st">"tip"</span>]</span>
-<span id="cb55-22"><a href="#cb55-22" aria-hidden="true" tabindex="-1"></a>ex1_mse <span class="op">=</span> mse_gradient(np.array([<span class="dv">0</span>, <span class="dv">0</span>]), X, y_obs)</span>
-<span id="cb55-23"><a href="#cb55-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb55-24"><a href="#cb55-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Gradient for values theta0 = 0 and theta1 = 0 : </span><span class="sc">{</span>ex1_mse<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>tips_with_bias <span class="op">=</span> df.copy()</span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>tips_with_bias[<span class="st">"bias"</span>] <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> tips_with_bias[[<span class="st">"bias"</span>, <span class="st">"total_bill"</span>]]</span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>X.head(<span class="dv">5</span>)</span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mse_gradient(theta, X, y_obs):</span>
+<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Returns the gradient of the MSE on our data for the given theta"""</span>    </span>
+<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a>    x0 <span class="op">=</span> X.iloc[:, <span class="dv">0</span>]</span>
+<span id="cb54-9"><a href="#cb54-9" aria-hidden="true" tabindex="-1"></a>    x1 <span class="op">=</span> X.iloc[:, <span class="dv">1</span>]</span>
+<span id="cb54-10"><a href="#cb54-10" aria-hidden="true" tabindex="-1"></a>    dth0 <span class="op">=</span> np.mean(<span class="op">-</span><span class="dv">2</span> <span class="op">*</span> (y_obs <span class="op">-</span> theta[<span class="dv">0</span>]<span class="op">*</span>x0 <span class="op">-</span> theta[<span class="dv">1</span>]<span class="op">*</span>x1) <span class="op">*</span> x0)</span>
+<span id="cb54-11"><a href="#cb54-11" aria-hidden="true" tabindex="-1"></a>    dth1 <span class="op">=</span> np.mean(<span class="op">-</span><span class="dv">2</span> <span class="op">*</span> (y_obs <span class="op">-</span> theta[<span class="dv">0</span>]<span class="op">*</span>x0 <span class="op">-</span> theta[<span class="dv">1</span>]<span class="op">*</span>x1) <span class="op">*</span> x1)</span>
+<span id="cb54-12"><a href="#cb54-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.array([dth0, dth1])</span>
+<span id="cb54-13"><a href="#cb54-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-14"><a href="#cb54-14" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mse_gradient_single_arg(theta):</span>
+<span id="cb54-15"><a href="#cb54-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Returns the gradient of the MSE on our data for the given theta"""</span></span>
+<span id="cb54-16"><a href="#cb54-16" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> tips_with_bias[[<span class="st">"bias"</span>, <span class="st">"total_bill"</span>]]</span>
+<span id="cb54-17"><a href="#cb54-17" aria-hidden="true" tabindex="-1"></a>    y_obs <span class="op">=</span> tips_with_bias[<span class="st">"tip"</span>]</span>
+<span id="cb54-18"><a href="#cb54-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> mse_gradient(theta, X, y_obs)</span>
+<span id="cb54-19"><a href="#cb54-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-20"><a href="#cb54-20" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> tips_with_bias[[<span class="st">"bias"</span>, <span class="st">"total_bill"</span>]]</span>
+<span id="cb54-21"><a href="#cb54-21" aria-hidden="true" tabindex="-1"></a>y_obs <span class="op">=</span> tips_with_bias[<span class="st">"tip"</span>]</span>
+<span id="cb54-22"><a href="#cb54-22" aria-hidden="true" tabindex="-1"></a>ex1_mse <span class="op">=</span> mse_gradient(np.array([<span class="dv">0</span>, <span class="dv">0</span>]), X, y_obs)</span>
+<span id="cb54-23"><a href="#cb54-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-24"><a href="#cb54-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Gradient for values theta0 = 0 and theta1 = 0 : </span><span class="sc">{</span>ex1_mse<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Gradient for values theta0 = 0 and theta1 = 0 : [  -5.99655738 -135.22631803]</code></pre>
 </div>
 </div>
 <p>Using our previously previously defined <code>gradient_descent</code> function, we can see if our intuition extends to higher dimensions.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="33">
+<div class="cell" data-execution_count="33">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="co">#print out the last 10 guesses our algorithm outputs to save space</span></span>
-<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>guesses <span class="op">=</span> gradient_descent(mse_gradient_single_arg, np.array([<span class="dv">0</span>, <span class="dv">0</span>]), <span class="fl">0.001</span>, <span class="dv">10000</span>)[<span class="op">-</span><span class="dv">10</span>:]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="co">#print out the last 10 guesses our algorithm outputs to save space</span></span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>guesses <span class="op">=</span> gradient_descent(mse_gradient_single_arg, np.array([<span class="dv">0</span>, <span class="dv">0</span>]), <span class="fl">0.001</span>, <span class="dv">10000</span>)[<span class="op">-</span><span class="dv">10</span>:]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -1486,7 +1483,7 @@ format:
       - cosmo
       - cerulean
     callout-icon: false
-jupyter: python3
+jupyter: myenv
 ---
 
 ::: {.callout-note collapse="true"}
@@ -1511,7 +1508,6 @@ Throughout this lecture, we'll refer to the `penguins` dataset.
 quarto-executable-code-5450563D
 
 ```python
-#| vscode: {languageId: python}
 import pandas as pd
 import seaborn as sns
 import numpy as np
@@ -1527,7 +1523,6 @@ quarto-executable-code-5450563D
 
 ```python
 #| code-fold: false
-#| vscode: {languageId: python}
 
 # Define the design matrix, X...
 X = penguins[["flipper_length_mm"]]
@@ -1547,12 +1542,11 @@ Let's do some EDA first.
 quarto-executable-code-5450563D
 
 ```python
-#| vscode: {languageId: python}
 import matplotlib.pyplot as plt
 
 plt.xlabel("flipper length (mm)")
 plt.ylabel("bill depth (mm)")
-plt.scatter(data = penguins, x = "flipper_length_mm", y = "bill_depth_mm")
+plt.scatter(data = penguins, x = "flipper_length_mm", y = "bill_depth_mm");
 ```
 
 Based on our EDA, there is a linear relationship, though it is somewhat weak.
@@ -1575,7 +1569,6 @@ Let's implement these using the base numpy library, which provides many importan
 quarto-executable-code-5450563D
 
 ```python
-#| vscode: {languageId: python}
 x = penguins["flipper_length_mm"]
 y = penguins["bill_depth_mm"]
 
@@ -1601,7 +1594,6 @@ $$\large MSE  = \sum_{i=1}^n (y_i - \hat{y}_i)^2 = \frac{1}{n}\sum_{i=1}^n (e_i)
 quarto-executable-code-5450563D
 
 ```python
-#| vscode: {languageId: python}
 # using our estimated parameter values to create a column containing our 
 # SLR predictions and errors
 penguins["analytical_preds_slr"] = theta0_hat + theta1_hat * penguins["flipper_length_mm"]
@@ -1618,7 +1610,6 @@ Let's plot plot our results.
 quarto-executable-code-5450563D
 
 ```python
-#| vscode: {languageId: python}
 sns.scatterplot(data = penguins, x = "flipper_length_mm", y = "bill_depth_mm")
 plt.plot(penguins["flipper_length_mm"], penguins["analytical_preds_slr"], 'r') # a line
 plt.legend([r'$\hat{y}$', '$y$']);
@@ -1656,7 +1647,6 @@ quarto-executable-code-5450563D
 
 ```python
 #| code-fold: false
-#| vscode: {languageId: python}
 from sklearn.linear_model import LinearRegression
 
 model = LinearRegression()
@@ -1668,7 +1658,6 @@ quarto-executable-code-5450563D
 
 ```python
 #| code-fold: false
-#| vscode: {languageId: python}
 model.fit(X, y)
 ```
 
@@ -1678,7 +1667,6 @@ quarto-executable-code-5450563D
 
 ```python
 #| code-fold: false
-#| vscode: {languageId: python}
 # Like before, show just the first 5 predictions. The output of predict is usually a np.array
 penguins["sklearn_preds_slr"] = model.predict(X)
 sklearn_5 = penguins["sklearn_preds_slr"][:5].to_numpy()
@@ -1692,7 +1680,6 @@ You can also use the model to predict what the `bill depth` of a hypothetical pe
 quarto-executable-code-5450563D
 
 ```python
-#| vscode: {languageId: python}
 # this produces a warning since we
 # did not specify what X this refers
 # to, but since we only 
@@ -1706,7 +1693,6 @@ We can also check if the fitted parameters,$\hat{\theta}_0,\hat{\theta}_1$, them
 quarto-executable-code-5450563D
 
 ```python
-#| vscode: {languageId: python}
 theta0 = model.intercept_      # this a scalar
 print("analytical bias term: ", theta0_hat)
 print("sklearn bias term: ", theta0)
@@ -1726,7 +1712,6 @@ The `sklearn` package also provides a function that computes the MSE from a list
 quarto-executable-code-5450563D
 
 ```python
-#| vscode: {languageId: python}
 from sklearn.metrics import mean_squared_error
 MSE_sklearn = mean_squared_error(penguins["bill_depth_mm"], penguins["sklearn_preds_slr"])
 print("MSE: ", MSE_sklearn)
@@ -1759,7 +1744,6 @@ quarto-executable-code-5450563D
 
 ```python
 #| code-fold: false
-#| vscode: {languageId: python}
 X = penguins[["flipper_length_mm", "body_mass_g"]].copy()
 
 X["bias"] = np.ones(len(X))
@@ -1776,7 +1760,6 @@ quarto-executable-code-5450563D
 
 ```python
 #| code-fold: false
-#| vscode: {languageId: python}
 y_hat = X.to_numpy() @ theta_hat
 
 # Show just the first 5 predictions to save space on the page
@@ -1793,7 +1776,6 @@ We can actually compute the optimal parameters very easily using sklearn, using 
 quarto-executable-code-5450563D
 
 ```python
-#| vscode: {languageId: python}
 # creating our design matrix.
 # Note:
 #  - no bias term needed here bc of sklearn automatically includes one
@@ -1810,7 +1792,6 @@ Now we again have a model with which we can use to make predictions. For example
 quarto-executable-code-5450563D
 
 ```python
-#| vscode: {languageId: python}
 penguins["sklearn_predictions_ols"] = model_2d.predict(X_2d)
 model_2d.predict([[185, 3750]]) 
 # since we have a 2d data matrix, we maintain the same 
@@ -1822,7 +1803,6 @@ Just like with SLR, we cam also extract the coefficient estimates using `.coef_`
 quarto-executable-code-5450563D
 
 ```python
-#| vscode: {languageId: python}
 print(f"(sklearn) theta0: {model_2d.intercept_}")
 print(f"(analytical) theta0 {theta_hat[2]}")
 print(f"(sklearn) theta1: {model_2d.coef_[0]}")
@@ -1838,7 +1818,6 @@ When we have two axis with which we can change an input, moving along this input
 quarto-executable-code-5450563D
 
 ```python
-#| vscode: {languageId: python}
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
@@ -1850,7 +1829,6 @@ plt.ylabel('body_mass_g')
 quarto-executable-code-5450563D
 
 ```python
-#| vscode: {languageId: python}
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 ax.scatter(penguins["flipper_length_mm"], penguins["body_mass_g"], penguins["bill_depth_mm"])
@@ -1896,7 +1874,6 @@ Above, we saw that the minimum is somewhere around 5.3ish. Let's see if we can f
 quarto-executable-code-5450563D
 
 ```python
-#| vscode: {languageId: python}
 def arbitrary(x):
     return (x**4 - 15*x**3 + 80*x**2 - 180*x + 144)/10
 
@@ -1917,7 +1894,6 @@ One way to minimize this mathematical function is to use the `scipy.optimize.min
 quarto-executable-code-5450563D
 
 ```python
-#| vscode: {languageId: python}
 from scipy.optimize import minimize
 
 # takes a function f and a starting point x0 and returns a readout 
@@ -1930,7 +1906,6 @@ Our choice of start point can affect the outcome. For example if we start to the
 quarto-executable-code-5450563D
 
 ```python
-#| vscode: {languageId: python}
 minimize(arbitrary, x0 = 1)
 
 #here we see the optimal value is different from before
@@ -1981,7 +1956,6 @@ The $\alpha$ term in the update rule is known as the **learning rate**. It is a 
 quarto-executable-code-5450563D
 
 ```python
-#| vscode: {languageId: python}
 # define the derivative of the arbitrary function we want to minimize
 def derivative_arbitrary(x):
     return (4*x**3 - 45*x**2 + 160*x - 180)/10
@@ -2024,7 +1998,6 @@ We want to find the parameter $\theta_1$ such that the L2 loss is minimized. In 
 quarto-executable-code-5450563D
 
 ```python
-#| vscode: {languageId: python}
 model = LinearRegression(fit_intercept = False)
 df = sns.load_dataset("tips")
 model.fit(df[["total_bill"]], df["tip"])
@@ -2040,7 +2013,6 @@ Let's start by writing a function that computes the MSE for a given choice of $\
 quarto-executable-code-5450563D
 
 ```python
-#| vscode: {languageId: python}
 def mse_single_arg(theta1):
     """Returns the MSE on our data for the given theta1"""
     x = df["total_bill"]
@@ -2059,7 +2031,6 @@ Since we only have 1 parameter, we can simply cross reference our results with a
 quarto-executable-code-5450563D
 
 ```python
-#| vscode: {languageId: python}
 theta1s = np.linspace(0, 0.2, 200)
 x = df["total_bill"]
 y_obs = df["tip"]
@@ -2076,7 +2047,6 @@ The minimum appears to be around $\theta_1 = 0.14$. We can once again check this
 quarto-executable-code-5450563D
 
 ```python
-#| vscode: {languageId: python}
 simple_minimize(mse_single_arg, np.linspace(0, 0.2, 21))
 ```
 
@@ -2085,7 +2055,6 @@ As before, what we're doing is computing all the starred values below and then r
 quarto-executable-code-5450563D
 
 ```python
-#| vscode: {languageId: python}
 theta1s = np.linspace(0, 0.2, 200)
 sparse_theta1s = np.linspace(0, 0.2, 21)
 
@@ -2103,7 +2072,6 @@ plt.ylabel(r"MSE");
 quarto-executable-code-5450563D
 
 ```python
-#| vscode: {languageId: python}
 import scipy.optimize
 from scipy.optimize import minimize
 minimize(mse_single_arg, x0 = 0)
@@ -2116,7 +2084,6 @@ Another approach is to use our 1D gradient descent algorithm from earlier. This 
 quarto-executable-code-5450563D
 
 ```python
-#| vscode: {languageId: python}
 def mse_loss_derivative_single_arg(theta_1):
     """Returns the derivative of the MSE on our data for the given theta1"""
     x = df["total_bill"]
@@ -2145,7 +2112,6 @@ Now, loss is expressed in terms of *two* parameters, $\theta_0$ and $\theta_1$. 
 quarto-executable-code-5450563D
 
 ```python
-#| vscode: {languageId: python}
 # This code is for illustration purposes only
 # It contains a lot of syntax you have not seen
 import plotly.graph_objects as go
@@ -2248,7 +2214,6 @@ First, we need to be able to easily determine the gradient for any pair of value
 quarto-executable-code-5450563D
 
 ```python
-#| vscode: {languageId: python}
 tips_with_bias = df.copy()
 tips_with_bias["bias"] = 1
 X = tips_with_bias[["bias", "total_bill"]]
@@ -2280,7 +2245,6 @@ Using our previously previously defined `gradient_descent` function, we can see 
 quarto-executable-code-5450563D
 
 ```python
-#| vscode: {languageId: python}
 #print out the last 10 guesses our algorithm outputs to save space
 guesses = gradient_descent(mse_gradient_single_arg, np.array([0, 0]), 0.001, 10000)[-10:]
 ```
