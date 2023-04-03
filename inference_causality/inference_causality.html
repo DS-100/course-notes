@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.313">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Inference &amp; Causality</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="inference_causality_files/libs/clipboard/clipboard.min.js"></script>
+<script src="inference_causality_files/libs/quarto-html/quarto.js"></script>
+<script src="inference_causality_files/libs/quarto-html/popper.min.js"></script>
+<script src="inference_causality_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="inference_causality_files/libs/quarto-html/anchor.min.js"></script>
+<link href="inference_causality_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="inference_causality_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="inference_causality_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="inference_causality_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="inference_causality_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-full">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Inference &amp; Causality</h2>
+   
+  <ul>
+  <li><a href="#bias-variance-tradeoff" id="toc-bias-variance-tradeoff" class="nav-link active" data-scroll-target="#bias-variance-tradeoff">Bias-Variance Tradeoff</a></li>
+  <li><a href="#inference-for-regression" id="toc-inference-for-regression" class="nav-link" data-scroll-target="#inference-for-regression">Inference for Regression</a>
+  <ul class="collapse">
+  <li><a href="#reminder-assumptions-matter" id="toc-reminder-assumptions-matter" class="nav-link" data-scroll-target="#reminder-assumptions-matter">Reminder: Assumptions Matter</a></li>
+  </ul></li>
+  <li><a href="#bonus-correlation-and-causation" id="toc-bonus-correlation-and-causation" class="nav-link" data-scroll-target="#bonus-correlation-and-causation">(Bonus) Correlation and Causation</a>
+  <ul class="collapse">
+  <li><a href="#prediction-vs-causation" id="toc-prediction-vs-causation" class="nav-link" data-scroll-target="#prediction-vs-causation">Prediction vs Causation</a></li>
+  <li><a href="#confounders" id="toc-confounders" class="nav-link" data-scroll-target="#confounders">Confounders</a></li>
+  <li><a href="#terminology" id="toc-terminology" class="nav-link" data-scroll-target="#terminology">Terminology</a></li>
+  <li><a href="#neyman-rubin-causal-model" id="toc-neyman-rubin-causal-model" class="nav-link" data-scroll-target="#neyman-rubin-causal-model">Neyman-Rubin Causal Model</a></li>
+  <li><a href="#average-treatment-effect" id="toc-average-treatment-effect" class="nav-link" data-scroll-target="#average-treatment-effect">Average Treatment Effect</a></li>
+  <li><a href="#randomized-experiments" id="toc-randomized-experiments" class="nav-link" data-scroll-target="#randomized-experiments">Randomized Experiments</a></li>
+  </ul></li>
+  <li><a href="#covariate-adjustment" id="toc-covariate-adjustment" class="nav-link" data-scroll-target="#covariate-adjustment">Covariate Adjustment</a>
+  <ul class="collapse">
+  <li><a href="#covariate-adjustment-without-parametric-assumptions" id="toc-covariate-adjustment-without-parametric-assumptions" class="nav-link" data-scroll-target="#covariate-adjustment-without-parametric-assumptions">Covariate adjustment without parametric assumptions</a></li>
+  <li><a href="#other-methods" id="toc-other-methods" class="nav-link" data-scroll-target="#other-methods">Other Methods</a></li>
+  </ul></li>
+  </ul>
+</nav>
+</div>
+<main class="content column-page-left" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Inference &amp; Causality</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li></ul></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<div class="callout-note callout callout-style-default no-icon callout-captioned">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Learning Outcomes
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li>Introduction to model risk of fitted models</li>
+<li>Decompose the model risk into bias and variance terms</li>
+<li>Construct confidence intervals for hypothesis testing</li>
+<li>Understand the assumptions we make and its impact on our regression inference</li>
+<li>Compare regression and causation</li>
+<li>Experment setup, confounding variables, average treatment effect, and covariate adjustment</li>
+</ul>
+</div>
+</div>
+</div>
+<p>Last time, we introduced the idea of random variables and its affect on the observed relationship we use to fit models.</p>
+<p>In this lecture, we will explore the decomposition of model risk from a fitted model, regression inference via hypothesis testing and considering the assumptions we make, and the environment of understanding causality in theory and in practice.</p>
+<section id="bias-variance-tradeoff" class="level2">
+<h2 class="anchored" data-anchor-id="bias-variance-tradeoff">Bias-Variance Tradeoff</h2>
+<p>Recall the model and the data we generated from that model from the last section:</p>
+<p><span class="math display">\[\text{True relationship: }Y = g(x)\]</span></p>
+<p><span class="math display">\[\text{Observed relationship: }Y = g(x) + \epsilon\]</span></p>
+<p><img src="images/data.png" alt="data" width="600"></p>
+<p>Remember we can only observe our random sample of data, represented by the blue points above. From this sample, we want to estimate the true relationship <span class="math inline">\(g\)</span>. We do this by constructing the model <span class="math inline">\(\hat{Y}(x)\)</span> to estimate <span class="math inline">\(g\)</span>.</p>
+<p><img src="images/y_hat.png" alt="y_hat" width="600"></p>
+<p>Recall that the observed relationship and our fitted model are random. With this random variables framework in hand, we’re now ready to understand how model complexity can finetune our model’s performance.</p>
+<p>To evaluate our model’s performance, we’ve previously considered the MSE of our model across a single sample of observed data. Now that we’ve reframed our model <span class="math inline">\(\hat{Y}\)</span> and observations <span class="math inline">\(Y\)</span> as random variables, we’ll use a theoretical approach to better understand the model’s error. <strong>Model risk</strong> is defined as the mean square prediction error of the random variable <span class="math inline">\(\hat{Y}\)</span>. It is an expectation across <em>all</em> samples we could have possibly gotten when fitting the model. Model risk considers the model’s performance on any sample that is theoretically possible, rather than the specific data that we have collected.</p>
+<p><span class="math display">\[\text{Model risk }=\mathbb{E}\left[(Y-\hat{Y})^2\right]\]</span></p>
+<p>What is the origin of the error encoded by model risk? Recall the data generation process we established earlier. There is the true underlying relationship <span class="math inline">\(g\)</span>, observed data (with random noise) <span class="math inline">\(Y\)</span>, and model <span class="math inline">\(\hat{Y}\)</span>.</p>
+<p><img src="images/errors.png" alt="errors" width="600"></p>
+<p>To better understand model risk, we’ll zoom in on a single data point in the plot above.</p>
+<p><img src="images/breakdown.png" alt="breakdown" width="600"></p>
+<p>Remember that <span class="math inline">\(\hat{Y}(x)\)</span> is a random variable – it is the prediction made for <span class="math inline">\(x\)</span> after being fit on the specific sample used for training. If we had used a different sample for training, a different prediction might have been made for this value of <span class="math inline">\(x\)</span>. To capture this, the diagram above considers both the prediction <span class="math inline">\(\hat{Y}(x)\)</span> made for a particular random training sample, and the <em>expected</em> prediction across all possible training samples, <span class="math inline">\(\mathbb{E}[\hat{Y}(x)]\)</span>.</p>
+<p>We can use this simplified diagram to break down the model risk into smaller components. First, start by considering the error on a single prediction, <span class="math inline">\(Y(x)-\hat{Y}(x)\)</span>.</p>
+<p><img src="images/error.png" alt="error" width="600"></p>
+<p>We can identify three components to this error.</p>
+<p><img src="images/decomposition.png" alt="decomposition" width="600"></p>
+<p>That is, the error can be written as:</p>
+<p><span class="math display">\[Y(x)-\hat{Y}(x) = \epsilon + \left(g(x)-\mathbb{E}\left[\hat{Y}(x)\right]\right) + \left(\mathbb{E}\left[\hat{Y}(x)\right] - \hat{Y}(x)\right)\]</span> <span class="math display">\[\newline   \]</span> The model risk is the expected square of the expression above, <span class="math inline">\(\mathbb{E}\left[(Y(x)-\hat{Y}(x))^2\right]\)</span>. If we work through the algebra, we find the following relationship:</p>
+<p><span class="math display">\[\mathbb{E}\left[(Y(x)-\hat{Y}(x))^2\right]=\sigma^2 + \left(\mathbb{E}\left[\hat{Y}(x)\right]-g(x)\right)^2 + \text{Var}(\hat{Y}(x))\]</span></p>
+<p>This expression may look complicated at first blush, but we’ve actually already defined each term earlier this lecture! Let’s break things down.</p>
+<ul>
+<li>The <strong>model risk</strong>, <span class="math inline">\(\mathbb{E}\left[(Y(x)-\hat{Y}(x))^2\right]\)</span>, is the mean squared prediction error of the model.</li>
+<li>The <strong>observation variance</strong>, <span class="math inline">\(\sigma^2\)</span>, is the variance of the random noise in the observations. It describes how variable the random error <span class="math inline">\(\epsilon\)</span> is for each observation.</li>
+<li>The <strong>model bias</strong>, <span class="math inline">\(\mathbb{E}\left[\hat{Y}(x)\right]-g(x)\)</span>, is how “off” the <span class="math inline">\(\hat{Y}(x)\)</span> is as an estimator of the true underlying relationship <span class="math inline">\(g(x)\)</span>.</li>
+<li>The <strong>model variance</strong>, <span class="math inline">\(\text{Var}(\hat{Y}(x))\)</span>, describes how much the prediction <span class="math inline">\(\hat{Y}(x)\)</span> tends to vary when we fit the model on different samples.</li>
+</ul>
+<p>This means that we can simplify the statement above.</p>
+<p><span class="math display">\[\text{Model risk = observation variance + (model bias)}^2 \text{+ model variance}\]</span></p>
+<p>This is known as the <strong>bias-variance tradeoff</strong>. What does it mean? Remember that the model risk is a measure of the model’s performance. Our goal in building models is to keep model risk low; this means that we will want to ensure that each component of model risk is kept at a low value.</p>
+<p>Observation variance is an inherent, random part of the data collection process. We aren’t able to reduce the observation variance, so we’ll focus our attention to the model bias and model variance.</p>
+<p>In the Feature Engineering lecture, we considered the issue of overfitting. We saw that the model’s error or bias tends to decrease as model complexity increases – if we design a highly complex model, it will tend to make predictions that are closer to the true relationship <span class="math inline">\(g\)</span>. At the same time, model variance tends to <em>increase</em> as model complexity increases: a complex model may overfit to the training data, meaning that small differences in the random samples used for training lead to large differences in the fitted model. We have a problem. To reduce model risk, we could decrease model bias by increasing the model’s complexity, which would lead to an increase in model variance. Alternatively, we could decrease model variance by decreasing the model’s complexity – at the cost of increased bias.</p>
+<p><img src="images/bvt.png" alt="bvt" width="600"></p>
+<p>We need to strike a balance. Our goal in model creation is to use a complexity level that is high enough to keep bias low, but not so high that model variance is large. We’ll explore how to do this using <strong>regularization</strong> in the next lecture.</p>
+</section>
+<section id="inference-for-regression" class="level2">
+<h2 class="anchored" data-anchor-id="inference-for-regression">Inference for Regression</h2>
+<p>We’ve spent a great deal of time now using random variables to explore model performance. It turns out that our work in probability can help us understand another aspect of model design – interpreting what exactly our fitted models can tell us about the world around us.</p>
+<p>Recall the framework we established earlier this lecture. If we assume that the underlying relationship between our observations and input features is linear, we can express this relationship in terms of the unknown, true model parameters <span class="math inline">\(\theta\)</span>.</p>
+<p><span class="math display">\[Y(x) = g(x) + \epsilon = \theta_0 + \theta_1 x_1 + \ldots + \theta_p x_p + \epsilon\]</span></p>
+<p>Our model attempts to estimate each true parameter <span class="math inline">\(\theta_i\)</span> using the estimates <span class="math inline">\(\hat{\theta}_i\)</span>.</p>
+<p><span class="math display">\[\hat{Y}(x) = \hat{\theta}_0 + \hat{\theta}_1 x_1 + \ldots + \hat{\theta}_p x_p\]</span></p>
+<p>Let’s pause for a moment. At this point, we’re very used to working with the idea of a model parameter. But what exactly does each coefficient <span class="math inline">\(\theta_i\)</span> actually <em>mean</em>? We can think of each <span class="math inline">\(\theta_i\)</span> as a <em>slope</em> of the linear model – if all other variables are held constant, a unit change in <span class="math inline">\(x_i\)</span> will result in a <span class="math inline">\(\theta_i\)</span> change in <span class="math inline">\(Y(x)\)</span>. Broadly speaking, a large value of <span class="math inline">\(\theta_i\)</span> means that the feature <span class="math inline">\(x_i\)</span> has a large effect on the response; conversely, a small value of <span class="math inline">\(\theta_i\)</span> means that <span class="math inline">\(x_i\)</span> has little effect on the response. In the extreme case, if the true parameter <span class="math inline">\(\theta_i\)</span> is 0, then the feature <span class="math inline">\(x_i\)</span> has <strong>no effect</strong> on <span class="math inline">\(Y(x)\)</span>.</p>
+<p>If the true parameter <span class="math inline">\(\theta_i\)</span> for a particular feature is 0, this tells us something pretty significant about the world – there is no underlying relationship between <span class="math inline">\(x_i\)</span> and <span class="math inline">\(Y(x)\)</span>! How then, can we test if a parameter is 0? As a baseline, we go through our usual process of drawing a sample, using this data to fit a model, and computing an estimate <span class="math inline">\(\hat{\theta}_i\)</span>. However, we need to also consider the fact that if our random sample had come out differently, we may have found a different result for <span class="math inline">\(\hat{\theta}_i\)</span>. To infer if the true parameter <span class="math inline">\(\theta_i\)</span> is 0, we want to draw our conclusion from the distribution of <span class="math inline">\(\hat{\theta}_i\)</span> estimates we could have drawn across all other random samples.</p>
+<p>To do this, we’ll use an inference technique called <strong>hypothesis testing</strong>. This concept was introduced back in <a href="https://inferentialthinking.com/chapters/11/Testing_Hypotheses.html">Data 8</a>. You may find it helpful to review the hypothesis testing method to refresh your memory.</p>
+<p>We’ll work with the <a href="https://www.audubon.org/field-guide/bird/snowy-plover">snowy plover</a> dataset throughout this section.</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>eggs <span class="op">=</span> pd.read_csv(<span class="st">"data/snowy_plover.csv"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>eggs.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Our goal will be to predict the weight of a newborn plover chick, which we assume follows the true relationship below.</p>
+<p><span class="math display">\[\text{bird\_weight} = \theta_0 + \theta_1 \text{egg\_weight} + \theta_2 \text{egg\_length} + \theta_3 \text{egg\_breadth} + \epsilon\]</span></p>
+<p>Say we wish to determine if the <code>egg_weight</code> impacts the <code>bird_weight</code> of a chick – we want to infer if <span class="math inline">\(\theta_1\)</span> is equal to 0.</p>
+<p>First, we define our hypotheses:</p>
+<ul>
+<li>Null hypothesis: the true parameter <span class="math inline">\(\theta_1\)</span> is 0</li>
+<li>Alternative hypothesis: the true parameter <span class="math inline">\(\theta_1\)</span> is not 0</li>
+</ul>
+<p>Next, we use our data to fit a model that approximates the relationship above. This gives us the <strong>observed value</strong> of <span class="math inline">\(\hat{\theta}_1\)</span> found from our data.</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LinearRegression</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> eggs[[<span class="st">"egg_weight"</span>, <span class="st">"egg_length"</span>, <span class="st">"egg_breadth"</span>]]</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>Y <span class="op">=</span> eggs[<span class="st">"bird_weight"</span>]</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> LinearRegression()</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>model.fit(X, Y)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co"># This gives an array containing the fitted model parameter estimates</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>thetas <span class="op">=</span> model.coef_</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Put the parameter estimates in a nice table for viewing</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>pd.DataFrame({<span class="st">"theta_hat"</span>:[model.intercept_, thetas[<span class="dv">0</span>], thetas[<span class="dv">1</span>], thetas[<span class="dv">2</span>]]}, index<span class="op">=</span>[<span class="st">"theta_0"</span>, <span class="st">"theta_1"</span>, <span class="st">"theta_2"</span>, <span class="st">"theta_3"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>We now have the value of <span class="math inline">\(\hat{\theta}_1\)</span> when considering the single sample of data that we have. To get a sense of how this estimate might vary if we were to draw different random samples, we will use <strong><a href="https://inferentialthinking.com/chapters/13/2/Bootstrap.html?">bootstrapping</a></strong>. To construct a bootstrap sample, we will draw a resample from the collected data that:</p>
+<ul>
+<li>Has the same sample size as the collected data, and</li>
+<li>Is drawn with replacement (this ensures that we don’t draw the exact same sample every time!)</li>
+</ul>
+<p>We draw a bootstrap sample, use this sample to fit a model, and record the result for <span class="math inline">\(\hat{\theta}_1\)</span> on this bootstrapped sample. We then repeat this process many times to generate a <strong>bootstrapped distribution</strong> of <span class="math inline">\(\hat{\theta}_1\)</span>. This gives us an estimate of what the true distribution of <span class="math inline">\(\hat{\theta}_1\)</span> across all possible samples might look like.</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Set a random seed so you generate the same random sample as staff</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># In the "real world", we wouldn't do this</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">1337</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Set the sample size of each bootstrap sample</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="bu">len</span>(eggs)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a list to store all the bootstrapped estimates</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>estimates <span class="op">=</span> []</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate a bootstrap resample from `eggs` and find an estimate for theta_1 using this sample. </span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Repeat 10000 times.</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10000</span>):</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    bootstrap_resample <span class="op">=</span> eggs.sample(n, replace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    X_bootstrap <span class="op">=</span> bootstrap_resample[[<span class="st">"egg_weight"</span>, <span class="st">"egg_length"</span>, <span class="st">"egg_breadth"</span>]]</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    Y_bootstrap <span class="op">=</span> bootstrap_resample[<span class="st">"bird_weight"</span>]</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    bootstrap_model <span class="op">=</span> LinearRegression()</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    bootstrap_model.fit(X_bootstrap, Y_bootstrap)</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    bootstrap_thetas <span class="op">=</span> bootstrap_model.coef_</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    estimates.append(bootstrap_thetas[<span class="dv">0</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>plt.figure(dpi<span class="op">=</span><span class="dv">120</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>sns.histplot(estimates, stat<span class="op">=</span><span class="st">"density"</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="vs">r"$\hat{\theta}_1$"</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="vs">r"Bootstrapped estimates $\hat{\theta}_1$"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Now, we have a sense of how <span class="math inline">\(\hat{\theta}_1\)</span> might vary across different random samples. How does this help us understand if the true parameter <span class="math inline">\(\theta_1\)</span> is 0 or not? We’ll use an approximate <strong>confidence interval</strong>. Recall from <a href="https://inferentialthinking.com/chapters/13/3/Confidence_Intervals.html?">Data 8</a> that a x% confidence interval is a range of values where we are x% confident that the interval contains the true parameter. In other words, if we repeated the bootstrapping process above many times, we’d expect the x% confidence interval to contain the true value of <span class="math inline">\(\theta_1\)</span> about x% of the time.</p>
+<p>For our purposes, we’ll consider the approximate 95% confidence interval. Because of the <a href="https://inferentialthinking.com/chapters/13/4/Using_Confidence_Intervals.html#using-a-confidence-interval-to-test-hypotheses">duality</a> of confidence intervals and hypothesis tests, we reject the null hypothesis at a cutoff level of 5% if 0 is not contained in the 95% confidence interval for <span class="math inline">\(\hat{\theta}_1\)</span>.</p>
+<p>To create a 95% confidence interval, we compute the 2.5th and 97.5th percentiles of our bootstrapped estimates of <span class="math inline">\(\theta_1\)</span>.</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>lower <span class="op">=</span> np.percentile(estimates, <span class="fl">2.5</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>upper <span class="op">=</span> np.percentile(estimates, <span class="fl">97.5</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>conf_interval <span class="op">=</span> (lower, upper)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>conf_interval</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We find that our bootstrapped approximate 95% confidence interval for <span class="math inline">\(\theta_1\)</span> is <span class="math inline">\([-0.259, 1.103]\)</span>. Immediately, we can see that 0 <em>is</em> contained in this interval – this means that we <em>cannot</em> conclude that <span class="math inline">\(\theta_1\)</span> is non-zero! More formally, we cannot reject the null hypothesis (that <span class="math inline">\(\theta_1\)</span> is 0) under a 5% cutoff.</p>
+<p>We can repeat this process to construct 95% confidence intervals for the other parameters of the model.</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">1337</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>theta_0_estimates <span class="op">=</span> []</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>theta_1_estimates <span class="op">=</span> []</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>theta_2_estimates <span class="op">=</span> []</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>theta_3_estimates <span class="op">=</span> []</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10000</span>):</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    bootstrap_resample <span class="op">=</span> eggs.sample(n, replace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    X_bootstrap <span class="op">=</span> bootstrap_resample[[<span class="st">"egg_weight"</span>, <span class="st">"egg_length"</span>, <span class="st">"egg_breadth"</span>]]</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    Y_bootstrap <span class="op">=</span> bootstrap_resample[<span class="st">"bird_weight"</span>]</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    bootstrap_model <span class="op">=</span> LinearRegression()</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    bootstrap_model.fit(X_bootstrap, Y_bootstrap)</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    bootstrap_theta_0 <span class="op">=</span> bootstrap_model.intercept_</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    bootstrap_theta_1, bootstrap_theta_2, bootstrap_theta_3 <span class="op">=</span> bootstrap_model.coef_</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    theta_0_estimates.append(bootstrap_theta_0)</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    theta_1_estimates.append(bootstrap_theta_1)</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    theta_2_estimates.append(bootstrap_theta_2)</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    theta_3_estimates.append(bootstrap_theta_3)</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>theta_0_lower, theta_0_upper <span class="op">=</span> np.percentile(theta_0_estimates, <span class="fl">2.5</span>), np.percentile(theta_0_estimates, <span class="fl">97.5</span>)</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>theta_1_lower, theta_1_upper <span class="op">=</span> np.percentile(theta_1_estimates, <span class="fl">2.5</span>), np.percentile(theta_1_estimates, <span class="fl">97.5</span>)</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>theta_2_lower, theta_2_upper <span class="op">=</span> np.percentile(theta_2_estimates, <span class="fl">2.5</span>), np.percentile(theta_2_estimates, <span class="fl">97.5</span>)</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>theta_3_lower, theta_3_upper <span class="op">=</span> np.percentile(theta_3_estimates, <span class="fl">2.5</span>), np.percentile(theta_3_estimates, <span class="fl">97.5</span>)</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Make a nice table to view results</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>pd.DataFrame({<span class="st">"lower"</span>:[theta_0_lower, theta_1_lower, theta_2_lower, theta_3_lower], <span class="st">"upper"</span>:[theta_0_upper, <span class="op">\</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>                theta_1_upper, theta_2_upper, theta_3_upper]}, index<span class="op">=</span>[<span class="st">"theta_0"</span>, <span class="st">"theta_1"</span>, <span class="st">"theta_2"</span>, <span class="st">"theta_3"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Something’s off here. Notice that 0 is included in the 95% confidence interval for <em>every</em> parameter of the model. Using the interpretation we outlined above, this would suggest that we can’t say for certain that <em>any</em> of the input variables impact the response variable! This makes it seem like our model can’t make any predictions – and yet, each model we fit in our bootstrap experiment above could very much make predictions of <span class="math inline">\(Y\)</span>.</p>
+<p>How can we explain this result? Think back to how we first interpreted the parameters of a linear model. We treated each <span class="math inline">\(\theta_i\)</span> as a slope, where a unit increase in <span class="math inline">\(x_i\)</span> leads to a <span class="math inline">\(\theta_i\)</span> increase in <span class="math inline">\(Y\)</span>, <strong>if all other variables are held constant</strong>. It turns out that this last assumption is very important. If variables in our model are somehow related to one another, then it might not be possible to have a change in one of them while holding the others constant. This means that our interpretation framework is no longer valid! In the models we fit above, we incorporated <code>egg_length</code>, <code>egg_breadth</code>, and <code>egg_weight</code> as input variables. These variables are very likely related to one another – an egg with large <code>egg_length</code> and <code>egg_breadth</code> will likely be heavy in <code>egg_weight</code>. This means that the model parameters cannot be meaningfully interpreted as slopes.</p>
+<p>To support this conclusion, we can visualize the relationships between our feature variables. Notice the strong positive association between the features.</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>sns.pairplot(eggs[[<span class="st">"egg_length"</span>, <span class="st">"egg_breadth"</span>, <span class="st">"egg_weight"</span>]])<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>This issue is known as <strong>colinearity</strong>, sometimes also called <strong>multicolinearity</strong>. Colinearity occurs when one feature can be predicted fairly accurately by a linear combination of the other features, which happens when one feature is highly correlated with the others.</p>
+<p>Why is colinearity a problem? Its consequences span several aspects of the modeling process:</p>
+<ul>
+<li>Slopes can’t be interpreted for an inference task</li>
+<li>If features strongly influence one another, even small changes in the sampled data can lead to large changes in the estimated slopes</li>
+<li>If one feature actually is a linear combination of the other features, the design matrix will not be full rank and <span class="math inline">\(\mathbb{X}^T\mathbb{X}\)</span> is not invertible. This means that least squares does not have a single solution</li>
+</ul>
+<p>The take-home point is that we need to be careful with what features we select for modeling. If two features likely encode similar information, it is often a good idea to choose only one of them as an input variable.</p>
+<p>Let us now consider a more interpretable model: we instead assume a true relationship using only egg weight:</p>
+<p><span class="math display">\[f_\theta(x) = \theta_0 + \theta_1 \text{egg\_weight} + \epsilon\]</span></p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>X_int <span class="op">=</span> eggs[[<span class="st">"egg_weight"</span>]]</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>Y_int <span class="op">=</span> eggs[<span class="st">"bird_weight"</span>]</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>model_int <span class="op">=</span> LinearRegression()</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>model_int.fit(X_int, Y_int)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co"># This gives an array containing the fitted model parameter estimates</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>thetas_int <span class="op">=</span> model_int.coef_</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Put the parameter estimates in a nice table for viewing</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>pd.DataFrame({<span class="st">"theta_hat"</span>:[model_int.intercept_, thetas_int[<span class="dv">0</span>]]}, index<span class="op">=</span>[<span class="st">"theta_0"</span>, <span class="st">"theta_1"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Set a random seed so you generate the same random sample as staff</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co"># In the "real world", we wouldn't do this</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">1337</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Set the sample size of each bootstrap sample</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="bu">len</span>(eggs)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a list to store all the bootstrapped estimates</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>estimates_int <span class="op">=</span> []</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate a bootstrap resample from `eggs` and find an estimate for theta_1 using this sample. </span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Repeat 10000 times.</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10000</span>):</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    bootstrap_resample_int <span class="op">=</span> eggs.sample(n, replace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    X_bootstrap_int <span class="op">=</span> bootstrap_resample_int[[<span class="st">"egg_weight"</span>]]</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    Y_bootstrap_int <span class="op">=</span> bootstrap_resample_int[<span class="st">"bird_weight"</span>]</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    bootstrap_model_int <span class="op">=</span> LinearRegression()</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    bootstrap_model_int.fit(X_bootstrap_int, Y_bootstrap_int)</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    bootstrap_thetas_int <span class="op">=</span> bootstrap_model_int.coef_</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    estimates_int.append(bootstrap_thetas_int[<span class="dv">0</span>])</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>plt.figure(dpi<span class="op">=</span><span class="dv">120</span>)</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>sns.histplot(estimates_int, stat<span class="op">=</span><span class="st">"density"</span>)</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="vs">r"$\hat{\theta}_1$"</span>)</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="vs">r"Bootstrapped estimates $\hat{\theta}_1$ Under the Interpretable Model"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Notice how the interpretable model performs almost as well as our other model:</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> mean_squared_error</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>rmse <span class="op">=</span> mean_squared_error(Y, model.predict(X))</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>rmse_int <span class="op">=</span> mean_squared_error(Y_int, model_int.predict(X_int))</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'RMSE of Original Model: </span><span class="sc">{</span>rmse<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'RMSE of Interpretable Model: </span><span class="sc">{</span>rmse_int<span class="sc">}</span><span class="ss">'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Yet, the confidence interval for the true parameter <span class="math inline">\(\theta_{1}\)</span> does not contain zero.</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>lower_int <span class="op">=</span> np.percentile(estimates_int, <span class="fl">2.5</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>upper_int <span class="op">=</span> np.percentile(estimates_int, <span class="fl">97.5</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>conf_interval_int <span class="op">=</span> (lower_int, upper_int)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>conf_interval_int</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>In retrospect, it’s no surprise that the weight of an egg best predicts the weight of a newly-hatched chick.</p>
+<p>A model with highly correlated variables prevents us from interpreting how the variables are related to the prediction.</p>
+<section id="reminder-assumptions-matter" class="level3">
+<h3 class="anchored" data-anchor-id="reminder-assumptions-matter">Reminder: Assumptions Matter</h3>
+<p>Keep the following in mind: All inference assumes that the regression model holds.</p>
+<ul>
+<li>If the model doesn’t hold, the inference might not be valid.</li>
+<li>If the <a href="https://inferentialthinking.com/chapters/13/3/Confidence_Intervals.html?highlight=p%20value%20confidence%20interval#care-in-using-the-bootstrap-percentile-method">assumptions of the bootstrap</a> don’t hold…
+<ul>
+<li>Sample size n is large</li>
+<li>Sample is representative of population distribution (drawn IID, unbiased) …then the results of the bootstrap might not be valid.</li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="bonus-correlation-and-causation" class="level2">
+<h2 class="anchored" data-anchor-id="bonus-correlation-and-causation">(Bonus) Correlation and Causation</h2>
+<p>Let us consider some questions in an arbitrary regression problem.</p>
+<p>What does <span class="math inline">\(\theta_{j}\)</span> mean in our regression?</p>
+<ul>
+<li>Holding other variables fixed, how much should our prediction change with <span class="math inline">\(X_{j}\)</span>?</li>
+</ul>
+<p>For simple linear regression, this boils down to the correlation coefficient</p>
+<ul>
+<li>Does having more <span class="math inline">\(x\)</span> predict more <span class="math inline">\(y\)</span> (and by how much)?</li>
+</ul>
+<p><strong>Examples</strong>: Are homes with granite countertops worth more money? Is college GPA higher for students who win a certain scholarship? Are breastfed babies less likely to develop asthma? Do cancer patients given some aggressive treatment have a higher 5-year survival rate? Are people who smoke more likely to get cancer?</p>
+<p>These sound like causal questions, but they are not!</p>
+<section id="prediction-vs-causation" class="level3">
+<h3 class="anchored" data-anchor-id="prediction-vs-causation">Prediction vs Causation</h3>
+<p>Questions about <strong>correlation / prediction</strong>:</p>
+<ul>
+<li>Are homes with granite countertops worth more money?</li>
+<li>Is college GPA higher for students who win a certain scholarship?</li>
+<li>Are breastfed babies less likely to develop asthma?</li>
+<li>Do cancer patients given some aggressive treatment have a higher 5-year survival rate?</li>
+<li>Are people who smoke more likely to get cancer?</li>
+</ul>
+<p>Questions about <strong>causality</strong>:</p>
+<ul>
+<li>How much do granite countertops <strong>raise</strong> the value of a house?</li>
+<li>Does getting the scholarship <strong>improve</strong> students’ GPAs?</li>
+<li>Does breastfeeding <strong>protect</strong> babies against asthma?</li>
+<li>Does the treatment <strong>improve</strong> cancer survival?</li>
+<li>Does smoking <strong>cause</strong> cancer?</li>
+</ul>
+<p>Causal questions are about the <strong>effects</strong> of <strong>interventions</strong> (not just passive observation)</p>
+<ul>
+<li>Regression coefficients sometimes called “effects” – can be deceptive!</li>
+</ul>
+<p>Only one of these questions can be answered using the data alone:</p>
+<ul>
+<li><strong>Predictive question:</strong> Are breastfed babies healthier?</li>
+<li><strong>Causal question:</strong> Does breastfeeding improve babies’ health?</li>
+</ul>
+<p>Possible explanations for why breastfed babies are healthier on average:</p>
+<ol type="1">
+<li><strong>Causal effect:</strong> breastfeeding makes babies healthier</li>
+<li><strong>Reverse causality:</strong> healthier babies more likely to successfully breastfeed</li>
+<li><strong>Common cause:</strong> healthier / richer parents have healthier babies and are more likely to breastfeed</li>
+</ol>
+<p>We cannot tell which explanations are true (or to what extent) just by observing (<span class="math inline">\(x\)</span>,<span class="math inline">\(y\)</span>) pairs</p>
+<p>Causal questions implicitly involve <strong>counterfactuals</strong>:</p>
+<ul>
+<li><strong>Would</strong> the <strong>same</strong> breastfed babies have been less healthy <strong>if</strong> they hadn’t been breastfed?</li>
+<li>Explanation 1 implies they would be, explanations 2 and 3 do not</li>
+</ul>
+</section>
+<section id="confounders" class="level3">
+<h3 class="anchored" data-anchor-id="confounders">Confounders</h3>
+<p><img src="images/confounder.png" alt="confounder" width="600"></p>
+<p>A <strong>confounder</strong> is a variable that affects both T and Y, distorting the correlation between them (e.g.&nbsp;rich parents → breastfeeding, baby’s health) Can be measured covariate, or unmeasured variable we don’t know about</p>
+<p>Confounders generally cause problems</p>
+<p><strong>Common assumption:</strong> all confounders are observed (<strong>ignorability</strong>)</p>
+</section>
+<section id="terminology" class="level3">
+<h3 class="anchored" data-anchor-id="terminology">Terminology</h3>
+<p>Let us define some terms that will help us understand causal effects.</p>
+<p>In prediction, we had two kinds of variables</p>
+<ul>
+<li><strong>Response</strong> (<span class="math inline">\(Y\)</span>): what we are trying to predict</li>
+<li><strong>Predictors</strong> (<span class="math inline">\(X\)</span>): inputs to our prediction</li>
+</ul>
+<p>More kinds of variables in causal inference</p>
+<ul>
+<li><strong>Response</strong> (<span class="math inline">\(Y\)</span>): the outcome of interest</li>
+<li><strong>Treatment</strong> (<span class="math inline">\(T\)</span>): the variable we might intervene on</li>
+<li><strong>Covariate</strong> (<span class="math inline">\(X\)</span>): other variables we measured that may affect <span class="math inline">\(T\)</span> and/or <span class="math inline">\(Y\)</span></li>
+</ul>
+<p>For this lecture, <span class="math inline">\(T\)</span> is a <strong>binary (0/1)</strong> variable:</p>
+<ul>
+<li><span class="math inline">\(T=1\)</span> is usually called treatment, and <span class="math inline">\(T=0\)</span> is usually called control</li>
+<li>e.g., breastfed or not, smoker or not</li>
+</ul>
+</section>
+<section id="neyman-rubin-causal-model" class="level3">
+<h3 class="anchored" data-anchor-id="neyman-rubin-causal-model">Neyman-Rubin Causal Model</h3>
+<p>Causal questions are about <strong>counterfactuals</strong>:</p>
+<ul>
+<li>What would have happened if T were different?</li>
+<li>What will happen if we set T differently in the future?</li>
+</ul>
+<p>We assume every individual has two <strong>potential outcomes</strong></p>
+<ul>
+<li><span class="math inline">\(Y_{i}(1)\)</span>: value of <span class="math inline">\(y_{i}\)</span> if <span class="math inline">\(T_{i} = 1\)</span> (<strong>treated outcome</strong>)</li>
+<li><span class="math inline">\(Y_{i}(0)\)</span>: value of <span class="math inline">\(y_{i}\)</span> if <span class="math inline">\(T_{i} = 0\)</span> (<strong>control outcome</strong>)</li>
+</ul>
+<p>For each individual in the data set, we observe:</p>
+<ul>
+<li>Covariates <span class="math inline">\(x_{i}\)</span></li>
+<li>Treatment <span class="math inline">\(T_{i}\)</span></li>
+<li>Response <span class="math inline">\(y_{i} = Y_{i}(T_{i})\)</span></li>
+</ul>
+<p>We will assume (<span class="math inline">\(x_{i}\)</span>, <span class="math inline">\(T_{i}\)</span>, <span class="math inline">\(y_{i} = Y_{i}(T_{i})\)</span>) tuples iid for <span class="math inline">\(i = 1,..., n\)</span></p>
+</section>
+<section id="average-treatment-effect" class="level3">
+<h3 class="anchored" data-anchor-id="average-treatment-effect">Average Treatment Effect</h3>
+<p>For each individual, the <strong>treatment effect</strong> is <span class="math inline">\(Y_{i}(1)-Y_{i}(0)\)</span></p>
+<p>Most common thing to estimate is the <strong>Average Treatment Effect (ATE)</strong></p>
+<p><span class="math display">\[ATE = \mathbb{E}[Y(1)-Y(0)] = \mathbb{E}[Y(1)] - \mathbb{E}[Y(0)]\]</span></p>
+<p>Can we just take the sample mean?</p>
+<p><span class="math display">\[\hat{ATE} = \frac{1}{n}\sum_{i=1}^{n}Y_{i}(1) - Y_{i}(0)\]</span></p>
+<p>We cannot. Why? We only observe one of <span class="math inline">\(Y_{i}(1)\)</span>, <span class="math inline">\(Y_{i}(0)\)</span>.</p>
+<p><strong>Fundamental problem of causal inference:</strong> We only ever observe one potential outcome</p>
+<p>To draw causal conclusions, we need some causal assumption relating the observed to the unobserved units</p>
+<p>Instead of <span class="math inline">\(\frac{1}{n}\sum_{i=1}^{n}Y_{i}(1) - Y_{i}(0)\)</span>, what if we took the difference between the sample mean for each group?</p>
+<p><span class="math display">\[\hat{ATE} = \frac{1}{n_{1}}\sum_{i: T_{i} = 1}{Y_{i}(1)} - \frac{1}{n_{0}}\sum_{i: T_{i} = 0}{Y_{i}(0)} = \frac{1}{n_{1}}\sum_{i: T_{i} = 1}{y_{i}} - \frac{1}{n_{0}}\sum_{i: T_{i} = 0}{y_{i}}\]</span></p>
+<p>Is this estimator of <span class="math inline">\(ATE\)</span> unbiased? Thus, this proposed <span class="math inline">\(\hat{ATE}\)</span> is not suitable for our purposes.</p>
+<p>if treatment assignment comes from random coin flips, then the treated units are an iid random sample of size <span class="math inline">\(n_{1}\)</span> from the population of <span class="math inline">\(Y_{i}(1)\)</span>.</p>
+<p>This means that,</p>
+<p><span class="math display">\[\mathbb{E}[\frac{1}{n_{1}}\sum_{i: T_{i} = 1}{y_{i}}] = \mathbb{E}[Y_{i}(1)]\]</span></p>
+<p>Similarly,</p>
+<p><span class="math display">\[\mathbb{E}[\frac{1}{n_{0}}\sum_{i: T_{i} = 0}{y_{i}}] = \mathbb{E}[Y_{i}(0)]\]</span></p>
+<p>which allows us to conclude that <span class="math inline">\(\hat{ATE}\)</span> is an unbiased estimator of <span class="math inline">\(ATE\)</span>:</p>
+<p><span class="math display">\[\mathbb{E}[\hat{ATE}] = ATE\]</span></p>
+</section>
+<section id="randomized-experiments" class="level3">
+<h3 class="anchored" data-anchor-id="randomized-experiments">Randomized Experiments</h3>
+<p>However, often, randomy assigning treatments is impractical or unethical. For example, assigning a treatment of cigarettes would likely be impractical and unethical.</p>
+<p>An alternative to bypass this issue is to utilize <strong>observational studies</strong>.</p>
+<p>Experiments:</p>
+<p><img src="images/experiment.png" alt="experiment" width="600"></p>
+<p>Observational Study:</p>
+<p><img src="images/observational.png" alt="observational" width="600"></p>
+</section>
+</section>
+<section id="covariate-adjustment" class="level2">
+<h2 class="anchored" data-anchor-id="covariate-adjustment">Covariate Adjustment</h2>
+<p>What to do about confounders?</p>
+<ul>
+<li><strong>Ignorability assumption:</strong> all important confounders are in the data set!</li>
+</ul>
+<p><strong>One idea:</strong> come up with a model that includes them, such as:</p>
+<p><span class="math display">\[Y_{i}(t) = \theta_{0} + \theta_{1}x_{1} + ... + \theta_{p}x_{p} + \tau{t} + \epsilon\]</span></p>
+<p><strong>Question:</strong> what is the <span class="math inline">\(ATE\)</span> in this model? <span class="math inline">\(\tau\)</span></p>
+<p>Approach can work but is <strong>fragile</strong>. Breaks if:</p>
+<ul>
+<li>Important covariates are missing or true dependence on <span class="math inline">\(x\)</span> is nonlinear</li>
+<li>Sometimes pejoratively called <strong>“casual inference”</strong></li>
+</ul>
+<p><img src="images/ignorability.png" alt="ignorability" width="600"></p>
+<section id="covariate-adjustment-without-parametric-assumptions" class="level3">
+<h3 class="anchored" data-anchor-id="covariate-adjustment-without-parametric-assumptions">Covariate adjustment without parametric assumptions</h3>
+<p>What to do about confounders?</p>
+<ul>
+<li><strong>Ignorability assumption:</strong> all possible confounders are in the data set!</li>
+</ul>
+<p><strong>One idea:</strong> come up with a model that includes them, such as:</p>
+<p><span class="math display">\[Y_{i}(t) = f_{\theta}(x, t) + \epsilon\]</span></p>
+<p>Then:</p>
+<p><span class="math display">\[ATE = \frac{1}{n}\sum_{i=1}^{n}{f_{\theta}(x_i, 1) - f_{\theta}(x_i, 0)}\]</span></p>
+<p>With enough data, we may be able to learn <span class="math inline">\(f_{\theta}\)</span> very accurately</p>
+<ul>
+<li>Very difficult if x is high-dimensional / functional form is highly nonlinear</li>
+<li>Need additional assumption: <strong>overlap</strong></li>
+</ul>
+</section>
+<section id="other-methods" class="level3">
+<h3 class="anchored" data-anchor-id="other-methods">Other Methods</h3>
+<p>Causal inference is hard, and covariate adjustment is often not the best approach</p>
+<p>Many other methods doing some combination of:</p>
+<ul>
+<li>Modeling treatment T as a function of covariates x</li>
+<li>Modeling the outcome y as a function of x, T</li>
+</ul>
+<p>What if we don’t believe in ignorability? Other methods look for a</p>
+<ul>
+<li>Favorite example: <strong>regression discontinuity</strong></li>
+</ul>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
