@@ -23,7 +23,7 @@ jupyter: python3
 * Construct confidence intervals for hypothesis testing
 * Understand the assumptions we make and its impact on our regression inference
 * Compare regression and causation
-* Experment setup, confounding variables, average treatment effect, and covariate adjustment
+* Experiment setup, confounding variables, average treatment effect, and covariate adjustment
 :::
 
 Last time, we introduced the idea of random variables and its affect on the observed relationship we use to fit models.
@@ -44,7 +44,7 @@ Remember we can only observe our random sample of data, represented by the blue 
 
 <img src="images/y_hat.png" alt='y_hat' width='600'>
 
-Recall that the observed relationship and our fitted model are random. With this random variables framework in hand, we're now ready to understand how model complexity can finetune our model's performance. 
+Recall that the observed relationship and our fitted model are random. With this random variables framework in hand, we're now ready to understand how model complexity can fine-tune our model's performance. 
 
 To evaluate our model's performance, we've previously considered the MSE of our model across a single sample of observed data. Now that we've reframed our model $\hat{Y}$ and observations $Y$ as random variables, we'll use a theoretical approach to better understand the model's error. **Model risk** is defined as the mean square prediction error of the random variable $\hat{Y}$. It is an expectation across *all* samples we could have possibly gotten when fitting the model. Model risk considers the model's performance on any sample that is theoretically possible, rather than the specific data that we have collected. 
 
@@ -119,6 +119,7 @@ We'll work with the [snowy plover](https://www.audubon.org/field-guide/bird/snow
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 import pandas as pd
 eggs = pd.read_csv("data/snowy_plover.csv")
 eggs.head(5)
@@ -126,7 +127,7 @@ eggs.head(5)
 
 Our goal will be to predict the weight of a newborn plover chick, which we assume follows the true relationship below.
 
-$$\text{bird_weight} = \theta_0 + \theta_1 \text{egg_weight} + \theta_2 \text{egg_length} + \theta_3 \text{egg_breadth} + \epsilon$$
+$$\text{bird\_weight} = \theta_0 + \theta_1 \text{egg\_weight} + \theta_2 \text{egg\_length} + \theta_3 \text{egg\_breadth} + \epsilon$$
 
 
 Say we wish to determine if the `egg_weight` impacts the `bird_weight` of a chick – we want to infer if $\theta_1$ is equal to 0.
@@ -139,6 +140,7 @@ First, we define our hypotheses:
 Next, we use our data to fit a model that approximates the relationship above. This gives us the **observed value** of $\hat{\theta}_1$ found from our data.
 
 ```{python}
+#| vscode: {languageId: python}
 from sklearn.linear_model import LinearRegression
 
 X = eggs[["egg_weight", "egg_length", "egg_breadth"]]
@@ -164,6 +166,7 @@ We draw a bootstrap sample, use this sample to fit a model, and record the resul
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 # Set a random seed so you generate the same random sample as staff
 # In the "real world", we wouldn't do this
 import numpy as np
@@ -190,6 +193,7 @@ for i in range(10000):
 ```
 
 ```{python}
+#| vscode: {languageId: python}
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -207,6 +211,7 @@ To create a 95% confidence interval, we compute the 2.5th and 97.5th percentiles
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 lower = np.percentile(estimates, 2.5)
 upper = np.percentile(estimates, 97.5)
 
@@ -219,6 +224,7 @@ We find that our bootstrapped approximate 95% confidence interval for $\theta_1$
 We can repeat this process to construct 95% confidence intervals for the other parameters of the model.
 
 ```{python}
+#| vscode: {languageId: python}
 np.random.seed(1337)
 
 theta_0_estimates = []
@@ -259,6 +265,7 @@ How can we explain this result? Think back to how we first interpreted the param
 To support this conclusion, we can visualize the relationships between our feature variables. Notice the strong positive association between the features.
 
 ```{python}
+#| vscode: {languageId: python}
 sns.pairplot(eggs[["egg_length", "egg_breadth", "egg_weight"]]);
 ```
 
@@ -274,9 +281,10 @@ The take-home point is that we need to be careful with what features we select f
 
 Let us now consider a more interpretable model: we instead assume a true relationship using only egg weight:
 
-$$f_\theta(x) = \theta_0 + \theta_1 \text{egg_weight} + \epsilon$$
+$$f_\theta(x) = \theta_0 + \theta_1 \text{egg\_weight} + \epsilon$$
 
 ```{python}
+#| vscode: {languageId: python}
 X_int = eggs[["egg_weight"]]
 Y_int = eggs["bird_weight"]
 
@@ -293,6 +301,7 @@ pd.DataFrame({"theta_hat":[model_int.intercept_, thetas_int[0]]}, index=["theta_
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 # Set a random seed so you generate the same random sample as staff
 # In the "real world", we wouldn't do this
 np.random.seed(1337)
@@ -325,6 +334,7 @@ plt.title(r"Bootstrapped estimates $\hat{\theta}_1$ Under the Interpretable Mode
 Notice how the interpretable model performs almost as well as our other model:
 
 ```{python}
+#| vscode: {languageId: python}
 from sklearn.metrics import mean_squared_error
 
 rmse = mean_squared_error(Y, model.predict(X))
@@ -336,6 +346,7 @@ print(f'RMSE of Interpretable Model: {rmse_int}')
 Yet, the confidence interval for the true parameter $\theta_{1}$ does not contain zero.
 
 ```{python}
+#| vscode: {languageId: python}
 lower_int = np.percentile(estimates_int, 2.5)
 upper_int = np.percentile(estimates_int, 97.5)
 
@@ -573,5 +584,4 @@ Many other methods doing some combination of:
 What if we don’t believe in ignorability? Other methods look for a
 
 - Favorite example: **regression discontinuity**
-
 

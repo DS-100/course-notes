@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.280">
+<meta name="generator" content="quarto-1.2.313">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -336,7 +336,7 @@ Learning Outcomes
 <li>Construct confidence intervals for hypothesis testing</li>
 <li>Understand the assumptions we make and its impact on our regression inference</li>
 <li>Compare regression and causation</li>
-<li>Experment setup, confounding variables, average treatment effect, and covariate adjustment</li>
+<li>Experiment setup, confounding variables, average treatment effect, and covariate adjustment</li>
 </ul>
 </div>
 </div>
@@ -351,7 +351,7 @@ Learning Outcomes
 <p><img src="images/data.png" alt="data" width="600"></p>
 <p>Remember we can only observe our random sample of data, represented by the blue points above. From this sample, we want to estimate the true relationship <span class="math inline">\(g\)</span>. We do this by constructing the model <span class="math inline">\(\hat{Y}(x)\)</span> to estimate <span class="math inline">\(g\)</span>.</p>
 <p><img src="images/y_hat.png" alt="y_hat" width="600"></p>
-<p>Recall that the observed relationship and our fitted model are random. With this random variables framework in hand, we’re now ready to understand how model complexity can finetune our model’s performance.</p>
+<p>Recall that the observed relationship and our fitted model are random. With this random variables framework in hand, we’re now ready to understand how model complexity can fine-tune our model’s performance.</p>
 <p>To evaluate our model’s performance, we’ve previously considered the MSE of our model across a single sample of observed data. Now that we’ve reframed our model <span class="math inline">\(\hat{Y}\)</span> and observations <span class="math inline">\(Y\)</span> as random variables, we’ll use a theoretical approach to better understand the model’s error. <strong>Model risk</strong> is defined as the mean square prediction error of the random variable <span class="math inline">\(\hat{Y}\)</span>. It is an expectation across <em>all</em> samples we could have possibly gotten when fitting the model. Model risk considers the model’s performance on any sample that is theoretically possible, rather than the specific data that we have collected.</p>
 <p><span class="math display">\[\text{Model risk }=\mathbb{E}\left[(Y-\hat{Y})^2\right]\]</span></p>
 <p>What is the origin of the error encoded by model risk? Recall the data generation process we established earlier. There is the true underlying relationship <span class="math inline">\(g\)</span>, observed data (with random noise) <span class="math inline">\(Y\)</span>, and model <span class="math inline">\(\hat{Y}\)</span>.</p>
@@ -392,7 +392,7 @@ Learning Outcomes
 <p>If the true parameter <span class="math inline">\(\theta_i\)</span> for a particular feature is 0, this tells us something pretty significant about the world – there is no underlying relationship between <span class="math inline">\(x_i\)</span> and <span class="math inline">\(Y(x)\)</span>! How then, can we test if a parameter is 0? As a baseline, we go through our usual process of drawing a sample, using this data to fit a model, and computing an estimate <span class="math inline">\(\hat{\theta}_i\)</span>. However, we need to also consider the fact that if our random sample had come out differently, we may have found a different result for <span class="math inline">\(\hat{\theta}_i\)</span>. To infer if the true parameter <span class="math inline">\(\theta_i\)</span> is 0, we want to draw our conclusion from the distribution of <span class="math inline">\(\hat{\theta}_i\)</span> estimates we could have drawn across all other random samples.</p>
 <p>To do this, we’ll use an inference technique called <strong>hypothesis testing</strong>. This concept was introduced back in <a href="https://inferentialthinking.com/chapters/11/Testing_Hypotheses.html">Data 8</a>. You may find it helpful to review the hypothesis testing method to refresh your memory.</p>
 <p>We’ll work with the <a href="https://www.audubon.org/field-guide/bird/snowy-plover">snowy plover</a> dataset throughout this section.</p>
-<div class="cell" data-execution_count="1">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>eggs <span class="op">=</span> pd.read_csv(<span class="st">"data/snowy_plover.csv"</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>eggs.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -452,7 +452,7 @@ Learning Outcomes
 </div>
 </div>
 <p>Our goal will be to predict the weight of a newborn plover chick, which we assume follows the true relationship below.</p>
-<p><span class="math display">\[\text{bird_weight} = \theta_0 + \theta_1 \text{egg_weight} + \theta_2 \text{egg_length} + \theta_3 \text{egg_breadth} + \epsilon\]</span></p>
+<p><span class="math display">\[\text{bird\_weight} = \theta_0 + \theta_1 \text{egg\_weight} + \theta_2 \text{egg\_length} + \theta_3 \text{egg\_breadth} + \epsilon\]</span></p>
 <p>Say we wish to determine if the <code>egg_weight</code> impacts the <code>bird_weight</code> of a chick – we want to infer if <span class="math inline">\(\theta_1\)</span> is equal to 0.</p>
 <p>First, we define our hypotheses:</p>
 <ul>
@@ -460,7 +460,7 @@ Learning Outcomes
 <li>Alternative hypothesis: the true parameter <span class="math inline">\(\theta_1\)</span> is not 0</li>
 </ul>
 <p>Next, we use our data to fit a model that approximates the relationship above. This gives us the <strong>observed value</strong> of <span class="math inline">\(\hat{\theta}_1\)</span> found from our data.</p>
-<div class="cell" data-execution_count="2">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="2">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LinearRegression</span>
@@ -517,7 +517,7 @@ Learning Outcomes
 <li>Is drawn with replacement (this ensures that we don’t draw the exact same sample every time!)</li>
 </ul>
 <p>We draw a bootstrap sample, use this sample to fit a model, and record the result for <span class="math inline">\(\hat{\theta}_1\)</span> on this bootstrapped sample. We then repeat this process many times to generate a <strong>bootstrapped distribution</strong> of <span class="math inline">\(\hat{\theta}_1\)</span>. This gives us an estimate of what the true distribution of <span class="math inline">\(\hat{\theta}_1\)</span> across all possible samples might look like.</p>
-<div class="cell" data-execution_count="3">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Set a random seed so you generate the same random sample as staff</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># In the "real world", we wouldn't do this</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
@@ -542,7 +542,7 @@ Learning Outcomes
 <span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    </span>
 <span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    estimates.append(bootstrap_thetas[<span class="dv">0</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-execution_count="4">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="4">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -560,19 +560,19 @@ Learning Outcomes
 <p>Now, we have a sense of how <span class="math inline">\(\hat{\theta}_1\)</span> might vary across different random samples. How does this help us understand if the true parameter <span class="math inline">\(\theta_1\)</span> is 0 or not? We’ll use an approximate <strong>confidence interval</strong>. Recall from <a href="https://inferentialthinking.com/chapters/13/3/Confidence_Intervals.html?">Data 8</a> that a x% confidence interval is a range of values where we are x% confident that the interval contains the true parameter. In other words, if we repeated the bootstrapping process above many times, we’d expect the x% confidence interval to contain the true value of <span class="math inline">\(\theta_1\)</span> about x% of the time.</p>
 <p>For our purposes, we’ll consider the approximate 95% confidence interval. Because of the <a href="https://inferentialthinking.com/chapters/13/4/Using_Confidence_Intervals.html#using-a-confidence-interval-to-test-hypotheses">duality</a> of confidence intervals and hypothesis tests, we reject the null hypothesis at a cutoff level of 5% if 0 is not contained in the 95% confidence interval for <span class="math inline">\(\hat{\theta}_1\)</span>.</p>
 <p>To create a 95% confidence interval, we compute the 2.5th and 97.5th percentiles of our bootstrapped estimates of <span class="math inline">\(\theta_1\)</span>.</p>
-<div class="cell" data-execution_count="5">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>lower <span class="op">=</span> np.percentile(estimates, <span class="fl">2.5</span>)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>upper <span class="op">=</span> np.percentile(estimates, <span class="fl">97.5</span>)</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>conf_interval <span class="op">=</span> (lower, upper)</span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>conf_interval</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
-<pre><code>(-0.258648119568487, 1.1034243854204047)</code></pre>
+<pre><code>(-0.2586481195684872, 1.103424385420405)</code></pre>
 </div>
 </div>
 <p>We find that our bootstrapped approximate 95% confidence interval for <span class="math inline">\(\theta_1\)</span> is <span class="math inline">\([-0.259, 1.103]\)</span>. Immediately, we can see that 0 <em>is</em> contained in this interval – this means that we <em>cannot</em> conclude that <span class="math inline">\(\theta_1\)</span> is non-zero! More formally, we cannot reject the null hypothesis (that <span class="math inline">\(\theta_1\)</span> is 0) under a 5% cutoff.</p>
 <p>We can repeat this process to construct 95% confidence intervals for the other parameters of the model.</p>
-<div class="cell" data-execution_count="6">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="6">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">1337</span>)</span>
@@ -648,13 +648,13 @@ Learning Outcomes
 <p>Something’s off here. Notice that 0 is included in the 95% confidence interval for <em>every</em> parameter of the model. Using the interpretation we outlined above, this would suggest that we can’t say for certain that <em>any</em> of the input variables impact the response variable! This makes it seem like our model can’t make any predictions – and yet, each model we fit in our bootstrap experiment above could very much make predictions of <span class="math inline">\(Y\)</span>.</p>
 <p>How can we explain this result? Think back to how we first interpreted the parameters of a linear model. We treated each <span class="math inline">\(\theta_i\)</span> as a slope, where a unit increase in <span class="math inline">\(x_i\)</span> leads to a <span class="math inline">\(\theta_i\)</span> increase in <span class="math inline">\(Y\)</span>, <strong>if all other variables are held constant</strong>. It turns out that this last assumption is very important. If variables in our model are somehow related to one another, then it might not be possible to have a change in one of them while holding the others constant. This means that our interpretation framework is no longer valid! In the models we fit above, we incorporated <code>egg_length</code>, <code>egg_breadth</code>, and <code>egg_weight</code> as input variables. These variables are very likely related to one another – an egg with large <code>egg_length</code> and <code>egg_breadth</code> will likely be heavy in <code>egg_weight</code>. This means that the model parameters cannot be meaningfully interpreted as slopes.</p>
 <p>To support this conclusion, we can visualize the relationships between our feature variables. Notice the strong positive association between the features.</p>
-<div class="cell" data-execution_count="7">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="7">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>sns.pairplot(eggs[[<span class="st">"egg_length"</span>, <span class="st">"egg_breadth"</span>, <span class="st">"egg_weight"</span>]])<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
-<p><img src="inference_causality_files/figure-html/cell-8-output-1.png" class="img-fluid"></p>
+<p><img src="inference_causality_files/figure-html/cell-8-output-1.png" width="710" height="709"></p>
 </div>
 </div>
 <p>This issue is known as <strong>colinearity</strong>, sometimes also called <strong>multicolinearity</strong>. Colinearity occurs when one feature can be predicted fairly accurately by a linear combination of the other features, which happens when one feature is highly correlated with the others.</p>
@@ -666,8 +666,8 @@ Learning Outcomes
 </ul>
 <p>The take-home point is that we need to be careful with what features we select for modeling. If two features likely encode similar information, it is often a good idea to choose only one of them as an input variable.</p>
 <p>Let us now consider a more interpretable model: we instead assume a true relationship using only egg weight:</p>
-<p><span class="math display">\[f_\theta(x) = \theta_0 + \theta_1 \text{egg_weight} + \epsilon\]</span></p>
-<div class="cell" data-execution_count="8">
+<p><span class="math display">\[f_\theta(x) = \theta_0 + \theta_1 \text{egg\_weight} + \epsilon\]</span></p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="8">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>X_int <span class="op">=</span> eggs[[<span class="st">"egg_weight"</span>]]</span>
@@ -708,7 +708,7 @@ Learning Outcomes
 </div>
 </div>
 </div>
-<div class="cell" data-execution_count="9">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Set a random seed so you generate the same random sample as staff</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co"># In the "real world", we wouldn't do this</span></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">1337</span>)</span>
@@ -741,7 +741,7 @@ Learning Outcomes
 </div>
 </div>
 <p>Notice how the interpretable model performs almost as well as our other model:</p>
-<div class="cell" data-execution_count="10">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="10">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> mean_squared_error</span>
@@ -752,12 +752,12 @@ Learning Outcomes
 <span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'RMSE of Interpretable Model: </span><span class="sc">{</span>rmse_int<span class="sc">}</span><span class="ss">'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>RMSE of Original Model: 0.04547085380275768
+<pre><code>RMSE of Original Model: 0.04547085380275772
 RMSE of Interpretable Model: 0.04649394137555684</code></pre>
 </div>
 </div>
 <p>Yet, the confidence interval for the true parameter <span class="math inline">\(\theta_{1}\)</span> does not contain zero.</p>
-<div class="cell" data-execution_count="11">
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="11">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>lower_int <span class="op">=</span> np.percentile(estimates_int, <span class="fl">2.5</span>)</span>
@@ -767,7 +767,7 @@ RMSE of Interpretable Model: 0.04649394137555684</code></pre>
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>conf_interval_int</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="11">
-<pre><code>(0.6029335250209632, 0.8208401738546206)</code></pre>
+<pre><code>(0.6029335250209634, 0.8208401738546208)</code></pre>
 </div>
 </div>
 <p>In retrospect, it’s no surprise that the weight of an egg best predicts the weight of a newly-hatched chick.</p>
@@ -1185,7 +1185,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Construct confidence intervals for hypothesis testing</span>
 <span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Understand the assumptions we make and its impact on our regression inference</span>
 <span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Compare regression and causation</span>
-<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Experment setup, confounding variables, average treatment effect, and covariate adjustment</span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Experiment setup, confounding variables, average treatment effect, and covariate adjustment</span>
 <span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>:::</span>
 <span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>Last time, we introduced the idea of random variables and its affect on the observed relationship we use to fit models.</span>
@@ -1206,7 +1206,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-45"><a href="#cb15-45" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/y_hat.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'y_hat'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'600'</span><span class="kw">&gt;</span></span>
 <span id="cb15-46"><a href="#cb15-46" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-47"><a href="#cb15-47" aria-hidden="true" tabindex="-1"></a>Recall that the observed relationship and our fitted model are random. With this random variables framework in hand, we're now ready to understand how model complexity can finetune our model's performance. </span>
+<span id="cb15-47"><a href="#cb15-47" aria-hidden="true" tabindex="-1"></a>Recall that the observed relationship and our fitted model are random. With this random variables framework in hand, we're now ready to understand how model complexity can fine-tune our model's performance. </span>
 <span id="cb15-48"><a href="#cb15-48" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-49"><a href="#cb15-49" aria-hidden="true" tabindex="-1"></a>To evaluate our model's performance, we've previously considered the MSE of our model across a single sample of observed data. Now that we've reframed our model $\hat{Y}$ and observations $Y$ as random variables, we'll use a theoretical approach to better understand the model's error. **Model risk** is defined as the mean square prediction error of the random variable $\hat{Y}$. It is an expectation across *all* samples we could have possibly gotten when fitting the model. Model risk considers the model's performance on any sample that is theoretically possible, rather than the specific data that we have collected. </span>
 <span id="cb15-50"><a href="#cb15-50" aria-hidden="true" tabindex="-1"></a></span>
@@ -1281,461 +1281,471 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb15-119"><a href="#cb15-119" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-122"><a href="#cb15-122" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
 <span id="cb15-123"><a href="#cb15-123" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: false</span></span>
-<span id="cb15-124"><a href="#cb15-124" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb15-125"><a href="#cb15-125" aria-hidden="true" tabindex="-1"></a>eggs <span class="op">=</span> pd.read_csv(<span class="st">"data/snowy_plover.csv"</span>)</span>
-<span id="cb15-126"><a href="#cb15-126" aria-hidden="true" tabindex="-1"></a>eggs.head(<span class="dv">5</span>)</span>
-<span id="cb15-127"><a href="#cb15-127" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb15-128"><a href="#cb15-128" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-129"><a href="#cb15-129" aria-hidden="true" tabindex="-1"></a>Our goal will be to predict the weight of a newborn plover chick, which we assume follows the true relationship below.</span>
-<span id="cb15-130"><a href="#cb15-130" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-131"><a href="#cb15-131" aria-hidden="true" tabindex="-1"></a>$$\text{bird_weight} = \theta_0 + \theta_1 \text{egg_weight} + \theta_2 \text{egg_length} + \theta_3 \text{egg_breadth} + \epsilon$$</span>
-<span id="cb15-132"><a href="#cb15-132" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-124"><a href="#cb15-124" aria-hidden="true" tabindex="-1"></a><span class="co">#| vscode: {languageId: python}</span></span>
+<span id="cb15-125"><a href="#cb15-125" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb15-126"><a href="#cb15-126" aria-hidden="true" tabindex="-1"></a>eggs <span class="op">=</span> pd.read_csv(<span class="st">"data/snowy_plover.csv"</span>)</span>
+<span id="cb15-127"><a href="#cb15-127" aria-hidden="true" tabindex="-1"></a>eggs.head(<span class="dv">5</span>)</span>
+<span id="cb15-128"><a href="#cb15-128" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb15-129"><a href="#cb15-129" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-130"><a href="#cb15-130" aria-hidden="true" tabindex="-1"></a>Our goal will be to predict the weight of a newborn plover chick, which we assume follows the true relationship below.</span>
+<span id="cb15-131"><a href="#cb15-131" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-132"><a href="#cb15-132" aria-hidden="true" tabindex="-1"></a>$$\text{bird<span class="sc">\_</span>weight} = \theta_0 + \theta_1 \text{egg<span class="sc">\_</span>weight} + \theta_2 \text{egg<span class="sc">\_</span>length} + \theta_3 \text{egg<span class="sc">\_</span>breadth} + \epsilon$$</span>
 <span id="cb15-133"><a href="#cb15-133" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-134"><a href="#cb15-134" aria-hidden="true" tabindex="-1"></a>Say we wish to determine if the <span class="in">`egg_weight`</span> impacts the <span class="in">`bird_weight`</span> of a chick – we want to infer if $\theta_1$ is equal to 0.</span>
-<span id="cb15-135"><a href="#cb15-135" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-136"><a href="#cb15-136" aria-hidden="true" tabindex="-1"></a>First, we define our hypotheses:</span>
-<span id="cb15-137"><a href="#cb15-137" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-138"><a href="#cb15-138" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Null hypothesis: the true parameter $\theta_1$ is 0</span>
-<span id="cb15-139"><a href="#cb15-139" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Alternative hypothesis: the true parameter $\theta_1$ is not 0</span>
-<span id="cb15-140"><a href="#cb15-140" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-141"><a href="#cb15-141" aria-hidden="true" tabindex="-1"></a>Next, we use our data to fit a model that approximates the relationship above. This gives us the **observed value** of $\hat{\theta}_1$ found from our data.</span>
-<span id="cb15-142"><a href="#cb15-142" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-145"><a href="#cb15-145" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb15-146"><a href="#cb15-146" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LinearRegression</span>
-<span id="cb15-147"><a href="#cb15-147" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-148"><a href="#cb15-148" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> eggs[[<span class="st">"egg_weight"</span>, <span class="st">"egg_length"</span>, <span class="st">"egg_breadth"</span>]]</span>
-<span id="cb15-149"><a href="#cb15-149" aria-hidden="true" tabindex="-1"></a>Y <span class="op">=</span> eggs[<span class="st">"bird_weight"</span>]</span>
-<span id="cb15-150"><a href="#cb15-150" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-151"><a href="#cb15-151" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> LinearRegression()</span>
+<span id="cb15-134"><a href="#cb15-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-135"><a href="#cb15-135" aria-hidden="true" tabindex="-1"></a>Say we wish to determine if the <span class="in">`egg_weight`</span> impacts the <span class="in">`bird_weight`</span> of a chick – we want to infer if $\theta_1$ is equal to 0.</span>
+<span id="cb15-136"><a href="#cb15-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-137"><a href="#cb15-137" aria-hidden="true" tabindex="-1"></a>First, we define our hypotheses:</span>
+<span id="cb15-138"><a href="#cb15-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-139"><a href="#cb15-139" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Null hypothesis: the true parameter $\theta_1$ is 0</span>
+<span id="cb15-140"><a href="#cb15-140" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Alternative hypothesis: the true parameter $\theta_1$ is not 0</span>
+<span id="cb15-141"><a href="#cb15-141" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-142"><a href="#cb15-142" aria-hidden="true" tabindex="-1"></a>Next, we use our data to fit a model that approximates the relationship above. This gives us the **observed value** of $\hat{\theta}_1$ found from our data.</span>
+<span id="cb15-143"><a href="#cb15-143" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-146"><a href="#cb15-146" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb15-147"><a href="#cb15-147" aria-hidden="true" tabindex="-1"></a><span class="co">#| vscode: {languageId: python}</span></span>
+<span id="cb15-148"><a href="#cb15-148" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LinearRegression</span>
+<span id="cb15-149"><a href="#cb15-149" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-150"><a href="#cb15-150" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> eggs[[<span class="st">"egg_weight"</span>, <span class="st">"egg_length"</span>, <span class="st">"egg_breadth"</span>]]</span>
+<span id="cb15-151"><a href="#cb15-151" aria-hidden="true" tabindex="-1"></a>Y <span class="op">=</span> eggs[<span class="st">"bird_weight"</span>]</span>
 <span id="cb15-152"><a href="#cb15-152" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-153"><a href="#cb15-153" aria-hidden="true" tabindex="-1"></a>model.fit(X, Y)</span>
+<span id="cb15-153"><a href="#cb15-153" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> LinearRegression()</span>
 <span id="cb15-154"><a href="#cb15-154" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-155"><a href="#cb15-155" aria-hidden="true" tabindex="-1"></a><span class="co"># This gives an array containing the fitted model parameter estimates</span></span>
-<span id="cb15-156"><a href="#cb15-156" aria-hidden="true" tabindex="-1"></a>thetas <span class="op">=</span> model.coef_</span>
-<span id="cb15-157"><a href="#cb15-157" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-158"><a href="#cb15-158" aria-hidden="true" tabindex="-1"></a><span class="co"># Put the parameter estimates in a nice table for viewing</span></span>
-<span id="cb15-159"><a href="#cb15-159" aria-hidden="true" tabindex="-1"></a>pd.DataFrame({<span class="st">"theta_hat"</span>:[model.intercept_, thetas[<span class="dv">0</span>], thetas[<span class="dv">1</span>], thetas[<span class="dv">2</span>]]}, index<span class="op">=</span>[<span class="st">"theta_0"</span>, <span class="st">"theta_1"</span>, <span class="st">"theta_2"</span>, <span class="st">"theta_3"</span>])</span>
-<span id="cb15-160"><a href="#cb15-160" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb15-161"><a href="#cb15-161" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-162"><a href="#cb15-162" aria-hidden="true" tabindex="-1"></a>We now have the value of $\hat{\theta}_1$ when considering the single sample of data that we have. To get a sense of how this estimate might vary if we were to draw different random samples, we will use **[bootstrapping](https://inferentialthinking.com/chapters/13/2/Bootstrap.html?)**. To construct a bootstrap sample, we will draw a resample from the collected data that:</span>
+<span id="cb15-155"><a href="#cb15-155" aria-hidden="true" tabindex="-1"></a>model.fit(X, Y)</span>
+<span id="cb15-156"><a href="#cb15-156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-157"><a href="#cb15-157" aria-hidden="true" tabindex="-1"></a><span class="co"># This gives an array containing the fitted model parameter estimates</span></span>
+<span id="cb15-158"><a href="#cb15-158" aria-hidden="true" tabindex="-1"></a>thetas <span class="op">=</span> model.coef_</span>
+<span id="cb15-159"><a href="#cb15-159" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-160"><a href="#cb15-160" aria-hidden="true" tabindex="-1"></a><span class="co"># Put the parameter estimates in a nice table for viewing</span></span>
+<span id="cb15-161"><a href="#cb15-161" aria-hidden="true" tabindex="-1"></a>pd.DataFrame({<span class="st">"theta_hat"</span>:[model.intercept_, thetas[<span class="dv">0</span>], thetas[<span class="dv">1</span>], thetas[<span class="dv">2</span>]]}, index<span class="op">=</span>[<span class="st">"theta_0"</span>, <span class="st">"theta_1"</span>, <span class="st">"theta_2"</span>, <span class="st">"theta_3"</span>])</span>
+<span id="cb15-162"><a href="#cb15-162" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb15-163"><a href="#cb15-163" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-164"><a href="#cb15-164" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Has the same sample size as the collected data, and </span>
-<span id="cb15-165"><a href="#cb15-165" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Is drawn with replacement (this ensures that we don't draw the exact same sample every time!)</span>
-<span id="cb15-166"><a href="#cb15-166" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-167"><a href="#cb15-167" aria-hidden="true" tabindex="-1"></a>We draw a bootstrap sample, use this sample to fit a model, and record the result for $\hat{\theta}_1$ on this bootstrapped sample. We then repeat this process many times to generate a **bootstrapped distribution** of $\hat{\theta}_1$. This gives us an estimate of what the true distribution of $\hat{\theta}_1$ across all possible samples might look like.</span>
+<span id="cb15-164"><a href="#cb15-164" aria-hidden="true" tabindex="-1"></a>We now have the value of $\hat{\theta}_1$ when considering the single sample of data that we have. To get a sense of how this estimate might vary if we were to draw different random samples, we will use **[bootstrapping](https://inferentialthinking.com/chapters/13/2/Bootstrap.html?)**. To construct a bootstrap sample, we will draw a resample from the collected data that:</span>
+<span id="cb15-165"><a href="#cb15-165" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-166"><a href="#cb15-166" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Has the same sample size as the collected data, and </span>
+<span id="cb15-167"><a href="#cb15-167" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Is drawn with replacement (this ensures that we don't draw the exact same sample every time!)</span>
 <span id="cb15-168"><a href="#cb15-168" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-171"><a href="#cb15-171" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb15-172"><a href="#cb15-172" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: false</span></span>
-<span id="cb15-173"><a href="#cb15-173" aria-hidden="true" tabindex="-1"></a><span class="co"># Set a random seed so you generate the same random sample as staff</span></span>
-<span id="cb15-174"><a href="#cb15-174" aria-hidden="true" tabindex="-1"></a><span class="co"># In the "real world", we wouldn't do this</span></span>
-<span id="cb15-175"><a href="#cb15-175" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb15-176"><a href="#cb15-176" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">1337</span>)</span>
-<span id="cb15-177"><a href="#cb15-177" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-178"><a href="#cb15-178" aria-hidden="true" tabindex="-1"></a><span class="co"># Set the sample size of each bootstrap sample</span></span>
-<span id="cb15-179"><a href="#cb15-179" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="bu">len</span>(eggs)</span>
+<span id="cb15-169"><a href="#cb15-169" aria-hidden="true" tabindex="-1"></a>We draw a bootstrap sample, use this sample to fit a model, and record the result for $\hat{\theta}_1$ on this bootstrapped sample. We then repeat this process many times to generate a **bootstrapped distribution** of $\hat{\theta}_1$. This gives us an estimate of what the true distribution of $\hat{\theta}_1$ across all possible samples might look like.</span>
+<span id="cb15-170"><a href="#cb15-170" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-173"><a href="#cb15-173" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb15-174"><a href="#cb15-174" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: false</span></span>
+<span id="cb15-175"><a href="#cb15-175" aria-hidden="true" tabindex="-1"></a><span class="co">#| vscode: {languageId: python}</span></span>
+<span id="cb15-176"><a href="#cb15-176" aria-hidden="true" tabindex="-1"></a><span class="co"># Set a random seed so you generate the same random sample as staff</span></span>
+<span id="cb15-177"><a href="#cb15-177" aria-hidden="true" tabindex="-1"></a><span class="co"># In the "real world", we wouldn't do this</span></span>
+<span id="cb15-178"><a href="#cb15-178" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb15-179"><a href="#cb15-179" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">1337</span>)</span>
 <span id="cb15-180"><a href="#cb15-180" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-181"><a href="#cb15-181" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a list to store all the bootstrapped estimates</span></span>
-<span id="cb15-182"><a href="#cb15-182" aria-hidden="true" tabindex="-1"></a>estimates <span class="op">=</span> []</span>
+<span id="cb15-181"><a href="#cb15-181" aria-hidden="true" tabindex="-1"></a><span class="co"># Set the sample size of each bootstrap sample</span></span>
+<span id="cb15-182"><a href="#cb15-182" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="bu">len</span>(eggs)</span>
 <span id="cb15-183"><a href="#cb15-183" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-184"><a href="#cb15-184" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate a bootstrap resample from `eggs` and find an estimate for theta_1 using this sample. </span></span>
-<span id="cb15-185"><a href="#cb15-185" aria-hidden="true" tabindex="-1"></a><span class="co"># Repeat 10000 times.</span></span>
-<span id="cb15-186"><a href="#cb15-186" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10000</span>):</span>
-<span id="cb15-187"><a href="#cb15-187" aria-hidden="true" tabindex="-1"></a>    bootstrap_resample <span class="op">=</span> eggs.sample(n, replace<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb15-188"><a href="#cb15-188" aria-hidden="true" tabindex="-1"></a>    X_bootstrap <span class="op">=</span> bootstrap_resample[[<span class="st">"egg_weight"</span>, <span class="st">"egg_length"</span>, <span class="st">"egg_breadth"</span>]]</span>
-<span id="cb15-189"><a href="#cb15-189" aria-hidden="true" tabindex="-1"></a>    Y_bootstrap <span class="op">=</span> bootstrap_resample[<span class="st">"bird_weight"</span>]</span>
-<span id="cb15-190"><a href="#cb15-190" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb15-191"><a href="#cb15-191" aria-hidden="true" tabindex="-1"></a>    bootstrap_model <span class="op">=</span> LinearRegression()</span>
-<span id="cb15-192"><a href="#cb15-192" aria-hidden="true" tabindex="-1"></a>    bootstrap_model.fit(X_bootstrap, Y_bootstrap)</span>
-<span id="cb15-193"><a href="#cb15-193" aria-hidden="true" tabindex="-1"></a>    bootstrap_thetas <span class="op">=</span> bootstrap_model.coef_</span>
-<span id="cb15-194"><a href="#cb15-194" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb15-195"><a href="#cb15-195" aria-hidden="true" tabindex="-1"></a>    estimates.append(bootstrap_thetas[<span class="dv">0</span>])</span>
-<span id="cb15-196"><a href="#cb15-196" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb15-197"><a href="#cb15-197" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-200"><a href="#cb15-200" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb15-201"><a href="#cb15-201" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb15-202"><a href="#cb15-202" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
-<span id="cb15-203"><a href="#cb15-203" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-204"><a href="#cb15-204" aria-hidden="true" tabindex="-1"></a>plt.figure(dpi<span class="op">=</span><span class="dv">120</span>)</span>
-<span id="cb15-205"><a href="#cb15-205" aria-hidden="true" tabindex="-1"></a>sns.histplot(estimates, stat<span class="op">=</span><span class="st">"density"</span>)</span>
-<span id="cb15-206"><a href="#cb15-206" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="vs">r"$\hat{\theta}_1$"</span>)</span>
-<span id="cb15-207"><a href="#cb15-207" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="vs">r"Bootstrapped estimates $\hat{\theta}_1$"</span>)<span class="op">;</span></span>
-<span id="cb15-208"><a href="#cb15-208" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb15-209"><a href="#cb15-209" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-210"><a href="#cb15-210" aria-hidden="true" tabindex="-1"></a>Now, we have a sense of how $\hat{\theta}_1$ might vary across different random samples. How does this help us understand if the true parameter $\theta_1$ is 0 or not? We'll use an approximate **confidence interval**. Recall from <span class="co">[</span><span class="ot">Data 8</span><span class="co">](https://inferentialthinking.com/chapters/13/3/Confidence_Intervals.html?)</span> that a x% confidence interval is a range of values where we are x% confident that the interval contains the true parameter. In other words, if we repeated the bootstrapping process above many times, we'd expect the x% confidence interval to contain the true value of $\theta_1$ about x% of the time. </span>
-<span id="cb15-211"><a href="#cb15-211" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-212"><a href="#cb15-212" aria-hidden="true" tabindex="-1"></a>For our purposes, we'll consider the approximate 95% confidence interval. Because of the <span class="co">[</span><span class="ot">duality</span><span class="co">](https://inferentialthinking.com/chapters/13/4/Using_Confidence_Intervals.html#using-a-confidence-interval-to-test-hypotheses)</span> of confidence intervals and hypothesis tests, we reject the null hypothesis at a cutoff level of 5% if 0 is not contained in the 95% confidence interval for $\hat{\theta}_1$. </span>
+<span id="cb15-184"><a href="#cb15-184" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a list to store all the bootstrapped estimates</span></span>
+<span id="cb15-185"><a href="#cb15-185" aria-hidden="true" tabindex="-1"></a>estimates <span class="op">=</span> []</span>
+<span id="cb15-186"><a href="#cb15-186" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-187"><a href="#cb15-187" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate a bootstrap resample from `eggs` and find an estimate for theta_1 using this sample. </span></span>
+<span id="cb15-188"><a href="#cb15-188" aria-hidden="true" tabindex="-1"></a><span class="co"># Repeat 10000 times.</span></span>
+<span id="cb15-189"><a href="#cb15-189" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10000</span>):</span>
+<span id="cb15-190"><a href="#cb15-190" aria-hidden="true" tabindex="-1"></a>    bootstrap_resample <span class="op">=</span> eggs.sample(n, replace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb15-191"><a href="#cb15-191" aria-hidden="true" tabindex="-1"></a>    X_bootstrap <span class="op">=</span> bootstrap_resample[[<span class="st">"egg_weight"</span>, <span class="st">"egg_length"</span>, <span class="st">"egg_breadth"</span>]]</span>
+<span id="cb15-192"><a href="#cb15-192" aria-hidden="true" tabindex="-1"></a>    Y_bootstrap <span class="op">=</span> bootstrap_resample[<span class="st">"bird_weight"</span>]</span>
+<span id="cb15-193"><a href="#cb15-193" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb15-194"><a href="#cb15-194" aria-hidden="true" tabindex="-1"></a>    bootstrap_model <span class="op">=</span> LinearRegression()</span>
+<span id="cb15-195"><a href="#cb15-195" aria-hidden="true" tabindex="-1"></a>    bootstrap_model.fit(X_bootstrap, Y_bootstrap)</span>
+<span id="cb15-196"><a href="#cb15-196" aria-hidden="true" tabindex="-1"></a>    bootstrap_thetas <span class="op">=</span> bootstrap_model.coef_</span>
+<span id="cb15-197"><a href="#cb15-197" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb15-198"><a href="#cb15-198" aria-hidden="true" tabindex="-1"></a>    estimates.append(bootstrap_thetas[<span class="dv">0</span>])</span>
+<span id="cb15-199"><a href="#cb15-199" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb15-200"><a href="#cb15-200" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-203"><a href="#cb15-203" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb15-204"><a href="#cb15-204" aria-hidden="true" tabindex="-1"></a><span class="co">#| vscode: {languageId: python}</span></span>
+<span id="cb15-205"><a href="#cb15-205" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb15-206"><a href="#cb15-206" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb15-207"><a href="#cb15-207" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-208"><a href="#cb15-208" aria-hidden="true" tabindex="-1"></a>plt.figure(dpi<span class="op">=</span><span class="dv">120</span>)</span>
+<span id="cb15-209"><a href="#cb15-209" aria-hidden="true" tabindex="-1"></a>sns.histplot(estimates, stat<span class="op">=</span><span class="st">"density"</span>)</span>
+<span id="cb15-210"><a href="#cb15-210" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="vs">r"$\hat{\theta}_1$"</span>)</span>
+<span id="cb15-211"><a href="#cb15-211" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="vs">r"Bootstrapped estimates $\hat{\theta}_1$"</span>)<span class="op">;</span></span>
+<span id="cb15-212"><a href="#cb15-212" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb15-213"><a href="#cb15-213" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-214"><a href="#cb15-214" aria-hidden="true" tabindex="-1"></a>To create a 95% confidence interval, we compute the 2.5th and 97.5th percentiles of our bootstrapped estimates of $\theta_1$. </span>
+<span id="cb15-214"><a href="#cb15-214" aria-hidden="true" tabindex="-1"></a>Now, we have a sense of how $\hat{\theta}_1$ might vary across different random samples. How does this help us understand if the true parameter $\theta_1$ is 0 or not? We'll use an approximate **confidence interval**. Recall from <span class="co">[</span><span class="ot">Data 8</span><span class="co">](https://inferentialthinking.com/chapters/13/3/Confidence_Intervals.html?)</span> that a x% confidence interval is a range of values where we are x% confident that the interval contains the true parameter. In other words, if we repeated the bootstrapping process above many times, we'd expect the x% confidence interval to contain the true value of $\theta_1$ about x% of the time. </span>
 <span id="cb15-215"><a href="#cb15-215" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-218"><a href="#cb15-218" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb15-219"><a href="#cb15-219" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: false</span></span>
-<span id="cb15-220"><a href="#cb15-220" aria-hidden="true" tabindex="-1"></a>lower <span class="op">=</span> np.percentile(estimates, <span class="fl">2.5</span>)</span>
-<span id="cb15-221"><a href="#cb15-221" aria-hidden="true" tabindex="-1"></a>upper <span class="op">=</span> np.percentile(estimates, <span class="fl">97.5</span>)</span>
-<span id="cb15-222"><a href="#cb15-222" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-223"><a href="#cb15-223" aria-hidden="true" tabindex="-1"></a>conf_interval <span class="op">=</span> (lower, upper)</span>
-<span id="cb15-224"><a href="#cb15-224" aria-hidden="true" tabindex="-1"></a>conf_interval</span>
-<span id="cb15-225"><a href="#cb15-225" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb15-226"><a href="#cb15-226" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-227"><a href="#cb15-227" aria-hidden="true" tabindex="-1"></a>We find that our bootstrapped approximate 95% confidence interval for $\theta_1$ is $<span class="co">[</span><span class="ot">-0.259, 1.103</span><span class="co">]</span>$. Immediately, we can see that 0 *is* contained in this interval – this means that we *cannot* conclude that $\theta_1$ is non-zero! More formally, we cannot reject the null hypothesis (that $\theta_1$ is 0) under a 5% cutoff. </span>
-<span id="cb15-228"><a href="#cb15-228" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-229"><a href="#cb15-229" aria-hidden="true" tabindex="-1"></a>We can repeat this process to construct 95% confidence intervals for the other parameters of the model.</span>
-<span id="cb15-230"><a href="#cb15-230" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-233"><a href="#cb15-233" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb15-234"><a href="#cb15-234" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">1337</span>)</span>
+<span id="cb15-216"><a href="#cb15-216" aria-hidden="true" tabindex="-1"></a>For our purposes, we'll consider the approximate 95% confidence interval. Because of the <span class="co">[</span><span class="ot">duality</span><span class="co">](https://inferentialthinking.com/chapters/13/4/Using_Confidence_Intervals.html#using-a-confidence-interval-to-test-hypotheses)</span> of confidence intervals and hypothesis tests, we reject the null hypothesis at a cutoff level of 5% if 0 is not contained in the 95% confidence interval for $\hat{\theta}_1$. </span>
+<span id="cb15-217"><a href="#cb15-217" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-218"><a href="#cb15-218" aria-hidden="true" tabindex="-1"></a>To create a 95% confidence interval, we compute the 2.5th and 97.5th percentiles of our bootstrapped estimates of $\theta_1$. </span>
+<span id="cb15-219"><a href="#cb15-219" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-222"><a href="#cb15-222" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb15-223"><a href="#cb15-223" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: false</span></span>
+<span id="cb15-224"><a href="#cb15-224" aria-hidden="true" tabindex="-1"></a><span class="co">#| vscode: {languageId: python}</span></span>
+<span id="cb15-225"><a href="#cb15-225" aria-hidden="true" tabindex="-1"></a>lower <span class="op">=</span> np.percentile(estimates, <span class="fl">2.5</span>)</span>
+<span id="cb15-226"><a href="#cb15-226" aria-hidden="true" tabindex="-1"></a>upper <span class="op">=</span> np.percentile(estimates, <span class="fl">97.5</span>)</span>
+<span id="cb15-227"><a href="#cb15-227" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-228"><a href="#cb15-228" aria-hidden="true" tabindex="-1"></a>conf_interval <span class="op">=</span> (lower, upper)</span>
+<span id="cb15-229"><a href="#cb15-229" aria-hidden="true" tabindex="-1"></a>conf_interval</span>
+<span id="cb15-230"><a href="#cb15-230" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb15-231"><a href="#cb15-231" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-232"><a href="#cb15-232" aria-hidden="true" tabindex="-1"></a>We find that our bootstrapped approximate 95% confidence interval for $\theta_1$ is $<span class="co">[</span><span class="ot">-0.259, 1.103</span><span class="co">]</span>$. Immediately, we can see that 0 *is* contained in this interval – this means that we *cannot* conclude that $\theta_1$ is non-zero! More formally, we cannot reject the null hypothesis (that $\theta_1$ is 0) under a 5% cutoff. </span>
+<span id="cb15-233"><a href="#cb15-233" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-234"><a href="#cb15-234" aria-hidden="true" tabindex="-1"></a>We can repeat this process to construct 95% confidence intervals for the other parameters of the model.</span>
 <span id="cb15-235"><a href="#cb15-235" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-236"><a href="#cb15-236" aria-hidden="true" tabindex="-1"></a>theta_0_estimates <span class="op">=</span> []</span>
-<span id="cb15-237"><a href="#cb15-237" aria-hidden="true" tabindex="-1"></a>theta_1_estimates <span class="op">=</span> []</span>
-<span id="cb15-238"><a href="#cb15-238" aria-hidden="true" tabindex="-1"></a>theta_2_estimates <span class="op">=</span> []</span>
-<span id="cb15-239"><a href="#cb15-239" aria-hidden="true" tabindex="-1"></a>theta_3_estimates <span class="op">=</span> []</span>
-<span id="cb15-240"><a href="#cb15-240" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-238"><a href="#cb15-238" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb15-239"><a href="#cb15-239" aria-hidden="true" tabindex="-1"></a><span class="co">#| vscode: {languageId: python}</span></span>
+<span id="cb15-240"><a href="#cb15-240" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">1337</span>)</span>
 <span id="cb15-241"><a href="#cb15-241" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-242"><a href="#cb15-242" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10000</span>):</span>
-<span id="cb15-243"><a href="#cb15-243" aria-hidden="true" tabindex="-1"></a>    bootstrap_resample <span class="op">=</span> eggs.sample(n, replace<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb15-244"><a href="#cb15-244" aria-hidden="true" tabindex="-1"></a>    X_bootstrap <span class="op">=</span> bootstrap_resample[[<span class="st">"egg_weight"</span>, <span class="st">"egg_length"</span>, <span class="st">"egg_breadth"</span>]]</span>
-<span id="cb15-245"><a href="#cb15-245" aria-hidden="true" tabindex="-1"></a>    Y_bootstrap <span class="op">=</span> bootstrap_resample[<span class="st">"bird_weight"</span>]</span>
-<span id="cb15-246"><a href="#cb15-246" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb15-247"><a href="#cb15-247" aria-hidden="true" tabindex="-1"></a>    bootstrap_model <span class="op">=</span> LinearRegression()</span>
-<span id="cb15-248"><a href="#cb15-248" aria-hidden="true" tabindex="-1"></a>    bootstrap_model.fit(X_bootstrap, Y_bootstrap)</span>
-<span id="cb15-249"><a href="#cb15-249" aria-hidden="true" tabindex="-1"></a>    bootstrap_theta_0 <span class="op">=</span> bootstrap_model.intercept_</span>
-<span id="cb15-250"><a href="#cb15-250" aria-hidden="true" tabindex="-1"></a>    bootstrap_theta_1, bootstrap_theta_2, bootstrap_theta_3 <span class="op">=</span> bootstrap_model.coef_</span>
-<span id="cb15-251"><a href="#cb15-251" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb15-252"><a href="#cb15-252" aria-hidden="true" tabindex="-1"></a>    theta_0_estimates.append(bootstrap_theta_0)</span>
-<span id="cb15-253"><a href="#cb15-253" aria-hidden="true" tabindex="-1"></a>    theta_1_estimates.append(bootstrap_theta_1)</span>
-<span id="cb15-254"><a href="#cb15-254" aria-hidden="true" tabindex="-1"></a>    theta_2_estimates.append(bootstrap_theta_2)</span>
-<span id="cb15-255"><a href="#cb15-255" aria-hidden="true" tabindex="-1"></a>    theta_3_estimates.append(bootstrap_theta_3)</span>
-<span id="cb15-256"><a href="#cb15-256" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb15-257"><a href="#cb15-257" aria-hidden="true" tabindex="-1"></a>theta_0_lower, theta_0_upper <span class="op">=</span> np.percentile(theta_0_estimates, <span class="fl">2.5</span>), np.percentile(theta_0_estimates, <span class="fl">97.5</span>)</span>
-<span id="cb15-258"><a href="#cb15-258" aria-hidden="true" tabindex="-1"></a>theta_1_lower, theta_1_upper <span class="op">=</span> np.percentile(theta_1_estimates, <span class="fl">2.5</span>), np.percentile(theta_1_estimates, <span class="fl">97.5</span>)</span>
-<span id="cb15-259"><a href="#cb15-259" aria-hidden="true" tabindex="-1"></a>theta_2_lower, theta_2_upper <span class="op">=</span> np.percentile(theta_2_estimates, <span class="fl">2.5</span>), np.percentile(theta_2_estimates, <span class="fl">97.5</span>)</span>
-<span id="cb15-260"><a href="#cb15-260" aria-hidden="true" tabindex="-1"></a>theta_3_lower, theta_3_upper <span class="op">=</span> np.percentile(theta_3_estimates, <span class="fl">2.5</span>), np.percentile(theta_3_estimates, <span class="fl">97.5</span>)</span>
-<span id="cb15-261"><a href="#cb15-261" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-262"><a href="#cb15-262" aria-hidden="true" tabindex="-1"></a><span class="co"># Make a nice table to view results</span></span>
-<span id="cb15-263"><a href="#cb15-263" aria-hidden="true" tabindex="-1"></a>pd.DataFrame({<span class="st">"lower"</span>:[theta_0_lower, theta_1_lower, theta_2_lower, theta_3_lower], <span class="st">"upper"</span>:[theta_0_upper, <span class="op">\</span></span>
-<span id="cb15-264"><a href="#cb15-264" aria-hidden="true" tabindex="-1"></a>                theta_1_upper, theta_2_upper, theta_3_upper]}, index<span class="op">=</span>[<span class="st">"theta_0"</span>, <span class="st">"theta_1"</span>, <span class="st">"theta_2"</span>, <span class="st">"theta_3"</span>])</span>
-<span id="cb15-265"><a href="#cb15-265" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb15-266"><a href="#cb15-266" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-267"><a href="#cb15-267" aria-hidden="true" tabindex="-1"></a>Something's off here. Notice that 0 is included in the 95% confidence interval for *every* parameter of the model. Using the interpretation we outlined above, this would suggest that we can't say for certain that *any* of the input variables impact the response variable! This makes it seem like our model can't make any predictions – and yet, each model we fit in our bootstrap experiment above could very much make predictions of $Y$. </span>
-<span id="cb15-268"><a href="#cb15-268" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-269"><a href="#cb15-269" aria-hidden="true" tabindex="-1"></a>How can we explain this result? Think back to how we first interpreted the parameters of a linear model. We treated each $\theta_i$ as a slope, where a unit increase in $x_i$ leads to a $\theta_i$ increase in $Y$, **if all other variables are held constant**. It turns out that this last assumption is very important. If variables in our model are somehow related to one another, then it might not be possible to have a change in one of them while holding the others constant. This means that our interpretation framework is no longer valid! In the models we fit above, we incorporated <span class="in">`egg_length`</span>, <span class="in">`egg_breadth`</span>, and <span class="in">`egg_weight`</span> as input variables. These variables are very likely related to one another – an egg with large <span class="in">`egg_length`</span> and <span class="in">`egg_breadth`</span> will likely be heavy in <span class="in">`egg_weight`</span>. This means that the model parameters cannot be meaningfully interpreted as slopes. </span>
-<span id="cb15-270"><a href="#cb15-270" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-271"><a href="#cb15-271" aria-hidden="true" tabindex="-1"></a>To support this conclusion, we can visualize the relationships between our feature variables. Notice the strong positive association between the features.</span>
+<span id="cb15-242"><a href="#cb15-242" aria-hidden="true" tabindex="-1"></a>theta_0_estimates <span class="op">=</span> []</span>
+<span id="cb15-243"><a href="#cb15-243" aria-hidden="true" tabindex="-1"></a>theta_1_estimates <span class="op">=</span> []</span>
+<span id="cb15-244"><a href="#cb15-244" aria-hidden="true" tabindex="-1"></a>theta_2_estimates <span class="op">=</span> []</span>
+<span id="cb15-245"><a href="#cb15-245" aria-hidden="true" tabindex="-1"></a>theta_3_estimates <span class="op">=</span> []</span>
+<span id="cb15-246"><a href="#cb15-246" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-247"><a href="#cb15-247" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-248"><a href="#cb15-248" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10000</span>):</span>
+<span id="cb15-249"><a href="#cb15-249" aria-hidden="true" tabindex="-1"></a>    bootstrap_resample <span class="op">=</span> eggs.sample(n, replace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb15-250"><a href="#cb15-250" aria-hidden="true" tabindex="-1"></a>    X_bootstrap <span class="op">=</span> bootstrap_resample[[<span class="st">"egg_weight"</span>, <span class="st">"egg_length"</span>, <span class="st">"egg_breadth"</span>]]</span>
+<span id="cb15-251"><a href="#cb15-251" aria-hidden="true" tabindex="-1"></a>    Y_bootstrap <span class="op">=</span> bootstrap_resample[<span class="st">"bird_weight"</span>]</span>
+<span id="cb15-252"><a href="#cb15-252" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb15-253"><a href="#cb15-253" aria-hidden="true" tabindex="-1"></a>    bootstrap_model <span class="op">=</span> LinearRegression()</span>
+<span id="cb15-254"><a href="#cb15-254" aria-hidden="true" tabindex="-1"></a>    bootstrap_model.fit(X_bootstrap, Y_bootstrap)</span>
+<span id="cb15-255"><a href="#cb15-255" aria-hidden="true" tabindex="-1"></a>    bootstrap_theta_0 <span class="op">=</span> bootstrap_model.intercept_</span>
+<span id="cb15-256"><a href="#cb15-256" aria-hidden="true" tabindex="-1"></a>    bootstrap_theta_1, bootstrap_theta_2, bootstrap_theta_3 <span class="op">=</span> bootstrap_model.coef_</span>
+<span id="cb15-257"><a href="#cb15-257" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb15-258"><a href="#cb15-258" aria-hidden="true" tabindex="-1"></a>    theta_0_estimates.append(bootstrap_theta_0)</span>
+<span id="cb15-259"><a href="#cb15-259" aria-hidden="true" tabindex="-1"></a>    theta_1_estimates.append(bootstrap_theta_1)</span>
+<span id="cb15-260"><a href="#cb15-260" aria-hidden="true" tabindex="-1"></a>    theta_2_estimates.append(bootstrap_theta_2)</span>
+<span id="cb15-261"><a href="#cb15-261" aria-hidden="true" tabindex="-1"></a>    theta_3_estimates.append(bootstrap_theta_3)</span>
+<span id="cb15-262"><a href="#cb15-262" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb15-263"><a href="#cb15-263" aria-hidden="true" tabindex="-1"></a>theta_0_lower, theta_0_upper <span class="op">=</span> np.percentile(theta_0_estimates, <span class="fl">2.5</span>), np.percentile(theta_0_estimates, <span class="fl">97.5</span>)</span>
+<span id="cb15-264"><a href="#cb15-264" aria-hidden="true" tabindex="-1"></a>theta_1_lower, theta_1_upper <span class="op">=</span> np.percentile(theta_1_estimates, <span class="fl">2.5</span>), np.percentile(theta_1_estimates, <span class="fl">97.5</span>)</span>
+<span id="cb15-265"><a href="#cb15-265" aria-hidden="true" tabindex="-1"></a>theta_2_lower, theta_2_upper <span class="op">=</span> np.percentile(theta_2_estimates, <span class="fl">2.5</span>), np.percentile(theta_2_estimates, <span class="fl">97.5</span>)</span>
+<span id="cb15-266"><a href="#cb15-266" aria-hidden="true" tabindex="-1"></a>theta_3_lower, theta_3_upper <span class="op">=</span> np.percentile(theta_3_estimates, <span class="fl">2.5</span>), np.percentile(theta_3_estimates, <span class="fl">97.5</span>)</span>
+<span id="cb15-267"><a href="#cb15-267" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-268"><a href="#cb15-268" aria-hidden="true" tabindex="-1"></a><span class="co"># Make a nice table to view results</span></span>
+<span id="cb15-269"><a href="#cb15-269" aria-hidden="true" tabindex="-1"></a>pd.DataFrame({<span class="st">"lower"</span>:[theta_0_lower, theta_1_lower, theta_2_lower, theta_3_lower], <span class="st">"upper"</span>:[theta_0_upper, <span class="op">\</span></span>
+<span id="cb15-270"><a href="#cb15-270" aria-hidden="true" tabindex="-1"></a>                theta_1_upper, theta_2_upper, theta_3_upper]}, index<span class="op">=</span>[<span class="st">"theta_0"</span>, <span class="st">"theta_1"</span>, <span class="st">"theta_2"</span>, <span class="st">"theta_3"</span>])</span>
+<span id="cb15-271"><a href="#cb15-271" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb15-272"><a href="#cb15-272" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-275"><a href="#cb15-275" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb15-276"><a href="#cb15-276" aria-hidden="true" tabindex="-1"></a>sns.pairplot(eggs[[<span class="st">"egg_length"</span>, <span class="st">"egg_breadth"</span>, <span class="st">"egg_weight"</span>]])<span class="op">;</span></span>
-<span id="cb15-277"><a href="#cb15-277" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb15-273"><a href="#cb15-273" aria-hidden="true" tabindex="-1"></a>Something's off here. Notice that 0 is included in the 95% confidence interval for *every* parameter of the model. Using the interpretation we outlined above, this would suggest that we can't say for certain that *any* of the input variables impact the response variable! This makes it seem like our model can't make any predictions – and yet, each model we fit in our bootstrap experiment above could very much make predictions of $Y$. </span>
+<span id="cb15-274"><a href="#cb15-274" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-275"><a href="#cb15-275" aria-hidden="true" tabindex="-1"></a>How can we explain this result? Think back to how we first interpreted the parameters of a linear model. We treated each $\theta_i$ as a slope, where a unit increase in $x_i$ leads to a $\theta_i$ increase in $Y$, **if all other variables are held constant**. It turns out that this last assumption is very important. If variables in our model are somehow related to one another, then it might not be possible to have a change in one of them while holding the others constant. This means that our interpretation framework is no longer valid! In the models we fit above, we incorporated <span class="in">`egg_length`</span>, <span class="in">`egg_breadth`</span>, and <span class="in">`egg_weight`</span> as input variables. These variables are very likely related to one another – an egg with large <span class="in">`egg_length`</span> and <span class="in">`egg_breadth`</span> will likely be heavy in <span class="in">`egg_weight`</span>. This means that the model parameters cannot be meaningfully interpreted as slopes. </span>
+<span id="cb15-276"><a href="#cb15-276" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-277"><a href="#cb15-277" aria-hidden="true" tabindex="-1"></a>To support this conclusion, we can visualize the relationships between our feature variables. Notice the strong positive association between the features.</span>
 <span id="cb15-278"><a href="#cb15-278" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-279"><a href="#cb15-279" aria-hidden="true" tabindex="-1"></a>This issue is known as **colinearity**, sometimes also called **multicolinearity**. Colinearity occurs when one feature can be predicted fairly accurately by a linear combination of the other features, which happens when one feature is highly correlated with the others. </span>
-<span id="cb15-280"><a href="#cb15-280" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-281"><a href="#cb15-281" aria-hidden="true" tabindex="-1"></a>Why is colinearity a problem? Its consequences span several aspects of the modeling process:</span>
-<span id="cb15-282"><a href="#cb15-282" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-283"><a href="#cb15-283" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Slopes can't be interpreted for an inference task</span>
-<span id="cb15-284"><a href="#cb15-284" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>If features strongly influence one another, even small changes in the sampled data can lead to large changes in the estimated slopes </span>
-<span id="cb15-285"><a href="#cb15-285" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>If one feature actually is a linear combination of the other features, the design matrix will not be full rank and $\mathbb{X}^T\mathbb{X}$ is not invertible. This means that least squares does not have a single solution</span>
-<span id="cb15-286"><a href="#cb15-286" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-287"><a href="#cb15-287" aria-hidden="true" tabindex="-1"></a>The take-home point is that we need to be careful with what features we select for modeling. If two features likely encode similar information, it is often a good idea to choose only one of them as an input variable.</span>
-<span id="cb15-288"><a href="#cb15-288" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-289"><a href="#cb15-289" aria-hidden="true" tabindex="-1"></a>Let us now consider a more interpretable model: we instead assume a true relationship using only egg weight:</span>
-<span id="cb15-290"><a href="#cb15-290" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-291"><a href="#cb15-291" aria-hidden="true" tabindex="-1"></a>$$f_\theta(x) = \theta_0 + \theta_1 \text{egg_weight} + \epsilon$$</span>
-<span id="cb15-292"><a href="#cb15-292" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-295"><a href="#cb15-295" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb15-296"><a href="#cb15-296" aria-hidden="true" tabindex="-1"></a>X_int <span class="op">=</span> eggs[[<span class="st">"egg_weight"</span>]]</span>
-<span id="cb15-297"><a href="#cb15-297" aria-hidden="true" tabindex="-1"></a>Y_int <span class="op">=</span> eggs[<span class="st">"bird_weight"</span>]</span>
-<span id="cb15-298"><a href="#cb15-298" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-299"><a href="#cb15-299" aria-hidden="true" tabindex="-1"></a>model_int <span class="op">=</span> LinearRegression()</span>
-<span id="cb15-300"><a href="#cb15-300" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-301"><a href="#cb15-301" aria-hidden="true" tabindex="-1"></a>model_int.fit(X_int, Y_int)</span>
-<span id="cb15-302"><a href="#cb15-302" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-303"><a href="#cb15-303" aria-hidden="true" tabindex="-1"></a><span class="co"># This gives an array containing the fitted model parameter estimates</span></span>
-<span id="cb15-304"><a href="#cb15-304" aria-hidden="true" tabindex="-1"></a>thetas_int <span class="op">=</span> model_int.coef_</span>
-<span id="cb15-305"><a href="#cb15-305" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-306"><a href="#cb15-306" aria-hidden="true" tabindex="-1"></a><span class="co"># Put the parameter estimates in a nice table for viewing</span></span>
-<span id="cb15-307"><a href="#cb15-307" aria-hidden="true" tabindex="-1"></a>pd.DataFrame({<span class="st">"theta_hat"</span>:[model_int.intercept_, thetas_int[<span class="dv">0</span>]]}, index<span class="op">=</span>[<span class="st">"theta_0"</span>, <span class="st">"theta_1"</span>])</span>
-<span id="cb15-308"><a href="#cb15-308" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb15-309"><a href="#cb15-309" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-312"><a href="#cb15-312" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb15-313"><a href="#cb15-313" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: false</span></span>
-<span id="cb15-314"><a href="#cb15-314" aria-hidden="true" tabindex="-1"></a><span class="co"># Set a random seed so you generate the same random sample as staff</span></span>
-<span id="cb15-315"><a href="#cb15-315" aria-hidden="true" tabindex="-1"></a><span class="co"># In the "real world", we wouldn't do this</span></span>
-<span id="cb15-316"><a href="#cb15-316" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">1337</span>)</span>
+<span id="cb15-281"><a href="#cb15-281" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb15-282"><a href="#cb15-282" aria-hidden="true" tabindex="-1"></a><span class="co">#| vscode: {languageId: python}</span></span>
+<span id="cb15-283"><a href="#cb15-283" aria-hidden="true" tabindex="-1"></a>sns.pairplot(eggs[[<span class="st">"egg_length"</span>, <span class="st">"egg_breadth"</span>, <span class="st">"egg_weight"</span>]])<span class="op">;</span></span>
+<span id="cb15-284"><a href="#cb15-284" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb15-285"><a href="#cb15-285" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-286"><a href="#cb15-286" aria-hidden="true" tabindex="-1"></a>This issue is known as **colinearity**, sometimes also called **multicolinearity**. Colinearity occurs when one feature can be predicted fairly accurately by a linear combination of the other features, which happens when one feature is highly correlated with the others. </span>
+<span id="cb15-287"><a href="#cb15-287" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-288"><a href="#cb15-288" aria-hidden="true" tabindex="-1"></a>Why is colinearity a problem? Its consequences span several aspects of the modeling process:</span>
+<span id="cb15-289"><a href="#cb15-289" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-290"><a href="#cb15-290" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Slopes can't be interpreted for an inference task</span>
+<span id="cb15-291"><a href="#cb15-291" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>If features strongly influence one another, even small changes in the sampled data can lead to large changes in the estimated slopes </span>
+<span id="cb15-292"><a href="#cb15-292" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>If one feature actually is a linear combination of the other features, the design matrix will not be full rank and $\mathbb{X}^T\mathbb{X}$ is not invertible. This means that least squares does not have a single solution</span>
+<span id="cb15-293"><a href="#cb15-293" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-294"><a href="#cb15-294" aria-hidden="true" tabindex="-1"></a>The take-home point is that we need to be careful with what features we select for modeling. If two features likely encode similar information, it is often a good idea to choose only one of them as an input variable.</span>
+<span id="cb15-295"><a href="#cb15-295" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-296"><a href="#cb15-296" aria-hidden="true" tabindex="-1"></a>Let us now consider a more interpretable model: we instead assume a true relationship using only egg weight:</span>
+<span id="cb15-297"><a href="#cb15-297" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-298"><a href="#cb15-298" aria-hidden="true" tabindex="-1"></a>$$f_\theta(x) = \theta_0 + \theta_1 \text{egg<span class="sc">\_</span>weight} + \epsilon$$</span>
+<span id="cb15-299"><a href="#cb15-299" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-302"><a href="#cb15-302" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb15-303"><a href="#cb15-303" aria-hidden="true" tabindex="-1"></a><span class="co">#| vscode: {languageId: python}</span></span>
+<span id="cb15-304"><a href="#cb15-304" aria-hidden="true" tabindex="-1"></a>X_int <span class="op">=</span> eggs[[<span class="st">"egg_weight"</span>]]</span>
+<span id="cb15-305"><a href="#cb15-305" aria-hidden="true" tabindex="-1"></a>Y_int <span class="op">=</span> eggs[<span class="st">"bird_weight"</span>]</span>
+<span id="cb15-306"><a href="#cb15-306" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-307"><a href="#cb15-307" aria-hidden="true" tabindex="-1"></a>model_int <span class="op">=</span> LinearRegression()</span>
+<span id="cb15-308"><a href="#cb15-308" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-309"><a href="#cb15-309" aria-hidden="true" tabindex="-1"></a>model_int.fit(X_int, Y_int)</span>
+<span id="cb15-310"><a href="#cb15-310" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-311"><a href="#cb15-311" aria-hidden="true" tabindex="-1"></a><span class="co"># This gives an array containing the fitted model parameter estimates</span></span>
+<span id="cb15-312"><a href="#cb15-312" aria-hidden="true" tabindex="-1"></a>thetas_int <span class="op">=</span> model_int.coef_</span>
+<span id="cb15-313"><a href="#cb15-313" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-314"><a href="#cb15-314" aria-hidden="true" tabindex="-1"></a><span class="co"># Put the parameter estimates in a nice table for viewing</span></span>
+<span id="cb15-315"><a href="#cb15-315" aria-hidden="true" tabindex="-1"></a>pd.DataFrame({<span class="st">"theta_hat"</span>:[model_int.intercept_, thetas_int[<span class="dv">0</span>]]}, index<span class="op">=</span>[<span class="st">"theta_0"</span>, <span class="st">"theta_1"</span>])</span>
+<span id="cb15-316"><a href="#cb15-316" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb15-317"><a href="#cb15-317" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-318"><a href="#cb15-318" aria-hidden="true" tabindex="-1"></a><span class="co"># Set the sample size of each bootstrap sample</span></span>
-<span id="cb15-319"><a href="#cb15-319" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="bu">len</span>(eggs)</span>
-<span id="cb15-320"><a href="#cb15-320" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-321"><a href="#cb15-321" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a list to store all the bootstrapped estimates</span></span>
-<span id="cb15-322"><a href="#cb15-322" aria-hidden="true" tabindex="-1"></a>estimates_int <span class="op">=</span> []</span>
-<span id="cb15-323"><a href="#cb15-323" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-324"><a href="#cb15-324" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate a bootstrap resample from `eggs` and find an estimate for theta_1 using this sample. </span></span>
-<span id="cb15-325"><a href="#cb15-325" aria-hidden="true" tabindex="-1"></a><span class="co"># Repeat 10000 times.</span></span>
-<span id="cb15-326"><a href="#cb15-326" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10000</span>):</span>
-<span id="cb15-327"><a href="#cb15-327" aria-hidden="true" tabindex="-1"></a>    bootstrap_resample_int <span class="op">=</span> eggs.sample(n, replace<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb15-328"><a href="#cb15-328" aria-hidden="true" tabindex="-1"></a>    X_bootstrap_int <span class="op">=</span> bootstrap_resample_int[[<span class="st">"egg_weight"</span>]]</span>
-<span id="cb15-329"><a href="#cb15-329" aria-hidden="true" tabindex="-1"></a>    Y_bootstrap_int <span class="op">=</span> bootstrap_resample_int[<span class="st">"bird_weight"</span>]</span>
-<span id="cb15-330"><a href="#cb15-330" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb15-331"><a href="#cb15-331" aria-hidden="true" tabindex="-1"></a>    bootstrap_model_int <span class="op">=</span> LinearRegression()</span>
-<span id="cb15-332"><a href="#cb15-332" aria-hidden="true" tabindex="-1"></a>    bootstrap_model_int.fit(X_bootstrap_int, Y_bootstrap_int)</span>
-<span id="cb15-333"><a href="#cb15-333" aria-hidden="true" tabindex="-1"></a>    bootstrap_thetas_int <span class="op">=</span> bootstrap_model_int.coef_</span>
-<span id="cb15-334"><a href="#cb15-334" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb15-335"><a href="#cb15-335" aria-hidden="true" tabindex="-1"></a>    estimates_int.append(bootstrap_thetas_int[<span class="dv">0</span>])</span>
-<span id="cb15-336"><a href="#cb15-336" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-337"><a href="#cb15-337" aria-hidden="true" tabindex="-1"></a>plt.figure(dpi<span class="op">=</span><span class="dv">120</span>)</span>
-<span id="cb15-338"><a href="#cb15-338" aria-hidden="true" tabindex="-1"></a>sns.histplot(estimates_int, stat<span class="op">=</span><span class="st">"density"</span>)</span>
-<span id="cb15-339"><a href="#cb15-339" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="vs">r"$\hat{\theta}_1$"</span>)</span>
-<span id="cb15-340"><a href="#cb15-340" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="vs">r"Bootstrapped estimates $\hat{\theta}_1$ Under the Interpretable Model"</span>)<span class="op">;</span></span>
-<span id="cb15-341"><a href="#cb15-341" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb15-342"><a href="#cb15-342" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-343"><a href="#cb15-343" aria-hidden="true" tabindex="-1"></a>Notice how the interpretable model performs almost as well as our other model:</span>
-<span id="cb15-344"><a href="#cb15-344" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-347"><a href="#cb15-347" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb15-348"><a href="#cb15-348" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> mean_squared_error</span>
-<span id="cb15-349"><a href="#cb15-349" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-350"><a href="#cb15-350" aria-hidden="true" tabindex="-1"></a>rmse <span class="op">=</span> mean_squared_error(Y, model.predict(X))</span>
-<span id="cb15-351"><a href="#cb15-351" aria-hidden="true" tabindex="-1"></a>rmse_int <span class="op">=</span> mean_squared_error(Y_int, model_int.predict(X_int))</span>
-<span id="cb15-352"><a href="#cb15-352" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'RMSE of Original Model: </span><span class="sc">{</span>rmse<span class="sc">}</span><span class="ss">'</span>)</span>
-<span id="cb15-353"><a href="#cb15-353" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'RMSE of Interpretable Model: </span><span class="sc">{</span>rmse_int<span class="sc">}</span><span class="ss">'</span>)</span>
-<span id="cb15-354"><a href="#cb15-354" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb15-355"><a href="#cb15-355" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-356"><a href="#cb15-356" aria-hidden="true" tabindex="-1"></a>Yet, the confidence interval for the true parameter $\theta_{1}$ does not contain zero.</span>
-<span id="cb15-357"><a href="#cb15-357" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-360"><a href="#cb15-360" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb15-361"><a href="#cb15-361" aria-hidden="true" tabindex="-1"></a>lower_int <span class="op">=</span> np.percentile(estimates_int, <span class="fl">2.5</span>)</span>
-<span id="cb15-362"><a href="#cb15-362" aria-hidden="true" tabindex="-1"></a>upper_int <span class="op">=</span> np.percentile(estimates_int, <span class="fl">97.5</span>)</span>
-<span id="cb15-363"><a href="#cb15-363" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-364"><a href="#cb15-364" aria-hidden="true" tabindex="-1"></a>conf_interval_int <span class="op">=</span> (lower_int, upper_int)</span>
-<span id="cb15-365"><a href="#cb15-365" aria-hidden="true" tabindex="-1"></a>conf_interval_int</span>
-<span id="cb15-366"><a href="#cb15-366" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb15-320"><a href="#cb15-320" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb15-321"><a href="#cb15-321" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: false</span></span>
+<span id="cb15-322"><a href="#cb15-322" aria-hidden="true" tabindex="-1"></a><span class="co">#| vscode: {languageId: python}</span></span>
+<span id="cb15-323"><a href="#cb15-323" aria-hidden="true" tabindex="-1"></a><span class="co"># Set a random seed so you generate the same random sample as staff</span></span>
+<span id="cb15-324"><a href="#cb15-324" aria-hidden="true" tabindex="-1"></a><span class="co"># In the "real world", we wouldn't do this</span></span>
+<span id="cb15-325"><a href="#cb15-325" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">1337</span>)</span>
+<span id="cb15-326"><a href="#cb15-326" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-327"><a href="#cb15-327" aria-hidden="true" tabindex="-1"></a><span class="co"># Set the sample size of each bootstrap sample</span></span>
+<span id="cb15-328"><a href="#cb15-328" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="bu">len</span>(eggs)</span>
+<span id="cb15-329"><a href="#cb15-329" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-330"><a href="#cb15-330" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a list to store all the bootstrapped estimates</span></span>
+<span id="cb15-331"><a href="#cb15-331" aria-hidden="true" tabindex="-1"></a>estimates_int <span class="op">=</span> []</span>
+<span id="cb15-332"><a href="#cb15-332" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-333"><a href="#cb15-333" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate a bootstrap resample from `eggs` and find an estimate for theta_1 using this sample. </span></span>
+<span id="cb15-334"><a href="#cb15-334" aria-hidden="true" tabindex="-1"></a><span class="co"># Repeat 10000 times.</span></span>
+<span id="cb15-335"><a href="#cb15-335" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10000</span>):</span>
+<span id="cb15-336"><a href="#cb15-336" aria-hidden="true" tabindex="-1"></a>    bootstrap_resample_int <span class="op">=</span> eggs.sample(n, replace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb15-337"><a href="#cb15-337" aria-hidden="true" tabindex="-1"></a>    X_bootstrap_int <span class="op">=</span> bootstrap_resample_int[[<span class="st">"egg_weight"</span>]]</span>
+<span id="cb15-338"><a href="#cb15-338" aria-hidden="true" tabindex="-1"></a>    Y_bootstrap_int <span class="op">=</span> bootstrap_resample_int[<span class="st">"bird_weight"</span>]</span>
+<span id="cb15-339"><a href="#cb15-339" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb15-340"><a href="#cb15-340" aria-hidden="true" tabindex="-1"></a>    bootstrap_model_int <span class="op">=</span> LinearRegression()</span>
+<span id="cb15-341"><a href="#cb15-341" aria-hidden="true" tabindex="-1"></a>    bootstrap_model_int.fit(X_bootstrap_int, Y_bootstrap_int)</span>
+<span id="cb15-342"><a href="#cb15-342" aria-hidden="true" tabindex="-1"></a>    bootstrap_thetas_int <span class="op">=</span> bootstrap_model_int.coef_</span>
+<span id="cb15-343"><a href="#cb15-343" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb15-344"><a href="#cb15-344" aria-hidden="true" tabindex="-1"></a>    estimates_int.append(bootstrap_thetas_int[<span class="dv">0</span>])</span>
+<span id="cb15-345"><a href="#cb15-345" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-346"><a href="#cb15-346" aria-hidden="true" tabindex="-1"></a>plt.figure(dpi<span class="op">=</span><span class="dv">120</span>)</span>
+<span id="cb15-347"><a href="#cb15-347" aria-hidden="true" tabindex="-1"></a>sns.histplot(estimates_int, stat<span class="op">=</span><span class="st">"density"</span>)</span>
+<span id="cb15-348"><a href="#cb15-348" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="vs">r"$\hat{\theta}_1$"</span>)</span>
+<span id="cb15-349"><a href="#cb15-349" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="vs">r"Bootstrapped estimates $\hat{\theta}_1$ Under the Interpretable Model"</span>)<span class="op">;</span></span>
+<span id="cb15-350"><a href="#cb15-350" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb15-351"><a href="#cb15-351" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-352"><a href="#cb15-352" aria-hidden="true" tabindex="-1"></a>Notice how the interpretable model performs almost as well as our other model:</span>
+<span id="cb15-353"><a href="#cb15-353" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-356"><a href="#cb15-356" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb15-357"><a href="#cb15-357" aria-hidden="true" tabindex="-1"></a><span class="co">#| vscode: {languageId: python}</span></span>
+<span id="cb15-358"><a href="#cb15-358" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> mean_squared_error</span>
+<span id="cb15-359"><a href="#cb15-359" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-360"><a href="#cb15-360" aria-hidden="true" tabindex="-1"></a>rmse <span class="op">=</span> mean_squared_error(Y, model.predict(X))</span>
+<span id="cb15-361"><a href="#cb15-361" aria-hidden="true" tabindex="-1"></a>rmse_int <span class="op">=</span> mean_squared_error(Y_int, model_int.predict(X_int))</span>
+<span id="cb15-362"><a href="#cb15-362" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'RMSE of Original Model: </span><span class="sc">{</span>rmse<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb15-363"><a href="#cb15-363" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'RMSE of Interpretable Model: </span><span class="sc">{</span>rmse_int<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb15-364"><a href="#cb15-364" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb15-365"><a href="#cb15-365" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-366"><a href="#cb15-366" aria-hidden="true" tabindex="-1"></a>Yet, the confidence interval for the true parameter $\theta_{1}$ does not contain zero.</span>
 <span id="cb15-367"><a href="#cb15-367" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-368"><a href="#cb15-368" aria-hidden="true" tabindex="-1"></a>In retrospect, it’s no surprise that the weight of an egg best predicts the weight of a newly-hatched chick.</span>
-<span id="cb15-369"><a href="#cb15-369" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-370"><a href="#cb15-370" aria-hidden="true" tabindex="-1"></a>A model with highly correlated variables prevents us from interpreting how the variables are related to the prediction.</span>
-<span id="cb15-371"><a href="#cb15-371" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-372"><a href="#cb15-372" aria-hidden="true" tabindex="-1"></a><span class="fu">### Reminder: Assumptions Matter</span></span>
-<span id="cb15-373"><a href="#cb15-373" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-374"><a href="#cb15-374" aria-hidden="true" tabindex="-1"></a>Keep the following in mind:</span>
-<span id="cb15-375"><a href="#cb15-375" aria-hidden="true" tabindex="-1"></a>All inference assumes that the regression model holds.</span>
-<span id="cb15-376"><a href="#cb15-376" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-377"><a href="#cb15-377" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>If the model doesn’t hold, the inference might not be valid.</span>
-<span id="cb15-378"><a href="#cb15-378" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>If the <span class="co">[</span><span class="ot">assumptions of the bootstrap</span><span class="co">](https://inferentialthinking.com/chapters/13/3/Confidence_Intervals.html?highlight=p%20value%20confidence%20interval#care-in-using-the-bootstrap-percentile-method)</span> don’t hold…</span>
-<span id="cb15-379"><a href="#cb15-379" aria-hidden="true" tabindex="-1"></a><span class="ss">    * </span>Sample size n is large</span>
-<span id="cb15-380"><a href="#cb15-380" aria-hidden="true" tabindex="-1"></a><span class="ss">    * </span>Sample is representative of population distribution (drawn IID, unbiased)</span>
-<span id="cb15-381"><a href="#cb15-381" aria-hidden="true" tabindex="-1"></a>    …then the results of the bootstrap might not be valid.</span>
+<span id="cb15-370"><a href="#cb15-370" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb15-371"><a href="#cb15-371" aria-hidden="true" tabindex="-1"></a><span class="co">#| vscode: {languageId: python}</span></span>
+<span id="cb15-372"><a href="#cb15-372" aria-hidden="true" tabindex="-1"></a>lower_int <span class="op">=</span> np.percentile(estimates_int, <span class="fl">2.5</span>)</span>
+<span id="cb15-373"><a href="#cb15-373" aria-hidden="true" tabindex="-1"></a>upper_int <span class="op">=</span> np.percentile(estimates_int, <span class="fl">97.5</span>)</span>
+<span id="cb15-374"><a href="#cb15-374" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-375"><a href="#cb15-375" aria-hidden="true" tabindex="-1"></a>conf_interval_int <span class="op">=</span> (lower_int, upper_int)</span>
+<span id="cb15-376"><a href="#cb15-376" aria-hidden="true" tabindex="-1"></a>conf_interval_int</span>
+<span id="cb15-377"><a href="#cb15-377" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb15-378"><a href="#cb15-378" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-379"><a href="#cb15-379" aria-hidden="true" tabindex="-1"></a>In retrospect, it’s no surprise that the weight of an egg best predicts the weight of a newly-hatched chick.</span>
+<span id="cb15-380"><a href="#cb15-380" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-381"><a href="#cb15-381" aria-hidden="true" tabindex="-1"></a>A model with highly correlated variables prevents us from interpreting how the variables are related to the prediction.</span>
 <span id="cb15-382"><a href="#cb15-382" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-383"><a href="#cb15-383" aria-hidden="true" tabindex="-1"></a><span class="fu">## Correlation and Causation</span></span>
+<span id="cb15-383"><a href="#cb15-383" aria-hidden="true" tabindex="-1"></a><span class="fu">### Reminder: Assumptions Matter</span></span>
 <span id="cb15-384"><a href="#cb15-384" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-385"><a href="#cb15-385" aria-hidden="true" tabindex="-1"></a>Let us consider some questions in an arbitrary regression problem. </span>
-<span id="cb15-386"><a href="#cb15-386" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-387"><a href="#cb15-387" aria-hidden="true" tabindex="-1"></a>What does $\theta_{j}$ mean in our regression?</span>
-<span id="cb15-388"><a href="#cb15-388" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-389"><a href="#cb15-389" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Holding other variables fixed, how much should our prediction change with $X_{j}$?</span>
-<span id="cb15-390"><a href="#cb15-390" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-391"><a href="#cb15-391" aria-hidden="true" tabindex="-1"></a>For simple linear regression, this boils down to the correlation coefficient</span>
-<span id="cb15-392"><a href="#cb15-392" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-393"><a href="#cb15-393" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Does having more $x$ predict more $y$ (and by how much)?</span>
-<span id="cb15-394"><a href="#cb15-394" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-395"><a href="#cb15-395" aria-hidden="true" tabindex="-1"></a>**Examples**:</span>
-<span id="cb15-396"><a href="#cb15-396" aria-hidden="true" tabindex="-1"></a>Are homes with granite countertops worth more money?</span>
-<span id="cb15-397"><a href="#cb15-397" aria-hidden="true" tabindex="-1"></a>Is college GPA higher for students who win a certain scholarship?</span>
-<span id="cb15-398"><a href="#cb15-398" aria-hidden="true" tabindex="-1"></a>Are breastfed babies less likely to develop asthma?</span>
-<span id="cb15-399"><a href="#cb15-399" aria-hidden="true" tabindex="-1"></a>Do cancer patients given some aggressive treatment have a higher 5-year survival rate?</span>
-<span id="cb15-400"><a href="#cb15-400" aria-hidden="true" tabindex="-1"></a>Are people who smoke more likely to get cancer? </span>
+<span id="cb15-385"><a href="#cb15-385" aria-hidden="true" tabindex="-1"></a>Keep the following in mind:</span>
+<span id="cb15-386"><a href="#cb15-386" aria-hidden="true" tabindex="-1"></a>All inference assumes that the regression model holds.</span>
+<span id="cb15-387"><a href="#cb15-387" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-388"><a href="#cb15-388" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>If the model doesn’t hold, the inference might not be valid.</span>
+<span id="cb15-389"><a href="#cb15-389" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>If the <span class="co">[</span><span class="ot">assumptions of the bootstrap</span><span class="co">](https://inferentialthinking.com/chapters/13/3/Confidence_Intervals.html?highlight=p%20value%20confidence%20interval#care-in-using-the-bootstrap-percentile-method)</span> don’t hold…</span>
+<span id="cb15-390"><a href="#cb15-390" aria-hidden="true" tabindex="-1"></a><span class="ss">    * </span>Sample size n is large</span>
+<span id="cb15-391"><a href="#cb15-391" aria-hidden="true" tabindex="-1"></a><span class="ss">    * </span>Sample is representative of population distribution (drawn IID, unbiased)</span>
+<span id="cb15-392"><a href="#cb15-392" aria-hidden="true" tabindex="-1"></a>    …then the results of the bootstrap might not be valid.</span>
+<span id="cb15-393"><a href="#cb15-393" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-394"><a href="#cb15-394" aria-hidden="true" tabindex="-1"></a><span class="fu">## Correlation and Causation</span></span>
+<span id="cb15-395"><a href="#cb15-395" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-396"><a href="#cb15-396" aria-hidden="true" tabindex="-1"></a>Let us consider some questions in an arbitrary regression problem. </span>
+<span id="cb15-397"><a href="#cb15-397" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-398"><a href="#cb15-398" aria-hidden="true" tabindex="-1"></a>What does $\theta_{j}$ mean in our regression?</span>
+<span id="cb15-399"><a href="#cb15-399" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-400"><a href="#cb15-400" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Holding other variables fixed, how much should our prediction change with $X_{j}$?</span>
 <span id="cb15-401"><a href="#cb15-401" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-402"><a href="#cb15-402" aria-hidden="true" tabindex="-1"></a>These sound like causal questions, but they are not!</span>
+<span id="cb15-402"><a href="#cb15-402" aria-hidden="true" tabindex="-1"></a>For simple linear regression, this boils down to the correlation coefficient</span>
 <span id="cb15-403"><a href="#cb15-403" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-404"><a href="#cb15-404" aria-hidden="true" tabindex="-1"></a><span class="fu">### Prediction vs Causation</span></span>
+<span id="cb15-404"><a href="#cb15-404" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Does having more $x$ predict more $y$ (and by how much)?</span>
 <span id="cb15-405"><a href="#cb15-405" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-406"><a href="#cb15-406" aria-hidden="true" tabindex="-1"></a>Questions about **correlation / prediction**:</span>
-<span id="cb15-407"><a href="#cb15-407" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-408"><a href="#cb15-408" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Are homes with granite countertops worth more money?</span>
-<span id="cb15-409"><a href="#cb15-409" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Is college GPA higher for students who win a certain scholarship?</span>
-<span id="cb15-410"><a href="#cb15-410" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Are breastfed babies less likely to develop asthma?</span>
-<span id="cb15-411"><a href="#cb15-411" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Do cancer patients given some aggressive treatment have a higher 5-year survival rate?</span>
-<span id="cb15-412"><a href="#cb15-412" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Are people who smoke more likely to get cancer? </span>
-<span id="cb15-413"><a href="#cb15-413" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-414"><a href="#cb15-414" aria-hidden="true" tabindex="-1"></a>Questions about **causality**:</span>
-<span id="cb15-415"><a href="#cb15-415" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-416"><a href="#cb15-416" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>How much do granite countertops **raise** the value of a house?</span>
-<span id="cb15-417"><a href="#cb15-417" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Does getting the scholarship **improve** students’ GPAs?</span>
-<span id="cb15-418"><a href="#cb15-418" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Does breastfeeding **protect** babies against asthma?</span>
-<span id="cb15-419"><a href="#cb15-419" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Does the treatment **improve** cancer survival?</span>
-<span id="cb15-420"><a href="#cb15-420" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Does smoking **cause** cancer?</span>
-<span id="cb15-421"><a href="#cb15-421" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-422"><a href="#cb15-422" aria-hidden="true" tabindex="-1"></a>Causal questions are about the **effects** of **interventions** (not just passive observation)</span>
-<span id="cb15-423"><a href="#cb15-423" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-424"><a href="#cb15-424" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Regression coefficients sometimes called “effects” – can be deceptive!</span>
-<span id="cb15-425"><a href="#cb15-425" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-426"><a href="#cb15-426" aria-hidden="true" tabindex="-1"></a>Only one of these questions can be answered using the data alone:</span>
-<span id="cb15-427"><a href="#cb15-427" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-428"><a href="#cb15-428" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Predictive question:** Are breastfed babies healthier?</span>
-<span id="cb15-429"><a href="#cb15-429" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Causal question:** Does breastfeeding improve babies’ health?</span>
-<span id="cb15-430"><a href="#cb15-430" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-431"><a href="#cb15-431" aria-hidden="true" tabindex="-1"></a>Possible explanations for why breastfed babies are healthier on average:</span>
+<span id="cb15-406"><a href="#cb15-406" aria-hidden="true" tabindex="-1"></a>**Examples**:</span>
+<span id="cb15-407"><a href="#cb15-407" aria-hidden="true" tabindex="-1"></a>Are homes with granite countertops worth more money?</span>
+<span id="cb15-408"><a href="#cb15-408" aria-hidden="true" tabindex="-1"></a>Is college GPA higher for students who win a certain scholarship?</span>
+<span id="cb15-409"><a href="#cb15-409" aria-hidden="true" tabindex="-1"></a>Are breastfed babies less likely to develop asthma?</span>
+<span id="cb15-410"><a href="#cb15-410" aria-hidden="true" tabindex="-1"></a>Do cancer patients given some aggressive treatment have a higher 5-year survival rate?</span>
+<span id="cb15-411"><a href="#cb15-411" aria-hidden="true" tabindex="-1"></a>Are people who smoke more likely to get cancer? </span>
+<span id="cb15-412"><a href="#cb15-412" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-413"><a href="#cb15-413" aria-hidden="true" tabindex="-1"></a>These sound like causal questions, but they are not!</span>
+<span id="cb15-414"><a href="#cb15-414" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-415"><a href="#cb15-415" aria-hidden="true" tabindex="-1"></a><span class="fu">### Prediction vs Causation</span></span>
+<span id="cb15-416"><a href="#cb15-416" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-417"><a href="#cb15-417" aria-hidden="true" tabindex="-1"></a>Questions about **correlation / prediction**:</span>
+<span id="cb15-418"><a href="#cb15-418" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-419"><a href="#cb15-419" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Are homes with granite countertops worth more money?</span>
+<span id="cb15-420"><a href="#cb15-420" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Is college GPA higher for students who win a certain scholarship?</span>
+<span id="cb15-421"><a href="#cb15-421" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Are breastfed babies less likely to develop asthma?</span>
+<span id="cb15-422"><a href="#cb15-422" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Do cancer patients given some aggressive treatment have a higher 5-year survival rate?</span>
+<span id="cb15-423"><a href="#cb15-423" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Are people who smoke more likely to get cancer? </span>
+<span id="cb15-424"><a href="#cb15-424" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-425"><a href="#cb15-425" aria-hidden="true" tabindex="-1"></a>Questions about **causality**:</span>
+<span id="cb15-426"><a href="#cb15-426" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-427"><a href="#cb15-427" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>How much do granite countertops **raise** the value of a house?</span>
+<span id="cb15-428"><a href="#cb15-428" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Does getting the scholarship **improve** students’ GPAs?</span>
+<span id="cb15-429"><a href="#cb15-429" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Does breastfeeding **protect** babies against asthma?</span>
+<span id="cb15-430"><a href="#cb15-430" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Does the treatment **improve** cancer survival?</span>
+<span id="cb15-431"><a href="#cb15-431" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Does smoking **cause** cancer?</span>
 <span id="cb15-432"><a href="#cb15-432" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-433"><a href="#cb15-433" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**Causal effect:** breastfeeding makes babies healthier</span>
-<span id="cb15-434"><a href="#cb15-434" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**Reverse causality:** healthier babies more likely to successfully breastfeed</span>
-<span id="cb15-435"><a href="#cb15-435" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**Common cause:** healthier / richer parents have healthier babies and are more likely to breastfeed</span>
+<span id="cb15-433"><a href="#cb15-433" aria-hidden="true" tabindex="-1"></a>Causal questions are about the **effects** of **interventions** (not just passive observation)</span>
+<span id="cb15-434"><a href="#cb15-434" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-435"><a href="#cb15-435" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Regression coefficients sometimes called “effects” – can be deceptive!</span>
 <span id="cb15-436"><a href="#cb15-436" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-437"><a href="#cb15-437" aria-hidden="true" tabindex="-1"></a>We cannot tell which explanations are true (or to what extent) just by observing ($x$,$y$) pairs</span>
+<span id="cb15-437"><a href="#cb15-437" aria-hidden="true" tabindex="-1"></a>Only one of these questions can be answered using the data alone:</span>
 <span id="cb15-438"><a href="#cb15-438" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-439"><a href="#cb15-439" aria-hidden="true" tabindex="-1"></a>Causal questions implicitly involve **counterfactuals**:</span>
-<span id="cb15-440"><a href="#cb15-440" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-441"><a href="#cb15-441" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Would** the **same** breastfed babies have been less healthy **if** they hadn’t been breastfed?</span>
-<span id="cb15-442"><a href="#cb15-442" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Explanation 1 implies they would be, explanations 2 and 3 do not</span>
+<span id="cb15-439"><a href="#cb15-439" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Predictive question:** Are breastfed babies healthier?</span>
+<span id="cb15-440"><a href="#cb15-440" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Causal question:** Does breastfeeding improve babies’ health?</span>
+<span id="cb15-441"><a href="#cb15-441" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-442"><a href="#cb15-442" aria-hidden="true" tabindex="-1"></a>Possible explanations for why breastfed babies are healthier on average:</span>
 <span id="cb15-443"><a href="#cb15-443" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-444"><a href="#cb15-444" aria-hidden="true" tabindex="-1"></a><span class="fu">### Confounders</span></span>
-<span id="cb15-445"><a href="#cb15-445" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-446"><a href="#cb15-446" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/confounder.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'confounder'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'600'</span><span class="kw">&gt;</span></span>
+<span id="cb15-444"><a href="#cb15-444" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**Causal effect:** breastfeeding makes babies healthier</span>
+<span id="cb15-445"><a href="#cb15-445" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**Reverse causality:** healthier babies more likely to successfully breastfeed</span>
+<span id="cb15-446"><a href="#cb15-446" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**Common cause:** healthier / richer parents have healthier babies and are more likely to breastfeed</span>
 <span id="cb15-447"><a href="#cb15-447" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-448"><a href="#cb15-448" aria-hidden="true" tabindex="-1"></a>A **confounder** is a variable that affects both T and Y, distorting the correlation between them</span>
-<span id="cb15-449"><a href="#cb15-449" aria-hidden="true" tabindex="-1"></a>(e.g. rich parents → breastfeeding, baby’s health)</span>
-<span id="cb15-450"><a href="#cb15-450" aria-hidden="true" tabindex="-1"></a>Can be measured covariate, or unmeasured variable we don’t know about</span>
+<span id="cb15-448"><a href="#cb15-448" aria-hidden="true" tabindex="-1"></a>We cannot tell which explanations are true (or to what extent) just by observing ($x$,$y$) pairs</span>
+<span id="cb15-449"><a href="#cb15-449" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-450"><a href="#cb15-450" aria-hidden="true" tabindex="-1"></a>Causal questions implicitly involve **counterfactuals**:</span>
 <span id="cb15-451"><a href="#cb15-451" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-452"><a href="#cb15-452" aria-hidden="true" tabindex="-1"></a>Confounders generally cause problems</span>
-<span id="cb15-453"><a href="#cb15-453" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-454"><a href="#cb15-454" aria-hidden="true" tabindex="-1"></a>**Common assumption:** all confounders are observed (**ignorability**)</span>
-<span id="cb15-455"><a href="#cb15-455" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-456"><a href="#cb15-456" aria-hidden="true" tabindex="-1"></a><span class="fu">### Terminology</span></span>
-<span id="cb15-457"><a href="#cb15-457" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-458"><a href="#cb15-458" aria-hidden="true" tabindex="-1"></a>Let us define some terms that will help us understand causal effects.</span>
-<span id="cb15-459"><a href="#cb15-459" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-460"><a href="#cb15-460" aria-hidden="true" tabindex="-1"></a>In prediction, we had two kinds of variables</span>
-<span id="cb15-461"><a href="#cb15-461" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-462"><a href="#cb15-462" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Response** ($Y$): what we are trying to predict</span>
-<span id="cb15-463"><a href="#cb15-463" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Predictors** ($X$): inputs to our prediction</span>
+<span id="cb15-452"><a href="#cb15-452" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Would** the **same** breastfed babies have been less healthy **if** they hadn’t been breastfed?</span>
+<span id="cb15-453"><a href="#cb15-453" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Explanation 1 implies they would be, explanations 2 and 3 do not</span>
+<span id="cb15-454"><a href="#cb15-454" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-455"><a href="#cb15-455" aria-hidden="true" tabindex="-1"></a><span class="fu">### Confounders</span></span>
+<span id="cb15-456"><a href="#cb15-456" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-457"><a href="#cb15-457" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/confounder.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'confounder'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'600'</span><span class="kw">&gt;</span></span>
+<span id="cb15-458"><a href="#cb15-458" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-459"><a href="#cb15-459" aria-hidden="true" tabindex="-1"></a>A **confounder** is a variable that affects both T and Y, distorting the correlation between them</span>
+<span id="cb15-460"><a href="#cb15-460" aria-hidden="true" tabindex="-1"></a>(e.g. rich parents → breastfeeding, baby’s health)</span>
+<span id="cb15-461"><a href="#cb15-461" aria-hidden="true" tabindex="-1"></a>Can be measured covariate, or unmeasured variable we don’t know about</span>
+<span id="cb15-462"><a href="#cb15-462" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-463"><a href="#cb15-463" aria-hidden="true" tabindex="-1"></a>Confounders generally cause problems</span>
 <span id="cb15-464"><a href="#cb15-464" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-465"><a href="#cb15-465" aria-hidden="true" tabindex="-1"></a>More kinds of variables in causal inference</span>
+<span id="cb15-465"><a href="#cb15-465" aria-hidden="true" tabindex="-1"></a>**Common assumption:** all confounders are observed (**ignorability**)</span>
 <span id="cb15-466"><a href="#cb15-466" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-467"><a href="#cb15-467" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Response** ($Y$): the outcome of interest</span>
-<span id="cb15-468"><a href="#cb15-468" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Treatment** ($T$): the variable we might intervene on</span>
-<span id="cb15-469"><a href="#cb15-469" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Covariate** ($X$): other variables we measured that may affect $T$ and/or $Y$</span>
+<span id="cb15-467"><a href="#cb15-467" aria-hidden="true" tabindex="-1"></a><span class="fu">### Terminology</span></span>
+<span id="cb15-468"><a href="#cb15-468" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-469"><a href="#cb15-469" aria-hidden="true" tabindex="-1"></a>Let us define some terms that will help us understand causal effects.</span>
 <span id="cb15-470"><a href="#cb15-470" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-471"><a href="#cb15-471" aria-hidden="true" tabindex="-1"></a>For this lecture, $T$ is a **binary (0/1)** variable:</span>
+<span id="cb15-471"><a href="#cb15-471" aria-hidden="true" tabindex="-1"></a>In prediction, we had two kinds of variables</span>
 <span id="cb15-472"><a href="#cb15-472" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-473"><a href="#cb15-473" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$T=1$ is usually called treatment, and $T=0$ is usually called control</span>
-<span id="cb15-474"><a href="#cb15-474" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>e.g., breastfed or not, smoker or not</span>
+<span id="cb15-473"><a href="#cb15-473" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Response** ($Y$): what we are trying to predict</span>
+<span id="cb15-474"><a href="#cb15-474" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Predictors** ($X$): inputs to our prediction</span>
 <span id="cb15-475"><a href="#cb15-475" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-476"><a href="#cb15-476" aria-hidden="true" tabindex="-1"></a><span class="fu">### Neyman-Rubin Causal Model</span></span>
+<span id="cb15-476"><a href="#cb15-476" aria-hidden="true" tabindex="-1"></a>More kinds of variables in causal inference</span>
 <span id="cb15-477"><a href="#cb15-477" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-478"><a href="#cb15-478" aria-hidden="true" tabindex="-1"></a>Causal questions are about **counterfactuals**:</span>
-<span id="cb15-479"><a href="#cb15-479" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-480"><a href="#cb15-480" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>What would have happened if T were different?</span>
-<span id="cb15-481"><a href="#cb15-481" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>What will happen if we set T differently in the future?</span>
-<span id="cb15-482"><a href="#cb15-482" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-483"><a href="#cb15-483" aria-hidden="true" tabindex="-1"></a>We assume every individual has two **potential outcomes**</span>
-<span id="cb15-484"><a href="#cb15-484" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-485"><a href="#cb15-485" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$Y_{i}(1)$: value of $y_{i}$ if $T_{i} = 1$ (**treated outcome**)</span>
-<span id="cb15-486"><a href="#cb15-486" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$Y_{i}(0)$: value of $y_{i}$ if $T_{i} = 0$ (**control outcome**)</span>
-<span id="cb15-487"><a href="#cb15-487" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-488"><a href="#cb15-488" aria-hidden="true" tabindex="-1"></a>For each individual in the data set, we observe:</span>
-<span id="cb15-489"><a href="#cb15-489" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-490"><a href="#cb15-490" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Covariates $x_{i}$</span>
-<span id="cb15-491"><a href="#cb15-491" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Treatment $T_{i}$</span>
-<span id="cb15-492"><a href="#cb15-492" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Response $y_{i} = Y_{i}(T_{i})$</span>
+<span id="cb15-478"><a href="#cb15-478" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Response** ($Y$): the outcome of interest</span>
+<span id="cb15-479"><a href="#cb15-479" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Treatment** ($T$): the variable we might intervene on</span>
+<span id="cb15-480"><a href="#cb15-480" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Covariate** ($X$): other variables we measured that may affect $T$ and/or $Y$</span>
+<span id="cb15-481"><a href="#cb15-481" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-482"><a href="#cb15-482" aria-hidden="true" tabindex="-1"></a>For this lecture, $T$ is a **binary (0/1)** variable:</span>
+<span id="cb15-483"><a href="#cb15-483" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-484"><a href="#cb15-484" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$T=1$ is usually called treatment, and $T=0$ is usually called control</span>
+<span id="cb15-485"><a href="#cb15-485" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>e.g., breastfed or not, smoker or not</span>
+<span id="cb15-486"><a href="#cb15-486" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-487"><a href="#cb15-487" aria-hidden="true" tabindex="-1"></a><span class="fu">### Neyman-Rubin Causal Model</span></span>
+<span id="cb15-488"><a href="#cb15-488" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-489"><a href="#cb15-489" aria-hidden="true" tabindex="-1"></a>Causal questions are about **counterfactuals**:</span>
+<span id="cb15-490"><a href="#cb15-490" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-491"><a href="#cb15-491" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>What would have happened if T were different?</span>
+<span id="cb15-492"><a href="#cb15-492" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>What will happen if we set T differently in the future?</span>
 <span id="cb15-493"><a href="#cb15-493" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-494"><a href="#cb15-494" aria-hidden="true" tabindex="-1"></a>We will assume ($x_{i}$, $T_{i}$, $y_{i} = Y_{i}(T_{i})$) tuples iid for $i = 1,..., n$</span>
+<span id="cb15-494"><a href="#cb15-494" aria-hidden="true" tabindex="-1"></a>We assume every individual has two **potential outcomes**</span>
 <span id="cb15-495"><a href="#cb15-495" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-496"><a href="#cb15-496" aria-hidden="true" tabindex="-1"></a><span class="fu">### Average Treatment Effect</span></span>
-<span id="cb15-497"><a href="#cb15-497" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-498"><a href="#cb15-498" aria-hidden="true" tabindex="-1"></a>For each individual, the **treatment effect** is $Y_{i}(1)-Y_{i}(0)$</span>
-<span id="cb15-499"><a href="#cb15-499" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-500"><a href="#cb15-500" aria-hidden="true" tabindex="-1"></a>Most common thing to estimate is the **Average Treatment Effect (ATE)**</span>
-<span id="cb15-501"><a href="#cb15-501" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-502"><a href="#cb15-502" aria-hidden="true" tabindex="-1"></a>$$ATE = \mathbb{E}<span class="co">[</span><span class="ot">Y(1)-Y(0)</span><span class="co">]</span> = \mathbb{E}<span class="co">[</span><span class="ot">Y(1)</span><span class="co">]</span> - \mathbb{E}<span class="co">[</span><span class="ot">Y(0)</span><span class="co">]</span>$$</span>
-<span id="cb15-503"><a href="#cb15-503" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-504"><a href="#cb15-504" aria-hidden="true" tabindex="-1"></a>Can we just take the sample mean?</span>
-<span id="cb15-505"><a href="#cb15-505" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-506"><a href="#cb15-506" aria-hidden="true" tabindex="-1"></a>$$\hat{ATE} = \frac{1}{n}\sum_{i=1}^{n}Y_{i}(1) - Y_{i}(0)$$</span>
-<span id="cb15-507"><a href="#cb15-507" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-508"><a href="#cb15-508" aria-hidden="true" tabindex="-1"></a>We cannot. Why? We only observe one of $Y_{i}(1)$, $Y_{i}(0)$.</span>
-<span id="cb15-509"><a href="#cb15-509" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-510"><a href="#cb15-510" aria-hidden="true" tabindex="-1"></a>**Fundamental problem of causal inference:** We only ever observe one potential outcome</span>
-<span id="cb15-511"><a href="#cb15-511" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-512"><a href="#cb15-512" aria-hidden="true" tabindex="-1"></a>To draw causal conclusions, we need some causal assumption relating the observed to the unobserved units</span>
-<span id="cb15-513"><a href="#cb15-513" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-514"><a href="#cb15-514" aria-hidden="true" tabindex="-1"></a>Instead of $\frac{1}{n}\sum_{i=1}^{n}Y_{i}(1) - Y_{i}(0)$, what if we took the difference between the sample mean for each group?</span>
-<span id="cb15-515"><a href="#cb15-515" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-516"><a href="#cb15-516" aria-hidden="true" tabindex="-1"></a>$$\hat{ATE} = \frac{1}{n_{1}}\sum_{i: T_{i} = 1}{Y_{i}(1)} - \frac{1}{n_{0}}\sum_{i: T_{i} = 0}{Y_{i}(0)} = \frac{1}{n_{1}}\sum_{i: T_{i} = 1}{y_{i}} - \frac{1}{n_{0}}\sum_{i: T_{i} = 0}{y_{i}}$$</span>
-<span id="cb15-517"><a href="#cb15-517" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-518"><a href="#cb15-518" aria-hidden="true" tabindex="-1"></a>Is this estimator of $ATE$ unbiased? Thus, this proposed $\hat{ATE}$ is not suitable for our purposes.</span>
-<span id="cb15-519"><a href="#cb15-519" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-520"><a href="#cb15-520" aria-hidden="true" tabindex="-1"></a>if treatment assignment comes from random coin flips, then the treated units are an iid random sample of size $n_{1}$ from the population of $Y_{i}(1)$.</span>
-<span id="cb15-521"><a href="#cb15-521" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-522"><a href="#cb15-522" aria-hidden="true" tabindex="-1"></a>This means that, </span>
-<span id="cb15-523"><a href="#cb15-523" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-524"><a href="#cb15-524" aria-hidden="true" tabindex="-1"></a>$$\mathbb{E}<span class="co">[</span><span class="ot">\frac{1}{n_{1}}\sum_{i: T_{i} = 1}{y_{i}}</span><span class="co">]</span> = \mathbb{E}<span class="co">[</span><span class="ot">Y_{i}(1)</span><span class="co">]</span>$$</span>
-<span id="cb15-525"><a href="#cb15-525" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-526"><a href="#cb15-526" aria-hidden="true" tabindex="-1"></a>Similarly, </span>
-<span id="cb15-527"><a href="#cb15-527" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-528"><a href="#cb15-528" aria-hidden="true" tabindex="-1"></a>$$\mathbb{E}<span class="co">[</span><span class="ot">\frac{1}{n_{0}}\sum_{i: T_{i} = 0}{y_{i}}</span><span class="co">]</span> = \mathbb{E}<span class="co">[</span><span class="ot">Y_{i}(0)</span><span class="co">]</span>$$</span>
-<span id="cb15-529"><a href="#cb15-529" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-530"><a href="#cb15-530" aria-hidden="true" tabindex="-1"></a>which allows us to conclude that $\hat{ATE}$ is an unbiased estimator of $ATE$:</span>
-<span id="cb15-531"><a href="#cb15-531" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-532"><a href="#cb15-532" aria-hidden="true" tabindex="-1"></a>$$\mathbb{E}<span class="co">[</span><span class="ot">\hat{ATE}</span><span class="co">]</span> = ATE$$</span>
-<span id="cb15-533"><a href="#cb15-533" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-534"><a href="#cb15-534" aria-hidden="true" tabindex="-1"></a><span class="fu">### Randomized Experiments</span></span>
-<span id="cb15-535"><a href="#cb15-535" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-536"><a href="#cb15-536" aria-hidden="true" tabindex="-1"></a>However, often, randomy assigning treatments is impractical or unethical. For example, assigning a treatment of cigarettes would likely be impractical and unethical.</span>
-<span id="cb15-537"><a href="#cb15-537" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-538"><a href="#cb15-538" aria-hidden="true" tabindex="-1"></a>An alternative to bypass this issue is to utilize **observational studies**.</span>
-<span id="cb15-539"><a href="#cb15-539" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-540"><a href="#cb15-540" aria-hidden="true" tabindex="-1"></a>Experiments:</span>
-<span id="cb15-541"><a href="#cb15-541" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-542"><a href="#cb15-542" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/experiment.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'experiment'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'600'</span><span class="kw">&gt;</span></span>
-<span id="cb15-543"><a href="#cb15-543" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-544"><a href="#cb15-544" aria-hidden="true" tabindex="-1"></a>Observational Study:</span>
-<span id="cb15-545"><a href="#cb15-545" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-546"><a href="#cb15-546" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/observational.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'observational'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'600'</span><span class="kw">&gt;</span></span>
-<span id="cb15-547"><a href="#cb15-547" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-548"><a href="#cb15-548" aria-hidden="true" tabindex="-1"></a><span class="fu">## Covariate Adjustment</span></span>
-<span id="cb15-549"><a href="#cb15-549" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-550"><a href="#cb15-550" aria-hidden="true" tabindex="-1"></a>What to do about confounders?</span>
-<span id="cb15-551"><a href="#cb15-551" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-552"><a href="#cb15-552" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Ignorability assumption:** all important confounders are in the data set! </span>
-<span id="cb15-553"><a href="#cb15-553" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-554"><a href="#cb15-554" aria-hidden="true" tabindex="-1"></a>**One idea:** come up with a model that includes them, such as:</span>
-<span id="cb15-555"><a href="#cb15-555" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-556"><a href="#cb15-556" aria-hidden="true" tabindex="-1"></a>$$Y_{i}(t) = \theta_{0} + \theta_{1}x_{1} + ... + \theta_{p}x_{p} + \tau{t} + \epsilon$$</span>
-<span id="cb15-557"><a href="#cb15-557" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-558"><a href="#cb15-558" aria-hidden="true" tabindex="-1"></a>**Question:** what is the $ATE$ in this model? $\tau$</span>
-<span id="cb15-559"><a href="#cb15-559" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-560"><a href="#cb15-560" aria-hidden="true" tabindex="-1"></a>Approach can work but is **fragile**. Breaks if:</span>
-<span id="cb15-561"><a href="#cb15-561" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-562"><a href="#cb15-562" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Important covariates are missing or true dependence on $x$ is nonlinear</span>
-<span id="cb15-563"><a href="#cb15-563" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Sometimes pejoratively called **“casual inference”**</span>
+<span id="cb15-496"><a href="#cb15-496" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$Y_{i}(1)$: value of $y_{i}$ if $T_{i} = 1$ (**treated outcome**)</span>
+<span id="cb15-497"><a href="#cb15-497" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$Y_{i}(0)$: value of $y_{i}$ if $T_{i} = 0$ (**control outcome**)</span>
+<span id="cb15-498"><a href="#cb15-498" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-499"><a href="#cb15-499" aria-hidden="true" tabindex="-1"></a>For each individual in the data set, we observe:</span>
+<span id="cb15-500"><a href="#cb15-500" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-501"><a href="#cb15-501" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Covariates $x_{i}$</span>
+<span id="cb15-502"><a href="#cb15-502" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Treatment $T_{i}$</span>
+<span id="cb15-503"><a href="#cb15-503" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Response $y_{i} = Y_{i}(T_{i})$</span>
+<span id="cb15-504"><a href="#cb15-504" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-505"><a href="#cb15-505" aria-hidden="true" tabindex="-1"></a>We will assume ($x_{i}$, $T_{i}$, $y_{i} = Y_{i}(T_{i})$) tuples iid for $i = 1,..., n$</span>
+<span id="cb15-506"><a href="#cb15-506" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-507"><a href="#cb15-507" aria-hidden="true" tabindex="-1"></a><span class="fu">### Average Treatment Effect</span></span>
+<span id="cb15-508"><a href="#cb15-508" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-509"><a href="#cb15-509" aria-hidden="true" tabindex="-1"></a>For each individual, the **treatment effect** is $Y_{i}(1)-Y_{i}(0)$</span>
+<span id="cb15-510"><a href="#cb15-510" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-511"><a href="#cb15-511" aria-hidden="true" tabindex="-1"></a>Most common thing to estimate is the **Average Treatment Effect (ATE)**</span>
+<span id="cb15-512"><a href="#cb15-512" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-513"><a href="#cb15-513" aria-hidden="true" tabindex="-1"></a>$$ATE = \mathbb{E}<span class="co">[</span><span class="ot">Y(1)-Y(0)</span><span class="co">]</span> = \mathbb{E}<span class="co">[</span><span class="ot">Y(1)</span><span class="co">]</span> - \mathbb{E}<span class="co">[</span><span class="ot">Y(0)</span><span class="co">]</span>$$</span>
+<span id="cb15-514"><a href="#cb15-514" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-515"><a href="#cb15-515" aria-hidden="true" tabindex="-1"></a>Can we just take the sample mean?</span>
+<span id="cb15-516"><a href="#cb15-516" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-517"><a href="#cb15-517" aria-hidden="true" tabindex="-1"></a>$$\hat{ATE} = \frac{1}{n}\sum_{i=1}^{n}Y_{i}(1) - Y_{i}(0)$$</span>
+<span id="cb15-518"><a href="#cb15-518" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-519"><a href="#cb15-519" aria-hidden="true" tabindex="-1"></a>We cannot. Why? We only observe one of $Y_{i}(1)$, $Y_{i}(0)$.</span>
+<span id="cb15-520"><a href="#cb15-520" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-521"><a href="#cb15-521" aria-hidden="true" tabindex="-1"></a>**Fundamental problem of causal inference:** We only ever observe one potential outcome</span>
+<span id="cb15-522"><a href="#cb15-522" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-523"><a href="#cb15-523" aria-hidden="true" tabindex="-1"></a>To draw causal conclusions, we need some causal assumption relating the observed to the unobserved units</span>
+<span id="cb15-524"><a href="#cb15-524" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-525"><a href="#cb15-525" aria-hidden="true" tabindex="-1"></a>Instead of $\frac{1}{n}\sum_{i=1}^{n}Y_{i}(1) - Y_{i}(0)$, what if we took the difference between the sample mean for each group?</span>
+<span id="cb15-526"><a href="#cb15-526" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-527"><a href="#cb15-527" aria-hidden="true" tabindex="-1"></a>$$\hat{ATE} = \frac{1}{n_{1}}\sum_{i: T_{i} = 1}{Y_{i}(1)} - \frac{1}{n_{0}}\sum_{i: T_{i} = 0}{Y_{i}(0)} = \frac{1}{n_{1}}\sum_{i: T_{i} = 1}{y_{i}} - \frac{1}{n_{0}}\sum_{i: T_{i} = 0}{y_{i}}$$</span>
+<span id="cb15-528"><a href="#cb15-528" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-529"><a href="#cb15-529" aria-hidden="true" tabindex="-1"></a>Is this estimator of $ATE$ unbiased? Thus, this proposed $\hat{ATE}$ is not suitable for our purposes.</span>
+<span id="cb15-530"><a href="#cb15-530" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-531"><a href="#cb15-531" aria-hidden="true" tabindex="-1"></a>if treatment assignment comes from random coin flips, then the treated units are an iid random sample of size $n_{1}$ from the population of $Y_{i}(1)$.</span>
+<span id="cb15-532"><a href="#cb15-532" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-533"><a href="#cb15-533" aria-hidden="true" tabindex="-1"></a>This means that, </span>
+<span id="cb15-534"><a href="#cb15-534" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-535"><a href="#cb15-535" aria-hidden="true" tabindex="-1"></a>$$\mathbb{E}<span class="co">[</span><span class="ot">\frac{1}{n_{1}}\sum_{i: T_{i} = 1}{y_{i}}</span><span class="co">]</span> = \mathbb{E}<span class="co">[</span><span class="ot">Y_{i}(1)</span><span class="co">]</span>$$</span>
+<span id="cb15-536"><a href="#cb15-536" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-537"><a href="#cb15-537" aria-hidden="true" tabindex="-1"></a>Similarly, </span>
+<span id="cb15-538"><a href="#cb15-538" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-539"><a href="#cb15-539" aria-hidden="true" tabindex="-1"></a>$$\mathbb{E}<span class="co">[</span><span class="ot">\frac{1}{n_{0}}\sum_{i: T_{i} = 0}{y_{i}}</span><span class="co">]</span> = \mathbb{E}<span class="co">[</span><span class="ot">Y_{i}(0)</span><span class="co">]</span>$$</span>
+<span id="cb15-540"><a href="#cb15-540" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-541"><a href="#cb15-541" aria-hidden="true" tabindex="-1"></a>which allows us to conclude that $\hat{ATE}$ is an unbiased estimator of $ATE$:</span>
+<span id="cb15-542"><a href="#cb15-542" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-543"><a href="#cb15-543" aria-hidden="true" tabindex="-1"></a>$$\mathbb{E}<span class="co">[</span><span class="ot">\hat{ATE}</span><span class="co">]</span> = ATE$$</span>
+<span id="cb15-544"><a href="#cb15-544" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-545"><a href="#cb15-545" aria-hidden="true" tabindex="-1"></a><span class="fu">### Randomized Experiments</span></span>
+<span id="cb15-546"><a href="#cb15-546" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-547"><a href="#cb15-547" aria-hidden="true" tabindex="-1"></a>However, often, randomy assigning treatments is impractical or unethical. For example, assigning a treatment of cigarettes would likely be impractical and unethical.</span>
+<span id="cb15-548"><a href="#cb15-548" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-549"><a href="#cb15-549" aria-hidden="true" tabindex="-1"></a>An alternative to bypass this issue is to utilize **observational studies**.</span>
+<span id="cb15-550"><a href="#cb15-550" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-551"><a href="#cb15-551" aria-hidden="true" tabindex="-1"></a>Experiments:</span>
+<span id="cb15-552"><a href="#cb15-552" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-553"><a href="#cb15-553" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/experiment.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'experiment'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'600'</span><span class="kw">&gt;</span></span>
+<span id="cb15-554"><a href="#cb15-554" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-555"><a href="#cb15-555" aria-hidden="true" tabindex="-1"></a>Observational Study:</span>
+<span id="cb15-556"><a href="#cb15-556" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-557"><a href="#cb15-557" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/observational.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'observational'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'600'</span><span class="kw">&gt;</span></span>
+<span id="cb15-558"><a href="#cb15-558" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-559"><a href="#cb15-559" aria-hidden="true" tabindex="-1"></a><span class="fu">## Covariate Adjustment</span></span>
+<span id="cb15-560"><a href="#cb15-560" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-561"><a href="#cb15-561" aria-hidden="true" tabindex="-1"></a>What to do about confounders?</span>
+<span id="cb15-562"><a href="#cb15-562" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-563"><a href="#cb15-563" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Ignorability assumption:** all important confounders are in the data set! </span>
 <span id="cb15-564"><a href="#cb15-564" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-565"><a href="#cb15-565" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/ignorability.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'ignorability'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'600'</span><span class="kw">&gt;</span></span>
+<span id="cb15-565"><a href="#cb15-565" aria-hidden="true" tabindex="-1"></a>**One idea:** come up with a model that includes them, such as:</span>
 <span id="cb15-566"><a href="#cb15-566" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-567"><a href="#cb15-567" aria-hidden="true" tabindex="-1"></a><span class="fu">### Covariate adjustment without parametric assumptions</span></span>
+<span id="cb15-567"><a href="#cb15-567" aria-hidden="true" tabindex="-1"></a>$$Y_{i}(t) = \theta_{0} + \theta_{1}x_{1} + ... + \theta_{p}x_{p} + \tau{t} + \epsilon$$</span>
 <span id="cb15-568"><a href="#cb15-568" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-569"><a href="#cb15-569" aria-hidden="true" tabindex="-1"></a>What to do about confounders?</span>
+<span id="cb15-569"><a href="#cb15-569" aria-hidden="true" tabindex="-1"></a>**Question:** what is the $ATE$ in this model? $\tau$</span>
 <span id="cb15-570"><a href="#cb15-570" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-571"><a href="#cb15-571" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Ignorability assumption:** all possible confounders are in the data set! </span>
+<span id="cb15-571"><a href="#cb15-571" aria-hidden="true" tabindex="-1"></a>Approach can work but is **fragile**. Breaks if:</span>
 <span id="cb15-572"><a href="#cb15-572" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-573"><a href="#cb15-573" aria-hidden="true" tabindex="-1"></a>**One idea:** come up with a model that includes them, such as:</span>
-<span id="cb15-574"><a href="#cb15-574" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-575"><a href="#cb15-575" aria-hidden="true" tabindex="-1"></a>$$Y_{i}(t) = f_{\theta}(x, t) + \epsilon$$</span>
-<span id="cb15-576"><a href="#cb15-576" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-577"><a href="#cb15-577" aria-hidden="true" tabindex="-1"></a>Then:</span>
-<span id="cb15-578"><a href="#cb15-578" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-579"><a href="#cb15-579" aria-hidden="true" tabindex="-1"></a>$$ATE = \frac{1}{n}\sum_{i=1}^{n}{f_{\theta}(x_i, 1) - f_{\theta}(x_i, 0)}$$</span>
-<span id="cb15-580"><a href="#cb15-580" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-581"><a href="#cb15-581" aria-hidden="true" tabindex="-1"></a>With enough data, we may be able to learn $f_{\theta}$ very accurately</span>
-<span id="cb15-582"><a href="#cb15-582" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-583"><a href="#cb15-583" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Very difficult if x is high-dimensional / functional form is highly nonlinear</span>
-<span id="cb15-584"><a href="#cb15-584" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Need additional assumption: **overlap**</span>
+<span id="cb15-573"><a href="#cb15-573" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Important covariates are missing or true dependence on $x$ is nonlinear</span>
+<span id="cb15-574"><a href="#cb15-574" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Sometimes pejoratively called **“casual inference”**</span>
+<span id="cb15-575"><a href="#cb15-575" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-576"><a href="#cb15-576" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/ignorability.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'ignorability'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'600'</span><span class="kw">&gt;</span></span>
+<span id="cb15-577"><a href="#cb15-577" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-578"><a href="#cb15-578" aria-hidden="true" tabindex="-1"></a><span class="fu">### Covariate adjustment without parametric assumptions</span></span>
+<span id="cb15-579"><a href="#cb15-579" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-580"><a href="#cb15-580" aria-hidden="true" tabindex="-1"></a>What to do about confounders?</span>
+<span id="cb15-581"><a href="#cb15-581" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-582"><a href="#cb15-582" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Ignorability assumption:** all possible confounders are in the data set! </span>
+<span id="cb15-583"><a href="#cb15-583" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-584"><a href="#cb15-584" aria-hidden="true" tabindex="-1"></a>**One idea:** come up with a model that includes them, such as:</span>
 <span id="cb15-585"><a href="#cb15-585" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-586"><a href="#cb15-586" aria-hidden="true" tabindex="-1"></a><span class="fu">### Other Methods</span></span>
+<span id="cb15-586"><a href="#cb15-586" aria-hidden="true" tabindex="-1"></a>$$Y_{i}(t) = f_{\theta}(x, t) + \epsilon$$</span>
 <span id="cb15-587"><a href="#cb15-587" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-588"><a href="#cb15-588" aria-hidden="true" tabindex="-1"></a>Causal inference is hard, and covariate adjustment is often not the best approach</span>
+<span id="cb15-588"><a href="#cb15-588" aria-hidden="true" tabindex="-1"></a>Then:</span>
 <span id="cb15-589"><a href="#cb15-589" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-590"><a href="#cb15-590" aria-hidden="true" tabindex="-1"></a>Many other methods doing some combination of:</span>
+<span id="cb15-590"><a href="#cb15-590" aria-hidden="true" tabindex="-1"></a>$$ATE = \frac{1}{n}\sum_{i=1}^{n}{f_{\theta}(x_i, 1) - f_{\theta}(x_i, 0)}$$</span>
 <span id="cb15-591"><a href="#cb15-591" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-592"><a href="#cb15-592" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Modeling treatment T as a function of covariates x</span>
-<span id="cb15-593"><a href="#cb15-593" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Modeling the outcome y as a function of x, T</span>
-<span id="cb15-594"><a href="#cb15-594" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-595"><a href="#cb15-595" aria-hidden="true" tabindex="-1"></a>What if we don’t believe in ignorability? Other methods look for a</span>
+<span id="cb15-592"><a href="#cb15-592" aria-hidden="true" tabindex="-1"></a>With enough data, we may be able to learn $f_{\theta}$ very accurately</span>
+<span id="cb15-593"><a href="#cb15-593" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-594"><a href="#cb15-594" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Very difficult if x is high-dimensional / functional form is highly nonlinear</span>
+<span id="cb15-595"><a href="#cb15-595" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Need additional assumption: **overlap**</span>
 <span id="cb15-596"><a href="#cb15-596" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-597"><a href="#cb15-597" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Favorite example: **regression discontinuity**</span>
+<span id="cb15-597"><a href="#cb15-597" aria-hidden="true" tabindex="-1"></a><span class="fu">### Other Methods</span></span>
 <span id="cb15-598"><a href="#cb15-598" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-599"><a href="#cb15-599" aria-hidden="true" tabindex="-1"></a>Causal inference is hard, and covariate adjustment is often not the best approach</span>
+<span id="cb15-600"><a href="#cb15-600" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-601"><a href="#cb15-601" aria-hidden="true" tabindex="-1"></a>Many other methods doing some combination of:</span>
+<span id="cb15-602"><a href="#cb15-602" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-603"><a href="#cb15-603" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Modeling treatment T as a function of covariates x</span>
+<span id="cb15-604"><a href="#cb15-604" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Modeling the outcome y as a function of x, T</span>
+<span id="cb15-605"><a href="#cb15-605" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-606"><a href="#cb15-606" aria-hidden="true" tabindex="-1"></a>What if we don’t believe in ignorability? Other methods look for a</span>
+<span id="cb15-607"><a href="#cb15-607" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-608"><a href="#cb15-608" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Favorite example: **regression discontinuity**</span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
