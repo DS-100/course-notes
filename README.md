@@ -70,6 +70,22 @@ Each lecture note should start with a brief list of intended student learning ou
 ## Generating Output
 To generate the final notebook as an HTML, run the terminal command `quarto render notebook.ipynb`. The HTML will be outputted in the same directory as the notebook.
 
+# Data 100-specific items
+
+General commands/notes:
+  * `jupyter lab # local jupyter setup`
+  * `ipynb` -> `qmd`: `quarto convert notebook.ipynb` or `quarto convert notebook.qmd`
+  * `quarto render`: renders HTML to `docs`. Note `qmd` has to exist for rendering
+  * Edit `_quarto.yml` to include note in sidebar/table of contents
+* Quick local development:
+  * TODO: how to quickly render just one notes directory and not all notes?
+* Publish notes to GitHub pages:
+  * `quarto render` everything
+  * `git add`, `git commit`, `git push`
+  * Can view website compilation on GitHub (look for yellow-to-green button next to commit number)
+* Common errors:
+  * `Illegal instruction: 4 ...` close jupyter lab
+
 ## Other Quarto Resources
 
 [Quick Start Guide](https://quarto.org/docs/get-started/)
