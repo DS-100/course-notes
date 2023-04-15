@@ -80,89 +80,71 @@ You can see this function is maximized at the value $0.4$. Thus, $\hat\theta = 0
 
 ## Deriving the Logistic Regression Model
 
-This section will focus on deriving the logistic regression model in the context of a breast cancer study. Our goal will be to use the mean radius of a tumor to predict whether a cancer is malignant ($y = 1$) or not ($y = 0$). Data from the study is plotted below, along with the overlayed least squares model that minimizes MSE.
+### Probabalistic Model
 
-<img src="images/radius_vs_malig.png" alt='radius_vs_malig' width='500'>
+What if instead of a 0-1 prediction response, the model returns the probability of data belonging to binary classes?
+ - If the model's predicted probability is **greater** than 0.5, classify as **class 1**.
+ - If the model's predicted probability is **less** than 0.5, classify as **class 0**.
+ 
+The model still uses the concept of classification activation as a way to aggregate multiple features using a weighted combination of features.
 
-The least squares approach is technically a *valid* model, but it is not *good*. The linear model's predictions can be outside of the label range {$0$, $1$}, which doesn't make sense. It is also sensitive to outliers -- that is, if we found a data point far from these two clusters, the least squares line would  be significantly worse.
+The probabilistic classifier learns to generate the following probabilities and with the decision threshold of 0.5, classifies datapoints into two categories:
 
-Instead, what if used a non-linear model that was a better fit of our data, and bounded predictions between [$0$, $1$]? We can look to the Data 8 Graph of Averages to formulate this model.
+<img src="images/classifier_rule.png" alt='classifier_rule' width='500'>
 
-<!-- This way, we'd be able classify data as such: $\hat y \ge 0.5$ corresponds to class $1$, and $\hat y < 0.5$ corresponds to class $0$. This is similar to our coin flip example.--> 
 
-### The Graph of Averages
 
-The Graph of Averages says
+### Odds Ratio
 
-- For each input $x$, compute the average value of $y$ for all nearby $x$, and predict that. 
-    - "nearby" is a loose definition; we'll say for example the nearest 5 points
-
-Here, $x$ is `mean radius` and $y$ is `malignant`. By the definition of an average, the prediction for a given $x$ is thus:
-
-$$\frac{\text{Sum of Nearby ``Malignant" Values}}{\text{Number of Points in Bin}}$$
-
-You'll notice that this is the proportion of malignant tumors in some point $x$'s bin. In a similar light, we can think of this proportion as the probability that point $x$ belongs to the malignant class (derived from it's nearest neighbors). That is, $P(Y = 1|x)$. This notation reads "given a tumor with a mean radius of $x$, it belongs to class 1 (equivalently, the malignant class) with some specified probability".
-
-You may recognize some similarities between $P(Y = 1|x)$ and $\hat \theta$ from our earlier coin toss example. $P(Y = 1|x)$ is a proportion of malignant tumors in a bin, whereas $\hat \theta$ was a proportion of heads in 10 coin tosses. Both also represent probabilities of some new point belonging to class $1$.
-
-Notice how the Graph of Averages is a much better fit of the data. 
-
-<img src="images/average_y.png" alt='average_y' width='500'>
-
-Unfortunately, the Graph of Averages begins to degenerate as we add more features. The exact reason is out of scope, but this model becomes harder to use in higher dimensions. Instead, we use **Logistic Regression**: a probabilistic model that tries to model the Graph of Averages.
-
-As a recap of what we've discussed so far:
-
-- We want to fit this "S" shaped curve as best as possible
-- This curve models the probability of belonging to class $1$
-    - $P(Y = 1|x)$
-
-### Transforming the Graph of Averages
-
-Our goal here is to find a mathematical function that models the Graph of Averages, or $P(Y = 1|x)$. For shorthand, let's call this function $p$. We will
-
-1. Transform $p$ until it looks linear.
-2. Then, use algebra to invert all transformations.
-
-**Note**: $P(Y = 1|x)$ and $p$ are used interchangeably throughout the rest of the note.
-
-#### 1. Transform $p$ until it looks linear
-
-To transform this "S" shaped curve, we will define a quantity called the odds ratio. The **odds of an event** is the probability the event happens divided by the probability that it doesn't happen. Remember, $p$ is shorthand for our event $P(Y = 1|x)$.
+**Odds** is defined as the ration of the probability of an event happening ($p$) vs. it not happening ($1-p$). 
+ - "9 to 1 against" means $p = 0.1$
+ - "Even odds" means $p = 0.5$
+ - "3 to 1 on" means $p = 0.75$
 
 $$\text{odds}(p) = \frac{p}{1 - p}$$
 
-Here, we've applied the odds ratio to our Graph of Averages. The result is an exponential relationship.
+**Domain** of odds function: $[0, 1)$
 
-<img src="images/odds.png" alt='odds' width='500'>
+**Range** of odds function: $[0, +\infty)$
 
-Applying a logarithmic transformation to the y-axis will linearize the data. We know this from the Tukey-Mosteller Buldge Diagram.
+Thus, the odds function maps values on $[0, 1)$ to $[1, \infty)$.
+
+<img src="images/odds_ratio.png" alt='odds_ratio' width='500'>
+
+
+### Logit Function
+
+Our end goal is to use a classification activation to output a probability value based on some unbounded real number. Currently, the odds ratio takes a probability value and outputs a positive real number. If we further transform the odds function to obtain a function that maps a probability to an unbouded real number, the inverse of that function will be our desired result.   
+
+Thus, we first need a transformation takes the ouput of the odds function and maps it to an unbounded real number (i.e. maps $[0, \infty)$ to $(-\infty, \infty)$). 
+
+Taking the **log** of a positive real number creates an unbounded real number!
+
+Applying this transformation to the odds ratio gives us the **Logit Function**:
 
 $$\text{log-odds}(p) = \text{log}(\frac{p}{1-p})$$
 
-<img src="images/log_odds.png" alt='log_odds' width='500'>
+<img src="images/logit_graph.png" alt='logit_graph' width='500'>
 
-We have a roughly linear relationship! Specifically, this is linear in our features $x$ and parameters $\theta$. In our one dimensional feature space, $x$ is the `mean radius` and $\theta$ some constant.
 
-$$\text{log}(\frac{p}{1-p}) = x^T\theta$$
+#### Logistic Function: Inverse of the Logit Function
 
-#### 2. Use algebra to invert all transformations
+$$\text{log}(\frac{p}{1-p}) = z$$ 
+$$\frac{p}{1-p} = e^{z}$$ 
+$$p = e^{z} - pe^{z}$$
+$$p + pe^{z} = e^{z}$$
+$$(1 + e^{z})p = e^{z}$$
+$$p = \frac{e^{z}}{1 + e^{z}}$$
+$$p = \frac{1}{1 + e^{z}}$$
 
-Remember our original goal was to model the Graph of Averages, which we called $p$. Here, we will algebraically solve for $p$.
 
-$$\text{log}(\frac{p}{1-p}) = x^T\theta$$ 
-$$\frac{p}{1-p} = e^{x^T\theta}$$ 
-$$p = e^{x^T\theta} - pe^{x^T\theta}$$
-$$p = \frac{e^{x^T\theta}}{1 + e^{x^T\theta}}$$
-$$p = \frac{1}{1 + e^{-x^T\theta}}$$
+#### Logistic Regression Model Summary
 
-## The Logistic Regression Model
+1. Optimize the model to find parameters $\vec{\hat{\theta}}$
+2. Use parameters to calculate classification activation: $z = \vec{\hat{\theta}}^{T}\vec{x}$
+3. Apply the logistic function to get the probabability of a given datapoint belonging to class 1.
 
-The last line in this derivation is the **logistic regression model**. It models the Graph of Averages quite well.
 
-$$P(Y = 1|x) = \frac{1}{1 + e^{-x^T\theta}}$$
-
-<img src="images/logistic_vs_emperical.png" alt='logistic_vs_emperical' width='500'>
 
 ### The Logistic Function
 
@@ -184,6 +166,13 @@ This logistic function has various properties, although we won't prove any of th
 You'll notice the logistic regression model is just the logistic function evaluated on the linear model $x^T\theta$. The logistic function squashes the result of $x^T\theta$ to a probability between $0$ and $1$. Larger values of $x^T\theta$ will be mapped to probabilities closer to $1$, and vice versa. Putting it all together, we have:
 
 $$P(Y = 1|x) = \sigma(x^T\theta) = \frac{1}{1 + e^{-x^T\theta}}$$
+
+
+## The Logistic Regression Model
+
+The figure below summarizes the logistic regression process:
+
+<img src="images/logistic_regression_process.png" alt='logistic_regression_process' width='500'>
 
 ### Example Calcualtion
 
@@ -327,82 +316,82 @@ $$L(\theta) = -(y\text{ log}(p) + (1-y)\text{log}(1-p))$$
 
 To understand why cross-entropy loss makes a great intuitive loss function, we will look towards maximum likelihood estimation in the next section.
 
-### Maximum Likelihood Estimation
+## Deriving the Logistic Regression Model Using the Graph of Averages
 
-**Preface**: This section will not be directly tested, but it is immensely helpful in your understanding of cross-entropy loss.
+This section demonstrates an alternative approach to deriving the logistic regression model using the graph of averages. Our goal will be to use the mean radius of a tumor to predict whether a cancer is malignant ($y = 1$) or not ($y = 0$). Data from the study is plotted below, along with the overlayed least squares model that minimizes MSE.
 
-In our earlier coin toss example, we had data on 10 coin flips, and wanted to estimate $\hat \theta$, the probability of a heads.
+<img src="images/radius_vs_malig.png" alt='radius_vs_malig' width='500'>
 
-```{python}
-flips
-```
+Rather than using a linear model, what if used a non-linear model that was a better fit of our data, and bounded predictions between [$0$, $1$]? We can look to the Data 8 Graph of Averages to formulate this model.
 
-$\hat \theta = 0.4$ is the most intuitive two reasons:
+<!-- This way, we'd be able classify data as such: $\hat y \ge 0.5$ corresponds to class $1$, and $\hat y < 0.5$ corresponds to class $0$. This is similar to our coin flip example.--> 
 
-1. It is the frequency of heads in our data
-2. It maximizes the **likelihood** of our data 
+### The Graph of Averages
 
-$$\hat \theta = \text{argmax}_\theta (\theta^4(1-\theta)^6)$$
+The Graph of Averages says
 
-More generally, we can apply this notion of likelihood to any random binary sample. For example, we can find the likelihood of the data observed in our breast cancer study. We will show how the likelihood is intrinsically related to cross-entropy loss.
+- For each input $x$, compute the average value of $y$ for all nearby $x$, and predict that. 
+    - "nearby" is a loose definition; we'll say for example the nearest 5 points
 
-As a quick refresher on likelihood:
+Here, $x$ is `mean radius` and $y$ is `malignant`. By the definition of an average, the prediction for a given $x$ is thus:
 
-For some Bernoulli($p$) random variable $Y$ the probability distribution, or likelihood is:
+$$\frac{\text{Sum of Nearby ``Malignant" Values}}{\text{Number of Points in Bin}}$$
 
-$$P(Y = y) = \begin{cases}
-        1, \text{with probability }  p\\
-        0, \text{with probability }  1 - p
-    \end{cases} $$
-    
-Equivalently, this can be written in a compact way:
+You'll notice that this is the proportion of malignant tumors in some point $x$'s bin. In a similar light, we can think of this proportion as the probability that point $x$ belongs to the malignant class (derived from it's nearest neighbors). That is, $P(Y = 1|x)$. This notation reads "given a tumor with a mean radius of $x$, it belongs to class 1 (equivalently, the malignant class) with some specified probability".
 
-$$P(Y=y) = p^y(1-p)^{1-y}$$
+You may recognize some similarities between $P(Y = 1|x)$ and $\hat \theta$ from our earlier coin toss example. $P(Y = 1|x)$ is a proportion of malignant tumors in a bin, whereas $\hat \theta$ was a proportion of heads in 10 coin tosses. Both also represent probabilities of some new point belonging to class $1$.
 
-- When $y = 1$, this reads $P(Y=y) = p$
-- When $y = 0$, this reads $P(Y=y) = (1-p)$
+Notice how the Graph of Averages is a much better fit of the data. 
 
-In our example, a Bernoulli random variable is analagous to a single data point, or tumor. All together, our breast cancer study consist of multiple IID Bernoulli($p$) random variables. To find the likelihood of independent events in succession, simply multiply their likelihoods.
+<img src="images/average_y.png" alt='average_y' width='500'>
 
-$$\prod_{i=1}^{n} p^{y_i} (1-p)^{1-y_i}$$
+Unfortunately, the Graph of Averages begins to degenerate as we add more features. The exact reason is out of scope, but this model becomes harder to use in higher dimensions. Instead, we use **Logistic Regression**: a probabilistic model that tries to model the Graph of Averages.
 
-As with the coin example, we want to find the parameter $p$ that maximizes this likelihood - this technique is known as **maximum likelihood estimation**. Earlier, we gave an intuitive graphical solution, but let's take the derivative of the likelihood to find this maximum.
+As a recap of what we've discussed so far:
 
-From a first glance, this derivative will be complicated! We will have to use the product rule, followed by the chain rule. Instead, we can make an observation that simplifies the problem. 
+- We want to fit this "S" shaped curve as best as possible
+- This curve models the probability of belonging to class $1$
+    - $P(Y = 1|x)$
 
-Finding the $p$ that maximizes $$\prod_{i=1}^{n} p^{y_i} (1-p)^{1-y_i}$$ is equivalent to the $p$ that maximizes $$\text{log}(\prod_{i=1}^{n} p^{y_i} (1-p)^{1-y_i})$$
+### Transforming the Graph of Averages
 
-This is because $\text{log}$ is a strictly *increasing* function. It won't change the maximum or minimum of the function it was applied to. From $\text{log}$ properties, $\text{log}(a*b)$ = $\text{log}(a) + \text{log}(b)$. We can apply this to our equation above to get:
+Our goal here is to find a mathematical function that models the Graph of Averages, or $P(Y = 1|x)$. For shorthand, let's call this function $p$. We will
 
-$$\text{argmax}_p \sum_{i=1}^{n} \text{log}(p^{y_i} (1-p)^{1-y_i})$$
+1. Transform $p$ until it looks linear.
+2. Then, use algebra to invert all transformations.
 
-$$= \text{argmax}_p \sum_{i=1}^{n} \text{log}(p^{y_i}) + \text{log}((1-p)^{1-y_i})$$
+**Note**: $P(Y = 1|x)$ and $p$ are used interchangeably throughout the rest of the note.
 
-$$= \text{argmax}_p \sum_{i=1}^{n} y_i\text{log}(p) + (1-y_i)\text{log}(1-p)$$
+#### 1. Transform $p$ until it looks linear
 
-We can add a constant factor of $\frac{1}{n}$ out front. It won't affect the $p$ that maximizes our likelihood.
+To transform this "S" shaped curve, we will define a quantity called the odds ratio. The **odds of an event** is the probability the event happens divided by the probability that it doesn't happen. Remember, $p$ is shorthand for our event $P(Y = 1|x)$.
 
-$$=\text{argmax}_p  \frac{1}{n} \sum_{i=1}^{n} y_i\text{log}(p) + (1-y_i)\text{log}(1-p)$$
+$$\text{odds}(p) = \frac{p}{1 - p}$$
 
-One last "trick" we can do is change this to a minimization problem by negating the result. This works because we are dealing with a *concave* function, which can be made *convex*.
+Here, we've applied the odds ratio to our Graph of Averages. The result is an exponential relationship.
 
-$$= \text{argmin}_p -\frac{1}{n} \sum_{i=1}^{n} y_i\text{log}(p) + (1-y_i)\text{log}(1-p)$$
+<img src="images/odds.png" alt='odds' width='500'>
 
-This is exactly our average cross-entropy loss minimization problem from before! 
+Applying a logarithmic transformation to the y-axis will linearize the data. We know this from the Tukey-Mosteller Buldge Diagram.
 
-Why did we do all this complicated math? We have shown that *minimizing* cross-entropy loss is equivalent to *maximizing* the likelihood of the training data.
+$$\text{log-odds}(p) = \text{log}(\frac{p}{1-p})$$
 
-- By minimizing cross-entropy loss, we are choosing the model parameters that are "most likely" for the data we observed.
+<img src="images/log_odds.png" alt='log_odds' width='500'>
 
-## Parting Note
+We have a roughly linear relationship! Specifically, this is linear in our features $x$ and parameters $\theta$. In our one dimensional feature space, $x$ is the `mean radius` and $\theta$ some constant.
 
-You will study MLE further in probability and ML classes. But now you know it exists. It turns out that many of the model + loss combinations we’ve seen can be motivated using MLE (OLS, Ridge Regression, etc.)
+$$\text{log}(\frac{p}{1-p}) = x^T\theta$$
 
-The two important takeways from this lecture were 
+#### 2. Use algebra to invert all transformations
 
-1. Formulating the Logistic Regression Model
-2. Motivating the Cross-Entropy Loss
+Remember our original goal was to model the Graph of Averages, which we called $p$. Here, we will algebraically solve for $p$.
 
-In the next lecture, we will learn how to evaluate the strength of logistic regression models.
+$$\text{log}(\frac{p}{1-p}) = x^T\theta$$ 
+$$\frac{p}{1-p} = e^{x^T\theta}$$ 
+$$p = e^{x^T\theta} - pe^{x^T\theta}$$
+$$p = \frac{e^{x^T\theta}}{1 + e^{x^T\theta}}$$
+$$p = \frac{1}{1 + e^{-x^T\theta}}$$
+
+We once again end up modeling $p$ with the sigmoid (logistic) function!
 
 
