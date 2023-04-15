@@ -13,13 +13,92 @@ format:
 jupyter: python3
 ---
 
-Today, we will continue studying the Logistic Regression model. We'll pick up from last lecture's discussion of cross-entropy loss, study a few of its pitfalls, and learn potential remedies. Then, we will provide an implementation of `sklearn`'s logistic regression model. 
+Today, we will continue studying the Logistic Regression model. First, we'll examine logisitc regression through the lens of maxmium likelihood estimation and understand its connection to cross-entropy loss. Then, we'll pick up from last lecture's discussion of cross-entropy loss, study a few of its pitfalls, and learn potential remedies. Finally, we will provide an implementation of `sklearn`'s logistic regression model. 
 
 This will introduce us to the process of **thresholding** -- a technique used to *classify* data from our model's predicted probabilities, or $P(Y=1|x)$. In doing so, we'll focus on how these thresholding decisions affect the behavior of our model. We will learn various evaluation metrics useful for binary classification, and apply them to our study of logistic regression.
 
 ## Logistic Regression Model (continued)
 
-We ended last lecture with a proof of how *minimizing* cross-entropy loss is equivalent to *maximizing* likelihood of the training data.
+
+### Maximum Likelihood Estimation
+
+
+In our earlier coin toss example, we had data on 10 coin flips, and wanted to estimate $\hat \theta$, the probability of a heads.
+
+```{python}
+flips = [0, 0, 1, 1, 1, 1, 0, 0, 0, 0]
+flips
+```
+
+$\hat \theta = 0.4$ is the most intuitive two reasons:
+
+1. It is the frequency of heads in our data
+2. It maximizes the **likelihood** of our data 
+
+$$\hat \theta = \text{argmax}_\theta (\theta^4(1-\theta)^6)$$
+
+More generally, we can apply this notion of likelihood to any random binary sample. For example, we can find the likelihood of the data observed in our breast cancer study. We will show how the likelihood is intrinsically related to cross-entropy loss.
+
+As a quick refresher on likelihood:
+
+For some Bernoulli($p$) random variable $Y$ the probability distribution, or likelihood is:
+
+$$P(Y = y) = \begin{cases}
+        1, \text{with probability }  p\\
+        0, \text{with probability }  1 - p
+    \end{cases} $$
+    
+Equivalently, this can be written in a compact way:
+
+$$P(Y=y) = p^y(1-p)^{1-y}$$
+
+- When $y = 1$, this reads $P(Y=y) = p$
+- When $y = 0$, this reads $P(Y=y) = (1-p)$
+
+In our example, a Bernoulli random variable is analagous to a single data point, or tumor (from the previous chapter). All together, our breast cancer study consist of multiple IID Bernoulli($p$) random variables. To find the likelihood of independent events in succession, simply multiply their likelihoods.
+
+$$\prod_{i=1}^{n} p^{y_i} (1-p)^{1-y_i}$$
+
+As with the coin example, we want to find the parameter $p$ that maximizes this likelihood - this technique is known as **maximum likelihood estimation**. Earlier, we gave an intuitive graphical solution, but let's take the derivative of the likelihood to find this maximum.
+
+From a first glance, this derivative will be complicated! We will have to use the product rule, followed by the chain rule. Instead, we can make an observation that simplifies the problem. 
+
+Finding the $p$ that maximizes $$\prod_{i=1}^{n} p^{y_i} (1-p)^{1-y_i}$$ is equivalent to the $p$ that maximizes $$\text{log}(\prod_{i=1}^{n} p^{y_i} (1-p)^{1-y_i})$$
+
+This is because $\text{log}$ is a strictly *increasing* function. It won't change the maximum or minimum of the function it was applied to. From $\text{log}$ properties, $\text{log}(a*b)$ = $\text{log}(a) + \text{log}(b)$. We can apply this to our equation above to get:
+
+$$\text{argmax}_p \sum_{i=1}^{n} \text{log}(p^{y_i} (1-p)^{1-y_i})$$
+
+$$= \text{argmax}_p \sum_{i=1}^{n} \text{log}(p^{y_i}) + \text{log}((1-p)^{1-y_i})$$
+
+$$= \text{argmax}_p \sum_{i=1}^{n} y_i\text{log}(p) + (1-y_i)\text{log}(1-p)$$
+
+We can add a constant factor of $\frac{1}{n}$ out front. It won't affect the $p$ that maximizes our likelihood.
+
+$$=\text{argmax}_p  \frac{1}{n} \sum_{i=1}^{n} y_i\text{log}(p) + (1-y_i)\text{log}(1-p)$$
+
+One last "trick" we can do is change this to a minimization problem by negating the result. This works because we are dealing with a *concave* function, which can be made *convex*.
+
+$$= \text{argmin}_p -\frac{1}{n} \sum_{i=1}^{n} y_i\text{log}(p) + (1-y_i)\text{log}(1-p)$$
+
+This is exactly our average cross-entropy loss minimization problem from before! 
+
+Why did we do all this complicated math? We have shown that *minimizing* cross-entropy loss is equivalent to *maximizing* the likelihood of the training data.
+
+- By minimizing cross-entropy loss, we are choosing the model parameters that are "most likely" for the data we observed.
+
+## A (Tangent) Note
+
+You will study MLE further in probability and ML classes. But now you know it exists. It turns out that many of the model + loss combinations we’ve seen can be motivated using MLE (OLS, Ridge Regression, etc.)
+
+The two important takeways from this section are 
+
+1. Formulating the Logistic Regression Model
+2. Motivating the Cross-Entropy Loss
+
+We will now continue to learn how to evaluate the strength of logistic regression models.
+
+Above, we proved that *minimizing* cross-entropy loss is equivalent to *maximizing* likelihood of the training data.
 
 Intuitively, this means that the optimal $\hat \theta$ that minimizes cross-entropy loss "pushes" all the probabilities in the direction of their true, underlying class. 
 
@@ -68,13 +147,29 @@ $$-(y\text{ log}(p) + (1-y)\text{ log}(1-p))$$
 
 $$=1\text{log}(0)$$
 
+Thus, diverging weights ($|\theta| \rightarrow \infty$) occur with **lineary separable** data. "Overconfidence" is a particularly dangerous version of overfitting.
+
+Consider the loss function with respect to the parameter $\theta$.
+
+<img src="images/unreg_loss.png" alt='unreg_loss' width='500'>
+
+Although impossible to see, the plateau for negative values of $\theta$ is slightly tilted downwards, meaning the loss approaches $0$ as $\theta$ decreases and approaches $-\infty$.
+
 #### Regularized Logistic Regression
 
 To avoid large weights, and thus, infinite loss (particularly on linearly seperable data), regularization is used. The same principles apply as with linear regression - make sure to standardize your features first.
 
 For example, L2 (Ridge) Logistic Regression takes on the form
 
-$$\min_{\theta} -\frac{1}{n} \sum_{i=1}^{n} (y_i \text{log}(\sigma(x_i^T\theta)) + (1-y_i)\text{log}(1-\sigma(x_i^T\theta))) + \lambda \sum_{i=1}^{d} \theta_j^2$$  
+$$\min_{\theta} -\frac{1}{n} \sum_{i=1}^{n} (y_i \text{log}(\sigma(x_i^T\theta)) + (1-y_i)\text{log}(1-\sigma(x_i^T\theta))) + \lambda \sum_{i=1}^{d} \theta_j^2$$
+
+Now, let us compare the loss functions of un-regularized and regularized logistic regression.
+
+<img src="images/unreg_loss.png" alt='unreg_loss' width='500'>
+
+<img src="images/reg_loss.png" alt='reg_loss' width='500'>
+
+As we can see, $L2$ regularization helps us prevent diverging weights and deters against "overconfidence."
 
 ### Logistic Regression Model Implementation
 
@@ -108,7 +203,6 @@ model = LogisticRegression(penalty='l2', C=1.0, fit_intercept=True)
 model.fit(X, y);
 ```
 
-
 The parameter `C` controls the amount of regularization -- `C` is the inverse of the regularization hyperparameter $\lambda$. Set `C` big for minimal regularization, and vice versa.
 
 The `.predict_proba` method returns the predicted probabilities of belonging to each class. The first element corresponds to class $0$, the second to class $1$.
@@ -134,7 +228,7 @@ model.predict(X)[:5]
 
 Now that we have our classifier, let's quantify how well it performs. The most basic evaluation metric is **accuracy** -- the proportion of correctly classified points.
 
-$$\text{accuracy} = \frac{\text{\# of points classified correctly}}{\# \text{ of total points}}$$
+$$\text{accuracy} = \frac{\text{# of points classified correctly}}{\# \text{ of total points}}$$
 
 ```{python}
 model.score(X, y) # built-in accuracy function
@@ -332,4 +426,5 @@ Once again, the perfect classifier will resemble the orange curve, this time, fa
 <img src="images/pr_curve_perfect.png" alt='pr_curve_perfect' width='675'>
 
 We want our PR-Curve to be as close to the “top right” of this graph as possible. Again, we use the AUC to determine "closeness", with the perfect classifier exhibiting an AUC = 1 (and the worst with an AUC = 0.5).
+
 
