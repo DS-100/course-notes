@@ -1,0 +1,138 @@
+---
+title: PCA II
+format:
+  html:
+    toc: true
+    toc-depth: 5
+    toc-location: right
+    code-fold: false
+    theme:
+      - cosmo
+      - cerulean
+    callout-icon: false
+jupyter: python3
+---
+
+::: {.callout-note collapse="true"}
+## Learning Outcomes
+
+- Develop a deeper understanding of how to interpret Principal Components Analysis (PCA).
+- See applications of PCA to some real-world contexts.
+:::
+
+## PCA Review
+
+### Using Principal Components
+
+Steps to obtain Principal Components via SVD:
+
+1. Center the data matrix by subtracting the mean of each attribute column elementwise from the column. 
+
+2. To find the p **principal components**:
+ - Compute the SVD of the data matrix ($X = U{\Sigma}V^{T}$)
+ - The first $p$ columns of $U{\Sigma}$ (or equivalently, $XV$) contain the $p$ principal components of $X$.
+ 
+The principal components are a low-dimension representation that capture as much of the original data's total variance as possible. 
+
+The **component scores** sum to total variance if we center our data.
+$$\text{component score} = \frac{\sigma_i^{2}}{N}$$
+
+We can also use the SVD to get a rank-p approximation of $X$, $X_p$.
+
+$$X_p = \sum_{j = 1}^{p} \sigma_ju_jv_j^{T} $$
+
+where $\sigma_j$ is the jth singular value of $X$, $u_j$ is the jth column of $U$, and $v_j$ is the jth column of $V$.
+
+
+## Case Study: House of Representatives Voting
+
+Let's examine how the House of Representatives (of the 116th Congress, 1st session) voted in the month of September 2019.
+
+Specifically, we’ll look at the records of Roll call votes. From the U.S. Senate ([link](https://www.senate.gov/reference/Index/Votes.htm)):
+
+- Roll call votes occur when a representative or senator votes "yea" or "nay," so that the names of members voting on each side are recorded. A voice vote is a vote in which those in favor or against a measure say "yea" or "nay," respectively, without the names or tallies of members voting on each side being recorded.
+
+
+**Do legislators' roll call votes show a relationship with their political party?**
+
+Please visit this [link](https://data100.datahub.berkeley.edu/hub/login?next=%2Fhub%2Fuser-redirect%2Fgit-pull%3Frepo%3Dhttps%253A%252F%252Fgithub.com%252FDS-100%252Fsp23%26branch%3Dmain%26urlpath%3Dlab%252Ftree%252Fsp23%252Flecture%252Flec26%252Flec26-votes.ipynb) to see the full Jupyter notebook demo. 
+
+
+As shown in the demo, the primary goal of PCA is to transform observations from high-dimensional data down to low dimensions through linear transformations. 
+
+A related goal of PCA relates to the idea that a low-dimension representation of the data should capture the variability of the original data. For example, if the first two singular values are large and the others are relatively small, then two dimensions are probably enough to describe most of waht distinguishes one observation from another. However, if this is not the case, then a PCA scatter plot is probably omitting lots of information. 
+
+We can use the the following formulas to quantify the amount each prinicial component contributes to the total variance:
+
+$$\text{component score} = \frac{\sigma_i^{2}}{N}$$
+
+$$\text{total variance} = \text{sum(component scores)}$$
+
+$$\text{variance ratio of principal component i} = \frac{\text{component score i}}{\text{total variance}}$$
+
+
+## Interpreting PCA
+
+### Scree Plots
+
+A **scree plot** shows the size of the diagonal value of $\Sigma^{2}$, largest first.
+
+Scree plots help us visually determine the number of dimensions needed to describe the data reasonably completely. The singular values that fall in region of the plot after a large drop off correspond to principal components that are **not** needed to describe the data, since they explain a relatively low proportion of the total variance of the data. 
+
+### PC with SVD
+
+After finding the SVD of $X$:
+
+<img src="images/slide15.png" alt='slide15' width='500'>
+
+
+We can derive the principal components of the data. Specifically, the first $n$ rows of $V^{T}$ are directions for the n principal components.
+
+### Columns of V are the Directions
+
+<img src="images/slide16.png" alt='slide16' width='500'>
+
+The elements of each column of $V$ (row of $V^{T}$) rotate the original feature vectors into a principal component. 
+
+The first column of V indicates how each feature contributes (e.g. positive, negative, etc.) to principal component 1. 
+
+### Biplots
+
+Biplots superimpose the directions onto the plot of principal component 2 vs. principal component 1. 
+
+Vector $j$ corresponds to the direction for feature $j$ (e.g. $v_1j, v_2j$).
+ - There are several ways to scale biplots vectors; in this course we plot the direction itself. 
+ - For other scalings, which can lead to more interpretable directions/loadings, see [SAS biplots](https://blogs.sas.com/content/iml/2019/11/06/what-are-biplots.html)
+ 
+Through biplots, we can interpret how features correlate with the principal components shown: positively, negatively, or not much at all. 
+
+
+<img src="images/slide17_2.png" alt='slide17_2' width='500'>
+
+
+## Applications of PCA
+
+### PCA in Biology
+
+PCA is commonly used in biomedical contexts, which have many named variables!
+
+1. To cluster data ([Paper 1](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-019-2680-1), [Paper 2](https://www.science.org/doi/10.1126/scirobotics.abk2378))
+
+2. To identify correlated variables ([interpret](https://docs.google.com/presentation/d/1-aDu0ILCkPx3iCcJGB3YXci-L4g90Q6AarXU6wffLB8/edit#slide=id.g62cb86badb_0_1128) rows of $V^{T}$ as linear coefficients) ([Paper 3](https://www.nature.com/articles/s41598-017-05714-1)). Uses [biplots](https://www.google.com/url?q=https://www.geo.fu-berlin.de/en/v/soga/Geodata-analysis/Principal-Component-Analysis/principal-components-basics/Interpretation-and-visualization/index.html%23:~:text%3DThe%2520biplot%2520is%2520a%2520very,in%2520a%2520single%2520biplot%2520display.%26text%3DThe%2520plot%2520shows%2520the%2520observations,principal%2520components%2520(synthetic%2520variables).&sa=D&source=editors&ust=1682131633152964&usg=AOvVaw2H9SOeMP5kUS890Fkhfthx).
+
+### Image Classification
+
+In machine learning, PCA is often used as a preprocessing step prior to training a supervised model. 
+
+See the following [demo](https://data100.datahub.berkeley.edu/hub/user-redirect/git-pull?repo=https%3A%2F%2Fgithub.com%2FDS-100%2Fsp23&branch=main&urlpath=lab%2Ftree%2Fsp23%2Flecture%2Flec26%2Flec26-fashion-mnist.ipynb) to see how PCA is useful for building an image classification model based on the MNIST-Fashion dataset.
+
+### Why PCA, then Model?
+
+1. Reduces dimensionality
+ - speeds up training, reduces number of features, etc.)
+2. Avoids multicollinearity in new features (i.e. principal components)
+
+<img src="images/slide21.png" alt='slide21' width='500'>
+
+
+
