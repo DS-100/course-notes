@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.280">
+<meta name="generator" content="quarto-1.2.313">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -303,6 +303,8 @@ Learning Outcomes
 <div class="callout-body-container callout-body">
 <ul>
 <li>Introduce principles of unsupervised learning</li>
+<li>Define and carry out procedure of PCA</li>
+<li>Understand connection between PCA and SVD</li>
 </ul>
 </div>
 </div>
@@ -336,7 +338,7 @@ Learning Outcomes
 <section id="dimensionality-of-data-linear-algebra" class="level3" data-number="25.1.2">
 <h3 data-number="25.1.2" class="anchored" data-anchor-id="dimensionality-of-data-linear-algebra"><span class="header-section-number">25.1.2</span> Dimensionality of Data (Linear Algebra)</h3>
 <p>Previously, we have been working with data tables with rows and columns. These rows and columns corresponded to observations and attributes about said observations. Now, we have to be a bit more clear with our wording to follow the language of linear algebra.</p>
-<p>Suppose we have a dataset of: - N observations (datapoints/rows) - d attributes (features/columns).</p>
+<p>Suppose we have a dataset of: - N observations (data points/rows) - d attributes (features/columns).</p>
 <p>In Linear Algebra, we think of data being a collection of vectors. Vectors have a <em>dimension</em>, meaning they have some number of unique elements. Row and column now denotes the direction a vector is written (horizontally, like a row, or vertically, like a column):</p>
 <p>Linear Algebra views our data as a matrix: - N row vectors in a d-Dimensions, OR - d column vectors in an N-Dimensions.</p>
 <p><strong>Dimensionality</strong> of data is a complex topic. Sometimes, it is clear from looking at the number of rows/columns, but other times it is not.</p>
@@ -440,18 +442,18 @@ Learning Outcomes
 </section>
 <section id="data-variance-and-centering" class="level2" data-number="25.3">
 <h2 data-number="25.3" class="anchored" data-anchor-id="data-variance-and-centering"><span class="header-section-number">25.3</span> Data Variance and Centering</h2>
-<p>Formally, the i-th singular value tells us the <strong>component score</strong>, i.e., how much of the data variance is captured by the ith principal component. Supposing the number of datapoints is <span class="math inline">\(n\)</span>:</p>
-<p><span class="math display">\[\text{i-th component score} = \frac{(\text{i-th singular varlue}^2}{n}\]</span></p>
+<p>Formally, the i-th singular value tells us the <strong>component score</strong>, i.e., how much of the data variance is captured by the ith principal component. Supposing the number of data points is <span class="math inline">\(n\)</span>:</p>
+<p><span class="math display">\[\text{i-th component score} = \frac{(\text{i-th singular value}^2)}{n}\]</span></p>
 <p>Summing up the component scores is equivalent to computing total variance.</p>
 <p><strong>Data Centering</strong>: PCA has a data centering step that precedes any singular value decomposition, where if implemented defines the component score as above.</p>
 </section>
 <section id="proof-of-component-score-out-of-scope" class="level2" data-number="25.4">
 <h2 data-number="25.4" class="anchored" data-anchor-id="proof-of-component-score-out-of-scope"><span class="header-section-number">25.4</span> Proof of component score (out of scope)</h2>
-<p>The proof defining component score out of scope for this class, but it is included below for your convenienve.</p>
+<p>The proof defining component score out of scope for this class, but it is included below for your convenience.</p>
 <p><em>Setup</em>: Consider the design matrix <span class="math inline">\(X \in \mathbb{R}^{n \times d}\)</span>, where the <span class="math inline">\(j\)</span>-th column (corresponding to the <span class="math inline">\(j\)</span>-th feature) is <span class="math inline">\(x_j \in \mathbb{R}^n\)</span> and the element in row <span class="math inline">\(i\)</span>, column <span class="math inline">\(j\)</span> is <span class="math inline">\(x_{ij}\)</span>. Further define <span class="math inline">\(\tilde{X}\)</span> as the <strong>centered</strong> design matrix. The <span class="math inline">\(j\)</span>-th column is <span class="math inline">\(\tilde{x}_j \in \mathbb{R}^n\)</span> and the element in row <span class="math inline">\(i\)</span>, column <span class="math inline">\(j\)</span> is <span class="math inline">\(\tilde{x}_{ij} = x_{ij} - \bar{x_j}\)</span>, where <span class="math inline">\(\bar{x_j}\)</span> is the mean of the <span class="math inline">\(x_j\)</span> column vector from the original <span class="math inline">\(X\)</span>.</p>
 <p><em>Variance</em>: Construct the <strong>covariance matrix</strong>: <span class="math inline">\(\frac{1}{n} \tilde{X}^T \tilde{X} \in \mathbb{R}^{d \times d}\)</span>. The <span class="math inline">\(j\)</span>-th element along the diagonal is the <strong>variance</strong> of the <span class="math inline">\(j\)</span>-th column of the original design matrix <span class="math inline">\(X\)</span>:</p>
 <p><span class="math display">\[\left( \frac{1}{n} \tilde{X}^T \tilde{X} \right)_{jj} = \frac{1}{n} \tilde{x}_j ^T \tilde{x}_j = \frac{1}{n} \sum_{i=i}^n (\tilde{x}_{ij} )^2 = \frac{1}{n} \sum_{i=i}^n (x_{ij} - \bar{x_j})^2\]</span></p>
-<p><em>SVD</em>: Suppose singular value decomposition of the <em>centered</em> design matrix <span class="math inline">\(\tilde{X}\)</span> yields <span class="math inline">\(\tilde{X} = U \Sigma V^T\)</span>, where $U ^{n d} $ and <span class="math inline">\(V \in \mathbb{R}^{d \times d}\)</span> are matrices with orthonormal columns, and <span class="math inline">\(\Sigma \in \mathbb{R}^{d \times d}\)</span> is a diagonal matrix with singular values of <span class="math inline">\(\tilde{X}\)</span>.</p>
+<p><em>SVD</em>: Suppose singular value decomposition of the <em>centered</em> design matrix <span class="math inline">\(\tilde{X}\)</span> yields <span class="math inline">\(\tilde{X} = U \Sigma V^T\)</span>, where <span class="math inline">\(U \in \mathbb{R}^{n \times d}\)</span> and <span class="math inline">\(V \in \mathbb{R}^{d \times d}\)</span> are matrices with orthonormal columns, and <span class="math inline">\(\Sigma \in \mathbb{R}^{d \times d}\)</span> is a diagonal matrix with singular values of <span class="math inline">\(\tilde{X}\)</span>.</p>
 <p><span class="math display">\[\begin{aligned}
 \tilde{X}^T \tilde{X} &amp;= (U \Sigma V^T )^T (U \Sigma V^T) \\
 &amp;= V \Sigma U^T U \Sigma V^T  &amp; (\Sigma^T = \Sigma) \\
