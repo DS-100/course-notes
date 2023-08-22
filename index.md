@@ -6,6 +6,8 @@ jupyter: python3
 
 ## About the Course Notes
 
-This text was developed for the Fall 2023 Edition of the UC Berkeley course Data 100: Principles and Techniques of Data Science. 
+This text offers supplementary resources to accompany lectures presented in the Fall 2023 Edition of the UC Berkeley course Data 100: Principles and Techniques of Data Science. 
 
-As this project is in development during the Fall 2023 semester, the course notes may be in flux. We appreciate your understanding. If you spot any errors or would like to suggest any changes, please email us. <br /> <br /> **Email**: data100.instructors@berkeley.edu
+New notes will be added each week to accompany live lectures. See the full calendar of lectures on the [course website](https://ds100.org/fa23/). 
+
+If you spot any typos or would like to suggest any changes, please email us. <br /> <br /> **Email**: data100.instructors@berkeley.edu
