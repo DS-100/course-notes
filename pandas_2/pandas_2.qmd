@@ -55,7 +55,7 @@ babynames.head()
 
 ## Conditional Selection
 
-Conditional selection allows us to select a subset of rows in a `DataFrame` based on if they meet some specified condition.
+Conditional selection allows us to select a subset of rows in a `DataFrame` that satisfy some specified condition.
 
 To understand how to use conditional selection, we must look at another possible input of the `.loc` and `[]` methods – a boolean array, which is simply an array or `Series` where each element is either `True` or `False`. This boolean array must have a length equal to the number of rows in the DataFrame. It will return all rows that correspond to a value of `True` in the array. We used a very similar technique when performing conditional extraction from a `Series` in the last lecture.
 
@@ -405,6 +405,20 @@ Another way to approach this is to use the `key` argument of `.sort_values()`. H
 
 ```{python}
 babynames.sort_values("Name", key = lambda x: x.str.len(), ascending = False).head()
+```
+
+### Approach 3: Sorting using the `map` Function
+
+Another way to approach this is to use the `map` function on a `Series`. Say we want to sort the `babynames` table by the number of `"dr"`'s and `"ea"`s in each `"Name"`. We'll define the function `dr_ea_count` to help us out.
+
+```{python}
+def dr_ea_count(string):
+    return string.count('dr') + string.count('ea')
+
+# Use map to apply dr_ea_count to each name in the "Name" column
+babynames["dr_ea_count"] = babynames["Name"].map(dr_ea_count)
+babynames = babynames.sort_values(by = "dr_ea_count", ascending=False)
+babynames.head()
 ```
 
 ## Aggregating Data with `.groupby`
