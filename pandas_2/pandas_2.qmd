@@ -15,13 +15,12 @@ jupyter: python3
 
 ::: {.callout-note collapse="false"}
 ## Learning Outcomes
-* Continue building familiarity with `pandas` syntax
-* Extract data from a DataFrame using conditional selection
-* Recognize situations where aggregation is useful and identify the correct technique for performing an aggregation
+* Continue building familiarity with `pandas` syntax.
+* Extract data from a `DataFrame` using conditional selection.
+* Recognize situations where aggregation is useful and identify the correct technique for performing an aggregation.
 :::
 
 Last time, we introduced the `pandas` library as a toolkit for processing data. We learned the `DataFrame` and `Series` data structures, familiarized ourselves with the basic syntax for manipulating tabular data, and began writing our first lines of `pandas` code.
-
 
 In this lecture, we'll start to dive into some advanced `pandas` syntax. You may find it helpful to follow along with a notebook of your own as we walk through these new pieces of code.
 
@@ -57,9 +56,9 @@ babynames.head()
 
 Conditional selection allows us to select a subset of rows in a `DataFrame` that satisfy some specified condition.
 
-To understand how to use conditional selection, we must look at another possible input of the `.loc` and `[]` methods – a boolean array, which is simply an array or `Series` where each element is either `True` or `False`. This boolean array must have a length equal to the number of rows in the DataFrame. It will return all rows that correspond to a value of `True` in the array. We used a very similar technique when performing conditional extraction from a `Series` in the last lecture.
+To understand how to use conditional selection, we must look at another possible input of the `.loc` and `[]` methods – a boolean array, which is simply an array or `Series` where each element is either `True` or `False`. This boolean array must have a length equal to the number of rows in the `DataFrame`. It will return all rows that correspond to a value of `True` in the array. We used a very similar technique when performing conditional extraction from a `Series` in the last lecture.
 
-To see this in action, let's select all even-indexed rows in the first 10 rows of our DataFrame.
+To see this in action, let's select all even-indexed rows in the first 10 rows of our `DataFrame`.
 
 ```{python}
 #| code-fold: false
@@ -109,7 +108,7 @@ print("The 239536th item in this 'logical_operator' is: {}".format(logical_opera
 print("The 239537th item in this 'logical_operator' is: {}".format(logical_operator.iloc[239537]))
 ```
 
-Passing a `Series` as an argument to `babynames[]` has the same affect as using a boolean array. In fact, the `[]` selection operator can take a boolean `Series`, array, and list as arguments. These three are used interchangeably thoughout the course.
+Passing a `Series` as an argument to `babynames[]` has the same effect as using a boolean array. In fact, the `[]` selection operator can take a boolean `Series`, array, and list as arguments. These three are used interchangeably throughout the course.
 
 We can also use `.loc` to achieve similar results.
 
@@ -127,16 +126,16 @@ Symbol | Usage      | Meaning
 &    | p & q    | p AND q
 ^  | p ^ q | p XOR q (exclusive or)
 
-When combining multiple conditions with logical operators, we surround each individual condition with a set of parenthesis `()`. This imposes an order of operations on `pandas` evaluating your logic, and can avoid code erroring.
+When combining multiple conditions with logical operators, we surround each individual condition with a set of parenthesis `()`. This imposes an order of operations on `pandas` evaluating your logic and can avoid code erroring.
 
-For example, if we want to return data on all names with sex `"F"` born before the 21st century, we can write:
+For example, if we want to return data on all names with sex `"F"` born before the year 2000, we can write:
 
 ```{python}
 #| code-fold: false
 babynames[(babynames["Sex"] == "F") & (babynames["Year"] < 2000)].head()
 ```
 
-If we want to return data on all names with sex `"F"` *or* all born before 2000, we can write:
+If we want to return data on all names with sex `"F"` *or* all born before the year 2000, we can write:
 
 ```{python}
 #| code-fold: false
@@ -158,12 +157,12 @@ Boolean array selection is a useful tool, but can lead to overly verbose code fo
 
  Fortunately, `pandas` provides many alternative methods for constructing boolean filters.
  
-The `.isin` function is one such example. This method evaluates if the values in a `Series` are contained in a different sequence (list, array, or `Series`) of values. In the cell below, we achieve equivalent result to the `DataFrame` above with far more concise code.
+The `.isin` function is one such example. This method evaluates if the values in a `Series` are contained in a different sequence (list, array, or `Series`) of values. In the cell below, we achieve equivalent results to the `DataFrame` above with far more concise code.
 
 ```{python}
 #| code-fold: false
 
-names = ["Bella", "Alex", "Ani", "Lisa"]
+names = ["Bella", "Alex", "Narges", "Lisa"]
 babynames["Name"].isin(names).head()
 ```
 
@@ -175,11 +174,12 @@ The function `str.startswith` can be used to define a filter based on string val
 
 ```{python}
 #| code-fold: false
-# Find the names that begin with the letter "N"
+# Identify whether names begin with the letter "N"
 babynames["Name"].str.startswith("N").head()
 ```
 
 ```{python}
+# Extracting names that begin with the letter "N"
 babynames[babynames["Name"].str.startswith("N")].head()
 ```
 
@@ -191,7 +191,7 @@ To add a new column to a `DataFrame`, we use a syntax similar to that used when 
 
 ```{python}
 #| code-fold: false
-# Create a Series of the length of each name. We'll discuss `str` methods next week
+# Create a Series of the length of each name. 
 babyname_lengths = babynames["Name"].str.len()
 
 # Add a column named "name_lengths" that includes the length of each name
@@ -204,7 +204,7 @@ If we need to later modify an existing column, we can do so by referencing this 
 ```{python}
 #| code-fold: false
 # Modify the “name_lengths” column to be one less than its original value
-babynames["name_lengths"] = babynames["name_lengths"]-1
+babynames["name_lengths"] = babynames["name_lengths"] - 1
 babynames.head()
 ```
 
@@ -226,7 +226,7 @@ babynames = babynames.drop("Length", axis="columns")
 babynames.head(5)
 ```
 
-Notice that we *re-assigned* `babynames` to the result of `babynames.drop(...)`. This is a subtle, but important point: `pandas` table operations **do not occur in-place**. Calling `df.drop(...)` will output a *copy* of `df` with the row/column of interest removed, without modifying the original `df` table. 
+Notice that we *re-assigned* `babynames` to the result of `babynames.drop(...)`. This is a subtle but important point: `pandas` table operations **do not occur in-place**. Calling `df.drop(...)` will output a *copy* of `df` with the row/column of interest removed without modifying the original `df` table. 
 
 In other words, if we simply call:
 
@@ -244,7 +244,7 @@ babynames.head(5)
 
 `pandas` contains an extensive library of functions that can help shorten the process of setting and getting information from its data structures. In the following section, we will give overviews of each of the main utility functions that will help us in Data 100.
 
-Discussing all functionality offered by `pandas` could take an entire semester! We will walk you through the most commonly-used functions, and encourage you to explore and experiment on your own. 
+Discussing all functionality offered by `pandas` could take an entire semester! We will walk you through the most commonly-used functions and encourage you to explore and experiment on your own. 
 
 - `NumPy` and built-in function support
 - `.shape`
@@ -310,7 +310,7 @@ If many statistics are required from a `DataFrame` (minimum value, maximum value
 babynames.describe()
 ```
 
-A different set of statistics will be reported if `.describe()` is called on a Series.
+A different set of statistics will be reported if `.describe()` is called on a `Series`.
 
 ```{python}
 #| code-fold: false
@@ -320,7 +320,7 @@ babynames["Sex"].describe()
 
 ### `.sample()`
 
-As we will see later in the semester, random processes are at the heart of many data science techniques (for example, train-test splits, bootstrapping, and cross-validation). [`.sample()`](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.sample.html) lets us quickly select random entries (a row if called from a DataFrame, or a value if called from a Series).
+As we will see later in the semester, random processes are at the heart of many data science techniques (for example, train-test splits, bootstrapping, and cross-validation). [`.sample()`](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.sample.html) lets us quickly select random entries (a row if called from a `DataFrame`, or a value if called from a `Series`).
 
 By default, `.sample()` selects entries *without* replacement. Pass in the argument `replace=True` to sample with replacement.
 
@@ -346,7 +346,7 @@ babynames[babynames["Year"] == 2000].sample(4, replace = True).iloc[:, 2:]
 
 ### `.value_counts()`
 
-The [`Series.value_counts()`](https://pandas.pydata.org/docs/reference/api/pandas.Series.value_counts.html) methods counts the number of occurrence of each unique value in a `Series`. In other words, it *counts* the number of times each unique *value* appears. This is often useful for determining the most or least common entries in a `Series`.
+The [`Series.value_counts()`](https://pandas.pydata.org/docs/reference/api/pandas.Series.value_counts.html) method counts the number of occurrence of each unique value in a `Series`. In other words, it *counts* the number of times each unique *value* appears. This is often useful for determining the most or least common entries in a `Series`.
 
 In the example below, we can determine the name with the most years in which at least one person has taken that name by counting the number of times each name appears in the `"Name"` column of `babynames`. Note that the return value is also a `Series`.
 
@@ -358,7 +358,7 @@ babynames["Name"].value_counts().head()
 
 ### `.unique()`
 
-If we have a Series with many repeated values, then [`.unique()`](https://pandas.pydata.org/docs/reference/api/pandas.unique.html) can be used to identify only the *unique* values. Here we return an array of all the names in `babynames`. 
+If we have a `Series` with many repeated values, then [`.unique()`](https://pandas.pydata.org/docs/reference/api/pandas.unique.html) can be used to identify only the *unique* values. Here we return an array of all the names in `babynames`. 
 
 ```{python}
 #| code-fold: false
@@ -373,7 +373,7 @@ Ordering a `DataFrame` can be useful for isolating extreme values. For example, 
 ```{python}
 #| code-fold: false
 # Sort the "Count" column from highest to lowest
-babynames.sort_values(by = "Count", ascending=False).head()
+babynames.sort_values(by="Count", ascending=False).head()
 ```
 
 Unlike when calling `.value_counts()` on a `DataFrame`, we do not need to explicitly specify the column used for sorting when calling `.value_counts()` on a `Series`. We can still specify the ordering paradigm – that is, whether values are sorted in ascending or descending order.
@@ -404,14 +404,8 @@ babynames.head(5)
 We can then sort the `DataFrame` by that column using `.sort_values()`:
 
 ```{python}
-# Here, a lambda function is applied to find the length of each value, `x`, in the "Name" column
-
-babynames.sort_values("Name", key=lambda x: x.str.len(), ascending = False).head(5)
-```
-
-```{python}
 # Sort by the temporary column
-babynames = babynames.sort_values(by = "name_lengths", ascending = False)
+babynames = babynames.sort_values(by="name_lengths", ascending=False)
 babynames.head(5)
 ```
 
@@ -419,7 +413,7 @@ Finally, we can drop the `name_length` column from `babynames` to prevent our ta
 
 ```{python}
 # Drop the 'name_length' column
-babynames = babynames.drop("name_lengths", axis = 'columns')
+babynames = babynames.drop("name_lengths", axis='columns')
 babynames.head(5)
 ```
 
@@ -428,7 +422,7 @@ babynames.head(5)
 Another way to approach this is to use the `key` argument of `.sort_values()`. Here we can specify that we want to sort `"Name"` values by their length.
 
 ```{python}
-babynames.sort_values("Name", key = lambda x: x.str.len(), ascending = False).head()
+babynames.sort_values("Name", key=lambda x: x.str.len(), ascending=False).head()
 ```
 
 ### Approach 3: Sorting using the `map` Function
@@ -444,7 +438,7 @@ def dr_ea_count(string):
 babynames["dr_ea_count"] = babynames["Name"].map(dr_ea_count)
 
 # Sort the DataFrame by the new "dr_ea_count" column so we can see our handiwork
-babynames = babynames.sort_values(by = "dr_ea_count", ascending=False)
+babynames = babynames.sort_values(by="dr_ea_count", ascending=False)
 babynames.head()
 ```
 
@@ -473,22 +467,22 @@ The diagram below shows a simplified view of `babynames` to help illustrate this
 
 ![Creating a GroupBy object](images/gb.png)
 
-We can't work with a `GroupBy` object directly – that is why you saw that strange output earlier, rather than a standard view of a DataFrame. To actually manipulate values within these "mini" DataFrames, we'll need to call an *aggregation method*. This is a method that tells `pandas` how to aggregate the values within the `GroupBy` object. Once the aggregation is applied, `pandas` will return a normal (now grouped) DataFrame.
+We can't work with a `GroupBy` object directly – that is why you saw that strange output earlier rather than a standard view of a `DataFrame`. To actually manipulate values within these "mini" DataFrames, we'll need to call an *aggregation method*. This is a method that tells `pandas` how to aggregate the values within the `GroupBy` object. Once the aggregation is applied, `pandas` will return a normal (now grouped) `DataFrame`.
 
-The first aggregation method we'll consider is `.agg`. The `.agg` method takes in a function as its argument; this function is then applied to each column of a "mini" grouped DataFrame. We end up with a new DataFrame with one aggregated row per subframe. Let's see this in action by finding the `sum` of all counts for each year in `babynames` – this is equivalent to finding the number of babies born in each year. 
+The first aggregation method we'll consider is `.agg`. The `.agg` method takes in a function as its argument; this function is then applied to each column of a "mini" grouped DataFrame. We end up with a new `DataFrame` with one aggregated row per subframe. Let's see this in action by finding the `sum` of all counts for each year in `babynames` – this is equivalent to finding the number of babies born in each year. 
 
 ```{python}
 #| code-fold: false
-babynames.groupby("Year").agg(sum).head(5)
+babynames[["Year", "Count"]].groupby("Year").agg(sum).head(5)
 ```
 
 We can relate this back to the diagram we used above. Remember that the diagram uses a simplified version of `babynames`, which is why we see smaller values for the summed counts.
 
 ![Performing an aggregation](images/agg.png)
 
-Calling `.agg` has condensed each subframe back into a single row. This gives us our final output: a DataFrame that is now indexed by `"Year"`, with a single row for each unique year in the original `babynames` DataFrame.
+Calling `.agg` has condensed each subframe back into a single row. This gives us our final output: a `DataFrame` that is now indexed by `"Year"`, with a single row for each unique year in the original `babynames` DataFrame.
 
-You may be wondering: where did the `"State"`, `"Sex"`, and `"Name"` columns go? Logically, it doesn't make sense to `sum` the string data in these columns (how would we add "Mary" + "Ann"?). Because of this, `pandas` will simply omit these columns when it performs the aggregation on the DataFrame. Since this happens implicitly, without the user specifying that these columns should be ignored, it's easy to run into troubling situations where columns are removed without the programmer noticing. It is better coding practice to select *only* the columns we care about before performing the aggregation.
+You may be wondering: where did the `"State"`, `"Sex"`, and `"Name"` columns go? Logically, it doesn't make sense to `sum` the string data in these columns (how would we add "Mary" + "Ann"?). Because of this, we need to omit these columns when we perform aggregation on the `DataFrame`.
 
 ```{python}
 #| code-fold: false
@@ -498,8 +492,8 @@ babynames.groupby("Year")[["Count"]].agg(sum).head(5)
 
 There are many different aggregations that can be applied to the grouped data. The primary requirement is that an aggregation function must:
 
-* Take in a `Series` of data (a single column of the grouped subframe)
-* Return a single value that aggregates this `Series`
+* Take in a `Series` of data (a single column of the grouped subframe).
+* Return a single value that aggregates this `Series`.
 
 Because of this fairly broad requirement, `pandas` offers many ways of computing an aggregation.
 
@@ -515,7 +509,7 @@ babynames.groupby("Name")[["Count"]].agg(min).head()
 babynames.groupby("Name")[["Count"]].agg(max).head()
 ```
 
-As mentioned previously, functions from the **`NumPy` library**, such as `np.mean`, `np.max`, `np.min`, and `np.sum`, are also fair game in `pandas`.
+As mentioned previously, functions from the `NumPy` library, such as `np.mean`, `np.max`, `np.min`, and `np.sum`, are also fair game in `pandas`.
 
 ```{python}
 #| code-fold: false
@@ -568,6 +562,7 @@ We can also define aggregation functions of our own! This can be done using eith
 
 ```{python}
 #| code-fold: false
+babynames = babynames.sort_values(by="Year", ascending=True)
 def ratio_to_peak(series):
     return series.iloc[-1]/max(series)
 
@@ -582,7 +577,7 @@ babynames.groupby("Name")[["Year", "Count"]].agg(lambda s: s.iloc[-1]/max(s))
 
 ## Parting Note
 
-Manipulating `DataFrames` is not a skill that is mastered in just one day. Due to the flexibility of `pandas`, there are many different ways to get from a point A to a point B. We recommend trying multiple different ways to solve the same problem to gain even more practice and reach that point of mastery sooner.  
+Manipulating `DataFrames` is not a skill that is mastered in just one day. Due to the flexibility of `pandas`, there are many different ways to get from point A to point B. We recommend trying multiple different ways to solve the same problem to gain even more practice and reach that point of mastery sooner.  
 
 Next, we will start digging deeper into the mechanics behind grouping data. 
 
