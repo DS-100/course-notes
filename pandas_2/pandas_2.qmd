@@ -38,7 +38,7 @@ import os.path
 import zipfile
 
 data_url = "https://www.ssa.gov/oact/babynames/state/namesbystate.zip"
-local_filename = "babynamesbystate.zip"
+local_filename = "data/babynamesbystate.zip"
 if not os.path.exists(local_filename): # If the data exists don't download again
     with urllib.request.urlopen(data_url) as resp, open(local_filename, 'wb') as f:
         f.write(resp.read())
@@ -164,6 +164,10 @@ The `.isin` function is one such example. This method evaluates if the values in
 #| code-fold: false
 
 names = ["Bella", "Alex", "Ani", "Lisa"]
+babynames["Name"].isin(names).head()
+```
+
+```{python}
 babynames[babynames["Name"].isin(names)].head()
 ```
 
@@ -172,6 +176,10 @@ The function `str.startswith` can be used to define a filter based on string val
 ```{python}
 #| code-fold: false
 # Find the names that begin with the letter "N"
+babynames["Name"].str.startswith("N").head()
+```
+
+```{python}
 babynames[babynames["Name"].str.startswith("N")].head()
 ```
 
@@ -257,6 +265,7 @@ The `pandas` [documentation](https://pandas.pydata.org/docs/reference/index.html
 #| code-fold: false
 # Pull out the number of babies named Yash each year
 yash_count = babynames[babynames["Name"] == "Yash"]["Count"]
+yash_count.head()
 ```
 
 ```{python}
@@ -395,7 +404,22 @@ babynames.head(5)
 We can then sort the `DataFrame` by that column using `.sort_values()`:
 
 ```{python}
+# Here, a lambda function is applied to find the length of each value, `x`, in the "Name" column
+
+babynames.sort_values("Name", key=lambda x: x.str.len(), ascending = False).head(5)
+```
+
+```{python}
+# Sort by the temporary column
 babynames = babynames.sort_values(by = "name_lengths", ascending = False)
+babynames.head(5)
+```
+
+Finally, we can drop the `name_length` column from `babynames` to prevent our table from getting cluttered.
+
+```{python}
+# Drop the 'name_length' column
+babynames = babynames.drop("name_lengths", axis = 'columns')
 babynames.head(5)
 ```
 
@@ -412,13 +436,24 @@ babynames.sort_values("Name", key = lambda x: x.str.len(), ascending = False).he
 We can also use the `map` function on a `Series` to solve this. Say we want to sort the `babynames` table by the number of `"dr"`'s and `"ea"`s in each `"Name"`. We'll define the function `dr_ea_count` to help us out.
 
 ```{python}
+# First, define a function to count the number of times "dr" or "ea" appear in each name
 def dr_ea_count(string):
     return string.count('dr') + string.count('ea')
 
-# Use map to apply dr_ea_count to each name in the "Name" column
+# Then, use `map` to apply `dr_ea_count` to each name in the "Name" column
 babynames["dr_ea_count"] = babynames["Name"].map(dr_ea_count)
+
+# Sort the DataFrame by the new "dr_ea_count" column so we can see our handiwork
 babynames = babynames.sort_values(by = "dr_ea_count", ascending=False)
 babynames.head()
+```
+
+We can drop the `dr_ea_count` once we're done using it to maintain a neat table.
+
+```{python}
+# Drop the `dr_ea_count` column
+babynames = babynames.drop("dr_ea_count", axis = 'columns')
+babynames.head(5)
 ```
 
 ## Aggregating Data with `.groupby`
@@ -471,14 +506,13 @@ Because of this fairly broad requirement, `pandas` offers many ways of computing
 **In-built** Python operations – such as `sum`, `max`, and `min` – are automatically recognized by `pandas`.
 
 ```{python}
-#| code-fold: false
-# What is the maximum count for each name in any year?
-babynames.groupby("Name")[["Count"]].agg(max).head()
+# What is the minimum count for each name in any year?
+babynames.groupby("Name")[["Count"]].agg(min).head()
 ```
 
 ```{python}
-# What is the minimum count for each name in any year?
-babynames.groupby("Name")[["Count"]].agg(min).head()
+# What is the largest single-year count of each name?
+babynames.groupby("Name")[["Count"]].agg(max).head()
 ```
 
 As mentioned previously, functions from the **`NumPy` library**, such as `np.mean`, `np.max`, `np.min`, and `np.sum`, are also fair game in `pandas`.
