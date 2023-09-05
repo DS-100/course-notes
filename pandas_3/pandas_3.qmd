@@ -16,16 +16,111 @@ format:
 jupyter: python3
 ---
 
-::: {.callout-note collapse="true"}
+::: {.callout-note collapse="false"}
 ## Learning Outcomes
 * Perform advanced aggregation using `.groupby()`
 * Use the `pd.pivot_table` method to contruct a pivot table
 * Perform simple merges between DataFrames using `pd.merge()`
 :::
 
-## More on `agg()` Function
-
 Last time, we introduced the concept of aggregating data – we familiarized ourselves with `GroupBy` objects and used them as tools to consolidate and summarize a DataFrame. In this lecture, we will explore some advanced `.groupby` methods to show just how powerful of a resource they can be for understanding our data. We will also introduce other techniques for data aggregation to provide flexibility in how we manipulate our tables. 
+
+## More on the `.agg()` Function
+
+Calling `.agg` has condensed each subframe back into a single row. This gives us our final output: a DataFrame that is now indexed by `"Year"`, with a single row for each unique year in the original `babynames` DataFrame.
+
+You may be wondering: where did the `"State"`, `"Sex"`, and `"Name"` columns go? Logically, it doesn't make sense to `sum` the string data in these columns (how would we add "Mary" + "Ann"?). Because of this, `pandas` will simply omit these columns when it performs the aggregation on the DataFrame. Since this happens implicitly, without the user specifying that these columns should be ignored, it's easy to run into troubling situations where columns are removed without the programmer noticing. It is better coding practice to select *only* the columns we care about before performing the aggregation.
+
+```{python}
+#| code-fold: false
+# Same result, but now we explicitly tell pandas to only consider the "Count" column when summing
+babynames.groupby("Year")[["Count"]].agg(sum).head(5)
+```
+
+There are many different aggregations that can be applied to the grouped data. The primary requirement is that an aggregation function must:
+
+* Take in a `Series` of data (a single column of the grouped subframe)
+* Return a single value that aggregates this `Series`
+
+Because of this fairly broad requirement, `pandas` offers many ways of computing an aggregation.
+
+**In-built** Python operations – such as `sum`, `max`, and `min` – are automatically recognized by `pandas`.
+
+```{python}
+#| code-fold: false
+# What is the maximum count for each name in any year?
+babynames.groupby("Name")[["Count"]].agg(max).head()
+```
+
+```{python}
+# What is the minimum count for each name in any year?
+babynames.groupby("Name")[["Count"]].agg(min).head()
+```
+
+As mentioned previously, functions from the **`NumPy` library**, such as `np.mean`, `np.max`, `np.min`, and `np.sum`, are also fair game in `pandas`.
+
+```{python}
+#| code-fold: false
+# What is the average count for each name across all years?
+babynames.groupby("Name")[["Count"]].agg(np.mean).head()
+```
+
+`pandas` also offers a number of in-built functions. Functions that are native to `pandas` can be referenced using their string name within a call to `.agg`. Some examples include:
+
+* `.agg("sum")`
+* `.agg("max")`
+* `.agg("min")`
+* `.agg("mean")`
+* `.agg("first")`
+* `.agg("last")`
+
+The latter two entries in this list – `"first"` and `"last"` – are unique to `pandas`. They return the first or last entry in a subframe column. Why might this be useful? Consider a case where *multiple* columns in a group share identical information. To represent this information in the grouped output, we can simply grab the first or last entry, which we know will be identical to all other entries.
+
+Let's illustrate this with an example. Say we add a new column to `babynames` that contains the first letter of each name. 
+
+```{python}
+#| code-fold: false
+# Imagine we had an additional column, "First Letter". We'll explain this code next week
+babynames["First Letter"] = babynames["Name"].str[0]
+
+# We construct a simplified DataFrame containing just a subset of columns
+babynames_new = babynames[["Name", "First Letter", "Year"]]
+babynames_new.head()
+```
+
+If we form groups for each name in the dataset, `"First Letter"` will be the same for all members of the group. This means that if we simply select the first entry for `"First Letter"` in the group, we'll represent all data in that group. 
+
+We can use a dictionary to apply different aggregation functions to each column during grouping.
+
+![Aggregating using "first"](images/first.png)
+
+```{python}
+#| code-fold: false
+babynames_new.groupby("Name").agg({"First Letter":"first", "Year":"max"}).head()
+```
+
+Some aggregation functions are common enough that `pandas` allows them to be called directly, without the explicit use of `.agg`.
+
+```{python}
+#| code-fold: false
+babynames.groupby("Name")[["Count"]].mean().head()
+```
+
+We can also define aggregation functions of our own! This can be done using either a `def` or `lambda` statement. Again, the condition for a custom aggregation function is that it must take in a `Series` and output a single scalar value.
+
+```{python}
+#| code-fold: false
+def ratio_to_peak(series):
+    return series.iloc[-1]/max(series)
+
+babynames.groupby("Name")[["Year", "Count"]].agg(ratio_to_peak)
+```
+
+```{python}
+#| code-fold: false
+# Alternatively, using lambda
+babynames.groupby("Name")[["Year", "Count"]].agg(lambda s: s.iloc[-1]/max(s))
+``` 
 
 ## `GroupBy()`, Continued
 
