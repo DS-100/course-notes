@@ -1,0 +1,2352 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Pandas III</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="pandas_3_files/libs/clipboard/clipboard.min.js"></script>
+<script src="pandas_3_files/libs/quarto-html/quarto.js"></script>
+<script src="pandas_3_files/libs/quarto-html/popper.min.js"></script>
+<script src="pandas_3_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="pandas_3_files/libs/quarto-html/anchor.min.js"></script>
+<link href="pandas_3_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="pandas_3_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="pandas_3_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="pandas_3_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="pandas_3_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-full">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Pandas III</h2>
+   
+  <ul>
+  <li><a href="#revisiting-the-.agg-function" id="toc-revisiting-the-.agg-function" class="nav-link active" data-scroll-target="#revisiting-the-.agg-function">Revisiting the <code>.agg()</code> Function</a>
+  <ul class="collapse">
+  <li><a href="#nuisance-columns" id="toc-nuisance-columns" class="nav-link" data-scroll-target="#nuisance-columns">Nuisance Columns</a></li>
+  <li><a href="#some-data-science-payoff" id="toc-some-data-science-payoff" class="nav-link" data-scroll-target="#some-data-science-payoff">Some Data Science Payoff</a></li>
+  </ul></li>
+  <li><a href="#groupby-continued" id="toc-groupby-continued" class="nav-link" data-scroll-target="#groupby-continued"><code>GroupBy()</code>, Continued</a>
+  <ul class="collapse">
+  <li><a href="#aggregation-with-lambda-functions" id="toc-aggregation-with-lambda-functions" class="nav-link" data-scroll-target="#aggregation-with-lambda-functions">Aggregation with <code>lambda</code> Functions</a></li>
+  <li><a href="#other-groupby-features" id="toc-other-groupby-features" class="nav-link" data-scroll-target="#other-groupby-features">Other <code>GroupBy</code> Features</a></li>
+  <li><a href="#filtering-by-group" id="toc-filtering-by-group" class="nav-link" data-scroll-target="#filtering-by-group">Filtering by Group</a></li>
+  </ul></li>
+  <li><a href="#aggregating-data-with-pivot-tables" id="toc-aggregating-data-with-pivot-tables" class="nav-link" data-scroll-target="#aggregating-data-with-pivot-tables">Aggregating Data with Pivot Tables</a></li>
+  <li><a href="#joining-tables" id="toc-joining-tables" class="nav-link" data-scroll-target="#joining-tables">Joining Tables</a></li>
+  <li><a href="#parting-note" id="toc-parting-note" class="nav-link" data-scroll-target="#parting-note">Parting Note</a></li>
+  </ul>
+</nav>
+</div>
+<main class="content column-page-left" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Pandas III</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li></ul></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<div class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="true" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Learning Outcomes
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse show">
+<div class="callout-body-container callout-body">
+<ul>
+<li>Perform advanced aggregation using <code>.groupby()</code></li>
+<li>Use the <code>pd.pivot_table</code> method to construct a pivot table</li>
+<li>Perform simple merges between DataFrames using <code>pd.merge()</code></li>
+</ul>
+</div>
+</div>
+</div>
+<p>Last time, we introduced the concept of aggregating data – we familiarized ourselves with <code>GroupBy</code> objects and used them as tools to consolidate and summarize a DataFrame. In this lecture, we will explore working with the different aggregation functions and dive into some advanced <code>.groupby</code> methods to show just how powerful of a resource they can be for understanding our data. We will also introduce other techniques for data aggregation to provide flexibility in how we manipulate our tables.</p>
+<section id="revisiting-the-.agg-function" class="level2">
+<h2 class="anchored" data-anchor-id="revisiting-the-.agg-function">Revisiting the <code>.agg()</code> Function</h2>
+<p>We’ll start by loading the <code>babynames</code> dataset.</p>
+<div class="cell" data-execution_count="63">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># This code pulls census data and loads it into a DataFrame</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># We won't cover it explicitly in this class, but you are welcome to explore it on your own</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> urllib.request</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os.path</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> zipfile</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> plotly.io <span class="im">as</span> pio</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>pio.renderers.default <span class="op">=</span> <span class="st">"notebook"</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>data_url <span class="op">=</span> <span class="st">"https://www.ssa.gov/oact/babynames/state/namesbystate.zip"</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>local_filename <span class="op">=</span> <span class="st">"data/babynamesbystate.zip"</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">not</span> os.path.exists(local_filename): <span class="co"># If the data exists don't download again</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> urllib.request.urlopen(data_url) <span class="im">as</span> resp, <span class="bu">open</span>(local_filename, <span class="st">'wb'</span>) <span class="im">as</span> f:</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>        f.write(resp.read())</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>zf <span class="op">=</span> zipfile.ZipFile(local_filename, <span class="st">'r'</span>)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>ca_name <span class="op">=</span> <span class="st">'STATE.CA.TXT'</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>field_names <span class="op">=</span> [<span class="st">'State'</span>, <span class="st">'Sex'</span>, <span class="st">'Year'</span>, <span class="st">'Name'</span>, <span class="st">'Count'</span>]</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> zf.<span class="bu">open</span>(ca_name) <span class="im">as</span> fh:</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    babynames <span class="op">=</span> pd.read_csv(fh, header<span class="op">=</span><span class="va">None</span>, names<span class="op">=</span>field_names)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>babynames.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="63">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">State</th>
+<th data-quarto-table-cell-role="th">Sex</th>
+<th data-quarto-table-cell-role="th">Year</th>
+<th data-quarto-table-cell-role="th">Name</th>
+<th data-quarto-table-cell-role="th">Count</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>CA</td>
+<td>F</td>
+<td>1910</td>
+<td>Mary</td>
+<td>295</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>CA</td>
+<td>F</td>
+<td>1910</td>
+<td>Helen</td>
+<td>239</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>CA</td>
+<td>F</td>
+<td>1910</td>
+<td>Dorothy</td>
+<td>220</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>CA</td>
+<td>F</td>
+<td>1910</td>
+<td>Margaret</td>
+<td>163</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>CA</td>
+<td>F</td>
+<td>1910</td>
+<td>Frances</td>
+<td>134</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Let’s start by using <code>.agg</code> to find the total number of babies born in each year. Recall that using <code>.agg</code> with <code>.groupby()</code> follows the format: <code>df.groupby(column_name).agg(aggregation_function)</code>.</p>
+<div class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>babynames.groupby(<span class="st">"Year"</span>)[[<span class="st">"Count"</span>]].agg(<span class="bu">sum</span>).head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Count</th>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">Year</th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1910</td>
+<td>9163</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1911</td>
+<td>9983</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1912</td>
+<td>17946</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1913</td>
+<td>22094</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1914</td>
+<td>26926</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p><img src="images/aggregation.png" alt="aggregation" width="600"></p>
+<p>There are many different aggregations that can be applied to the grouped data. <code>.agg()</code> can take in any function that aggregates several values into one summary value.</p>
+<p>Because of this fairly broad requirement, <code>pandas</code> offers many ways of computing an aggregation.</p>
+<p><strong>In-built</strong> Python operations – such as <code>sum</code>, <code>max</code>, and <code>min</code> – are automatically recognized by <code>pandas</code>.</p>
+<p><strong><code>NumPy</code></strong> functions, such as <code>np.mean</code>, <code>np.max</code>, <code>np.min</code>, and <code>np.sum</code>, are also fair game in <code>pandas</code>.</p>
+<p><code>pandas</code> also offers a number of in-built functions, including:</p>
+<ul>
+<li><code>.agg("sum")</code></li>
+<li><code>.agg("max")</code></li>
+<li><code>.agg("min")</code></li>
+<li><code>.agg("mean")</code></li>
+<li><code>.agg("first")</code></li>
+<li><code>.agg("last")</code></li>
+</ul>
+<p>Some commonly-used aggregation functions can even be called directly, without explicit use of <code>.agg()</code>. For example, we can call <code>.mean()</code> on <code>.groupby()</code>: <code>babynames.groupby("Year").mean()</code>.</p>
+<p>We can now put this all into practice. Say we want to find the baby name with sex “F” that has fallen in popularity the most in California. To calculate this, we can first create a metric: “Ratio to Peak” (RTP). The RTP is the ratio of babies born with a given name in 2022 to the <em>maximum</em> number of babies born with the name in <em>any</em> year.</p>
+<p>Let’s start with calculating this for one baby, “Jennifer”.</p>
+<div class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># We filter by babies with sex "F" and sort by "Year"</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>f_babynames <span class="op">=</span> babynames[babynames[<span class="st">"Sex"</span>] <span class="op">==</span> <span class="st">"F"</span>]</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>f_babynames <span class="op">=</span> f_babynames.sort_values([<span class="st">"Year"</span>])</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#Determine how many Jennifers were born in CA per year</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>jenn_counts_series <span class="op">=</span> f_babynames[f_babynames[<span class="st">"Name"</span>] <span class="op">==</span> <span class="st">"Jennifer"</span>][<span class="st">"Count"</span>]</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">#Determine the max number of Jennifers born in a year and the number born in 2022 to calculate RTP</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>max_jenn <span class="op">=</span> <span class="bu">max</span>(f_babynames[f_babynames[<span class="st">"Name"</span>] <span class="op">==</span> <span class="st">"Jennifer"</span>][<span class="st">"Count"</span>])</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>curr_jenn <span class="op">=</span> f_babynames[f_babynames[<span class="st">"Name"</span>] <span class="op">==</span> <span class="st">"Jennifer"</span>][<span class="st">"Count"</span>].iloc[<span class="op">-</span><span class="dv">1</span>]</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>rtp <span class="op">=</span> curr_jenn <span class="op">/</span> max_jenn</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>rtp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<pre><code>0.018796372629843364</code></pre>
+</div>
+</div>
+<p>By creating a function to calculate RTP and applying it to our <code>DataFrame</code> by using <code>.groupby()</code>, we can easily compute the RTP for all names at once!</p>
+<div class="cell" data-execution_count="33">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> ratio_to_peak(series):</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> series.iloc[<span class="op">-</span><span class="dv">1</span>] <span class="op">/</span> <span class="bu">max</span>(series)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co">#Using .groupby() to apply the function</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>rtp_table <span class="op">=</span> f_babynames.groupby(<span class="st">"Name"</span>)[[<span class="st">"Year"</span>, <span class="st">"Count"</span>]].agg(ratio_to_peak)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>rtp_table.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="33">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Year</th>
+<th data-quarto-table-cell-role="th">Count</th>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">Name</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Aadhini</td>
+<td>1.0</td>
+<td>1.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Aadhira</td>
+<td>1.0</td>
+<td>0.500000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Aadhya</td>
+<td>1.0</td>
+<td>0.660000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Aadya</td>
+<td>1.0</td>
+<td>0.586207</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Aahana</td>
+<td>1.0</td>
+<td>0.269231</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>This is the “<strong><code>pandas</code></strong>-ification” of logic you saw in Data 8. Much of the logic you’ve learned in Data 8 will serve you well in Data 100.</p>
+<section id="nuisance-columns" class="level3">
+<h3 class="anchored" data-anchor-id="nuisance-columns">Nuisance Columns</h3>
+<p>Note that you must be careful with which columns you apply the <code>.agg()</code> function to. If we were to apply our function to the table as a whole by doing <code>f_babynames.groupby("Name").agg(ratio_to_peak)</code>, executing our <code>.agg()</code> call would result in a <code>TypeError</code>.</p>
+<p><img src="images/error.png" alt="error" width="600"></p>
+<p>By explicitly selecting column(s) we want to apply our aggregation function to <strong>BEFORE</strong> calling <code>.agg()</code>, we can avoid this issue and prevent unintentional loss of data.</p>
+</section>
+<section id="some-data-science-payoff" class="level3">
+<h3 class="anchored" data-anchor-id="some-data-science-payoff">Some Data Science Payoff</h3>
+<p>Let’s rename our <code>"Count"</code> column as <code>"Count RTP"</code> to provide some more readability. Then, by sorting <code>rtp_table</code> we can see the names whose popularity has decreased the most.</p>
+<div class="cell" data-execution_count="59">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>rtp_table <span class="op">=</span> rtp_table.rename(columns <span class="op">=</span> {<span class="st">"Count"</span>: <span class="st">"Count RTP"</span>})</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>rtp_table.sort_values(<span class="st">"Count RTP"</span>).head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="59">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Year</th>
+<th data-quarto-table-cell-role="th">Count RTP</th>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">Name</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Debra</td>
+<td>1.0</td>
+<td>0.001260</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Debbie</td>
+<td>1.0</td>
+<td>0.002815</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Carol</td>
+<td>1.0</td>
+<td>0.003180</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Tammy</td>
+<td>1.0</td>
+<td>0.003249</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Susan</td>
+<td>1.0</td>
+<td>0.003305</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>To visualize the above <code>Dataframe</code>, let’s look at the line plot below:</p>
+<div class="cell" data-execution_count="60">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> plotly.express <span class="im">as</span> px</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>px.line(f_babynames[f_babynames[<span class="st">"Name"</span>] <span class="op">==</span> <span class="st">"Debra"</span>], x <span class="op">=</span> <span class="st">"Year"</span>, y <span class="op">=</span> <span class="st">"Count"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<pre><code>Unable to display output for mime type(s): application/vnd.plotly.v1+json</code></pre>
+</div>
+</div>
+<p>We can get the list of the top 10 names and then plot popularity with the following code:</p>
+<div class="cell" data-execution_count="62">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>top10 <span class="op">=</span> rtp_table.sort_values(<span class="st">"Count RTP"</span>).head(<span class="dv">10</span>).index</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>px.line(f_babynames[f_babynames[<span class="st">"Name"</span>].isin(top10)], x <span class="op">=</span> <span class="st">"Year"</span>, y <span class="op">=</span> <span class="st">"Count"</span>, color <span class="op">=</span> <span class="st">"Name"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>Unable to display output for mime type(s): application/vnd.plotly.v1+json</code></pre>
+</div>
+</div>
+<p>As a quick exercise, consider what code would compute the total number of babies with each name.</p>
+<div class="cell" data-execution_count="58">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>babynames.groupby(<span class="st">"Name"</span>)[[<span class="st">"Count"</span>]].agg(ratio_to_peak)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="58">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Count</th>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">Name</th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Aaban</td>
+<td>0.437500</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Aabha</td>
+<td>0.555556</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Aabid</td>
+<td>1.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Aabidah</td>
+<td>1.000000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Aabir</td>
+<td>1.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Zyvion</td>
+<td>1.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Zyvon</td>
+<td>1.000000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Zyyanna</td>
+<td>1.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Zyyon</td>
+<td>1.000000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Zzyzx</td>
+<td>1.000000</td>
+</tr>
+</tbody>
+</table>
+
+<p>102449 rows × 1 columns</p>
+</div>
+</div>
+</div>
+<p>Now, let’s think about the code to compute the total number of babies born each <em>year</em>. You’ll see that there are multiple ways to achieve this, some of which are listed below.</p>
+<div class="cell" data-execution_count="50">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>babynames.groupby(<span class="st">"Year"</span>)[[<span class="st">"Count"</span>]].agg(<span class="bu">sum</span>).head()</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Alternative 1</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co"># babynames.groupby("Year")[["Count"]].sum()</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Alternative 2</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="co"># babynames.groupby("Year").sum(numeric_only=True)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="50">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Count</th>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">Year</th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1880</td>
+<td>201484</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1881</td>
+<td>192690</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1882</td>
+<td>221533</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1883</td>
+<td>216945</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1884</td>
+<td>243461</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>For the second alternative, note how we can avoid the error we faced earlier with aggregating non-numeric colums by passing in the <code>numeric_only=True</code> argument to <code>groupby</code>. Plotting the <code>Dataframe</code> we obtain tells an interesting story.</p>
+<div class="cell" data-execution_count="56">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> plotly.express <span class="im">as</span> px</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>puzzle2 <span class="op">=</span> babynames.groupby(<span class="st">"Year"</span>)[[<span class="st">"Count"</span>]].agg(<span class="bu">sum</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co"># sns.lineplot(babynames.groupby("Year")[["Count"]].agg(sum), x = puzzle2.index, y = "Count")</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>px.line(puzzle2, y <span class="op">=</span> <span class="st">"Count"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<pre><code>Unable to display output for mime type(s): application/vnd.plotly.v1+json</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="groupby-continued" class="level2">
+<h2 class="anchored" data-anchor-id="groupby-continued"><code>GroupBy()</code>, Continued</h2>
+<p>Let’s now dive deeper into <code>groupby</code>. As we learned last lecture, a <code>groupby</code> operation involves some combination of <strong>splitting a DataFrame into grouped subframes</strong>, <strong>applying a function</strong>, and <strong>combining the results</strong>.</p>
+<p>For some arbitrary DataFrame <code>df</code> below, the code <code>df.groupby("year").agg(sum)</code> does the following:</p>
+<ul>
+<li><strong>Splits</strong> the <code>DataFrame</code> into sub-<code>DataFrame</code>s with rows belonging to the same year.</li>
+<li><strong>Applies</strong> the <code>sum</code> function to each column of each sub-<code>DataFrame</code>.</li>
+<li><strong>Combines</strong> the results of <code>sum</code> into a single <code>DataFrame</code>, indexed by <code>year</code>.</li>
+</ul>
+<p><img src="images/groupby_demo.png" alt="groupby_demo" width="600"></p>
+<p>Note that the result of <code>groupby</code> applied to a <code>DataFrame</code> is a <code>DataFrameGroupBy</code> object, <strong>not</strong> a <code>DataFrame</code>, as you can verify below.</p>
+<div class="cell" data-execution_count="57">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>grouped_by_year <span class="op">=</span> elections.groupby(<span class="st">"Year"</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="bu">type</span>(grouped_by_year)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="57">
+<pre><code>pandas.core.groupby.generic.DataFrameGroupBy</code></pre>
+</div>
+</div>
+<section id="aggregation-with-lambda-functions" class="level3">
+<h3 class="anchored" data-anchor-id="aggregation-with-lambda-functions">Aggregation with <code>lambda</code> Functions</h3>
+<p>What if we wish to aggregate our DataFrame using a non-standard function – for example, a function of our own design? We can do so by combining <code>.agg</code> with <code>lambda</code> expressions.</p>
+<p>We’ll work with the <code>elections</code> DataFrame again.</p>
+<div class="cell" data-execution_count="13">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>elections <span class="op">=</span> pd.read_csv(<span class="st">"data/elections.csv"</span>)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>elections.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="13">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Year</th>
+<th data-quarto-table-cell-role="th">Candidate</th>
+<th data-quarto-table-cell-role="th">Party</th>
+<th data-quarto-table-cell-role="th">Popular vote</th>
+<th data-quarto-table-cell-role="th">Result</th>
+<th data-quarto-table-cell-role="th">%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>1824</td>
+<td>Andrew Jackson</td>
+<td>Democratic-Republican</td>
+<td>151271</td>
+<td>loss</td>
+<td>57.210122</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>1824</td>
+<td>John Quincy Adams</td>
+<td>Democratic-Republican</td>
+<td>113142</td>
+<td>win</td>
+<td>42.789878</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>1828</td>
+<td>Andrew Jackson</td>
+<td>Democratic</td>
+<td>642806</td>
+<td>win</td>
+<td>56.203927</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>1828</td>
+<td>John Quincy Adams</td>
+<td>National Republican</td>
+<td>500897</td>
+<td>loss</td>
+<td>43.796073</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>1832</td>
+<td>Andrew Jackson</td>
+<td>Democratic</td>
+<td>702735</td>
+<td>win</td>
+<td>54.574789</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Let’s first consider a puzzle to jog our memory. We will attempt to find the <code>Candidate</code> from each <code>Party</code> with the highest <code>%</code> of votes.</p>
+<p>A naive approach may be to group by the <code>Party</code> column and aggregate by the maximum.</p>
+<div class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>elections.groupby(<span class="st">"Party"</span>).agg(<span class="bu">max</span>).head(<span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="14">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Year</th>
+<th data-quarto-table-cell-role="th">Candidate</th>
+<th data-quarto-table-cell-role="th">Popular vote</th>
+<th data-quarto-table-cell-role="th">Result</th>
+<th data-quarto-table-cell-role="th">%</th>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">Party</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">American</td>
+<td>1976</td>
+<td>Thomas J. Anderson</td>
+<td>873053</td>
+<td>loss</td>
+<td>21.554001</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">American Independent</td>
+<td>1976</td>
+<td>Lester Maddox</td>
+<td>9901118</td>
+<td>loss</td>
+<td>13.571218</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Anti-Masonic</td>
+<td>1832</td>
+<td>William Wirt</td>
+<td>100715</td>
+<td>loss</td>
+<td>7.821583</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Anti-Monopoly</td>
+<td>1884</td>
+<td>Benjamin Butler</td>
+<td>134294</td>
+<td>loss</td>
+<td>1.335838</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Citizens</td>
+<td>1980</td>
+<td>Barry Commoner</td>
+<td>233052</td>
+<td>loss</td>
+<td>0.270182</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Communist</td>
+<td>1932</td>
+<td>William Z. Foster</td>
+<td>103307</td>
+<td>loss</td>
+<td>0.261069</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Constitution</td>
+<td>2016</td>
+<td>Michael Peroutka</td>
+<td>203091</td>
+<td>loss</td>
+<td>0.152398</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Constitutional Union</td>
+<td>1860</td>
+<td>John Bell</td>
+<td>590901</td>
+<td>loss</td>
+<td>12.639283</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Democratic</td>
+<td>2020</td>
+<td>Woodrow Wilson</td>
+<td>81268924</td>
+<td>win</td>
+<td>61.344703</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Democratic-Republican</td>
+<td>1824</td>
+<td>John Quincy Adams</td>
+<td>151271</td>
+<td>win</td>
+<td>57.210122</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>This approach is clearly wrong – the DataFrame claims that Woodrow Wilson won the presidency in 2020.</p>
+<p>Why is this happening? Here, the <code>max</code> aggregation function is taken over every column <em>independently</em>. Among Democrats, <code>max</code> is computing:</p>
+<ul>
+<li>The most recent <code>Year</code> a Democratic candidate ran for president (2020)</li>
+<li>The <code>Candidate</code> with the alphabetically “largest” name (“Woodrow Wilson”)</li>
+<li>The <code>Result</code> with the alphabetically “largest” outcome (“win”)</li>
+</ul>
+<p>Instead, let’s try a different approach. We will:</p>
+<ol type="1">
+<li>Sort the DataFrame so that rows are in descending order of <code>%</code></li>
+<li>Group by <code>Party</code> and select the first row of each sub-DataFrame</li>
+</ol>
+<p>While it may seem unintuitive, sorting <code>elections</code> by descending order of <code>%</code> is extremely helpful. If we then group by <code>Party</code>, the first row of each groupby object will contain information about the <code>Candidate</code> with the highest voter <code>%</code>.</p>
+<div class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>elections_sorted_by_percent <span class="op">=</span> elections.sort_values(<span class="st">"%"</span>, ascending<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>elections_sorted_by_percent.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="15">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Year</th>
+<th data-quarto-table-cell-role="th">Candidate</th>
+<th data-quarto-table-cell-role="th">Party</th>
+<th data-quarto-table-cell-role="th">Popular vote</th>
+<th data-quarto-table-cell-role="th">Result</th>
+<th data-quarto-table-cell-role="th">%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">114</td>
+<td>1964</td>
+<td>Lyndon Johnson</td>
+<td>Democratic</td>
+<td>43127041</td>
+<td>win</td>
+<td>61.344703</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">91</td>
+<td>1936</td>
+<td>Franklin Roosevelt</td>
+<td>Democratic</td>
+<td>27752648</td>
+<td>win</td>
+<td>60.978107</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">120</td>
+<td>1972</td>
+<td>Richard Nixon</td>
+<td>Republican</td>
+<td>47168710</td>
+<td>win</td>
+<td>60.907806</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">79</td>
+<td>1920</td>
+<td>Warren Harding</td>
+<td>Republican</td>
+<td>16144093</td>
+<td>win</td>
+<td>60.574501</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">133</td>
+<td>1984</td>
+<td>Ronald Reagan</td>
+<td>Republican</td>
+<td>54455472</td>
+<td>win</td>
+<td>59.023326</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>elections_sorted_by_percent.groupby(<span class="st">"Party"</span>).agg(<span class="kw">lambda</span> x : x.iloc[<span class="dv">0</span>]).head(<span class="dv">10</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Equivalent to the below code</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="co"># elections_sorted_by_percent.groupby("Party").agg('first').head(10)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="16">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Year</th>
+<th data-quarto-table-cell-role="th">Candidate</th>
+<th data-quarto-table-cell-role="th">Popular vote</th>
+<th data-quarto-table-cell-role="th">Result</th>
+<th data-quarto-table-cell-role="th">%</th>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">Party</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">American</td>
+<td>1856</td>
+<td>Millard Fillmore</td>
+<td>873053</td>
+<td>loss</td>
+<td>21.554001</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">American Independent</td>
+<td>1968</td>
+<td>George Wallace</td>
+<td>9901118</td>
+<td>loss</td>
+<td>13.571218</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Anti-Masonic</td>
+<td>1832</td>
+<td>William Wirt</td>
+<td>100715</td>
+<td>loss</td>
+<td>7.821583</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Anti-Monopoly</td>
+<td>1884</td>
+<td>Benjamin Butler</td>
+<td>134294</td>
+<td>loss</td>
+<td>1.335838</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Citizens</td>
+<td>1980</td>
+<td>Barry Commoner</td>
+<td>233052</td>
+<td>loss</td>
+<td>0.270182</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Communist</td>
+<td>1932</td>
+<td>William Z. Foster</td>
+<td>103307</td>
+<td>loss</td>
+<td>0.261069</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Constitution</td>
+<td>2008</td>
+<td>Chuck Baldwin</td>
+<td>199750</td>
+<td>loss</td>
+<td>0.152398</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Constitutional Union</td>
+<td>1860</td>
+<td>John Bell</td>
+<td>590901</td>
+<td>loss</td>
+<td>12.639283</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Democratic</td>
+<td>1964</td>
+<td>Lyndon Johnson</td>
+<td>43127041</td>
+<td>win</td>
+<td>61.344703</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Democratic-Republican</td>
+<td>1824</td>
+<td>Andrew Jackson</td>
+<td>151271</td>
+<td>loss</td>
+<td>57.210122</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Here’s an illustration of the process:</p>
+<p><img src="images/puzzle_demo.png" alt="groupby_demo" width="600"></p>
+<p>Notice how our code correctly determines that Lyndon Johnson from the Democratic Party has the highest voter <code>%</code>.</p>
+<p>More generally, <code>lambda</code> functions are used to design custom aggregation functions that aren’t pre-defined by Python. The input parameter <code>x</code> to the <code>lambda</code> function is a <code>GroupBy</code> object. Therefore, it should make sense why <code>lambda x : x.iloc[0]</code> selects the first row in each groupby object.</p>
+<p>In fact, there’s a few different ways to approach this problem. Each approach has different tradeoffs in terms of readability, performance, memory consumption, complexity, etc. We’ve given a few examples below.</p>
+<p><strong>Note</strong>: Understanding these alternative solutions is not required. They are given to demonstrate the vast number of problem-solving approaches in <code>pandas</code>.</p>
+<div class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Using the idxmax function</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>best_per_party <span class="op">=</span> elections.loc[elections.groupby(<span class="st">'Party'</span>)[<span class="st">'%'</span>].idxmax()]</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>best_per_party.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="17">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Year</th>
+<th data-quarto-table-cell-role="th">Candidate</th>
+<th data-quarto-table-cell-role="th">Party</th>
+<th data-quarto-table-cell-role="th">Popular vote</th>
+<th data-quarto-table-cell-role="th">Result</th>
+<th data-quarto-table-cell-role="th">%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">22</td>
+<td>1856</td>
+<td>Millard Fillmore</td>
+<td>American</td>
+<td>873053</td>
+<td>loss</td>
+<td>21.554001</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">115</td>
+<td>1968</td>
+<td>George Wallace</td>
+<td>American Independent</td>
+<td>9901118</td>
+<td>loss</td>
+<td>13.571218</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">6</td>
+<td>1832</td>
+<td>William Wirt</td>
+<td>Anti-Masonic</td>
+<td>100715</td>
+<td>loss</td>
+<td>7.821583</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">38</td>
+<td>1884</td>
+<td>Benjamin Butler</td>
+<td>Anti-Monopoly</td>
+<td>134294</td>
+<td>loss</td>
+<td>1.335838</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">127</td>
+<td>1980</td>
+<td>Barry Commoner</td>
+<td>Citizens</td>
+<td>233052</td>
+<td>loss</td>
+<td>0.270182</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Using the .drop_duplicates function</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>best_per_party2 <span class="op">=</span> elections.sort_values(<span class="st">'%'</span>).drop_duplicates([<span class="st">'Party'</span>], keep<span class="op">=</span><span class="st">'last'</span>)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>best_per_party2.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="18">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Year</th>
+<th data-quarto-table-cell-role="th">Candidate</th>
+<th data-quarto-table-cell-role="th">Party</th>
+<th data-quarto-table-cell-role="th">Popular vote</th>
+<th data-quarto-table-cell-role="th">Result</th>
+<th data-quarto-table-cell-role="th">%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">148</td>
+<td>1996</td>
+<td>John Hagelin</td>
+<td>Natural Law</td>
+<td>113670</td>
+<td>loss</td>
+<td>0.118219</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">164</td>
+<td>2008</td>
+<td>Chuck Baldwin</td>
+<td>Constitution</td>
+<td>199750</td>
+<td>loss</td>
+<td>0.152398</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">110</td>
+<td>1956</td>
+<td>T. Coleman Andrews</td>
+<td>States' Rights</td>
+<td>107929</td>
+<td>loss</td>
+<td>0.174883</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">147</td>
+<td>1996</td>
+<td>Howard Phillips</td>
+<td>Taxpayers</td>
+<td>184656</td>
+<td>loss</td>
+<td>0.192045</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">136</td>
+<td>1988</td>
+<td>Lenora Fulani</td>
+<td>New Alliance</td>
+<td>217221</td>
+<td>loss</td>
+<td>0.237804</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="other-groupby-features" class="level3">
+<h3 class="anchored" data-anchor-id="other-groupby-features">Other <code>GroupBy</code> Features</h3>
+<p>There are many aggregation methods we can use with <code>.agg</code>. Some useful options are:</p>
+<ul>
+<li><a href="https://pandas.pydata.org/docs/reference/api/pandas.core.groupby.DataFrameGroupBy.mean.html#pandas.core.groupby.DataFrameGroupBy.mean"><code>.mean</code></a>: creates a new DataFrame with the mean value of each group</li>
+<li><a href="https://pandas.pydata.org/docs/reference/api/pandas.core.groupby.DataFrameGroupBy.sum.html#pandas.core.groupby.DataFrameGroupBy.sum"><code>.sum</code></a>: creates a new DataFrame with the sum of each group</li>
+<li><a href="https://pandas.pydata.org/docs/reference/api/pandas.core.groupby.DataFrameGroupBy.max.html#pandas.core.groupby.DataFrameGroupBy.max"><code>.max</code></a> and <a href="https://pandas.pydata.org/docs/reference/api/pandas.core.groupby.DataFrameGroupBy.min.html#pandas.core.groupby.DataFrameGroupBy.min"><code>.min</code></a>: creates a new DataFrame with the maximum/minimum value of each group</li>
+<li><a href="https://pandas.pydata.org/docs/reference/api/pandas.core.groupby.DataFrameGroupBy.first.html#pandas.core.groupby.DataFrameGroupBy.first"><code>.first</code></a> and <a href="https://pandas.pydata.org/docs/reference/api/pandas.core.groupby.DataFrameGroupBy.last.html#pandas.core.groupby.DataFrameGroupBy.last"><code>.last</code></a>: creates a new DataFrame with the first/last row in each group</li>
+<li><a href="https://pandas.pydata.org/docs/reference/api/pandas.core.groupby.DataFrameGroupBy.size.html#pandas.core.groupby.DataFrameGroupBy.size"><code>.size</code></a>: creates a new <strong>Series</strong> with the number of entries in each group</li>
+<li><a href="https://pandas.pydata.org/docs/reference/api/pandas.core.groupby.DataFrameGroupBy.count.html#pandas.core.groupby.DataFrameGroupBy.count"><code>.count</code></a>: creates a new <strong>DataFrame</strong> with the number of entries, excluding missing values.</li>
+</ul>
+<p>Note the slight difference between <code>.size()</code> and <code>.count()</code>: while <code>.size()</code> returns a Series and counts the number of entries including the missing values, <code>.count()</code> returns a DataFrame and counts the number of entries in each column excluding missing values. Here’s an example:</p>
+<div class="cell" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame({<span class="st">'letter'</span>:[<span class="st">'A'</span>,<span class="st">'A'</span>,<span class="st">'B'</span>,<span class="st">'C'</span>,<span class="st">'C'</span>,<span class="st">'C'</span>], </span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>                   <span class="st">'num'</span>:[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,np.NaN,<span class="dv">4</span>], </span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>                   <span class="st">'state'</span>:[np.NaN, <span class="st">'tx'</span>, <span class="st">'fl'</span>, <span class="st">'hi'</span>, np.NaN, <span class="st">'ak'</span>]})</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="19">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">letter</th>
+<th data-quarto-table-cell-role="th">num</th>
+<th data-quarto-table-cell-role="th">state</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>A</td>
+<td>1.0</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>A</td>
+<td>2.0</td>
+<td>tx</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>B</td>
+<td>3.0</td>
+<td>fl</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>C</td>
+<td>4.0</td>
+<td>hi</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>C</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">5</td>
+<td>C</td>
+<td>4.0</td>
+<td>ak</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div class="cell" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>df.groupby(<span class="st">"letter"</span>).size()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="20">
+<pre><code>letter
+A    2
+B    1
+C    3
+dtype: int64</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="21">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>df.groupby(<span class="st">"letter"</span>).count()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="21">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">num</th>
+<th data-quarto-table-cell-role="th">state</th>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">letter</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">A</td>
+<td>2</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">B</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">C</td>
+<td>2</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>You might recall that the <code>value_counts()</code> function in the previous note does something similar. It turns out <code>value_counts()</code> and <code>groupby.size()</code> are the same, except <code>value_counts()</code> sorts the resulting Series in descending order automatically.</p>
+<div class="cell" data-execution_count="22">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"letter"</span>].value_counts()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="22">
+<pre><code>C    3
+A    2
+B    1
+Name: letter, dtype: int64</code></pre>
+</div>
+</div>
+<p>These (and other) aggregation functions are so common that <code>pandas</code> allows for writing shorthand. Instead of explicitly stating the use of <code>.agg</code>, we can call the function directly on the <code>GroupBy</code> object.</p>
+<p>For example, the following are equivalent:</p>
+<ul>
+<li><code>elections.groupby("Candidate").agg(mean)</code></li>
+<li><code>elections.groupby("Candidate").mean()</code></li>
+</ul>
+<p>There are many other methods that <code>pandas</code> supports. You can check them out on the <a href="https://pandas.pydata.org/docs/reference/groupby.html"><code>pandas</code> documentation</a>.</p>
+</section>
+<section id="filtering-by-group" class="level3">
+<h3 class="anchored" data-anchor-id="filtering-by-group">Filtering by Group</h3>
+<p>Another common use for <code>GroupBy</code> objects is to filter data by group.</p>
+<p><code>groupby.filter</code> takes an argument <span class="math inline">\(\text{f}\)</span>, where <span class="math inline">\(\text{f}\)</span> is a function that:</p>
+<ul>
+<li>Takes a DataFrame object as input</li>
+<li>Returns a single <code>True</code> or <code>False</code> for the each sub-DataFrame</li>
+</ul>
+<p>Sub-DataFrames that correspond to <code>True</code> are returned in the final result, whereas those with a <code>False</code> value are not. Importantly, <code>groupby.filter</code> is different from <code>groupby.agg</code> in that an <em>entire</em> sub-DataFrame is returned in the final DataFrame, not just a single row. As a result, <code>groupby.filter</code> preserves the original indices.</p>
+<p>To illustrate how this happens, consider the following <code>.filter</code> function applied on some arbitrary data. Say we want to identify “tight” election years – that is, we want to find all rows that correspond to elections years where all candidates in that year won a similar portion of the total vote. Specifically, let’s find all rows corresponding to a year where no candidate won more than 45% of the total vote.</p>
+<p>In other words, we want to:</p>
+<ul>
+<li>Find the years where the maximum <code>%</code> in that year is less than 45%</li>
+<li>Return all DataFrame rows that correspond to these years</li>
+</ul>
+<p>For each year, we need to find the maximum <code>%</code> among <em>all</em> rows for that year. If this maximum <code>%</code> is lower than 45%, we will tell <code>pandas</code> to keep all rows corresponding to that year.</p>
+<div class="cell" data-execution_count="23">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>elections.groupby(<span class="st">"Year"</span>).<span class="bu">filter</span>(<span class="kw">lambda</span> sf: sf[<span class="st">"%"</span>].<span class="bu">max</span>() <span class="op">&lt;</span> <span class="dv">45</span>).head(<span class="dv">9</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="23">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Year</th>
+<th data-quarto-table-cell-role="th">Candidate</th>
+<th data-quarto-table-cell-role="th">Party</th>
+<th data-quarto-table-cell-role="th">Popular vote</th>
+<th data-quarto-table-cell-role="th">Result</th>
+<th data-quarto-table-cell-role="th">%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">23</td>
+<td>1860</td>
+<td>Abraham Lincoln</td>
+<td>Republican</td>
+<td>1855993</td>
+<td>win</td>
+<td>39.699408</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">24</td>
+<td>1860</td>
+<td>John Bell</td>
+<td>Constitutional Union</td>
+<td>590901</td>
+<td>loss</td>
+<td>12.639283</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">25</td>
+<td>1860</td>
+<td>John C. Breckinridge</td>
+<td>Southern Democratic</td>
+<td>848019</td>
+<td>loss</td>
+<td>18.138998</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">26</td>
+<td>1860</td>
+<td>Stephen A. Douglas</td>
+<td>Northern Democratic</td>
+<td>1380202</td>
+<td>loss</td>
+<td>29.522311</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">66</td>
+<td>1912</td>
+<td>Eugene V. Debs</td>
+<td>Socialist</td>
+<td>901551</td>
+<td>loss</td>
+<td>6.004354</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">67</td>
+<td>1912</td>
+<td>Eugene W. Chafin</td>
+<td>Prohibition</td>
+<td>208156</td>
+<td>loss</td>
+<td>1.386325</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">68</td>
+<td>1912</td>
+<td>Theodore Roosevelt</td>
+<td>Progressive</td>
+<td>4122721</td>
+<td>loss</td>
+<td>27.457433</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">69</td>
+<td>1912</td>
+<td>William Taft</td>
+<td>Republican</td>
+<td>3486242</td>
+<td>loss</td>
+<td>23.218466</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">70</td>
+<td>1912</td>
+<td>Woodrow Wilson</td>
+<td>Democratic</td>
+<td>6296284</td>
+<td>win</td>
+<td>41.933422</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>What’s going on here? In this example, we’ve defined our filtering function, <span class="math inline">\(\text{f}\)</span>, to be <code>lambda sf: sf["%"].max() &lt; 45</code>. This filtering function will find the maximum <code>"%"</code> value among all entries in the grouped sub-DataFrame, which we call <code>sf</code>. If the maximum value is less than 45, then the filter function will return <code>True</code> and all rows in that grouped sub-DataFrame will appear in the final output DataFrame.</p>
+<p>Examine the DataFrame above. Notice how, in this preview of the first 9 rows, all entries from the years 1860 and 1912 appear. This means that in 1860 and 1912, no candidate in that year won more than 45% of the total vote.</p>
+<p>You may ask: how is the <code>groupby.filter</code> procedure different to the boolean filtering we’ve seen previously? Boolean filtering considers <em>individual</em> rows when applying a boolean condition. For example, the code <code>elections[elections["%"] &lt; 45]</code> will check the <code>"%"</code> value of every single row in <code>elections</code>; if it is less than 45, then that row will be kept in the output. <code>groupby.filter</code>, in contrast, applies a boolean condition <em>across</em> all rows in a group. If not all rows in that group satisfy the condition specified by the filter, the entire group will be discarded in the output.</p>
+</section>
+</section>
+<section id="aggregating-data-with-pivot-tables" class="level2">
+<h2 class="anchored" data-anchor-id="aggregating-data-with-pivot-tables">Aggregating Data with Pivot Tables</h2>
+<p>We know now that <code>.groupby</code> gives us the ability to group and aggregate data across our DataFrame. The examples above formed groups using just one column in the DataFrame. It’s possible to group by multiple columns at once by passing in a list of column names to <code>.groupby</code>.</p>
+<p>Let’s consider the <code>babynames</code> dataset. In this problem, we will find the total number of baby names associated with each sex for each year. To do this, we’ll group by <em>both</em> the <code>"Year"</code> and <code>"Sex"</code> columns.</p>
+<div class="cell" data-execution_count="24">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> urllib.request</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os.path</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Download data from the web directly</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>data_url <span class="op">=</span> <span class="st">"https://www.ssa.gov/oact/babynames/names.zip"</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>local_filename <span class="op">=</span> <span class="st">"data/babynames.zip"</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">not</span> os.path.exists(local_filename): <span class="co"># if the data exists don't download again</span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> urllib.request.urlopen(data_url) <span class="im">as</span> resp, <span class="bu">open</span>(local_filename, <span class="st">'wb'</span>) <span class="im">as</span> f:</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>        f.write(resp.read())</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Load data without unzipping the file</span></span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> zipfile</span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>babynames <span class="op">=</span> [] </span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> zipfile.ZipFile(local_filename, <span class="st">"r"</span>) <span class="im">as</span> zf:</span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a>    data_files <span class="op">=</span> [f <span class="cf">for</span> f <span class="kw">in</span> zf.filelist <span class="cf">if</span> f.filename[<span class="op">-</span><span class="dv">3</span>:] <span class="op">==</span> <span class="st">"txt"</span>]</span>
+<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> extract_year_from_filename(fn):</span>
+<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">int</span>(fn[<span class="dv">3</span>:<span class="dv">7</span>])</span>
+<span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> f <span class="kw">in</span> data_files:</span>
+<span id="cb30-20"><a href="#cb30-20" aria-hidden="true" tabindex="-1"></a>        year <span class="op">=</span> extract_year_from_filename(f.filename)</span>
+<span id="cb30-21"><a href="#cb30-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> zf.<span class="bu">open</span>(f) <span class="im">as</span> fp:</span>
+<span id="cb30-22"><a href="#cb30-22" aria-hidden="true" tabindex="-1"></a>            df <span class="op">=</span> pd.read_csv(fp, names<span class="op">=</span>[<span class="st">"Name"</span>, <span class="st">"Sex"</span>, <span class="st">"Count"</span>])</span>
+<span id="cb30-23"><a href="#cb30-23" aria-hidden="true" tabindex="-1"></a>            df[<span class="st">"Year"</span>] <span class="op">=</span> year</span>
+<span id="cb30-24"><a href="#cb30-24" aria-hidden="true" tabindex="-1"></a>            babynames.append(df)</span>
+<span id="cb30-25"><a href="#cb30-25" aria-hidden="true" tabindex="-1"></a>babynames <span class="op">=</span> pd.concat(babynames)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-execution_count="25">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>babynames.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="25">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Name</th>
+<th data-quarto-table-cell-role="th">Sex</th>
+<th data-quarto-table-cell-role="th">Count</th>
+<th data-quarto-table-cell-role="th">Year</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>Mary</td>
+<td>F</td>
+<td>7065</td>
+<td>1880</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>Anna</td>
+<td>F</td>
+<td>2604</td>
+<td>1880</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>Emma</td>
+<td>F</td>
+<td>2003</td>
+<td>1880</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>Elizabeth</td>
+<td>F</td>
+<td>1939</td>
+<td>1880</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>Minnie</td>
+<td>F</td>
+<td>1746</td>
+<td>1880</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div class="cell" data-execution_count="26">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Find the total number of baby names associated with each sex for each year in the data</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>babynames.groupby([<span class="st">"Year"</span>, <span class="st">"Sex"</span>])[[<span class="st">"Count"</span>]].agg(<span class="bu">sum</span>).head(<span class="dv">6</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="26">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Count</th>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">Year</th>
+<th data-quarto-table-cell-role="th">Sex</th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td rowspan="2" data-quarto-table-cell-role="th" data-valign="top">1880</td>
+<td data-quarto-table-cell-role="th">F</td>
+<td>90994</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">M</td>
+<td>110490</td>
+</tr>
+<tr class="odd">
+<td rowspan="2" data-quarto-table-cell-role="th" data-valign="top">1881</td>
+<td data-quarto-table-cell-role="th">F</td>
+<td>91953</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">M</td>
+<td>100737</td>
+</tr>
+<tr class="odd">
+<td rowspan="2" data-quarto-table-cell-role="th" data-valign="top">1882</td>
+<td data-quarto-table-cell-role="th">F</td>
+<td>107847</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">M</td>
+<td>113686</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Notice that both <code>"Year"</code> and <code>"Sex"</code> serve as the index of the DataFrame (they are both rendered in bold). We’ve created a <em>multi-index</em> DataFrame where two different index values, the year and sex, are used to uniquely identify each row.</p>
+<p>This isn’t the most intuitive way of representing this data – and, because multi-indexed DataFrames have multiple dimensions in their index, they can often be difficult to use.</p>
+<p>Another strategy to aggregate across two columns is to create a pivot table. You saw these back in <a href="https://inferentialthinking.com/chapters/08/3/Cross-Classifying_by_More_than_One_Variable.html#pivot-tables-rearranging-the-output-of-group">Data 8</a>. One set of values is used to create the index of the pivot table; another set is used to define the column names. The values contained in each cell of the table correspond to the aggregated data for each index-column pair.</p>
+<p>The best way to understand pivot tables is to see one in action. Let’s return to our original goal of summing the total number of names associated with each combination of year and sex. We’ll call the <code>pandas</code> <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.pivot_table.html"><code>.pivot_table</code></a> method to create a new table.</p>
+<div class="cell" data-execution_count="27">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The `pivot_table` method is used to generate a Pandas pivot table</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>babynames.pivot_table(</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>    index <span class="op">=</span> <span class="st">"Year"</span>, </span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>    columns <span class="op">=</span> <span class="st">"Sex"</span>, </span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>    values <span class="op">=</span> <span class="st">"Count"</span>, </span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>    aggfunc <span class="op">=</span> np.<span class="bu">sum</span>).head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="27">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Sex</th>
+<th data-quarto-table-cell-role="th">F</th>
+<th data-quarto-table-cell-role="th">M</th>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">Year</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1880</td>
+<td>90994</td>
+<td>110490</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1881</td>
+<td>91953</td>
+<td>100737</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1882</td>
+<td>107847</td>
+<td>113686</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1883</td>
+<td>112320</td>
+<td>104625</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1884</td>
+<td>129019</td>
+<td>114442</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Looks a lot better! Now, our DataFrame is structured with clear index-column combinations. Each entry in the pivot table represents the summed count of names for a given combination of <code>"Year"</code> and <code>"Sex"</code>.</p>
+<p>Let’s take a closer look at the code implemented above.</p>
+<ul>
+<li><code>index = "Year"</code> specifies the column name in the original DataFrame that should be used as the index of the pivot table</li>
+<li><code>columns = "Sex"</code> specifies the column name in the original DataFrame that should be used to generate the columns of the pivot table</li>
+<li><code>values = "Count"</code> indicates what values from the original DataFrame should be used to populate the entry for each index-column combination</li>
+<li><code>aggfunc = np.sum</code> tells <code>pandas</code> what function to use when aggregating the data specified by <code>values</code>. Here, we are summing the name counts for each pair of <code>"Year"</code> and <code>"Sex"</code></li>
+</ul>
+<p>We can even include multiple values in the index or columns of our pivot tables.</p>
+<div class="cell" data-execution_count="28">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>babynames_pivot <span class="op">=</span> babynames.pivot_table(</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>    index<span class="op">=</span><span class="st">"Year"</span>,     <span class="co"># the rows (turned into index)</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    columns<span class="op">=</span><span class="st">"Sex"</span>,    <span class="co"># the column values</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    values<span class="op">=</span>[<span class="st">"Count"</span>, <span class="st">"Name"</span>], </span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>    aggfunc<span class="op">=</span><span class="bu">max</span>,   <span class="co"># group operation</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>babynames_pivot.head(<span class="dv">6</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="28">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th colspan="2" data-quarto-table-cell-role="th" data-halign="left">Count</th>
+<th colspan="2" data-quarto-table-cell-role="th" data-halign="left">Name</th>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">Sex</th>
+<th data-quarto-table-cell-role="th">F</th>
+<th data-quarto-table-cell-role="th">M</th>
+<th data-quarto-table-cell-role="th">F</th>
+<th data-quarto-table-cell-role="th">M</th>
+</tr>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Year</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1880</td>
+<td>7065</td>
+<td>9655</td>
+<td>Zula</td>
+<td>Zeke</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1881</td>
+<td>6919</td>
+<td>8769</td>
+<td>Zula</td>
+<td>Zeb</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1882</td>
+<td>8148</td>
+<td>9557</td>
+<td>Zula</td>
+<td>Zed</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1883</td>
+<td>8012</td>
+<td>8894</td>
+<td>Zula</td>
+<td>Zeno</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1884</td>
+<td>9217</td>
+<td>9388</td>
+<td>Zula</td>
+<td>Zollie</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1885</td>
+<td>9128</td>
+<td>8756</td>
+<td>Zula</td>
+<td>Zollie</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="joining-tables" class="level2">
+<h2 class="anchored" data-anchor-id="joining-tables">Joining Tables</h2>
+<p>When working on data science projects, we’re unlikely to have absolutely all the data we want contained in a single DataFrame – a real-world data scientist needs to grapple with data coming from multiple sources. If we have access to multiple datasets with related information, we can join two or more tables into a single DataFrame.</p>
+<p>To put this into practice, we’ll revisit the <code>elections</code> dataset.</p>
+<div class="cell" data-execution_count="29">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>elections.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="29">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Year</th>
+<th data-quarto-table-cell-role="th">Candidate</th>
+<th data-quarto-table-cell-role="th">Party</th>
+<th data-quarto-table-cell-role="th">Popular vote</th>
+<th data-quarto-table-cell-role="th">Result</th>
+<th data-quarto-table-cell-role="th">%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>1824</td>
+<td>Andrew Jackson</td>
+<td>Democratic-Republican</td>
+<td>151271</td>
+<td>loss</td>
+<td>57.210122</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>1824</td>
+<td>John Quincy Adams</td>
+<td>Democratic-Republican</td>
+<td>113142</td>
+<td>win</td>
+<td>42.789878</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>1828</td>
+<td>Andrew Jackson</td>
+<td>Democratic</td>
+<td>642806</td>
+<td>win</td>
+<td>56.203927</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>1828</td>
+<td>John Quincy Adams</td>
+<td>National Republican</td>
+<td>500897</td>
+<td>loss</td>
+<td>43.796073</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>1832</td>
+<td>Andrew Jackson</td>
+<td>Democratic</td>
+<td>702735</td>
+<td>win</td>
+<td>54.574789</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Say we want to understand the popularity of the names of each presidential candidate in 2020. To do this, we’ll need the combined data of <code>babynames</code> <em>and</em> <code>elections</code>.</p>
+<p>We’ll start by creating a new column containing the first name of each presidential candidate. This will help us join each name in <code>elections</code> to the corresponding name data in <code>babynames</code>.</p>
+<div class="cell" data-execution_count="30">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># This `str` operation splits each candidate's full name at each </span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="co"># blank space, then takes just the candidiate's first name</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>elections[<span class="st">"First Name"</span>] <span class="op">=</span> elections[<span class="st">"Candidate"</span>].<span class="bu">str</span>.split().<span class="bu">str</span>[<span class="dv">0</span>]</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>elections.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="30">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Year</th>
+<th data-quarto-table-cell-role="th">Candidate</th>
+<th data-quarto-table-cell-role="th">Party</th>
+<th data-quarto-table-cell-role="th">Popular vote</th>
+<th data-quarto-table-cell-role="th">Result</th>
+<th data-quarto-table-cell-role="th">%</th>
+<th data-quarto-table-cell-role="th">First Name</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>1824</td>
+<td>Andrew Jackson</td>
+<td>Democratic-Republican</td>
+<td>151271</td>
+<td>loss</td>
+<td>57.210122</td>
+<td>Andrew</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>1824</td>
+<td>John Quincy Adams</td>
+<td>Democratic-Republican</td>
+<td>113142</td>
+<td>win</td>
+<td>42.789878</td>
+<td>John</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>1828</td>
+<td>Andrew Jackson</td>
+<td>Democratic</td>
+<td>642806</td>
+<td>win</td>
+<td>56.203927</td>
+<td>Andrew</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>1828</td>
+<td>John Quincy Adams</td>
+<td>National Republican</td>
+<td>500897</td>
+<td>loss</td>
+<td>43.796073</td>
+<td>John</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>1832</td>
+<td>Andrew Jackson</td>
+<td>Democratic</td>
+<td>702735</td>
+<td>win</td>
+<td>54.574789</td>
+<td>Andrew</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div class="cell" data-execution_count="31">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Here, we'll only consider `babynames` data from 2020</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>babynames_2020 <span class="op">=</span> babynames[babynames[<span class="st">"Year"</span>]<span class="op">==</span><span class="dv">2020</span>]</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>babynames_2020.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="31">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Name</th>
+<th data-quarto-table-cell-role="th">Sex</th>
+<th data-quarto-table-cell-role="th">Count</th>
+<th data-quarto-table-cell-role="th">Year</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>Olivia</td>
+<td>F</td>
+<td>17664</td>
+<td>2020</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>Emma</td>
+<td>F</td>
+<td>15680</td>
+<td>2020</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>Ava</td>
+<td>F</td>
+<td>13179</td>
+<td>2020</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>Charlotte</td>
+<td>F</td>
+<td>13083</td>
+<td>2020</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>Sophia</td>
+<td>F</td>
+<td>13070</td>
+<td>2020</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Now, we’re ready to join the two tables. <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.merge.html"><code>pd.merge</code></a> is the <code>pandas</code> method used to join DataFrames together.</p>
+<div class="cell" data-tags="[]" data-execution_count="32">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>merged <span class="op">=</span> pd.merge(left <span class="op">=</span> elections, right <span class="op">=</span> babynames_2020, <span class="op">\</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>                  left_on <span class="op">=</span> <span class="st">"First Name"</span>, right_on <span class="op">=</span> <span class="st">"Name"</span>)</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>merged.head()</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Notice that pandas automatically specifies `Year_x` and `Year_y` </span></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a><span class="co"># when both merged DataFrames have the same column name to avoid confusion</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="32">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Year_x</th>
+<th data-quarto-table-cell-role="th">Candidate</th>
+<th data-quarto-table-cell-role="th">Party</th>
+<th data-quarto-table-cell-role="th">Popular vote</th>
+<th data-quarto-table-cell-role="th">Result</th>
+<th data-quarto-table-cell-role="th">%</th>
+<th data-quarto-table-cell-role="th">First Name</th>
+<th data-quarto-table-cell-role="th">Name</th>
+<th data-quarto-table-cell-role="th">Sex</th>
+<th data-quarto-table-cell-role="th">Count</th>
+<th data-quarto-table-cell-role="th">Year_y</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>1824</td>
+<td>Andrew Jackson</td>
+<td>Democratic-Republican</td>
+<td>151271</td>
+<td>loss</td>
+<td>57.210122</td>
+<td>Andrew</td>
+<td>Andrew</td>
+<td>F</td>
+<td>12</td>
+<td>2020</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>1824</td>
+<td>Andrew Jackson</td>
+<td>Democratic-Republican</td>
+<td>151271</td>
+<td>loss</td>
+<td>57.210122</td>
+<td>Andrew</td>
+<td>Andrew</td>
+<td>M</td>
+<td>6049</td>
+<td>2020</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>1828</td>
+<td>Andrew Jackson</td>
+<td>Democratic</td>
+<td>642806</td>
+<td>win</td>
+<td>56.203927</td>
+<td>Andrew</td>
+<td>Andrew</td>
+<td>F</td>
+<td>12</td>
+<td>2020</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>1828</td>
+<td>Andrew Jackson</td>
+<td>Democratic</td>
+<td>642806</td>
+<td>win</td>
+<td>56.203927</td>
+<td>Andrew</td>
+<td>Andrew</td>
+<td>M</td>
+<td>6049</td>
+<td>2020</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>1832</td>
+<td>Andrew Jackson</td>
+<td>Democratic</td>
+<td>702735</td>
+<td>win</td>
+<td>54.574789</td>
+<td>Andrew</td>
+<td>Andrew</td>
+<td>F</td>
+<td>12</td>
+<td>2020</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Let’s take a closer look at the parameters:</p>
+<ul>
+<li><code>left</code> and <code>right</code> parameters are used to specify the DataFrames to be joined.</li>
+<li><code>left_on</code> and <code>right_on</code> parameters are assigned to the string names of the columns to be used when performing the join. These two <code>on</code> parameters tell <code>pandas</code> what values should act as pairing keys to determine which rows to merge across the DataFrames. We’ll talk more about this idea of a pairing key next lecture.</li>
+</ul>
+</section>
+<section id="parting-note" class="level2">
+<h2 class="anchored" data-anchor-id="parting-note">Parting Note</h2>
+<p>Congratulations! We finally tackled <code>pandas</code>. Don’t worry if you are still not feeling very comfortable with it—you will have plenty of chance to practice over the next few weeks.</p>
+<p>Next, we will get our hands dirty with some real-world datasets and use our <code>pandas</code> knowledge to conduct some exploratory data analysis.</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
