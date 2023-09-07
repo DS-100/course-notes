@@ -43,7 +43,6 @@ In the past two `pandas` lectures, we briefly touched on the idea of file format
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 import pandas as pd
 pd.read_csv("data/elections.csv").head(5)
 ```
@@ -52,7 +51,6 @@ CSVs, which stand for **Comma-Separated Values**, are a common tabular data form
 
 ```{python}
 #| echo: false
-#| vscode: {languageId: python}
 with open("data/elections.csv", "r") as table:
     i = 0
     for row in table:
@@ -64,11 +62,10 @@ with open("data/elections.csv", "r") as table:
 
 Each row, or **record**, in the data is delimited by a newline. Each column, or **field**, in the data is delimited by a comma (hence, comma-separated!). 
 
-Another common file type is the **TSV (Tab-Separated Values)**. In a TSV, records are still delimited by a newline, while fields are delimited by `\t` tab character. A TSV can be loaded into `pandas` using `pd.read_csv()` with the `delimiter` parameter: `pd.read_csv("file_name.tsv", delimiter="\t")`. A raw TSV file is shown below.
+Another common file type is the **TSV (Tab-Separated Values)**. In a TSV, records are still delimited by a newline `\n`, while fields are delimited by `\t` tab character. A raw TSV file is shown below.
 
 ```{python}
 #| echo: false
-#| vscode: {languageId: python}
 with open("data/elections.txt", "r") as table:
     i = 0
     for row in table:
@@ -78,11 +75,17 @@ with open("data/elections.txt", "r") as table:
             break
 ```
 
-**JSON (JavaScript Object Notation)** files behave similarly to Python dictionaries. They can be loaded into `pandas` using `pd.read_json`. A raw JSON is shown below.
+TSV files can be loaded into `pandas` using `pd.read_csv()` with the `delimiter` parameter: `pd.read_csv("file_name.tsv", delimiter="\t")`. 
 
 ```{python}
 #| echo: false
-#| vscode: {languageId: python}
+pd.read_csv('data/elections.tsv', sep="\t").head(3)
+```
+
+**JSON (JavaScript Object Notation)** files behave similarly to Python dictionaries. A raw JSON is shown below.
+
+```{python}
+#| echo: false
 with open("data/elections.json", "r") as table:
     i = 0
     for row in table:
@@ -92,31 +95,41 @@ with open("data/elections.json", "r") as table:
             break
 ```
 
+JSON files can be loaded into `pandas` using `pd.read_json`. 
+
+```{python}
+#| echo: false
+pd.read_json('data/elections.json').head(3)
+```
+
+An issue with CSV and TSVs comes up whenever there are commas or tabs within the records. How does `pandas` differentiate between a comma delimiter vs. a comma within the field itself, for example `8,900`. To remedy this, check out the [`quotechar` parameter](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html). 
+
 ### Variable Types
 
 After loading data into a file, it's a good idea to take the time to understand what pieces of information are encoded in the dataset. In particular, we want to identify what variable types are present in our data. Broadly speaking, we can categorize variables into one of two overarching types. 
 
 **Quantitative variables** describe some numeric quantity or amount. We can sub-divide quantitative data into:
 
-* **Continuous quantitative variables**: numeric data that can be measured on a continuous scale to arbitrary precision. Continuous variables do not have a strict set of possible values – they can be recorded to any number of decimal places. For example, weights, GPA, or CO<sub>2</sub> concentrations
+* **Continuous quantitative variables**: numeric data that can be measured on a continuous scale to arbitrary precision. Continuous variables do not have a strict set of possible values – they can be recorded to any number of decimal places. For example, weights, GPA, or CO<sub>2</sub> concentrations.
 * **Discrete quantitative variables**: numeric data that can only take on a finite set of possible values. For example, someone's age or number of siblings.
 
 **Qualitative variables**, also known as **categorical variables**, describe data that isn't measuring some quantity or amount. The sub-categories of categorical data are:
 
-* **Ordinal qualitative variables**: categories with ordered levels. Specifically, ordinal variables are those where the difference between levels has no consistent, quantifiable meaning. For example, a Yelp rating or set of income brackets. 
+* **Ordinal qualitative variables**: categories with ordered levels. Specifically, ordinal variables are those where the difference between levels has no consistent, quantifiable meaning. Some examples include levels of education (high school, undergrad, grad, etc.), income bracket (low, medium, high), or Yelp rating. 
 * **Nominal qualitative variables**: categories with no specific order. For example, someone's political affiliation or Cal ID number.
 
 ![Classification of variable types](images/variable.png)
 
+Note that many variables don't sit neatly in just one of these categories. Qualitative variables could have numeric levels, and conversely, quantitative variables could be stored as strings. 
+
 ### Primary and Foreign Keys
 
-Last time, we introduced `.merge` as the `pandas` method for joining multiple DataFrames together. In our discussion of joins, we touched on the idea of using a "key" to determine what rows should be merged from each table. Let's take a moment to examine this idea more closely.
+Last time, we introduced `.merge` as the `pandas` method for joining multiple `DataFrames` together. In our discussion of joins, we touched on the idea of using a "key" to determine what rows should be merged from each table. Let's take a moment to examine this idea more closely.
 
-The **primary key** is the column or set of columns in a table that determine the values of the remaining columns. It can be thought of as the unique identifier for each individual row in the table. For example, a table of Data 100 students might use each student's Cal ID as the primary key. 
+The **primary key** is the column or set of columns in a table that *uniquely* determine the values of the remaining columns. It can be thought of as the unique identifier for each individual row in the table. For example, a table of Data 100 students might use each student's Cal ID as the primary key. 
 
 ```{python}
 #| echo: false
-#| vscode: {languageId: python}
 pd.DataFrame({"Cal ID":[3034619471, 3035619472, 3025619473, 3046789372], \
              "Name":["Oski", "Ollie", "Orrie", "Ollie"], \
              "Major":["Data Science", "Computer Science", "Data Science", "Economics"]})
@@ -126,7 +139,6 @@ The **foreign key** is the column or set of columns in a table that reference pr
 
 ```{python}
 #| echo: false
-#| vscode: {languageId: python}
 pd.DataFrame({"OH Request":[1, 2, 3, 4], \
              "Cal ID":[3034619471, 3035619472, 3025619473, 3035619472], \
              "Question":["HW 2 Q1", "HW 2 Q3", "Lab 3 Q4", "HW 2 Q7"]})
@@ -138,9 +150,9 @@ After understanding the structure of the dataset, the next task is to determine 
 
 The **granularity** of a dataset is what a single row represents. You can also think of it as the level of detail included in the data. To determine the data's granularity, ask: what does each row in the dataset represent? Fine-grained data contains a high level of detail, with a single row representing a small individual unit. For example, each record may represent one person. Coarse-grained data is encoded such that a single row represents a large individual unit – for example, each record may represent a group of people.
 
-The **scope** of a dataset is the subset of the population covered by the data. If we were investigating student performance in Data Science courses, a dataset with narrow scope might encompass all students enrolled in Data 100; a dataset with expansive scope might encompass all students in California. 
+The **scope** of a dataset is the subset of the population covered by the data. Let's say we're investigating student performance in Data Science courses. A dataset with narrow scope might encompass all students enrolled in Data 100; a dataset with expansive scope might encompass all students in California. If we find that our scope is too narrow, we can either collect more data or change the research question to better fit the scope of the data. If our scope is too expansive, one potential solution is is to filter the data. We'll cover this more next week. 
 
-The **temporality** of a dataset describes the time period over which the data was collected. To fully understand the temporality of the data, it may be necessary to standardize timezones or inspect recurring time-based trends in the data (Do patterns recur in 24-hour patterns? Over the course of a month? Seasonally?).
+The **temporality** of a dataset describes the periodicity over which the data was collected as well as when the data was most recently collected or updated. Time and date fields could mean a few things: (1) when the "event" happened, (2) when the data was collected, or when it was entered into the system, or (3) when the data was copied into the database. To fully understand the temporality of the data, it also may be necessary to standardize timezones or inspect recurring time-based trends in the data (do patterns recur in 24-hour patterns? Over the course of a month? Seasonally?). The convention for standardizing time is the Coordinated Universal Time (UTC), an international time standard measured at 0 degrees latitude and does not change for daylight savings. We can represent Berkeley's timezone, Pacific Standard Time (PST), as UTC-7 (with daylight savings). 
 
 ## Faithfulness
 
@@ -153,10 +165,18 @@ Data used in research or industry is often "messy" – there may be errors or in
 * Clear signs that data was entered by hand, which can lead to spelling errors or fields that are incorrectly shifted
 * Signs of data falsification, such as fake email addresses or repeated use of the same names
 * Duplicated records or fields containing the same information
+* Truncated data, e.g. Microsoft Excel would limit the number of rows to 655536 and the number of columns to 255
 
-A common issue encountered with real-world datasets is that of missing data. One strategy to resolve this is to simply drop any records with missing values from the dataset. This does, however, introduce the risk of inducing biases – it is possible that the missing or corrupt records may be systemically related to some feature of interest in the data.
+Below are some potential solutions to common issues:
 
-Another method to address missing data is to perform **imputation**: infer the missing values using other data available in the dataset. There is a wide variety of imputation techniques that can be implemented; some of the most common are listed below.
+* Spelling errors: apply corrections or drop records that aren't in a dictionary
+* Time zone inconsistencies: convert to a common timezone (e.g. UTC) 
+* Duplicated records or fields: identify and eliminate duplicates (using primary keys)
+* Unspecified or inconsistent units: infer the units and check that values are in reasonable ranges in the data
+
+A common issue encountered with real-world datasets is that of missing data. One strategy to resolve this is to simply drop any records with missing values from the dataset. This does, however, introduce the risk of inducing biases – it is possible that the missing or corrupt records may be systemically related to some feature of interest in the data. Another solution is to keep the data as `NaN` values. 
+
+A third method to address missing data is to perform **imputation**: infer the missing values using other data available in the dataset. There is a wide variety of imputation techniques that can be implemented; some of the most common are listed below.
 
 * Average imputation: replace missing values with the average value for that field
 * Hot deck imputation: replace missing values with some random value
@@ -186,7 +206,6 @@ We can then explore the CSV (which is a text file, and does not contain binary-e
 3. Next, let's try using the Python file object. Let's check out the first three lines:
 
 ```{python}
-#| vscode: {languageId: python}
 with open("data/cdc_tuberculosis.csv", "r") as f:
     i = 0
     for row in f:
@@ -203,7 +222,6 @@ You may recall that all line breaks in text files are encoded as the special new
 If you're curious, we can use the `repr()` function to return the raw string with all special characters:
 
 ```{python}
-#| vscode: {languageId: python}
 with open("data/cdc_tuberculosis.csv", "r") as f:
     i = 0
     for row in f:
@@ -216,7 +234,6 @@ with open("data/cdc_tuberculosis.csv", "r") as f:
 4. Finally, let's see the tried-and-true Data 100 approach: pandas.
 
 ```{python}
-#| vscode: {languageId: python}
 tb_df = pd.read_csv("data/cdc_tuberculosis.csv")
 tb_df.head()
 ```
@@ -229,7 +246,6 @@ Congratulations -- you're ready to wrangle your data. Because of how things are 
 A reasonable first step is to identify the row with the right header. The `pd.read_csv()` function ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html)) has the convenient `header` parameter:
 
 ```{python}
-#| vscode: {languageId: python}
 tb_df = pd.read_csv("data/cdc_tuberculosis.csv", header=1) # row index
 tb_df.head(5)
 ```
@@ -239,7 +255,6 @@ Wait...but now we can't differentiate betwen the "Number of TB cases" and "TB in
 We can do this manually with `df.rename()` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.rename.html?highlight=rename#pandas.DataFrame.rename)):
 
 ```{python}
-#| vscode: {languageId: python}
 rename_dict = {'2019': 'TB cases 2019',
                '2020': 'TB cases 2020',
                '2021': 'TB cases 2021',
@@ -261,24 +276,21 @@ Okay, EDA step two. How was the rollup record aggregated?
 Let's check if Total TB cases is the sum of all state TB cases. If we sum over all rows, we should get **2x** the total cases in each of our TB cases by year (why?).
 
 ```{python}
-#| vscode: {languageId: python}
 tb_df.sum(axis=0)
 ```
 
 Whoa, what's going on? Check out the column types:
 
 ```{python}
-#| vscode: {languageId: python}
 tb_df.dtypes
 ```
 
-Looks like those commas are causing all TB cases to be read as the `object` datatype, or **storage type** (close to the Python string datatype), so pandas is concatenating strings instead of adding integers.
+Looks like those commas are causing all TB cases to be read as the `object` datatype, or **storage type** (close to the `Python` string datatype), so `pandas` is concatenating strings instead of adding integers.
 
 
 Fortunately `read_csv` also has a `thousands` parameter (https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html):
 
 ```{python}
-#| vscode: {languageId: python}
 # improve readability: chaining method calls with outer parentheses/line breaks
 tb_df = (
     pd.read_csv("data/cdc_tuberculosis.csv", header=1, thousands=',')
@@ -288,7 +300,6 @@ tb_df.head(5)
 ```
 
 ```{python}
-#| vscode: {languageId: python}
 tb_df.sum()
 ```
 
@@ -297,7 +308,6 @@ The Total TB cases look right. Phew!
 Let's just look at the records with **state-level granularity**:
 
 ```{python}
-#| vscode: {languageId: python}
 state_tb_df = tb_df[1:]
 state_tb_df.head(5)
 ```
@@ -312,7 +322,6 @@ There are a few new methods here:
 * `df.drop_na()` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.dropna.html)) will be explained in more detail next time.
 
 ```{python}
-#| vscode: {languageId: python}
 # 2010s census data
 census_2010s_df = pd.read_csv("data/nst-est2019-01.csv", header=3, thousands=",")
 census_2010s_df = (
@@ -346,7 +355,6 @@ or use iPython magic which will intelligently import code when files change:
 ```
 
 ```{python}
-#| vscode: {languageId: python}
 # census 2020s data
 census_2020s_df = pd.read_csv("data/NST-EST2022-POP.csv", header=3, thousands=",")
 census_2020s_df = (
@@ -367,7 +375,6 @@ census_2020s_df.head(5)
 Time to `merge`! Here we use the DataFrame method `df1.merge(right=df2, ...)` on DataFrame `df1` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.merge.html)). Contrast this with the function `pd.merge(left=df1, right=df2, ...)` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.merge.html?highlight=pandas%20merge#pandas.merge)). Feel free to use either.
 
 ```{python}
-#| vscode: {languageId: python}
 # merge TB dataframe with two US census dataframes
 tb_census_df = (
     tb_df
@@ -382,7 +389,6 @@ tb_census_df.head(5)
 This is a little unwieldy. We could either drop the unneeded columns now, or just merge on smaller census DataFrames. Let's do the latter.
 
 ```{python}
-#| vscode: {languageId: python}
 # try merging again, but cleaner this time
 tb_census_df = (
     tb_df
@@ -411,17 +417,15 @@ $$= \frac{\text{TB cases in population}}{\text{population}} \times 100000$$
 Let's try this for 2019:
 
 ```{python}
-#| vscode: {languageId: python}
 tb_census_df["recompute incidence 2019"] = tb_census_df["TB cases 2019"]/tb_census_df["2019"]*100000
 tb_census_df.head(5)
 ```
 
 Awesome!!!
 
-Let's use a for-loop and Python format strings to compute TB incidence for all years. Python f-strings are just used for the purposes of this demo, but they're handy to know when you explore data beyond this course ([Python documentation](https://docs.python.org/3/tutorial/inputoutput.html)).
+Let's use a for-loop and `Python` format strings to compute TB incidence for all years. `Python` f-strings are just used for the purposes of this demo, but they're handy to know when you explore data beyond this course ([Python documentation](https://docs.python.org/3/tutorial/inputoutput.html)).
 
 ```{python}
-#| vscode: {languageId: python}
 # recompute incidence for all years
 for year in [2019, 2020, 2021]:
     tb_census_df[f"recompute incidence {year}"] = tb_census_df[f"TB cases {year}"]/tb_census_df[f"{year}"]*100000
@@ -431,7 +435,6 @@ tb_census_df.head(5)
 These numbers look pretty close!!! There are a few errors in the hundredths place, particularly in 2021. It may be useful to further explore reasons behind this discrepancy. 
 
 ```{python}
-#| vscode: {languageId: python}
 tb_census_df.describe()
 ```
 
@@ -452,19 +455,16 @@ Let's get exploring!
 Before we keep exploring, we'll set all indexes to more meaningful values, instead of just numbers that pertained to some row at some point. This will make our cleaning slightly easier.
 
 ```{python}
-#| vscode: {languageId: python}
 tb_df = tb_df.set_index("U.S. jurisdiction")
 tb_df.head(5)
 ```
 
 ```{python}
-#| vscode: {languageId: python}
 census_2010s_df = census_2010s_df.set_index("Geographic Area")
 census_2010s_df.head(5)
 ```
 
 ```{python}
-#| vscode: {languageId: python}
 census_2020s_df = census_2020s_df.set_index("Geographic Area")
 census_2020s_df.head(5)
 ```
@@ -472,7 +472,6 @@ census_2020s_df.head(5)
 It turns out that our merge above only kept state records, even though our original `tb_df` had the "Total" rolled record:
 
 ```{python}
-#| vscode: {languageId: python}
 tb_df.head()
 ```
 
@@ -481,23 +480,20 @@ Recall that merge by default does an **inner** merge by default, meaning that it
 The rolled records in our census dataframes have different `Geographic Area` fields, which was the key we merged on:
 
 ```{python}
-#| vscode: {languageId: python}
 census_2010s_df.head(5)
 ```
 
-The Census DataFrame has several rolled records. The aggregate record we are looking for actually has the Geographic Area named "United States".
+The Census `DataFrame` has several rolled records. The aggregate record we are looking for actually has the Geographic Area named "United States".
 
 One straightforward way to get the right merge is to rename the value itself. Because we now have the Geographic Area index, we'll use `df.rename()` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.rename.html)):
 
 ```{python}
-#| vscode: {languageId: python}
 # rename rolled record for 2010s
 census_2010s_df.rename(index={'United States':'Total'}, inplace=True)
 census_2010s_df.head(5)
 ```
 
 ```{python}
-#| vscode: {languageId: python}
 # same, but for 2020s rename rolled record
 census_2020s_df.rename(index={'United States':'Total'}, inplace=True)
 census_2020s_df.head(5)
@@ -508,7 +504,6 @@ census_2020s_df.head(5)
 Next let's rerun our merge. Note the different chaining, because we are now merging on indexes (`df.merge()` [documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.merge.html)).
 
 ```{python}
-#| vscode: {languageId: python}
 tb_census_df = (
     tb_df
     .merge(right=census_2010s_df[["2019"]],
@@ -524,7 +519,6 @@ tb_census_df.head(5)
 Finally, let's recompute our incidences:
 
 ```{python}
-#| vscode: {languageId: python}
 # recompute incidence for all years
 for year in [2019, 2020, 2021]:
     tb_census_df[f"recompute incidence {year}"] = tb_census_df[f"TB cases {year}"]/tb_census_df[f"{year}"]*100000
@@ -542,22 +536,42 @@ $\text{percent change} = \frac{B - A}{A} \times 100$.
 
 ```{python}
 #| tags: []
-#| vscode: {languageId: python}
 incidence_2020 = tb_census_df.loc['Total', 'recompute incidence 2020']
 incidence_2020
 ```
 
 ```{python}
 #| tags: []
-#| vscode: {languageId: python}
 incidence_2021 = tb_census_df.loc['Total', 'recompute incidence 2021']
 incidence_2021
 ```
 
 ```{python}
 #| tags: []
-#| vscode: {languageId: python}
 difference = (incidence_2021 - incidence_2020)/incidence_2020 * 100
 difference
 ```
+
+## Summary
+We went over a lot of content this lecture; let's summarize the most important points: 
+
+### Dealing with Missing Values
+There are a few options we can take to deal with missing data:
+
+* Drop missing records
+* keep `NaN` missing values
+* impute using an interpolated column
+
+### EDA and Data Wrangling
+There are several ways to approach EDA and Data Wrangling: 
+
+* Examine the **data and metadata**: what is the date, size, organization, and structure of the data? 
+* Examine each **field/attribute/dimension** individually.
+* Examine pairs of related dimensions (e.g. breaking down grades by major).
+* Along the way, we can 
+    * **Visualize** or summarize the data.
+    * Validate assumptions** about data and its collection process. Pay particular attention to when the data was collected. 
+    * Identify and **address anomalies**.
+    * Apply data transformations and corrections (we'll cover this in the upcoming lecture).
+    * **Record everything you do!** Developing in Jupyter Notebook promotes *reproducibility* of your own work!
 
