@@ -54,7 +54,7 @@ pd.read_csv("data/elections.csv").head(5)
 To better understand the properties of a CSV, let's take a look at the first few rows of the raw data file to see what it looks like before being loaded into a `DataFrame`. We'll use the `repr()` function to return the raw string with its special characters: 
 
 ```{python}
-#| echo: false
+#| code-fold: false
 with open("data/elections.csv", "r") as table:
     i = 0
     for row in table:
@@ -73,8 +73,7 @@ Another common file type is **TSV (Tab-Separated Values)**. In a TSV, records ar
 Let's check out the first few rows of the raw TSV file. Again, we'll use the `repr()` function so that `print` shows the special characters.
 
 ```{python}
-
-#| echo: false
+#| code-fold: false
 with open("data/elections.txt", "r") as table:
     i = 0
     for row in table:
@@ -87,7 +86,7 @@ with open("data/elections.txt", "r") as table:
 TSVs can be loaded into `pandas` using `pd.read_csv`. We'll need to specify the **delimiter** with parameter` sep='\t'` [(documentation)](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html).
 
 ```{python}
-#| echo: false
+#| code-fold: false
 pd.read_csv("data/elections.txt", sep='\t').head(3)
 ```
 
@@ -97,7 +96,7 @@ An issue with CSVs and TSVs comes up whenever there are commas or tabs within th
 **JSON (JavaScript Object Notation)** files behave similarly to Python dictionaries. A raw JSON is shown below.
 
 ```{python}
-#| echo: false
+#| code-fold: false
 with open("data/elections.json", "r") as table:
     i = 0
     for row in table:
@@ -110,8 +109,183 @@ with open("data/elections.json", "r") as table:
 JSON files can be loaded into `pandas` using `pd.read_json`. 
 
 ```{python}
-#| echo: false
+#| code-fold: false
 pd.read_json('data/elections.json').head(3)
+```
+
+##### EDA with JSON: Berkeley COVID-19 Data
+The City of Berkeley Open Data [website](https://data.cityofberkeley.info/Health/COVID-19-Confirmed-Cases/xn6j-b766) has a dataset with COVID-19 Confirmed Cases among Berkeley residents by date. Let's download the file and save it as a JSON (note the source URL file type is also a JSON). In the interest of reproducible data science, we will download the data programatically. We have defined some helper functions in the [`ds100_utils.py`](https://ds100.org/fa23/resources/assets/lectures/lec05/lec05-eda.html) file that we can reuse these helper functions in many different notebooks.
+
+```{python}
+#| code-fold: false
+from ds100_utils import fetch_and_cache
+
+covid_file = fetch_and_cache(
+    "https://data.cityofberkeley.info/api/views/xn6j-b766/rows.json?accessType=DOWNLOAD",
+    "confirmed-cases.json",
+    force=False)
+covid_file          # a file path wrapper object
+```
+
+###### File Size
+Let's start our analysis by getting a rough estimate of the size of the dataset to inform the tools we use to view the data. For relatively small datasets, we can use a text editor or spreadsheet. For larger datasets, more programmatic exploration or distributed computing tools may be more fitting. Here we will use `Python` tools to probe the file.
+
+Since there seem to be text files, let's investigate the number of lines, which often corresponds to the number of records
+
+```{python}
+#| code-fold: false
+import os
+
+print(covid_file, "is", os.path.getsize(covid_file) / 1e6, "MB")
+
+with open(covid_file, "r") as f:
+    print(covid_file, "is", sum(1 for l in f), "lines.")
+```
+
+###### Unix Commands
+As part of the EDA workflow, Unix commands can come in very handy. In fact, there's an entire book called ["Data Science at the Command Line"](https://datascienceatthecommandline.com/) that explores this idea in depth! 
+In Jupyter/IPython, you can prefix lines with `!` to execute arbitrary Unix commands, and within those lines, you can refer to `Python` variables and expressions with the syntax `{expr}`.
+
+Here, we use the ls command to list files, using the `-lh` flags, which request "long format with information in human-readable form". We also use the `wc` command for "word count", but with the `-l` flag, which asks for line counts instead of words.
+
+These two give us the same information as the code above, albeit in a slightly different form:
+
+```{python}
+#| code-fold: false
+!ls -lh {covid_file}
+!wc -l {covid_file}
+```
+
+###### File Contents
+Let's explore the data format using `Python`> 
+
+```{python}
+#| code-fold: false
+with open(covid_file, "r") as f:
+    for i, row in enumerate(f):
+        print(repr(row)) # print raw strings
+        if i >= 4: break
+```
+
+We can use the `head` Unix command (which is where `pandas`' `head` method comes from!) to see the first few lines of the file:
+
+```{python}
+#| code-fold: false
+!head -5 {covid_file}
+```
+
+In order to load the JSON file into `pandas`, Let's first do some EDA with `Python`'s `json` package to understand the particular structure of this JSON file so that we can decide what (if anything) to load into `pandas`. `Python` has relatively good support for JSON data since it closely matches the internal python object model. In the following cell we import the entire JSON datafile into a python dictionary using the `json` package.
+
+```{python}
+#| code-fold: false
+import json
+
+with open(covid_file, "rb") as f:
+    covid_json = json.load(f)
+```
+
+The `covid_json` variable is now a dictionary encoding the data in the file:
+
+```{python}
+#| code-fold: false
+type(covid_json)
+```
+
+We can examine what keys are in the top level json object by listing out the keys. 
+
+```{python}
+#| code-fold: false
+covid_json.keys()
+```
+
+**Observation**: The JSON dictionary contains a `meta` key which likely refers to meta data (data about the data).  Meta data often maintained with the data and can be a good source of additional information.
+
+
+We can investigate the meta data further by examining the keys associated with the metadata.
+
+```{python}
+#| code-fold: false
+covid_json['meta'].keys()
+```
+
+The `meta` key contains another dictionary called `view`.  This likely refers to meta-data about a particular "view" of some underlying database.  We will learn more about views when we study SQL later in the class.    
+
+```{python}
+#| code-fold: false
+covid_json['meta']['view'].keys()
+```
+
+Notice that this a nested/recursive data structure.  As we dig deeper we reveal more and more keys and the corresponding data:
+
+```
+meta
+|-> data
+    | ... (haven't explored yet)
+|-> view
+    | -> id
+    | -> name
+    | -> attribution 
+    ...
+    | -> description
+    ...
+    | -> columns
+    ...
+```
+
+
+There is a key called description in the view sub dictionary.  This likely contains a description of the data:
+
+```{python}
+#| code-fold: false
+print(covid_json['meta']['view']['description'])
+```
+
+###### Examining the Data Field for Records
+
+We can look at a few entries in the `data` field. This is what we'll load into `pandas`.
+
+```{python}
+#| code-fold: false
+for i in range(3):
+    print(f"{i:03} | {covid_json['data'][i]}")
+```
+
+Observations:
+* These look like equal-length records, so maybe `data` is a table!
+* But what do each of values in the record mean? Where can we find column headers?
+
+For that, we'l need the `columns` key in the metadata dictionary. This returns a list: 
+
+```{python}
+#| code-fold: false
+type(covid_json['meta']['view']['columns'])
+```
+
+###### Summary of exploring the JSON file
+
+1. The above **metadata** tells us a lot about the columns in the data including column names, potential data anomalies, and a basic statistic. 
+1. Because of its non-tabular structure, JSON makes it easier (than CSV) to create **self-documenting data**, meaning that information about the data is stored in the same file as the data.
+1. Self documenting data can be helpful since it maintains its own description and these descriptions are more likely to be updated as data changes. 
+
+###### Loading COVID Data into `pandas`
+Finally, le'ts load the data (not the metadata) into a `pandas` `DatFrame`. In the following block of code we:
+
+1. Translate the JSON records into a dataframe:
+
+    * fields: `covid_json['meta']['view']['columns']`
+    * records: `covid_json['data']`
+    
+1. Remove columns that have no metadata description.  This would be a bad idea in general but here we remove these columns since the above analysis suggests that they are unlikely to contain useful information.
+1. Examine the `tail` of the table.
+
+```{python}
+#| code-fold: false
+# Load the data from JSON and assign column titles
+covid = pd.DataFrame(
+    covid_json['data'],
+    columns=[c['name'] for c in covid_json['meta']['view']['columns']])
+
+covid.tail()
 ```
 
 ### Variable Types
@@ -175,6 +349,55 @@ Time and date fields of a dataset could represent a few things:
 
 To fully understand the temporality of the data, it also may be necessary to standardize time zones or inspect recurring time-based trends in the data (do patterns recur in 24-hour periods? Over the course of a month? Seasonally?). The convention for standardizing time is the Coordinated Universal Time (UTC), an international time standard measured at 0 degrees latitude that stays consistent throughout the year (no daylight savings). We can represent Berkeley's time zone, Pacific Standard Time (PST), as UTC-7 (with daylight savings). 
 
+#### Temporality with `pandas`' `dt` accessors 
+Let's briefly look at how we can use `pandas`' `dt` accessors to work with dates/times in a dataset using the dataset you'll see in Lab 3: the Berkeley PD Calls for Service dataset.
+
+```{python}
+#| code-fold: true
+calls = pd.read_csv("data/Berkeley_PD_-_Calls_for_Service.csv")
+calls.head()
+```
+
+Looks like there are three columns with dates/times: `EVENTDT`, `EVENTTM`, and `InDbDate`. 
+
+Most likely, `EVENTDT` stands for the date when the event took place, `EVENTTM` stands for the time of day the event took place (in 24-hr format), and `InDbDate` is the date this call is recorded onto the database.
+
+If we check the data type of these columns, we will see they are stored as strings. We can convert them to `datetime` objects using pandas `to_datetime` function.
+
+```{python}
+#| code-fold: false
+calls["EVENTDT"] = pd.to_datetime(calls["EVENTDT"])
+calls.head()
+```
+
+Now, we can use the `dt` accessor on this column.
+
+We can get the month: 
+
+```{python}
+#| code-fold: false
+calls["EVENTDT"].dt.month.head()
+```
+
+Which day of the week the date is on:
+
+```{python}
+#| code-fold: false
+calls["EVENTDT"].dt.dayofweek.head()
+```
+
+Check the mimimum values to see if there are any suspicious-looking, 70s dates:
+
+```{python}
+#| code-fold: false
+calls.sort_values("EVENTDT").head()
+```
+
+Doesn't look like it! We are good!
+
+
+We can also do many things with the `dt` accessor like switching time zones and converting time back to UNIX/POSIX time. Check out the documentation on [`.dt` accessor](https://pandas.pydata.org/docs/user_guide/basics.html#basics-dt-accessors) and [time series/date functionality](https://pandas.pydata.org/docs/user_guide/timeseries.html#).
+
 ## Faithfulness
 
 At this stage in our data cleaning and EDA workflow, we've achieved quite a lot: we've identified how our data is structured, come to terms with what information it encodes, and gained insight as to how it was generated. Throughout this process, we should always recall the original intent of our work in Data Science – to use data to better understand and model the real world. To achieve this goal, we need to ensure that the data we use is faithful to reality; that is, that our data accurately captures the "real world."
@@ -228,6 +451,7 @@ To try out options 1 and 2, you can view or download the Tuberculosis from the [
 Next, let's try out option 3 using the `Python` file object. We'll look at the first four lines:
 
 ```{python}
+#| code-fold: true
 with open("data/cdc_tuberculosis.csv", "r") as f:
     i = 0
     for row in f:
@@ -244,6 +468,7 @@ You may recall that all line breaks in text files are encoded as the special new
 If you're curious, we can use the `repr()` function to return the raw string with all special characters:
 
 ```{python}
+#| code-fold: true
 with open("data/cdc_tuberculosis.csv", "r") as f:
     i = 0
     for row in f:
@@ -256,6 +481,7 @@ with open("data/cdc_tuberculosis.csv", "r") as f:
 Finally, let's try option 4 and use the tried-and-true Data 100 approach: `pandas`.
 
 ```{python}
+#| code-fold: false
 tb_df = pd.read_csv("data/cdc_tuberculosis.csv")
 tb_df.head()
 ```
@@ -267,6 +493,7 @@ Congratulations — you're ready to wrangle your data. Because of how things are
 A reasonable first step is to identify the row with the right header. The `pd.read_csv()` function ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html)) has the convenient `header` parameter that we can set to use the elements in row 1 as the appropriate columns:
 
 ```{python}
+#| code-fold: false
 tb_df = pd.read_csv("data/cdc_tuberculosis.csv", header=1) # row index
 tb_df.head(5)
 ```
@@ -276,6 +503,7 @@ Wait...but now we can't differentiate betwen the "Number of TB cases" and "TB in
 We can do this manually with `df.rename()` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.rename.html?highlight=rename#pandas.DataFrame.rename)):
 
 ```{python}
+#| code-fold: false
 rename_dict = {'2019': 'TB cases 2019',
                '2020': 'TB cases 2020',
                '2021': 'TB cases 2021',
@@ -297,12 +525,14 @@ Okay, EDA step two. How was the rollup record aggregated?
 Let's check if Total TB cases is the sum of all state TB cases. If we sum over all rows, we should get **2x** the total cases in each of our TB cases by year (why do you think this is?).
 
 ```{python}
+#| code-fold: true
 tb_df.sum(axis=0)
 ```
 
 Whoa, what's going on with the TB cases in 2019, 2020, and 2021? Check out the column types:
 
 ```{python}
+#| code-fold: true
 tb_df.dtypes
 ```
 
@@ -312,6 +542,7 @@ Since there are commas in the values for TB cases, the numbers are read as the `
 Fortunately `read_csv` also has a `thousands` parameter ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html)):
 
 ```{python}
+#| code-fold: false
 # improve readability: chaining method calls with outer parentheses/line breaks
 tb_df = (
     pd.read_csv("data/cdc_tuberculosis.csv", header=1, thousands=',')
@@ -321,6 +552,7 @@ tb_df.head(5)
 ```
 
 ```{python}
+#| code-fold: false
 tb_df.sum()
 ```
 
@@ -329,6 +561,7 @@ The Total TB cases look right. Phew!
 Let's just look at the records with **state-level granularity**:
 
 ```{python}
+#| code-fold: true
 state_tb_df = tb_df[1:]
 state_tb_df.head(5)
 ```
@@ -343,6 +576,7 @@ There are a few new methods here:
 * `df.drop_na()` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.dropna.html)) will be explained in more detail next time.
 
 ```{python}
+#| code-fold: true
 # 2010s census data
 census_2010s_df = pd.read_csv("data/nst-est2019-01.csv", header=3, thousands=",")
 census_2010s_df = (
@@ -376,6 +610,7 @@ or use `iPython` magic which will intelligently import code when files change:
 ```
 
 ```{python}
+#| code-fold: true
 # census 2020s data
 census_2020s_df = pd.read_csv("data/NST-EST2022-POP.csv", header=3, thousands=",")
 census_2020s_df = (
@@ -396,6 +631,7 @@ census_2020s_df.head(5)
 Time to `merge`! Here we use the `DataFrame` method `df1.merge(right=df2, ...)` on `DataFrame` `df1` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.merge.html)). Contrast this with the function `pd.merge(left=df1, right=df2, ...)` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.merge.html?highlight=pandas%20merge#pandas.merge)). Feel free to use either.
 
 ```{python}
+#| code-fold: false
 # merge TB DataFrame with two US census DataFrames
 tb_census_df = (
     tb_df
@@ -410,6 +646,7 @@ tb_census_df.head(5)
 Having all of these columns is a little unwieldy. We could either drop the unneeded columns now, or just merge on smaller census `DataFrame`s. Let's do the latter.
 
 ```{python}
+#| code-fold: false
 # try merging again, but cleaner this time
 tb_census_df = (
     tb_df
@@ -438,6 +675,7 @@ $$= \frac{\text{TB cases in population}}{\text{population}} \times 100000$$
 Let's try this for 2019:
 
 ```{python}
+#| code-fold: false
 tb_census_df["recompute incidence 2019"] = tb_census_df["TB cases 2019"]/tb_census_df["2019"]*100000
 tb_census_df.head(5)
 ```
@@ -447,6 +685,7 @@ Awesome!!!
 Let's use a for-loop and `Python` format strings to compute TB incidence for all years. `Python` f-strings are just used for the purposes of this demo, but they're handy to know when you explore data beyond this course ([documentation](https://docs.python.org/3/tutorial/inputoutput.html)).
 
 ```{python}
+#| code-fold: false
 # recompute incidence for all years
 for year in [2019, 2020, 2021]:
     tb_census_df[f"recompute incidence {year}"] = tb_census_df[f"TB cases {year}"]/tb_census_df[f"{year}"]*100000
@@ -456,6 +695,7 @@ tb_census_df.head(5)
 These numbers look pretty close!!! There are a few errors in the hundredths place, particularly in 2021. It may be useful to further explore reasons behind this discrepancy. 
 
 ```{python}
+#| code-fold: false
 tb_census_df.describe()
 ```
 
@@ -476,16 +716,19 @@ Let's get exploring!
 Before we keep exploring, we'll set all indexes to more meaningful values, instead of just numbers that pertain to some row at some point. This will make our cleaning slightly easier.
 
 ```{python}
+#| code-fold: true
 tb_df = tb_df.set_index("U.S. jurisdiction")
 tb_df.head(5)
 ```
 
 ```{python}
+#| code-fold: false
 census_2010s_df = census_2010s_df.set_index("Geographic Area")
 census_2010s_df.head(5)
 ```
 
 ```{python}
+#| code-fold: false
 census_2020s_df = census_2020s_df.set_index("Geographic Area")
 census_2020s_df.head(5)
 ```
@@ -493,6 +736,7 @@ census_2020s_df.head(5)
 It turns out that our merge above only kept state records, even though our original `tb_df` had the "Total" rolled record:
 
 ```{python}
+#| code-fold: false
 tb_df.head()
 ```
 
@@ -501,6 +745,7 @@ Recall that `merge` by default does an **inner** merge by default, meaning that 
 The rolled records in our census `DataFrame` have different `Geographic Area` fields, which was the key we merged on:
 
 ```{python}
+#| code-fold: false
 census_2010s_df.head(5)
 ```
 
@@ -509,12 +754,14 @@ The Census `DataFrame` has several rolled records. The aggregate record we are l
 One straightforward way to get the right merge is to rename the value itself. Because we now have the Geographic Area index, we'll use `df.rename()` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.rename.html)):
 
 ```{python}
+#| code-fold: false
 # rename rolled record for 2010s
 census_2010s_df.rename(index={'United States':'Total'}, inplace=True)
 census_2010s_df.head(5)
 ```
 
 ```{python}
+#| code-fold: false
 # same, but for 2020s rename rolled record
 census_2020s_df.rename(index={'United States':'Total'}, inplace=True)
 census_2020s_df.head(5)
@@ -525,6 +772,7 @@ census_2020s_df.head(5)
 Next let's rerun our merge. Note the different chaining, because we are now merging on indexes (`df.merge()` [documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.merge.html)).
 
 ```{python}
+#| code-fold: false
 tb_census_df = (
     tb_df
     .merge(right=census_2010s_df[["2019"]],
@@ -540,6 +788,7 @@ tb_census_df.head(5)
 Finally, let's recompute our incidences:
 
 ```{python}
+#| code-fold: false
 # recompute incidence for all years
 for year in [2019, 2020, 2021]:
     tb_census_df[f"recompute incidence {year}"] = tb_census_df[f"TB cases {year}"]/tb_census_df[f"{year}"]*100000
@@ -556,18 +805,21 @@ Recall that percent change from $A$ to $B$ is computed as
 $\text{percent change} = \frac{B - A}{A} \times 100$.
 
 ```{python}
+#| code-fold: false
 #| tags: []
 incidence_2020 = tb_census_df.loc['Total', 'recompute incidence 2020']
 incidence_2020
 ```
 
 ```{python}
+#| code-fold: false
 #| tags: []
 incidence_2021 = tb_census_df.loc['Total', 'recompute incidence 2021']
 incidence_2021
 ```
 
 ```{python}
+#| code-fold: false
 #| tags: []
 difference = (incidence_2021 - incidence_2020)/incidence_2020 * 100
 difference
@@ -576,14 +828,14 @@ difference
 # Summary
 We went over a lot of content this lecture; let's summarize the most important points: 
 
-### Dealing with Missing Values
+## Dealing with Missing Values
 There are a few options we can take to deal with missing data:
 
 * Drop missing records
 * Keep `NaN` missing values
 * Impute using an interpolated column
 
-### EDA and Data Wrangling
+## EDA and Data Wrangling
 There are several ways to approach EDA and Data Wrangling: 
 
 * Examine the **data and metadata**: what is the date, size, organization, and structure of the data? 
