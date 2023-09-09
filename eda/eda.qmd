@@ -16,7 +16,7 @@ format:
 jupyter: python3
 ---
 
-::: {.callout-note collapse="true"}
+::: {.callout-note collapse="false"}
 ## Learning Outcomes
 * Recognize common file formats
 * Categorize data by its variable type
@@ -32,14 +32,14 @@ In the past few lectures, we've learned that `pandas` is a toolkit to restructur
 * Unit conversions
 * ...and so on
 
-**Exploratory Data Analysis (EDA)** is the process of understanding a new dataset. It is an open-ended, informal analysis that involves familiarizing ourselves with the variables present in the data, discovering potential hypotheses, and identifying potential issues with the data. This last point can often motivate further data cleaning to address any problems with the dataset's format; because of this, EDA and data cleaning are often thought of as an "infinite loop," with each process driving the other.
+**Exploratory Data Analysis (EDA)** is the process of understanding a new dataset. It is an open-ended, informal analysis that involves familiarizing ourselves with the variables present in the data, discovering potential hypotheses, and identifying possible issues with the data. This last point can often motivate further data cleaning to address any problems with the dataset's format; because of this, EDA and data cleaning are often thought of as an "infinite loop," with each process driving the other.
 
 In this lecture, we will consider the key properties of data to consider when performing data cleaning and EDA. In doing so, we'll develop a "checklist" of sorts for you to consider when approaching a new dataset. Throughout this process, we'll build a deeper understanding of this early (but very important!) stage of the data science lifecycle.
 
 ## Structure
 
 ### File Formats
-There are many more file types for storing structured data: TSV, JSON, XML, ASCII, SAS, etc. We'll only cover CSV, TSV, and JSON in lecture, but you'll likely encounter many other formats. Reading documentation is your best bet for understanding how to process the multitude of different file types. 
+There are many file types for storing structured data: TSV, JSON, XML, ASCII, SAS, etc. We'll only cover CSV, TSV, and JSON in lecture, but you'll likely encounter other formats as you work with different datasets. Reading documentation is your best bet for understanding how to process the multitude of different file types. 
 
 #### CSV
 CSVs, which stand for **Comma-Separated Values**, are a common tabular data format. 
@@ -68,7 +68,7 @@ Each row, or **record**, in the data is delimited by a newline `\n`. Each column
 
 #### TSV
 
-Another common file type is the **TSV (Tab-Separated Values)**. In a TSV, records are still delimited by a newline `\n`, while fields are delimited by `\t` tab character. 
+Another common file type is **TSV (Tab-Separated Values)**. In a TSV, records are still delimited by a newline `\n`, while fields are delimited by `\t` tab character. 
 
 Let's check out the first few rows of the raw TSV file. Again, we'll use the `repr()` function so that `print` shows the special characters.
 
@@ -91,7 +91,7 @@ TSVs can be loaded into `pandas` using `pd.read_csv`. We'll need to specify the 
 pd.read_csv("data/elections.txt", sep='\t').head(3)
 ```
 
-An issue with CSV and TSVs comes up whenever there are commas or tabs within the records. How does `pandas` differentiate between a comma delimiter vs. a comma within the field itself, for example `8,900`. To remedy this, check out the [`quotechar` parameter](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html). 
+An issue with CSVs and TSVs comes up whenever there are commas or tabs within the records. How does `pandas` differentiate between a comma delimiter vs. a comma within the field itself, for example `8,900`? To remedy this, check out the [`quotechar` parameter](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html). 
 
 #### JSON
 **JSON (JavaScript Object Notation)** files behave similarly to Python dictionaries. A raw JSON is shown below.
@@ -118,10 +118,10 @@ pd.read_json('data/elections.json').head(3)
 
 After loading data into a file, it's a good idea to take the time to understand what pieces of information are encoded in the dataset. In particular, we want to identify what variable types are present in our data. Broadly speaking, we can categorize variables into one of two overarching types. 
 
-**Quantitative variables** describe some numeric quantity or amount. We can sub-divide quantitative data into:
+**Quantitative variables** describe some numeric quantity or amount. We can divide quantitative data further into:
 
 * **Continuous quantitative variables**: numeric data that can be measured on a continuous scale to arbitrary precision. Continuous variables do not have a strict set of possible values – they can be recorded to any number of decimal places. For example, weights, GPA, or CO<sub>2</sub> concentrations.
-* **Discrete quantitative variables**: numeric data that can only take on a finite set of possible values. For example, someone's age or number of siblings.
+* **Discrete quantitative variables**: numeric data that can only take on a finite set of possible values. For example, someone's age or the number of siblings they have.
 
 **Qualitative variables**, also known as **categorical variables**, describe data that isn't measuring some quantity or amount. The sub-categories of categorical data are:
 
@@ -162,18 +162,18 @@ After understanding the structure of the dataset, the next task is to determine 
 The **granularity** of a dataset is what a single row represents. You can also think of it as the level of detail included in the data. To determine the data's granularity, ask: what does each row in the dataset represent? Fine-grained data contains a high level of detail, with a single row representing a small individual unit. For example, each record may represent one person. Coarse-grained data is encoded such that a single row represents a large individual unit – for example, each record may represent a group of people.
 
 ### Scope
-The **scope** of a dataset is the subset of the population covered by the data. If we were investigating student performance in Data Science courses, a dataset with narrow scope might encompass all students enrolled in Data 100; a dataset with expansive scope might encompass all students in California. 
+The **scope** of a dataset is the subset of the population covered by the data. If we were investigating student performance in Data Science courses, a dataset with a narrow scope might encompass all students enrolled in Data 100; a dataset with an expansive scope might encompass all students in California. 
 
 ### Temporality
 The **temporality** of a dataset describes the periodicity over which the data was collected as well as when the data was most recently collected or updated. 
 
-Time and date fields of a dataset could mean a few things:
+Time and date fields of a dataset could represent a few things:
 
 1. when the "event" happened
 2. when the data was collected, or when it was entered into the system
-3 when the data was copied into the database. 
+3. when the data was copied into the database 
 
-To fully understand the temporality of the data, it also may be necessary to standardize timezones or inspect recurring time-based trends in the data (do patterns recur in 24-hour patterns? Over the course of a month? Seasonally?). The convention for standardizing time is the Coordinated Universal Time (UTC), an international time standard measured at 0 degrees latitude that stays consistent throughout the year (no daylight savings). We can represent Berkeley's timezone, Pacific Standard Time (PST), as UTC-7 (with daylight savings). 
+To fully understand the temporality of the data, it also may be necessary to standardize time zones or inspect recurring time-based trends in the data (do patterns recur in 24-hour periods? Over the course of a month? Seasonally?). The convention for standardizing time is the Coordinated Universal Time (UTC), an international time standard measured at 0 degrees latitude that stays consistent throughout the year (no daylight savings). We can represent Berkeley's time zone, Pacific Standard Time (PST), as UTC-7 (with daylight savings). 
 
 ## Faithfulness
 
@@ -191,7 +191,7 @@ Data used in research or industry is often "messy" – there may be errors or in
 We often solve some of these more common issues in the following ways: 
 
 * Spelling errors: apply corrections or drop records that aren't in a dictionary
-* Time zone inconsistencies: convert to a common timezone (e.g. UTC) 
+* Time zone inconsistencies: convert to a common time zone (e.g. UTC) 
 * Duplicated records or fields: identify and eliminate duplicates (using primary keys)
 * Unspecified or inconsistent units: infer the units and check that values are in reasonable ranges in the data
 
@@ -205,11 +205,11 @@ A third method to address missing data is to perform **imputation**: infer the m
 * Regression imputation: develop a model to predict missing values
 * Multiple imputation: replace missing values with multiple random values
 
-Regardless of the strategy used to deal with missing data, we should think carefully about *why* particular records or fields may be missing – this can help inform whether or not the absence of these values is significant in some meaningful way.
+Regardless of the strategy used to deal with missing data, we should think carefully about *why* particular records or fields may be missing – this can help inform whether or not the absence of these values is significant or meaningful.
 
 # EDA Demo: Tuberculosis in the United States
 
-Now, let's follow this data-cleaning and EDA workflow to see what can we say about the presence of Tuberculosis in the United States!
+Now, let's walk through the data-cleaning and EDA workflow to see what can we learn about the presence of Tuberculosis in the United States!
 
 We will examine the data included in the [original CDC article](https://www.cdc.gov/mmwr/volumes/71/wr/mm7112a1.htm?s_cid=mm7112a1_w#T1_down) published in 2021.
 
@@ -253,7 +253,7 @@ with open("data/cdc_tuberculosis.csv", "r") as f:
             break
 ```
 
-Finally, let's try option 4 and using the tried-and-true Data 100 approach: `pandas`.
+Finally, let's try option 4 and use the tried-and-true Data 100 approach: `pandas`.
 
 ```{python}
 tb_df = pd.read_csv("data/cdc_tuberculosis.csv")
@@ -262,7 +262,7 @@ tb_df.head()
 
 You may notice some strange things about this table: what's up with the "Unnamed" column names and the first row? 
 
-Congratulations -- you're ready to wrangle your data. Because of how things are stored, we'll need to clean the data a bit to name our columns better.
+Congratulations — you're ready to wrangle your data. Because of how things are stored, we'll need to clean the data a bit to name our columns better.
 
 A reasonable first step is to identify the row with the right header. The `pd.read_csv()` function ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html)) has the convenient `header` parameter that we can set to use the elements in row 1 as the appropriate columns:
 
@@ -271,7 +271,7 @@ tb_df = pd.read_csv("data/cdc_tuberculosis.csv", header=1) # row index
 tb_df.head(5)
 ```
 
-Wait...but now we can't differentiate betwen the "Number of TB cases" and "TB incidence" year columns. `pandas` has tried to make our lives easier by automatically adding ".1" to the latter columns, but this doesn't help us as humans understand the data.
+Wait...but now we can't differentiate betwen the "Number of TB cases" and "TB incidence" year columns. `pandas` has tried to make our lives easier by automatically adding ".1" to the latter columns, but this doesn't help us, as humans, understand the data.
 
 We can do this manually with `df.rename()` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.rename.html?highlight=rename#pandas.DataFrame.rename)):
 
@@ -294,7 +294,7 @@ Row 0 is what we call a **rollup record**, or summary record. It's often useful 
 
 Okay, EDA step two. How was the rollup record aggregated?
 
-Let's check if Total TB cases is the sum of all state TB cases. If we sum over all rows, we should get **2x** the total cases in each of our TB cases by year (why?).
+Let's check if Total TB cases is the sum of all state TB cases. If we sum over all rows, we should get **2x** the total cases in each of our TB cases by year (why do you think this is?).
 
 ```{python}
 tb_df.sum(axis=0)
@@ -306,10 +306,10 @@ Whoa, what's going on with the TB cases in 2019, 2020, and 2021? Check out the c
 tb_df.dtypes
 ```
 
-Since there are commas in the the values for TB cases, the numbers are read as the `object` datatype, or **storage type** (close to the `Python` string datatype), so `pandas` is concatenating strings instead of adding integers (recall that `Python` can "sum", or concatenate, strings together: `"data" + "100"` evaluates to `"data100"`). 
+Since there are commas in the values for TB cases, the numbers are read as the `object` datatype, or **storage type** (close to the `Python` string datatype), so `pandas` is concatenating strings instead of adding integers (recall that `Python` can "sum", or concatenate, strings together: `"data" + "100"` evaluates to `"data100"`). 
 
 
-Fortunately `read_csv` also has a `thousands` parameter (https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html):
+Fortunately `read_csv` also has a `thousands` parameter ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html)):
 
 ```{python}
 # improve readability: chaining method calls with outer parentheses/line breaks
@@ -407,7 +407,7 @@ tb_census_df = (
 tb_census_df.head(5)
 ```
 
-Having all of these columns is little unwieldy. We could either drop the unneeded columns now, or just merge on smaller census `DataFrame`s. Let's do the latter.
+Having all of these columns is a little unwieldy. We could either drop the unneeded columns now, or just merge on smaller census `DataFrame`s. Let's do the latter.
 
 ```{python}
 # try merging again, but cleaner this time
@@ -444,7 +444,7 @@ tb_census_df.head(5)
 
 Awesome!!!
 
-Let's use a for-loop and `Python` format strings to compute TB incidence for all years. `Python` f-strings are just used for the purposes of this demo, but they're handy to know when you explore data beyond this course ([Python documentation](https://docs.python.org/3/tutorial/inputoutput.html)).
+Let's use a for-loop and `Python` format strings to compute TB incidence for all years. `Python` f-strings are just used for the purposes of this demo, but they're handy to know when you explore data beyond this course ([documentation](https://docs.python.org/3/tutorial/inputoutput.html)).
 
 ```{python}
 # recompute incidence for all years
@@ -459,21 +459,21 @@ These numbers look pretty close!!! There are a few errors in the hundredths plac
 tb_census_df.describe()
 ```
 
-## Bonus EDA: Reproducing the reported statistic
+## Bonus EDA: Reproducing the Reported Statistic
 
 
 **How do we reproduce that reported statistic in the original [CDC report](https://www.cdc.gov/mmwr/volumes/71/wr/mm7112a1.htm?s_cid=mm7112a1_w)?**
 
 > Reported TB incidence (cases per 100,000 persons) increased **9.4%**, from **2.2** during 2020 to **2.4** during 2021 but was lower than incidence during 2019 (2.7). Increases occurred among both U.S.-born and non–U.S.-born persons.
 
-This is TB incidence computed across the entire U.S. population! How do we reproduce this
+This is TB incidence computed across the entire U.S. population! How do we reproduce this?
 * We need to reproduce the "Total" TB incidences in our rolled record.
 * But our current `tb_census_df` only has 51 entries (50 states plus Washington, D.C.). There is no rolled record.
 * What happened...?
 
 Let's get exploring!
 
-Before we keep exploring, we'll set all indexes to more meaningful values, instead of just numbers that pertained to some row at some point. This will make our cleaning slightly easier.
+Before we keep exploring, we'll set all indexes to more meaningful values, instead of just numbers that pertain to some row at some point. This will make our cleaning slightly easier.
 
 ```{python}
 tb_df = tb_df.set_index("U.S. jurisdiction")
@@ -496,7 +496,7 @@ It turns out that our merge above only kept state records, even though our origi
 tb_df.head()
 ```
 
-Recall that merge by default does an **inner** merge by default, meaning that it only preserves keys that are present in **both** `DataFrames`.
+Recall that `merge` by default does an **inner** merge by default, meaning that it only preserves keys that are present in **both** `DataFrame`s.
 
 The rolled records in our census `DataFrame` have different `Geographic Area` fields, which was the key we merged on:
 
@@ -580,8 +580,8 @@ We went over a lot of content this lecture; let's summarize the most important p
 There are a few options we can take to deal with missing data:
 
 * Drop missing records
-* keep `NaN` missing values
-* impute using an interpolated column
+* Keep `NaN` missing values
+* Impute using an interpolated column
 
 ### EDA and Data Wrangling
 There are several ways to approach EDA and Data Wrangling: 
@@ -591,7 +591,7 @@ There are several ways to approach EDA and Data Wrangling:
 * Examine pairs of related dimensions (e.g. breaking down grades by major).
 * Along the way, we can 
     * **Visualize** or summarize the data.
-    * Validate assumptions** about data and its collection process. Pay particular attention to when the data was collected. 
+    * **Validate assumptions** about data and its collection process. Pay particular attention to when the data was collected. 
     * Identify and **address anomalies**.
     * Apply data transformations and corrections (we'll cover this in the upcoming lecture).
     * **Record everything you do!** Developing in Jupyter Notebook promotes *reproducibility* of your own work!
