@@ -86,25 +86,33 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#structure" id="toc-structure" class="nav-link active" data-scroll-target="#structure">Structure</a>
   <ul class="collapse">
-  <li><a href="#file-format" id="toc-file-format" class="nav-link" data-scroll-target="#file-format">File Format</a></li>
+  <li><a href="#file-formats" id="toc-file-formats" class="nav-link" data-scroll-target="#file-formats">File Formats</a></li>
   <li><a href="#variable-types" id="toc-variable-types" class="nav-link" data-scroll-target="#variable-types">Variable Types</a></li>
   <li><a href="#primary-and-foreign-keys" id="toc-primary-and-foreign-keys" class="nav-link" data-scroll-target="#primary-and-foreign-keys">Primary and Foreign Keys</a></li>
   </ul></li>
-  <li><a href="#granularity-scope-and-temporality" id="toc-granularity-scope-and-temporality" class="nav-link" data-scroll-target="#granularity-scope-and-temporality">Granularity, Scope, and Temporality</a></li>
-  <li><a href="#faithfulness" id="toc-faithfulness" class="nav-link" data-scroll-target="#faithfulness">Faithfulness</a></li>
+  <li><a href="#granularity-scope-and-temporality" id="toc-granularity-scope-and-temporality" class="nav-link" data-scroll-target="#granularity-scope-and-temporality">Granularity, Scope, and Temporality</a>
+  <ul class="collapse">
+  <li><a href="#granularity" id="toc-granularity" class="nav-link" data-scroll-target="#granularity">Granularity</a></li>
+  <li><a href="#scope" id="toc-scope" class="nav-link" data-scroll-target="#scope">Scope</a></li>
+  <li><a href="#temporality" id="toc-temporality" class="nav-link" data-scroll-target="#temporality">Temporality</a></li>
+  </ul></li>
+  <li><a href="#faithfulness" id="toc-faithfulness" class="nav-link" data-scroll-target="#faithfulness">Faithfulness</a>
+  <ul class="collapse">
+  <li><a href="#missing-values" id="toc-missing-values" class="nav-link" data-scroll-target="#missing-values">Missing Values</a></li>
+  </ul></li>
   <li><a href="#eda-demo-tuberculosis-in-the-united-states" id="toc-eda-demo-tuberculosis-in-the-united-states" class="nav-link" data-scroll-target="#eda-demo-tuberculosis-in-the-united-states">EDA Demo: Tuberculosis in the United States</a>
   <ul class="collapse">
   <li><a href="#csvs-and-field-names" id="toc-csvs-and-field-names" class="nav-link" data-scroll-target="#csvs-and-field-names">CSVs and Field Names</a></li>
   <li><a href="#record-granularity" id="toc-record-granularity" class="nav-link" data-scroll-target="#record-granularity">Record Granularity</a></li>
-  <li><a href="#gather-more-data-census" id="toc-gather-more-data-census" class="nav-link" data-scroll-target="#gather-more-data-census">Gather More Data: Census</a></li>
-  <li><a href="#joining-data-on-primary-keys" id="toc-joining-data-on-primary-keys" class="nav-link" data-scroll-target="#joining-data-on-primary-keys">Joining Data on Primary Keys</a></li>
+  <li><a href="#gather-census-data" id="toc-gather-census-data" class="nav-link" data-scroll-target="#gather-census-data">Gather Census Data</a></li>
+  <li><a href="#joining-data-merging-dataframes" id="toc-joining-data-merging-dataframes" class="nav-link" data-scroll-target="#joining-data-merging-dataframes">Joining Data (Merging <code>DataFrames</code>)</a></li>
   <li><a href="#reproducing-data-compute-incidence" id="toc-reproducing-data-compute-incidence" class="nav-link" data-scroll-target="#reproducing-data-compute-incidence">Reproducing Data: Compute Incidence</a></li>
   <li><a href="#bonus-eda-reproducing-the-reported-statistic" id="toc-bonus-eda-reproducing-the-reported-statistic" class="nav-link" data-scroll-target="#bonus-eda-reproducing-the-reported-statistic">Bonus EDA: Reproducing the reported statistic</a></li>
+  </ul></li>
   <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a>
   <ul class="collapse">
   <li><a href="#dealing-with-missing-values" id="toc-dealing-with-missing-values" class="nav-link" data-scroll-target="#dealing-with-missing-values">Dealing with Missing Values</a></li>
   <li><a href="#eda-and-data-wrangling" id="toc-eda-and-data-wrangling" class="nav-link" data-scroll-target="#eda-and-data-wrangling">EDA and Data Wrangling</a></li>
-  </ul></li>
   </ul></li>
   </ul>
 </nav>
@@ -160,13 +168,16 @@ Learning Outcomes
 <p>In this lecture, we will consider the key properties of data to consider when performing data cleaning and EDA. In doing so, we’ll develop a “checklist” of sorts for you to consider when approaching a new dataset. Throughout this process, we’ll build a deeper understanding of this early (but very important!) stage of the data science lifecycle.</p>
 <section id="structure" class="level2">
 <h2 class="anchored" data-anchor-id="structure">Structure</h2>
-<section id="file-format" class="level3">
-<h3 class="anchored" data-anchor-id="file-format">File Format</h3>
-<p>In the past two <code>pandas</code> lectures, we briefly touched on the idea of file format: the way data is encoded in a file for storage. Specifically, our <code>elections</code> and <code>babynames</code> datasets were stored and loaded as CSVs:</p>
-<div class="cell" data-execution_count="1">
+<section id="file-formats" class="level3">
+<h3 class="anchored" data-anchor-id="file-formats">File Formats</h3>
+<p>There are many more file types for storing structured data: TSV, JSON, XML, ASCII, SAS, etc. We’ll only cover CSV, TSV, and JSON in lecture, but you’ll likely encounter many other formats. Reading documentation is your best bet for understanding how to process the multitude of different file types.</p>
+<section id="csv" class="level4">
+<h4 class="anchored" data-anchor-id="csv">CSV</h4>
+<p>CSVs, which stand for <strong>Comma-Separated Values</strong>, are a common tabular data format. In the past two <code>pandas</code> lectures, we briefly touched on the idea of file format: the way data is encoded in a file for storage. Specifically, our <code>elections</code> and <code>babynames</code> datasets were stored and loaded as CSVs:</p>
+<div class="cell" data-execution_count="39">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>pd.read_csv(<span class="st">"data/elections.csv"</span>).head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="1">
+<div class="cell-output cell-output-display" data-execution_count="39">
 <div>
 
 
@@ -234,91 +245,44 @@ Learning Outcomes
 </div>
 </div>
 </div>
-<p>CSVs, which stand for <strong>Comma-Separated Values</strong>, are a common tabular data format. To better understand the properties of a CSV, let’s take a look at the first few rows of the raw data file to see what it looks like before being loaded into a DataFrame.</p>
-<div class="cell" data-execution_count="2">
+<p>To better understand the properties of a CSV, let’s take a look at the first few rows of the raw data file to see what it looks like before being loaded into a <code>DataFrame</code>. We’ll use the <code>repr()</code> function to return the raw string with its special characters:</p>
+<div class="cell" data-execution_count="47">
 <div class="cell-output cell-output-stdout">
-<pre><code>Year,Candidate,Party,Popular vote,Result,%
-
-1824,Andrew Jackson,Democratic-Republican,151271,loss,57.21012204
-
-1824,John Quincy Adams,Democratic-Republican,113142,win,42.78987796
-
-1828,Andrew Jackson,Democratic,642806,win,56.20392707
-</code></pre>
+<pre><code>'Year,Candidate,Party,Popular vote,Result,%\n'
+'1824,Andrew Jackson,Democratic-Republican,151271,loss,57.21012204\n'
+'1824,John Quincy Adams,Democratic-Republican,113142,win,42.78987796\n'
+'1828,Andrew Jackson,Democratic,642806,win,56.20392707\n'</code></pre>
 </div>
 </div>
-<p>Each row, or <strong>record</strong>, in the data is delimited by a newline. Each column, or <strong>field</strong>, in the data is delimited by a comma (hence, comma-separated!).</p>
-<p>Another common file type is the <strong>TSV (Tab-Separated Values)</strong>. In a TSV, records are still delimited by a newline <code>\n</code>, while fields are delimited by <code>\t</code> tab character. A raw TSV file is shown below.</p>
-<div class="cell" data-execution_count="3">
+<p>Each row, or <strong>record</strong>, in the data is delimited by a newline <code>\n</code>. Each column, or <strong>field</strong>, in the data is delimited by a comma <code>,</code> (hence, comma-separated!).</p>
+</section>
+<section id="tsv" class="level4">
+<h4 class="anchored" data-anchor-id="tsv">TSV</h4>
+<p>Another common file type is the <strong>TSV (Tab-Separated Values)</strong>. In a TSV, records are still delimited by a newline <code>\n</code>, while fields are delimited by <code>\t</code> tab character.</p>
+<p>Let’s check out the first few rows of the raw TSV file. Again, we’ll use the <code>repr()</code> function so that <code>print</code> shows the special characters.</p>
+<div class="cell" data-execution_count="48">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"data/elections.txt"</span>, <span class="st">"r"</span>) <span class="im">as</span> table:</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    i <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> row <span class="kw">in</span> table:</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="bu">repr</span>(row))</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        i <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> i <span class="op">&gt;</span> <span class="dv">3</span>:</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Year    Candidate   Party   Popular vote    Result  %
-
-1824    Andrew Jackson  Democratic-Republican   151271  loss    57.21012204
-
-1824    John Quincy Adams   Democratic-Republican   113142  win 42.78987796
-
-1828    Andrew Jackson  Democratic  642806  win 56.20392707
-</code></pre>
+<pre><code>'\ufeffYear\tCandidate\tParty\tPopular vote\tResult\t%\n'
+'1824\tAndrew Jackson\tDemocratic-Republican\t151271\tloss\t57.21012204\n'
+'1824\tJohn Quincy Adams\tDemocratic-Republican\t113142\twin\t42.78987796\n'
+'1828\tAndrew Jackson\tDemocratic\t642806\twin\t56.20392707\n'</code></pre>
 </div>
 </div>
-<p>TSV files can be loaded into <code>pandas</code> using <code>pd.read_csv()</code> with the <code>delimiter</code> parameter: <code>pd.read_csv("file_name.tsv", delimiter="\t")</code>.</p>
-<div class="cell" data-execution_count="37">
-<div class="cell-output cell-output-display" data-execution_count="37">
-<div>
-
-
-<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">Year,Candidate,Party,Popular vote,Result,%</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">0</td>
-<td>1824,Andrew Jackson,Democratic-Republican,1512...</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">1</td>
-<td>1824,John Quincy Adams,Democratic-Republican,1...</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">2</td>
-<td>1828,Andrew Jackson,Democratic,642806,win,56.2...</td>
-</tr>
-</tbody>
-</table>
-
-</div>
-</div>
-</div>
-<p><strong>JSON (JavaScript Object Notation)</strong> files behave similarly to Python dictionaries. A raw JSON is shown below.</p>
-<div class="cell" data-execution_count="4">
-<div class="cell-output cell-output-stdout">
-<pre><code>[
-
- {
-
-   "Year": 1824,
-
-   "Candidate": "Andrew Jackson",
-
-   "Party": "Democratic-Republican",
-
-   "Popular vote": 151271,
-
-   "Result": "loss",
-
-   "%": 57.21012204
-
- },
-</code></pre>
-</div>
-</div>
-<p>JSON files can be loaded into <code>pandas</code> using <code>pd.read_json</code>.</p>
-<div class="cell" data-execution_count="38">
-<div class="cell-output cell-output-display" data-execution_count="38">
+<p>TSVs can be loaded into <code>pandas</code> using <code>pd.read_csv</code>. We’ll need to specify the <strong>delimiter</strong> with parameter<code>sep='\t'</code> <a href="https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html">(documentation)</a>.</p>
+<div class="cell" data-execution_count="49">
+<div class="cell-output cell-output-display" data-execution_count="49">
 <div>
 
 
@@ -370,6 +334,85 @@ Learning Outcomes
 </div>
 <p>An issue with CSV and TSVs comes up whenever there are commas or tabs within the records. How does <code>pandas</code> differentiate between a comma delimiter vs.&nbsp;a comma within the field itself, for example <code>8,900</code>. To remedy this, check out the <a href="https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html"><code>quotechar</code> parameter</a>.</p>
 </section>
+<section id="json" class="level4">
+<h4 class="anchored" data-anchor-id="json">JSON</h4>
+<p><strong>JSON (JavaScript Object Notation)</strong> files behave similarly to Python dictionaries. A raw JSON is shown below.</p>
+<div class="cell" data-execution_count="43">
+<div class="cell-output cell-output-stdout">
+<pre><code>[
+
+ {
+
+   "Year": 1824,
+
+   "Candidate": "Andrew Jackson",
+
+   "Party": "Democratic-Republican",
+
+   "Popular vote": 151271,
+
+   "Result": "loss",
+
+   "%": 57.21012204
+
+ },
+</code></pre>
+</div>
+</div>
+<p>JSON files can be loaded into <code>pandas</code> using <code>pd.read_json</code>.</p>
+<div class="cell" data-execution_count="44">
+<div class="cell-output cell-output-display" data-execution_count="44">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Year</th>
+<th data-quarto-table-cell-role="th">Candidate</th>
+<th data-quarto-table-cell-role="th">Party</th>
+<th data-quarto-table-cell-role="th">Popular vote</th>
+<th data-quarto-table-cell-role="th">Result</th>
+<th data-quarto-table-cell-role="th">%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>1824</td>
+<td>Andrew Jackson</td>
+<td>Democratic-Republican</td>
+<td>151271</td>
+<td>loss</td>
+<td>57.210122</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>1824</td>
+<td>John Quincy Adams</td>
+<td>Democratic-Republican</td>
+<td>113142</td>
+<td>win</td>
+<td>42.789878</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>1828</td>
+<td>Andrew Jackson</td>
+<td>Democratic</td>
+<td>642806</td>
+<td>win</td>
+<td>56.203927</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+</section>
 <section id="variable-types" class="level3">
 <h3 class="anchored" data-anchor-id="variable-types">Variable Types</h3>
 <p>After loading data into a file, it’s a good idea to take the time to understand what pieces of information are encoded in the dataset. In particular, we want to identify what variable types are present in our data. Broadly speaking, we can categorize variables into one of two overarching types.</p>
@@ -395,8 +438,8 @@ Learning Outcomes
 <h3 class="anchored" data-anchor-id="primary-and-foreign-keys">Primary and Foreign Keys</h3>
 <p>Last time, we introduced <code>.merge</code> as the <code>pandas</code> method for joining multiple <code>DataFrames</code> together. In our discussion of joins, we touched on the idea of using a “key” to determine what rows should be merged from each table. Let’s take a moment to examine this idea more closely.</p>
 <p>The <strong>primary key</strong> is the column or set of columns in a table that <em>uniquely</em> determine the values of the remaining columns. It can be thought of as the unique identifier for each individual row in the table. For example, a table of Data 100 students might use each student’s Cal ID as the primary key.</p>
-<div class="cell" data-execution_count="5">
-<div class="cell-output cell-output-display" data-execution_count="5">
+<div class="cell" data-execution_count="45">
+<div class="cell-output cell-output-display" data-execution_count="45">
 <div>
 
 
@@ -441,8 +484,8 @@ Learning Outcomes
 </div>
 </div>
 <p>The <strong>foreign key</strong> is the column or set of columns in a table that reference primary keys in other tables. Knowing a dataset’s foreign keys can be useful when assigning the <code>left_on</code> and <code>right_on</code> parameters of <code>.merge</code>. In the table of office hour tickets below, <code>"Cal ID"</code> is a foreign key referencing the previous table.</p>
-<div class="cell" data-execution_count="6">
-<div class="cell-output cell-output-display" data-execution_count="6">
+<div class="cell" data-execution_count="46">
+<div class="cell-output cell-output-display" data-execution_count="46">
 <div>
 
 
@@ -491,9 +534,24 @@ Learning Outcomes
 <section id="granularity-scope-and-temporality" class="level2">
 <h2 class="anchored" data-anchor-id="granularity-scope-and-temporality">Granularity, Scope, and Temporality</h2>
 <p>After understanding the structure of the dataset, the next task is to determine what exactly the data represents. We’ll do so by considering the data’s granularity, scope, and temporality.</p>
+<section id="granularity" class="level3">
+<h3 class="anchored" data-anchor-id="granularity">Granularity</h3>
 <p>The <strong>granularity</strong> of a dataset is what a single row represents. You can also think of it as the level of detail included in the data. To determine the data’s granularity, ask: what does each row in the dataset represent? Fine-grained data contains a high level of detail, with a single row representing a small individual unit. For example, each record may represent one person. Coarse-grained data is encoded such that a single row represents a large individual unit – for example, each record may represent a group of people.</p>
-<p>The <strong>scope</strong> of a dataset is the subset of the population covered by the data. Let’s say we’re investigating student performance in Data Science courses. A dataset with narrow scope might encompass all students enrolled in Data 100; a dataset with expansive scope might encompass all students in California. If we find that our scope is too narrow, we can either collect more data or change the research question to better fit the scope of the data. If our scope is too expansive, one potential solution is is to filter the data. We’ll cover this more next week.</p>
-<p>The <strong>temporality</strong> of a dataset describes the periodicity over which the data was collected as well as when the data was most recently collected or updated. Time and date fields could mean a few things: (1) when the “event” happened, (2) when the data was collected, or when it was entered into the system, or (3) when the data was copied into the database. To fully understand the temporality of the data, it also may be necessary to standardize timezones or inspect recurring time-based trends in the data (do patterns recur in 24-hour patterns? Over the course of a month? Seasonally?). The convention for standardizing time is the Coordinated Universal Time (UTC), an international time standard measured at 0 degrees latitude and does not change for daylight savings. We can represent Berkeley’s timezone, Pacific Standard Time (PST), as UTC-7 (with daylight savings).</p>
+</section>
+<section id="scope" class="level3">
+<h3 class="anchored" data-anchor-id="scope">Scope</h3>
+<p>The <strong>scope</strong> of a dataset is the subset of the population covered by the data. If we were investigating student performance in Data Science courses, a dataset with narrow scope might encompass all students enrolled in Data 100; a dataset with expansive scope might encompass all students in California.</p>
+</section>
+<section id="temporality" class="level3">
+<h3 class="anchored" data-anchor-id="temporality">Temporality</h3>
+<p>The <strong>temporality</strong> of a dataset describes the periodicity over which the data was collected as well as when the data was most recently collected or updated.</p>
+<p>Time and date fields of a dataset could mean a few things:</p>
+<ol type="1">
+<li>when the “event” happened</li>
+<li>when the data was collected, or when it was entered into the system 3 when the data was copied into the database.</li>
+</ol>
+<p>To fully understand the temporality of the data, it also may be necessary to standardize timezones or inspect recurring time-based trends in the data (do patterns recur in 24-hour patterns? Over the course of a month? Seasonally?). The convention for standardizing time is the Coordinated Universal Time (UTC), an international time standard measured at 0 degrees latitude that stays consistent throughout the year (no daylight savings). We can represent Berkeley’s timezone, Pacific Standard Time (PST), as UTC-7 (with daylight savings).</p>
+</section>
 </section>
 <section id="faithfulness" class="level2">
 <h2 class="anchored" data-anchor-id="faithfulness">Faithfulness</h2>
@@ -507,14 +565,16 @@ Learning Outcomes
 <li>Duplicated records or fields containing the same information</li>
 <li>Truncated data, e.g.&nbsp;Microsoft Excel would limit the number of rows to 655536 and the number of columns to 255</li>
 </ul>
-<p>Below are some potential solutions to common issues:</p>
+<p>We often solve some of these more common issues in the following ways:</p>
 <ul>
 <li>Spelling errors: apply corrections or drop records that aren’t in a dictionary</li>
 <li>Time zone inconsistencies: convert to a common timezone (e.g.&nbsp;UTC)</li>
 <li>Duplicated records or fields: identify and eliminate duplicates (using primary keys)</li>
 <li>Unspecified or inconsistent units: infer the units and check that values are in reasonable ranges in the data</li>
 </ul>
-<p>A common issue encountered with real-world datasets is that of missing data. One strategy to resolve this is to simply drop any records with missing values from the dataset. This does, however, introduce the risk of inducing biases – it is possible that the missing or corrupt records may be systemically related to some feature of interest in the data. Another solution is to keep the data as <code>NaN</code> values.</p>
+<section id="missing-values" class="level3">
+<h3 class="anchored" data-anchor-id="missing-values">Missing Values</h3>
+<p>Another common issue encountered with real-world datasets is that of missing data. One strategy to resolve this is to simply drop any records with missing values from the dataset. This does, however, introduce the risk of inducing biases – it is possible that the missing or corrupt records may be systemically related to some feature of interest in the data. Another solution is to keep the data as <code>NaN</code> values.</p>
 <p>A third method to address missing data is to perform <strong>imputation</strong>: infer the missing values using other data available in the dataset. There is a wide variety of imputation techniques that can be implemented; some of the most common are listed below.</p>
 <ul>
 <li>Average imputation: replace missing values with the average value for that field</li>
@@ -522,7 +582,8 @@ Learning Outcomes
 <li>Regression imputation: develop a model to predict missing values</li>
 <li>Multiple imputation: replace missing values with multiple random values</li>
 </ul>
-<p>Regardless of the strategy used to deal with missing data, we should think carefully about <em>why</em> particular records or fields may be missing – this can help inform whether or not the absence of these values is signficant in some meaningful way.</p>
+<p>Regardless of the strategy used to deal with missing data, we should think carefully about <em>why</em> particular records or fields may be missing – this can help inform whether or not the absence of these values is significant in some meaningful way.</p>
+</section>
 </section>
 <section id="eda-demo-tuberculosis-in-the-united-states" class="level1">
 <h1>EDA Demo: Tuberculosis in the United States</h1>
@@ -531,21 +592,19 @@ Learning Outcomes
 <section id="csvs-and-field-names" class="level2">
 <h2 class="anchored" data-anchor-id="csvs-and-field-names">CSVs and Field Names</h2>
 <p>Suppose Table 1 was saved as a CSV file located in <code>data/cdc_tuberculosis.csv</code>.</p>
-<p>We can then explore the CSV (which is a text file, and does not contain binary-encoded data) in many ways: 1. Using a text editor like emacs, vim, VSCode, etc. 2. Opening the CSV directly in DataHub (read-only), Excel, Google Sheets, etc. 3. The Python file object 4. pandas, using <code>pd.read_csv()</code></p>
-<p>1, 2. Let’s start with the first two so we really solidify the idea of a CSV as <strong>rectangular data (i.e., tabular data) stored as comma-separated values</strong>.</p>
-<ol start="3" type="1">
-<li>Next, let’s try using the Python file object. Let’s check out the first three lines:</li>
-</ol>
-<div class="cell" data-execution_count="7">
+<p>We can then explore the CSV (which is a text file, and does not contain binary-encoded data) in many ways: 1. Using a text editor like emacs, vim, VSCode, etc. 2. Opening the CSV directly in DataHub (read-only), Excel, Google Sheets, etc. 3. The <code>Python</code> file object 4. <code>pandas</code>, using <code>pd.read_csv()</code></p>
+<p>To try out options 1 and 2, you can view or download the Tuberculosis from the <a href="https://data100.datahub.berkeley.edu/hub/user-redirect/git-pull?repo=https%3A%2F%2Fgithub.com%2FDS-100%2Ffa23-student&amp;urlpath=lab%2Ftree%2Ffa23-student%2Flecture%2Flec05%2Flec04-eda.ipynb&amp;branch=main">lecture demo notebook</a> under the <code>data</code> folder in the left hand menu. Notice how the CSV file is a type of <strong>rectangular data (i.e., tabular data) stored as comma-separated values</strong>.</p>
+<p>Next, let’s try out option 3 using the <code>Python</code> file object. We’ll look at the first four lines:</p>
+<div class="cell" data-execution_count="47">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"data/cdc_tuberculosis.csv"</span>, <span class="st">"r"</span>) <span class="im">as</span> f:</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    i <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> row <span class="kw">in</span> f:</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(row)</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        i <span class="op">+=</span> <span class="dv">1</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> i <span class="op">&gt;</span> <span class="dv">3</span>:</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"data/cdc_tuberculosis.csv"</span>, <span class="st">"r"</span>) <span class="im">as</span> f:</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    i <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> row <span class="kw">in</span> f:</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(row)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        i <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> i <span class="op">&gt;</span> <span class="dv">3</span>:</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>,No. of TB cases,,,TB incidence,,
@@ -561,16 +620,16 @@ Alabama,87,72,92,1.77,1.43,1.83
 <p>Whoa, why are there blank lines interspaced between the lines of the CSV?</p>
 <p>You may recall that all line breaks in text files are encoded as the special newline character <code>\n</code>. Python’s <code>print()</code> prints each string (including the newline), and an additional newline on top of that.</p>
 <p>If you’re curious, we can use the <code>repr()</code> function to return the raw string with all special characters:</p>
-<div class="cell" data-execution_count="8">
+<div class="cell" data-execution_count="48">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"data/cdc_tuberculosis.csv"</span>, <span class="st">"r"</span>) <span class="im">as</span> f:</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    i <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> row <span class="kw">in</span> f:</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="bu">repr</span>(row)) <span class="co"># print raw strings</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        i <span class="op">+=</span> <span class="dv">1</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> i <span class="op">&gt;</span> <span class="dv">3</span>:</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"data/cdc_tuberculosis.csv"</span>, <span class="st">"r"</span>) <span class="im">as</span> f:</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    i <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> row <span class="kw">in</span> f:</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="bu">repr</span>(row)) <span class="co"># print raw strings</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        i <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> i <span class="op">&gt;</span> <span class="dv">3</span>:</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>',No. of TB cases,,,TB incidence,,\n'
@@ -579,16 +638,14 @@ Alabama,87,72,92,1.77,1.43,1.83
 'Alabama,87,72,92,1.77,1.43,1.83\n'</code></pre>
 </div>
 </div>
-<ol start="4" type="1">
-<li>Finally, let’s see the tried-and-true Data 100 approach: pandas.</li>
-</ol>
-<div class="cell" data-execution_count="9">
+<p>Finally, let’s try option 4 and using the tried-and-true Data 100 approach: <code>pandas</code>.</p>
+<div class="cell" data-execution_count="49">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>tb_df <span class="op">=</span> pd.read_csv(<span class="st">"data/cdc_tuberculosis.csv"</span>)</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>tb_df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>tb_df <span class="op">=</span> pd.read_csv(<span class="st">"data/cdc_tuberculosis.csv"</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>tb_df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="9">
+<div class="cell-output cell-output-display" data-execution_count="49">
 <div>
 
 
@@ -662,16 +719,16 @@ Alabama,87,72,92,1.77,1.43,1.83
 </div>
 </div>
 </div>
-<p>Wait, what’s up with the “Unnamed” column names? And the first row, for that matter?</p>
+<p>You may notice some strange things about this table: what’s up with the “Unnamed” column names and the first row?</p>
 <p>Congratulations – you’re ready to wrangle your data. Because of how things are stored, we’ll need to clean the data a bit to name our columns better.</p>
-<p>A reasonable first step is to identify the row with the right header. The <code>pd.read_csv()</code> function (<a href="https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html">documentation</a>) has the convenient <code>header</code> parameter:</p>
-<div class="cell" data-execution_count="10">
+<p>A reasonable first step is to identify the row with the right header. The <code>pd.read_csv()</code> function (<a href="https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html">documentation</a>) has the convenient <code>header</code> parameter that we can set to use the elements in row 1 as the appropriate columns:</p>
+<div class="cell" data-execution_count="50">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>tb_df <span class="op">=</span> pd.read_csv(<span class="st">"data/cdc_tuberculosis.csv"</span>, header<span class="op">=</span><span class="dv">1</span>) <span class="co"># row index</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>tb_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>tb_df <span class="op">=</span> pd.read_csv(<span class="st">"data/cdc_tuberculosis.csv"</span>, header<span class="op">=</span><span class="dv">1</span>) <span class="co"># row index</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>tb_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="10">
+<div class="cell-output cell-output-display" data-execution_count="50">
 <div>
 
 
@@ -745,21 +802,21 @@ Alabama,87,72,92,1.77,1.43,1.83
 </div>
 </div>
 </div>
-<p>Wait…but now we can’t differentiate betwen the “Number of TB cases” and “TB incidence” year columns. pandas has tried to make our lives easier by automatically adding “.1” to the latter columns, but this doesn’t help us as humans understand the data.</p>
+<p>Wait…but now we can’t differentiate betwen the “Number of TB cases” and “TB incidence” year columns. <code>pandas</code> has tried to make our lives easier by automatically adding “.1” to the latter columns, but this doesn’t help us as humans understand the data.</p>
 <p>We can do this manually with <code>df.rename()</code> (<a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.rename.html?highlight=rename#pandas.DataFrame.rename">documentation</a>):</p>
-<div class="cell" data-execution_count="11">
+<div class="cell" data-execution_count="51">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>rename_dict <span class="op">=</span> {<span class="st">'2019'</span>: <span class="st">'TB cases 2019'</span>,</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>               <span class="st">'2020'</span>: <span class="st">'TB cases 2020'</span>,</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>               <span class="st">'2021'</span>: <span class="st">'TB cases 2021'</span>,</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>               <span class="st">'2019.1'</span>: <span class="st">'TB incidence 2019'</span>,</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>               <span class="st">'2020.1'</span>: <span class="st">'TB incidence 2020'</span>,</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>               <span class="st">'2021.1'</span>: <span class="st">'TB incidence 2021'</span>}</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>tb_df <span class="op">=</span> tb_df.rename(columns<span class="op">=</span>rename_dict)</span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>tb_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>rename_dict <span class="op">=</span> {<span class="st">'2019'</span>: <span class="st">'TB cases 2019'</span>,</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>               <span class="st">'2020'</span>: <span class="st">'TB cases 2020'</span>,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>               <span class="st">'2021'</span>: <span class="st">'TB cases 2021'</span>,</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>               <span class="st">'2019.1'</span>: <span class="st">'TB incidence 2019'</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>               <span class="st">'2020.1'</span>: <span class="st">'TB incidence 2020'</span>,</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>               <span class="st">'2021.1'</span>: <span class="st">'TB incidence 2021'</span>}</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>tb_df <span class="op">=</span> tb_df.rename(columns<span class="op">=</span>rename_dict)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>tb_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="11">
+<div class="cell-output cell-output-display" data-execution_count="51">
 <div>
 
 
@@ -840,12 +897,12 @@ Alabama,87,72,92,1.77,1.43,1.83
 <p>Row 0 is what we call a <strong>rollup record</strong>, or summary record. It’s often useful when displaying tables to humans. The <strong>granularity</strong> of record 0 (Totals) vs the rest of the records (States) is different.</p>
 <p>Okay, EDA step two. How was the rollup record aggregated?</p>
 <p>Let’s check if Total TB cases is the sum of all state TB cases. If we sum over all rows, we should get <strong>2x</strong> the total cases in each of our TB cases by year (why?).</p>
-<div class="cell" data-execution_count="12">
+<div class="cell" data-execution_count="52">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>tb_df.<span class="bu">sum</span>(axis<span class="op">=</span><span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>tb_df.<span class="bu">sum</span>(axis<span class="op">=</span><span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="12">
+<div class="cell-output cell-output-display" data-execution_count="52">
 <pre><code>U.S. jurisdiction    TotalAlabamaAlaskaArizonaArkansasCaliforniaCol...
 TB cases 2019        8,9008758183642,111666718245583029973261085237...
 TB cases 2020        7,1737258136591,706525417194122219282169239376...
@@ -856,13 +913,13 @@ TB incidence 2021                                               102.94
 dtype: object</code></pre>
 </div>
 </div>
-<p>Whoa, what’s going on? Check out the column types:</p>
-<div class="cell" data-execution_count="13">
+<p>Whoa, what’s going on with the TB cases in 2019, 2020, and 2021? Check out the column types:</p>
+<div class="cell" data-execution_count="53">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>tb_df.dtypes</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>tb_df.dtypes</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="13">
+<div class="cell-output cell-output-display" data-execution_count="53">
 <pre><code>U.S. jurisdiction     object
 TB cases 2019         object
 TB cases 2020         object
@@ -873,19 +930,19 @@ TB incidence 2021    float64
 dtype: object</code></pre>
 </div>
 </div>
-<p>Looks like those commas are causing all TB cases to be read as the <code>object</code> datatype, or <strong>storage type</strong> (close to the <code>Python</code> string datatype), so <code>pandas</code> is concatenating strings instead of adding integers.</p>
+<p>Since there are commas in the the values for TB cases, the numbers are read as the <code>object</code> datatype, or <strong>storage type</strong> (close to the <code>Python</code> string datatype), so <code>pandas</code> is concatenating strings instead of adding integers (recall that <code>Python</code> can “sum”, or concatenate, strings together: <code>"data" + "100"</code> evaluates to <code>"data100"</code>).</p>
 <p>Fortunately <code>read_csv</code> also has a <code>thousands</code> parameter (https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html):</p>
-<div class="cell" data-execution_count="14">
+<div class="cell" data-execution_count="54">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># improve readability: chaining method calls with outer parentheses/line breaks</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>tb_df <span class="op">=</span> (</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    pd.read_csv(<span class="st">"data/cdc_tuberculosis.csv"</span>, header<span class="op">=</span><span class="dv">1</span>, thousands<span class="op">=</span><span class="st">','</span>)</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    .rename(columns<span class="op">=</span>rename_dict)</span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>tb_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># improve readability: chaining method calls with outer parentheses/line breaks</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>tb_df <span class="op">=</span> (</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    pd.read_csv(<span class="st">"data/cdc_tuberculosis.csv"</span>, header<span class="op">=</span><span class="dv">1</span>, thousands<span class="op">=</span><span class="st">','</span>)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    .rename(columns<span class="op">=</span>rename_dict)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>tb_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="14">
+<div class="cell-output cell-output-display" data-execution_count="54">
 <div>
 
 
@@ -959,12 +1016,12 @@ dtype: object</code></pre>
 </div>
 </div>
 </div>
-<div class="cell" data-execution_count="15">
+<div class="cell" data-execution_count="55">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>tb_df.<span class="bu">sum</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>tb_df.<span class="bu">sum</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="15">
+<div class="cell-output cell-output-display" data-execution_count="55">
 <pre><code>U.S. jurisdiction    TotalAlabamaAlaskaArizonaArkansasCaliforniaCol...
 TB cases 2019                                                    17800
 TB cases 2020                                                    14346
@@ -977,13 +1034,13 @@ dtype: object</code></pre>
 </div>
 <p>The Total TB cases look right. Phew!</p>
 <p>Let’s just look at the records with <strong>state-level granularity</strong>:</p>
-<div class="cell" data-execution_count="16">
+<div class="cell" data-execution_count="56">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>state_tb_df <span class="op">=</span> tb_df[<span class="dv">1</span>:]</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>state_tb_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>state_tb_df <span class="op">=</span> tb_df[<span class="dv">1</span>:]</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>state_tb_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="16">
+<div class="cell-output cell-output-display" data-execution_count="56">
 <div>
 
 
@@ -1058,31 +1115,31 @@ dtype: object</code></pre>
 </div>
 </div>
 </section>
-<section id="gather-more-data-census" class="level2">
-<h2 class="anchored" data-anchor-id="gather-more-data-census">Gather More Data: Census</h2>
+<section id="gather-census-data" class="level2">
+<h2 class="anchored" data-anchor-id="gather-census-data">Gather Census Data</h2>
 <p>U.S. Census population estimates <a href="https://www.census.gov/data/tables/time-series/demo/popest/2010s-state-total.html">source</a> (2019), <a href="https://www.census.gov/data/tables/time-series/demo/popest/2020s-state-total.html">source</a> (2020-2021).</p>
 <p>Running the below cells cleans the data. There are a few new methods here: * <code>df.convert_dtypes()</code> (<a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.convert_dtypes.html">documentation</a>) conveniently converts all float dtypes into ints and is out of scope for the class. * <code>df.drop_na()</code> (<a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.dropna.html">documentation</a>) will be explained in more detail next time.</p>
-<div class="cell" data-execution_count="17">
+<div class="cell" data-execution_count="57">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 2010s census data</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>census_2010s_df <span class="op">=</span> pd.read_csv(<span class="st">"data/nst-est2019-01.csv"</span>, header<span class="op">=</span><span class="dv">3</span>, thousands<span class="op">=</span><span class="st">","</span>)</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>census_2010s_df <span class="op">=</span> (</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    census_2010s_df</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    .reset_index()</span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    .drop(columns<span class="op">=</span>[<span class="st">"index"</span>, <span class="st">"Census"</span>, <span class="st">"Estimates Base"</span>])</span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    .rename(columns<span class="op">=</span>{<span class="st">"Unnamed: 0"</span>: <span class="st">"Geographic Area"</span>})</span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    .convert_dtypes()                 <span class="co"># "smart" converting of columns, use at your own risk</span></span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    .dropna()                         <span class="co"># we'll introduce this next time</span></span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>census_2010s_df[<span class="st">'Geographic Area'</span>] <span class="op">=</span> census_2010s_df[<span class="st">'Geographic Area'</span>].<span class="bu">str</span>.strip(<span class="st">'.'</span>)</span>
-<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a><span class="co"># with pd.option_context('display.min_rows', 30): # shows more rows</span></span>
-<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a><span class="co">#     display(census_2010s_df)</span></span>
-<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>census_2010s_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 2010s census data</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>census_2010s_df <span class="op">=</span> pd.read_csv(<span class="st">"data/nst-est2019-01.csv"</span>, header<span class="op">=</span><span class="dv">3</span>, thousands<span class="op">=</span><span class="st">","</span>)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>census_2010s_df <span class="op">=</span> (</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    census_2010s_df</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    .reset_index()</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    .drop(columns<span class="op">=</span>[<span class="st">"index"</span>, <span class="st">"Census"</span>, <span class="st">"Estimates Base"</span>])</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    .rename(columns<span class="op">=</span>{<span class="st">"Unnamed: 0"</span>: <span class="st">"Geographic Area"</span>})</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    .convert_dtypes()                 <span class="co"># "smart" converting of columns, use at your own risk</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    .dropna()                         <span class="co"># we'll introduce this next time</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>census_2010s_df[<span class="st">'Geographic Area'</span>] <span class="op">=</span> census_2010s_df[<span class="st">'Geographic Area'</span>].<span class="bu">str</span>.strip(<span class="st">'.'</span>)</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a><span class="co"># with pd.option_context('display.min_rows', 30): # shows more rows</span></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a><span class="co">#     display(census_2010s_df)</span></span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>census_2010s_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="17">
+<div class="cell-output cell-output-display" data-execution_count="57">
 <div>
 
 
@@ -1180,30 +1237,30 @@ dtype: object</code></pre>
 </div>
 </div>
 </div>
-<p>Occasionally, you will want to modify code that you have imported. To reimport those modifications you can either use the python importlib library:</p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> importlib <span class="im">import</span> <span class="bu">reload</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="bu">reload</span>(utils)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>or use iPython magic which will intelligently import code when files change:</p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>load_ext autoreload</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>autoreload <span class="dv">2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell" data-execution_count="18">
+<p>Occasionally, you will want to modify code that you have imported. To reimport those modifications you can either use <code>python</code>’s <code>importlib</code> library:</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> importlib <span class="im">import</span> <span class="bu">reload</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="bu">reload</span>(utils)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>or use <code>iPython</code> magic which will intelligently import code when files change:</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>load_ext autoreload</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>autoreload <span class="dv">2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-execution_count="58">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># census 2020s data</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>census_2020s_df <span class="op">=</span> pd.read_csv(<span class="st">"data/NST-EST2022-POP.csv"</span>, header<span class="op">=</span><span class="dv">3</span>, thousands<span class="op">=</span><span class="st">","</span>)</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>census_2020s_df <span class="op">=</span> (</span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    census_2020s_df</span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    .reset_index()</span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    .drop(columns<span class="op">=</span>[<span class="st">"index"</span>, <span class="st">"Unnamed: 1"</span>])</span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    .rename(columns<span class="op">=</span>{<span class="st">"Unnamed: 0"</span>: <span class="st">"Geographic Area"</span>})</span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    .convert_dtypes()                 <span class="co"># "smart" converting of columns, use at your own risk</span></span>
-<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    .dropna()                         <span class="co"># we'll introduce this next time</span></span>
-<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>census_2020s_df[<span class="st">'Geographic Area'</span>] <span class="op">=</span> census_2020s_df[<span class="st">'Geographic Area'</span>].<span class="bu">str</span>.strip(<span class="st">'.'</span>)</span>
-<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>census_2020s_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># census 2020s data</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>census_2020s_df <span class="op">=</span> pd.read_csv(<span class="st">"data/NST-EST2022-POP.csv"</span>, header<span class="op">=</span><span class="dv">3</span>, thousands<span class="op">=</span><span class="st">","</span>)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>census_2020s_df <span class="op">=</span> (</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    census_2020s_df</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    .reset_index()</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    .drop(columns<span class="op">=</span>[<span class="st">"index"</span>, <span class="st">"Unnamed: 1"</span>])</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    .rename(columns<span class="op">=</span>{<span class="st">"Unnamed: 0"</span>: <span class="st">"Geographic Area"</span>})</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    .convert_dtypes()                 <span class="co"># "smart" converting of columns, use at your own risk</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>    .dropna()                         <span class="co"># we'll introduce this next time</span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>census_2020s_df[<span class="st">'Geographic Area'</span>] <span class="op">=</span> census_2020s_df[<span class="st">'Geographic Area'</span>].<span class="bu">str</span>.strip(<span class="st">'.'</span>)</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>census_2020s_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="18">
+<div class="cell-output cell-output-display" data-execution_count="58">
 <div>
 
 
@@ -1260,23 +1317,23 @@ dtype: object</code></pre>
 </div>
 </div>
 </section>
-<section id="joining-data-on-primary-keys" class="level2">
-<h2 class="anchored" data-anchor-id="joining-data-on-primary-keys">Joining Data on Primary Keys</h2>
-<p>Time to <code>merge</code>! Here we use the DataFrame method <code>df1.merge(right=df2, ...)</code> on DataFrame <code>df1</code> (<a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.merge.html">documentation</a>). Contrast this with the function <code>pd.merge(left=df1, right=df2, ...)</code> (<a href="https://pandas.pydata.org/docs/reference/api/pandas.merge.html?highlight=pandas%20merge#pandas.merge">documentation</a>). Feel free to use either.</p>
-<div class="cell" data-execution_count="19">
+<section id="joining-data-merging-dataframes" class="level2">
+<h2 class="anchored" data-anchor-id="joining-data-merging-dataframes">Joining Data (Merging <code>DataFrames</code>)</h2>
+<p>Time to <code>merge</code>! Here we use the <code>DataFrame</code> method <code>df1.merge(right=df2, ...)</code> on <code>DataFrame</code> <code>df1</code> (<a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.merge.html">documentation</a>). Contrast this with the function <code>pd.merge(left=df1, right=df2, ...)</code> (<a href="https://pandas.pydata.org/docs/reference/api/pandas.merge.html?highlight=pandas%20merge#pandas.merge">documentation</a>). Feel free to use either.</p>
+<div class="cell" data-execution_count="59">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># merge TB dataframe with two US census dataframes</span></span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>tb_census_df <span class="op">=</span> (</span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    tb_df</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    .merge(right<span class="op">=</span>census_2010s_df,</span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>           left_on<span class="op">=</span><span class="st">"U.S. jurisdiction"</span>, right_on<span class="op">=</span><span class="st">"Geographic Area"</span>)</span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    .merge(right<span class="op">=</span>census_2020s_df,</span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>           left_on<span class="op">=</span><span class="st">"U.S. jurisdiction"</span>, right_on<span class="op">=</span><span class="st">"Geographic Area"</span>)</span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>tb_census_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># merge TB DataFrame with two US census DataFrames</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>tb_census_df <span class="op">=</span> (</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    tb_df</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    .merge(right<span class="op">=</span>census_2010s_df,</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>           left_on<span class="op">=</span><span class="st">"U.S. jurisdiction"</span>, right_on<span class="op">=</span><span class="st">"Geographic Area"</span>)</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    .merge(right<span class="op">=</span>census_2020s_df,</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>           left_on<span class="op">=</span><span class="st">"U.S. jurisdiction"</span>, right_on<span class="op">=</span><span class="st">"Geographic Area"</span>)</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>tb_census_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="19">
+<div class="cell-output cell-output-display" data-execution_count="59">
 <div>
 
 
@@ -1435,23 +1492,23 @@ dtype: object</code></pre>
 </div>
 </div>
 </div>
-<p>This is a little unwieldy. We could either drop the unneeded columns now, or just merge on smaller census DataFrames. Let’s do the latter.</p>
-<div class="cell" data-execution_count="20">
+<p>Having all of these columns is little unwieldy. We could either drop the unneeded columns now, or just merge on smaller census <code>DataFrame</code>s. Let’s do the latter.</p>
+<div class="cell" data-execution_count="60">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># try merging again, but cleaner this time</span></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>tb_census_df <span class="op">=</span> (</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    tb_df</span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    .merge(right<span class="op">=</span>census_2010s_df[[<span class="st">"Geographic Area"</span>, <span class="st">"2019"</span>]],</span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>           left_on<span class="op">=</span><span class="st">"U.S. jurisdiction"</span>, right_on<span class="op">=</span><span class="st">"Geographic Area"</span>)</span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    .drop(columns<span class="op">=</span><span class="st">"Geographic Area"</span>)</span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    .merge(right<span class="op">=</span>census_2020s_df[[<span class="st">"Geographic Area"</span>, <span class="st">"2020"</span>, <span class="st">"2021"</span>]],</span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>           left_on<span class="op">=</span><span class="st">"U.S. jurisdiction"</span>, right_on<span class="op">=</span><span class="st">"Geographic Area"</span>)</span>
-<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>    .drop(columns<span class="op">=</span><span class="st">"Geographic Area"</span>)</span>
-<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>tb_census_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># try merging again, but cleaner this time</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>tb_census_df <span class="op">=</span> (</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    tb_df</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    .merge(right<span class="op">=</span>census_2010s_df[[<span class="st">"Geographic Area"</span>, <span class="st">"2019"</span>]],</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>           left_on<span class="op">=</span><span class="st">"U.S. jurisdiction"</span>, right_on<span class="op">=</span><span class="st">"Geographic Area"</span>)</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    .drop(columns<span class="op">=</span><span class="st">"Geographic Area"</span>)</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>    .merge(right<span class="op">=</span>census_2020s_df[[<span class="st">"Geographic Area"</span>, <span class="st">"2020"</span>, <span class="st">"2021"</span>]],</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>           left_on<span class="op">=</span><span class="st">"U.S. jurisdiction"</span>, right_on<span class="op">=</span><span class="st">"Geographic Area"</span>)</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>    .drop(columns<span class="op">=</span><span class="st">"Geographic Area"</span>)</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>tb_census_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="20">
+<div class="cell-output cell-output-display" data-execution_count="60">
 <div>
 
 
@@ -1552,13 +1609,13 @@ dtype: object</code></pre>
 <p><span class="math display">\[\text{TB incidence} = \frac{\text{TB cases in population}}{\text{groups in population}} = \frac{\text{TB cases in population}}{\text{population}/100000} \]</span></p>
 <p><span class="math display">\[= \frac{\text{TB cases in population}}{\text{population}} \times 100000\]</span></p>
 <p>Let’s try this for 2019:</p>
-<div class="cell" data-execution_count="21">
+<div class="cell" data-execution_count="61">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>tb_census_df[<span class="st">"recompute incidence 2019"</span>] <span class="op">=</span> tb_census_df[<span class="st">"TB cases 2019"</span>]<span class="op">/</span>tb_census_df[<span class="st">"2019"</span>]<span class="op">*</span><span class="dv">100000</span></span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>tb_census_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>tb_census_df[<span class="st">"recompute incidence 2019"</span>] <span class="op">=</span> tb_census_df[<span class="st">"TB cases 2019"</span>]<span class="op">/</span>tb_census_df[<span class="st">"2019"</span>]<span class="op">*</span><span class="dv">100000</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>tb_census_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="21">
+<div class="cell-output cell-output-display" data-execution_count="61">
 <div>
 
 
@@ -1658,15 +1715,15 @@ dtype: object</code></pre>
 </div>
 <p>Awesome!!!</p>
 <p>Let’s use a for-loop and <code>Python</code> format strings to compute TB incidence for all years. <code>Python</code> f-strings are just used for the purposes of this demo, but they’re handy to know when you explore data beyond this course (<a href="https://docs.python.org/3/tutorial/inputoutput.html">Python documentation</a>).</p>
-<div class="cell" data-execution_count="22">
+<div class="cell" data-execution_count="62">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># recompute incidence for all years</span></span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> year <span class="kw">in</span> [<span class="dv">2019</span>, <span class="dv">2020</span>, <span class="dv">2021</span>]:</span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    tb_census_df[<span class="ss">f"recompute incidence </span><span class="sc">{</span>year<span class="sc">}</span><span class="ss">"</span>] <span class="op">=</span> tb_census_df[<span class="ss">f"TB cases </span><span class="sc">{</span>year<span class="sc">}</span><span class="ss">"</span>]<span class="op">/</span>tb_census_df[<span class="ss">f"</span><span class="sc">{</span>year<span class="sc">}</span><span class="ss">"</span>]<span class="op">*</span><span class="dv">100000</span></span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>tb_census_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># recompute incidence for all years</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> year <span class="kw">in</span> [<span class="dv">2019</span>, <span class="dv">2020</span>, <span class="dv">2021</span>]:</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    tb_census_df[<span class="ss">f"recompute incidence </span><span class="sc">{</span>year<span class="sc">}</span><span class="ss">"</span>] <span class="op">=</span> tb_census_df[<span class="ss">f"TB cases </span><span class="sc">{</span>year<span class="sc">}</span><span class="ss">"</span>]<span class="op">/</span>tb_census_df[<span class="ss">f"</span><span class="sc">{</span>year<span class="sc">}</span><span class="ss">"</span>]<span class="op">*</span><span class="dv">100000</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>tb_census_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="22">
+<div class="cell-output cell-output-display" data-execution_count="62">
 <div>
 
 
@@ -1777,12 +1834,12 @@ dtype: object</code></pre>
 </div>
 </div>
 <p>These numbers look pretty close!!! There are a few errors in the hundredths place, particularly in 2021. It may be useful to further explore reasons behind this discrepancy.</p>
-<div class="cell" data-execution_count="23">
+<div class="cell" data-execution_count="63">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>tb_census_df.describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>tb_census_df.describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="23">
+<div class="cell-output cell-output-display" data-execution_count="63">
 <div>
 
 
@@ -1941,13 +1998,13 @@ dtype: object</code></pre>
 <p>This is TB incidence computed across the entire U.S. population! How do we reproduce this * We need to reproduce the “Total” TB incidences in our rolled record. * But our current <code>tb_census_df</code> only has 51 entries (50 states plus Washington, D.C.). There is no rolled record. * What happened…?</p>
 <p>Let’s get exploring!</p>
 <p>Before we keep exploring, we’ll set all indexes to more meaningful values, instead of just numbers that pertained to some row at some point. This will make our cleaning slightly easier.</p>
-<div class="cell" data-execution_count="24">
+<div class="cell" data-execution_count="64">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>tb_df <span class="op">=</span> tb_df.set_index(<span class="st">"U.S. jurisdiction"</span>)</span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>tb_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>tb_df <span class="op">=</span> tb_df.set_index(<span class="st">"U.S. jurisdiction"</span>)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>tb_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="24">
+<div class="cell-output cell-output-display" data-execution_count="64">
 <div>
 
 
@@ -2024,13 +2081,13 @@ dtype: object</code></pre>
 </div>
 </div>
 </div>
-<div class="cell" data-execution_count="25">
+<div class="cell" data-execution_count="65">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>census_2010s_df <span class="op">=</span> census_2010s_df.set_index(<span class="st">"Geographic Area"</span>)</span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>census_2010s_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>census_2010s_df <span class="op">=</span> census_2010s_df.set_index(<span class="st">"Geographic Area"</span>)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>census_2010s_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="25">
+<div class="cell-output cell-output-display" data-execution_count="65">
 <div>
 
 
@@ -2135,13 +2192,13 @@ dtype: object</code></pre>
 </div>
 </div>
 </div>
-<div class="cell" data-execution_count="26">
+<div class="cell" data-execution_count="66">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>census_2020s_df <span class="op">=</span> census_2020s_df.set_index(<span class="st">"Geographic Area"</span>)</span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>census_2020s_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>census_2020s_df <span class="op">=</span> census_2020s_df.set_index(<span class="st">"Geographic Area"</span>)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>census_2020s_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="26">
+<div class="cell-output cell-output-display" data-execution_count="66">
 <div>
 
 
@@ -2198,12 +2255,12 @@ dtype: object</code></pre>
 </div>
 </div>
 <p>It turns out that our merge above only kept state records, even though our original <code>tb_df</code> had the “Total” rolled record:</p>
-<div class="cell" data-execution_count="27">
+<div class="cell" data-execution_count="67">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>tb_df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>tb_df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="27">
+<div class="cell-output cell-output-display" data-execution_count="67">
 <div>
 
 
@@ -2280,14 +2337,14 @@ dtype: object</code></pre>
 </div>
 </div>
 </div>
-<p>Recall that merge by default does an <strong>inner</strong> merge by default, meaning that it only preserves keys that are present in <strong>both</strong> DataFrames.</p>
-<p>The rolled records in our census dataframes have different <code>Geographic Area</code> fields, which was the key we merged on:</p>
-<div class="cell" data-execution_count="28">
+<p>Recall that merge by default does an <strong>inner</strong> merge by default, meaning that it only preserves keys that are present in <strong>both</strong> <code>DataFrames</code>.</p>
+<p>The rolled records in our census <code>DataFrame</code> have different <code>Geographic Area</code> fields, which was the key we merged on:</p>
+<div class="cell" data-execution_count="68">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>census_2010s_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>census_2010s_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="28">
+<div class="cell-output cell-output-display" data-execution_count="68">
 <div>
 
 
@@ -2394,14 +2451,14 @@ dtype: object</code></pre>
 </div>
 <p>The Census <code>DataFrame</code> has several rolled records. The aggregate record we are looking for actually has the Geographic Area named “United States”.</p>
 <p>One straightforward way to get the right merge is to rename the value itself. Because we now have the Geographic Area index, we’ll use <code>df.rename()</code> (<a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.rename.html">documentation</a>):</p>
-<div class="cell" data-execution_count="29">
+<div class="cell" data-execution_count="69">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># rename rolled record for 2010s</span></span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>census_2010s_df.rename(index<span class="op">=</span>{<span class="st">'United States'</span>:<span class="st">'Total'</span>}, inplace<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>census_2010s_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># rename rolled record for 2010s</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>census_2010s_df.rename(index<span class="op">=</span>{<span class="st">'United States'</span>:<span class="st">'Total'</span>}, inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>census_2010s_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="29">
+<div class="cell-output cell-output-display" data-execution_count="69">
 <div>
 
 
@@ -2506,14 +2563,14 @@ dtype: object</code></pre>
 </div>
 </div>
 </div>
-<div class="cell" data-execution_count="30">
+<div class="cell" data-execution_count="70">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># same, but for 2020s rename rolled record</span></span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>census_2020s_df.rename(index<span class="op">=</span>{<span class="st">'United States'</span>:<span class="st">'Total'</span>}, inplace<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>census_2020s_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># same, but for 2020s rename rolled record</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>census_2020s_df.rename(index<span class="op">=</span>{<span class="st">'United States'</span>:<span class="st">'Total'</span>}, inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>census_2020s_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="30">
+<div class="cell-output cell-output-display" data-execution_count="70">
 <div>
 
 
@@ -2571,19 +2628,19 @@ dtype: object</code></pre>
 </div>
 <p><br></p>
 <p>Next let’s rerun our merge. Note the different chaining, because we are now merging on indexes (<code>df.merge()</code> <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.merge.html">documentation</a>).</p>
-<div class="cell" data-execution_count="31">
+<div class="cell" data-execution_count="71">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>tb_census_df <span class="op">=</span> (</span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>    tb_df</span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>    .merge(right<span class="op">=</span>census_2010s_df[[<span class="st">"2019"</span>]],</span>
-<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>           left_index<span class="op">=</span><span class="va">True</span>, right_index<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>    .merge(right<span class="op">=</span>census_2020s_df[[<span class="st">"2020"</span>, <span class="st">"2021"</span>]],</span>
-<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>           left_index<span class="op">=</span><span class="va">True</span>, right_index<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>tb_census_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>tb_census_df <span class="op">=</span> (</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>    tb_df</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>    .merge(right<span class="op">=</span>census_2010s_df[[<span class="st">"2019"</span>]],</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>           left_index<span class="op">=</span><span class="va">True</span>, right_index<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>    .merge(right<span class="op">=</span>census_2020s_df[[<span class="st">"2020"</span>, <span class="st">"2021"</span>]],</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>           left_index<span class="op">=</span><span class="va">True</span>, right_index<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>tb_census_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="31">
+<div class="cell-output cell-output-display" data-execution_count="71">
 <div>
 
 
@@ -2671,15 +2728,15 @@ dtype: object</code></pre>
 </div>
 <p><br></p>
 <p>Finally, let’s recompute our incidences:</p>
-<div class="cell" data-execution_count="32">
+<div class="cell" data-execution_count="72">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># recompute incidence for all years</span></span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> year <span class="kw">in</span> [<span class="dv">2019</span>, <span class="dv">2020</span>, <span class="dv">2021</span>]:</span>
-<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>    tb_census_df[<span class="ss">f"recompute incidence </span><span class="sc">{</span>year<span class="sc">}</span><span class="ss">"</span>] <span class="op">=</span> tb_census_df[<span class="ss">f"TB cases </span><span class="sc">{</span>year<span class="sc">}</span><span class="ss">"</span>]<span class="op">/</span>tb_census_df[<span class="ss">f"</span><span class="sc">{</span>year<span class="sc">}</span><span class="ss">"</span>]<span class="op">*</span><span class="dv">100000</span></span>
-<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>tb_census_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># recompute incidence for all years</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> year <span class="kw">in</span> [<span class="dv">2019</span>, <span class="dv">2020</span>, <span class="dv">2021</span>]:</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>    tb_census_df[<span class="ss">f"recompute incidence </span><span class="sc">{</span>year<span class="sc">}</span><span class="ss">"</span>] <span class="op">=</span> tb_census_df[<span class="ss">f"TB cases </span><span class="sc">{</span>year<span class="sc">}</span><span class="ss">"</span>]<span class="op">/</span>tb_census_df[<span class="ss">f"</span><span class="sc">{</span>year<span class="sc">}</span><span class="ss">"</span>]<span class="op">*</span><span class="dv">100000</span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>tb_census_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="32">
+<div class="cell-output cell-output-display" data-execution_count="72">
 <div>
 
 
@@ -2789,39 +2846,40 @@ dtype: object</code></pre>
 <p>Reported TB incidence (cases per 100,000 persons) increased <strong>9.4%</strong>, from <strong>2.2</strong> during 2020 to <strong>2.4</strong> during 2021 but was lower than incidence during 2019 (2.7). Increases occurred among both U.S.-born and non–U.S.-born persons.</p>
 </blockquote>
 <p>Recall that percent change from <span class="math inline">\(A\)</span> to <span class="math inline">\(B\)</span> is computed as <span class="math inline">\(\text{percent change} = \frac{B - A}{A} \times 100\)</span>.</p>
-<div class="cell" data-tags="[]" data-execution_count="33">
+<div class="cell" data-tags="[]" data-execution_count="73">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>incidence_2020 <span class="op">=</span> tb_census_df.loc[<span class="st">'Total'</span>, <span class="st">'recompute incidence 2020'</span>]</span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>incidence_2020</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>incidence_2020 <span class="op">=</span> tb_census_df.loc[<span class="st">'Total'</span>, <span class="st">'recompute incidence 2020'</span>]</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>incidence_2020</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="33">
+<div class="cell-output cell-output-display" data-execution_count="73">
 <pre><code>2.1637257652759883</code></pre>
 </div>
 </div>
-<div class="cell" data-tags="[]" data-execution_count="34">
+<div class="cell" data-tags="[]" data-execution_count="74">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>incidence_2021 <span class="op">=</span> tb_census_df.loc[<span class="st">'Total'</span>, <span class="st">'recompute incidence 2021'</span>]</span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>incidence_2021</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>incidence_2021 <span class="op">=</span> tb_census_df.loc[<span class="st">'Total'</span>, <span class="st">'recompute incidence 2021'</span>]</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>incidence_2021</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="34">
+<div class="cell-output cell-output-display" data-execution_count="74">
 <pre><code>2.3672448914298068</code></pre>
 </div>
 </div>
-<div class="cell" data-tags="[]" data-execution_count="35">
+<div class="cell" data-tags="[]" data-execution_count="75">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>difference <span class="op">=</span> (incidence_2021 <span class="op">-</span> incidence_2020)<span class="op">/</span>incidence_2020 <span class="op">*</span> <span class="dv">100</span></span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>difference</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>difference <span class="op">=</span> (incidence_2021 <span class="op">-</span> incidence_2020)<span class="op">/</span>incidence_2020 <span class="op">*</span> <span class="dv">100</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>difference</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="35">
+<div class="cell-output cell-output-display" data-execution_count="75">
 <pre><code>9.405957511804143</code></pre>
 </div>
 </div>
 </section>
-<section id="summary" class="level2">
-<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+</section>
+<section id="summary" class="level1">
+<h1>Summary</h1>
 <p>We went over a lot of content this lecture; let’s summarize the most important points:</p>
 <section id="dealing-with-missing-values" class="level3">
 <h3 class="anchored" data-anchor-id="dealing-with-missing-values">Dealing with Missing Values</h3>
@@ -2848,7 +2906,6 @@ dtype: object</code></pre>
 <li><strong>Record everything you do!</strong> Developing in Jupyter Notebook promotes <em>reproducibility</em> of your own work!</li>
 </ul></li>
 </ul>
-</section>
 </section>
 </section>
 

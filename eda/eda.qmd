@@ -38,7 +38,11 @@ In this lecture, we will consider the key properties of data to consider when pe
 
 ## Structure
 
-### File Format
+### File Formats
+There are many more file types for storing structured data: TSV, JSON, XML, ASCII, SAS, etc. We'll only cover CSV, TSV, and JSON in lecture, but you'll likely encounter many other formats. Reading documentation is your best bet for understanding how to process the multitude of different file types. 
+
+#### CSV
+CSVs, which stand for **Comma-Separated Values**, are a common tabular data format. 
 In the past two `pandas` lectures, we briefly touched on the idea of file format: the way data is encoded in a file for storage. Specifically, our `elections` and `babynames` datasets were stored and loaded as CSVs:
 
 ```{python}
@@ -47,41 +51,49 @@ import pandas as pd
 pd.read_csv("data/elections.csv").head(5)
 ```
 
-CSVs, which stand for **Comma-Separated Values**, are a common tabular data format. To better understand the properties of a CSV, let's take a look at the first few rows of the raw data file to see what it looks like before being loaded into a DataFrame. 
+To better understand the properties of a CSV, let's take a look at the first few rows of the raw data file to see what it looks like before being loaded into a `DataFrame`. We'll use the `repr()` function to return the raw string with its special characters: 
 
 ```{python}
 #| echo: false
 with open("data/elections.csv", "r") as table:
     i = 0
     for row in table:
-        print(row)
+        print(repr(row))
         i += 1
         if i > 3:
             break
 ```
 
-Each row, or **record**, in the data is delimited by a newline. Each column, or **field**, in the data is delimited by a comma (hence, comma-separated!). 
+Each row, or **record**, in the data is delimited by a newline `\n`. Each column, or **field**, in the data is delimited by a comma `,` (hence, comma-separated!). 
 
-Another common file type is the **TSV (Tab-Separated Values)**. In a TSV, records are still delimited by a newline `\n`, while fields are delimited by `\t` tab character. A raw TSV file is shown below.
+#### TSV
+
+Another common file type is the **TSV (Tab-Separated Values)**. In a TSV, records are still delimited by a newline `\n`, while fields are delimited by `\t` tab character. 
+
+Let's check out the first few rows of the raw TSV file. Again, we'll use the `repr()` function so that `print` shows the special characters.
 
 ```{python}
+
 #| echo: false
 with open("data/elections.txt", "r") as table:
     i = 0
     for row in table:
-        print(row)
+        print(repr(row))
         i += 1
         if i > 3:
             break
 ```
 
-TSV files can be loaded into `pandas` using `pd.read_csv()` with the `delimiter` parameter: `pd.read_csv("file_name.tsv", delimiter="\t")`. 
+TSVs can be loaded into `pandas` using `pd.read_csv`. We'll need to specify the **delimiter** with parameter` sep='\t'` [(documentation)](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html).
 
 ```{python}
 #| echo: false
-pd.read_csv('data/elections.tsv', sep="\t").head(3)
+pd.read_csv("data/elections.txt", sep='\t').head(3)
 ```
 
+An issue with CSV and TSVs comes up whenever there are commas or tabs within the records. How does `pandas` differentiate between a comma delimiter vs. a comma within the field itself, for example `8,900`. To remedy this, check out the [`quotechar` parameter](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html). 
+
+#### JSON
 **JSON (JavaScript Object Notation)** files behave similarly to Python dictionaries. A raw JSON is shown below.
 
 ```{python}
@@ -101,8 +113,6 @@ JSON files can be loaded into `pandas` using `pd.read_json`.
 #| echo: false
 pd.read_json('data/elections.json').head(3)
 ```
-
-An issue with CSV and TSVs comes up whenever there are commas or tabs within the records. How does `pandas` differentiate between a comma delimiter vs. a comma within the field itself, for example `8,900`. To remedy this, check out the [`quotechar` parameter](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html). 
 
 ### Variable Types
 
@@ -148,11 +158,22 @@ pd.DataFrame({"OH Request":[1, 2, 3, 4], \
 
 After understanding the structure of the dataset, the next task is to determine what exactly the data represents. We'll do so by considering the data's granularity, scope, and temporality.
 
+### Granularity
 The **granularity** of a dataset is what a single row represents. You can also think of it as the level of detail included in the data. To determine the data's granularity, ask: what does each row in the dataset represent? Fine-grained data contains a high level of detail, with a single row representing a small individual unit. For example, each record may represent one person. Coarse-grained data is encoded such that a single row represents a large individual unit – for example, each record may represent a group of people.
 
-The **scope** of a dataset is the subset of the population covered by the data. Let's say we're investigating student performance in Data Science courses. A dataset with narrow scope might encompass all students enrolled in Data 100; a dataset with expansive scope might encompass all students in California. If we find that our scope is too narrow, we can either collect more data or change the research question to better fit the scope of the data. If our scope is too expansive, one potential solution is is to filter the data. We'll cover this more next week. 
+### Scope
+The **scope** of a dataset is the subset of the population covered by the data. If we were investigating student performance in Data Science courses, a dataset with narrow scope might encompass all students enrolled in Data 100; a dataset with expansive scope might encompass all students in California. 
 
-The **temporality** of a dataset describes the periodicity over which the data was collected as well as when the data was most recently collected or updated. Time and date fields could mean a few things: (1) when the "event" happened, (2) when the data was collected, or when it was entered into the system, or (3) when the data was copied into the database. To fully understand the temporality of the data, it also may be necessary to standardize timezones or inspect recurring time-based trends in the data (do patterns recur in 24-hour patterns? Over the course of a month? Seasonally?). The convention for standardizing time is the Coordinated Universal Time (UTC), an international time standard measured at 0 degrees latitude and does not change for daylight savings. We can represent Berkeley's timezone, Pacific Standard Time (PST), as UTC-7 (with daylight savings). 
+### Temporality
+The **temporality** of a dataset describes the periodicity over which the data was collected as well as when the data was most recently collected or updated. 
+
+Time and date fields of a dataset could mean a few things:
+
+1. when the "event" happened
+2. when the data was collected, or when it was entered into the system
+3 when the data was copied into the database. 
+
+To fully understand the temporality of the data, it also may be necessary to standardize timezones or inspect recurring time-based trends in the data (do patterns recur in 24-hour patterns? Over the course of a month? Seasonally?). The convention for standardizing time is the Coordinated Universal Time (UTC), an international time standard measured at 0 degrees latitude that stays consistent throughout the year (no daylight savings). We can represent Berkeley's timezone, Pacific Standard Time (PST), as UTC-7 (with daylight savings). 
 
 ## Faithfulness
 
@@ -167,14 +188,15 @@ Data used in research or industry is often "messy" – there may be errors or in
 * Duplicated records or fields containing the same information
 * Truncated data, e.g. Microsoft Excel would limit the number of rows to 655536 and the number of columns to 255
 
-Below are some potential solutions to common issues:
+We often solve some of these more common issues in the following ways: 
 
 * Spelling errors: apply corrections or drop records that aren't in a dictionary
 * Time zone inconsistencies: convert to a common timezone (e.g. UTC) 
 * Duplicated records or fields: identify and eliminate duplicates (using primary keys)
 * Unspecified or inconsistent units: infer the units and check that values are in reasonable ranges in the data
 
-A common issue encountered with real-world datasets is that of missing data. One strategy to resolve this is to simply drop any records with missing values from the dataset. This does, however, introduce the risk of inducing biases – it is possible that the missing or corrupt records may be systemically related to some feature of interest in the data. Another solution is to keep the data as `NaN` values. 
+### Missing Values
+Another common issue encountered with real-world datasets is that of missing data. One strategy to resolve this is to simply drop any records with missing values from the dataset. This does, however, introduce the risk of inducing biases – it is possible that the missing or corrupt records may be systemically related to some feature of interest in the data. Another solution is to keep the data as `NaN` values. 
 
 A third method to address missing data is to perform **imputation**: infer the missing values using other data available in the dataset. There is a wide variety of imputation techniques that can be implemented; some of the most common are listed below.
 
@@ -183,7 +205,7 @@ A third method to address missing data is to perform **imputation**: infer the m
 * Regression imputation: develop a model to predict missing values
 * Multiple imputation: replace missing values with multiple random values
 
-Regardless of the strategy used to deal with missing data, we should think carefully about *why* particular records or fields may be missing – this can help inform whether or not the absence of these values is signficant in some meaningful way.
+Regardless of the strategy used to deal with missing data, we should think carefully about *why* particular records or fields may be missing – this can help inform whether or not the absence of these values is significant in some meaningful way.
 
 # EDA Demo: Tuberculosis in the United States
 
@@ -198,12 +220,12 @@ Suppose Table 1 was saved as a CSV file located in `data/cdc_tuberculosis.csv`.
 We can then explore the CSV (which is a text file, and does not contain binary-encoded data) in many ways:
 1. Using a text editor like emacs, vim, VSCode, etc.
 2. Opening the CSV directly in DataHub (read-only), Excel, Google Sheets, etc.
-3. The Python file object
-4. pandas, using `pd.read_csv()`
+3. The `Python` file object
+4. `pandas`, using `pd.read_csv()`
 
-1, 2. Let's start with the first two so we really solidify the idea of a CSV as **rectangular data (i.e., tabular data) stored as comma-separated values**.
+To try out options 1 and 2, you can view or download the Tuberculosis from the [lecture demo notebook](https://data100.datahub.berkeley.edu/hub/user-redirect/git-pull?repo=https%3A%2F%2Fgithub.com%2FDS-100%2Ffa23-student&urlpath=lab%2Ftree%2Ffa23-student%2Flecture%2Flec05%2Flec04-eda.ipynb&branch=main) under the `data` folder in the left hand menu. Notice how the CSV file is a type of **rectangular data (i.e., tabular data) stored as comma-separated values**.
 
-3. Next, let's try using the Python file object. Let's check out the first three lines:
+Next, let's try out option 3 using the `Python` file object. We'll look at the first four lines:
 
 ```{python}
 with open("data/cdc_tuberculosis.csv", "r") as f:
@@ -231,26 +253,25 @@ with open("data/cdc_tuberculosis.csv", "r") as f:
             break
 ```
 
-4. Finally, let's see the tried-and-true Data 100 approach: pandas.
+Finally, let's try option 4 and using the tried-and-true Data 100 approach: `pandas`.
 
 ```{python}
 tb_df = pd.read_csv("data/cdc_tuberculosis.csv")
 tb_df.head()
 ```
 
-Wait, what's up with the "Unnamed" column names? And the first row, for that matter?
+You may notice some strange things about this table: what's up with the "Unnamed" column names and the first row? 
 
 Congratulations -- you're ready to wrangle your data. Because of how things are stored, we'll need to clean the data a bit to name our columns better.
 
-
-A reasonable first step is to identify the row with the right header. The `pd.read_csv()` function ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html)) has the convenient `header` parameter:
+A reasonable first step is to identify the row with the right header. The `pd.read_csv()` function ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html)) has the convenient `header` parameter that we can set to use the elements in row 1 as the appropriate columns:
 
 ```{python}
 tb_df = pd.read_csv("data/cdc_tuberculosis.csv", header=1) # row index
 tb_df.head(5)
 ```
 
-Wait...but now we can't differentiate betwen the "Number of TB cases" and "TB incidence" year columns. pandas has tried to make our lives easier by automatically adding ".1" to the latter columns, but this doesn't help us as humans understand the data.
+Wait...but now we can't differentiate betwen the "Number of TB cases" and "TB incidence" year columns. `pandas` has tried to make our lives easier by automatically adding ".1" to the latter columns, but this doesn't help us as humans understand the data.
 
 We can do this manually with `df.rename()` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.rename.html?highlight=rename#pandas.DataFrame.rename)):
 
@@ -279,13 +300,13 @@ Let's check if Total TB cases is the sum of all state TB cases. If we sum over a
 tb_df.sum(axis=0)
 ```
 
-Whoa, what's going on? Check out the column types:
+Whoa, what's going on with the TB cases in 2019, 2020, and 2021? Check out the column types:
 
 ```{python}
 tb_df.dtypes
 ```
 
-Looks like those commas are causing all TB cases to be read as the `object` datatype, or **storage type** (close to the `Python` string datatype), so `pandas` is concatenating strings instead of adding integers.
+Since there are commas in the the values for TB cases, the numbers are read as the `object` datatype, or **storage type** (close to the `Python` string datatype), so `pandas` is concatenating strings instead of adding integers (recall that `Python` can "sum", or concatenate, strings together: `"data" + "100"` evaluates to `"data100"`). 
 
 
 Fortunately `read_csv` also has a `thousands` parameter (https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html):
@@ -312,7 +333,7 @@ state_tb_df = tb_df[1:]
 state_tb_df.head(5)
 ```
 
-## Gather More Data: Census
+## Gather Census Data
 
 U.S. Census population estimates [source](https://www.census.gov/data/tables/time-series/demo/popest/2010s-state-total.html) (2019), [source](https://www.census.gov/data/tables/time-series/demo/popest/2020s-state-total.html) (2020-2021).
 
@@ -340,14 +361,14 @@ census_2010s_df['Geographic Area'] = census_2010s_df['Geographic Area'].str.stri
 census_2010s_df.head(5)
 ```
 
-Occasionally, you will want to modify code that you have imported.  To reimport those modifications you can either use the python importlib library:
+Occasionally, you will want to modify code that you have imported.  To reimport those modifications you can either use `python`'s `importlib` library:
 
 ```python
 from importlib import reload
 reload(utils)
 ```
 
-or use iPython magic which will intelligently import code when files change:
+or use `iPython` magic which will intelligently import code when files change:
 
 ```python
 %load_ext autoreload
@@ -370,12 +391,12 @@ census_2020s_df['Geographic Area'] = census_2020s_df['Geographic Area'].str.stri
 census_2020s_df.head(5)
 ```
 
-## Joining Data on Primary Keys
+## Joining Data (Merging `DataFrames`)
 
-Time to `merge`! Here we use the DataFrame method `df1.merge(right=df2, ...)` on DataFrame `df1` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.merge.html)). Contrast this with the function `pd.merge(left=df1, right=df2, ...)` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.merge.html?highlight=pandas%20merge#pandas.merge)). Feel free to use either.
+Time to `merge`! Here we use the `DataFrame` method `df1.merge(right=df2, ...)` on `DataFrame` `df1` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.merge.html)). Contrast this with the function `pd.merge(left=df1, right=df2, ...)` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.merge.html?highlight=pandas%20merge#pandas.merge)). Feel free to use either.
 
 ```{python}
-# merge TB dataframe with two US census dataframes
+# merge TB DataFrame with two US census DataFrames
 tb_census_df = (
     tb_df
     .merge(right=census_2010s_df,
@@ -386,7 +407,7 @@ tb_census_df = (
 tb_census_df.head(5)
 ```
 
-This is a little unwieldy. We could either drop the unneeded columns now, or just merge on smaller census DataFrames. Let's do the latter.
+Having all of these columns is little unwieldy. We could either drop the unneeded columns now, or just merge on smaller census `DataFrame`s. Let's do the latter.
 
 ```{python}
 # try merging again, but cleaner this time
@@ -475,9 +496,9 @@ It turns out that our merge above only kept state records, even though our origi
 tb_df.head()
 ```
 
-Recall that merge by default does an **inner** merge by default, meaning that it only preserves keys that are present in **both** DataFrames.
+Recall that merge by default does an **inner** merge by default, meaning that it only preserves keys that are present in **both** `DataFrames`.
 
-The rolled records in our census dataframes have different `Geographic Area` fields, which was the key we merged on:
+The rolled records in our census `DataFrame` have different `Geographic Area` fields, which was the key we merged on:
 
 ```{python}
 census_2010s_df.head(5)
@@ -552,7 +573,7 @@ difference = (incidence_2021 - incidence_2020)/incidence_2020 * 100
 difference
 ```
 
-## Summary
+# Summary
 We went over a lot of content this lecture; let's summarize the most important points: 
 
 ### Dealing with Missing Values
