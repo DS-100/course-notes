@@ -23,6 +23,8 @@ jupyter: python3
 * Build awareness of issues with data faithfulness and develop targeted solutions
 :::
 
+**This content is covered in lectures 4, 5, and 6.**
+
 In the past few lectures, we've learned that `pandas` is a toolkit to restructure, modify, and explore a dataset. What we haven't yet touched on is *how* to make these data transformation decisions. When we receive a new set of data from the "real world," how do we know what processing we should do to convert this data into a usable form?
 
 **Data cleaning**, also called **data wrangling**, is the process of transforming raw data to facilitate subsequent analysis. It is often used to address issues like:
@@ -47,6 +49,7 @@ In the past two `pandas` lectures, we briefly touched on the idea of file format
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 import pandas as pd
 pd.read_csv("data/elections.csv").head(5)
 ```
@@ -55,6 +58,7 @@ To better understand the properties of a CSV, let's take a look at the first few
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 with open("data/elections.csv", "r") as table:
     i = 0
     for row in table:
@@ -74,6 +78,7 @@ Let's check out the first few rows of the raw TSV file. Again, we'll use the `re
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 with open("data/elections.txt", "r") as table:
     i = 0
     for row in table:
@@ -87,6 +92,7 @@ TSVs can be loaded into `pandas` using `pd.read_csv`. We'll need to specify the 
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 pd.read_csv("data/elections.txt", sep='\t').head(3)
 ```
 
@@ -97,6 +103,7 @@ An issue with CSVs and TSVs comes up whenever there are commas or tabs within th
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 with open("data/elections.json", "r") as table:
     i = 0
     for row in table:
@@ -110,6 +117,7 @@ JSON files can be loaded into `pandas` using `pd.read_json`.
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 pd.read_json('data/elections.json').head(3)
 ```
 
@@ -118,6 +126,7 @@ The City of Berkeley Open Data [website](https://data.cityofberkeley.info/Health
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 from ds100_utils import fetch_and_cache
 
 covid_file = fetch_and_cache(
@@ -134,6 +143,7 @@ Since there seem to be text files, let's investigate the number of lines, which 
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 import os
 
 print(covid_file, "is", os.path.getsize(covid_file) / 1e6, "MB")
@@ -146,21 +156,23 @@ with open(covid_file, "r") as f:
 As part of the EDA workflow, Unix commands can come in very handy. In fact, there's an entire book called ["Data Science at the Command Line"](https://datascienceatthecommandline.com/) that explores this idea in depth! 
 In Jupyter/IPython, you can prefix lines with `!` to execute arbitrary Unix commands, and within those lines, you can refer to `Python` variables and expressions with the syntax `{expr}`.
 
-Here, we use the ls command to list files, using the `-lh` flags, which request "long format with information in human-readable form". We also use the `wc` command for "word count", but with the `-l` flag, which asks for line counts instead of words.
+Here, we use the `ls` command to list files, using the `-lh` flags, which request "long format with information in human-readable form." We also use the `wc` command for "word count," but with the `-l` flag, which asks for line counts instead of words.
 
 These two give us the same information as the code above, albeit in a slightly different form:
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 !ls -lh {covid_file}
 !wc -l {covid_file}
 ```
 
 ###### File Contents
-Let's explore the data format using `Python`> 
+Let's explore the data format using `Python`. 
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 with open(covid_file, "r") as f:
     for i, row in enumerate(f):
         print(repr(row)) # print raw strings
@@ -171,6 +183,7 @@ We can use the `head` Unix command (which is where `pandas`' `head` method comes
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 !head -5 {covid_file}
 ```
 
@@ -178,6 +191,7 @@ In order to load the JSON file into `pandas`, Let's first do some EDA with `Pyth
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 import json
 
 with open(covid_file, "rb") as f:
@@ -188,6 +202,7 @@ The `covid_json` variable is now a dictionary encoding the data in the file:
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 type(covid_json)
 ```
 
@@ -195,6 +210,7 @@ We can examine what keys are in the top level json object by listing out the key
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 covid_json.keys()
 ```
 
@@ -205,6 +221,7 @@ We can investigate the meta data further by examining the keys associated with t
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 covid_json['meta'].keys()
 ```
 
@@ -212,6 +229,7 @@ The `meta` key contains another dictionary called `view`.  This likely refers to
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 covid_json['meta']['view'].keys()
 ```
 
@@ -237,6 +255,7 @@ There is a key called description in the view sub dictionary.  This likely conta
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 print(covid_json['meta']['view']['description'])
 ```
 
@@ -246,6 +265,7 @@ We can look at a few entries in the `data` field. This is what we'll load into `
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 for i in range(3):
     print(f"{i:03} | {covid_json['data'][i]}")
 ```
@@ -254,10 +274,11 @@ Observations:
 * These look like equal-length records, so maybe `data` is a table!
 * But what do each of values in the record mean? Where can we find column headers?
 
-For that, we'l need the `columns` key in the metadata dictionary. This returns a list: 
+For that, we'll need the `columns` key in the metadata dictionary. This returns a list: 
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 type(covid_json['meta']['view']['columns'])
 ```
 
@@ -265,21 +286,24 @@ type(covid_json['meta']['view']['columns'])
 
 1. The above **metadata** tells us a lot about the columns in the data including column names, potential data anomalies, and a basic statistic. 
 1. Because of its non-tabular structure, JSON makes it easier (than CSV) to create **self-documenting data**, meaning that information about the data is stored in the same file as the data.
-1. Self documenting data can be helpful since it maintains its own description and these descriptions are more likely to be updated as data changes. 
+1. Self-documenting data can be helpful since it maintains its own description and these descriptions are more likely to be updated as data changes. 
 
 ###### Loading COVID Data into `pandas`
-Finally, le'ts load the data (not the metadata) into a `pandas` `DatFrame`. In the following block of code we:
+Finally, let's load the data (not the metadata) into a `pandas` `DataFrame`. In the following block of code we:
 
-1. Translate the JSON records into a dataframe:
+1. Translate the JSON records into a `DataFrame`:
 
     * fields: `covid_json['meta']['view']['columns']`
     * records: `covid_json['data']`
+
     
-1. Remove columns that have no metadata description.  This would be a bad idea in general but here we remove these columns since the above analysis suggests that they are unlikely to contain useful information.
+1. Remove columns that have no metadata description.  This would be a bad idea in general, but here we remove these columns since the above analysis suggests they are unlikely to contain useful information.
+   
 1. Examine the `tail` of the table.
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 # Load the data from JSON and assign column titles
 covid = pd.DataFrame(
     covid_json['data'],
@@ -308,12 +332,13 @@ Note that many variables don't sit neatly in just one of these categories. Quali
 
 ### Primary and Foreign Keys
 
-Last time, we introduced `.merge` as the `pandas` method for joining multiple `DataFrames` together. In our discussion of joins, we touched on the idea of using a "key" to determine what rows should be merged from each table. Let's take a moment to examine this idea more closely.
+Last time, we introduced `.merge` as the `pandas` method for joining multiple `DataFrame`s together. In our discussion of joins, we touched on the idea of using a "key" to determine what rows should be merged from each table. Let's take a moment to examine this idea more closely.
 
 The **primary key** is the column or set of columns in a table that *uniquely* determine the values of the remaining columns. It can be thought of as the unique identifier for each individual row in the table. For example, a table of Data 100 students might use each student's Cal ID as the primary key. 
 
 ```{python}
 #| echo: false
+#| vscode: {languageId: python}
 pd.DataFrame({"Cal ID":[3034619471, 3035619472, 3025619473, 3046789372], \
              "Name":["Oski", "Ollie", "Orrie", "Ollie"], \
              "Major":["Data Science", "Computer Science", "Data Science", "Economics"]})
@@ -323,6 +348,7 @@ The **foreign key** is the column or set of columns in a table that reference pr
 
 ```{python}
 #| echo: false
+#| vscode: {languageId: python}
 pd.DataFrame({"OH Request":[1, 2, 3, 4], \
              "Cal ID":[3034619471, 3035619472, 3025619473, 3035619472], \
              "Question":["HW 2 Q1", "HW 2 Q3", "Lab 3 Q4", "HW 2 Q7"]})
@@ -336,7 +362,7 @@ After understanding the structure of the dataset, the next task is to determine 
 The **granularity** of a dataset is what a single row represents. You can also think of it as the level of detail included in the data. To determine the data's granularity, ask: what does each row in the dataset represent? Fine-grained data contains a high level of detail, with a single row representing a small individual unit. For example, each record may represent one person. Coarse-grained data is encoded such that a single row represents a large individual unit – for example, each record may represent a group of people.
 
 ### Scope
-The **scope** of a dataset is the subset of the population covered by the data. If we were investigating student performance in Data Science courses, a dataset with a narrow scope might encompass all students enrolled in Data 100; a dataset with an expansive scope might encompass all students in California. 
+The **scope** of a dataset is the subset of the population covered by the data. If we were investigating student performance in Data Science courses, a dataset with a narrow scope might encompass all students enrolled in Data 100 whereas a dataset with an expansive scope might encompass all students in California. 
 
 ### Temporality
 The **temporality** of a dataset describes the periodicity over which the data was collected as well as when the data was most recently collected or updated. 
@@ -354,6 +380,7 @@ Let's briefly look at how we can use `pandas`' `dt` accessors to work with dates
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 calls = pd.read_csv("data/Berkeley_PD_-_Calls_for_Service.csv")
 calls.head()
 ```
@@ -366,6 +393,7 @@ If we check the data type of these columns, we will see they are stored as strin
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 calls["EVENTDT"] = pd.to_datetime(calls["EVENTDT"])
 calls.head()
 ```
@@ -376,6 +404,7 @@ We can get the month:
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 calls["EVENTDT"].dt.month.head()
 ```
 
@@ -383,6 +412,7 @@ Which day of the week the date is on:
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 calls["EVENTDT"].dt.dayofweek.head()
 ```
 
@@ -390,6 +420,7 @@ Check the mimimum values to see if there are any suspicious-looking, 70s dates:
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 calls.sort_values("EVENTDT").head()
 ```
 
@@ -452,6 +483,7 @@ Next, let's try out option 3 using the `Python` file object. We'll look at the f
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 with open("data/cdc_tuberculosis.csv", "r") as f:
     i = 0
     for row in f:
@@ -469,6 +501,7 @@ If you're curious, we can use the `repr()` function to return the raw string wit
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 with open("data/cdc_tuberculosis.csv", "r") as f:
     i = 0
     for row in f:
@@ -482,18 +515,20 @@ Finally, let's try option 4 and use the tried-and-true Data 100 approach: `panda
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 tb_df = pd.read_csv("data/cdc_tuberculosis.csv")
 tb_df.head()
 ```
 
 You may notice some strange things about this table: what's up with the "Unnamed" column names and the first row? 
 
-Congratulations — you're ready to wrangle your data. Because of how things are stored, we'll need to clean the data a bit to name our columns better.
+Congratulations — you're ready to wrangle your data! Because of how things are stored, we'll need to clean the data a bit to name our columns better.
 
 A reasonable first step is to identify the row with the right header. The `pd.read_csv()` function ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html)) has the convenient `header` parameter that we can set to use the elements in row 1 as the appropriate columns:
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 tb_df = pd.read_csv("data/cdc_tuberculosis.csv", header=1) # row index
 tb_df.head(5)
 ```
@@ -504,6 +539,7 @@ We can do this manually with `df.rename()` ([documentation](https://pandas.pydat
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 rename_dict = {'2019': 'TB cases 2019',
                '2020': 'TB cases 2020',
                '2021': 'TB cases 2021',
@@ -516,7 +552,7 @@ tb_df.head(5)
 
 ## Record Granularity
 
-You might already be wondering: What's up with that first record?
+You might already be wondering: what's up with that first record?
 
 Row 0 is what we call a **rollup record**, or summary record. It's often useful when displaying tables to humans. The **granularity** of record 0 (Totals) vs the rest of the records (States) is different.
 
@@ -526,6 +562,7 @@ Let's check if Total TB cases is the sum of all state TB cases. If we sum over a
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 tb_df.sum(axis=0)
 ```
 
@@ -533,6 +570,7 @@ Whoa, what's going on with the TB cases in 2019, 2020, and 2021? Check out the c
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 tb_df.dtypes
 ```
 
@@ -543,6 +581,7 @@ Fortunately `read_csv` also has a `thousands` parameter ([documentation](https:/
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 # improve readability: chaining method calls with outer parentheses/line breaks
 tb_df = (
     pd.read_csv("data/cdc_tuberculosis.csv", header=1, thousands=',')
@@ -553,6 +592,7 @@ tb_df.head(5)
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 tb_df.sum()
 ```
 
@@ -562,6 +602,7 @@ Let's just look at the records with **state-level granularity**:
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 state_tb_df = tb_df[1:]
 state_tb_df.head(5)
 ```
@@ -577,6 +618,7 @@ There are a few new methods here:
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 # 2010s census data
 census_2010s_df = pd.read_csv("data/nst-est2019-01.csv", header=3, thousands=",")
 census_2010s_df = (
@@ -611,6 +653,7 @@ or use `iPython` magic which will intelligently import code when files change:
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 # census 2020s data
 census_2020s_df = pd.read_csv("data/NST-EST2022-POP.csv", header=3, thousands=",")
 census_2020s_df = (
@@ -626,12 +669,13 @@ census_2020s_df['Geographic Area'] = census_2020s_df['Geographic Area'].str.stri
 census_2020s_df.head(5)
 ```
 
-## Joining Data (Merging `DataFrames`)
+## Joining Data (Merging `DataFrame`s)
 
 Time to `merge`! Here we use the `DataFrame` method `df1.merge(right=df2, ...)` on `DataFrame` `df1` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.merge.html)). Contrast this with the function `pd.merge(left=df1, right=df2, ...)` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.merge.html?highlight=pandas%20merge#pandas.merge)). Feel free to use either.
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 # merge TB DataFrame with two US census DataFrames
 tb_census_df = (
     tb_df
@@ -647,6 +691,7 @@ Having all of these columns is a little unwieldy. We could either drop the unnee
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 # try merging again, but cleaner this time
 tb_census_df = (
     tb_df
@@ -676,6 +721,7 @@ Let's try this for 2019:
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 tb_census_df["recompute incidence 2019"] = tb_census_df["TB cases 2019"]/tb_census_df["2019"]*100000
 tb_census_df.head(5)
 ```
@@ -686,6 +732,7 @@ Let's use a for-loop and `Python` format strings to compute TB incidence for all
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 # recompute incidence for all years
 for year in [2019, 2020, 2021]:
     tb_census_df[f"recompute incidence {year}"] = tb_census_df[f"TB cases {year}"]/tb_census_df[f"{year}"]*100000
@@ -696,6 +743,7 @@ These numbers look pretty close!!! There are a few errors in the hundredths plac
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 tb_census_df.describe()
 ```
 
@@ -717,18 +765,21 @@ Before we keep exploring, we'll set all indexes to more meaningful values, inste
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 tb_df = tb_df.set_index("U.S. jurisdiction")
 tb_df.head(5)
 ```
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 census_2010s_df = census_2010s_df.set_index("Geographic Area")
 census_2010s_df.head(5)
 ```
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 census_2020s_df = census_2020s_df.set_index("Geographic Area")
 census_2020s_df.head(5)
 ```
@@ -737,6 +788,7 @@ It turns out that our merge above only kept state records, even though our origi
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 tb_df.head()
 ```
 
@@ -746,6 +798,7 @@ The rolled records in our census `DataFrame` have different `Geographic Area` fi
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 census_2010s_df.head(5)
 ```
 
@@ -755,6 +808,7 @@ One straightforward way to get the right merge is to rename the value itself. Be
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 # rename rolled record for 2010s
 census_2010s_df.rename(index={'United States':'Total'}, inplace=True)
 census_2010s_df.head(5)
@@ -762,6 +816,7 @@ census_2010s_df.head(5)
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 # same, but for 2020s rename rolled record
 census_2020s_df.rename(index={'United States':'Total'}, inplace=True)
 census_2020s_df.head(5)
@@ -773,6 +828,7 @@ Next let's rerun our merge. Note the different chaining, because we are now merg
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 tb_census_df = (
     tb_df
     .merge(right=census_2010s_df[["2019"]],
@@ -789,6 +845,7 @@ Finally, let's recompute our incidences:
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 # recompute incidence for all years
 for year in [2019, 2020, 2021]:
     tb_census_df[f"recompute incidence {year}"] = tb_census_df[f"TB cases {year}"]/tb_census_df[f"{year}"]*100000
@@ -807,6 +864,7 @@ $\text{percent change} = \frac{B - A}{A} \times 100$.
 ```{python}
 #| code-fold: false
 #| tags: []
+#| vscode: {languageId: python}
 incidence_2020 = tb_census_df.loc['Total', 'recompute incidence 2020']
 incidence_2020
 ```
@@ -814,6 +872,7 @@ incidence_2020
 ```{python}
 #| code-fold: false
 #| tags: []
+#| vscode: {languageId: python}
 incidence_2021 = tb_census_df.loc['Total', 'recompute incidence 2021']
 incidence_2021
 ```
@@ -821,6 +880,7 @@ incidence_2021
 ```{python}
 #| code-fold: false
 #| tags: []
+#| vscode: {languageId: python}
 difference = (incidence_2021 - incidence_2020)/incidence_2020 * 100
 difference
 ```
@@ -841,7 +901,7 @@ There are several ways to approach EDA and Data Wrangling:
 * Examine the **data and metadata**: what is the date, size, organization, and structure of the data? 
 * Examine each **field/attribute/dimension** individually.
 * Examine pairs of related dimensions (e.g. breaking down grades by major).
-* Along the way, we can 
+* Along the way, we can:
     * **Visualize** or summarize the data.
     * **Validate assumptions** about data and its collection process. Pay particular attention to when the data was collected. 
     * Identify and **address anomalies**.
