@@ -16,6 +16,30 @@ format:
 jupyter: python3
 ---
 
+```{python}
+#| code-fold: true
+import numpy as np
+import pandas as pd
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+#%matplotlib inline
+plt.rcParams['figure.figsize'] = (12, 9)
+
+sns.set()
+sns.set_context('talk')
+np.set_printoptions(threshold=20, precision=2, suppress=True)
+pd.set_option('display.max_rows', 30)
+pd.set_option('display.max_columns', None)
+pd.set_option('display.precision', 2)
+# This option stops scientific notation for pandas
+pd.set_option('display.float_format', '{:.2f}'.format)
+
+# Silence some spurious seaborn warnings
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
+```
+
 ::: {.callout-note collapse="false"}
 ## Learning Outcomes
 * Recognize common file formats
@@ -49,8 +73,6 @@ In the past two `pandas` lectures, we briefly touched on the idea of file format
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
-import pandas as pd
 pd.read_csv("data/elections.csv").head(5)
 ```
 
@@ -58,7 +80,6 @@ To better understand the properties of a CSV, let's take a look at the first few
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 with open("data/elections.csv", "r") as table:
     i = 0
     for row in table:
@@ -78,7 +99,6 @@ Let's check out the first few rows of the raw TSV file. Again, we'll use the `re
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 with open("data/elections.txt", "r") as table:
     i = 0
     for row in table:
@@ -92,7 +112,6 @@ TSVs can be loaded into `pandas` using `pd.read_csv`. We'll need to specify the 
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 pd.read_csv("data/elections.txt", sep='\t').head(3)
 ```
 
@@ -103,7 +122,6 @@ An issue with CSVs and TSVs comes up whenever there are commas or tabs within th
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 with open("data/elections.json", "r") as table:
     i = 0
     for row in table:
@@ -117,7 +135,6 @@ JSON files can be loaded into `pandas` using `pd.read_json`.
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 pd.read_json('data/elections.json').head(3)
 ```
 
@@ -126,7 +143,6 @@ The City of Berkeley Open Data [website](https://data.cityofberkeley.info/Health
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 from ds100_utils import fetch_and_cache
 
 covid_file = fetch_and_cache(
@@ -143,7 +159,6 @@ Since there seem to be text files, let's investigate the number of lines, which 
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 import os
 
 print(covid_file, "is", os.path.getsize(covid_file) / 1e6, "MB")
@@ -162,7 +177,6 @@ These two give us the same information as the code above, albeit in a slightly d
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 !ls -lh {covid_file}
 !wc -l {covid_file}
 ```
@@ -172,7 +186,6 @@ Let's explore the data format using `Python`.
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 with open(covid_file, "r") as f:
     for i, row in enumerate(f):
         print(repr(row)) # print raw strings
@@ -183,7 +196,6 @@ We can use the `head` Unix command (which is where `pandas`' `head` method comes
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 !head -5 {covid_file}
 ```
 
@@ -191,7 +203,6 @@ In order to load the JSON file into `pandas`, Let's first do some EDA with `Pyth
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 import json
 
 with open(covid_file, "rb") as f:
@@ -202,7 +213,6 @@ The `covid_json` variable is now a dictionary encoding the data in the file:
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 type(covid_json)
 ```
 
@@ -210,7 +220,6 @@ We can examine what keys are in the top level json object by listing out the key
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 covid_json.keys()
 ```
 
@@ -221,7 +230,6 @@ We can investigate the meta data further by examining the keys associated with t
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 covid_json['meta'].keys()
 ```
 
@@ -229,7 +237,6 @@ The `meta` key contains another dictionary called `view`.  This likely refers to
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 covid_json['meta']['view'].keys()
 ```
 
@@ -255,7 +262,6 @@ There is a key called description in the view sub dictionary.  This likely conta
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 print(covid_json['meta']['view']['description'])
 ```
 
@@ -265,7 +271,6 @@ We can look at a few entries in the `data` field. This is what we'll load into `
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 for i in range(3):
     print(f"{i:03} | {covid_json['data'][i]}")
 ```
@@ -278,7 +283,6 @@ For that, we'll need the `columns` key in the metadata dictionary. This returns 
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 type(covid_json['meta']['view']['columns'])
 ```
 
@@ -303,7 +307,6 @@ Finally, let's load the data (not the metadata) into a `pandas` `DataFrame`. In 
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 # Load the data from JSON and assign column titles
 covid = pd.DataFrame(
     covid_json['data'],
@@ -338,7 +341,6 @@ The **primary key** is the column or set of columns in a table that *uniquely* d
 
 ```{python}
 #| echo: false
-#| vscode: {languageId: python}
 pd.DataFrame({"Cal ID":[3034619471, 3035619472, 3025619473, 3046789372], \
              "Name":["Oski", "Ollie", "Orrie", "Ollie"], \
              "Major":["Data Science", "Computer Science", "Data Science", "Economics"]})
@@ -348,7 +350,6 @@ The **foreign key** is the column or set of columns in a table that reference pr
 
 ```{python}
 #| echo: false
-#| vscode: {languageId: python}
 pd.DataFrame({"OH Request":[1, 2, 3, 4], \
              "Cal ID":[3034619471, 3035619472, 3025619473, 3035619472], \
              "Question":["HW 2 Q1", "HW 2 Q3", "Lab 3 Q4", "HW 2 Q7"]})
@@ -380,7 +381,6 @@ Let's briefly look at how we can use `pandas`' `dt` accessors to work with dates
 
 ```{python}
 #| code-fold: true
-#| vscode: {languageId: python}
 calls = pd.read_csv("data/Berkeley_PD_-_Calls_for_Service.csv")
 calls.head()
 ```
@@ -393,7 +393,6 @@ If we check the data type of these columns, we will see they are stored as strin
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 calls["EVENTDT"] = pd.to_datetime(calls["EVENTDT"])
 calls.head()
 ```
@@ -404,7 +403,6 @@ We can get the month:
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 calls["EVENTDT"].dt.month.head()
 ```
 
@@ -412,7 +410,6 @@ Which day of the week the date is on:
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 calls["EVENTDT"].dt.dayofweek.head()
 ```
 
@@ -420,7 +417,6 @@ Check the mimimum values to see if there are any suspicious-looking, 70s dates:
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 calls.sort_values("EVENTDT").head()
 ```
 
@@ -461,7 +457,7 @@ A third method to address missing data is to perform **imputation**: infer the m
 
 Regardless of the strategy used to deal with missing data, we should think carefully about *why* particular records or fields may be missing – this can help inform whether or not the absence of these values is significant or meaningful.
 
-# EDA Demo: Tuberculosis in the United States
+# EDA Demo 1: Tuberculosis in the United States
 
 Now, let's walk through the data-cleaning and EDA workflow to see what can we learn about the presence of Tuberculosis in the United States!
 
@@ -483,7 +479,6 @@ Next, let's try out option 3 using the `Python` file object. We'll look at the f
 
 ```{python}
 #| code-fold: true
-#| vscode: {languageId: python}
 with open("data/cdc_tuberculosis.csv", "r") as f:
     i = 0
     for row in f:
@@ -501,7 +496,6 @@ If you're curious, we can use the `repr()` function to return the raw string wit
 
 ```{python}
 #| code-fold: true
-#| vscode: {languageId: python}
 with open("data/cdc_tuberculosis.csv", "r") as f:
     i = 0
     for row in f:
@@ -515,7 +509,6 @@ Finally, let's try option 4 and use the tried-and-true Data 100 approach: `panda
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 tb_df = pd.read_csv("data/cdc_tuberculosis.csv")
 tb_df.head()
 ```
@@ -528,7 +521,6 @@ A reasonable first step is to identify the row with the right header. The `pd.re
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 tb_df = pd.read_csv("data/cdc_tuberculosis.csv", header=1) # row index
 tb_df.head(5)
 ```
@@ -539,7 +531,6 @@ We can do this manually with `df.rename()` ([documentation](https://pandas.pydat
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 rename_dict = {'2019': 'TB cases 2019',
                '2020': 'TB cases 2020',
                '2021': 'TB cases 2021',
@@ -562,7 +553,6 @@ Let's check if Total TB cases is the sum of all state TB cases. If we sum over a
 
 ```{python}
 #| code-fold: true
-#| vscode: {languageId: python}
 tb_df.sum(axis=0)
 ```
 
@@ -570,7 +560,6 @@ Whoa, what's going on with the TB cases in 2019, 2020, and 2021? Check out the c
 
 ```{python}
 #| code-fold: true
-#| vscode: {languageId: python}
 tb_df.dtypes
 ```
 
@@ -581,7 +570,6 @@ Fortunately `read_csv` also has a `thousands` parameter ([documentation](https:/
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 # improve readability: chaining method calls with outer parentheses/line breaks
 tb_df = (
     pd.read_csv("data/cdc_tuberculosis.csv", header=1, thousands=',')
@@ -592,7 +580,6 @@ tb_df.head(5)
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 tb_df.sum()
 ```
 
@@ -602,7 +589,6 @@ Let's just look at the records with **state-level granularity**:
 
 ```{python}
 #| code-fold: true
-#| vscode: {languageId: python}
 state_tb_df = tb_df[1:]
 state_tb_df.head(5)
 ```
@@ -618,7 +604,6 @@ There are a few new methods here:
 
 ```{python}
 #| code-fold: true
-#| vscode: {languageId: python}
 # 2010s census data
 census_2010s_df = pd.read_csv("data/nst-est2019-01.csv", header=3, thousands=",")
 census_2010s_df = (
@@ -653,7 +638,6 @@ or use `iPython` magic which will intelligently import code when files change:
 
 ```{python}
 #| code-fold: true
-#| vscode: {languageId: python}
 # census 2020s data
 census_2020s_df = pd.read_csv("data/NST-EST2022-POP.csv", header=3, thousands=",")
 census_2020s_df = (
@@ -675,7 +659,6 @@ Time to `merge`! Here we use the `DataFrame` method `df1.merge(right=df2, ...)` 
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 # merge TB DataFrame with two US census DataFrames
 tb_census_df = (
     tb_df
@@ -691,7 +674,6 @@ Having all of these columns is a little unwieldy. We could either drop the unnee
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 # try merging again, but cleaner this time
 tb_census_df = (
     tb_df
@@ -721,7 +703,6 @@ Let's try this for 2019:
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 tb_census_df["recompute incidence 2019"] = tb_census_df["TB cases 2019"]/tb_census_df["2019"]*100000
 tb_census_df.head(5)
 ```
@@ -732,7 +713,6 @@ Let's use a for-loop and `Python` format strings to compute TB incidence for all
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 # recompute incidence for all years
 for year in [2019, 2020, 2021]:
     tb_census_df[f"recompute incidence {year}"] = tb_census_df[f"TB cases {year}"]/tb_census_df[f"{year}"]*100000
@@ -743,7 +723,6 @@ These numbers look pretty close!!! There are a few errors in the hundredths plac
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 tb_census_df.describe()
 ```
 
@@ -765,21 +744,18 @@ Before we keep exploring, we'll set all indexes to more meaningful values, inste
 
 ```{python}
 #| code-fold: true
-#| vscode: {languageId: python}
 tb_df = tb_df.set_index("U.S. jurisdiction")
 tb_df.head(5)
 ```
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 census_2010s_df = census_2010s_df.set_index("Geographic Area")
 census_2010s_df.head(5)
 ```
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 census_2020s_df = census_2020s_df.set_index("Geographic Area")
 census_2020s_df.head(5)
 ```
@@ -788,7 +764,6 @@ It turns out that our merge above only kept state records, even though our origi
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 tb_df.head()
 ```
 
@@ -798,7 +773,6 @@ The rolled records in our census `DataFrame` have different `Geographic Area` fi
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 census_2010s_df.head(5)
 ```
 
@@ -808,7 +782,6 @@ One straightforward way to get the right merge is to rename the value itself. Be
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 # rename rolled record for 2010s
 census_2010s_df.rename(index={'United States':'Total'}, inplace=True)
 census_2010s_df.head(5)
@@ -816,7 +789,6 @@ census_2010s_df.head(5)
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 # same, but for 2020s rename rolled record
 census_2020s_df.rename(index={'United States':'Total'}, inplace=True)
 census_2020s_df.head(5)
@@ -828,7 +800,6 @@ Next let's rerun our merge. Note the different chaining, because we are now merg
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 tb_census_df = (
     tb_df
     .merge(right=census_2010s_df[["2019"]],
@@ -845,7 +816,6 @@ Finally, let's recompute our incidences:
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 # recompute incidence for all years
 for year in [2019, 2020, 2021]:
     tb_census_df[f"recompute incidence {year}"] = tb_census_df[f"TB cases {year}"]/tb_census_df[f"{year}"]*100000
@@ -864,7 +834,6 @@ $\text{percent change} = \frac{B - A}{A} \times 100$.
 ```{python}
 #| code-fold: false
 #| tags: []
-#| vscode: {languageId: python}
 incidence_2020 = tb_census_df.loc['Total', 'recompute incidence 2020']
 incidence_2020
 ```
@@ -872,7 +841,6 @@ incidence_2020
 ```{python}
 #| code-fold: false
 #| tags: []
-#| vscode: {languageId: python}
 incidence_2021 = tb_census_df.loc['Total', 'recompute incidence 2021']
 incidence_2021
 ```
@@ -880,10 +848,345 @@ incidence_2021
 ```{python}
 #| code-fold: false
 #| tags: []
-#| vscode: {languageId: python}
 difference = (incidence_2021 - incidence_2020)/incidence_2020 * 100
 difference
 ```
+
+# EDA Demo 2: Mauna Loa CO<sub>2</sub> Data -- A Lesson in Data Faithfulness
+
+[Mauna Loa Observatory](https://gml.noaa.gov/ccgg/trends/data.html) has been monitoring CO<sub>2</sub> concentrations since 1958
+
+```{python}
+#| code-fold: false
+co2_file = "data/co2_mm_mlo.txt"
+```
+
+Let's do some **EDA**!!
+
+## Reading this file into Pandas?
+Let's instead check out this `.txt` file. Some questions to keep in mind: Do we trust this file extension? What structure is it? 
+
+Lines 71-78 (inclusive) are shown below: 
+
+    line number |                            file contents
+    
+    71          |   #            decimal     average   interpolated    trend    #days
+    72          |   #             date                             (season corr)
+    73          |   1958   3    1958.208      315.71      315.71      314.62     -1
+    74          |   1958   4    1958.292      317.45      317.45      315.29     -1
+    75          |   1958   5    1958.375      317.50      317.50      314.71     -1
+    76          |   1958   6    1958.458      -99.99      317.10      314.85     -1
+    77          |   1958   7    1958.542      315.86      315.86      314.98     -1
+    78          |   1958   8    1958.625      314.93      314.93      315.94     -1
+
+
+Notice how: 
+
+- The values are separated by white space, possibly tabs.
+- The data line up down the rows. For example, the month appears in 7th to 8th position of each line.
+- The 71st and 72nd lines in the file contain column headings split over two lines.
+
+We can use `read_csv` to read the data into a `pandas` `DataFrame`, and we provide several arguments to specify that the separators are white space, there is no header (**we will set our own column names**), and to skip the first 72 rows of the file.
+
+```{python}
+#| code-fold: false
+co2 = pd.read_csv(
+    co2_file, header = None, skiprows = 72,
+    sep = r'\s+'       #delimiter for continuous whitespace (stay tuned for regex next lecture))
+)
+co2.head()
+```
+
+Congratulations! You've wrangled the data!
+
+<br/>
+
+...But our columns aren't named.
+**We need to do more EDA.**
+
+## Exploring Variable Feature Types
+
+The NOAA [webpage](https://gml.noaa.gov/ccgg/trends/) might have some useful tidbits (in this case it doesn't).
+
+Using this information, we'll rerun `pd.read_csv`, but this time with some **custom column names.**
+
+```{python}
+#| code-fold: false
+co2 = pd.read_csv(
+    co2_file, header = None, skiprows = 72,
+    sep = '\s+', #regex for continuous whitespace (next lecture)
+    names = ['Yr', 'Mo', 'DecDate', 'Avg', 'Int', 'Trend', 'Days']
+)
+co2.head()
+```
+
+## Visualizing CO<sub>2</sub>
+Scientific studies tend to have very clean data, right...? Let's jump right in and make a time series plot of CO2 monthly averages.
+
+```{python}
+#| code-fold: true
+sns.lineplot(x='DecDate', y='Avg', data=co2);
+```
+
+The code above uses the `seaborn` plotting library (abbreviated `sns`). We will cover this in the Visualization lecture, but now you don't need to worry about how it works!
+
+Yikes! Plotting the data uncovered a problem. The sharp vertical lines suggest that we have some **missing values**. What happened here?
+
+```{python}
+#| code-fold: false
+co2.head()
+```
+
+```{python}
+#| code-fold: false
+co2.tail()
+```
+
+Some data have unusual values like -1 and -99.99.
+
+Let's check the description at the top of the file again.
+
+* -1 signifies a missing value for the number of days `Days` the equipment was in operation that month.
+* -99.99 denotes a missing monthly average `Avg`
+
+How can we fix this? First, let's explore other aspects of our data. Understanding our data will help us decide what to do with the missing values.
+
+<br/>
+
+
+## Sanity Checks: Reasoning about the data
+First, we consider the shape of the data. How many rows should we have?
+
+* If chronological order, we should have one record per month.
+* Data from March 1958 to August 2019.
+* We should have $ 12 \times (2019-1957) - 2 - 4 = 738 $ records.
+
+```{python}
+#| code-fold: false
+co2.shape
+```
+
+Nice!! The number of rows (i.e. records) match our expectations.\
+
+<br/>
+
+
+Let's now check the quality of each feature.
+
+## Understanding Missing Value 1: `Days`
+`Days` is a time field, so let's analyze other time fields to see if there is an explanation for missing values of days of operation.
+
+Let's start with **months**, `Mo`.
+
+Are we missing any records? The number of months should have 62 or 61 instances (March 1957-August 2019).
+
+```{python}
+#| code-fold: false
+co2["Mo"].value_counts().sort_index()
+```
+
+As expected Jan, Feb, Sep, Oct, Nov, and Dec have 61 occurrences and the rest 62.
+
+<br/>
+
+Next let's explore **days** `Days` itself, which is the number of days that the measurement equipment worked.
+
+```{python}
+#| code-fold: true
+sns.displot(co2['Days']);
+plt.title("Distribution of days feature"); # suppresses unneeded plotting output
+```
+
+In terms of data quality, a handful of months have averages based on measurements taken on fewer than half the days. In addition, there are nearly 200 missing values--**that's about 27% of the data**!
+
+<br/>
+
+Finally, let's check the last time feature, **year** `Yr`.
+
+Let's check to see if there is any connection between missing-ness and the year of the recording.
+
+```{python}
+#| code-fold: true
+sns.scatterplot(x="Yr", y="Days", data=co2);
+plt.title("Day field by Year"); # the ; suppresses output
+```
+
+**Observations**:
+
+* All of the missing data are in the early years of operation.
+* It appears there may have been problems with equipment in the mid to late 80s.
+
+**Potential Next Steps**:
+
+* Confirm these explanations through documentation about the historical readings.
+* Maybe drop earliest recordings? However, we would want to delay such action until after we have examined the time trends and assess whether there are any potential problems.
+
+<br/>
+
+## Understanding Missing Value 2: `Avg`
+Next, let's return to the -99.99 values in `Avg` to analyze the overall quality of the CO2 measurements. We'll plot a histogram of the average CO<sub>2</sub> measurements
+
+```{python}
+#| code-fold: true
+# Histograms of average CO2 measurements
+sns.displot(co2['Avg']);
+```
+
+The non-missing values are in the 300-400 range (a regular range of CO2 levels).
+
+We also see that there are only a few missing `Avg` values (**<1% of values**). Let's examine all of them:
+
+```{python}
+#| code-fold: false
+co2[co2["Avg"] < 0]
+```
+
+There doesn't seem to be a pattern to these values, other than that most records also were missing `Days` data.
+
+## Drop, `NaN`, or Impute Missing `Avg` Data?
+
+How should we address the invalid `Avg` data?
+
+1. Drop records
+2. Set to NaN
+3. Impute using some strategy
+
+Remember we want to fix the following plot:
+
+```{python}
+#| code-fold: true
+sns.lineplot(x='DecDate', y='Avg', data=co2)
+plt.title("CO2 Average By Month");
+```
+
+Since we are plotting `Avg` vs `DecDate`, we should just focus on dealing with missing values for `Avg`.
+
+
+Let's consider a few options:
+1. Drop those records
+2. Replace -99.99 with NaN
+3. Substitute it with a likely value for the average CO2?
+
+What do you think are the pros and cons of each possible action?
+
+<br/>
+
+
+Let's examine each of these three options.
+
+```{python}
+#| code-fold: false
+# 1. Drop missing values
+co2_drop = co2[co2['Avg'] > 0]
+co2_drop.head()
+```
+
+```{python}
+#| code-fold: false
+# 2. Replace NaN with -99.99
+co2_NA = co2.replace(-99.99, np.NaN)
+co2_NA.head()
+```
+
+We'll also use a third version of the data.
+
+First, we note that the dataset already comes with a **substitute value** for the -99.99.
+
+From the file description:
+
+>  The `interpolated` column includes average values from the preceding column (`average`)
+and **interpolated values** where data are missing.  Interpolated values are
+computed in two steps...
+
+The `Int` feature has values that exactly match those in `Avg`, except when `Avg` is -99.99, and then a **reasonable** estimate is used instead.
+
+So, the third version of our data will use the `Int` feature instead of `Avg`.
+
+```{python}
+#| code-fold: false
+# 3. Use interpolated column which estimates missing Avg values
+co2_impute = co2.copy()
+co2_impute['Avg'] = co2['Int']
+co2_impute.head()
+```
+
+What's a **reasonable** estimate?
+
+To answer this question, let's zoom in on a short time period, say the measurements in 1958 (where we know we have two missing values).
+
+```{python}
+#| code-fold: true
+# results of plotting data in 1958
+
+def line_and_points(data, ax, title):
+    # assumes single year, hence Mo
+    ax.plot('Mo', 'Avg', data=data)
+    ax.scatter('Mo', 'Avg', data=data)
+    ax.set_xlim(2, 13)
+    ax.set_title(title)
+    ax.set_xticks(np.arange(3, 13))
+
+def data_year(data, year):
+    return data[data["Yr"] == 1958]
+    
+# uses matplotlib subplots
+# you may see more next week; focus on output for now
+fig, axes = plt.subplots(ncols = 3, figsize=(12, 4), sharey=True)
+
+year = 1958
+line_and_points(data_year(co2_drop, year), axes[0], title="1. Drop Missing")
+line_and_points(data_year(co2_NA, year), axes[1], title="2. Missing Set to NaN")
+line_and_points(data_year(co2_impute, year), axes[2], title="3. Missing Interpolated")
+
+fig.suptitle(f"Monthly Averages for {year}")
+plt.tight_layout()
+```
+
+In the big picture since there are only 7 `Avg` values missing (**<1%** of 738 months), any of these approaches would work.
+
+However there is some appeal to **option C: Imputing**:
+
+* Shows seasonal trends for CO2
+* We are plotting all months in our data as a line plot
+
+<br/>
+
+
+Let's replot our original figure with option 3:
+
+```{python}
+#| code-fold: true
+sns.lineplot(x='DecDate', y='Avg', data=co2_impute)
+plt.title("CO2 Average By Month, Imputed");
+```
+
+Looks pretty close to what we see on the NOAA [website](https://gml.noaa.gov/ccgg/trends/)!
+
+## Presenting the data: A Discussion on Data Granularity
+
+From the description:
+
+* monthly measurements are averages of average day measurements.
+* The NOAA GML website has datasets for daily/hourly measurements too.
+
+The data you present depends on your research question.
+
+**How do CO2 levels vary by season?**
+
+* You might want to keep average monthly data.
+
+**Are CO2 levels rising over the past 50+ years, consistent with global warming predictions?**
+
+* You might be happier with a **coarser granularity** of average year data!
+
+```{python}
+#| code-fold: true
+co2_year = co2_impute.groupby('Yr').mean()
+sns.lineplot(x='Yr', y='Avg', data=co2_year)
+plt.title("CO2 Average By Year");
+```
+
+Indeed, we see a rise by nearly 100 ppm of CO2 since Mauna Loa began recording in 1958.
 
 # Summary
 We went over a lot of content this lecture; let's summarize the most important points: 
