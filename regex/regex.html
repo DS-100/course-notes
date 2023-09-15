@@ -105,7 +105,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </ul></li>
   <li><a href="#convenient-regex" id="toc-convenient-regex" class="nav-link" data-scroll-target="#convenient-regex">Convenient Regex</a>
   <ul>
-  <li><a href="#greediness" id="toc-greediness" class="nav-link" data-scroll-target="#greediness">Greediness</a></li>
   <li><a href="#examples-2" id="toc-examples-2" class="nav-link" data-scroll-target="#examples-2">Examples</a></li>
   </ul></li>
   <li><a href="#regex-in-python-and-pandas-regex-groups" id="toc-regex-in-python-and-pandas-regex-groups" class="nav-link" data-scroll-target="#regex-in-python-and-pandas-regex-groups">Regex in Python and Pandas (Regex Groups)</a>
@@ -489,8 +488,14 @@ Learning Outcomes
 <span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>county_and_pop[<span class="st">'clean_county_pandas'</span>] <span class="op">=</span> canonicalize_county_series(county_and_pop[<span class="st">'County'</span>])</span>
 <span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>county_and_state[<span class="st">'clean_county_pandas'</span>] <span class="op">=</span> canonicalize_county_series(county_and_state[<span class="st">'County'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>C:\Users\yashd\AppData\Local\Temp\ipykernel_35008\837021704.py:3: FutureWarning: The default value of regex will change from True to False in a future version. In addition, single character regular expressions will *not* be treated as literal strings when regex=True.
-  county_series</code></pre>
+<pre><code>/var/folders/7t/zbwy02ts2m7cn64fvwjqb8xw0000gp/T/ipykernel_43617/837021704.py:3: FutureWarning:
+
+The default value of regex will change from True to False in a future version. In addition, single character regular expressions will *not* be treated as literal strings when regex=True.
+
+/var/folders/7t/zbwy02ts2m7cn64fvwjqb8xw0000gp/T/ipykernel_43617/837021704.py:3: FutureWarning:
+
+The default value of regex will change from True to False in a future version. In addition, single character regular expressions will *not* be treated as literal strings when regex=True.
+</code></pre>
 </div>
 </div>
 <div class="cell" data-execution_count="7">
@@ -929,20 +934,8 @@ Learning Outcomes
 </tr>
 </tbody>
 </table>
-<section id="greediness" class="level3">
-<h3 class="anchored" data-anchor-id="greediness">Greediness</h3>
-<p>In order to fully understand the last operation in the table, we have to discuss greediness. Regex is greedy – it will look for the longest possible match in a string. To motivate this with an example, consider the pattern <code>&lt;div&gt;.*&lt;/div&gt;</code>. Given the sentence below, we would hope that the bolded portions would be matched:</p>
-<p>“This is a <strong>&lt;div&gt;example&lt;/div&gt;</strong> of greediness &lt;div&gt;in&lt;/div&gt; regular expressions.” ”</p>
-<p>In actuality, the way RegEx processes the text given that pattern is as follows:</p>
-<ol type="1">
-<li><p>“Look for the exact string &lt;&gt;”</p></li>
-<li><p>then, “look for any character 0 or more times”</p></li>
-<li><p>then, “look for the exact string &lt;/div&gt;”</p></li>
-</ol>
-<p>The result would be all the characters starting from the leftmost &lt;div&gt; and the rightmost &lt;/div&gt; (inclusive). We can fix this making our the pattern non-greedy, <code>&lt;div&gt;.*?&lt;/div&gt;</code>. You can read up more on the documentation <a href="https://docs.python.org/3/howto/regex.html#greedy-versus-non-greedy">here</a>.</p>
-</section>
-<section id="examples-2" class="level3">
-<h3 class="anchored" data-anchor-id="examples-2">Examples</h3>
+<section id="examples-2" class="level4">
+<h4 class="anchored" data-anchor-id="examples-2">Examples</h4>
 <p>Let’s revist our earlier problem of extracting date/time data from the given <code>.txt</code> files. Here is how the data looked.</p>
 <div class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>log_lines[<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1122,111 +1115,6 @@ Name: SSN, dtype: object</code></pre>
 </div>
 </div>
 <p>This function returns a list for every row containing the pattern matches in a given string.</p>
-<p>As you may expect, there are similar <code>pandas</code> equivalents for other <code>re</code> functions as well. <code>Series.str.extract</code> takes in a pattern and returns a DataFrame of each capture group’s first match in the string. In contrast, <code>Series.str.extractall</code> returns a multi-indexed DataFrame of all matches for each capture group. You can see the difference in the outputs below:</p>
-<div class="cell" data-execution_count="31">
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>pattern_cg <span class="op">=</span> <span class="vs">r"([0-9]</span><span class="sc">{3}</span><span class="vs">)-([0-9]</span><span class="sc">{2}</span><span class="vs">)-([0-9]</span><span class="sc">{4}</span><span class="vs">)"</span></span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>ssn_data[<span class="st">"SSN"</span>].<span class="bu">str</span>.extract(pattern_cg)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="31">
-<div>
-
-
-<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">0</th>
-<th data-quarto-table-cell-role="th">1</th>
-<th data-quarto-table-cell-role="th">2</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">0</td>
-<td>987</td>
-<td>65</td>
-<td>4321</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">1</td>
-<td>NaN</td>
-<td>NaN</td>
-<td>NaN</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">2</td>
-<td>123</td>
-<td>45</td>
-<td>6789</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">3</td>
-<td>999</td>
-<td>99</td>
-<td>9999</td>
-</tr>
-</tbody>
-</table>
-
-</div>
-</div>
-</div>
-<div class="cell" data-execution_count="32">
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>ssn_data[<span class="st">"SSN"</span>].<span class="bu">str</span>.extractall(pattern_cg)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="32">
-<div>
-
-
-<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">0</th>
-<th data-quarto-table-cell-role="th">1</th>
-<th data-quarto-table-cell-role="th">2</th>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">match</th>
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th"></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">0</td>
-<td data-quarto-table-cell-role="th">0</td>
-<td>987</td>
-<td>65</td>
-<td>4321</td>
-</tr>
-<tr class="even">
-<td rowspan="2" data-quarto-table-cell-role="th" data-valign="top">2</td>
-<td data-quarto-table-cell-role="th">0</td>
-<td>123</td>
-<td>45</td>
-<td>6789</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">1</td>
-<td>321</td>
-<td>45</td>
-<td>6789</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">3</td>
-<td data-quarto-table-cell-role="th">0</td>
-<td>999</td>
-<td>99</td>
-<td>9999</td>
-</tr>
-</tbody>
-</table>
-
-</div>
-</div>
-</div>
 </section>
 </section>
 <section id="regular-expression-capture-groups" class="level3">
@@ -1236,13 +1124,13 @@ Name: SSN, dtype: object</code></pre>
 <section id="example-1" class="level4">
 <h4 class="anchored" data-anchor-id="example-1">Example 1</h4>
 <div class="cell" data-execution_count="21">
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>text <span class="op">=</span> <span class="st">"Observations: 03:04:53 - Horse awakens. </span><span class="ch">\</span></span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="st">        03:05:14 - Horse goes back to sleep."</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>text <span class="op">=</span> <span class="st">"Observations: 03:04:53 - Horse awakens. </span><span class="ch">\</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="st">        03:05:14 - Horse goes back to sleep."</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Say we want to capture all occurences of time data (hour, minute, and second) as <em>seperate entities</em>.</p>
 <div class="cell" data-execution_count="22">
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>pattern_1 <span class="op">=</span> <span class="vs">r"(\d\d):(\d\d):(\d\d)"</span></span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>re.findall(pattern_1, text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>pattern_1 <span class="op">=</span> <span class="vs">r"(\d\d):(\d\d):(\d\d)"</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>re.findall(pattern_1, text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="22">
 <pre><code>[('03', '04', '53'), ('03', '05', '14')]</code></pre>
 </div>
@@ -1250,8 +1138,8 @@ Name: SSN, dtype: object</code></pre>
 <p>Notice how the given pattern has 3 capture groups, each specified by the regular expression <code>(\d\d)</code>. We then use <code>re.findall</code> to return these capture groups, each as tuples containing 3 matches.</p>
 <p>These regular expression capture groups can be different. We can use the <code>(\d{2})</code> shorthand to extract the same data.</p>
 <div class="cell" data-execution_count="23">
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>pattern_2 <span class="op">=</span> <span class="vs">r"(\d\d):(\d\d):(\d</span><span class="sc">{2}</span><span class="vs">)"</span></span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>re.findall(pattern_2, text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>pattern_2 <span class="op">=</span> <span class="vs">r"(\d\d):(\d\d):(\d</span><span class="sc">{2}</span><span class="vs">)"</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>re.findall(pattern_2, text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="23">
 <pre><code>[('03', '04', '53'), ('03', '05', '14')]</code></pre>
 </div>
@@ -1261,16 +1149,16 @@ Name: SSN, dtype: object</code></pre>
 <h4 class="anchored" data-anchor-id="example-2">Example 2</h4>
 <p>With the notion of capture groups, convince yourself how the following regular expression works.</p>
 <div class="cell" data-execution_count="24">
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>first <span class="op">=</span> log_lines[<span class="dv">0</span>]</span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>first</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>first <span class="op">=</span> log_lines[<span class="dv">0</span>]</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>first</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="24">
 <pre><code>'169.237.46.168 - - [26/Jan/2014:10:47:58 -0800] "GET /stat141/Winter04/ HTTP/1.1" 200 2585 "http://anson.ucdavis.edu/courses/"\n'</code></pre>
 </div>
 </div>
 <div class="cell" data-execution_count="25">
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>pattern <span class="op">=</span> <span class="vs">r'\[(\d+)\/(\w+)\/(\d+):(\d+):(\d+):(\d+) (.+)\]'</span></span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>day, month, year, hour, minute, second, time_zone <span class="op">=</span> re.findall(pattern, first)[<span class="dv">0</span>]</span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(day, month, year, hour, minute, second, time_zone)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>pattern <span class="op">=</span> <span class="vs">r'\[(\d+)\/(\w+)\/(\d+):(\d+):(\d+):(\d+) (.+)\]'</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>day, month, year, hour, minute, second, time_zone <span class="op">=</span> re.findall(pattern, first)[<span class="dv">0</span>]</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(day, month, year, hour, minute, second, time_zone)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>26 Jan 2014 10 47 58 -0800</code></pre>
 </div>
@@ -1293,15 +1181,6 @@ Name: SSN, dtype: object</code></pre>
 <li>Complex features (e.g.&nbsp;valid email address).</li>
 <li>Counting (same number of instances of a and b). (impossible)</li>
 <li>Complex properties (palindromes, balanced parentheses). (impossible)</li>
-</ul>
-<p>Ultimately, the goal is not to memorize all of regular expressions. Rather, the aim is to:</p>
-<ul>
-<li>Understand what regex is capable of.</li>
-<li>Parse and create regex, with a reference table</li>
-<li>Use vocabulary (metacharacter, escape character, groups, etc.) to describe regex metacharacters.</li>
-<li>Differentiate between (), [], {}</li>
-<li>Design your own character classes with , , […-…], ^, etc.</li>
-<li>Use Python and <code>pandas</code> regex methods.</li>
 </ul>
 </section>
 

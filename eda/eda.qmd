@@ -16,12 +16,38 @@ format:
 jupyter: python3
 ---
 
+```{python}
+#| code-fold: true
+import numpy as np
+import pandas as pd
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+#%matplotlib inline
+plt.rcParams['figure.figsize'] = (12, 9)
+
+sns.set()
+sns.set_context('talk')
+np.set_printoptions(threshold=20, precision=2, suppress=True)
+pd.set_option('display.max_rows', 30)
+pd.set_option('display.max_columns', None)
+pd.set_option('display.precision', 2)
+# This option stops scientific notation for pandas
+pd.set_option('display.float_format', '{:.2f}'.format)
+
+# Silence some spurious seaborn warnings
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
+```
+
 ::: {.callout-note collapse="false"}
 ## Learning Outcomes
 * Recognize common file formats
 * Categorize data by its variable type
 * Build awareness of issues with data faithfulness and develop targeted solutions
 :::
+
+**This content is covered in lectures 4, 5, and 6.**
 
 In the past few lectures, we've learned that `pandas` is a toolkit to restructure, modify, and explore a dataset. What we haven't yet touched on is *how* to make these data transformation decisions. When we receive a new set of data from the "real world," how do we know what processing we should do to convert this data into a usable form?
 
@@ -47,7 +73,6 @@ In the past two `pandas` lectures, we briefly touched on the idea of file format
 
 ```{python}
 #| code-fold: false
-import pandas as pd
 pd.read_csv("data/elections.csv").head(5)
 ```
 
@@ -146,7 +171,7 @@ with open(covid_file, "r") as f:
 As part of the EDA workflow, Unix commands can come in very handy. In fact, there's an entire book called ["Data Science at the Command Line"](https://datascienceatthecommandline.com/) that explores this idea in depth! 
 In Jupyter/IPython, you can prefix lines with `!` to execute arbitrary Unix commands, and within those lines, you can refer to `Python` variables and expressions with the syntax `{expr}`.
 
-Here, we use the ls command to list files, using the `-lh` flags, which request "long format with information in human-readable form". We also use the `wc` command for "word count", but with the `-l` flag, which asks for line counts instead of words.
+Here, we use the `ls` command to list files, using the `-lh` flags, which request "long format with information in human-readable form." We also use the `wc` command for "word count," but with the `-l` flag, which asks for line counts instead of words.
 
 These two give us the same information as the code above, albeit in a slightly different form:
 
@@ -157,7 +182,7 @@ These two give us the same information as the code above, albeit in a slightly d
 ```
 
 ###### File Contents
-Let's explore the data format using `Python`> 
+Let's explore the data format using `Python`. 
 
 ```{python}
 #| code-fold: false
@@ -254,7 +279,7 @@ Observations:
 * These look like equal-length records, so maybe `data` is a table!
 * But what do each of values in the record mean? Where can we find column headers?
 
-For that, we'l need the `columns` key in the metadata dictionary. This returns a list: 
+For that, we'll need the `columns` key in the metadata dictionary. This returns a list: 
 
 ```{python}
 #| code-fold: false
@@ -265,17 +290,19 @@ type(covid_json['meta']['view']['columns'])
 
 1. The above **metadata** tells us a lot about the columns in the data including column names, potential data anomalies, and a basic statistic. 
 1. Because of its non-tabular structure, JSON makes it easier (than CSV) to create **self-documenting data**, meaning that information about the data is stored in the same file as the data.
-1. Self documenting data can be helpful since it maintains its own description and these descriptions are more likely to be updated as data changes. 
+1. Self-documenting data can be helpful since it maintains its own description and these descriptions are more likely to be updated as data changes. 
 
 ###### Loading COVID Data into `pandas`
-Finally, le'ts load the data (not the metadata) into a `pandas` `DatFrame`. In the following block of code we:
+Finally, let's load the data (not the metadata) into a `pandas` `DataFrame`. In the following block of code we:
 
-1. Translate the JSON records into a dataframe:
+1. Translate the JSON records into a `DataFrame`:
 
     * fields: `covid_json['meta']['view']['columns']`
     * records: `covid_json['data']`
+
     
-1. Remove columns that have no metadata description.  This would be a bad idea in general but here we remove these columns since the above analysis suggests that they are unlikely to contain useful information.
+1. Remove columns that have no metadata description.  This would be a bad idea in general, but here we remove these columns since the above analysis suggests they are unlikely to contain useful information.
+   
 1. Examine the `tail` of the table.
 
 ```{python}
@@ -308,7 +335,7 @@ Note that many variables don't sit neatly in just one of these categories. Quali
 
 ### Primary and Foreign Keys
 
-Last time, we introduced `.merge` as the `pandas` method for joining multiple `DataFrames` together. In our discussion of joins, we touched on the idea of using a "key" to determine what rows should be merged from each table. Let's take a moment to examine this idea more closely.
+Last time, we introduced `.merge` as the `pandas` method for joining multiple `DataFrame`s together. In our discussion of joins, we touched on the idea of using a "key" to determine what rows should be merged from each table. Let's take a moment to examine this idea more closely.
 
 The **primary key** is the column or set of columns in a table that *uniquely* determine the values of the remaining columns. It can be thought of as the unique identifier for each individual row in the table. For example, a table of Data 100 students might use each student's Cal ID as the primary key. 
 
@@ -336,7 +363,7 @@ After understanding the structure of the dataset, the next task is to determine 
 The **granularity** of a dataset is what a single row represents. You can also think of it as the level of detail included in the data. To determine the data's granularity, ask: what does each row in the dataset represent? Fine-grained data contains a high level of detail, with a single row representing a small individual unit. For example, each record may represent one person. Coarse-grained data is encoded such that a single row represents a large individual unit – for example, each record may represent a group of people.
 
 ### Scope
-The **scope** of a dataset is the subset of the population covered by the data. If we were investigating student performance in Data Science courses, a dataset with a narrow scope might encompass all students enrolled in Data 100; a dataset with an expansive scope might encompass all students in California. 
+The **scope** of a dataset is the subset of the population covered by the data. If we were investigating student performance in Data Science courses, a dataset with a narrow scope might encompass all students enrolled in Data 100 whereas a dataset with an expansive scope might encompass all students in California. 
 
 ### Temporality
 The **temporality** of a dataset describes the periodicity over which the data was collected as well as when the data was most recently collected or updated. 
@@ -430,7 +457,7 @@ A third method to address missing data is to perform **imputation**: infer the m
 
 Regardless of the strategy used to deal with missing data, we should think carefully about *why* particular records or fields may be missing – this can help inform whether or not the absence of these values is significant or meaningful.
 
-# EDA Demo: Tuberculosis in the United States
+# EDA Demo 1: Tuberculosis in the United States
 
 Now, let's walk through the data-cleaning and EDA workflow to see what can we learn about the presence of Tuberculosis in the United States!
 
@@ -488,7 +515,7 @@ tb_df.head()
 
 You may notice some strange things about this table: what's up with the "Unnamed" column names and the first row? 
 
-Congratulations — you're ready to wrangle your data. Because of how things are stored, we'll need to clean the data a bit to name our columns better.
+Congratulations — you're ready to wrangle your data! Because of how things are stored, we'll need to clean the data a bit to name our columns better.
 
 A reasonable first step is to identify the row with the right header. The `pd.read_csv()` function ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html)) has the convenient `header` parameter that we can set to use the elements in row 1 as the appropriate columns:
 
@@ -516,7 +543,7 @@ tb_df.head(5)
 
 ## Record Granularity
 
-You might already be wondering: What's up with that first record?
+You might already be wondering: what's up with that first record?
 
 Row 0 is what we call a **rollup record**, or summary record. It's often useful when displaying tables to humans. The **granularity** of record 0 (Totals) vs the rest of the records (States) is different.
 
@@ -626,7 +653,7 @@ census_2020s_df['Geographic Area'] = census_2020s_df['Geographic Area'].str.stri
 census_2020s_df.head(5)
 ```
 
-## Joining Data (Merging `DataFrames`)
+## Joining Data (Merging `DataFrame`s)
 
 Time to `merge`! Here we use the `DataFrame` method `df1.merge(right=df2, ...)` on `DataFrame` `df1` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.merge.html)). Contrast this with the function `pd.merge(left=df1, right=df2, ...)` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.merge.html?highlight=pandas%20merge#pandas.merge)). Feel free to use either.
 
@@ -825,6 +852,342 @@ difference = (incidence_2021 - incidence_2020)/incidence_2020 * 100
 difference
 ```
 
+# EDA Demo 2: Mauna Loa CO<sub>2</sub> Data -- A Lesson in Data Faithfulness
+
+[Mauna Loa Observatory](https://gml.noaa.gov/ccgg/trends/data.html) has been monitoring CO<sub>2</sub> concentrations since 1958
+
+```{python}
+#| code-fold: false
+co2_file = "data/co2_mm_mlo.txt"
+```
+
+Let's do some **EDA**!!
+
+## Reading this file into Pandas?
+Let's instead check out this `.txt` file. Some questions to keep in mind: Do we trust this file extension? What structure is it? 
+
+Lines 71-78 (inclusive) are shown below: 
+
+    line number |                            file contents
+    
+    71          |   #            decimal     average   interpolated    trend    #days
+    72          |   #             date                             (season corr)
+    73          |   1958   3    1958.208      315.71      315.71      314.62     -1
+    74          |   1958   4    1958.292      317.45      317.45      315.29     -1
+    75          |   1958   5    1958.375      317.50      317.50      314.71     -1
+    76          |   1958   6    1958.458      -99.99      317.10      314.85     -1
+    77          |   1958   7    1958.542      315.86      315.86      314.98     -1
+    78          |   1958   8    1958.625      314.93      314.93      315.94     -1
+
+
+Notice how: 
+
+- The values are separated by white space, possibly tabs.
+- The data line up down the rows. For example, the month appears in 7th to 8th position of each line.
+- The 71st and 72nd lines in the file contain column headings split over two lines.
+
+We can use `read_csv` to read the data into a `pandas` `DataFrame`, and we provide several arguments to specify that the separators are white space, there is no header (**we will set our own column names**), and to skip the first 72 rows of the file.
+
+```{python}
+#| code-fold: false
+co2 = pd.read_csv(
+    co2_file, header = None, skiprows = 72,
+    sep = r'\s+'       #delimiter for continuous whitespace (stay tuned for regex next lecture))
+)
+co2.head()
+```
+
+Congratulations! You've wrangled the data!
+
+<br/>
+
+...But our columns aren't named.
+**We need to do more EDA.**
+
+## Exploring Variable Feature Types
+
+The NOAA [webpage](https://gml.noaa.gov/ccgg/trends/) might have some useful tidbits (in this case it doesn't).
+
+Using this information, we'll rerun `pd.read_csv`, but this time with some **custom column names.**
+
+```{python}
+#| code-fold: false
+co2 = pd.read_csv(
+    co2_file, header = None, skiprows = 72,
+    sep = '\s+', #regex for continuous whitespace (next lecture)
+    names = ['Yr', 'Mo', 'DecDate', 'Avg', 'Int', 'Trend', 'Days']
+)
+co2.head()
+```
+
+## Visualizing CO<sub>2</sub>
+Scientific studies tend to have very clean data, right...? Let's jump right in and make a time series plot of CO2 monthly averages.
+
+```{python}
+#| code-fold: true
+sns.lineplot(x='DecDate', y='Avg', data=co2);
+```
+
+The code above uses the `seaborn` plotting library (abbreviated `sns`). We will cover this in the Visualization lecture, but now you don't need to worry about how it works!
+
+Yikes! Plotting the data uncovered a problem. The sharp vertical lines suggest that we have some **missing values**. What happened here?
+
+```{python}
+#| code-fold: false
+co2.head()
+```
+
+```{python}
+#| code-fold: false
+co2.tail()
+```
+
+Some data have unusual values like -1 and -99.99.
+
+Let's check the description at the top of the file again.
+
+* -1 signifies a missing value for the number of days `Days` the equipment was in operation that month.
+* -99.99 denotes a missing monthly average `Avg`
+
+How can we fix this? First, let's explore other aspects of our data. Understanding our data will help us decide what to do with the missing values.
+
+<br/>
+
+
+## Sanity Checks: Reasoning about the data
+First, we consider the shape of the data. How many rows should we have?
+
+* If chronological order, we should have one record per month.
+* Data from March 1958 to August 2019.
+* We should have $ 12 \times (2019-1957) - 2 - 4 = 738 $ records.
+
+```{python}
+#| code-fold: false
+co2.shape
+```
+
+Nice!! The number of rows (i.e. records) match our expectations.\
+
+<br/>
+
+
+Let's now check the quality of each feature.
+
+## Understanding Missing Value 1: `Days`
+`Days` is a time field, so let's analyze other time fields to see if there is an explanation for missing values of days of operation.
+
+Let's start with **months**, `Mo`.
+
+Are we missing any records? The number of months should have 62 or 61 instances (March 1957-August 2019).
+
+```{python}
+#| code-fold: false
+co2["Mo"].value_counts().sort_index()
+```
+
+As expected Jan, Feb, Sep, Oct, Nov, and Dec have 61 occurrences and the rest 62.
+
+<br/>
+
+Next let's explore **days** `Days` itself, which is the number of days that the measurement equipment worked.
+
+```{python}
+#| code-fold: true
+sns.displot(co2['Days']);
+plt.title("Distribution of days feature"); # suppresses unneeded plotting output
+```
+
+In terms of data quality, a handful of months have averages based on measurements taken on fewer than half the days. In addition, there are nearly 200 missing values--**that's about 27% of the data**!
+
+<br/>
+
+Finally, let's check the last time feature, **year** `Yr`.
+
+Let's check to see if there is any connection between missing-ness and the year of the recording.
+
+```{python}
+#| code-fold: true
+sns.scatterplot(x="Yr", y="Days", data=co2);
+plt.title("Day field by Year"); # the ; suppresses output
+```
+
+**Observations**:
+
+* All of the missing data are in the early years of operation.
+* It appears there may have been problems with equipment in the mid to late 80s.
+
+**Potential Next Steps**:
+
+* Confirm these explanations through documentation about the historical readings.
+* Maybe drop earliest recordings? However, we would want to delay such action until after we have examined the time trends and assess whether there are any potential problems.
+
+<br/>
+
+## Understanding Missing Value 2: `Avg`
+Next, let's return to the -99.99 values in `Avg` to analyze the overall quality of the CO2 measurements. We'll plot a histogram of the average CO<sub>2</sub> measurements
+
+```{python}
+#| code-fold: true
+# Histograms of average CO2 measurements
+sns.displot(co2['Avg']);
+```
+
+The non-missing values are in the 300-400 range (a regular range of CO2 levels).
+
+We also see that there are only a few missing `Avg` values (**<1% of values**). Let's examine all of them:
+
+```{python}
+#| code-fold: false
+co2[co2["Avg"] < 0]
+```
+
+There doesn't seem to be a pattern to these values, other than that most records also were missing `Days` data.
+
+## Drop, `NaN`, or Impute Missing `Avg` Data?
+
+How should we address the invalid `Avg` data?
+
+1. Drop records
+2. Set to NaN
+3. Impute using some strategy
+
+Remember we want to fix the following plot:
+
+```{python}
+#| code-fold: true
+sns.lineplot(x='DecDate', y='Avg', data=co2)
+plt.title("CO2 Average By Month");
+```
+
+Since we are plotting `Avg` vs `DecDate`, we should just focus on dealing with missing values for `Avg`.
+
+
+Let's consider a few options:
+1. Drop those records
+2. Replace -99.99 with NaN
+3. Substitute it with a likely value for the average CO2?
+
+What do you think are the pros and cons of each possible action?
+
+<br/>
+
+
+Let's examine each of these three options.
+
+```{python}
+#| code-fold: false
+# 1. Drop missing values
+co2_drop = co2[co2['Avg'] > 0]
+co2_drop.head()
+```
+
+```{python}
+#| code-fold: false
+# 2. Replace NaN with -99.99
+co2_NA = co2.replace(-99.99, np.NaN)
+co2_NA.head()
+```
+
+We'll also use a third version of the data.
+
+First, we note that the dataset already comes with a **substitute value** for the -99.99.
+
+From the file description:
+
+>  The `interpolated` column includes average values from the preceding column (`average`)
+and **interpolated values** where data are missing.  Interpolated values are
+computed in two steps...
+
+The `Int` feature has values that exactly match those in `Avg`, except when `Avg` is -99.99, and then a **reasonable** estimate is used instead.
+
+So, the third version of our data will use the `Int` feature instead of `Avg`.
+
+```{python}
+#| code-fold: false
+# 3. Use interpolated column which estimates missing Avg values
+co2_impute = co2.copy()
+co2_impute['Avg'] = co2['Int']
+co2_impute.head()
+```
+
+What's a **reasonable** estimate?
+
+To answer this question, let's zoom in on a short time period, say the measurements in 1958 (where we know we have two missing values).
+
+```{python}
+#| code-fold: true
+# results of plotting data in 1958
+
+def line_and_points(data, ax, title):
+    # assumes single year, hence Mo
+    ax.plot('Mo', 'Avg', data=data)
+    ax.scatter('Mo', 'Avg', data=data)
+    ax.set_xlim(2, 13)
+    ax.set_title(title)
+    ax.set_xticks(np.arange(3, 13))
+
+def data_year(data, year):
+    return data[data["Yr"] == 1958]
+    
+# uses matplotlib subplots
+# you may see more next week; focus on output for now
+fig, axes = plt.subplots(ncols = 3, figsize=(12, 4), sharey=True)
+
+year = 1958
+line_and_points(data_year(co2_drop, year), axes[0], title="1. Drop Missing")
+line_and_points(data_year(co2_NA, year), axes[1], title="2. Missing Set to NaN")
+line_and_points(data_year(co2_impute, year), axes[2], title="3. Missing Interpolated")
+
+fig.suptitle(f"Monthly Averages for {year}")
+plt.tight_layout()
+```
+
+In the big picture since there are only 7 `Avg` values missing (**<1%** of 738 months), any of these approaches would work.
+
+However there is some appeal to **option C: Imputing**:
+
+* Shows seasonal trends for CO2
+* We are plotting all months in our data as a line plot
+
+<br/>
+
+
+Let's replot our original figure with option 3:
+
+```{python}
+#| code-fold: true
+sns.lineplot(x='DecDate', y='Avg', data=co2_impute)
+plt.title("CO2 Average By Month, Imputed");
+```
+
+Looks pretty close to what we see on the NOAA [website](https://gml.noaa.gov/ccgg/trends/)!
+
+## Presenting the data: A Discussion on Data Granularity
+
+From the description:
+
+* monthly measurements are averages of average day measurements.
+* The NOAA GML website has datasets for daily/hourly measurements too.
+
+The data you present depends on your research question.
+
+**How do CO2 levels vary by season?**
+
+* You might want to keep average monthly data.
+
+**Are CO2 levels rising over the past 50+ years, consistent with global warming predictions?**
+
+* You might be happier with a **coarser granularity** of average year data!
+
+```{python}
+#| code-fold: true
+co2_year = co2_impute.groupby('Yr').mean()
+sns.lineplot(x='Yr', y='Avg', data=co2_year)
+plt.title("CO2 Average By Year");
+```
+
+Indeed, we see a rise by nearly 100 ppm of CO2 since Mauna Loa began recording in 1958.
+
 # Summary
 We went over a lot of content this lecture; let's summarize the most important points: 
 
@@ -841,7 +1204,7 @@ There are several ways to approach EDA and Data Wrangling:
 * Examine the **data and metadata**: what is the date, size, organization, and structure of the data? 
 * Examine each **field/attribute/dimension** individually.
 * Examine pairs of related dimensions (e.g. breaking down grades by major).
-* Along the way, we can 
+* Along the way, we can:
     * **Visualize** or summarize the data.
     * **Validate assumptions** about data and its collection process. Pay particular attention to when the data was collected. 
     * Identify and **address anomalies**.
