@@ -24,7 +24,7 @@ jupyter: python3
 
 ## Why Work with Text?
 
-Last lecture, we learned of the difference between quantitative and qualitative variable types. The latter includes string data — the primary focus of lecture 6. In this note, we'll discuss the necessary tools to manipulate text: Python string manipulation and regular expressions. 
+Last lecture, we learned of the difference between quantitative and qualitative variable types. The latter includes string data — the primary focus of lecture 6. In this note, we'll discuss the necessary tools to manipulate text: `python` string manipulation and regular expressions. 
 
 There are two main reasons for working with text.
 
@@ -36,7 +36,7 @@ There are two main reasons for working with text.
 
 ## Python String Methods
 
-First, we'll introduce a few methods useful for string manipulation. The following table includes a number of string operations supported by Python and `pandas`. The Python functions operate on a single string, while their equivalent in `pandas` are  **vectorized** — they operate on a `Series` of string data.
+First, we'll introduce a few methods useful for string manipulation. The following table includes a number of string operations supported by `python` and `pandas`. The `python` functions operate on a single string, while their equivalent in `pandas` are  **vectorized** — they operate on a `Series` of string data.
 
 +-----------------------+-----------------+---------------------------+
 | Operation             | Python          | `Pandas` (`Series`)       |
@@ -60,7 +60,7 @@ First, we'll introduce a few methods useful for string manipulation. The followi
 |                       |                 |                           |
 +-----------------------+-----------------+---------------------------+
 
-We'll discuss the differences between Python string functions and `pandas` `Series` methods in the following section on canonicalization.
+We'll discuss the differences between `python` string functions and `pandas` `Series` methods in the following section on canonicalization.
 
 ### Canonicalization
 Assume we want to merge the given tables.
@@ -77,16 +77,18 @@ with open('data/county_and_population.csv') as f:
 ```
 
 ```{python}
+#| code-fold: false
 display(county_and_state), display(county_and_pop);
 ```
 
 Last time, we used a **primary key** and **foreign key** to join two tables. While neither of these keys exist in our `DataFrame`s, the `"County"` columns look similar enough. Can we convert these columns into one standard, canonical form to merge the two tables? 
 
-#### Canonicalization with Python String Manipulation
+#### Canonicalization with `python` String Manipulation
 
-The following function uses Python string manipulation to convert a single county name into canonical form. It does so by eliminating whitespace, punctuation, and unnecessary text. 
+The following function uses `python` string manipulation to convert a single county name into canonical form. It does so by eliminating whitespace, punctuation, and unnecessary text. 
 
 ```{python}
+#| code-fold: false
 def canonicalize_county(county_name):
     return (
         county_name
@@ -104,11 +106,9 @@ canonicalize_county("St. John the Baptist")
 We will use the `pandas` `map` function to apply the `canonicalize_county` function to every row in both `DataFrame`s. In doing so, we'll create a new column in each called `clean_county_python` with the canonical form.
 
 ```{python}
+#| code-fold: false
 county_and_pop['clean_county_python'] = county_and_pop['County'].map(canonicalize_county)
 county_and_state['clean_county_python'] = county_and_state['County'].map(canonicalize_county)
-```
-
-```{python}
 display(county_and_state), display(county_and_pop);
 ```
 
@@ -119,6 +119,7 @@ Alternatively, we can use `pandas` `Series` methods to create this standardized 
 Chaining multiple `Series` methods in this manner eliminates the need to use the `map` function (as this code is vectorized).
 
 ```{python}
+#| code-fold: false
 def canonicalize_county_series(county_series):
     return (
         county_series
@@ -132,9 +133,6 @@ def canonicalize_county_series(county_series):
 
 county_and_pop['clean_county_pandas'] = canonicalize_county_series(county_and_pop['County'])
 county_and_state['clean_county_pandas'] = canonicalize_county_series(county_and_state['County'])
-```
-
-```{python}
 display(county_and_pop), display(county_and_state);
 ```
 
@@ -145,19 +143,19 @@ Extraction explores the idea of obtaining useful information from text data. Thi
 Say we want to read some data from a `.txt` file.
 
 ```{python}
+#| code-fold: false
 with open('data/log.txt', 'r') as f:
     log_lines = f.readlines()
-```
 
-```{python}
 log_lines
 ```
 
 Suppose we want to extract the day, month, year, hour, minutes, seconds, and time zone. Unfortunately, these items are not in a fixed position from the beginning of the string, so slicing by some fixed offset won't work.
 
-Instead, we can use some clever thinking. Notice how the relevant information is contained within a set of brackets, further seperated by `/` and `:`. We can hone in on this region of text, and split the data on these characters. Python's built-in `.split` function makes this easy.
+Instead, we can use some clever thinking. Notice how the relevant information is contained within a set of brackets, further seperated by `/` and `:`. We can hone in on this region of text, and split the data on these characters. `Python`'s built-in `.split` function makes this easy.
 
 ```{python}
+#| code-fold: false
 first = log_lines[0] # Only considering the first row of data
 
 pertinent = first.split("[")[1].split(']')[0]
@@ -169,7 +167,7 @@ day, month, year, hour, minute, seconds, time_zone
 
 There are two problems with this code:
 
-1. Python's built-in functions limit us to extract data one record at a time,
+1. `Python`'s built-in functions limit us to extract data one record at a time,
     - This can be resolved using the `map` function or `pandas` `Series` methods.
 2. The code is quite verbose.
     - This is a larger issue that is trickier to solve
@@ -178,11 +176,12 @@ In the next section, we'll introduce regular expressions - a tool that solves pr
 
 ## Regex Basics
 
-A **regular expression ("regex")** is a sequence of characters that specifies a search pattern. They are written to extract specific information from text. Regular expressions are essentially part of a smaller programming language embedded in Python, made available through the `re` module. As such, they have a stand-alone syntax and methods for various capabilities.
+A **regular expression ("RegEx")** is a sequence of characters that specifies a search pattern. They are written to extract specific information from text. Regular expressions are essentially part of a smaller programming language embedded in `python`, made available through the `re` module. As such, they have a stand-alone syntax and methods for various capabilities.
 
-Regular expressions are useful in many applications beyond data science. For example, Social Security Numbers (SSNs) are often validated with regular expresions.
+Regular expressions are useful in many applications beyond data science. For example, Social Security Numbers (SSNs) are often validated with regular expressions.
 
 ```{python}
+#| code-fold: false
 r"[0-9]{3}-[0-9]{2}-[0-9]{4}" # Regular Expression Syntax
 
 # 3 of any digit, then a dash,
@@ -206,6 +205,7 @@ There are a ton of resources to learn and experiment with regular expressions. A
 
 There are four basic operations with regular expressions.
 
+
 +-----------------------+-----------------+----------------+-------------+-------------------+
 | Operation             | Order           | Syntax Example | Matches     | Doesn't Match     | 
 +=======================+=================+================+=============+===================+
@@ -225,6 +225,7 @@ There are four basic operations with regular expressions.
 |                       |                 | (AB)*A         | A <br />    | AA <br />         |
 |                       |                 |                | ABABABABA   | ABBA              |
 +-----------------------+-----------------+----------------+-------------+-------------------+
+
 
 Notice how these metacharacter operations are ordered. Rather than being literal characters, these **metacharacters** manipulate adjacent characters. `()` takes precedence, followed by `*`, and finally `|`. This allows us to differentiate between very different regex commands like `AB*` and `(AB)*`. The former reads "`A` then zero or more copies of `B`", while the latter specifies "zero or more copies of `AB`".
 
@@ -371,6 +372,7 @@ The result would be all the characters starting from the leftmost \<div> and the
 Let's revist our earlier problem of extracting date/time data from the given `.txt` files. Here is how the data looked.
 
 ```{python}
+#| code-fold: false
 log_lines[0]
 ```
 
@@ -387,15 +389,15 @@ log_lines[0]
     - Imagine the data between `[` and `]` was garbage - `.*` will still match that. 
     - The alternate solution will only match data that follows the correct format.
 
-## Regex in Python and Pandas (Regex Groups)
+## Regex in Python and Pandas (RegEx Groups)
 
 ### Canonicalization
 
-#### Canonicalization with Regex
+#### Canonicalization with RegEx
 
-Earlier in this note, we examined the process of canonicalization using Python string manipulation and `pandas` `Series` methods. However, we mentioned this approach had a major flaw: our code was unnecessarily verbose. Equipped with our knowledge of regular expressions, let's fix this.
+Earlier in this note, we examined the process of canonicalization using `python` string manipulation and `pandas` `Series` methods. However, we mentioned this approach had a major flaw: our code was unnecessarily verbose. Equipped with our knowledge of regular expressions, let's fix this.
 
-To do so, we need to understand a few functions in the `re` module. The first of these is the substitute function: `re.sub(pattern, rep1, text)`. It behaves similarly to Python's built-in `.replace` function, and returns text with all instances of `pattern` replaced by `rep1`. 
+To do so, we need to understand a few functions in the `re` module. The first of these is the substitute function: `re.sub(pattern, rep1, text)`. It behaves similarly to `python`'s built-in `.replace` function, and returns text with all instances of `pattern` replaced by `rep1`. 
 
 The regular expression here removes text surrounded by `<>` (also known as HTML tags).
 
@@ -407,6 +409,7 @@ In order, the pattern matches ...
 Any substring in `text` that fulfills all three conditions will be replaced by `''`.
 
 ```{python}
+#| code-fold: false
 import re
 
 text = "<div><td valign='top'>Moo</td></div>"
@@ -418,7 +421,7 @@ Notice the `r` preceding the regular expression pattern; this specifies the regu
 
 In other words, don't forget to tag your RegEx with an `r`.
 
-#### Canonicalization with Pandas
+#### Canonicalization with `pandas`
 
 We can also use regular expressions with `pandas` `Series` methods. This gives us the benefit of operating on an entire column of data as opposed to a single value. The code is simple: <br /> `ser.str.replace(pattern, repl, regex=True`).
 
@@ -433,31 +436,34 @@ html_data = pd.DataFrame(data)
 ```
 
 ```{python}
+#| code-fold: false
 html_data
 ```
 
 ```{python}
+#| code-fold: false
 pattern = r"<[^>]+>"
 html_data['HTML'].str.replace(pattern, '', regex=True)
 ```
 
 ### Extraction
 
-#### Extraction with Regex
+#### Extraction with RegEx
 
 Just like with canonicalization, the `re` module provides capability to extract relevant text from a string: <br /> `re.findall(pattern, text)`. This function returns a list of all matches to `pattern`. 
 
 Using the familiar regular expression for Social Security Numbers:
 
 ```{python}
+#| code-fold: false
 text = "My social security number is 123-45-6789 bro, or maybe it’s 321-45-6789."
 pattern = r"[0-9]{3}-[0-9]{2}-[0-9]{4}"
 re.findall(pattern, text)  
 ```
 
-#### Extraction with Pandas
+#### Extraction with `pandas`
 
-Pandas similarily provides extraction functionality on a `Series` of data: `ser.str.findall(pattern)`
+`pandas` similarily provides extraction functionality on a `Series` of data: `ser.str.findall(pattern)`
 
 Consider the following `DataFrame` `ssn_data`.
 
@@ -470,10 +476,12 @@ ssn_data = pd.DataFrame(data)
 ```
 
 ```{python}
+#| code-fold: false
 ssn_data
 ```
 
 ```{python}
+#| code-fold: false
 ssn_data["SSN"].str.findall(pattern)
 ```
 
@@ -482,11 +490,13 @@ This function returns a list for every row containing the pattern matches in a g
 As you may expect, there are similar `pandas` equivalents for other `re` functions as well. `Series.str.extract` takes in a pattern and returns a `DataFrame` of each capture group’s first match in the string. In contrast, `Series.str.extractall` returns a multi-indexed `DataFrame` of all matches for each capture group. You can see the difference in the outputs below:
 
 ```{python}
+#| code-fold: false
 pattern_cg = r"([0-9]{3})-([0-9]{2})-([0-9]{4})"
 ssn_data["SSN"].str.extract(pattern_cg)
 ```
 
 ```{python}
+#| code-fold: false
 ssn_data["SSN"].str.extractall(pattern_cg)
 ```
 
@@ -499,6 +509,7 @@ Let's take a look at an example.
 #### Example 1
 
 ```{python}
+#| code-fold: false
 text = "Observations: 03:04:53 - Horse awakens. \
         03:05:14 - Horse goes back to sleep."
 ```
@@ -506,6 +517,7 @@ text = "Observations: 03:04:53 - Horse awakens. \
 Say we want to capture all occurences of time data (hour, minute, and second) as *seperate entities*.
 
 ```{python}
+#| code-fold: false
 pattern_1 = r"(\d\d):(\d\d):(\d\d)"
 re.findall(pattern_1, text)
 ```
@@ -515,6 +527,7 @@ Notice how the given pattern has 3 capture groups, each specified by the regular
 These regular expression capture groups can be different. We can use the `(\d{2})` shorthand to extract the same data.
 
 ```{python}
+#| code-fold: false
 pattern_2 = r"(\d\d):(\d\d):(\d{2})"
 re.findall(pattern_2, text)
 ```
@@ -524,11 +537,13 @@ re.findall(pattern_2, text)
 With the notion of capture groups, convince yourself how the following regular expression works.
 
 ```{python}
+#| code-fold: false
 first = log_lines[0]
 first
 ```
 
 ```{python}
+#| code-fold: false
 pattern = r'\[(\d+)\/(\w+)\/(\d+):(\d+):(\d+):(\d+) (.+)\]'
 day, month, year, hour, minute, second, time_zone = re.findall(pattern, first)[0]
 print(day, month, year, hour, minute, second, time_zone)
@@ -558,6 +573,6 @@ Ultimately, the goal is not to memorize all regular expressions. Rather, the aim
 - Use vocabulary (metacharacter, escape character, groups, etc.) to describe regex metacharacters.
 - Differentiate between (), [], {}
 - Design your own character classes with \d, \w, \s, […-…], ^, etc.
-- Use Python and `pandas` RegEx methods.
+- Use `python` and `pandas` RegEx methods.
 
 
