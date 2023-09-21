@@ -24,20 +24,22 @@ jupyter: python3
 
 #### KDE Theory
 
-A **kernel density estimate (KDE)** is a smooth, continuous function that approximates a curve. They allow us to represent general trends in a distribution without focusing on the details, which is useful for analyzing the broad structure of a dataset. 
+Let's now dive into kernel density estimation. A **kernel density estimate (KDE)** is a smooth, continuous function that approximates a curve. They allow us to represent general trends in a distribution without focusing on the details, which is useful for analyzing the broad structure of a dataset. 
 
 More formally, a KDE attempts to approximate the underlying **probability distribution** from which our dataset was drawn. You may have encountered the idea of a probability distribution in your other classes; if not, we'll discuss it at length in the next lecture. For now, you can think of a probability distribution as a description of how likely it is for us to sample a particular value in our dataset. 
 
-A KDE curve estimates the probability density function of a random variable. Consider the example below, where we have used `sns.displot` to plot both a histogram (containing the data points we actually collected) and a KDE curve (representing the *approximated* probability distribution from which this data was drawn). 
-
-Let's look at the World Bank dataset (`wb`) we saw in the previous lecture as we conduct our analysis.
+A KDE curve estimates the probability density function of a random variable. Consider the example below, where we have used `sns.displot` to plot both a histogram (containing the data points we actually collected) and a KDE curve (representing the *approximated* probability distribution from which this data was drawn) using data from the World Bank dataset (`wb`) we've worked with before.
 
 ```{python}
 #| code-fold: true
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 wb = pd.read_csv("data/world_bank.csv", index_col=0)
+wb = wb.rename(columns={'Antiretroviral therapy coverage: % of people living with HIV: 2015':"HIV rate",
+                       'Gross national income per capita, Atlas method: $: 2016':'gni'})
 wb.head()
 ```
 
@@ -45,7 +47,7 @@ wb.head()
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-sns.displot(data = wb, x = 'Antiretroviral therapy coverage: % of people living with HIV: 2015', \
+sns.displot(data = wb, x = 'HIV rate', \
                        kde = True, stat = "density")
 
 plt.title("Distribution of HIV rates");
@@ -59,7 +61,7 @@ The area under a probability density function should always integrate to 1, repr
 
 We perform kernel density estimation using three steps.
 
-1. Place a kernel at each data point.
+1. Place a kernel at each datapoint.
 2. Normalize the kernels to have a total area of 1 (across all kernels).
 3. Sum the normalized kernels.
 
@@ -94,7 +96,7 @@ plt.ylim(0, 0.5);
 
 To begin generating a density curve, we need to choose a **kernel** and **bandwidth value ($\alpha$)**. What are these exactly? 
 
-A **kernel** is a density curve. It is the mathematical function that attempts to capture the randomness of each data point in our sampled data. To explain what this means, consider just *one* of the data points in our dataset: $2.2$. We obtained this data point by randomly sampling some information out in the real world (you can imagine $2.2$ as representing a single measurement taken in an experiment, for example). If we were to sample a new data point, we may obtain a slightly different value. It could be higher than $2.2$; it could also be lower than $2.2$. We make the assumption that any future sampled data points will likely be similar in value to the data we've already drawn. This means that our *kernel* – our description of the probability of randomly sampling any new value – will be greatest at the data point we've already drawn but still have non-zero probability above and below it. The area under any kernel should integrate to 1, representing the total probability of drawing a new data point.
+A **kernel** is a density curve. It is the mathematical function that attempts to capture the randomness of each data point in our sampled data. To explain what this means, consider just *one* of the datapoints in our dataset: $2.2$. We obtained this datapoint by randomly sampling some information out in the real world (you can imagine $2.2$ as representing a single measurement taken in an experiment, for example). If we were to sample a new datapoint, we may obtain a slightly different value. It could be higher than $2.2$; it could also be lower than $2.2$. We make the assumption that any future sampled datapoints will likely be similar in value to the data we've already drawn. This means that our *kernel* – our description of the probability of randomly sampling any new value – will be greatest at the datapoint we've already drawn but still have non-zero probability above and below it. The area under any kernel should integrate to 1, representing the total probability of drawing a new datapoint.
 
 A **bandwidth value**, usually denoted by $\alpha$, represents the width of the kernel. A large value of $\alpha$ will result in a wide, short kernel function, while a small value with result in a narrow, tall kernel.
 
@@ -120,7 +122,7 @@ plt.xlim(-3, 10)
 plt.ylim(0, 0.5);
 ```
 
-To begin creating our KDE, we place a kernel on *each* data point in our dataset. For our dataset of 5 points, we will have 5 kernels.
+To begin creating our KDE, we place a kernel on *each* datapoint in our dataset. For our dataset of 5 points, we will have 5 kernels.
 
 ```{python}
 #| code-fold: true
@@ -200,16 +202,16 @@ A **kernel** (for our purposes) is a valid density function. This means it:
 - Must be non-negative for all inputs.
 - Must integrate to 1.
 
-<img src= "./images/kde_function.png"></img>
+<img src="images/kde_function.png" alt='kde_function' width='345'>
 
 A general “KDE formula” function is given above.
 
-1. $K_{\alpha}(x, xi)$ is the kernel centered on the observation `i`. 
+1. $K_{\alpha}(x, x_i)$ is the kernel centered on the observation `i`. 
     - Each kernel individually has area 1.
     - x represents any number on the number line. It is the input to our function.
-2. $n$ is the number of observed data points that we have.
+2. $n$ is the number of observed datapoints that we have.
     - We multiply by $\frac{1}{n}$ so that the total area of the KDE is still 1.
-3. Each $x_i \in \{x_1, x_2, \dots, x_n\}$ represents an observed data point. 
+3. Each $x_i \in \{x_1, x_2, \dots, x_n\}$ represents an observed datapoint. 
     - These are what we use to create our KDE by summing multiple shifted kernels centered at these points.
 
 \*$\alpha$ (alpha) is the bandwidth or smoothing parameter. 
@@ -223,7 +225,7 @@ $$K_a(x, x_i) = \frac{1}{\sqrt{2\pi\alpha^{2}}}e^{-\frac{(x-x_i)^{2}}{2\alpha^{2
 In this formula:
 
 * $x$ (no subscript) represents values along the x-axis of our plot
-* $x_i$ represents the $i$th data point in our dataset. It is one of the values that we have actually collected in our data sampling process. In our example earlier, $x_i=2.2$. Those of you who have taken a probability class may recognize $x_i$ as the **mean** of the normal distribution.
+* $x_i$ represents the $i$th datapoint in our dataset. It is one of the values that we have actually collected in our data sampling process. In our example earlier, $x_i=2.2$. Those of you who have taken a probability class may recognize $x_i$ as the **mean** of the normal distribution.
 * $\alpha$ is the bandwidth parameter, representing the width of our kernel. More formally, $\alpha$ is the **standard deviation** of the Gaussian curve.
 
 The details of this (admittedly intimidating) formula are less important than understanding its role in kernel density estimation – this equation gives us the shape of each kernel.
@@ -312,6 +314,40 @@ The diagram on the right is how the density curve for our 5 point dataset would 
 
 ::::
 
+#### Diving Deeper into `displot`
+
+As we saw earlier, we can use `seaborn`'s `displot` function to plot various distributions. In particular, `displot` allows you to specify the `kind` of plot and is a wrapper for `histplot`, `kdeplot`, and `ecdfplot`.
+
+Below, we can see a couple of examples of how `sns.displot` can be used to plot various distributions.
+
+First, we can plot a histogram by setting `kind` to `"hist"`. Note that here we've specified `stat = density` to normalize the histogram such that the area under the histogram is equal to 1.
+
+```{python}
+sns.displot(data=wb, 
+            x="gni", 
+            kind="hist", 
+            stat="density") # default: stat=count and density integrates to 1
+plt.title("Distribution of gross national income per capita");
+```
+
+Now, what if we want to generate a KDE plot? We can set `kind` = to `"kde"`! 
+
+```{python}
+sns.displot(data=wb, 
+            x="gni", 
+            kind='kde')
+plt.title("Distribution of gross national income per capita");
+```
+
+And finally, if we want to generate an Empirical Cumulative Distribution Function (ECDF), we can specify `kind = "ecdf"`.
+
+```{python}
+sns.displot(data=wb, 
+            x="gni", 
+            kind='ecdf')
+plt.title("Cumulative Distribution of gross national income per capita")
+```
+
 ## Relationships Between Quantitative Variables
 
 Up until now, we've discussed how to visualize single-variable distributions. Going beyond this, we want to understand the relationship between pairs of numerical variables.
@@ -346,7 +382,7 @@ Although the plots above communicate the general relationship between the two pl
 We have a few methods to help reduce overplotting:
 
 * Decreasing the size of the scatter point markers can improve readability. We do this by setting a new value to the size parameter, `s`, of `plt.scatter` or `sns.scatterplot`
-* **Jittering** is the process of adding a small amount of random noise to all x and y values to slightly shift the position of each data point. By randomly shifting all the data by some small distance, we can discern individual points more clearly without modifying the major trends of the original dataset.
+* **Jittering** is the process of adding a small amount of random noise to all x and y values to slightly shift the position of each datapoint. By randomly shifting all the data by some small distance, we can discern individual points more clearly without modifying the major trends of the original dataset.
 
 In the cell below, we first jitter the data using `np.random.uniform`, then re-plot it with smaller markers. The resulting plot is much easier to interpret.
 
@@ -397,7 +433,7 @@ plt.subplots_adjust(top=0.9);
 ```
 
 #### Hex plots
-For datasets with a very large number of data points, jittering is unlikely to fully resolve the issue of overplotting. In these cases, we can attempt to visualize our data by its *density*, rather than displaying each individual data point.
+For datasets with a very large number of datapoints, jittering is unlikely to fully resolve the issue of overplotting. In these cases, we can attempt to visualize our data by its *density*, rather than displaying each individual datapoint.
 
 **Hex plots** can be thought of as two-dimensional histograms that show the joint distribution between two variables. This is particularly useful when working with very dense data. In a hex plot, the x-y plane is binned into hexagons. Hexagons that are darker in color indicate a greater density of data – that is, there are more data points that lie in the region enclosed by the hexagon.
 
@@ -415,7 +451,7 @@ plt.subplots_adjust(top=0.9);
 
 #### Contour Plots
 
-**Contour plots** are an alternative way of plotting the joint distribution of two variables. You can think of them as the 2-dimensional versions of KDE plots. A contour plot can be interpreted in a similar way to a [topographic map](https://gisgeography.com/contour-lines-topographic-map/). Each contour line represents an area that has the same *density* of data points throughout the region. Contours marked with darker colors contain more data points (a higher density) in that region.
+**Contour plots** are an alternative way of plotting the joint distribution of two variables. You can think of them as the 2-dimensional versions of KDE plots. A contour plot can be interpreted in a similar way to a [topographic map](https://gisgeography.com/contour-lines-topographic-map/). Each contour line represents an area that has the same *density* of datapoints throughout the region. Contours marked with darker colors contain more datapoints (a higher density) in that region.
 
 `sns.kdeplot` will generate a contour plot if we specify both x and y data.
 
@@ -443,7 +479,7 @@ To see why we may want to transform data, consider the following plot of adult l
 df = pd.DataFrame(index=wb.index)
 df['lit'] = wb['Adult literacy rate: Female: % ages 15 and older: 2005-14'] \
             + wb["Adult literacy rate: Male: % ages 15 and older: 2005-14"]
-df['inc'] = wb['Gross national income per capita, Atlas method: $: 2016']
+df['inc'] = wb['gni']
 df.dropna(inplace=True)
 
 plt.scatter(df["inc"], df["lit"])
@@ -454,7 +490,7 @@ plt.title("Adult literacy rate against GNI per capita");
 
 This plot is difficult to interpret for two reasons:
 
-* The data shown in the visualization appears almost "smushed" – it is heavily concentrated in the upper lefthand region of the plot. Even if we jittered the dataset, we likely would not be able to fully assess all data points in that area.
+* The data shown in the visualization appears almost "smushed" – it is heavily concentrated in the upper lefthand region of the plot. Even if we jittered the dataset, we likely would not be able to fully assess all datapoints in that area.
 * It is hard to generalize a clear relationship between the two plotted variables. While adult literacy rate appears to share some positive relationship with gross national income, we are not able to describe the specifics of this trend in much detail.
 
 A transformation would allow us to visualize this data more clearly, which, in turn, would enable us to describe the underlying relationship between our variables of interest.
@@ -491,13 +527,13 @@ plt.ylabel("Adult literacy rate")
 plt.title("Adult literacy rate against Log(GNI per capita)");
 ```
 
-After taking the logarithm of our x values, our plot appears much more balanced in its horizontal scale. We no longer have many data points clumped on one end and a few outliers out at extreme values. 
+After taking the logarithm of our x values, our plot appears much more balanced in its horizontal scale. We no longer have many datapoints clumped on one end and a few outliers out at extreme values. 
 
-Let's repeat this reasoning for the y values. Considering only the vertical axis of the plot, notice how there are many data points concentrated at large y values. Only a few data points lie at smaller values of y.
+Let's repeat this reasoning for the y values. Considering only the vertical axis of the plot, notice how there are many datapoints concentrated at large y values. Only a few datapoints lie at smaller values of y.
 
 If we were to "spread out" these large values of y more, we would no longer see the dense concentration in one region of the y-axis. We need a transformation that will:
 
-* Increase the magnitude of large values of y so these data points are distributed more broadly on the vertical scale
+* Increase the magnitude of large values of y so these datapoints are distributed more broadly on the vertical scale
 * Not substantially alter the scaling of small values of y (we do not want to drastically modify the lower end of the y axis, which is already distributed evenly on the vertical scale)
 
 In this case, it is helpful to apply a **power transformation** – that is, raise our y values to a power. Let's try raising our adult literacy rate values to the power of 4. Large values raised to the power of 4 will increase in magnitude proportionally much more than small values raised to the power of 4 (consider the difference between $2^4 = 16$ and $200^4 = 1600000000$). 
@@ -596,6 +632,7 @@ Generally:
 ### Additional Remarks
 
 Visualization requires a lot of thought!
+
 - There are many tools for visualizing distributions.
     - Distribution of a single variable:
         1. Rugplot
@@ -609,6 +646,7 @@ Visualization requires a lot of thought!
         3. Contour plot
 
 This class primarily uses `seaborn` and `matplotlib`, but `pandas` also has basic built-in plotting methods. Many other visualization libraries exist, and `plotly` is one of them.
+
 - `plotly` creates very easily creates interactive plots.
 - `plotly` will occasionally appear in lecture code, labs, and assignments! 
 
@@ -702,7 +740,7 @@ The visualization on the right captures the trend in coronavirus cases during Ma
 
 Color is another important feature in visualizations that does more than what meets the eye. 
 
-Last lecture, we used color to encode a categorical variable in our scatter plot. In this section, we will discuss the uses of color in novel visualizations like colormaps and heatmaps.
+We already explored using color to encode a categorical variable in our scatter plot. Let's now discuss the uses of color in novel visualizations like colormaps and heatmaps.
 
 5-8% of the world is red-green color blind, so we have to be very particular about our color scheme. We want to make these as accessible as possible. Choosing a set of colors that work together is evidently a challenging task!
 
@@ -831,9 +869,9 @@ A publication-ready plot (and every Data 100 plot) needs:
 - Legends, if appropriate
 - Captions that describe data
 
-Captions should be:
+Captions should:
 
-- Comprehensive and self-contained
+- Be comprehensive and self-contained
 - Describe what has been graphed
 - Draw attention to important features
 - Describe conclusions drawn from graphs
