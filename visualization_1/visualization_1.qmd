@@ -111,6 +111,7 @@ Let's contextualize this in an example. We will use the World Bank dataset (`wb`
 ```{python}
 #| code-fold: true
 #| tags: []
+#| vscode: {languageId: python}
 import pandas as pd
 import numpy as np
 
@@ -124,6 +125,7 @@ We can visualize the distribution of the `Continent` column using a bar plot. Th
 
 ```{python}
 #| tags: []
+#| vscode: {languageId: python}
 wb['Continent'].value_counts().plot(kind = 'bar');
 ```
 
@@ -134,6 +136,7 @@ Plotting methods in `pandas` are the least preferred and not supported in Data 1
 ### Plotting in Matplotlib
 
 ```{python}
+#| vscode: {languageId: python}
 import matplotlib.pyplot as plt # matplotlib is typically given the alias plt
 
 continent = wb['Continent'].value_counts()
@@ -150,6 +153,7 @@ However, note how we needed to label the axes with `plt.xlabel` and `plt.ylabel`
 
 ```{python}
 #| tags: []
+#| vscode: {languageId: python}
 import seaborn as sns # seaborn is typically given the alias sns
 sns.countplot(data = wb, x = 'Continent');
 ```
@@ -181,14 +185,13 @@ To accomplish this, here are some ways we can improve a plot:
 - Increase the font size
 
 
-## Histograms
-
-**Histograms** are a natural extension to bar plots; they visualize the distribution of **quantitative** (numerical) data.
+## Distributions of Quantitative Variables
 
 Revisiting our example with the `wb` DataFrame, let's plot the distribution of `Gross national income per capita`.
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 wb.head(5)
 ```
 
@@ -197,6 +200,7 @@ How should we define our categories for this variable? In the previous example, 
 Under this assumption, let's plot this distribution using the `seaborn.countplot` function.
 
 ```{python}
+#| vscode: {languageId: python}
 sns.countplot(data = wb, x = 'Gross national income per capita, Atlas method: $: 2016');
 ```
 
@@ -217,10 +221,12 @@ Box plots and violin plots are two very similar kinds of visualizations. Both di
 In a box plot, the width of the box at any point does not encode meaning. In a violin plot, the width of the plot indicates the density of the distribution at each possible value.
 
 ```{python}
+#| vscode: {languageId: python}
 sns.boxplot(data=wb, y='Gross national income per capita, Atlas method: $: 2016');
 ```
 
 ```{python}
+#| vscode: {languageId: python}
 sns.violinplot(data=wb, y="Gross national income per capita, Atlas method: $: 2016");
 ```
 
@@ -233,6 +239,7 @@ A quartile represents a 25% portion of the data. We say that:
 This means that the middle 50% of the data lies between the first and third quartiles. This is demonstrated in the histogram below. The three quartiles are marked with red vertical bars.
 
 ```{python}
+#| vscode: {languageId: python}
 gdp = wb['Gross domestic product: % growth : 2016']
 gdp = gdp[~gdp.isna()]
 
@@ -250,6 +257,7 @@ sns.rugplot([q1, q2, q3], c="firebrick", lw=6, height=0.1);
 In a box plot, the lower extent of the box lies at Q1, while the upper extent of the box lies at Q3. The horizontal line in the middle of the box corresponds to Q2 (equivalently, the median).
 
 ```{python}
+#| vscode: {languageId: python}
 sns.boxplot(data=wb, y='Gross domestic product: % growth : 2016');
 ```
 
@@ -262,6 +270,7 @@ The different forms of information contained in a box plot can be summarised as 
 A violin plot displays quartile information, albeit a bit more subtly. Look closely at the center vertical bar of the violin plot below!
 
 ```{python}
+#| vscode: {languageId: python}
 sns.violinplot(data=wb, y='Gross domestic product: % growth : 2016');
 ```
 
@@ -272,6 +281,7 @@ Plotting side-by-side box or violin plots allows us to compare distributions acr
 With `seaborn`, we can easily create side-by-side plots by specifying both an x and y column.
 
 ```{python}
+#| vscode: {languageId: python}
 sns.boxplot(data=wb, x="Continent", y='Gross domestic product: % growth : 2016');
 ```
 
@@ -280,6 +290,7 @@ sns.boxplot(data=wb, x="Continent", y='Gross domestic product: % growth : 2016')
 You are likely familiar with histograms from Data 8. A histogram collects continuous data into bins, then plots this binned data. Each bin reflects the density of datapoints with values that lie between the left and right ends of the bin.
 
 ```{python}
+#| vscode: {languageId: python}
 # The `edgecolor` argument controls the color of the bin edges
 gni = wb["Gross national income per capita, Atlas method: $: 2016"]
 plt.hist(gni, density=True, edgecolor="white")
@@ -291,6 +302,7 @@ plt.title("Distribution of gross national income per capita");
 ```
 
 ```{python}
+#| vscode: {languageId: python}
 sns.histplot(data=wb, x="Gross national income per capita, Atlas method: $: 2016", stat="density")
 plt.title("Distribution of gross national income per capita");
 ```
@@ -304,6 +316,7 @@ The `hue` parameter of `sns.histplot` specifies the column that should be used t
 Notice that the resulting plot includes a legend describing which color corresponds to each hemisphere – a legend should always be included if color is used to encode information in a visualization!
 
 ```{python}
+#| vscode: {languageId: python}
 # Create a new variable to store the hemisphere in which each country is located
 north = ["Asia", "Europe", "N. America"]
 south = ["Africa", "Oceania", "S. America"]
@@ -312,6 +325,7 @@ wb.loc[wb["Continent"].isin(south), "Hemisphere"] = "Southern"
 ```
 
 ```{python}
+#| vscode: {languageId: python}
 sns.histplot(data=wb, x="Gross national income per capita, Atlas method: $: 2016", hue="Hemisphere", stat="density")
 plt.title("Distribution of gross national income per capita");
 ```
@@ -319,7 +333,7 @@ plt.title("Distribution of gross national income per capita");
 Each bin of a histogram is scaled such that its area is equal to the percentage of all datapoints that it contains.
 
 ```{python}
-
+#| vscode: {languageId: python}
 densities, bins, _ = plt.hist(gni, density=True, edgecolor="white", bins=5)
 plt.xlabel("Gross national income per capita")
 plt.ylabel("Density")
@@ -349,11 +363,13 @@ The skew of a histogram describes the direction in which its "tail" extends.
 In the case where a distribution has equal-sized right and left tails, it is **symmetric**. The mean is approximately **equal** to the median. Think of mean as the balancing point of the distribution.
 
 ```{python}
+#| vscode: {languageId: python}
 sns.histplot(data = wb, x = 'Gross national income per capita, Atlas method: $: 2016', stat = 'density');
 plt.title('Distribution with a long right tail')
 ```
 
 ```{python}
+#| vscode: {languageId: python}
 sns.histplot(data = wb, x = 'Access to an improved water source: % of population: 2015', stat = 'density');
 plt.title('Distribution with a long left tail')
 ```
@@ -369,6 +385,7 @@ In Data 100, we describe a "mode" of a histogram as a peak in the distribution. 
 If we set the number of bins to 5, the distribution appears unimodal.
 
 ```{python}
+#| vscode: {languageId: python}
 # Rename the very long column name for convenience
 wb = wb.rename(columns={'Antiretroviral therapy coverage: % of people living with HIV: 2015':"HIV rate"})
 # With 5 bins, it seems that there is only one peak
@@ -377,6 +394,7 @@ plt.title("5 histogram bins");
 ```
 
 ```{python}
+#| vscode: {languageId: python}
 # With 10 bins, there seem to be two peaks
 
 sns.histplot(data=wb, x="HIV rate", stat="density", bins=10)
@@ -384,6 +402,7 @@ plt.title("10 histogram bins");
 ```
 
 ```{python}
+#| vscode: {languageId: python}
 # And with 20 bins, it becomes hard to say what counts as a "peak"!
 
 sns.histplot(data=wb, x ="HIV rate", stat="density", bins=20)
