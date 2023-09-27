@@ -24,6 +24,7 @@ In data science, understanding characteristics of a population starts with havin
 
 ![Lifecycle diagram](images/data_life_cycle_sampling.png)
 
+
 ## Censuses and Surveys
 
 In general: a **census** is “an official count or survey of a **population**, typically recording various details of **individuals**.”
@@ -73,7 +74,6 @@ So what's the moral of the story? Samples, while convenient, are subject to chan
 
 Today, the *Gallup Poll* is one of the leading polls for election results. The many sources of biases -- who responds to polls? Do voters tell the truth? How can we predict turnout? -- still remain, but the *Gallup Poll* uses several tactics to mitigate them. Within their sampling frame of "civilian, non-institutionalized population” of adults in telephone households in continental U.S., they use random digit dialing to include both listed/unlisted phone numbers and to avoid selection bias. Additionally, they use a within-household selection process to randomly select households with one or more adults. If no one answers, re-call multiple times to avoid non-response bias.
 
-
 ## Probability Samples
 
 When sampling, it is essential to focus on the quality of the sample rather than the quantity of the sample. A huge sample size does not fix a bad sampling method. Our main goal is to gather a sample that is representative of the population it came from. In this section, we'll explore the different types of sampling and their pros and cons. 
@@ -114,12 +114,15 @@ We can list all the possible outcomes and their respective probabilities in a ta
 | {A, B} | 0.5 |
 | {A, C} | 0.5 |
 | {B, C} | 0 |
- 
+
 This is a **probability sample** (though not a great one). Of the 3 people in my population, I know the chance of getting each subset. Suppose I’m measuring the average distance TAs live from campus.
 
 * This scheme does not see the entire population!
 * My estimate using the single sample I take has some chance error depending on if I see AB or AC.
 * This scheme is biased towards A’s response.
+
+
+
 
 ### Example Scheme 2: Simple Random Sample
 Consider the following sampling scheme:
@@ -129,7 +132,7 @@ Consider the following sampling scheme:
 * To create your sample, take that student and every 10th student listed after that (e.g. Students 8, 18, 28, 38, etc.).
 
 <details>
-  <summary>1. Is this a probability sample?</summary>
+  <summary>Is this a probability sample?</summary>
   
   Yes. For a sample [n, n + 10, n + 20, …, n + 1090], where 1 <= n <= 10, the probability of that sample is 1/10. Otherwise, the probability is 0. 
   
@@ -137,13 +140,13 @@ Consider the following sampling scheme:
 </details>
 
 <details>
-  <summary>2. Does each student have the same probability of being selected?</summary>
+  <summary>Does each student have the same probability of being selected?</summary>
   
   Yes. Each student is chosen with a probability of 1/10.
 </details>
 
 <details>
-  <summary>3. Is this a simple random sample?</summary>
+  <summary>Is this a simple random sample?</summary>
   
   No. The chance of selecting (8, 18) is 1/10; the chance of selecting (8, 9) is 0.
 </details>
@@ -300,197 +303,6 @@ You can see the curve looks roughly Gaussian/normal. Using KDE:
 #| code-fold: true
 sns.histplot(poll_result, stat='density', kde=True);
 ```
-
-### Multinomial Probabilities
-So far, we've obtained a sample from a population, and that gave us the ability to quantify error and bias. **Given the population distribution**, we can compute the probability of us getting a **particular sample**. (In the real world, we almost **never** know the population distribution, but this is a good start!). A special case called **Multinomial Probabilities** arises when we randomly sample with replacement of a **categorical** population.
-
-It's very common in data science to have an enormous population that we can only afford to sample a relatively small number of individuals from. If the population is *huge* compared to the sample, then random sampling *with* and *without* replacement are *pretty much the same*.
-
-For example, Suppose there are 10,000 people in a population. Exactly 7,500 of them like Reese's; the other 2,500 like Snickers.
-What is the probability that in a random sample of 20, all people like Reese's?
-
-* Random Sample Without Replacement (SRS): 
-    $$ 
-    \frac{7500}{10000} * \frac{7499}{99999} * ... * \frac{7482}{9982} * \frac{7481}{9981} \\
-     \\ \approx 0.75 * 0.74997 * ... * 0.7495 * 0.7495
-     \\ \approx 0.003151
-    $$
-* Random Sample With Replacement: 
-    $$(\frac{7500}{10000})^{20}  \approx 0.00317$$
-    
-
-As you can see, probabilities of sampling with replacement are much easier to compute!
-
-Multinomial probabilities arise when we sample:
-
-* Uniformly at random, with replacement.
-* A fixed number (n) times.
-* From a categorical distribution.
-* If 2 categories, Binomial
-* If > 2 categories, Multinomial:
-
-
-#### Example: Marbles
-Say we have a bag of marbles where 60% are blue, 30% are green, and 10% are red. We can use NumPy's `np.random.multinomial` to simulate random samples **with replacement**.
-
-```{python}
-marble_probabilities = [0.60, 0.30, 0.10]
-# draw 100 marbels from this bag at random with replacement.
-np.random.multinomial(100, marble_probabilities)
-```
-
-```{python}
-# We can repeat this simulation multiple times, say 5
-np.random.multinomial(100, [0.60, 0.30, 0.10], size=5)
-```
-
-If we draw 7 marbles from this bag of marbles, how many of each color will we get?
-
-Suppose we get a sample of 4 blue marbles, 2 green marbles, and 1 red marble. What is the probability of getting this sample?
-
-<details>
-  <summary>What is P(bgbbbgr)?</summary>
-  
-  Use the product rule to determine the probability for a particular order:
-
-  $P(bgbbbgr) = 0.6 * 0.3 * 0.6 * 0.6 * 0.6 * 0.3 * 0.1 = (0.6)^4 (0.3)^2 (0.1)^1 $
-</details>
-
-<details>
-  <summary>What is P(4 blue, 2 green, 1 red)?</summary>
-  
-  We use the addition rule and the multiplication rule: 
-    * The first term is the # of ways to choose 4 of 7 places to write b, then choose 2 places to write g (the other 1 gets filled with r).
-    * The second term is the probability of this ordered series of b‘s, g ‘s, and r’s for a particular outcome (say, Q1).
-
-
-  $$\frac{7!}{4! 2! 1!} (0.6)^4 (0.3)^2 (0.1)^1 $$
-
-  This is a multinomial probability!
-</details>
-
-#### Multinomial Probabilities: Generalized
-If we are drawing at random with replacement n times, from a population broken into three separate categories (where p1 + p2 + p3 = 1):
-
-* Category 1, with proportion p1 of the individuals.
-* Category 2, with proportion p2 of the individuals.
-* Category 3, with proportion p3 of the individuals.
-
-Then, the multinomial probability of drawing k<sub>1</sub> individuals from Category 1, k<sub>2</sub> individuals from Category 2, and k<sub>3</sub> individuals from Category 3 (where k<sub>1</sub> + k<sub>2</sub> + k<sub>3</sub> = n) is
-
-$$\frac{n!}{k_1! k_2! k_3!} p_1 ^ {k_1} p_2 ^ {k_2} p_3 ^ {k_3} $$
-
-**At no point in this class will you be required to memorize this!** This is just for your own understanding.
-
-## Comparing Convenience Sample and SRS
-
-Suppose that we are trying to run a poll to predict the mayoral election in Bearkeley City (an imaginary city that neighbors Berkeley)m and we took a sample to predict the election outcome by polling all retirees. Even if they answer truthfully, we have a **convenience sample**. How biased would this sample be in predicting the results? While we will not numerically quantify the bias, in this demo we'll visually show that because of the voter population distribution, any error in our prediction from a retiree sample cannot be simply due to chance:
-
-First, let's grab a dataset that has every single voter in the Bearkeley (again, this is a fake dataset) and how they **actually** voted in the election. For the purposes of this example, assume:
-* "High income" indicates a voter is above the median household income, which is $97,834 (actual Berkeley number).
-* There are only two mayoral candidates: one Democrat and one Republican.
-* Every registered voter votes in the election for the candidate under their registered party (Dem or Rep).
-
-```{python}
-#| tags: []
-import pandas as pd
-import numpy as np
-bearkeley = pd.read_csv("data/bearkeley.csv")
-
-# create a 1/0 int that indicates democratic vote
-bearkeley['vote.dem'] = (bearkeley['vote'] == 'Dem').astype(int)
-bearkeley.head()
-```
-
-```{python}
-bearkeley.shape
-```
-
-```{python}
-actual_vote = np.mean(bearkeley["vote.dem"])
-actual_vote
-```
-
-This is the **actual outcome** of the election. Based on this result, the Democratic candidate would win. However, if we were to only consider retiree voters (a retired person is anyone age 65 and up):
-
-```{python}
-convenience_sample = bearkeley[bearkeley['age'] >= 65]
-np.mean(convenience_sample["vote.dem"])
-```
-
-Based on this result, we would have predicted that the Republican candidate would win! This error is not due to the sample being too small to yield accurate predictions, because there are 359,396 retirees (about 27\% of the 1.3 million Bearkeley voters). Instead, there seems to be something larger happening. Let's visualize the voter preferences of the entire population to see how retirees trend.
-
-Let us aggregate all voters by age and visualize the fraction of Democratic voters, split by income.
-
-```{python}
-import seaborn as sns
-import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
-
-sns.set_theme(style='darkgrid', font_scale = 1.5,
-              rc={'figure.figsize':(7,5)})
-
-# aggregate all voters by age
-votes_by_demo = bearkeley.groupby(["age","high_income"]).agg("mean").reset_index()
-
-fig = plt.figure();
-red_blue = ["#bf1518", "#397eb7"]
-with sns.color_palette(sns.color_palette(red_blue)):
-    ax = sns.pointplot(data=votes_by_demo, x = "age", y = "vote.dem", hue = "high_income")
-
-ax.set_title("Voting preferences by demographics")
-fig.canvas.draw()
-new_ticks = [i.get_text() for i in ax.get_xticklabels()];
-plt.xticks(range(0, len(new_ticks), 10), new_ticks[::10]);
-```
-
-From the plot above, we see that retirees in the imaginary city of Bearkeley tend to vote less Democrat, which skewed our predictions from our sample. We also note that high-income voters tend to vote less Democrat (and more Republican).
-
-Let's compare our biased convenience sample to a simple random sample. Supposing we took an SRS the same size as our retiree sample, we see that we get a result very close to the actual vote:
-
-```{python}
-## By default, replace = False
-n = len(convenience_sample)
-random_sample = bearkeley.sample(n, replace = False)
-
-np.mean(random_sample["vote.dem"])
-```
-
-This is very close to the actual vote!
-
-We could even get pretty close with a *much smaller sample size*, say 800:
-
-It turns out that we are pretty close, **much smaller sample size**, say, 800 (we'll learn how to choose this number when we introduce the Central Limit Theorem):
-
-```{python}
-n = 800
-random_sample = bearkeley.sample(n, replace = False)
-np.mean(random_sample["vote.dem"])
-```
-
-To visualize the chance error in an SRS, let's simulate 1000 samples of the 800-size Simple Random Sample:
-
-```{python}
-poll_result = []
-nrep = 1000   # number of simulations
-n = 800       # size of our sample
-for i in range(0,nrep):
-    random_sample = bearkeley.sample(n, replace = False)
-    poll_result.append(np.mean(random_sample["vote.dem"]))
-sns.histplot(poll_result, stat='density', kde=True)
-
-# What fraction of these simulated samples would have predicted Democrat?
-poll_result = pd.Series(poll_result)
-np.sum(poll_result >= 0.5)/1000
-```
-
-A few observations: 
-
-- The KDE looks roughly Gaussian.
-- Supposing that we predicted a Democratic winner if 50\% of our sample voted Democrat, then just about 4\% of our simulated samples would have predicted the election result incorrectly
-
-This visualization further justifies why our convenience sample had an error that was not entirely just due to chance. We'll revisit this notion later in the course.
-
 
 ## Summary
 
