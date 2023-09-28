@@ -25,7 +25,7 @@ jupyter: python3
 
 Up until this point in the semester, we've focused on analyzing datasets. We've looked into the early stages of the data science lifecycle, focusing on the programming tools, visualization techniques, and data cleaning methods needed for data analysis.
 
-This lecture marks a shift in focus. We will move away from examining datasets to actually *using* our data to better understand the world. Specifically, the next sequence of lectures will explore predictive modeling: generating models to make some prediction about the world around us. In this lecture, we'll introduce the conceptual framework for setting up a modeling task. In the next few lectures, we'll put this framework into practice by implementing various kinds of models.
+This lecture marks a shift in focus. We will move away from examining datasets to actually *using* our data to better understand the world. Specifically, the next sequence of lectures will explore predictive modeling: generating models to make some predictions about the world around us. In this lecture, we'll introduce the conceptual framework for setting up a modeling task. In the next few lectures, we'll put this framework into practice by implementing various kinds of models.
 
 ## What is a Model?
 
@@ -90,10 +90,10 @@ Note: These specific models are not in the scope of Data 100 and exist to serve 
 
 The **regression line** is the unique straight line that minimizes the **mean squared error** of estimation among all straight lines. As with any straight line, it can be defined by a slope and a y-intercept:
 
-- slope: $r \cdot \frac{\text{Standard Deviation of } y}{\text{Standard Deviation of }x}$
-- y-intercept: $\text{average of }y - \text{slope}\cdot\text{average of }x$
-- regression estimate: $y\text{-intercept} + \text{slope}\cdot\text{}x$
-- residual: $\text{observed }y - \text{regression estimate}$
+- $slope = r \cdot \frac{\text{Standard Deviation of } y}{\text{Standard Deviation of }x}$
+- $y\text{-intercept} = \text{average of }y - \text{slope}\cdot\text{average of }x$
+- $\text{regression estimate} = y\text{-intercept} + \text{slope}\cdot\text{}x$
+- $\text{residual} =\text{observed }y - \text{regression estimate}$
 
 ```{python}
 import pandas as pd
@@ -191,8 +191,8 @@ Starting from the top, we have our claimed form of the regression line, and we w
 
 Recall: 
 
-- $\hat{b}$: $r \cdot \frac{\text{Standard Deviation of }y}{\text{Standard Deviation of }x}$
-- $\hat{a}$: $\text{average of }y - \text{slope}\cdot\text{average of }x$
+- $\hat{b} = r \cdot \frac{\text{Standard Deviation of }y}{\text{Standard Deviation of }x}$
+- $\hat{a} = \text{average of }y - \text{slope}\cdot\text{average of }x$
 
 :::{.callout}
 
@@ -257,7 +257,7 @@ In Data 100, we'll use slightly different notation: we will replace $a$ with $\t
 
 $$\hat{y}_i = \theta_0 + \theta_1 x_i$$
 
-The parameters of the SLR model are $\theta_0$, also called the intercept term, and $\theta_1$, also called the slope term. To create an effective model, we want to choose values for $\theta_0$ and $\theta_1$ that most accurately predict the output variable. The "best" fitting model parameters are given the special names $\hat{\theta}_0$ and $\hat{\theta}_1$ – they are the specific parameter values that allow our model to generate the best possible predictions.
+The parameters of the SLR model are $\theta_0$, also called the intercept term, and $\theta_1$, also called the slope term. To create an effective model, we want to choose values for $\theta_0$ and $\theta_1$ that most accurately predict the output variable. The "best" fitting model parameters are given the special names: $\hat{\theta}_0$ and $\hat{\theta}_1$; they are the specific parameter values that allow our model to generate the best possible predictions.
 
 In Data 8, you learned that the best SLR model parameters are:
 $$\hat{\theta}_0 = \bar{y} - \hat{\theta}_1\bar{x} \qquad \qquad \hat{\theta}_1 = r \frac{\sigma_y}{\sigma_x}$$
@@ -274,9 +274,15 @@ In Data 100, we want to understand *how* to derive these best model coefficients
 
 We've talked about the idea of creating the "best" possible predictions. This begs the question: how do we decide how "good" or "bad" our model's predictions are?
 
-A **loss function** characterizes the cost, error, or fit resulting from a particular choice of model or model parameters. This function, $L(y, \hat{y})$, quantifies how "far off" a single prediction by our model is from a true, observed value in our collected data. 
+A **loss function** characterizes the cost, error, or fit resulting from a particular choice of model or model parameters. This function, $L(y, \hat{y})$, quantifies how "bad" or "far off" a single prediction by our model is from a true, observed value in our collected data. 
 
-The choice of loss function for a particular model depends on the modeling task at hand. Regardless of the specific function used, a loss function should follow two basic principles:
+The choice of loss function for a particular model will affect the accuracy and computational cost of estimation, and it'll also depend on the estimation task at hand. For example, 
+
+* Are outputs quantitative or qualitative? 
+* Do outliers matter? 
+* Are all errors equally costly? (e.g., a false negative on a cancer test is arguably more dangerous than a false positive) 
+
+Regardless of the specific function used, a loss function should follow two basic principles:
 
 * If the prediction $\hat{y}_i$ is *close* to the actual value $y_i$, loss should be low.
 * If the prediction $\hat{y}_i$ is *far* from the actual value $y_i$, loss should be high.
@@ -289,10 +295,10 @@ $$L(y_i, \hat{y}_i) = (y_i - \hat{y}_i)^2$$
 **Absolute loss**, also known as **L1 loss**, computes loss as the absolute difference between the observed $y_i$ and predicted $\hat{y}_i$:
 $$L(y_i, \hat{y}_i) = |y_i - \hat{y}_i|$$
 
-L1 and L2 loss give us a tool for quantifying our model's performance on a single datapoint. This is a good start, but ideally, we want to understand how our model performs across our *entire* dataset. A natural way to do this is to compute the average loss across all datapoints in the dataset. This is known as the **cost function**, $\hat{R}(\theta)$:
+L1 and L2 loss give us a tool for quantifying our model's performance on a single data point. This is a good start, but ideally, we want to understand how our model performs across our *entire* dataset. A natural way to do this is to compute the average loss across all data points in the dataset. This is known as the **cost function**, $\hat{R}(\theta)$:
 $$\hat{R}(\theta) = \frac{1}{n} \sum^n_{i=1} L(y_i, \hat{y}_i)$$
 
-The cost function has many names in statistics literature. You may also encounter the terms:
+The cost function has many names in the statistics literature. You may also encounter the terms:
 
 * Empirical risk (this is why we give the cost function the name $R$)
 * Error function
@@ -326,6 +332,32 @@ $$\text{MSE} = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 = \frac{1}{n} \sum
 $$\frac{\partial}{\partial \theta_0} \text{MSE} = \frac{-2}{n} \sum_{i=1}^{n} y_i - \theta_0 - \theta_1 x_i$$
 
 $$\frac{\partial}{\partial \theta_1} \text{MSE} = \frac{-2}{n} \sum_{i=1}^{n} (y_i - \theta_0 - \theta_1 x_i)x_i$$
+
+Let's walk through these derivations in more depth, starting with the derivative of MSE with respect to $\theta_0$.
+
+Given our MSE above, we know that:
+$$\frac{\partial}{\partial \theta_0} \text{MSE} = \frac{\partial}{\partial \theta_0} \frac{1}{n} \sum_{i=1}^{n} {(y_i - \theta_0 - \theta_1 x_i)}^{2}$$
+
+Noting that the derivative of sum is equivalent to the sum of derivatives, this then becomes:
+$$\frac{1}{n} \sum_{i=1}^{n} \frac{\partial}{\partial \theta_0} {(y_i - \theta_0 - \theta_1 x_i)}^{2}$$
+
+We can then apply the chain rule.
+
+$$\frac{1}{n} \sum_{i=1}^{n} 2 \dot{(y_i - \theta_0 - \theta_1 x_i)}\dot(-1)$$
+
+Finally, we can simplify the constants, leaving us with our answer. 
+
+$$\frac{\partial}{\partial \theta_0} \text{MSE} = \frac{-2}{n} \sum_{i=1}^{n}{(y_i - \theta_0 - \theta_1 x_i)}$$
+
+Following the same procedure, we can take the derivative of MSE with respect to  $\theta_1$.
+
+$$\frac{\partial}{\partial \theta_1} \text{MSE} = \frac{\partial}{\partial \theta_1} \frac{1}{n} \sum_{i=1}^{n} {(y_i - \theta_0 - \theta_1 x_i)}^{2}$$
+
+$$ = \frac{1}{n} \sum_{i=1}^{n} \frac{\partial}{\partial \theta_1} {(y_i - \theta_0 - \theta_1 x_i)}^{2}$$
+
+$$ = \frac{1}{n} \sum_{i=1}^{n} 2 \dot{(y_i - \theta_0 - \theta_1 x_i)}\dot(-x_i)$$
+
+$$= \frac{-2}{n} \sum_{i=1}^{n} {(y_i - \theta_0 - \theta_1 x_i)}x_i$$
 
 Step 2: set the derivatives equal to 0. After simplifying terms, this produces two **estimating equations**. The best set of model parameters $(\hat{\theta}_0, \hat{\theta}_1)$ *must* satisfy these two optimality conditions.
 $$0 = \frac{-2}{n} \sum_{i=1}^{n} y_i - \hat{\theta}_0 - \hat{\theta}_1 x_i \Longleftrightarrow \frac{1}{n}\sum_{i=1}^{n} y_i - \hat{y}_i = 0$$
