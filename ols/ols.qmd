@@ -16,7 +16,7 @@ format:
 jupyter: python3
 ---
 
-::: {.callout-note collapse = "false"}
+::: {.callout-note collapse="false"}
 ## Learning Outcomes
 * Define linearity with respect to a vector of parameters $\theta$.
 * Understand the use of matrix notation to express multiple linear regression.
@@ -24,22 +24,23 @@ jupyter: python3
 * Compute performance metrics for multiple linear regression.
 :::
 
+
 We've now spent a number of lectures exploring how to build effective models – we introduced the SLR and constant models, selected cost functions to suit our modeling task, and applied transformations to improve the linear fit.
 
 Throughout all of this, we considered models of one feature ($\hat{y}_i = \theta_0 + \theta_1 x_i$) or zero features ($\hat{y}_i = \theta_0$). As data scientists, we usually have access to datasets containing *many* features. To make the best models we can, it will be beneficial to consider all of the variables available to us as inputs to a model, rather than just one. In today's lecture, we'll introduce **multiple linear regression** as a framework to incorporate multiple features into a model. We will also learn how to accelerate the modeling process – specifically, we'll see how linear algebra offers us a powerful set of tools for understanding model performance.
 
 ## Linearity 
 
-An expression is **linear in $\theta$** (a set of parameters) if it is a linear combination of the elements of the set. Checking if an expression can separate into a matrix product of two terms: a **vector of $\theta$** s, and a matrix/vector **not involving $\theta$**.
+An expression is **linear in $\theta$** (a set of parameters) if it is a linear combination of the elements of the set. Checking if an expression can separate into a matrix product of two terms -- a **vector of $\theta$** s, and a matrix/vector **not involving $\theta$** -- is a good indicator of linearity.
 
 
-Example: $\theta = [\theta_1, \theta_2, ... \theta_p]$
+For example, consider the vector $\theta = [\theta_0, \theta_1, \theta_2]$
 
-1. Linear in theta: $\hat{y} = \theta_0 + 2\theta_1 + 3\theta_2$
+1. $\hat{y} = \theta_0 + 2\theta_1 + 3\theta_2$ is linear in theta, and we can separate it into a matrix product of two terms:
 
 $$\hat{y} = \begin{bmatrix} 1 \space 2 \space 3 \end{bmatrix} \begin{bmatrix} \theta_0 \\ \theta_1 \\ \theta_2 \end{bmatrix}$$
 
-2. Not linear in theta: $\hat{y} = \theta_0\theta_1 + 2\theta_1^2 + 3log(\theta_2)$
+2. $\hat{y} = \theta_0\theta_1 + 2\theta_1^2 + 3log(\theta_2)$ is *not* linear in theta, as the $\theta_1$ term is squared, and the $\theta_2$ term is logged. We cannot separate it into a matrix product of two terms.
 
 ## Terminology for Multiple Linear Regression
 
@@ -83,12 +84,14 @@ We can explore this idea further by looking at a dataset containing aggregate pe
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 import pandas as pd
 nba = pd.read_csv('data/nba18-19.csv', index_col=0)
 nba.index.name = None # Drops name of index (players are ordered by rank)
 ```
 
 ```{python}
+#| vscode: {languageId: python}
 nba.head(5)
 ```
 
@@ -101,7 +104,8 @@ Suppose we want to fit a linear model by using some characteristics, or **featur
 * `3PA`, the number of 3-point field goals attempted per game
 
 ```{python}
-nba[['FG', 'AST', '3PA', 'PTS']]
+#| vscode: {languageId: python}
+nba[['FG', 'AST', '3PA', 'PTS']].head()
 ```
 
 Because we are now dealing with many parameter values, we've collected them all into a **parameter vector** with dimensions $(p+1) \times 1$ to keep things tidy. Remember that $p$ represents the number of features we have (in this case, 3).
@@ -137,24 +141,50 @@ We now know how to generate a single prediction from multiple observed features.
 
 Let's think about how we can apply what we did above. To accomodate for the fact that we're considering several feature variables, we'll adjust our notation slightly. Each observation can now be thought of as a row vector with an entry for each of $p$ features.
 
-<img src="images/observation.png" alt='observation' width='400'>
+
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td><img src="images/observation.png" alt='observation' width='550'>
+      </td>
+    </tr>
+  </table>
+</div>
 
 To make a prediction from the first observation in the data, we take the dot product of the parameter vector and first observation vector. To make a prediction from the *second* observation, we would repeat this process to find the dot product of the parameter vector and the *second* observation vector. If we wanted to find the model predictions for each observation in the dataset, we'd repeat this process for all $n$ observations in the data. 
 
-$$\hat{y}_1 = [1,\:x_{11},\:x_{12},\:x_{13},\:...,\:x_{1p}] \theta$$
-$$\hat{y}_2 = [1,\:x_{21},\:x_{22},\:x_{23},\:...,\:x_{2p}] \theta$$
+$$\hat{y}_1 = \theta_0 + \theta_1 x_{11} + \theta_2 x_{12} + ... + \theta_p x_{1p} = [1,\:x_{11},\:x_{12},\:x_{13},\:...,\:x_{1p}] \theta$$
+$$\hat{y}_2 = \theta_0 + \theta_1 x_{21} + \theta_2 x_{22} + ... + \theta_p x_{2p} = [1,\:x_{21},\:x_{22},\:x_{23},\:...,\:x_{2p}] \theta$$
 $$\vdots$$
-$$\hat{y}_n = [1,\:x_{n1},\:x_{n2},\:x_{n3},\:...,\:x_{np}] \theta$$
+$$\hat{y}_n = \theta_0 + \theta_1 x_{n1} + \theta_2 x_{n2} + ... + \theta_p x_{np} = [1,\:x_{n1},\:x_{n2},\:x_{n3},\:...,\:x_{np}] \theta$$
 
 Our observed data is represented by $n$ row vectors, each with dimension $(p+1)$. We can collect them all into a single matrix, which we call $\mathbb{X}$.
 
-<img src="images/design_matrix.png" alt='design_matrix' width='400'>
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td><img src="images/design_matrix.png" alt='design_matrix' width='400'>
+      </td>
+    </tr>
+  </table>
+</div>
 
-The matrix $\mathbb{X}$ is known as the **design matrix**. It contains all observed data for each of our $p$ features. It often (but not always) contains an additional column of all ones to represent the **intercept** or **bias column**. 
+
+The matrix $\mathbb{X}$ is known as the **design matrix**. It contains all observed data for each of our $p$ features, where each **row** corresponds to one **observation**, and each **column** corresponds to a **feature**. It often (but not always) contains an additional column of all ones to represent the **intercept** or **bias column**. 
 
 To review what is happening in the design matrix: each row represents a single observation. For example, a student in Data 100. Each column represents a feature. For example, the ages of students in Data 100. This convention allows us to easily transfer our previous work in DataFrames over to this new linear algebra perspective.
 
-<img src="images/row_col.png" alt='row_col' width='600'>
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/row_col.png" alt='row_col' width='600'>
+      </td>
+    </tr>
+  </table>
+</div>
+
 
 The multiple linear regression model can then be restated in terms of matrices:
 $$
@@ -162,7 +192,7 @@ $$
 \mathbb{\hat{Y}} = \mathbb{X} \theta
 $$
 
-Here, $\mathbb{\hat{Y}}$ is the **prediction vector** with dimensions $(n \times 1)$. It contains the prediction made by the model for each of the $n$ input observations.
+Here, $\mathbb{\hat{Y}}$ is the **prediction vector** with $n$ elements ($\mathbb{\hat{Y}} \in \mathbb{R}^{n}$); it contains the prediction made by the model for each of the $n$ input observations. $\mathbb{X}$ is the **design matrix** with dimensions $\mathbb{X} \in \mathbb{R}^(n \times (p + 1))$, and $\theta$ is the **parameter vector** with dimensions $\theta \in \mathbb{R}^{(p + 1)}$
 
 As a refresher, let's also review the **dot product (or inner product)**. This is a vector operation that:
 
@@ -223,7 +253,15 @@ To derive the best parameter vector to meet this goal, we can turn to the geomet
 
 Up until now, we've mostly thought of our model as a scalar product between horizontally stacked observations and the parameter vector. We can also think of $\hat{\mathbb{Y}}$ as a **linear combination of feature vectors**, scaled by the **parameters**. We use the notation $\mathbb{X}_{:, i}$ to denote the $i$th column of the design matrix. You can think of this as following the same convention as used when calling `.iloc` and `.loc`. ":" means that we are taking all entries in the $i$th column.
 
-<img src="images/columns.png" alt='columns' width='500'>
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/columns.png" alt='columns' width='500'>
+      </td>
+    </tr>
+  </table>
+</div>
 
 $$
 \hat{\mathbb{Y}} = 
@@ -253,13 +291,31 @@ Because the prediction vector, $\hat{\mathbb{Y}} = \mathbb{X} \theta$, is a **li
 
 The diagram below is a simplified view of $\text{Span}(\mathbb{X})$, assuming that each column of $\mathbb{X}$ has length $n$. Notice that the columns of $\mathbb{X}$ define a subspace of $\mathbb{R}^n$, where each point in the subspace can be reached by a linear combination of $\mathbb{X}$'s columns. The prediction vector $\mathbb{\hat{Y}}$ lies somewhere in this subspace.
 
-<img src="images/span.png" alt='span' width='600'>
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/span.png" alt='span' width='600'>
+      </td>
+    </tr>
+  </table>
+</div>
+
 
 Examining this diagram, we find a problem. The vector of true values, $\mathbb{Y}$, could theoretically lie *anywhere* in $\mathbb{R}^n$ space – its exact location depends on the data we collect out in the real world. However, our multiple linear regression model can only make predictions in the subspace of $\mathbb{R}^n$ spanned by $\mathbb{X}$. Remember the model fitting goal we established in the previous section: we want to generate predictions such that the distance between the vector of true values, $\mathbb{Y}$, and the vector of predicted values, $\mathbb{\hat{Y}}$, is minimized. This means that **we want $\mathbb{\hat{Y}}$ to be the vector in $\text{Span}(\mathbb{X})$ that is closest to $\mathbb{Y}$**. 
 
 Another way of rephrasing this goal is to say that we wish to minimize the length of the residual vector $e$, as measured by its $L_2$ norm. 
 
-<img src="images/residual.png" alt='residual' width='600'>
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/residual.png" alt='residual' width='600'>
+      </td>
+    </tr>
+  </table>
+</div>
+
 
 The vector in $\text{Span}(\mathbb{X})$ that is closest to $\mathbb{Y}$ is always the **orthogonal projection** of $\mathbb{Y}$ onto $\text{Span}(\mathbb{X}).$ Thus, we should choose the parameter vector $\theta$ that makes the **residual vector orthogonal to any vector in $\text{Span}(\mathbb{X})$**. You can visualize this as the vector created by dropping a perpendicular line from $\mathbb{Y}$ onto the span of $\mathbb{X}$. 
 
@@ -299,13 +355,22 @@ $$\text{RMSE} = \sqrt{\frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2}$$
 
 When working with SLR, we generated plots of the residuals against a single feature to understand the behavior of residuals. When working with several features in multiple linear regression, it no longer makes sense to consider a single feature in our residual plots. Instead, multiple linear regression is evaluated by making plots of the residuals against the predicted values. As was the case with SLR, a multiple linear model performs well if its residual plot shows no patterns.
 
-<img src="images/residual_plot.png" alt='residual_plot' width='500'>
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/residual_plot.png" alt='residual_plot' width='500'>
+      </td>
+    </tr>
+  </table>
+</div>
+
 
 For SLR, we used the correlation coefficient to capture the association between the target variable and a single feature variable. In a multiple linear model setting, we will need a performance metric that can account for multiple features at once. **Multiple $R^2$**, also called the **coefficient of determination**, is the **proportion of variance** of our **fitted values** (predictions) $\hat{y}_i$ to our true values $y_i$. It ranges from 0 to 1 and is effectively the *proportion* of variance in the observations the **model explains**. 
 
 $$R^2 = \frac{\text{variance of } \hat{y}_i}{\text{variance of } y_i} = \frac{\sigma^2_{\hat{y}}}{\sigma^2_y}$$
 
-Note that for OLS with an intercept term (e.g., $$\hat{y} = \theta_0 + \theta_1x_1 + \theta_2x_2 + \vdot + \theta_px_p) $\mathbb{R}^2$ is equal to the square of the correlation between $y, \hat{y}$. On the other hand, for SLR  $\mathbb{R}^2 = r^2$, the correlation between $x, y$. The proof of these last two properties is out of scope for this course.
+Note that for OLS with an intercept term, for example $\hat{y} = \theta_0 + \theta_1x_1 + \theta_2x_2 + \cdots + \theta_px_p$, $\mathbb{R}^2$ is equal to the square of the correlation between $y$ and $\hat{y}$. On the other hand for SLR, $\mathbb{R}^2$ is equal to $r^2$, the correlation between $x$ and $y$. The proof of these last two properties is out of scope for this course.
 
 Additionally, as we add more features, our fitted values tend to become closer and closer to our actual values. Thus, $\mathbb{R}^2$ increases.
 
@@ -313,20 +378,20 @@ Adding more features doesn't always mean our model is better though! We'll see w
 
 ## OLS Properties
 
-1. When using the optimal parameter vector, our residuals $e = \mathbb{Y} - \hat{\mathbb{Y}}$ are orthogonal to $span(\mathbb{X})$ 
+1. When using the optimal parameter vector, our residuals $e = \mathbb{Y} - \hat{\mathbb{Y}}$ are orthogonal to $span(\mathbb{X})$.
 
 $$\mathbb{X}^Te = 0 $$
 
 ::: {.callout}
 Proof: 
 
-The optimal parameter vector, $\hat{\theta}$, solves the normal equations $\implies \hat{\theta} = \mathbb{X}^T\mathbb{X}^{-1}\mathbb{X}^T\mathbb{Y}$
+* The optimal parameter vector, $\hat{\theta}$, solves the normal equations $\implies \hat{\theta} = \mathbb{X}^T\mathbb{X}^{-1}\mathbb{X}^T\mathbb{Y}$
 
 $$\mathbb{X}^Te = \mathbb{X}^T (\mathbb{Y} - \mathbb{\hat{Y}}) $$
 
 $$\mathbb{X}^T (\mathbb{Y} - \mathbb{X}\hat{\theta}) = \mathbb{X}^T\mathbb{Y} - \mathbb{X}^T\mathbb{X}\hat{\theta}$$
 
-Any matrix multiplied with its own inverse is the identity matrix $\mathbb{I}$
+* Any matrix multiplied with its own inverse is the identity matrix $\mathbb{I}$
 
 $$\mathbb{X}^T\mathbb{Y} - (\mathbb{X}^T\mathbb{X})(\mathbb{X}^T\mathbb{X})^{-1}\mathbb{X}^T\mathbb{Y} = \mathbb{X}^T\mathbb{Y} - \mathbb{X}^T\mathbb{Y} = 0$$
 :::
@@ -338,16 +403,11 @@ $$\sum_i^n e_i = 0$$
 ::: {.callout}
 Proof:
 
-For all linear models with an **intercept term**, the average of the predicted $y$ values is equal to the average of the true $y$ values.
-
+* For all linear models with an **intercept term**, the average of the predicted $y$ values is equal to the average of the true $y$ values.
 $$\bar{y} = \bar{\hat{y}}$$
-
-Rewriting the sum of residuals as two separate sums,
-
+* Rewriting the sum of residuals as two separate sums,
 $$\sum_i^n e_i = \sum_i^n y_i - \sum_i^n\hat{y}_i$$
-
-Each respective sum is a multiple of the average of the sum.
-
+* Each respective sum is a multiple of the average of the sum.
 $$\sum_i^n e_i = n\bar{y} - n\bar{y} = n(\bar{y} - \bar{y}) = 0$$
 :::
 
@@ -356,15 +416,12 @@ $$\sum_i^n e_i = n\bar{y} - n\bar{y} = n(\bar{y} - \bar{y}) = 0$$
 ::: {.callout}
 Proof: 
 
-We know the solution to the normal equation $\mathbb{X}^T\mathbb{X}\hat{\theta} = \mathbb{Y}$ is the least square estimate that fulfills the prior equality.
-
-$\hat{\theta}$ has a **unique** solution $\iff$ the square matrix $\mathbb{X}^T\mathbb{X}$ is **invertible**.
-
-The rank of a square matrix is the maximum number of linearly independent columns it contains. $\mathbb{X}^T\mathbb{X}$ has shape $(p + 1) \times (p + 1)$, and therefore has max rank $p + 1$. 
-
-$rank(\mathbb{X}^T\mathbb{X})$ = $rank(\mathbb{X})$ (proof out of scope).
-
-Therefore, $\mathbb{X}^T\mathbb{X}$ has rank p + 1 $\iff$  $\mathbb{X}$ has rank p + 1 $\iff \mathbb{X}$ is full column rank.
+* We know the solution to the normal equation $\mathbb{X}^T\mathbb{X}\hat{\theta} = \mathbb{Y}$ is the least square estimate that fulfills the prior equality.
+* $\hat{\theta}$ has a **unique** solution $\iff$ the square matrix $\mathbb{X}^T\mathbb{X}$ is **invertible**.
+  * The rank of a square matrix is the maximum number of linearly independent columns it contains. 
+  * $\mathbb{X}^T\mathbb{X}$ has shape $(p + 1) \times (p + 1)$, and therefore has max rank $p + 1$. 
+* $rank(\mathbb{X}^T\mathbb{X})$ = $rank(\mathbb{X})$ (proof out of scope).
+* Therefore, $\mathbb{X}^T\mathbb{X}$ has rank p + 1 $\iff$  $\mathbb{X}$ has rank p + 1 $\iff \mathbb{X}$ is full column rank.
 :::
 
 To summarize:
