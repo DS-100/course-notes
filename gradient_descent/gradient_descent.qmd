@@ -5,7 +5,7 @@ execute:
   warning: false
 format:
   html:
-    code-fold: true
+    code-fold: false
     code-tools: true
     toc: true
     toc-title: Gradient Descent
@@ -25,7 +25,7 @@ jupyter: python3
 :::
 
 At this point, we've grown quite familiar with the process of choosing a model and a corresponding loss function and optimizing parameters by choosing the values of $\theta$ that minimize the loss function. So far, we've optimized $\theta$ by
-1. Using calculus to take the derivative of the loss function with respect to $\theta$, setting it equal to 0, and solve.
+1. Using calculus to take the derivative of the loss function with respect to $\theta$, setting it equal to 0, and solving for $\theta$.
 2. Using the geometric argument of orthogonality to derive the OLS solution $\hat{\theta} = (\mathbb{X}^T \mathbb{X})^{-1}\mathbb{X}^T \mathbb{Y}$.
 
 One thing to note, however, is that the techniques we used above can only be applied if we make some big assumptions. For the calculus approach, we assumed that the loss function was differentiable at all points and that the algebra was manageable; for the geometric approach, OLS *only* applies when using a linear model with MSE loss. What happens when we have more complex models with different, more complex loss functions? The techniques we've learned so far will not work, so we need a new optimization technique: **gradient descent**. 
@@ -116,7 +116,7 @@ It turns out that under the hood, the `fit` method for `LinearRegression` models
 In Data 100, the gradient descent process will usually be invisible to us, hidden beneath an abstraction layer. However, to be good data scientists, it's important that we know the underlying principles that optimization functions harness to find optimal parameters.
 
 
-## Digging into Gradient Descent
+# Digging into Gradient Descent
 Looking at the function across this domain, it is clear that the function's minimum value occurs around $\theta = 5.3$. Let's pretend for a moment that we *couldn't* see the full view of the cost function. How would we guess the value of $\theta$ that minimizes the function? 
 
 It turns out that the first derivative of the function can give us a clue. In the plots below, the line indicates the value of the derivative of each value of $\theta$. The derivative is negative where it is red and positive where it is green.
@@ -159,7 +159,7 @@ In other words, the derivative of the function at each point tells us the direct
 * A negative slope means we want to step to the right, or move in the *positive* direction. 
 * A positive slope means we want to step to the left, or move in the *negative* direction.
 
-### Algorithm Attempt 1
+## Algorithm Attempt 1
 Armed with this knowledge, let's try to see if we can use the derivative to optimize the function.
 
 We start by making some guess for the minimizing value of $x$. Then, we look at the derivative of the function at this value of $x$, and step downhill in the *opposite* direction. We can express our new rule as a recurrence relation:
@@ -173,7 +173,7 @@ A few steps are shown below, where the old step is shown as a transparent point,
 <div align="middle">
   <table style="width:100%">
     <tr align="center">
-      <td><img src="images/grad_descent_2.png" alt='grad_descent_2' width='600'>
+      <td><img src="images/grad_descent_1.png" alt='grad_descent_2' width='800'>
       </td>
     </tr>
   </table>
@@ -184,7 +184,7 @@ Looking pretty good! We do have a problem though – once we arrive close to the
 <div align="middle">
   <table style="width:100%">
     <tr align="center">
-      <td><img src="images/grad_descent_2.png" alt='grad_descent_2' width='600'>
+      <td><img src="images/grad_descent_2.png" alt='grad_descent_2' width='500'>
       </td>
     </tr>
   </table>
@@ -192,7 +192,7 @@ Looking pretty good! We do have a problem though – once we arrive close to the
 
 In other words, each step we take when updating our guess moves us too far. We can address this by decreasing the size of each step. 
 
-### Algorithm Attempt 2
+## Algorithm Attempt 2
 Let's update our algorithm to use a **learning rate** (also sometimes called the step size), which controls how far we move with each update. We represent the learning rate with $\alpha$. 
 
 $$x^{(t+1)} = x^{(t)} - \alpha \frac{d}{dx} f(x^{(t)})$$
@@ -204,13 +204,13 @@ Updating our function to use $\alpha=0.3$, our algorithm successfully **converge
 <div align="middle">
   <table style="width:100%">
     <tr align="center">
-      <td><img src="images/grad_descent_3.png" alt='grad_descent_3' width='600'>
+      <td><img src="images/grad_descent_3.png" alt='grad_descent_3' width='500'>
       </td>
     </tr>
   </table>
 </div>
 
-### Convexity
+## Convexity
 In our analysis above, we focused our attention on the global minimum of the loss function. You may be wondering: what about the local minimum that's just to the left? 
 
 If we had chosen a different starting guess for $\theta$, or a different value for the learning rate $\alpha$, our algorithm may have gotten "stuck" and converged on the local minimum, rather than on the true optimum value of loss. 
@@ -241,9 +241,9 @@ To put this into words: if you drew a line between any two points on the curve, 
 
 In summary, non-convex loss functions can cause problems with optimization. This means that our choice of loss function is a key factor in our modeling process. It turns out that MSE *is* convex, which is a major reason why it is such a popular choice of loss function.
 
-## Gradient Descent in 1 Dimension
+# Gradient Descent in 1 Dimension
 
-> **Terminology clarification**: In past lectures, we have used “loss” to refer to the error incurred on a *single* datapoint. In applications, we usually care more about the average error across *all* datapoints. Going forward, we will take the “model’s loss” to mean the model’s average error across the dataset. This is sometimes also known as the empirical risk, cost function, or objective function. $$L(\theta) = R(\theta) = \frac{1}{n} \sum_{i=1}^{n} l(y, \hat{y})$$
+> **Terminology clarification**: In past lectures, we have used “loss” to refer to the error incurred on a *single* datapoint. In applications, we usually care more about the average error across *all* datapoints. Going forward, we will take the “model’s loss” to mean the model’s average error across the dataset. This is sometimes also known as the empirical risk, cost function, or objective function. $$L(\theta) = R(\theta) = \frac{1}{n} \sum_{i=1}^{n} L(y, \hat{y})$$
 
 In our discussion above, we worked with some arbitrary function $f$. As data scientists, we will almost always work with gradient descent in the context of optimizing *models* – specifically, we want to apply gradient descent to find the minimum of a *loss function*. In a modeling context, our goal is to minimize a *loss function* by choosing the minimizing model *parameters*.
 
@@ -262,7 +262,7 @@ We can "translate" our gradient descent rule from before by replacing $x$ with $
 
 $$\theta^{(t+1)} = \theta^{(t)} - \alpha \frac{d}{d\theta} L(\theta^{(t)})$$
 
-### Gradient Descent on the `tips` Dataset 
+## Gradient Descent on the `tips` Dataset 
 To see this in action, let's consider a case where we have a linear model with no offset. We want to predict the tip (y) given the price of a meal (x). To do this, we
 
 * Choose a model: $\hat{y} = \theta_1 x$,
@@ -299,6 +299,7 @@ fig.show()
 ```
 
 To apply gradient descent, we need to compute the derivative of the loss function with respect to our parameter $\theta_1$.
+
 * Given our loss function, $$L(\theta) = MSE(\theta) = \frac{1}{n} \sum_{i=1}^n (y_i - \theta_1x_i)^2$$
 * We take the derivative with respect to $\theta_1$ $$\frac{\partial}{\partial \theta_{1}} L(\theta_1^{(t)}) = \frac{-2}{n} \sum_{i=1}^n (y_i - \theta_1^{(t)} x_i) x_i$$
 * Which results in the gradient descent update rule
@@ -349,7 +350,7 @@ plt.ylabel(r"$L(\theta_1)$");
 print(f"Final guess for theta_1: {trajectory[-1]}")
 ```
 
-## Gradient Descent on Multi-Dimensional Models
+# Gradient Descent on Multi-Dimensional Models
 The function we worked with above was one-dimensional – we were only minimizing the function with respect to a single parameter, $\theta$. However, models usually have a cost function with multiple parameters that need to be optimized. For example, simple linear regression has 2 parameters: $\hat{y} + \theta_0 + \theta_1x$, and multiple linear regression has $p+1$ parameters: $\mathbb{Y} = \theta_0 + \theta_1 \Bbb{X}_{:,1} + \theta_2 \Bbb{X}_{:,2} + \cdots + \theta_p \Bbb{X}_{:,p}$
 
 We'll need to expand gradient descent so we can update our guesses for all model parameters, all in one go.
@@ -408,7 +409,7 @@ fig.update_layout(
 fig.show()
 ```
 
-### The Gradient Vector
+## The Gradient Vector
 As before, the derivative of the loss function tells us the best way towards the minimum value.
 
 On a 2D (or higher) surface, the best way to go down (gradient) is described by a *vector*.
@@ -434,7 +435,7 @@ For the *vector* of parameter values $\vec{\theta} = \begin{bmatrix}
          \end{bmatrix}$, we take the *partial derivative* of loss with respect to each parameter: $\frac{\partial L}{\partial \theta_0}$ and $\frac{\partial L}{\partial \theta_1}$.
 
 The **gradient vector** is therefore 
-$$\nabla_\theta L =  \begin{bmatrix} \frac{\partial L}{\partial \theta_0} \\ \frac{\partial L}{\partial \theta_1} \\... \end{bmatrix}$$
+$$\nabla_\theta L =  \begin{bmatrix} \frac{\partial L}{\partial \theta_0} \\ \frac{\partial L}{\partial \theta_1} \\ \vdots \end{bmatrix}$$
 where $\nabla_\theta L$ always points in the downhill direction of the surface. 
 
 We can use this to update our 1D gradient rule for models with multiple parameters. 
@@ -445,15 +446,11 @@ $$\begin{bmatrix}
            \theta_{0}^{(t+1)} \\
            \theta_{1}^{(t+1)} \\
            \vdots
-         \end{bmatrix}
-=
-\begin{bmatrix}
+         \end{bmatrix} = \begin{bmatrix}
            \theta_{0}^{(t)} \\
            \theta_{1}^{(t)} \\
            \vdots
-         \end{bmatrix}
-- \alpha
-\begin{bmatrix}
+         \end{bmatrix} - \alpha \begin{bmatrix}
            \frac{\partial L}{\partial \theta_{0}} \\
            \frac{\partial L}{\partial \theta_{1}} \\
            \vdots \\
@@ -468,7 +465,7 @@ $$\begin{bmatrix}
   * $\vec{\theta}^{(t+1)}$ is the next value of $\theta$
   * $\nabla_{\vec{\theta}} L(\theta^{(t)})$ is the gradient of the loss function evaluated at the current $\vec{\theta}^{(t)}$
 
-## Batch, Mini-Batch Gradient Descent and Stochastic Gradient Descent
+# Batch, Mini-Batch Gradient Descent and Stochastic Gradient Descent
 
 Formally, the algorithm we derived above is called **batch gradient descent.** For each iteration of the algorithm, the derivative of loss is computed across the *entire* batch of all $n$ datapoints. While this update rule works well in theory, it is not practical in most circumstances. For large datasets (with perhaps billions of datapoints), finding the gradient across all the data is incredibly computationally taxing; gradient descent will converge slowly because each individual update is slow.
 

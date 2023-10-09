@@ -146,7 +146,7 @@ Learning Outcomes
 </div>
 </div>
 </div>
-<p>At this point, we’ve grown quite familiar with the process of choosing a model and a corresponding loss function and optimizing parameters by choosing the values of <span class="math inline">\(\theta\)</span> that minimize the loss function. So far, we’ve optimized <span class="math inline">\(\theta\)</span> theta by 1. Using calculus to take the derivative of the loss function with respect to <span class="math inline">\(\theta\)</span>, set it equal to 0, and solve. 2. Using the geometric argument of orthogonality to derive the OLS solution <span class="math inline">\(\hat{\theta} = (\mathbb{X}^T \mathbb{X})^{-1}\mathbb{X}^T \mathbb{Y}\)</span>.</p>
+<p>At this point, we’ve grown quite familiar with the process of choosing a model and a corresponding loss function and optimizing parameters by choosing the values of <span class="math inline">\(\theta\)</span> that minimize the loss function. So far, we’ve optimized <span class="math inline">\(\theta\)</span> by 1. Using calculus to take the derivative of the loss function with respect to <span class="math inline">\(\theta\)</span>, setting it equal to 0, and solving for <span class="math inline">\(\theta\)</span>. 2. Using the geometric argument of orthogonality to derive the OLS solution <span class="math inline">\(\hat{\theta} = (\mathbb{X}^T \mathbb{X})^{-1}\mathbb{X}^T \mathbb{Y}\)</span>.</p>
 <p>One thing to note, however, is that the techniques we used above can only be applied if we make some big assumptions. For the calculus approach, we assumed that the loss function was differentiable at all points and that the algebra was manageable; for the geometric approach, OLS <em>only</em> applies when using a linear model with MSE loss. What happens when we have more complex models with different, more complex loss functions? The techniques we’ve learned so far will not work, so we need a new optimization technique: <strong>gradient descent</strong>.</p>
 <blockquote class="blockquote">
 <p><strong>BIG IDEA</strong>: use an algorithm instead of solving for an exact answer</p>
@@ -195,7 +195,7 @@ Learning Outcomes
 </div>
 </div>
 <p>This process is essentially the same as before where we made a graphical plot, it’s just that we’re only looking at 20 selected points.</p>
-<div class="cell" data-execution_count="12">
+<div class="cell" data-execution_count="5">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>xs <span class="op">=</span> np.linspace(<span class="dv">1</span>, <span class="dv">7</span>, <span class="dv">200</span>)</span>
@@ -240,7 +240,7 @@ Learning Outcomes
 </div>
 <p><code>scipy.optimize.minimize</code> is great. It may also seem a bit magical. How could you write a function that can find the minimum of any mathematical function? There are a number of ways to do this, which we’ll explore in today’s lecture, eventually arriving at the important idea of <strong>gradient descent</strong>, which is the principle that <code>scipy.optimize.minimize</code> uses.</p>
 <p>It turns out that under the hood, the <code>fit</code> method for <code>LinearRegression</code> models uses gradient descent. Gradient descent is also how much of machine learning works, including even advanced neural network models.</p>
-<p>In Data 100, the gradient descent process will usually be invisible to us, hidden beneath an abstraction layer. However, to be good data scientists, it’s important that we know the basic principles beyond the optimization functions that harness to find optimal parameters.</p>
+<p>In Data 100, the gradient descent process will usually be invisible to us, hidden beneath an abstraction layer. However, to be good data scientists, it’s important that we know the underlying principles that optimization functions harness to find optimal parameters.</p>
 </section>
 </section>
 <section id="digging-into-gradient-descent" class="level1">
@@ -296,7 +296,7 @@ Learning Outcomes
 <table style="width:100%">
 <tbody><tr align="center">
 <td>
-<img src="images/grad_descent_2.png" alt="grad_descent_2" width="600">
+<img src="images/grad_descent_1.png" alt="grad_descent_2" width="800">
 </td>
 </tr>
 
@@ -308,7 +308,7 @@ Learning Outcomes
 <table style="width:100%">
 <tbody><tr align="center">
 <td>
-<img src="images/grad_descent_2.png" alt="grad_descent_2" width="600">
+<img src="images/grad_descent_2.png" alt="grad_descent_2" width="500">
 </td>
 </tr>
 
@@ -327,7 +327,7 @@ Learning Outcomes
 <table style="width:100%">
 <tbody><tr align="center">
 <td>
-<img src="images/grad_descent_3.png" alt="grad_descent_3" width="600">
+<img src="images/grad_descent_3.png" alt="grad_descent_3" width="500">
 </td>
 </tr>
 
@@ -626,11 +626,23 @@ Learning Outcomes
 <p>Math Aside: Partial Derivatives - For an equation with multiple variables, we take a <strong>partial derivative</strong> by differentiating with respect to just one variable at a time. The partial derivative is denoted with a <span class="math inline">\(\partial\)</span>. Intuitively, we want to see how the function changes if we only vary one variable while holding other variables constant. - Using <span class="math inline">\(f(x, y) = 3x^2 + y\)</span> as an example, - taking the partial derivative with respect to x and treating y as a constant gives us <span class="math inline">\(\frac{\partial f}{\partial x} = 6x\)</span> - taking the partial derivative with respect to y and treating x as a constant gives us <span class="math inline">\(\frac{\partial f}{\partial y} = 1\)</span></p>
 </blockquote>
 <p>For the <em>vector</em> of parameter values <span class="math inline">\(\vec{\theta} = \begin{bmatrix}  \theta_{0} \\  \theta_{1} \\  \end{bmatrix}\)</span>, we take the <em>partial derivative</em> of loss with respect to each parameter: <span class="math inline">\(\frac{\partial L}{\partial \theta_0}\)</span> and <span class="math inline">\(\frac{\partial L}{\partial \theta_1}\)</span>.</p>
-<p>The <strong>gradient vector</strong> is therefore <span class="math display">\[\nabla_\theta L =  \begin{bmatrix} \frac{\partial L}{\partial \theta_0} \\ \frac{\partial L}{\partial \theta_1} \\... \end{bmatrix}\]</span> where <span class="math inline">\(\nabla_\theta L\)</span> always points in the downhill direction of the surface.</p>
+<p>The <strong>gradient vector</strong> is therefore <span class="math display">\[\nabla_\theta L =  \begin{bmatrix} \frac{\partial L}{\partial \theta_0} \\ \frac{\partial L}{\partial \theta_1} \\ \vdots \end{bmatrix}\]</span> where <span class="math inline">\(\nabla_\theta L\)</span> always points in the downhill direction of the surface.</p>
 <p>We can use this to update our 1D gradient rule for models with multiple parameters.</p>
 <ul>
 <li><p>Recall our 1D update rule: <span class="math display">\[\theta^{(t+1)} = \theta^{(t)} - \alpha \frac{d}{d\theta}L(\theta^{(t)})\]</span></p></li>
-<li><p>For models with multiple parameters, we work in terms of vectors: <span class="math display">\[\begin{bmatrix} \theta_{0}^{(t+1)} \\ \theta_{1}^{(t+1)} \\ \vdots \end{bmatrix} = \begin{bmatrix}  \theta_{0}^{(t)} \\  \theta_{1}^{(t)} \\  \vdots  \end{bmatrix} - \alpha \begin{bmatrix}  \frac{\partial L}{\partial \theta_{0}} \\  \frac{\partial L}{\partial \theta_{1}} \\  \vdots \\  \end{bmatrix}\]</span></p></li>
+<li><p>For models with multiple parameters, we work in terms of vectors: <span class="math display">\[\begin{bmatrix}
+         \theta_{0}^{(t+1)} \\
+         \theta_{1}^{(t+1)} \\
+         \vdots
+       \end{bmatrix} = \begin{bmatrix}
+         \theta_{0}^{(t)} \\
+         \theta_{1}^{(t)} \\
+         \vdots
+       \end{bmatrix} - \alpha \begin{bmatrix}
+         \frac{\partial L}{\partial \theta_{0}} \\
+         \frac{\partial L}{\partial \theta_{1}} \\
+         \vdots \\
+       \end{bmatrix}\]</span></p></li>
 <li><p>Written in a more compact form, <span class="math display">\[\vec{\theta}^{(t+1)} = \vec{\theta}^{(t)} - \alpha \nabla_{\vec{\theta}} L(\theta^{(t)}) \]</span></p>
 <ul>
 <li><span class="math inline">\(\theta\)</span> is a vector with our model weights</li>
