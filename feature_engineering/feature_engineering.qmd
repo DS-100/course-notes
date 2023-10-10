@@ -1,14 +1,14 @@
 ---
-title: Feature Engineering
+title: Sklearn and Feature Engineering
 execute:
   echo: true
   warning: false
 format:
   html:
-    code-fold: true
+    code-fold: false
     code-tools: true
     toc: true
-    toc-title: Feature Engineering
+    toc-title: Sklearn and Feature Engineering
     page-layout: full
     theme:
       - cosmo
@@ -17,240 +17,396 @@ format:
 jupyter: python3
 ---
 
-::: {.callout-note collapse="true"}
+::: {.callout-note collapse="false"}
 ## Learning Outcomes
+* Apply the `sklearn` library for model creation and training
 * Recognize the value of feature engineering as a tool to improve model performance
-* Implement polynominal feature generation and one hot encoding
+* Implement polynomial feature generation and one hot encoding
 * Understand the interactions between model complexity, model variance, and training error
 :::
 
-At this point in the course, we've equipped ourselves with some powerful techniques to build and optimize models. We've explored how to develop models of multiple variables, as well as how to fit these models to maximize their performance.
+At this point, we've grown quite familiar with the modeling process. We've introduced the concept of loss, used it to fit several types of models, and, most recently, extended our analysis to multiple regression. Along the way, we've forged our way through the mathematics of deriving the optimal model parameters in all its gory detail. It's time to make our lives a little easier – let's implement the modeling process in code!
 
-All of this was done with one major caveat: the regression models we've worked with so far are all **linear in the input variables**. We've assumed that our predictions should be some combination of linear variables. While this works well in some cases, the real world isn't always so straightforward. In today's lecture, we'll learn an important method to address this issue – and consider some new problems that can arise when we do so.
+In this lecture, we'll explore two techniques for model fitting:
 
-## Feature Engineering
+1. Translating our derived formulas for regression to Python
+2. Using the `sklearn` Python package
 
-Feature Engineering is the process of *transforming* the raw features into *more informative features* that can be used in modeling or EDA tasks.
+With our new programming frameworks in hand, we will also add sophistication to our models by introducing more complex features to enhance model performance. 
 
-Feature engineering allows you to:
-Capture domain knowledge (e.g. periodicity or relationships between features).
-Express non-linear relationships using simple linear models.
-Encode non-numeric features to be used as inputs to models.
-Example: Using the country of origin of a car as an input to modeling its efficiency.
+## Implementing Derived Formulas in Code
 
-
-Why doesn’t sklearn doesn’t have SquareRegression /PolynomialRegression.
-
-- We can translate these into linear models with features that are polynomials of x.
-- Feature engineering saves `sklearn` a lot of redundancy in their library.
-- Linear models have really nice properties.
-
-
-
-## Feature Functions
-
-A feature function takes our original d dimensional input, $\mathbb{X}$, and transforms it into a $d'$ dimensional input $\Phi$.
-
-For example, when we add the squared term of an existing column, we are effectively using kind of feature function, taking a $n \times 1$ matrix, $[hp]$, and turning it into an $n \times 2$ matrix $[hp,hp^2]$ 
-
-As number of features grows, we can capture arbitrarily complex relationships.
-
-Let's take a moment to dig further in to remind ourselves where this linearity comes from. Consider the following dataset on vehicles:
+Throughout this lecture, we'll refer to the `penguins` dataset. 
 
 ```{python}
+import pandas as pd
 import seaborn as sns
-vehicles = sns.load_dataset("mpg").rename(columns={"horsepower":"hp"}).dropna()
-vehicles.head(5)
+import numpy as np
+
+penguins = sns.load_dataset("penguins")
+penguins = penguins[penguins["species"] == "Adelie"].dropna()
+penguins.head()
 ```
 
-Suppose we wish to develop a model to predict a vehicle's fuel efficiency (`"mpg"`) as a function of its horsepower (`"hp"`). Glancing at the plot below, we see that the relationship between `"mpg"` and `"hp"` is non-linear – an SLR fit doesn't capture the relationship between the two variables.
-
-<img src="images/degree_1.png" alt='degree_1' width='600'>
-
-Recall our standard multiple linear regression model. In its current form, it is linear in terms of both $\theta_i$ and $x$:
-
-$$\hat{y} = \theta_0 + \theta_1 x + \theta_2 x\:+\:...$$
-
-Just by eyeballing the `vehicle` data plotted above, it seems that a *quadratic* model might be more appropriate. In other words, a model of the form below would likely do a better job of capturing the non-linear relationship between the two variables:
-
-$$\hat{y} = \theta_0 + \theta_1 x + \theta_2 x^2$$
-
-This looks fairly similar to our original multiple regression framework! Importantly, it is **still linear in $\theta_i$** – the prediction $\hat{y}$ is a linear combination of the model parameters. This means that we can use the same linear algebra methods as before to derive the optimal model parameters when fitting the model.
-
-You may be wondering: how can this be a linear model if there is now a $x^2$ term? Although the model contains non-linear $x$ terms, it is linear with respect to the *model parameters*, $\theta_i$. Because our OLS derivation relied on assuming a linear model of $\theta_i$, the method is still valid to fit this new model.
-
-If we refit the model with `"hp"` squared as its own feature, we see that the model follows the data much more closely.
-
-$$\hat{\text{mpg}} = \theta_0 + \theta_1 (\text{hp}) + \theta_2 (\text{hp})^2$$
-
-<img src="images/degree_2.png" alt='degree_2' width='600'>
-
-Looks much better! What we've done here is called **feature engineering**: the process of transforming the raw features of a dataset into more informative features for modeling. By squaring the `"hp"` feature, we were able to create a new feature that signficantly improved the quality of our model.
-
-We perform feature engineering by defining a **feature function**. A feature function is some function applied to the original variables in the data to generate one or more new features. More formally, a feature function is said to take a $d$ dimensional input and transform it to a $p$ dimensional input. This results in a new, feature-engineered design matrix that we rename $\Phi$.
-
-$$\mathbb{X} \in \mathbb{R}^{n \times d} \longrightarrow \Phi \in \mathbb{R}^{n \times p}$$
-
-In the `vehicles` example above, we applied a feature function to transform the original input with $d=1$ features into an engineered design matrix with $p=2$ features.
-
-## One Hot Encoding
-Feature engineering opens up a whole new set of possibilities for designing better performing models. As you will see in lab and homework, feature engineering is one of the most important parts of the entire modeling process.
-
-A particularly powerful use of feature engineering is to allow us to perform regression on non-numeric features. **One hot encoding** is a feature engineering technique that generates numeric features from categorical data, allowing us to use our usual methods to fit a regression model on the data. 
-
-To illustrate how this works, we'll refer back to the `tips` data from last lecture. Consider the `"day"` column of the dataset:
+Our goal will be to predict the value of the `"bill_depth_mm"` for a particular penguin given its `"flipper_length_mm"` and `"body_mass_g"`. We'll also add a bias column of all ones to represent the intercept term of our models.
 
 ```{python}
-import numpy as np
-np.random.seed(1337)
-tips_df = sns.load_dataset("tips").sample(100)
-tips_df[["day"]].head(5)
+# Add a bias column of all ones to `penguins`
+penguins["bias"] = np.ones(len(penguins), dtype=int) 
+
+# Define the design matrix, X...
+X = penguins[["bias", "flipper_length_mm", "body_mass_g"]].to_numpy()
+
+# ...as well as the target variable, y
+Y = penguins[["bill_depth_mm"]].to_numpy()
+# Converting X and Y to NumPy arrays avoids misinterpretation of column labels
 ```
 
-   At first glance, it doesn't seem possible to fit a regression model to this data – we can't directly perform any mathematical operations on the entry "Thur". 
-  
-To resolve this, we instead create a new table with a feature for each unique value in the original `"day"` column. We then iterate through the `"day"` column. For each entry in `"day"` we fill the corresponding feature in the new table with 1. All other features are set to 0.
+In the lecture on ordinary least squares, we expressed multiple linear regression using matrix notation.
 
-<img src="images/ohe.png" alt='ohe' width='600'>
+$$\hat{\mathbb{Y}} = \mathbb{X}\theta$$
 
-This can be implemented in code using `sklearn`'s `OneHotEncoder()` to generate the one hot encoding, then calling `pd.concat` to combine these new features with the original DataFrame.
+We used a geometric approach to derive the following expression for the optimal model parameters:
+
+$$\hat{\theta} = (\mathbb{X}^T \mathbb{X})^{-1}\mathbb{X}^T \mathbb{Y}$$
+
+That's a whole lot of matrix manipulation. How do we implement it in Python?
+
+There are three operations we need to perform here: multiplying matrices, taking transposes, and finding inverses. 
+
+* To perform matrix multiplication, use the `@` operator
+* To take a transpose, call the `.T` attribute of an array or `DataFrame`
+* To compute an inverse, use NumPy's in-built method `np.linalg.inv`
+
+Putting this all together, we can compute the OLS estimate for the optimal model parameters, stored in the array `theta_hat`.
 
 ```{python}
 #| code-fold: false
-import pandas as pd
-from sklearn.preprocessing import OneHotEncoder
-
-# Perform the one hot encoding
-oh_enc = OneHotEncoder()
-oh_enc.fit(tips_df[['day']])
-ohe_data = oh_enc.transform(tips_df[['day']]).toarray()
-
-
-# Combine with original features
-data_w_ohe = (tips_df
-              .join(
-                  pd.DataFrame(ohe_data, columns=oh_enc.get_feature_names_out(), index=tips_df.index))
-             )
-data_w_ohe
+theta_hat = np.linalg.inv(X.T @ X) @ X.T @ Y
+theta_hat
 ```
 
-Now, the "day" feature (or rather, the four new boolean features that represent day) can be used to fit a model.
+To make predictions using our optimized parameter values, we matrix-multiply the design matrix with the parameter vector:
 
-## Higher-order Polynomial Example
-
-Let’s return to where we started today: Creating higher-order polynomial features for the mpg dataset.
-
-What happens if we add a feature corresponding to the horsepower, *cubed*? or to the fourth power? the fifth power?
-
-* Will we get better results?
-* What will the model look like?
-
-Let’s try it out. The below code plots polynomial models fit to the mpg dataset, from order 0 (the constant model) to order 5 (polynomial features through horsepower to the fifth power).
+$$\hat{\mathbb{Y}} = \mathbb{X}\theta$$
 
 ```{python}
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn.metrics import mean_squared_error
-from sklearn.linear_model import LinearRegression
-import matplotlib.pyplot as plt
-
-
-vehicle_data = sns.load_dataset("mpg")
-vehicle_data = vehicle_data.rename(columns = {"horsepower": "hp"})
-vehicle_data = vehicle_data.dropna()
-
-
-def get_MSE_for_degree_k_model(k):
-    pipelined_model = Pipeline([
-        ('poly_transform', PolynomialFeatures(degree = k)),
-        ('regression', LinearRegression(fit_intercept = True))    
-    ])
-    pipelined_model.fit(vehicle_data[["hp"]], vehicle_data["mpg"])
-    return mean_squared_error(pipelined_model.predict(vehicle_data[["hp"]]), vehicle_data["mpg"])
-
-ks = np.array(range(0, 7))
-MSEs = [get_MSE_for_degree_k_model(k) for k in ks]
-MSEs_and_k = pd.DataFrame({"k": ks, "MSE": MSEs})
-MSEs_and_k.set_index("k")
-
-def plot_degree_k_model(k, MSEs_and_k, axs):
-    pipelined_model = Pipeline([
-        ('poly_transform', PolynomialFeatures(degree = k)),
-        ('regression', LinearRegression(fit_intercept = True))    
-    ])
-    pipelined_model.fit(vehicle_data[["hp"]], vehicle_data["mpg"])
-    
-    row = k // 3
-    col = k % 3
-    ax = axs[row, col]
-    
-    sns.scatterplot(data=vehicle_data, x='hp', y='mpg', ax=ax)
-    
-    x_range = np.linspace(45, 210, 100).reshape(-1, 1)
-    ax.plot(x_range, pipelined_model.predict(pd.DataFrame(x_range, columns=['hp'])), c='orange', linewidth=2)
-    
-    ax.set_ylim((0, 50))
-    mse_str = f"MSE: {MSEs_and_k.loc[k, 'MSE']:.4}\norder: {k}"
-    ax.text(150, 30, mse_str, dict(size=13))
-
-fig = plt.figure(figsize=(10, 4))
-axs = fig.subplots(nrows=2, ncols=3)
-
-for k in range(6):
-    plot_degree_k_model(k, MSEs_and_k, axs)
-fig.tight_layout()
+#| code-fold: false
+y_hat = X @ theta_hat
+pd.DataFrame(y_hat).head()
 ```
 
-With constant and linear models, there seems to be a clear pattern in prediction error. With a quadratic model (order 2), the plot seems to match our data much more consistently across different `hp` values. For higher order polynomials, we observe a small improvement in MSE, but not much beyond 18.98. The MSE will continue to marginally decrease as we add more and more terms to our model. However, there ain't no free lunch. This decreasing of the MSE is coming at a major cost!
+## `sklearn`
+We've already saved a lot of time (and avoided tedious calculations) by translating our derived formulas into code. However, we still had to go through the process of writing out the linear algebra ourselves. 
+
+To make life *even easier*, we can turn to the `sklearn` [Python library](https://scikit-learn.org/stable/). `sklearn` is a robust library of machine learning tools used extensively in research and industry. It gives us a wide variety of in-built modeling frameworks and methods, so we'll keep returning to `sklearn` techniques as we progress through Data 100. 
+
+Regardless of the specific type of model being implemented, `sklearn` follows a standard set of steps for creating a model. 
+
+1. Create a model object. This generates a new instance of the model class. You can think of it as making a new "copy" of a standard "template" for a model. In pseudocode, this looks like:
+
+    ```
+    my_model = ModelClass()
+    
+    ```
+
+    
+2. Fit the model to the `X` design matrix and `Y` target vector. This calculates the optimal model parameters "behind the scenes" without us explicitly working through the calculations ourselves. The fitted parameters are then stored within the model for use in future predictions:
+
+    ```
+    my_model.fit(X, Y)
+
+     ```
+
+    
+4. Use the fitted model to make predictions on the `X` input data using `.predict`. 
+
+    ```
+    my_model.predict(X)
+    
+    ```
+
+To extract the fitted parameters, we can use:
+
+  ```
+  my_model.coef_
+
+  my_model.intercept_
+
+  ```
 
 
-## Variance and Training Error
+Let's put this into action with our multiple regression task. 
+
+**1. Initialize an instance of the model class**
+
+`sklearn` stores "templates" of useful models for machine learning. We begin the modeling process by making a "copy" of one of these templates for our own use. Model initialization looks like `ModelClass()`, where `ModelClass` is the type of model we wish to create.
+
+For now, let's create a linear regression model using `LinearRegression()`. 
+
+`my_model` is now an instance of the `LinearRegression` class. You can think of it as the "idea" of a linear regression model. We haven't trained it yet, so it doesn't know any model parameters and cannot be used to make predictions. In fact, we haven't even told it what data to use for modeling! It simply waits for further instructions.
+
+```{python}
+import sklearn.linear_model as lm
+
+my_model = lm.LinearRegression()
+```
+
+**2. Train the model using `.fit`**
+
+Before the model can make predictions, we will need to fit it to our training data. When we fit the model, `sklearn` will run gradient descent behind the scenes to determine the optimal model parameters. It will then save these model parameters to our model instance for future use. 
+
+All `sklearn` model classes include a `.fit` method, which is used to fit the model. It takes in two inputs: the design matrix, `X`, and the target variable, `y`. 
+
+Let's start by fitting a model with just one feature: the flipper length. We create a design matrix `X` by pulling out the `"flipper_length_mm"` column from the `DataFrame`. 
+
+```{python}
+# .fit expects a 2D data design matrix, so we use double brackets to extract a DataFrame
+X = penguins[["flipper_length_mm"]]
+y = penguins["bill_depth_mm"]
+
+my_model.fit(X, y)
+```
+
+Notice that we use **double brackets** to extract this column. Why double brackets instead of just single brackets? The `.fit` method, by default, expects to receive **2-dimensional** data – some kind of data that includes both rows and columns. Writing `penguins["flipper_length_mm"]` would return a 1D `Series`, causing `sklearn` to error. We avoid this by writing `penguins[["flipper_length_mm"]]` to produce a 2D `DataFrame`. 
+
+And in just three lines of code, our model has run gradient descent to determine the optimal model parameters! Our single-feature model takes the form:
+
+$$\text{bill depth} = \theta_0 + \theta_1 \text{flipper length}$$
+
+Note that `LinearRegression` will automatically include an intercept term. 
+
+The fitted model parameters are stored as attributes of the model instance. `my_model.intercept_` will return the value of $\hat{\theta}_0$ as a scalar. `my_model.coef_` will return all values $\hat{\theta}_1, 
+\hat{\theta}_1, ...$ in an array. Because our model only contains one feature, we see just the value of $\hat{\theta}_1$ in the cell below.
+
+```{python}
+# The intercept term, theta_0
+my_model.intercept_
+```
+
+```{python}
+# All parameters theta_1, ..., theta_p
+my_model.coef_
+```
+
+**3. Use the fitted model to make predictions**
+
+Now that the model has been trained, we can use it to make predictions! To do so, we use the `.predict` method. `.predict` takes in one argument, the design matrix that should be used to generate predictions. To understand how the model performs on the training set, we would pass in the training data. Alternatively, to make predictions on unseen data, we would pass in a new dataset that wasn't used to train the model.
+
+Below, we call `.predict` to generate model predictions on the original training data. As before, we use double brackets to ensure that we extract 2-dimensional data.
+
+```{python}
+y_hat_one_feature = my_model.predict(penguins[["flipper_length_mm"]])
+
+print(f"The RMSE of the model is {np.sqrt(np.mean((y-y_hat_one_feature)**2))}")
+```
+
+What if we wanted a model with two features? 
+
+$$\text{bill depth} = \theta_0 + \theta_1 \text{flipper length} + \theta_2 \text{body mass}$$
+
+We repeat this three-step process by intializing a new model object, then calling `.fit` and `.predict` as before.
+
+```{python}
+# Step 1: initialize LinearRegression model
+two_feature_model = lm.LinearRegression()
+
+# Step 2: fit the model
+X_two_features = penguins[["flipper_length_mm", "body_mass_g"]]
+y = penguins["bill_depth_mm"]
+
+two_feature_model.fit(X_two_features, y)
+
+# Step 3: make predictions
+y_hat_two_features = two_feature_model.predict(X_two_features)
+
+print(f"The RMSE of the model is {np.sqrt(np.mean((y-y_hat_two_features)**2))}")
+```
+
+We can also see that we obtain the same predictions using `sklearn` as we did when applying the ordinary least squares formula before! 
+
+```{python}
+#| code-fold: true
+pd.DataFrame({"Y_hat from OLS":np.squeeze(y_hat), "Y_hat from sklearn":y_hat_two_features}).head()
+```
+
+## Feature Engineering
+
+At this point in the course, we've equipped ourselves with some powerful techniques to build and optimize models. We've explored how to develop models of multiple variables, as well as how to transform variables to help **linearize** a dataset and fit these models to maximize their performance.
+
+All of this was done with one major caveat: the regression models we've worked with so far are all **linear in the input variables**. We've assumed that our predictions should be some combination of linear variables. While this works well in some cases, the real world isn't always so straightforward. We'll learn an important method to address this issue – feature engineering – and consider some new problems that can arise when we do so.
+
+Feature engineering is the process of *transforming* raw features into *more informative features* that can be used in modeling or EDA tasks and improve model performance.
+
+Feature engineering allows you to:
+
+* Capture domain knowledge 
+* Express non-linear relationships using linear models
+* Use non-numeric features in models
+
+## Feature Functions
+
+A **feature function** describes the transformations we apply to raw features in a dataset to create a design matrix of transformed features. We typically denote the feature function as $\Phi$ (think to yourself: "phi"-ture function). When we apply the feature function to our original dataset $\mathbb{X}$, the result, $\Phi(\mathbb{X})$, is a transformed design matrix ready to be used in modeling. 
+
+For example, we might design a feature function that computes the square of an existing feature and adds it to the design matrix. In this case, our existing matrix $[x]$ is transformed to $[x, x^2]$. Its *dimension* increases from 1 to 2. Often, the dimension of the *featurized* dataset increases as seen here.
+
+<center><img src="images/phi.png" alt='phi' width='500'></center>
+
+The new features introduced by the feature function can then be used in modeling. Often, we use the symbol $\phi_i$ to represent transformed features after feature engineering. 
+
+$$\hat{y} = \theta_1 x + \theta_2 x^2$$
+$$\hat{y}= \theta_1 \phi_1 + \theta_2 \phi_2$$
+
+In matrix notation, the symbol $\Phi$ is sometimes used to denote the design matrix after feature engineering has been performed. Note that in the usage below, $\Phi$ is now a feature-engineered matrix, rather than a function.
+
+$$\hat{\mathbb{Y}} = \Phi \theta$$
+
+More formally, we describe a feature function as transforming the original $\mathbb{R}^{n \times p}$ dataset $\mathbb{X}$ to a featurized $\mathbb{R}^{n \times p'}$ dataset $\mathbb{\Phi}$, where $p'$ is typically greater than $p$. 
+
+$$\mathbb{X} \in \mathbb{R}^{n \times p} \longrightarrow \Phi \in \mathbb{R}^{n \times p'}$$
+
+## One Hot Encoding
+Feature engineering opens up a whole new set of possibilities for designing better-performing models. As you will see in lab and homework, feature engineering is one of the most important parts of the entire modeling process.
+
+A particularly powerful use of feature engineering is to allow us to perform regression on *non-numeric* features. **One hot encoding** is a feature engineering technique that generates numeric features from categorical data, allowing us to use our usual methods to fit a regression model on the data. 
+
+To illustrate how this works, we'll refer back to the `tips` dataset from previous lectures. Consider the `"day"` column of the dataset:
+
+```{python}
+#| code-fold: true
+import numpy as np
+np.random.seed(1337)
+tips = sns.load_dataset("tips").sample(100)
+tips.head(5)
+```
+
+   At first glance, it doesn't seem possible to fit a regression model to this data – we can't directly perform any mathematical operations on the entry "Sun". 
+  
+To resolve this, we instead create a new table with a feature for each unique value in the original `"day"` column. We then iterate through the `"day"` column. For each entry in `"day"` we fill the corresponding feature in the new table with 1. All other features are set to 0.
+
+<center><img src="images/ohe.png" alt='ohe' width='600'></center>
+
+The one-hot encoded features can then be used in the design matrix to train a model:
+
+<center><img src="images/ohemodel.png" alt='ohemodel' width='600'></center>
+
+$$\hat{y} = \theta_1 (\text{total}\textunderscore\text{bill}) + \theta_2 (\text{size}) + \theta_3 (\text{day}\textunderscore\text{Fri}) + \theta_4 (\text{day}\textunderscore\text{Sat}) + \theta_5 (\text{day}\textunderscore\text{Sun}) + \theta_6 (\text{day}\textunderscore\text{Thur})$$
+
+Or in shorthand:
+
+$$\hat{y} = \theta_1\phi_1 + \theta_2\phi_2 + \theta_3\phi_3 + \theta_4\phi_4 + \theta_5\phi_5 + \theta_6\phi_6$$
+
+The `OneHotEncoder` class of `sklearn` ([documentation](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OneHotEncoder.html#sklearn.preprocessing.OneHotEncoder.get_feature_names_out)) offers a quick way to perform one-hot encoding. You will explore its use in detail in the lab. For now, recognize that we follow a very similar workflow to when we were working with the `LinearRegression` class: we initialize a `OneHotEncoder` object, fit it to our data, then use `.transform` to apply the fitted encoder.
+
+```{python}
+#| code-fold: false
+from sklearn.preprocessing import OneHotEncoder
+
+# Initialize a OneHotEncoder object
+ohe = OneHotEncoder()
+
+# Fit the encoder
+ohe.fit(tips[["day"]])
+
+# Use the encoder to transform the raw "day" feature
+encoded_day = ohe.transform(tips[["day"]]).toarray()
+encoded_day_df = pd.DataFrame(encoded_day, columns=ohe.get_feature_names_out())
+
+encoded_day_df.head()
+```
+
+Now, the `"day"` feature (or rather, the four new boolean features that represent day) can be used to fit a model.
+
+## Polynomial Features
+
+We have encountered a few cases now where models with linear features have performed poorly on datasets that show clear non-linear curvature. 
+
+As an example, consider the `vehicles` dataset, which contains information about cars. Suppose we want to use the `"hp"` (horsepower) of a car to predict its `"mpg"` (gas mileage in miles per gallon). If we visualize the relationship between these two variables, we see a non-linear curvature. Fitting a linear model to these variables results in a high (poor) value of RMSE. 
+
+$$\hat{y} = \theta_0 + \theta_1 (\text{hp})$$
+
+```{python}
+#| code-fold: true
+pd.options.mode.chained_assignment = None 
+vehicles = sns.load_dataset("mpg").dropna().rename(columns = {"horsepower": "hp"}).sort_values("hp")
+
+X = vehicles[["hp"]]
+y = vehicles["mpg"]
+
+hp_model = lm.LinearRegression()
+hp_model.fit(X, y)
+hp_model_predictions = hp_model.predict(X)
+
+import matplotlib.pyplot as plt
+
+sns.scatterplot(data=vehicles, x="hp", y="mpg")
+plt.plot(vehicles["hp"], hp_model_predictions, c="tab:red");
+
+print(f"MSE of model with (hp) feature: {np.mean((y-hp_model_predictions)**2)}")
+```
+
+To capture non-linearity in a dataset, it makes sense to incorporate **non-linear** features. Let's introduce a **polynomial** term, $\text{hp}^2$, into our regression model. The model now takes the form:
+
+$$\hat{y} = \theta_0 + \theta_1 (\text{hp}) + \theta_2 (\text{hp}^2)$$
+$$\hat{y} = \theta_0 + \theta_1 \phi_1 + \theta_2 \phi_2$$
+
+How can we fit a model with non-linear features? We can use the exact same techniques as before: ordinary least squares, gradient descent, or `sklearn`. This is because our new model is still a **linear model**. Although it contains non-linear *features*, it is linear with respect to the model *parameters*. All of our previous work on fitting models was done under the assumption that we were working with linear models. Because our new model is still linear, we can apply our existing methods to determine the optimal parameters. 
+
+```{python}
+# Add a hp^2 feature to the design matrix
+X = vehicles[["hp"]]
+X["hp^2"] = vehicles["hp"]**2
+
+# Use sklearn to fit the model
+hp2_model = lm.LinearRegression()
+hp2_model.fit(X, y)
+hp2_model_predictions = hp2_model.predict(X)
+
+sns.scatterplot(data=vehicles, x="hp", y="mpg")
+plt.plot(vehicles["hp"], hp2_model_predictions, c="tab:red");
+
+print(f"MSE of model with (hp^2) feature: {np.mean((y-hp2_model_predictions)**2)}")
+```
+
+Looking a lot better! By incorporating a squared feature, we are able to capture the curvature of the dataset. Our model is now a parabola centered on our data. Notice that our new model's error has decreased relative to the original model with linear features. .
+
+## Complexity and Overfitting
 
 We've seen now that feature engineering allows us to build all sorts of features to improve the performance of the model. In particular, we saw that designing a more complex feature (squaring `"hp"` in the `vehicles` data previously) substantially improved the model's ability to capture non-linear relationships. To take full advantage of this, we might be inclined to design increasingly complex features. Consider the following three models, each of different order (the maximum exponent power of each model):
 
-* Model with order 1: $\hat{\text{mpg}} = \theta_0 + \theta_1 (\text{hp})$
-* Model with order 2: $\hat{\text{mpg}} = \theta_0 + \theta_1 (\text{hp}) + \theta_2 (\text{hp})^2$
-* Model with order 4: $\hat{\text{mpg}} = \theta_0 + \theta_1 (\text{hp}) + \theta_2 (\text{hp})^2 + \theta_3 (\text{hp})^3 + \theta_4 (\text{hp})^4$
+* Model with order 2: $\hat{\text{mpg}} = \theta_0 + \theta_1 (\text{hp}) + \theta_2 (\text{hp}^2)$
+* Model with order 3: $\hat{\text{mpg}} = \theta_0 + \theta_1 (\text{hp}) + \theta_2 (\text{hp}^2) + \theta_3 (\text{hp}^3)$
+* Model with order 4: $\hat{\text{mpg}} = \theta_0 + \theta_1 (\text{hp}) + \theta_2 (\text{hp}^2) + \theta_3 (\text{hp}^3) + \theta_4 (\text{hp}^4)$
 
 <br/>
 
-<img src="images/degree_comparison.png" alt='degree_comparison' width='800'>
+<center><img src="images/degree_comparison.png" alt='degree_comparison' width='800'></center>
 
-When we use our model to make predictions on the same data that was used to fit the model, we find that the MSE decreases with increasingly complex models. The **training error** is the model's error when generating predictions from the same data that was used for training purposes. We can conclude that the training error goes down as the complexity of the model increases. 
+When we use our model to make predictions on the same data that was used to fit the model, we find that the MSE decreases with each additional polynomial term (as our model gets more complex). The **training error** is the model's error when generating predictions from the same data that was used for training purposes. We can conclude that the training error goes down as the complexity of the model increases. 
 
-<img src="images/train_error.png" alt='train_error' width='500'>
+<center><img src="images/train_error.png" alt='train_error' width='400'></center>
 
 This seems like good news – when working on the **training data**, we can improve model performance by designing increasingly complex models. 
 
-However, high model complexity comes with its own set of issues. When a model has many complicated features, it becomes increasingly sensitive to the data used to fit it. Even a small variation in the data points used to train the model may result in wildly different results for the fitted model. The plots below illustrate this idea. In each case, we've fit a model to two very similar sets of data (in fact, they only differ by two data points!). Notice that the model with order 2 appears roughly the same across the two sets of data; in contrast, the model with order 4 changes erratically across the two datasets.
+However, high model complexity comes with its own set of issues. When building the `vehicles` models above, we trained the models on the *entire* dataset and then evaluated their performance on this same dataset. In reality, we are likely to instead train the model on a *sample* from the population, then use it to make predictions on data it didn't encounter during training. 
 
-<img src="images/model_variance.png" alt='model_variance' width='600'>
+Let's walk through a more realistic example. Say we are given a training dataset of just 6 datapoints and want to train a model to then make predictions on a *different* set of points. We may be tempted to make a highly complex model (e.g., degree 5), especially given it makes perfect predictions on the training data as clear on the left. However, as shown in the graph on the right, this model would perform *horribly* on the rest of the population! 
 
-The sensitivity of the model to the data used to train it is called the **model variance**. As we saw above, model variance tends to increase with model complexity. 
+<center><img src="images/complex.png" alt='complex' width='600'></center>
 
-<img src="images/bvt.png" alt='bvt' width='500'>
+The phenomenon above is called **overfitting**. The model effectively just memorized the training data it encountered when it was fitted, leaving it unable to **generalize** well to data it didn't encounter during training.
 
-We will further explore this tradeoff (and more precisely define model variance) in future lectures.
+Additionally, since complex models are sensitive to the specific dataset used to train them, they have high **variance**. A model with high variance tends to *vary* more dramatically when trained on different datasets. Going back to our example above, we can see our degree-5 model varies erratically when we fit it to different samples of 6 points from `vehicles`. 
 
-## Overfitting
+<center><img src="images/resamples.png" alt='resamples' width='800'></center>
+
+We now face a dilemma: we know that we can **decrease training error** by increasing model complexity, but models that are *too* complex start to overfit and can't be reapplied to new datasets due to **high variance**.
+
+<center><img src="images/bvt.png" alt='bvt' width='400'></center>
 
 We can see that there is a clear "trade-off" that comes from the complexity of our model. As model complexity increases, the model's error on the training data decreases. At the same time, the model's variance tends to increase.
 
-Why does this matter? To answer this question, let's take a moment to review our modeling workflow when making predictions on new data. 
+The takeaway here: we need to strike a balance in the complexity of our models; we want models that are generalizable to "unseen" data. A model that is too simple won't be able to capture the key relationships between our variables of interest; a model that is too complex runs the risk of overfitting. 
 
-1. Sample a dataset of training data from the real world
-2. Use this training data to fit a model
-3. Apply this fitted model to generate predictions on unseen data 
-
-This first step – sampling training data – is important to remember in our analysis. As we saw above, a highly complex model may produce results that vary wildly across different samples of training data. If we happen to sample a set of training data that is a poor representation of the population we are trying to model, our model may perform poorly on any new set of data it has not seen before.
-
-To see why, consider a model fit using the training data shown on the left. Because the model is so complex, it achieves zero error on the training set – it perfectly predicts each value in the training data! When we go to use this model to make predictions on a new sample of data, however, things aren't so good. The model now has enormous error on the unseen data. 
-
-<img src="images/overfit.png" alt='overfit' width='600'>
-
-The phenomenon above is called **overfitting**. The model effectively just memorized the training data it encountered when it was fitted, leaving it unable to handle new situations. 
-
-The takeaway here: we need to strike a balance in the complexity of our models. A model that is too simple won't be able to capture the key relationships between our variables of interest; a model that is too complex runs the risk of overfitting. 
-
-This begs the question: how do we control the complexity of a model? Stay tuned for the next lecture.
+This begs the question: how do we control the complexity of a model? Stay tuned for our Lecture 16 on Cross-Validation and Regularization!
 
