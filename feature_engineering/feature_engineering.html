@@ -98,7 +98,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<div class="quarto-title-block"><div><h1 class="title">Sklearn and Feature Engineering</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+<div class="quarto-title-block"><div><h1 class="title">Sklearn and Feature Engineering</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li></ul></div></div>
 </div>
 
 
@@ -137,14 +137,14 @@ Learning Outcomes
 <p>At this point, we’ve grown quite familiar with the modeling process. We’ve introduced the concept of loss, used it to fit several types of models, and, most recently, extended our analysis to multiple regression. Along the way, we’ve forged our way through the mathematics of deriving the optimal model parameters in all its gory detail. It’s time to make our lives a little easier – let’s implement the modeling process in code!</p>
 <p>In this lecture, we’ll explore two techniques for model fitting:</p>
 <ol type="1">
-<li>Translating our derived formulas for regression to Python</li>
-<li>Using the <code>sklearn</code> Python package</li>
+<li>Translating our derived formulas for regression to <code>python</code></li>
+<li>Using <code>python</code>’s <code>sklearn</code> package</li>
 </ol>
 <p>With our new programming frameworks in hand, we will also add sophistication to our models by introducing more complex features to enhance model performance.</p>
 <section id="implementing-derived-formulas-in-code" class="level2">
 <h2 class="anchored" data-anchor-id="implementing-derived-formulas-in-code">Implementing Derived Formulas in Code</h2>
 <p>Throughout this lecture, we’ll refer to the <code>penguins</code> dataset.</p>
-<div class="cell" data-execution_count="1">
+<div class="cell" data-execution_count="57">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
@@ -152,7 +152,7 @@ Learning Outcomes
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>penguins <span class="op">=</span> sns.load_dataset(<span class="st">"penguins"</span>)</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>penguins <span class="op">=</span> penguins[penguins[<span class="st">"species"</span>] <span class="op">==</span> <span class="st">"Adelie"</span>].dropna()</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>penguins.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="1">
+<div class="cell-output cell-output-display" data-execution_count="57">
 <div>
 
 
@@ -227,7 +227,7 @@ Learning Outcomes
 </div>
 </div>
 <p>Our goal will be to predict the value of the <code>"bill_depth_mm"</code> for a particular penguin given its <code>"flipper_length_mm"</code> and <code>"body_mass_g"</code>. We’ll also add a bias column of all ones to represent the intercept term of our models.</p>
-<div class="cell" data-execution_count="2">
+<div class="cell" data-execution_count="58">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Add a bias column of all ones to `penguins`</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>penguins[<span class="st">"bias"</span>] <span class="op">=</span> np.ones(<span class="bu">len</span>(penguins), dtype<span class="op">=</span><span class="bu">int</span>) </span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -242,18 +242,18 @@ Learning Outcomes
 <p><span class="math display">\[\hat{\mathbb{Y}} = \mathbb{X}\theta\]</span></p>
 <p>We used a geometric approach to derive the following expression for the optimal model parameters:</p>
 <p><span class="math display">\[\hat{\theta} = (\mathbb{X}^T \mathbb{X})^{-1}\mathbb{X}^T \mathbb{Y}\]</span></p>
-<p>That’s a whole lot of matrix manipulation. How do we implement it in Python?</p>
+<p>That’s a whole lot of matrix manipulation. How do we implement it in <code>python</code>?</p>
 <p>There are three operations we need to perform here: multiplying matrices, taking transposes, and finding inverses.</p>
 <ul>
 <li>To perform matrix multiplication, use the <code>@</code> operator</li>
-<li>To take a transpose, call the <code>.T</code> attribute of an array or <code>DataFrame</code></li>
+<li>To take a transpose, call the <code>.T</code> attribute of an NumPy array or <code>DataFrame</code></li>
 <li>To compute an inverse, use NumPy’s in-built method <code>np.linalg.inv</code></li>
 </ul>
 <p>Putting this all together, we can compute the OLS estimate for the optimal model parameters, stored in the array <code>theta_hat</code>.</p>
-<div class="cell" data-execution_count="3">
+<div class="cell" data-execution_count="59">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>theta_hat <span class="op">=</span> np.linalg.inv(X.T <span class="op">@</span> X) <span class="op">@</span> X.T <span class="op">@</span> Y</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>theta_hat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="3">
+<div class="cell-output cell-output-display" data-execution_count="59">
 <pre><code>array([[1.10029953e+01],
        [9.82848689e-03],
        [1.47749591e-03]])</code></pre>
@@ -261,10 +261,10 @@ Learning Outcomes
 </div>
 <p>To make predictions using our optimized parameter values, we matrix-multiply the design matrix with the parameter vector:</p>
 <p><span class="math display">\[\hat{\mathbb{Y}} = \mathbb{X}\theta\]</span></p>
-<div class="cell" data-execution_count="4">
+<div class="cell" data-execution_count="60">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>y_hat <span class="op">=</span> X <span class="op">@</span> theta_hat</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>pd.DataFrame(y_hat).head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="4">
+<div class="cell-output cell-output-display" data-execution_count="60">
 <div>
 
 
@@ -306,10 +306,10 @@ Learning Outcomes
 <section id="sklearn" class="level2">
 <h2 class="anchored" data-anchor-id="sklearn"><code>sklearn</code></h2>
 <p>We’ve already saved a lot of time (and avoided tedious calculations) by translating our derived formulas into code. However, we still had to go through the process of writing out the linear algebra ourselves.</p>
-<p>To make life <em>even easier</em>, we can turn to the <code>sklearn</code> <a href="https://scikit-learn.org/stable/">Python library</a>. <code>sklearn</code> is a robust library of machine learning tools used extensively in research and industry. It gives us a wide variety of in-built modeling frameworks and methods, so we’ll keep returning to <code>sklearn</code> techniques as we progress through Data 100.</p>
+<p>To make life <em>even easier</em>, we can turn to the <code>sklearn</code> <a href="https://scikit-learn.org/stable/"><code>python</code> library</a>. <code>sklearn</code> is a robust library of machine learning tools used extensively in research and industry. It gives us a wide variety of in-built modeling frameworks and methods, so we’ll keep returning to <code>sklearn</code> techniques as we progress through Data 100.</p>
 <p>Regardless of the specific type of model being implemented, <code>sklearn</code> follows a standard set of steps for creating a model.</p>
 <ol type="1">
-<li><p>Create a model object. This generates a new instance of the model class. You can think of it as making a new “copy” of a standard “template” for a model. In pseudocode, this looks like:</p>
+<li><p>Create a model object. This generates a new instance of the model class. You can think of it as making a new “copy” of a standard “template” for a model. In code, this looks like:</p>
 <pre><code>my_model = ModelClass()
 </code></pre></li>
 <li><p>Fit the model to the <code>X</code> design matrix and <code>Y</code> target vector. This calculates the optimal model parameters “behind the scenes” without us explicitly working through the calculations ourselves. The fitted parameters are then stored within the model for use in future predictions:</p>
@@ -329,7 +329,7 @@ my_model.intercept_
 <p><code>sklearn</code> stores “templates” of useful models for machine learning. We begin the modeling process by making a “copy” of one of these templates for our own use. Model initialization looks like <code>ModelClass()</code>, where <code>ModelClass</code> is the type of model we wish to create.</p>
 <p>For now, let’s create a linear regression model using <code>LinearRegression()</code>.</p>
 <p><code>my_model</code> is now an instance of the <code>LinearRegression</code> class. You can think of it as the “idea” of a linear regression model. We haven’t trained it yet, so it doesn’t know any model parameters and cannot be used to make predictions. In fact, we haven’t even told it what data to use for modeling! It simply waits for further instructions.</p>
-<div class="cell" data-execution_count="5">
+<div class="cell" data-execution_count="61">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sklearn.linear_model <span class="im">as</span> lm</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>my_model <span class="op">=</span> lm.LinearRegression()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -338,14 +338,14 @@ my_model.intercept_
 <p>Before the model can make predictions, we will need to fit it to our training data. When we fit the model, <code>sklearn</code> will run gradient descent behind the scenes to determine the optimal model parameters. It will then save these model parameters to our model instance for future use.</p>
 <p>All <code>sklearn</code> model classes include a <code>.fit</code> method, which is used to fit the model. It takes in two inputs: the design matrix, <code>X</code>, and the target variable, <code>y</code>.</p>
 <p>Let’s start by fitting a model with just one feature: the flipper length. We create a design matrix <code>X</code> by pulling out the <code>"flipper_length_mm"</code> column from the <code>DataFrame</code>.</p>
-<div class="cell" data-execution_count="6">
+<div class="cell" data-execution_count="62">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># .fit expects a 2D data design matrix, so we use double brackets to extract a DataFrame</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> penguins[[<span class="st">"flipper_length_mm"</span>]]</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> penguins[<span class="st">"bill_depth_mm"</span>]</span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>my_model.fit(X, y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="6">
-<style>#sk-container-id-1 {color: black;}#sk-container-id-1 pre{padding: 0;}#sk-container-id-1 div.sk-toggleable {background-color: white;}#sk-container-id-1 label.sk-toggleable__label {cursor: pointer;display: block;width: 100%;margin-bottom: 0;padding: 0.3em;box-sizing: border-box;text-align: center;}#sk-container-id-1 label.sk-toggleable__label-arrow:before {content: "▸";float: left;margin-right: 0.25em;color: #696969;}#sk-container-id-1 label.sk-toggleable__label-arrow:hover:before {color: black;}#sk-container-id-1 div.sk-estimator:hover label.sk-toggleable__label-arrow:before {color: black;}#sk-container-id-1 div.sk-toggleable__content {max-height: 0;max-width: 0;overflow: hidden;text-align: left;background-color: #f0f8ff;}#sk-container-id-1 div.sk-toggleable__content pre {margin: 0.2em;color: black;border-radius: 0.25em;background-color: #f0f8ff;}#sk-container-id-1 input.sk-toggleable__control:checked~div.sk-toggleable__content {max-height: 200px;max-width: 100%;overflow: auto;}#sk-container-id-1 input.sk-toggleable__control:checked~label.sk-toggleable__label-arrow:before {content: "▾";}#sk-container-id-1 div.sk-estimator input.sk-toggleable__control:checked~label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-1 div.sk-label input.sk-toggleable__control:checked~label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-1 input.sk-hidden--visually {border: 0;clip: rect(1px 1px 1px 1px);clip: rect(1px, 1px, 1px, 1px);height: 1px;margin: -1px;overflow: hidden;padding: 0;position: absolute;width: 1px;}#sk-container-id-1 div.sk-estimator {font-family: monospace;background-color: #f0f8ff;border: 1px dotted black;border-radius: 0.25em;box-sizing: border-box;margin-bottom: 0.5em;}#sk-container-id-1 div.sk-estimator:hover {background-color: #d4ebff;}#sk-container-id-1 div.sk-parallel-item::after {content: "";width: 100%;border-bottom: 1px solid gray;flex-grow: 1;}#sk-container-id-1 div.sk-label:hover label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-1 div.sk-serial::before {content: "";position: absolute;border-left: 1px solid gray;box-sizing: border-box;top: 0;bottom: 0;left: 50%;z-index: 0;}#sk-container-id-1 div.sk-serial {display: flex;flex-direction: column;align-items: center;background-color: white;padding-right: 0.2em;padding-left: 0.2em;position: relative;}#sk-container-id-1 div.sk-item {position: relative;z-index: 1;}#sk-container-id-1 div.sk-parallel {display: flex;align-items: stretch;justify-content: center;background-color: white;position: relative;}#sk-container-id-1 div.sk-item::before, #sk-container-id-1 div.sk-parallel-item::before {content: "";position: absolute;border-left: 1px solid gray;box-sizing: border-box;top: 0;bottom: 0;left: 50%;z-index: -1;}#sk-container-id-1 div.sk-parallel-item {display: flex;flex-direction: column;z-index: 1;position: relative;background-color: white;}#sk-container-id-1 div.sk-parallel-item:first-child::after {align-self: flex-end;width: 50%;}#sk-container-id-1 div.sk-parallel-item:last-child::after {align-self: flex-start;width: 50%;}#sk-container-id-1 div.sk-parallel-item:only-child::after {width: 0;}#sk-container-id-1 div.sk-dashed-wrapped {border: 1px dashed gray;margin: 0 0.4em 0.5em 0.4em;box-sizing: border-box;padding-bottom: 0.4em;background-color: white;}#sk-container-id-1 div.sk-label label {font-family: monospace;font-weight: bold;display: inline-block;line-height: 1.2em;}#sk-container-id-1 div.sk-label-container {text-align: center;}#sk-container-id-1 div.sk-container {/* jupyter's `normalize.less` sets `[hidden] { display: none; }` but bootstrap.min.css set `[hidden] { display: none !important; }` so we also need the `!important` here to be able to override the default hidden behavior on the sphinx rendered scikit-learn.org. See: https://github.com/scikit-learn/scikit-learn/issues/21755 */display: inline-block !important;position: relative;}#sk-container-id-1 div.sk-text-repr-fallback {display: none;}</style><div id="sk-container-id-1" class="sk-top-container"><div class="sk-text-repr-fallback"><pre>LinearRegression()</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br>On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class="sk-container" hidden=""><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-1" type="checkbox" checked=""><label for="sk-estimator-id-1" class="sk-toggleable__label sk-toggleable__label-arrow">LinearRegression</label><div class="sk-toggleable__content"><pre>LinearRegression()</pre></div></div></div></div></div>
+<div class="cell-output cell-output-display" data-execution_count="62">
+<style>#sk-container-id-4 {color: black;}#sk-container-id-4 pre{padding: 0;}#sk-container-id-4 div.sk-toggleable {background-color: white;}#sk-container-id-4 label.sk-toggleable__label {cursor: pointer;display: block;width: 100%;margin-bottom: 0;padding: 0.3em;box-sizing: border-box;text-align: center;}#sk-container-id-4 label.sk-toggleable__label-arrow:before {content: "▸";float: left;margin-right: 0.25em;color: #696969;}#sk-container-id-4 label.sk-toggleable__label-arrow:hover:before {color: black;}#sk-container-id-4 div.sk-estimator:hover label.sk-toggleable__label-arrow:before {color: black;}#sk-container-id-4 div.sk-toggleable__content {max-height: 0;max-width: 0;overflow: hidden;text-align: left;background-color: #f0f8ff;}#sk-container-id-4 div.sk-toggleable__content pre {margin: 0.2em;color: black;border-radius: 0.25em;background-color: #f0f8ff;}#sk-container-id-4 input.sk-toggleable__control:checked~div.sk-toggleable__content {max-height: 200px;max-width: 100%;overflow: auto;}#sk-container-id-4 input.sk-toggleable__control:checked~label.sk-toggleable__label-arrow:before {content: "▾";}#sk-container-id-4 div.sk-estimator input.sk-toggleable__control:checked~label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-4 div.sk-label input.sk-toggleable__control:checked~label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-4 input.sk-hidden--visually {border: 0;clip: rect(1px 1px 1px 1px);clip: rect(1px, 1px, 1px, 1px);height: 1px;margin: -1px;overflow: hidden;padding: 0;position: absolute;width: 1px;}#sk-container-id-4 div.sk-estimator {font-family: monospace;background-color: #f0f8ff;border: 1px dotted black;border-radius: 0.25em;box-sizing: border-box;margin-bottom: 0.5em;}#sk-container-id-4 div.sk-estimator:hover {background-color: #d4ebff;}#sk-container-id-4 div.sk-parallel-item::after {content: "";width: 100%;border-bottom: 1px solid gray;flex-grow: 1;}#sk-container-id-4 div.sk-label:hover label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-4 div.sk-serial::before {content: "";position: absolute;border-left: 1px solid gray;box-sizing: border-box;top: 0;bottom: 0;left: 50%;z-index: 0;}#sk-container-id-4 div.sk-serial {display: flex;flex-direction: column;align-items: center;background-color: white;padding-right: 0.2em;padding-left: 0.2em;position: relative;}#sk-container-id-4 div.sk-item {position: relative;z-index: 1;}#sk-container-id-4 div.sk-parallel {display: flex;align-items: stretch;justify-content: center;background-color: white;position: relative;}#sk-container-id-4 div.sk-item::before, #sk-container-id-4 div.sk-parallel-item::before {content: "";position: absolute;border-left: 1px solid gray;box-sizing: border-box;top: 0;bottom: 0;left: 50%;z-index: -1;}#sk-container-id-4 div.sk-parallel-item {display: flex;flex-direction: column;z-index: 1;position: relative;background-color: white;}#sk-container-id-4 div.sk-parallel-item:first-child::after {align-self: flex-end;width: 50%;}#sk-container-id-4 div.sk-parallel-item:last-child::after {align-self: flex-start;width: 50%;}#sk-container-id-4 div.sk-parallel-item:only-child::after {width: 0;}#sk-container-id-4 div.sk-dashed-wrapped {border: 1px dashed gray;margin: 0 0.4em 0.5em 0.4em;box-sizing: border-box;padding-bottom: 0.4em;background-color: white;}#sk-container-id-4 div.sk-label label {font-family: monospace;font-weight: bold;display: inline-block;line-height: 1.2em;}#sk-container-id-4 div.sk-label-container {text-align: center;}#sk-container-id-4 div.sk-container {/* jupyter's `normalize.less` sets `[hidden] { display: none; }` but bootstrap.min.css set `[hidden] { display: none !important; }` so we also need the `!important` here to be able to override the default hidden behavior on the sphinx rendered scikit-learn.org. See: https://github.com/scikit-learn/scikit-learn/issues/21755 */display: inline-block !important;position: relative;}#sk-container-id-4 div.sk-text-repr-fallback {display: none;}</style><div id="sk-container-id-4" class="sk-top-container"><div class="sk-text-repr-fallback"><pre>LinearRegression()</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br>On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class="sk-container" hidden=""><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-4" type="checkbox" checked=""><label for="sk-estimator-id-4" class="sk-toggleable__label sk-toggleable__label-arrow">LinearRegression</label><div class="sk-toggleable__content"><pre>LinearRegression()</pre></div></div></div></div></div>
 </div>
 </div>
 <p>Notice that we use <strong>double brackets</strong> to extract this column. Why double brackets instead of just single brackets? The <code>.fit</code> method, by default, expects to receive <strong>2-dimensional</strong> data – some kind of data that includes both rows and columns. Writing <code>penguins["flipper_length_mm"]</code> would return a 1D <code>Series</code>, causing <code>sklearn</code> to error. We avoid this by writing <code>penguins[["flipper_length_mm"]]</code> to produce a 2D <code>DataFrame</code>.</p>
@@ -353,24 +353,24 @@ my_model.intercept_
 <p><span class="math display">\[\text{bill depth} = \theta_0 + \theta_1 \text{flipper length}\]</span></p>
 <p>Note that <code>LinearRegression</code> will automatically include an intercept term.</p>
 <p>The fitted model parameters are stored as attributes of the model instance. <code>my_model.intercept_</code> will return the value of <span class="math inline">\(\hat{\theta}_0\)</span> as a scalar. <code>my_model.coef_</code> will return all values <span class="math inline">\(\hat{\theta}_1, \hat{\theta}_1, ...\)</span> in an array. Because our model only contains one feature, we see just the value of <span class="math inline">\(\hat{\theta}_1\)</span> in the cell below.</p>
-<div class="cell" data-execution_count="7">
+<div class="cell" data-execution_count="63">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The intercept term, theta_0</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>my_model.intercept_</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="7">
+<div class="cell-output cell-output-display" data-execution_count="63">
 <pre><code>7.297305899612306</code></pre>
 </div>
 </div>
-<div class="cell" data-execution_count="8">
+<div class="cell" data-execution_count="64">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># All parameters theta_1, ..., theta_p</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>my_model.coef_</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="8">
+<div class="cell-output cell-output-display" data-execution_count="64">
 <pre><code>array([0.05812622])</code></pre>
 </div>
 </div>
 <p><strong>3. Use the fitted model to make predictions</strong></p>
-<p>Now that the model has been trained, we can use it to make predictions! To do so, we use the <code>.predict</code> method. <code>.predict</code> takes in one argument, the design matrix that should be used to generate predictions. To understand how the model performs on the training set, we would pass in the training data. Alternatively, to make predictions on unseen data, we would pass in a new dataset that wasn’t used to train the model.</p>
+<p>Now that the model has been trained, we can use it to make predictions! To do so, we use the <code>.predict</code> method. <code>.predict</code> takes in one argument: the design matrix that should be used to generate predictions. To understand how the model performs on the training set, we would pass in the training data. Alternatively, to make predictions on unseen data, we would pass in a new dataset that wasn’t used to train the model.</p>
 <p>Below, we call <code>.predict</code> to generate model predictions on the original training data. As before, we use double brackets to ensure that we extract 2-dimensional data.</p>
-<div class="cell" data-execution_count="9">
+<div class="cell" data-execution_count="65">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>y_hat_one_feature <span class="op">=</span> my_model.predict(penguins[[<span class="st">"flipper_length_mm"</span>]])</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"The RMSE of the model is </span><span class="sc">{</span>np<span class="sc">.</span>sqrt(np.mean((y<span class="op">-</span>y_hat_one_feature)<span class="op">**</span><span class="dv">2</span>))<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -381,7 +381,7 @@ my_model.intercept_
 <p>What if we wanted a model with two features?</p>
 <p><span class="math display">\[\text{bill depth} = \theta_0 + \theta_1 \text{flipper length} + \theta_2 \text{body mass}\]</span></p>
 <p>We repeat this three-step process by intializing a new model object, then calling <code>.fit</code> and <code>.predict</code> as before.</p>
-<div class="cell" data-execution_count="10">
+<div class="cell" data-execution_count="66">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 1: initialize LinearRegression model</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>two_feature_model <span class="op">=</span> lm.LinearRegression()</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -400,12 +400,12 @@ my_model.intercept_
 </div>
 </div>
 <p>We can also see that we obtain the same predictions using <code>sklearn</code> as we did when applying the ordinary least squares formula before!</p>
-<div class="cell" data-execution_count="11">
+<div class="cell" data-execution_count="67">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>pd.DataFrame({<span class="st">"Y_hat from OLS"</span>:np.squeeze(y_hat), <span class="st">"Y_hat from sklearn"</span>:y_hat_two_features}).head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="11">
+<div class="cell-output cell-output-display" data-execution_count="67">
 <div>
 
 
@@ -467,7 +467,7 @@ my_model.intercept_
 <p>A <strong>feature function</strong> describes the transformations we apply to raw features in a dataset to create a design matrix of transformed features. We typically denote the feature function as <span class="math inline">\(\Phi\)</span> (think to yourself: “phi”-ture function). When we apply the feature function to our original dataset <span class="math inline">\(\mathbb{X}\)</span>, the result, <span class="math inline">\(\Phi(\mathbb{X})\)</span>, is a transformed design matrix ready to be used in modeling.</p>
 <p>For example, we might design a feature function that computes the square of an existing feature and adds it to the design matrix. In this case, our existing matrix <span class="math inline">\([x]\)</span> is transformed to <span class="math inline">\([x, x^2]\)</span>. Its <em>dimension</em> increases from 1 to 2. Often, the dimension of the <em>featurized</em> dataset increases as seen here.</p>
 <center>
-<img src="images/phi.png" alt="phi" width="500">
+<img src="images/phi.png" alt="phi" width="700">
 </center>
 <p>The new features introduced by the feature function can then be used in modeling. Often, we use the symbol <span class="math inline">\(\phi_i\)</span> to represent transformed features after feature engineering.</p>
 <p><span class="math display">\[\hat{y} = \theta_1 x + \theta_2 x^2\]</span> <span class="math display">\[\hat{y}= \theta_1 \phi_1 + \theta_2 \phi_2\]</span></p>
@@ -481,15 +481,14 @@ my_model.intercept_
 <p>Feature engineering opens up a whole new set of possibilities for designing better-performing models. As you will see in lab and homework, feature engineering is one of the most important parts of the entire modeling process.</p>
 <p>A particularly powerful use of feature engineering is to allow us to perform regression on <em>non-numeric</em> features. <strong>One hot encoding</strong> is a feature engineering technique that generates numeric features from categorical data, allowing us to use our usual methods to fit a regression model on the data.</p>
 <p>To illustrate how this works, we’ll refer back to the <code>tips</code> dataset from previous lectures. Consider the <code>"day"</code> column of the dataset:</p>
-<div class="cell" data-execution_count="12">
+<div class="cell" data-execution_count="83">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">1337</span>)</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>tips <span class="op">=</span> sns.load_dataset(<span class="st">"tips"</span>).sample(<span class="dv">100</span>)</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>tips.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>tips <span class="op">=</span> sns.load_dataset(<span class="st">"tips"</span>)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>tips.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="12">
+<div class="cell-output cell-output-display" data-execution_count="83">
 <div>
 
 
@@ -508,54 +507,54 @@ my_model.intercept_
 </thead>
 <tbody>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">54</td>
-<td>25.56</td>
-<td>4.34</td>
+<td data-quarto-table-cell-role="th">0</td>
+<td>16.99</td>
+<td>1.01</td>
+<td>Female</td>
+<td>No</td>
+<td>Sun</td>
+<td>Dinner</td>
+<td>2</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>10.34</td>
+<td>1.66</td>
 <td>Male</td>
+<td>No</td>
+<td>Sun</td>
+<td>Dinner</td>
+<td>3</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>21.01</td>
+<td>3.50</td>
+<td>Male</td>
+<td>No</td>
+<td>Sun</td>
+<td>Dinner</td>
+<td>3</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>23.68</td>
+<td>3.31</td>
+<td>Male</td>
+<td>No</td>
+<td>Sun</td>
+<td>Dinner</td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>24.59</td>
+<td>3.61</td>
+<td>Female</td>
 <td>No</td>
 <td>Sun</td>
 <td>Dinner</td>
 <td>4</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">46</td>
-<td>22.23</td>
-<td>5.00</td>
-<td>Male</td>
-<td>No</td>
-<td>Sun</td>
-<td>Dinner</td>
-<td>2</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">86</td>
-<td>13.03</td>
-<td>2.00</td>
-<td>Male</td>
-<td>No</td>
-<td>Thur</td>
-<td>Lunch</td>
-<td>2</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">199</td>
-<td>13.51</td>
-<td>2.00</td>
-<td>Male</td>
-<td>Yes</td>
-<td>Thur</td>
-<td>Lunch</td>
-<td>2</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">106</td>
-<td>20.49</td>
-<td>4.06</td>
-<td>Male</td>
-<td>Yes</td>
-<td>Sat</td>
-<td>Dinner</td>
-<td>2</td>
 </tr>
 </tbody>
 </table>
@@ -568,15 +567,9 @@ my_model.intercept_
 <center>
 <img src="images/ohe.png" alt="ohe" width="600">
 </center>
-<p>The one-hot encoded features can then be used in the design matrix to train a model:</p>
-<center>
-<img src="images/ohemodel.png" alt="ohemodel" width="600">
-</center>
-<p><span class="math display">\[\hat{y} = \theta_1 (\text{total}\textunderscore\text{bill}) + \theta_2 (\text{size}) + \theta_3 (\text{day}\textunderscore\text{Fri}) + \theta_4 (\text{day}\textunderscore\text{Sat}) + \theta_5 (\text{day}\textunderscore\text{Sun}) + \theta_6 (\text{day}\textunderscore\text{Thur})\]</span></p>
-<p>Or in shorthand:</p>
-<p><span class="math display">\[\hat{y} = \theta_1\phi_1 + \theta_2\phi_2 + \theta_3\phi_3 + \theta_4\phi_4 + \theta_5\phi_5 + \theta_6\phi_6\]</span></p>
-<p>The <code>OneHotEncoder</code> class of <code>sklearn</code> (<a href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OneHotEncoder.html#sklearn.preprocessing.OneHotEncoder.get_feature_names_out">documentation</a>) offers a quick way to perform one-hot encoding. You will explore its use in detail in the lab. For now, recognize that we follow a very similar workflow to when we were working with the <code>LinearRegression</code> class: we initialize a <code>OneHotEncoder</code> object, fit it to our data, then use <code>.transform</code> to apply the fitted encoder.</p>
-<div class="cell" data-execution_count="13">
+<p><br></p>
+<p>The <code>OneHotEncoder</code> class of <code>sklearn</code> (<a href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OneHotEncoder.html#sklearn.preprocessing.OneHotEncoder.get_feature_names_out">documentation</a>) offers a quick way to perform this one-hot encoding. You will explore its use in detail in the lab. For now, recognize that we follow a very similar workflow to when we were working with the <code>LinearRegression</code> class: we initialize a <code>OneHotEncoder</code> object, fit it to our data, then use <code>.transform</code> to apply the fitted encoder.</p>
+<div class="cell" data-execution_count="84">
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> OneHotEncoder</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialize a OneHotEncoder object</span></span>
@@ -590,7 +583,7 @@ my_model.intercept_
 <span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>encoded_day_df <span class="op">=</span> pd.DataFrame(encoded_day, columns<span class="op">=</span>ohe.get_feature_names_out())</span>
 <span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>encoded_day_df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="13">
+<div class="cell-output cell-output-display" data-execution_count="84">
 <div>
 
 
@@ -623,21 +616,21 @@ my_model.intercept_
 <td data-quarto-table-cell-role="th">2</td>
 <td>0.0</td>
 <td>0.0</td>
-<td>0.0</td>
 <td>1.0</td>
+<td>0.0</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">3</td>
 <td>0.0</td>
 <td>0.0</td>
-<td>0.0</td>
 <td>1.0</td>
+<td>0.0</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">4</td>
 <td>0.0</td>
-<td>1.0</td>
 <td>0.0</td>
+<td>1.0</td>
 <td>0.0</td>
 </tr>
 </tbody>
@@ -646,69 +639,144 @@ my_model.intercept_
 </div>
 </div>
 </div>
-<p>Now, the <code>"day"</code> feature (or rather, the four new boolean features that represent day) can be used to fit a model.</p>
+<p>The one-hot encoded features can then be used in the design matrix to train a model:</p>
+<center>
+<img src="images/ohemodel.png" alt="ohemodel" width="600">
+</center>
+<p><span class="math display">\[\hat{y} = \theta_1 (\text{total}\textunderscore\text{bill}) + \theta_2 (\text{size}) + \theta_3 (\text{day}\textunderscore\text{Fri}) + \theta_4 (\text{day}\textunderscore\text{Sat}) + \theta_5 (\text{day}\textunderscore\text{Sun}) + \theta_6 (\text{day}\textunderscore\text{Thur})\]</span></p>
+<p>Or in shorthand:</p>
+<p><span class="math display">\[\hat{y} = \theta_1\phi_1 + \theta_2\phi_2 + \theta_3\phi_3 + \theta_4\phi_4 + \theta_5\phi_5 + \theta_6\phi_6\]</span></p>
+<p>Now, the <code>day</code> feature (or rather, the four new boolean features that represent day) can be used to fit a model.</p>
+<p>Using <code>sklearn</code> to fit the new model, we can determine the model coefficients, allowing us to understand how each feature impacts the predicted tip.</p>
+<div class="cell" data-execution_count="85">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LinearRegression</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>data_w_ohe <span class="op">=</span> tips[[<span class="st">"total_bill"</span>, <span class="st">"size"</span>, <span class="st">"day"</span>]].join(encoded_day_df).drop(columns <span class="op">=</span> <span class="st">"day"</span>)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>ohe_model <span class="op">=</span> lm.LinearRegression(fit_intercept<span class="op">=</span><span class="va">False</span>) <span class="co">#Tell sklearn to not add an additional bias column. Why?</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>ohe_model.fit(data_w_ohe, tips[<span class="st">"tip"</span>])</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>pd.DataFrame({<span class="st">"Feature"</span>:data_w_ohe.columns, <span class="st">"Model Coefficient"</span>:ohe_model.coef_})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="85">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Feature</th>
+<th data-quarto-table-cell-role="th">Model Coefficient</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>total_bill</td>
+<td>0.092994</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>size</td>
+<td>0.187132</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>day_Fri</td>
+<td>0.745787</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>day_Sat</td>
+<td>0.621129</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>day_Sun</td>
+<td>0.732289</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">5</td>
+<td>day_Thur</td>
+<td>0.668294</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>For example, when looking at the coefficient for <code>day_Fri</code>, we can understand how much the fact that it is Friday impacts the predicted tip.</p>
+<p>When one-hot encoding, keep in mind that any set of one-hot encoded columns will always sum to a column of all ones, representing the bias column. More formally, the bias column is a linear combination of the OHE columns.</p>
+<center>
+<img src="images/bias.png" alt="bias" width="600">
+</center>
+<p>We must be careful not to include this bias column in our design matrix. Otherwise, there will be linear dependence in the model, meaning <span class="math inline">\(\mathbb{X}^T\mathbb{X}\)</span> would no longer be invertible, and our OLS estimate <span class="math inline">\(\hat{\theta} = (\mathbb{X}^T\mathbb{X})^{-1}\mathbb{X}^T\mathbb{Y}\)</span> fails.</p>
+<p>To resolve this issue, we simply omit one of the one-hot encoded columns <em>or</em> do not include an intercept term.</p>
+<center>
+<img src="images/remove.png" alt="remove" width="600">
+</center>
+<p>Either approach works — we still retain the same information as the omitted column being a linear combination of the remaining columns.</p>
 </section>
 <section id="polynomial-features" class="level2">
 <h2 class="anchored" data-anchor-id="polynomial-features">Polynomial Features</h2>
 <p>We have encountered a few cases now where models with linear features have performed poorly on datasets that show clear non-linear curvature.</p>
-<p>As an example, consider the <code>vehicles</code> dataset, which contains information about cars. Suppose we want to use the <code>"hp"</code> (horsepower) of a car to predict its <code>"mpg"</code> (gas mileage in miles per gallon). If we visualize the relationship between these two variables, we see a non-linear curvature. Fitting a linear model to these variables results in a high (poor) value of RMSE.</p>
+<p>As an example, consider the <code>vehicles</code> dataset, which contains information about cars. Suppose we want to use the <code>hp</code> (horsepower) of a car to predict its <code>"mpg"</code> (gas mileage in miles per gallon). If we visualize the relationship between these two variables, we see a non-linear curvature. Fitting a linear model to these variables results in a high (poor) value of RMSE.</p>
 <p><span class="math display">\[\hat{y} = \theta_0 + \theta_1 (\text{hp})\]</span></p>
-<div class="cell" data-execution_count="14">
+<div class="cell" data-execution_count="19">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>pd.options.mode.chained_assignment <span class="op">=</span> <span class="va">None</span> </span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>vehicles <span class="op">=</span> sns.load_dataset(<span class="st">"mpg"</span>).dropna().rename(columns <span class="op">=</span> {<span class="st">"horsepower"</span>: <span class="st">"hp"</span>}).sort_values(<span class="st">"hp"</span>)</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> vehicles[[<span class="st">"hp"</span>]]</span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> vehicles[<span class="st">"mpg"</span>]</span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>hp_model <span class="op">=</span> lm.LinearRegression()</span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>hp_model.fit(X, y)</span>
-<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>hp_model_predictions <span class="op">=</span> hp_model.predict(X)</span>
-<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>sns.scatterplot(data<span class="op">=</span>vehicles, x<span class="op">=</span><span class="st">"hp"</span>, y<span class="op">=</span><span class="st">"mpg"</span>)</span>
-<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>plt.plot(vehicles[<span class="st">"hp"</span>], hp_model_predictions, c<span class="op">=</span><span class="st">"tab:red"</span>)<span class="op">;</span></span>
-<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"MSE of model with (hp) feature: </span><span class="sc">{</span>np<span class="sc">.</span>mean((y<span class="op">-</span>hp_model_predictions)<span class="op">**</span><span class="dv">2</span>)<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>pd.options.mode.chained_assignment <span class="op">=</span> <span class="va">None</span> </span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>vehicles <span class="op">=</span> sns.load_dataset(<span class="st">"mpg"</span>).dropna().rename(columns <span class="op">=</span> {<span class="st">"horsepower"</span>: <span class="st">"hp"</span>}).sort_values(<span class="st">"hp"</span>)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> vehicles[[<span class="st">"hp"</span>]]</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> vehicles[<span class="st">"mpg"</span>]</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>hp_model <span class="op">=</span> lm.LinearRegression()</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>hp_model.fit(X, y)</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>hp_model_predictions <span class="op">=</span> hp_model.predict(X)</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>sns.scatterplot(data<span class="op">=</span>vehicles, x<span class="op">=</span><span class="st">"hp"</span>, y<span class="op">=</span><span class="st">"mpg"</span>)</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>plt.plot(vehicles[<span class="st">"hp"</span>], hp_model_predictions, c<span class="op">=</span><span class="st">"tab:red"</span>)<span class="op">;</span></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"MSE of model with (hp) feature: </span><span class="sc">{</span>np<span class="sc">.</span>mean((y<span class="op">-</span>hp_model_predictions)<span class="op">**</span><span class="dv">2</span>)<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>MSE of model with (hp) feature: 23.943662938603108</code></pre>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="feature_engineering_files/figure-html/cell-15-output-2.png" width="585" height="429"></p>
+<p><img src="feature_engineering_files/figure-html/cell-16-output-2.png" class="img-fluid"></p>
 </div>
 </div>
 <p>To capture non-linearity in a dataset, it makes sense to incorporate <strong>non-linear</strong> features. Let’s introduce a <strong>polynomial</strong> term, <span class="math inline">\(\text{hp}^2\)</span>, into our regression model. The model now takes the form:</p>
 <p><span class="math display">\[\hat{y} = \theta_0 + \theta_1 (\text{hp}) + \theta_2 (\text{hp}^2)\]</span> <span class="math display">\[\hat{y} = \theta_0 + \theta_1 \phi_1 + \theta_2 \phi_2\]</span></p>
 <p>How can we fit a model with non-linear features? We can use the exact same techniques as before: ordinary least squares, gradient descent, or <code>sklearn</code>. This is because our new model is still a <strong>linear model</strong>. Although it contains non-linear <em>features</em>, it is linear with respect to the model <em>parameters</em>. All of our previous work on fitting models was done under the assumption that we were working with linear models. Because our new model is still linear, we can apply our existing methods to determine the optimal parameters.</p>
-<div class="cell" data-execution_count="15">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Add a hp^2 feature to the design matrix</span></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> vehicles[[<span class="st">"hp"</span>]]</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>X[<span class="st">"hp^2"</span>] <span class="op">=</span> vehicles[<span class="st">"hp"</span>]<span class="op">**</span><span class="dv">2</span></span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Use sklearn to fit the model</span></span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>hp2_model <span class="op">=</span> lm.LinearRegression()</span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>hp2_model.fit(X, y)</span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>hp2_model_predictions <span class="op">=</span> hp2_model.predict(X)</span>
-<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>sns.scatterplot(data<span class="op">=</span>vehicles, x<span class="op">=</span><span class="st">"hp"</span>, y<span class="op">=</span><span class="st">"mpg"</span>)</span>
-<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>plt.plot(vehicles[<span class="st">"hp"</span>], hp2_model_predictions, c<span class="op">=</span><span class="st">"tab:red"</span>)<span class="op">;</span></span>
-<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"MSE of model with (hp^2) feature: </span><span class="sc">{</span>np<span class="sc">.</span>mean((y<span class="op">-</span>hp2_model_predictions)<span class="op">**</span><span class="dv">2</span>)<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Add a hp^2 feature to the design matrix</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> vehicles[[<span class="st">"hp"</span>]]</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>X[<span class="st">"hp^2"</span>] <span class="op">=</span> vehicles[<span class="st">"hp"</span>]<span class="op">**</span><span class="dv">2</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Use sklearn to fit the model</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>hp2_model <span class="op">=</span> lm.LinearRegression()</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>hp2_model.fit(X, y)</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>hp2_model_predictions <span class="op">=</span> hp2_model.predict(X)</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>sns.scatterplot(data<span class="op">=</span>vehicles, x<span class="op">=</span><span class="st">"hp"</span>, y<span class="op">=</span><span class="st">"mpg"</span>)</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>plt.plot(vehicles[<span class="st">"hp"</span>], hp2_model_predictions, c<span class="op">=</span><span class="st">"tab:red"</span>)<span class="op">;</span></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"MSE of model with (hp^2) feature: </span><span class="sc">{</span>np<span class="sc">.</span>mean((y<span class="op">-</span>hp2_model_predictions)<span class="op">**</span><span class="dv">2</span>)<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>MSE of model with (hp^2) feature: 18.984768907617223</code></pre>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="feature_engineering_files/figure-html/cell-16-output-2.png" width="585" height="429"></p>
+<p><img src="feature_engineering_files/figure-html/cell-17-output-2.png" class="img-fluid"></p>
 </div>
 </div>
 <p>Looking a lot better! By incorporating a squared feature, we are able to capture the curvature of the dataset. Our model is now a parabola centered on our data. Notice that our new model’s error has decreased relative to the original model with linear features. .</p>
 </section>
 <section id="complexity-and-overfitting" class="level2">
 <h2 class="anchored" data-anchor-id="complexity-and-overfitting">Complexity and Overfitting</h2>
-<p>We’ve seen now that feature engineering allows us to build all sorts of features to improve the performance of the model. In particular, we saw that designing a more complex feature (squaring <code>"hp"</code> in the <code>vehicles</code> data previously) substantially improved the model’s ability to capture non-linear relationships. To take full advantage of this, we might be inclined to design increasingly complex features. Consider the following three models, each of different order (the maximum exponent power of each model):</p>
+<p>We’ve seen now that feature engineering allows us to build all sorts of features to improve the performance of the model. In particular, we saw that designing a more complex feature (squaring <code>hp</code> in the <code>vehicles</code> data previously) substantially improved the model’s ability to capture non-linear relationships. To take full advantage of this, we might be inclined to design increasingly complex features. Consider the following three models, each of different order (the maximum exponent power of each model):</p>
 <ul>
 <li>Model with order 2: <span class="math inline">\(\hat{\text{mpg}} = \theta_0 + \theta_1 (\text{hp}) + \theta_2 (\text{hp}^2)\)</span></li>
 <li>Model with order 3: <span class="math inline">\(\hat{\text{mpg}} = \theta_0 + \theta_1 (\text{hp}) + \theta_2 (\text{hp}^2) + \theta_3 (\text{hp}^3)\)</span></li>
@@ -716,17 +784,28 @@ my_model.intercept_
 </ul>
 <p><br></p>
 <center>
-<img src="images/degree_comparison.png" alt="degree_comparison" width="800">
+<img src="images/degree_comparison.png" alt="degree_comparison" width="900">
+</center>
+<p>As we can see in the plots above, MSE continues to decrease with each additional polynomial term. To visualize it further, let’s plot models as the complexity increases from 0 to 6:</p>
+<center>
+<img src="images/degree_comparison2.png" alt="degree_comparison" width="900">
 </center>
 <p>When we use our model to make predictions on the same data that was used to fit the model, we find that the MSE decreases with each additional polynomial term (as our model gets more complex). The <strong>training error</strong> is the model’s error when generating predictions from the same data that was used for training purposes. We can conclude that the training error goes down as the complexity of the model increases.</p>
 <center>
 <img src="images/train_error.png" alt="train_error" width="400">
 </center>
 <p>This seems like good news – when working on the <strong>training data</strong>, we can improve model performance by designing increasingly complex models.</p>
+<blockquote class="blockquote">
+<p><strong>Math Fact</strong>: given <span class="math inline">\(N\)</span> overlapping data points, we can always find a polynomial of degree <span class="math inline">\(N-1\)</span> that goes through all those points.</p>
+For example: there always exists a degree-4 polynomial curve that can perfectly model a dataset of 5 datapoints
+<center>
+<img src="images/perfect_poly_fits.png" alt="train_error" width="600">
+</center>
+</blockquote>
 <p>However, high model complexity comes with its own set of issues. When building the <code>vehicles</code> models above, we trained the models on the <em>entire</em> dataset and then evaluated their performance on this same dataset. In reality, we are likely to instead train the model on a <em>sample</em> from the population, then use it to make predictions on data it didn’t encounter during training.</p>
 <p>Let’s walk through a more realistic example. Say we are given a training dataset of just 6 datapoints and want to train a model to then make predictions on a <em>different</em> set of points. We may be tempted to make a highly complex model (e.g., degree 5), especially given it makes perfect predictions on the training data as clear on the left. However, as shown in the graph on the right, this model would perform <em>horribly</em> on the rest of the population!</p>
 <center>
-<img src="images/complex.png" alt="complex" width="800">
+<img src="images/complex.png" alt="complex" width="600">
 </center>
 <p>The phenomenon above is called <strong>overfitting</strong>. The model effectively just memorized the training data it encountered when it was fitted, leaving it unable to <strong>generalize</strong> well to data it didn’t encounter during training.</p>
 <p>Additionally, since complex models are sensitive to the specific dataset used to train them, they have high <strong>variance</strong>. A model with high variance tends to <em>vary</em> more dramatically when trained on different datasets. Going back to our example above, we can see our degree-5 model varies erratically when we fit it to different samples of 6 points from <code>vehicles</code>.</p>
@@ -737,11 +816,9 @@ my_model.intercept_
 <center>
 <img src="images/bvt.png" alt="bvt" width="400">
 </center>
-<p>We can see that there is a clear “trade-off” that comes from the complexity of our model. As model complexity increases, the model’s error on the training data decreases. At the same time, the model’s variance tends to increase.</p>
+<p>We can see that there is a clear trade-off that comes from the complexity of our model. As model complexity increases, the model’s error on the training data decreases. At the same time, the model’s variance tends to increase.</p>
 <p>The takeaway here: we need to strike a balance in the complexity of our models; we want models that are generalizable to “unseen” data. A model that is too simple won’t be able to capture the key relationships between our variables of interest; a model that is too complex runs the risk of overfitting.</p>
 <p>This begs the question: how do we control the complexity of a model? Stay tuned for our Lecture 16 on Cross-Validation and Regularization!</p>
-<!-- -->
-
 </section>
 
 </main>
@@ -1029,420 +1106,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
   }
 });
-</script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="sourceCode" id="cb27" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> Sklearn and Feature Engineering</span></span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="an">execute:</span></span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="co">  echo: true</span></span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="co">  warning: false</span></span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
-<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
-<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a><span class="co">    code-fold: false</span></span>
-<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools: true</span></span>
-<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a><span class="co">    toc: true</span></span>
-<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a><span class="co">    toc-title: Sklearn and Feature Engineering</span></span>
-<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a><span class="co">    page-layout: full</span></span>
-<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a><span class="co">    theme:</span></span>
-<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a><span class="co">      - cosmo</span></span>
-<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a><span class="co">      - cerulean</span></span>
-<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a><span class="co">    callout-icon: false</span></span>
-<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a><span class="an">jupyter:</span><span class="co"> python3</span></span>
-<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="false"}</span>
-<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a><span class="fu">## Learning Outcomes</span></span>
-<span id="cb27-22"><a href="#cb27-22" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Apply the <span class="in">`sklearn`</span> library for model creation and training</span>
-<span id="cb27-23"><a href="#cb27-23" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Recognize the value of feature engineering as a tool to improve model performance</span>
-<span id="cb27-24"><a href="#cb27-24" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Implement polynomial feature generation and one hot encoding</span>
-<span id="cb27-25"><a href="#cb27-25" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Understand the interactions between model complexity, model variance, and training error</span>
-<span id="cb27-26"><a href="#cb27-26" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb27-27"><a href="#cb27-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-28"><a href="#cb27-28" aria-hidden="true" tabindex="-1"></a>At this point, we've grown quite familiar with the modeling process. We've introduced the concept of loss, used it to fit several types of models, and, most recently, extended our analysis to multiple regression. Along the way, we've forged our way through the mathematics of deriving the optimal model parameters in all its gory detail. It's time to make our lives a little easier – let's implement the modeling process in code!</span>
-<span id="cb27-29"><a href="#cb27-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-30"><a href="#cb27-30" aria-hidden="true" tabindex="-1"></a>In this lecture, we'll explore two techniques for model fitting:</span>
-<span id="cb27-31"><a href="#cb27-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-32"><a href="#cb27-32" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Translating our derived formulas for regression to Python</span>
-<span id="cb27-33"><a href="#cb27-33" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Using the <span class="in">`sklearn`</span> Python package</span>
-<span id="cb27-34"><a href="#cb27-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-35"><a href="#cb27-35" aria-hidden="true" tabindex="-1"></a>With our new programming frameworks in hand, we will also add sophistication to our models by introducing more complex features to enhance model performance. </span>
-<span id="cb27-36"><a href="#cb27-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-37"><a href="#cb27-37" aria-hidden="true" tabindex="-1"></a><span class="fu">## Implementing Derived Formulas in Code</span></span>
-<span id="cb27-38"><a href="#cb27-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-39"><a href="#cb27-39" aria-hidden="true" tabindex="-1"></a>Throughout this lecture, we'll refer to the <span class="in">`penguins`</span> dataset. </span>
-<span id="cb27-40"><a href="#cb27-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-43"><a href="#cb27-43" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-44"><a href="#cb27-44" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb27-45"><a href="#cb27-45" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
-<span id="cb27-46"><a href="#cb27-46" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb27-47"><a href="#cb27-47" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-48"><a href="#cb27-48" aria-hidden="true" tabindex="-1"></a>penguins <span class="op">=</span> sns.load_dataset(<span class="st">"penguins"</span>)</span>
-<span id="cb27-49"><a href="#cb27-49" aria-hidden="true" tabindex="-1"></a>penguins <span class="op">=</span> penguins[penguins[<span class="st">"species"</span>] <span class="op">==</span> <span class="st">"Adelie"</span>].dropna()</span>
-<span id="cb27-50"><a href="#cb27-50" aria-hidden="true" tabindex="-1"></a>penguins.head()</span>
-<span id="cb27-51"><a href="#cb27-51" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-52"><a href="#cb27-52" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-53"><a href="#cb27-53" aria-hidden="true" tabindex="-1"></a>Our goal will be to predict the value of the <span class="in">`"bill_depth_mm"`</span> for a particular penguin given its <span class="in">`"flipper_length_mm"`</span> and <span class="in">`"body_mass_g"`</span>. We'll also add a bias column of all ones to represent the intercept term of our models.</span>
-<span id="cb27-54"><a href="#cb27-54" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-57"><a href="#cb27-57" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-58"><a href="#cb27-58" aria-hidden="true" tabindex="-1"></a><span class="co"># Add a bias column of all ones to `penguins`</span></span>
-<span id="cb27-59"><a href="#cb27-59" aria-hidden="true" tabindex="-1"></a>penguins[<span class="st">"bias"</span>] <span class="op">=</span> np.ones(<span class="bu">len</span>(penguins), dtype<span class="op">=</span><span class="bu">int</span>) </span>
-<span id="cb27-60"><a href="#cb27-60" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-61"><a href="#cb27-61" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the design matrix, X...</span></span>
-<span id="cb27-62"><a href="#cb27-62" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> penguins[[<span class="st">"bias"</span>, <span class="st">"flipper_length_mm"</span>, <span class="st">"body_mass_g"</span>]].to_numpy()</span>
-<span id="cb27-63"><a href="#cb27-63" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-64"><a href="#cb27-64" aria-hidden="true" tabindex="-1"></a><span class="co"># ...as well as the target variable, y</span></span>
-<span id="cb27-65"><a href="#cb27-65" aria-hidden="true" tabindex="-1"></a>Y <span class="op">=</span> penguins[[<span class="st">"bill_depth_mm"</span>]].to_numpy()</span>
-<span id="cb27-66"><a href="#cb27-66" aria-hidden="true" tabindex="-1"></a><span class="co"># Converting X and Y to NumPy arrays avoids misinterpretation of column labels</span></span>
-<span id="cb27-67"><a href="#cb27-67" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-68"><a href="#cb27-68" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-69"><a href="#cb27-69" aria-hidden="true" tabindex="-1"></a>In the lecture on ordinary least squares, we expressed multiple linear regression using matrix notation.</span>
-<span id="cb27-70"><a href="#cb27-70" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-71"><a href="#cb27-71" aria-hidden="true" tabindex="-1"></a>$$\hat{\mathbb{Y}} = \mathbb{X}\theta$$</span>
-<span id="cb27-72"><a href="#cb27-72" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-73"><a href="#cb27-73" aria-hidden="true" tabindex="-1"></a>We used a geometric approach to derive the following expression for the optimal model parameters:</span>
-<span id="cb27-74"><a href="#cb27-74" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-75"><a href="#cb27-75" aria-hidden="true" tabindex="-1"></a>$$\hat{\theta} = (\mathbb{X}^T \mathbb{X})^{-1}\mathbb{X}^T \mathbb{Y}$$</span>
-<span id="cb27-76"><a href="#cb27-76" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-77"><a href="#cb27-77" aria-hidden="true" tabindex="-1"></a>That's a whole lot of matrix manipulation. How do we implement it in Python?</span>
-<span id="cb27-78"><a href="#cb27-78" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-79"><a href="#cb27-79" aria-hidden="true" tabindex="-1"></a>There are three operations we need to perform here: multiplying matrices, taking transposes, and finding inverses. </span>
-<span id="cb27-80"><a href="#cb27-80" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-81"><a href="#cb27-81" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>To perform matrix multiplication, use the <span class="in">`@`</span> operator</span>
-<span id="cb27-82"><a href="#cb27-82" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>To take a transpose, call the <span class="in">`.T`</span> attribute of an array or <span class="in">`DataFrame`</span></span>
-<span id="cb27-83"><a href="#cb27-83" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>To compute an inverse, use NumPy's in-built method <span class="in">`np.linalg.inv`</span></span>
-<span id="cb27-84"><a href="#cb27-84" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-85"><a href="#cb27-85" aria-hidden="true" tabindex="-1"></a>Putting this all together, we can compute the OLS estimate for the optimal model parameters, stored in the array <span class="in">`theta_hat`</span>.</span>
-<span id="cb27-86"><a href="#cb27-86" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-89"><a href="#cb27-89" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-90"><a href="#cb27-90" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: false</span></span>
-<span id="cb27-91"><a href="#cb27-91" aria-hidden="true" tabindex="-1"></a>theta_hat <span class="op">=</span> np.linalg.inv(X.T <span class="op">@</span> X) <span class="op">@</span> X.T <span class="op">@</span> Y</span>
-<span id="cb27-92"><a href="#cb27-92" aria-hidden="true" tabindex="-1"></a>theta_hat</span>
-<span id="cb27-93"><a href="#cb27-93" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-94"><a href="#cb27-94" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-95"><a href="#cb27-95" aria-hidden="true" tabindex="-1"></a>To make predictions using our optimized parameter values, we matrix-multiply the design matrix with the parameter vector:</span>
-<span id="cb27-96"><a href="#cb27-96" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-97"><a href="#cb27-97" aria-hidden="true" tabindex="-1"></a>$$\hat{\mathbb{Y}} = \mathbb{X}\theta$$</span>
-<span id="cb27-98"><a href="#cb27-98" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-101"><a href="#cb27-101" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-102"><a href="#cb27-102" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: false</span></span>
-<span id="cb27-103"><a href="#cb27-103" aria-hidden="true" tabindex="-1"></a>y_hat <span class="op">=</span> X <span class="op">@</span> theta_hat</span>
-<span id="cb27-104"><a href="#cb27-104" aria-hidden="true" tabindex="-1"></a>pd.DataFrame(y_hat).head()</span>
-<span id="cb27-105"><a href="#cb27-105" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-106"><a href="#cb27-106" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-107"><a href="#cb27-107" aria-hidden="true" tabindex="-1"></a><span class="fu">## `sklearn`</span></span>
-<span id="cb27-108"><a href="#cb27-108" aria-hidden="true" tabindex="-1"></a>We've already saved a lot of time (and avoided tedious calculations) by translating our derived formulas into code. However, we still had to go through the process of writing out the linear algebra ourselves. </span>
-<span id="cb27-109"><a href="#cb27-109" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-110"><a href="#cb27-110" aria-hidden="true" tabindex="-1"></a>To make life *even easier*, we can turn to the <span class="in">`sklearn`</span> <span class="co">[</span><span class="ot">Python library</span><span class="co">](https://scikit-learn.org/stable/)</span>. <span class="in">`sklearn`</span> is a robust library of machine learning tools used extensively in research and industry. It gives us a wide variety of in-built modeling frameworks and methods, so we'll keep returning to <span class="in">`sklearn`</span> techniques as we progress through Data 100. </span>
-<span id="cb27-111"><a href="#cb27-111" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-112"><a href="#cb27-112" aria-hidden="true" tabindex="-1"></a>Regardless of the specific type of model being implemented, <span class="in">`sklearn`</span> follows a standard set of steps for creating a model. </span>
-<span id="cb27-113"><a href="#cb27-113" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-114"><a href="#cb27-114" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Create a model object. This generates a new instance of the model class. You can think of it as making a new "copy" of a standard "template" for a model. In pseudocode, this looks like:</span>
-<span id="cb27-115"><a href="#cb27-115" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-116"><a href="#cb27-116" aria-hidden="true" tabindex="-1"></a>    <span class="in">```</span></span>
-<span id="cb27-117"><a href="#cb27-117" aria-hidden="true" tabindex="-1"></a><span class="in">    my_model = ModelClass()</span></span>
-<span id="cb27-118"><a href="#cb27-118" aria-hidden="true" tabindex="-1"></a><span class="in">    </span></span>
-<span id="cb27-119"><a href="#cb27-119" aria-hidden="true" tabindex="-1"></a><span class="in">    ```</span></span>
-<span id="cb27-120"><a href="#cb27-120" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-121"><a href="#cb27-121" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb27-122"><a href="#cb27-122" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Fit the model to the <span class="in">`X`</span> design matrix and <span class="in">`Y`</span> target vector. This calculates the optimal model parameters "behind the scenes" without us explicitly working through the calculations ourselves. The fitted parameters are then stored within the model for use in future predictions:</span>
-<span id="cb27-123"><a href="#cb27-123" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-124"><a href="#cb27-124" aria-hidden="true" tabindex="-1"></a>    <span class="in">```</span></span>
-<span id="cb27-125"><a href="#cb27-125" aria-hidden="true" tabindex="-1"></a><span class="in">    my_model.fit(X, Y)</span></span>
-<span id="cb27-126"><a href="#cb27-126" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-127"><a href="#cb27-127" aria-hidden="true" tabindex="-1"></a><span class="in">     ```</span></span>
-<span id="cb27-128"><a href="#cb27-128" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-129"><a href="#cb27-129" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb27-130"><a href="#cb27-130" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>Use the fitted model to make predictions on the <span class="in">`X`</span> input data using <span class="in">`.predict`</span>. </span>
-<span id="cb27-131"><a href="#cb27-131" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-132"><a href="#cb27-132" aria-hidden="true" tabindex="-1"></a>    <span class="in">```</span></span>
-<span id="cb27-133"><a href="#cb27-133" aria-hidden="true" tabindex="-1"></a><span class="in">    my_model.predict(X)</span></span>
-<span id="cb27-134"><a href="#cb27-134" aria-hidden="true" tabindex="-1"></a><span class="in">    </span></span>
-<span id="cb27-135"><a href="#cb27-135" aria-hidden="true" tabindex="-1"></a><span class="in">    ```</span></span>
-<span id="cb27-136"><a href="#cb27-136" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-137"><a href="#cb27-137" aria-hidden="true" tabindex="-1"></a>To extract the fitted parameters, we can use:</span>
-<span id="cb27-138"><a href="#cb27-138" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-139"><a href="#cb27-139" aria-hidden="true" tabindex="-1"></a>  <span class="in">```</span></span>
-<span id="cb27-140"><a href="#cb27-140" aria-hidden="true" tabindex="-1"></a><span class="in">  my_model.coef_</span></span>
-<span id="cb27-141"><a href="#cb27-141" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-142"><a href="#cb27-142" aria-hidden="true" tabindex="-1"></a><span class="in">  my_model.intercept_</span></span>
-<span id="cb27-143"><a href="#cb27-143" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-144"><a href="#cb27-144" aria-hidden="true" tabindex="-1"></a><span class="in">  ```</span></span>
-<span id="cb27-145"><a href="#cb27-145" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-146"><a href="#cb27-146" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-147"><a href="#cb27-147" aria-hidden="true" tabindex="-1"></a>Let's put this into action with our multiple regression task. </span>
-<span id="cb27-148"><a href="#cb27-148" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-149"><a href="#cb27-149" aria-hidden="true" tabindex="-1"></a>**1. Initialize an instance of the model class**</span>
-<span id="cb27-150"><a href="#cb27-150" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-151"><a href="#cb27-151" aria-hidden="true" tabindex="-1"></a><span class="in">`sklearn`</span> stores "templates" of useful models for machine learning. We begin the modeling process by making a "copy" of one of these templates for our own use. Model initialization looks like <span class="in">`ModelClass()`</span>, where <span class="in">`ModelClass`</span> is the type of model we wish to create.</span>
-<span id="cb27-152"><a href="#cb27-152" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-153"><a href="#cb27-153" aria-hidden="true" tabindex="-1"></a>For now, let's create a linear regression model using <span class="in">`LinearRegression()`</span>. </span>
-<span id="cb27-154"><a href="#cb27-154" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-155"><a href="#cb27-155" aria-hidden="true" tabindex="-1"></a><span class="in">`my_model`</span> is now an instance of the <span class="in">`LinearRegression`</span> class. You can think of it as the "idea" of a linear regression model. We haven't trained it yet, so it doesn't know any model parameters and cannot be used to make predictions. In fact, we haven't even told it what data to use for modeling! It simply waits for further instructions.</span>
-<span id="cb27-156"><a href="#cb27-156" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-159"><a href="#cb27-159" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-160"><a href="#cb27-160" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sklearn.linear_model <span class="im">as</span> lm</span>
-<span id="cb27-161"><a href="#cb27-161" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-162"><a href="#cb27-162" aria-hidden="true" tabindex="-1"></a>my_model <span class="op">=</span> lm.LinearRegression()</span>
-<span id="cb27-163"><a href="#cb27-163" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-164"><a href="#cb27-164" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-165"><a href="#cb27-165" aria-hidden="true" tabindex="-1"></a>**2. Train the model using `.fit`**</span>
-<span id="cb27-166"><a href="#cb27-166" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-167"><a href="#cb27-167" aria-hidden="true" tabindex="-1"></a>Before the model can make predictions, we will need to fit it to our training data. When we fit the model, <span class="in">`sklearn`</span> will run gradient descent behind the scenes to determine the optimal model parameters. It will then save these model parameters to our model instance for future use. </span>
-<span id="cb27-168"><a href="#cb27-168" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-169"><a href="#cb27-169" aria-hidden="true" tabindex="-1"></a>All <span class="in">`sklearn`</span> model classes include a <span class="in">`.fit`</span> method, which is used to fit the model. It takes in two inputs: the design matrix, <span class="in">`X`</span>, and the target variable, <span class="in">`y`</span>. </span>
-<span id="cb27-170"><a href="#cb27-170" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-171"><a href="#cb27-171" aria-hidden="true" tabindex="-1"></a>Let's start by fitting a model with just one feature: the flipper length. We create a design matrix <span class="in">`X`</span> by pulling out the <span class="in">`"flipper_length_mm"`</span> column from the <span class="in">`DataFrame`</span>. </span>
-<span id="cb27-172"><a href="#cb27-172" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-175"><a href="#cb27-175" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-176"><a href="#cb27-176" aria-hidden="true" tabindex="-1"></a><span class="co"># .fit expects a 2D data design matrix, so we use double brackets to extract a DataFrame</span></span>
-<span id="cb27-177"><a href="#cb27-177" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> penguins[[<span class="st">"flipper_length_mm"</span>]]</span>
-<span id="cb27-178"><a href="#cb27-178" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> penguins[<span class="st">"bill_depth_mm"</span>]</span>
-<span id="cb27-179"><a href="#cb27-179" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-180"><a href="#cb27-180" aria-hidden="true" tabindex="-1"></a>my_model.fit(X, y)</span>
-<span id="cb27-181"><a href="#cb27-181" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-182"><a href="#cb27-182" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-183"><a href="#cb27-183" aria-hidden="true" tabindex="-1"></a>Notice that we use **double brackets** to extract this column. Why double brackets instead of just single brackets? The `.fit` method, by default, expects to receive **2-dimensional** data – some kind of data that includes both rows and columns. Writing <span class="in">`penguins["flipper_length_mm"]`</span> would return a 1D <span class="in">`Series`</span>, causing <span class="in">`sklearn`</span> to error. We avoid this by writing <span class="in">`penguins[["flipper_length_mm"]]`</span> to produce a 2D <span class="in">`DataFrame`</span>. </span>
-<span id="cb27-184"><a href="#cb27-184" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-185"><a href="#cb27-185" aria-hidden="true" tabindex="-1"></a>And in just three lines of code, our model has run gradient descent to determine the optimal model parameters! Our single-feature model takes the form:</span>
-<span id="cb27-186"><a href="#cb27-186" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-187"><a href="#cb27-187" aria-hidden="true" tabindex="-1"></a>$$\text{bill depth} = \theta_0 + \theta_1 \text{flipper length}$$</span>
-<span id="cb27-188"><a href="#cb27-188" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-189"><a href="#cb27-189" aria-hidden="true" tabindex="-1"></a>Note that <span class="in">`LinearRegression`</span> will automatically include an intercept term. </span>
-<span id="cb27-190"><a href="#cb27-190" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-191"><a href="#cb27-191" aria-hidden="true" tabindex="-1"></a>The fitted model parameters are stored as attributes of the model instance. <span class="in">`my_model.intercept_`</span> will return the value of $\hat{\theta}_0$ as a scalar. `my_model.coef_` will return all values $\hat{\theta}_1, </span>
-<span id="cb27-192"><a href="#cb27-192" aria-hidden="true" tabindex="-1"></a>\hat{\theta}_1, ...$ in an array. Because our model only contains one feature, we see just the value of $\hat{\theta}_1$ in the cell below.</span>
-<span id="cb27-193"><a href="#cb27-193" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-196"><a href="#cb27-196" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-197"><a href="#cb27-197" aria-hidden="true" tabindex="-1"></a><span class="co"># The intercept term, theta_0</span></span>
-<span id="cb27-198"><a href="#cb27-198" aria-hidden="true" tabindex="-1"></a>my_model.intercept_</span>
-<span id="cb27-199"><a href="#cb27-199" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-200"><a href="#cb27-200" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-203"><a href="#cb27-203" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-204"><a href="#cb27-204" aria-hidden="true" tabindex="-1"></a><span class="co"># All parameters theta_1, ..., theta_p</span></span>
-<span id="cb27-205"><a href="#cb27-205" aria-hidden="true" tabindex="-1"></a>my_model.coef_</span>
-<span id="cb27-206"><a href="#cb27-206" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-207"><a href="#cb27-207" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-208"><a href="#cb27-208" aria-hidden="true" tabindex="-1"></a>**3. Use the fitted model to make predictions**</span>
-<span id="cb27-209"><a href="#cb27-209" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-210"><a href="#cb27-210" aria-hidden="true" tabindex="-1"></a>Now that the model has been trained, we can use it to make predictions! To do so, we use the <span class="in">`.predict`</span> method. <span class="in">`.predict`</span> takes in one argument, the design matrix that should be used to generate predictions. To understand how the model performs on the training set, we would pass in the training data. Alternatively, to make predictions on unseen data, we would pass in a new dataset that wasn't used to train the model.</span>
-<span id="cb27-211"><a href="#cb27-211" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-212"><a href="#cb27-212" aria-hidden="true" tabindex="-1"></a>Below, we call <span class="in">`.predict`</span> to generate model predictions on the original training data. As before, we use double brackets to ensure that we extract 2-dimensional data.</span>
-<span id="cb27-213"><a href="#cb27-213" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-216"><a href="#cb27-216" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-217"><a href="#cb27-217" aria-hidden="true" tabindex="-1"></a>y_hat_one_feature <span class="op">=</span> my_model.predict(penguins[[<span class="st">"flipper_length_mm"</span>]])</span>
-<span id="cb27-218"><a href="#cb27-218" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-219"><a href="#cb27-219" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"The RMSE of the model is </span><span class="sc">{</span>np<span class="sc">.</span>sqrt(np.mean((y<span class="op">-</span>y_hat_one_feature)<span class="op">**</span><span class="dv">2</span>))<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb27-220"><a href="#cb27-220" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-221"><a href="#cb27-221" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-222"><a href="#cb27-222" aria-hidden="true" tabindex="-1"></a>What if we wanted a model with two features? </span>
-<span id="cb27-223"><a href="#cb27-223" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-224"><a href="#cb27-224" aria-hidden="true" tabindex="-1"></a>$$\text{bill depth} = \theta_0 + \theta_1 \text{flipper length} + \theta_2 \text{body mass}$$</span>
-<span id="cb27-225"><a href="#cb27-225" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-226"><a href="#cb27-226" aria-hidden="true" tabindex="-1"></a>We repeat this three-step process by intializing a new model object, then calling <span class="in">`.fit`</span> and <span class="in">`.predict`</span> as before.</span>
-<span id="cb27-227"><a href="#cb27-227" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-230"><a href="#cb27-230" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-231"><a href="#cb27-231" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 1: initialize LinearRegression model</span></span>
-<span id="cb27-232"><a href="#cb27-232" aria-hidden="true" tabindex="-1"></a>two_feature_model <span class="op">=</span> lm.LinearRegression()</span>
-<span id="cb27-233"><a href="#cb27-233" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-234"><a href="#cb27-234" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 2: fit the model</span></span>
-<span id="cb27-235"><a href="#cb27-235" aria-hidden="true" tabindex="-1"></a>X_two_features <span class="op">=</span> penguins[[<span class="st">"flipper_length_mm"</span>, <span class="st">"body_mass_g"</span>]]</span>
-<span id="cb27-236"><a href="#cb27-236" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> penguins[<span class="st">"bill_depth_mm"</span>]</span>
-<span id="cb27-237"><a href="#cb27-237" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-238"><a href="#cb27-238" aria-hidden="true" tabindex="-1"></a>two_feature_model.fit(X_two_features, y)</span>
-<span id="cb27-239"><a href="#cb27-239" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-240"><a href="#cb27-240" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 3: make predictions</span></span>
-<span id="cb27-241"><a href="#cb27-241" aria-hidden="true" tabindex="-1"></a>y_hat_two_features <span class="op">=</span> two_feature_model.predict(X_two_features)</span>
-<span id="cb27-242"><a href="#cb27-242" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-243"><a href="#cb27-243" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"The RMSE of the model is </span><span class="sc">{</span>np<span class="sc">.</span>sqrt(np.mean((y<span class="op">-</span>y_hat_two_features)<span class="op">**</span><span class="dv">2</span>))<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb27-244"><a href="#cb27-244" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-245"><a href="#cb27-245" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-246"><a href="#cb27-246" aria-hidden="true" tabindex="-1"></a>We can also see that we obtain the same predictions using <span class="in">`sklearn`</span> as we did when applying the ordinary least squares formula before! </span>
-<span id="cb27-247"><a href="#cb27-247" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-250"><a href="#cb27-250" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-251"><a href="#cb27-251" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb27-252"><a href="#cb27-252" aria-hidden="true" tabindex="-1"></a>pd.DataFrame({<span class="st">"Y_hat from OLS"</span>:np.squeeze(y_hat), <span class="st">"Y_hat from sklearn"</span>:y_hat_two_features}).head()</span>
-<span id="cb27-253"><a href="#cb27-253" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-254"><a href="#cb27-254" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-255"><a href="#cb27-255" aria-hidden="true" tabindex="-1"></a><span class="fu">## Feature Engineering</span></span>
-<span id="cb27-256"><a href="#cb27-256" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-257"><a href="#cb27-257" aria-hidden="true" tabindex="-1"></a>At this point in the course, we've equipped ourselves with some powerful techniques to build and optimize models. We've explored how to develop models of multiple variables, as well as how to transform variables to help **linearize** a dataset and fit these models to maximize their performance.</span>
-<span id="cb27-258"><a href="#cb27-258" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-259"><a href="#cb27-259" aria-hidden="true" tabindex="-1"></a>All of this was done with one major caveat: the regression models we've worked with so far are all **linear in the input variables**. We've assumed that our predictions should be some combination of linear variables. While this works well in some cases, the real world isn't always so straightforward. We'll learn an important method to address this issue – feature engineering – and consider some new problems that can arise when we do so.</span>
-<span id="cb27-260"><a href="#cb27-260" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-261"><a href="#cb27-261" aria-hidden="true" tabindex="-1"></a>Feature engineering is the process of *transforming* raw features into *more informative features* that can be used in modeling or EDA tasks and improve model performance.</span>
-<span id="cb27-262"><a href="#cb27-262" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-263"><a href="#cb27-263" aria-hidden="true" tabindex="-1"></a>Feature engineering allows you to:</span>
-<span id="cb27-264"><a href="#cb27-264" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-265"><a href="#cb27-265" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Capture domain knowledge </span>
-<span id="cb27-266"><a href="#cb27-266" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Express non-linear relationships using linear models</span>
-<span id="cb27-267"><a href="#cb27-267" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Use non-numeric features in models</span>
-<span id="cb27-268"><a href="#cb27-268" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-269"><a href="#cb27-269" aria-hidden="true" tabindex="-1"></a><span class="fu">## Feature Functions</span></span>
-<span id="cb27-270"><a href="#cb27-270" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-271"><a href="#cb27-271" aria-hidden="true" tabindex="-1"></a>A **feature function** describes the transformations we apply to raw features in a dataset to create a design matrix of transformed features. We typically denote the feature function as $\Phi$ (think to yourself: "phi"-ture function). When we apply the feature function to our original dataset $\mathbb{X}$, the result, $\Phi(\mathbb{X})$, is a transformed design matrix ready to be used in modeling. </span>
-<span id="cb27-272"><a href="#cb27-272" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-273"><a href="#cb27-273" aria-hidden="true" tabindex="-1"></a>For example, we might design a feature function that computes the square of an existing feature and adds it to the design matrix. In this case, our existing matrix $<span class="co">[</span><span class="ot">x</span><span class="co">]</span>$ is transformed to $<span class="co">[</span><span class="ot">x, x^2</span><span class="co">]</span>$. Its *dimension* increases from 1 to 2. Often, the dimension of the *featurized* dataset increases as seen here.</span>
-<span id="cb27-274"><a href="#cb27-274" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-275"><a href="#cb27-275" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;center&gt;&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/phi.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'phi'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'500'</span><span class="kw">&gt;&lt;/center&gt;</span></span>
-<span id="cb27-276"><a href="#cb27-276" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-277"><a href="#cb27-277" aria-hidden="true" tabindex="-1"></a>The new features introduced by the feature function can then be used in modeling. Often, we use the symbol $\phi_i$ to represent transformed features after feature engineering. </span>
-<span id="cb27-278"><a href="#cb27-278" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-279"><a href="#cb27-279" aria-hidden="true" tabindex="-1"></a>$$\hat{y} = \theta_1 x + \theta_2 x^2$$</span>
-<span id="cb27-280"><a href="#cb27-280" aria-hidden="true" tabindex="-1"></a>$$\hat{y}= \theta_1 \phi_1 + \theta_2 \phi_2$$</span>
-<span id="cb27-281"><a href="#cb27-281" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-282"><a href="#cb27-282" aria-hidden="true" tabindex="-1"></a>In matrix notation, the symbol $\Phi$ is sometimes used to denote the design matrix after feature engineering has been performed. Note that in the usage below, $\Phi$ is now a feature-engineered matrix, rather than a function.</span>
-<span id="cb27-283"><a href="#cb27-283" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-284"><a href="#cb27-284" aria-hidden="true" tabindex="-1"></a>$$\hat{\mathbb{Y}} = \Phi \theta$$</span>
-<span id="cb27-285"><a href="#cb27-285" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-286"><a href="#cb27-286" aria-hidden="true" tabindex="-1"></a>More formally, we describe a feature function as transforming the original $\mathbb{R}^{n \times p}$ dataset $\mathbb{X}$ to a featurized $\mathbb{R}^{n \times p'}$ dataset $\mathbb{\Phi}$, where $p'$ is typically greater than $p$. </span>
-<span id="cb27-287"><a href="#cb27-287" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-288"><a href="#cb27-288" aria-hidden="true" tabindex="-1"></a>$$\mathbb{X} \in \mathbb{R}^{n \times p} \longrightarrow \Phi \in \mathbb{R}^{n \times p'}$$</span>
-<span id="cb27-289"><a href="#cb27-289" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-290"><a href="#cb27-290" aria-hidden="true" tabindex="-1"></a><span class="fu">## One Hot Encoding</span></span>
-<span id="cb27-291"><a href="#cb27-291" aria-hidden="true" tabindex="-1"></a>Feature engineering opens up a whole new set of possibilities for designing better-performing models. As you will see in lab and homework, feature engineering is one of the most important parts of the entire modeling process.</span>
-<span id="cb27-292"><a href="#cb27-292" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-293"><a href="#cb27-293" aria-hidden="true" tabindex="-1"></a>A particularly powerful use of feature engineering is to allow us to perform regression on *non-numeric* features. **One hot encoding** is a feature engineering technique that generates numeric features from categorical data, allowing us to use our usual methods to fit a regression model on the data. </span>
-<span id="cb27-294"><a href="#cb27-294" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-295"><a href="#cb27-295" aria-hidden="true" tabindex="-1"></a>To illustrate how this works, we'll refer back to the <span class="in">`tips`</span> dataset from previous lectures. Consider the <span class="in">`"day"`</span> column of the dataset:</span>
-<span id="cb27-296"><a href="#cb27-296" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-299"><a href="#cb27-299" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-300"><a href="#cb27-300" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb27-301"><a href="#cb27-301" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb27-302"><a href="#cb27-302" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">1337</span>)</span>
-<span id="cb27-303"><a href="#cb27-303" aria-hidden="true" tabindex="-1"></a>tips <span class="op">=</span> sns.load_dataset(<span class="st">"tips"</span>).sample(<span class="dv">100</span>)</span>
-<span id="cb27-304"><a href="#cb27-304" aria-hidden="true" tabindex="-1"></a>tips.head(<span class="dv">5</span>)</span>
-<span id="cb27-305"><a href="#cb27-305" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-306"><a href="#cb27-306" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-307"><a href="#cb27-307" aria-hidden="true" tabindex="-1"></a>   At first glance, it doesn't seem possible to fit a regression model to this data – we can't directly perform any mathematical operations on the entry "Sun". </span>
-<span id="cb27-308"><a href="#cb27-308" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb27-309"><a href="#cb27-309" aria-hidden="true" tabindex="-1"></a>To resolve this, we instead create a new table with a feature for each unique value in the original <span class="in">`"day"`</span> column. We then iterate through the <span class="in">`"day"`</span> column. For each entry in <span class="in">`"day"`</span> we fill the corresponding feature in the new table with 1. All other features are set to 0.</span>
-<span id="cb27-310"><a href="#cb27-310" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-311"><a href="#cb27-311" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;center&gt;&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/ohe.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'ohe'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'600'</span><span class="kw">&gt;&lt;/center&gt;</span></span>
-<span id="cb27-312"><a href="#cb27-312" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-313"><a href="#cb27-313" aria-hidden="true" tabindex="-1"></a>The one-hot encoded features can then be used in the design matrix to train a model:</span>
-<span id="cb27-314"><a href="#cb27-314" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-315"><a href="#cb27-315" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;center&gt;&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/ohemodel.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'ohemodel'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'600'</span><span class="kw">&gt;&lt;/center&gt;</span></span>
-<span id="cb27-316"><a href="#cb27-316" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-317"><a href="#cb27-317" aria-hidden="true" tabindex="-1"></a>$$\hat{y} = \theta_1 (\text{total}\textunderscore\text{bill}) + \theta_2 (\text{size}) + \theta_3 (\text{day}\textunderscore\text{Fri}) + \theta_4 (\text{day}\textunderscore\text{Sat}) + \theta_5 (\text{day}\textunderscore\text{Sun}) + \theta_6 (\text{day}\textunderscore\text{Thur})$$</span>
-<span id="cb27-318"><a href="#cb27-318" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-319"><a href="#cb27-319" aria-hidden="true" tabindex="-1"></a>Or in shorthand:</span>
-<span id="cb27-320"><a href="#cb27-320" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-321"><a href="#cb27-321" aria-hidden="true" tabindex="-1"></a>$$\hat{y} = \theta_1\phi_1 + \theta_2\phi_2 + \theta_3\phi_3 + \theta_4\phi_4 + \theta_5\phi_5 + \theta_6\phi_6$$</span>
-<span id="cb27-322"><a href="#cb27-322" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-323"><a href="#cb27-323" aria-hidden="true" tabindex="-1"></a>The <span class="in">`OneHotEncoder`</span> class of <span class="in">`sklearn`</span> (<span class="co">[</span><span class="ot">documentation</span><span class="co">](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OneHotEncoder.html#sklearn.preprocessing.OneHotEncoder.get_feature_names_out)</span>) offers a quick way to perform one-hot encoding. You will explore its use in detail in the lab. For now, recognize that we follow a very similar workflow to when we were working with the <span class="in">`LinearRegression`</span> class: we initialize a <span class="in">`OneHotEncoder`</span> object, fit it to our data, then use <span class="in">`.transform`</span> to apply the fitted encoder.</span>
-<span id="cb27-324"><a href="#cb27-324" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-327"><a href="#cb27-327" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-328"><a href="#cb27-328" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: false</span></span>
-<span id="cb27-329"><a href="#cb27-329" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> OneHotEncoder</span>
-<span id="cb27-330"><a href="#cb27-330" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-331"><a href="#cb27-331" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialize a OneHotEncoder object</span></span>
-<span id="cb27-332"><a href="#cb27-332" aria-hidden="true" tabindex="-1"></a>ohe <span class="op">=</span> OneHotEncoder()</span>
-<span id="cb27-333"><a href="#cb27-333" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-334"><a href="#cb27-334" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit the encoder</span></span>
-<span id="cb27-335"><a href="#cb27-335" aria-hidden="true" tabindex="-1"></a>ohe.fit(tips[[<span class="st">"day"</span>]])</span>
-<span id="cb27-336"><a href="#cb27-336" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-337"><a href="#cb27-337" aria-hidden="true" tabindex="-1"></a><span class="co"># Use the encoder to transform the raw "day" feature</span></span>
-<span id="cb27-338"><a href="#cb27-338" aria-hidden="true" tabindex="-1"></a>encoded_day <span class="op">=</span> ohe.transform(tips[[<span class="st">"day"</span>]]).toarray()</span>
-<span id="cb27-339"><a href="#cb27-339" aria-hidden="true" tabindex="-1"></a>encoded_day_df <span class="op">=</span> pd.DataFrame(encoded_day, columns<span class="op">=</span>ohe.get_feature_names_out())</span>
-<span id="cb27-340"><a href="#cb27-340" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-341"><a href="#cb27-341" aria-hidden="true" tabindex="-1"></a>encoded_day_df.head()</span>
-<span id="cb27-342"><a href="#cb27-342" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-343"><a href="#cb27-343" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-344"><a href="#cb27-344" aria-hidden="true" tabindex="-1"></a>Now, the <span class="in">`"day"`</span> feature (or rather, the four new boolean features that represent day) can be used to fit a model.</span>
-<span id="cb27-345"><a href="#cb27-345" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-346"><a href="#cb27-346" aria-hidden="true" tabindex="-1"></a><span class="fu">## Polynomial Features</span></span>
-<span id="cb27-347"><a href="#cb27-347" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-348"><a href="#cb27-348" aria-hidden="true" tabindex="-1"></a>We have encountered a few cases now where models with linear features have performed poorly on datasets that show clear non-linear curvature. </span>
-<span id="cb27-349"><a href="#cb27-349" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-350"><a href="#cb27-350" aria-hidden="true" tabindex="-1"></a>As an example, consider the <span class="in">`vehicles`</span> dataset, which contains information about cars. Suppose we want to use the <span class="in">`"hp"`</span> (horsepower) of a car to predict its <span class="in">`"mpg"`</span> (gas mileage in miles per gallon). If we visualize the relationship between these two variables, we see a non-linear curvature. Fitting a linear model to these variables results in a high (poor) value of RMSE. </span>
-<span id="cb27-351"><a href="#cb27-351" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-352"><a href="#cb27-352" aria-hidden="true" tabindex="-1"></a>$$\hat{y} = \theta_0 + \theta_1 (\text{hp})$$</span>
-<span id="cb27-353"><a href="#cb27-353" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-356"><a href="#cb27-356" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-357"><a href="#cb27-357" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb27-358"><a href="#cb27-358" aria-hidden="true" tabindex="-1"></a>pd.options.mode.chained_assignment <span class="op">=</span> <span class="va">None</span> </span>
-<span id="cb27-359"><a href="#cb27-359" aria-hidden="true" tabindex="-1"></a>vehicles <span class="op">=</span> sns.load_dataset(<span class="st">"mpg"</span>).dropna().rename(columns <span class="op">=</span> {<span class="st">"horsepower"</span>: <span class="st">"hp"</span>}).sort_values(<span class="st">"hp"</span>)</span>
-<span id="cb27-360"><a href="#cb27-360" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-361"><a href="#cb27-361" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> vehicles[[<span class="st">"hp"</span>]]</span>
-<span id="cb27-362"><a href="#cb27-362" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> vehicles[<span class="st">"mpg"</span>]</span>
-<span id="cb27-363"><a href="#cb27-363" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-364"><a href="#cb27-364" aria-hidden="true" tabindex="-1"></a>hp_model <span class="op">=</span> lm.LinearRegression()</span>
-<span id="cb27-365"><a href="#cb27-365" aria-hidden="true" tabindex="-1"></a>hp_model.fit(X, y)</span>
-<span id="cb27-366"><a href="#cb27-366" aria-hidden="true" tabindex="-1"></a>hp_model_predictions <span class="op">=</span> hp_model.predict(X)</span>
-<span id="cb27-367"><a href="#cb27-367" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-368"><a href="#cb27-368" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb27-369"><a href="#cb27-369" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-370"><a href="#cb27-370" aria-hidden="true" tabindex="-1"></a>sns.scatterplot(data<span class="op">=</span>vehicles, x<span class="op">=</span><span class="st">"hp"</span>, y<span class="op">=</span><span class="st">"mpg"</span>)</span>
-<span id="cb27-371"><a href="#cb27-371" aria-hidden="true" tabindex="-1"></a>plt.plot(vehicles[<span class="st">"hp"</span>], hp_model_predictions, c<span class="op">=</span><span class="st">"tab:red"</span>)<span class="op">;</span></span>
-<span id="cb27-372"><a href="#cb27-372" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-373"><a href="#cb27-373" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"MSE of model with (hp) feature: </span><span class="sc">{</span>np<span class="sc">.</span>mean((y<span class="op">-</span>hp_model_predictions)<span class="op">**</span><span class="dv">2</span>)<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb27-374"><a href="#cb27-374" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-375"><a href="#cb27-375" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-376"><a href="#cb27-376" aria-hidden="true" tabindex="-1"></a>To capture non-linearity in a dataset, it makes sense to incorporate **non-linear** features. Let's introduce a **polynomial** term, $\text{hp}^2$, into our regression model. The model now takes the form:</span>
-<span id="cb27-377"><a href="#cb27-377" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-378"><a href="#cb27-378" aria-hidden="true" tabindex="-1"></a>$$\hat{y} = \theta_0 + \theta_1 (\text{hp}) + \theta_2 (\text{hp}^2)$$</span>
-<span id="cb27-379"><a href="#cb27-379" aria-hidden="true" tabindex="-1"></a>$$\hat{y} = \theta_0 + \theta_1 \phi_1 + \theta_2 \phi_2$$</span>
-<span id="cb27-380"><a href="#cb27-380" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-381"><a href="#cb27-381" aria-hidden="true" tabindex="-1"></a>How can we fit a model with non-linear features? We can use the exact same techniques as before: ordinary least squares, gradient descent, or <span class="in">`sklearn`</span>. This is because our new model is still a **linear model**. Although it contains non-linear *features*, it is linear with respect to the model *parameters*. All of our previous work on fitting models was done under the assumption that we were working with linear models. Because our new model is still linear, we can apply our existing methods to determine the optimal parameters. </span>
-<span id="cb27-382"><a href="#cb27-382" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-385"><a href="#cb27-385" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-386"><a href="#cb27-386" aria-hidden="true" tabindex="-1"></a><span class="co"># Add a hp^2 feature to the design matrix</span></span>
-<span id="cb27-387"><a href="#cb27-387" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> vehicles[[<span class="st">"hp"</span>]]</span>
-<span id="cb27-388"><a href="#cb27-388" aria-hidden="true" tabindex="-1"></a>X[<span class="st">"hp^2"</span>] <span class="op">=</span> vehicles[<span class="st">"hp"</span>]<span class="op">**</span><span class="dv">2</span></span>
-<span id="cb27-389"><a href="#cb27-389" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-390"><a href="#cb27-390" aria-hidden="true" tabindex="-1"></a><span class="co"># Use sklearn to fit the model</span></span>
-<span id="cb27-391"><a href="#cb27-391" aria-hidden="true" tabindex="-1"></a>hp2_model <span class="op">=</span> lm.LinearRegression()</span>
-<span id="cb27-392"><a href="#cb27-392" aria-hidden="true" tabindex="-1"></a>hp2_model.fit(X, y)</span>
-<span id="cb27-393"><a href="#cb27-393" aria-hidden="true" tabindex="-1"></a>hp2_model_predictions <span class="op">=</span> hp2_model.predict(X)</span>
-<span id="cb27-394"><a href="#cb27-394" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-395"><a href="#cb27-395" aria-hidden="true" tabindex="-1"></a>sns.scatterplot(data<span class="op">=</span>vehicles, x<span class="op">=</span><span class="st">"hp"</span>, y<span class="op">=</span><span class="st">"mpg"</span>)</span>
-<span id="cb27-396"><a href="#cb27-396" aria-hidden="true" tabindex="-1"></a>plt.plot(vehicles[<span class="st">"hp"</span>], hp2_model_predictions, c<span class="op">=</span><span class="st">"tab:red"</span>)<span class="op">;</span></span>
-<span id="cb27-397"><a href="#cb27-397" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-398"><a href="#cb27-398" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"MSE of model with (hp^2) feature: </span><span class="sc">{</span>np<span class="sc">.</span>mean((y<span class="op">-</span>hp2_model_predictions)<span class="op">**</span><span class="dv">2</span>)<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb27-399"><a href="#cb27-399" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-400"><a href="#cb27-400" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-401"><a href="#cb27-401" aria-hidden="true" tabindex="-1"></a>Looking a lot better! By incorporating a squared feature, we are able to capture the curvature of the dataset. Our model is now a parabola centered on our data. Notice that our new model's error has decreased relative to the original model with linear features. .</span>
-<span id="cb27-402"><a href="#cb27-402" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-403"><a href="#cb27-403" aria-hidden="true" tabindex="-1"></a><span class="fu">## Complexity and Overfitting</span></span>
-<span id="cb27-404"><a href="#cb27-404" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-405"><a href="#cb27-405" aria-hidden="true" tabindex="-1"></a>We've seen now that feature engineering allows us to build all sorts of features to improve the performance of the model. In particular, we saw that designing a more complex feature (squaring <span class="in">`"hp"`</span> in the <span class="in">`vehicles`</span> data previously) substantially improved the model's ability to capture non-linear relationships. To take full advantage of this, we might be inclined to design increasingly complex features. Consider the following three models, each of different order (the maximum exponent power of each model):</span>
-<span id="cb27-406"><a href="#cb27-406" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-407"><a href="#cb27-407" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Model with order 2: $\hat{\text{mpg}} = \theta_0 + \theta_1 (\text{hp}) + \theta_2 (\text{hp}^2)$</span>
-<span id="cb27-408"><a href="#cb27-408" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Model with order 3: $\hat{\text{mpg}} = \theta_0 + \theta_1 (\text{hp}) + \theta_2 (\text{hp}^2) + \theta_3 (\text{hp}^3)$</span>
-<span id="cb27-409"><a href="#cb27-409" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Model with order 4: $\hat{\text{mpg}} = \theta_0 + \theta_1 (\text{hp}) + \theta_2 (\text{hp}^2) + \theta_3 (\text{hp}^3) + \theta_4 (\text{hp}^4)$</span>
-<span id="cb27-410"><a href="#cb27-410" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-411"><a href="#cb27-411" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;br/&gt;</span></span>
-<span id="cb27-412"><a href="#cb27-412" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-413"><a href="#cb27-413" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;center&gt;&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/degree_comparison.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'degree_comparison'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'800'</span><span class="kw">&gt;&lt;/center&gt;</span></span>
-<span id="cb27-414"><a href="#cb27-414" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-415"><a href="#cb27-415" aria-hidden="true" tabindex="-1"></a>When we use our model to make predictions on the same data that was used to fit the model, we find that the MSE decreases with each additional polynomial term (as our model gets more complex). The **training error** is the model's error when generating predictions from the same data that was used for training purposes. We can conclude that the training error goes down as the complexity of the model increases. </span>
-<span id="cb27-416"><a href="#cb27-416" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-417"><a href="#cb27-417" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;center&gt;&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/train_error.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'train_error'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'400'</span><span class="kw">&gt;&lt;/center&gt;</span></span>
-<span id="cb27-418"><a href="#cb27-418" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-419"><a href="#cb27-419" aria-hidden="true" tabindex="-1"></a>This seems like good news – when working on the **training data**, we can improve model performance by designing increasingly complex models. </span>
-<span id="cb27-420"><a href="#cb27-420" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-421"><a href="#cb27-421" aria-hidden="true" tabindex="-1"></a>However, high model complexity comes with its own set of issues. When building the <span class="in">`vehicles`</span> models above, we trained the models on the *entire* dataset and then evaluated their performance on this same dataset. In reality, we are likely to instead train the model on a *sample* from the population, then use it to make predictions on data it didn't encounter during training. </span>
-<span id="cb27-422"><a href="#cb27-422" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-423"><a href="#cb27-423" aria-hidden="true" tabindex="-1"></a>Let's walk through a more realistic example. Say we are given a training dataset of just 6 datapoints and want to train a model to then make predictions on a *different* set of points. We may be tempted to make a highly complex model (e.g., degree 5), especially given it makes perfect predictions on the training data as clear on the left. However, as shown in the graph on the right, this model would perform *horribly* on the rest of the population! </span>
-<span id="cb27-424"><a href="#cb27-424" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-425"><a href="#cb27-425" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;center&gt;&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/complex.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'complex'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'800'</span><span class="kw">&gt;&lt;/center&gt;</span></span>
-<span id="cb27-426"><a href="#cb27-426" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-427"><a href="#cb27-427" aria-hidden="true" tabindex="-1"></a>The phenomenon above is called **overfitting**. The model effectively just memorized the training data it encountered when it was fitted, leaving it unable to **generalize** well to data it didn't encounter during training.</span>
-<span id="cb27-428"><a href="#cb27-428" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-429"><a href="#cb27-429" aria-hidden="true" tabindex="-1"></a>Additionally, since complex models are sensitive to the specific dataset used to train them, they have high **variance**. A model with high variance tends to *vary* more dramatically when trained on different datasets. Going back to our example above, we can see our degree-5 model varies erratically when we fit it to different samples of 6 points from <span class="in">`vehicles`</span>. </span>
-<span id="cb27-430"><a href="#cb27-430" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-431"><a href="#cb27-431" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;center&gt;&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/resamples.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'resamples'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'800'</span><span class="kw">&gt;&lt;/center&gt;</span></span>
-<span id="cb27-432"><a href="#cb27-432" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-433"><a href="#cb27-433" aria-hidden="true" tabindex="-1"></a>We now face a dilemma: we know that we can **decrease training error** by increasing model complexity, but models that are *too* complex start to overfit and can't be reapplied to new datasets due to **high variance**.</span>
-<span id="cb27-434"><a href="#cb27-434" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-435"><a href="#cb27-435" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;center&gt;&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/bvt.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'bvt'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'400'</span><span class="kw">&gt;&lt;/center&gt;</span></span>
-<span id="cb27-436"><a href="#cb27-436" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-437"><a href="#cb27-437" aria-hidden="true" tabindex="-1"></a>We can see that there is a clear "trade-off" that comes from the complexity of our model. As model complexity increases, the model's error on the training data decreases. At the same time, the model's variance tends to increase.</span>
-<span id="cb27-438"><a href="#cb27-438" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-439"><a href="#cb27-439" aria-hidden="true" tabindex="-1"></a>The takeaway here: we need to strike a balance in the complexity of our models; we want models that are generalizable to "unseen" data. A model that is too simple won't be able to capture the key relationships between our variables of interest; a model that is too complex runs the risk of overfitting. </span>
-<span id="cb27-440"><a href="#cb27-440" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-441"><a href="#cb27-441" aria-hidden="true" tabindex="-1"></a>This begs the question: how do we control the complexity of a model? Stay tuned for our Lecture 16 on Cross-Validation and Regularization!</span>
-</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div></div></div></div></div>
+</script>
 </div> <!-- /content -->
 
 

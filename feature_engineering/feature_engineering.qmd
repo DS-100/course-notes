@@ -29,8 +29,8 @@ At this point, we've grown quite familiar with the modeling process. We've intro
 
 In this lecture, we'll explore two techniques for model fitting:
 
-1. Translating our derived formulas for regression to Python
-2. Using the `sklearn` Python package
+1. Translating our derived formulas for regression to `python`
+2. Using `python`'s `sklearn` package
 
 With our new programming frameworks in hand, we will also add sophistication to our models by introducing more complex features to enhance model performance. 
 
@@ -70,12 +70,12 @@ We used a geometric approach to derive the following expression for the optimal 
 
 $$\hat{\theta} = (\mathbb{X}^T \mathbb{X})^{-1}\mathbb{X}^T \mathbb{Y}$$
 
-That's a whole lot of matrix manipulation. How do we implement it in Python?
+That's a whole lot of matrix manipulation. How do we implement it in `python`?
 
 There are three operations we need to perform here: multiplying matrices, taking transposes, and finding inverses. 
 
 * To perform matrix multiplication, use the `@` operator
-* To take a transpose, call the `.T` attribute of an array or `DataFrame`
+* To take a transpose, call the `.T` attribute of an NumPy array or `DataFrame`
 * To compute an inverse, use NumPy's in-built method `np.linalg.inv`
 
 Putting this all together, we can compute the OLS estimate for the optimal model parameters, stored in the array `theta_hat`.
@@ -99,11 +99,11 @@ pd.DataFrame(y_hat).head()
 ## `sklearn`
 We've already saved a lot of time (and avoided tedious calculations) by translating our derived formulas into code. However, we still had to go through the process of writing out the linear algebra ourselves. 
 
-To make life *even easier*, we can turn to the `sklearn` [Python library](https://scikit-learn.org/stable/). `sklearn` is a robust library of machine learning tools used extensively in research and industry. It gives us a wide variety of in-built modeling frameworks and methods, so we'll keep returning to `sklearn` techniques as we progress through Data 100. 
+To make life *even easier*, we can turn to the `sklearn` [`python` library](https://scikit-learn.org/stable/). `sklearn` is a robust library of machine learning tools used extensively in research and industry. It gives us a wide variety of in-built modeling frameworks and methods, so we'll keep returning to `sklearn` techniques as we progress through Data 100. 
 
 Regardless of the specific type of model being implemented, `sklearn` follows a standard set of steps for creating a model. 
 
-1. Create a model object. This generates a new instance of the model class. You can think of it as making a new "copy" of a standard "template" for a model. In pseudocode, this looks like:
+1. Create a model object. This generates a new instance of the model class. You can think of it as making a new "copy" of a standard "template" for a model. In code, this looks like:
 
     ```
     my_model = ModelClass()
@@ -191,7 +191,7 @@ my_model.coef_
 
 **3. Use the fitted model to make predictions**
 
-Now that the model has been trained, we can use it to make predictions! To do so, we use the `.predict` method. `.predict` takes in one argument, the design matrix that should be used to generate predictions. To understand how the model performs on the training set, we would pass in the training data. Alternatively, to make predictions on unseen data, we would pass in a new dataset that wasn't used to train the model.
+Now that the model has been trained, we can use it to make predictions! To do so, we use the `.predict` method. `.predict` takes in one argument: the design matrix that should be used to generate predictions. To understand how the model performs on the training set, we would pass in the training data. Alternatively, to make predictions on unseen data, we would pass in a new dataset that wasn't used to train the model.
 
 Below, we call `.predict` to generate model predictions on the original training data. As before, we use double brackets to ensure that we extract 2-dimensional data.
 
@@ -250,7 +250,7 @@ A **feature function** describes the transformations we apply to raw features in
 
 For example, we might design a feature function that computes the square of an existing feature and adds it to the design matrix. In this case, our existing matrix $[x]$ is transformed to $[x, x^2]$. Its *dimension* increases from 1 to 2. Often, the dimension of the *featurized* dataset increases as seen here.
 
-<center><img src="images/phi.png" alt='phi' width='500'></center>
+<center><img src="images/phi.png" alt='phi' width='700'></center>
 
 The new features introduced by the feature function can then be used in modeling. Often, we use the symbol $\phi_i$ to represent transformed features after feature engineering. 
 
@@ -275,9 +275,8 @@ To illustrate how this works, we'll refer back to the `tips` dataset from previo
 ```{python}
 #| code-fold: true
 import numpy as np
-np.random.seed(1337)
-tips = sns.load_dataset("tips").sample(100)
-tips.head(5)
+tips = sns.load_dataset("tips")
+tips.head()
 ```
 
    At first glance, it doesn't seem possible to fit a regression model to this data – we can't directly perform any mathematical operations on the entry "Sun". 
@@ -286,17 +285,9 @@ To resolve this, we instead create a new table with a feature for each unique va
 
 <center><img src="images/ohe.png" alt='ohe' width='600'></center>
 
-The one-hot encoded features can then be used in the design matrix to train a model:
+<br> 
 
-<center><img src="images/ohemodel.png" alt='ohemodel' width='600'></center>
-
-$$\hat{y} = \theta_1 (\text{total}\textunderscore\text{bill}) + \theta_2 (\text{size}) + \theta_3 (\text{day}\textunderscore\text{Fri}) + \theta_4 (\text{day}\textunderscore\text{Sat}) + \theta_5 (\text{day}\textunderscore\text{Sun}) + \theta_6 (\text{day}\textunderscore\text{Thur})$$
-
-Or in shorthand:
-
-$$\hat{y} = \theta_1\phi_1 + \theta_2\phi_2 + \theta_3\phi_3 + \theta_4\phi_4 + \theta_5\phi_5 + \theta_6\phi_6$$
-
-The `OneHotEncoder` class of `sklearn` ([documentation](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OneHotEncoder.html#sklearn.preprocessing.OneHotEncoder.get_feature_names_out)) offers a quick way to perform one-hot encoding. You will explore its use in detail in the lab. For now, recognize that we follow a very similar workflow to when we were working with the `LinearRegression` class: we initialize a `OneHotEncoder` object, fit it to our data, then use `.transform` to apply the fitted encoder.
+The `OneHotEncoder` class of `sklearn` ([documentation](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OneHotEncoder.html#sklearn.preprocessing.OneHotEncoder.get_feature_names_out)) offers a quick way to perform this one-hot encoding. You will explore its use in detail in the lab. For now, recognize that we follow a very similar workflow to when we were working with the `LinearRegression` class: we initialize a `OneHotEncoder` object, fit it to our data, then use `.transform` to apply the fitted encoder.
 
 ```{python}
 #| code-fold: false
@@ -315,13 +306,48 @@ encoded_day_df = pd.DataFrame(encoded_day, columns=ohe.get_feature_names_out())
 encoded_day_df.head()
 ```
 
-Now, the `"day"` feature (or rather, the four new boolean features that represent day) can be used to fit a model.
+The one-hot encoded features can then be used in the design matrix to train a model:
+
+<center><img src="images/ohemodel.png" alt='ohemodel' width='600'></center>
+
+$$\hat{y} = \theta_1 (\text{total}\textunderscore\text{bill}) + \theta_2 (\text{size}) + \theta_3 (\text{day}\textunderscore\text{Fri}) + \theta_4 (\text{day}\textunderscore\text{Sat}) + \theta_5 (\text{day}\textunderscore\text{Sun}) + \theta_6 (\text{day}\textunderscore\text{Thur})$$
+
+Or in shorthand:
+
+$$\hat{y} = \theta_1\phi_1 + \theta_2\phi_2 + \theta_3\phi_3 + \theta_4\phi_4 + \theta_5\phi_5 + \theta_6\phi_6$$
+
+Now, the `day` feature (or rather, the four new boolean features that represent day) can be used to fit a model.
+
+Using `sklearn` to fit the new model, we can determine the model coefficients, allowing us to understand how each feature impacts the predicted tip.
+
+```{python}
+from sklearn.linear_model import LinearRegression
+data_w_ohe = tips[["total_bill", "size", "day"]].join(encoded_day_df).drop(columns = "day")
+ohe_model = lm.LinearRegression(fit_intercept=False) #Tell sklearn to not add an additional bias column. Why?
+ohe_model.fit(data_w_ohe, tips["tip"])
+
+pd.DataFrame({"Feature":data_w_ohe.columns, "Model Coefficient":ohe_model.coef_})
+```
+
+For example, when looking at the coefficient for `day_Fri`, we can understand how much the fact that it is Friday impacts the predicted tip. 
+
+When one-hot encoding, keep in mind that any set of one-hot encoded columns will always sum to a column of all ones, representing the bias column. More formally, the bias column is a linear combination of the OHE columns.
+
+<center><img src="images/bias.png" alt='bias' width='600'></center>
+
+We must be careful not to include this bias column in our design matrix. Otherwise, there will be linear dependence in the model, meaning $\mathbb{X}^T\mathbb{X}$ would no longer be invertible, and our OLS estimate $\hat{\theta} = (\mathbb{X}^T\mathbb{X})^{-1}\mathbb{X}^T\mathbb{Y}$ fails.
+
+To resolve this issue, we simply omit one of the one-hot encoded columns *or* do not include an intercept term. 
+
+<center><img src="images/remove.png" alt='remove' width='600'></center>
+
+Either approach works — we still retain the same information as the omitted column being a linear combination of the remaining columns.
 
 ## Polynomial Features
 
 We have encountered a few cases now where models with linear features have performed poorly on datasets that show clear non-linear curvature. 
 
-As an example, consider the `vehicles` dataset, which contains information about cars. Suppose we want to use the `"hp"` (horsepower) of a car to predict its `"mpg"` (gas mileage in miles per gallon). If we visualize the relationship between these two variables, we see a non-linear curvature. Fitting a linear model to these variables results in a high (poor) value of RMSE. 
+As an example, consider the `vehicles` dataset, which contains information about cars. Suppose we want to use the `hp` (horsepower) of a car to predict its `"mpg"` (gas mileage in miles per gallon). If we visualize the relationship between these two variables, we see a non-linear curvature. Fitting a linear model to these variables results in a high (poor) value of RMSE. 
 
 $$\hat{y} = \theta_0 + \theta_1 (\text{hp})$$
 
@@ -372,7 +398,7 @@ Looking a lot better! By incorporating a squared feature, we are able to capture
 
 ## Complexity and Overfitting
 
-We've seen now that feature engineering allows us to build all sorts of features to improve the performance of the model. In particular, we saw that designing a more complex feature (squaring `"hp"` in the `vehicles` data previously) substantially improved the model's ability to capture non-linear relationships. To take full advantage of this, we might be inclined to design increasingly complex features. Consider the following three models, each of different order (the maximum exponent power of each model):
+We've seen now that feature engineering allows us to build all sorts of features to improve the performance of the model. In particular, we saw that designing a more complex feature (squaring `hp` in the `vehicles` data previously) substantially improved the model's ability to capture non-linear relationships. To take full advantage of this, we might be inclined to design increasingly complex features. Consider the following three models, each of different order (the maximum exponent power of each model):
 
 * Model with order 2: $\hat{\text{mpg}} = \theta_0 + \theta_1 (\text{hp}) + \theta_2 (\text{hp}^2)$
 * Model with order 3: $\hat{\text{mpg}} = \theta_0 + \theta_1 (\text{hp}) + \theta_2 (\text{hp}^2) + \theta_3 (\text{hp}^3)$
@@ -380,13 +406,23 @@ We've seen now that feature engineering allows us to build all sorts of features
 
 <br/>
 
-<center><img src="images/degree_comparison.png" alt='degree_comparison' width='800'></center>
+<center><img src="images/degree_comparison.png" alt='degree_comparison' width='900'></center>
+
+As we can see in the plots above, MSE continues to decrease with each additional polynomial term. To visualize it further, let's plot models as the complexity increases from 0 to 6: 
+
+<center><img src="images/degree_comparison2.png" alt='degree_comparison' width='900'></center>
 
 When we use our model to make predictions on the same data that was used to fit the model, we find that the MSE decreases with each additional polynomial term (as our model gets more complex). The **training error** is the model's error when generating predictions from the same data that was used for training purposes. We can conclude that the training error goes down as the complexity of the model increases. 
 
 <center><img src="images/train_error.png" alt='train_error' width='400'></center>
 
 This seems like good news – when working on the **training data**, we can improve model performance by designing increasingly complex models. 
+
+>**Math Fact**: given $N$ overlapping data points, we can always find a polynomial of degree $N-1$ that goes through all those points.
+> 
+> For example: there always exists a degree-4 polynomial curve that can perfectly model a dataset of 5 datapoints
+> <center><img src="images/perfect_poly_fits.png" alt='train_error' width='600'></center>
+
 
 However, high model complexity comes with its own set of issues. When building the `vehicles` models above, we trained the models on the *entire* dataset and then evaluated their performance on this same dataset. In reality, we are likely to instead train the model on a *sample* from the population, then use it to make predictions on data it didn't encounter during training. 
 
@@ -404,7 +440,7 @@ We now face a dilemma: we know that we can **decrease training error** by increa
 
 <center><img src="images/bvt.png" alt='bvt' width='400'></center>
 
-We can see that there is a clear "trade-off" that comes from the complexity of our model. As model complexity increases, the model's error on the training data decreases. At the same time, the model's variance tends to increase.
+We can see that there is a clear trade-off that comes from the complexity of our model. As model complexity increases, the model's error on the training data decreases. At the same time, the model's variance tends to increase.
 
 The takeaway here: we need to strike a balance in the complexity of our models; we want models that are generalizable to "unseen" data. A model that is too simple won't be able to capture the key relationships between our variables of interest; a model that is too complex runs the risk of overfitting. 
 
