@@ -75,8 +75,8 @@ That's a whole lot of matrix manipulation. How do we implement it in `python`?
 There are three operations we need to perform here: multiplying matrices, taking transposes, and finding inverses. 
 
 * To perform matrix multiplication, use the `@` operator
-* To take a transpose, call the `.T` attribute of an NumPy array or `DataFrame`
-* To compute an inverse, use NumPy's in-built method `np.linalg.inv`
+* To take a transpose, call the `.T` attribute of an `NumPy` array or `DataFrame`
+* To compute an inverse, use `NumPy`'s in-built method `np.linalg.inv`
 
 Putting this all together, we can compute the OLS estimate for the optimal model parameters, stored in the array `theta_hat`.
 
@@ -92,8 +92,8 @@ $$\hat{\mathbb{Y}} = \mathbb{X}\theta$$
 
 ```{python}
 #| code-fold: false
-y_hat = X @ theta_hat
-pd.DataFrame(y_hat).head()
+Y_hat = X @ theta_hat
+pd.DataFrame(Y_hat).head()
 ```
 
 ## `sklearn`
@@ -156,16 +156,16 @@ my_model = lm.LinearRegression()
 
 Before the model can make predictions, we will need to fit it to our training data. When we fit the model, `sklearn` will run gradient descent behind the scenes to determine the optimal model parameters. It will then save these model parameters to our model instance for future use. 
 
-All `sklearn` model classes include a `.fit` method, which is used to fit the model. It takes in two inputs: the design matrix, `X`, and the target variable, `y`. 
+All `sklearn` model classes include a `.fit` method, which is used to fit the model. It takes in two inputs: the design matrix, `X`, and the target variable, `Y`. 
 
 Let's start by fitting a model with just one feature: the flipper length. We create a design matrix `X` by pulling out the `"flipper_length_mm"` column from the `DataFrame`. 
 
 ```{python}
 # .fit expects a 2D data design matrix, so we use double brackets to extract a DataFrame
 X = penguins[["flipper_length_mm"]]
-y = penguins["bill_depth_mm"]
+Y = penguins["bill_depth_mm"]
 
-my_model.fit(X, y)
+my_model.fit(X, Y)
 ```
 
 Notice that we use **double brackets** to extract this column. Why double brackets instead of just single brackets? The `.fit` method, by default, expects to receive **2-dimensional** data – some kind of data that includes both rows and columns. Writing `penguins["flipper_length_mm"]` would return a 1D `Series`, causing `sklearn` to error. We avoid this by writing `penguins[["flipper_length_mm"]]` to produce a 2D `DataFrame`. 
@@ -196,9 +196,9 @@ Now that the model has been trained, we can use it to make predictions! To do so
 Below, we call `.predict` to generate model predictions on the original training data. As before, we use double brackets to ensure that we extract 2-dimensional data.
 
 ```{python}
-y_hat_one_feature = my_model.predict(penguins[["flipper_length_mm"]])
+Y_hat_one_feature = my_model.predict(penguins[["flipper_length_mm"]])
 
-print(f"The RMSE of the model is {np.sqrt(np.mean((y-y_hat_one_feature)**2))}")
+print(f"The RMSE of the model is {np.sqrt(np.mean((Y-Y_hat_one_feature)**2))}")
 ```
 
 What if we wanted a model with two features? 
@@ -213,21 +213,21 @@ two_feature_model = lm.LinearRegression()
 
 # Step 2: fit the model
 X_two_features = penguins[["flipper_length_mm", "body_mass_g"]]
-y = penguins["bill_depth_mm"]
+Y = penguins["bill_depth_mm"]
 
-two_feature_model.fit(X_two_features, y)
+two_feature_model.fit(X_two_features, Y)
 
 # Step 3: make predictions
-y_hat_two_features = two_feature_model.predict(X_two_features)
+Y_hat_two_features = two_feature_model.predict(X_two_features)
 
-print(f"The RMSE of the model is {np.sqrt(np.mean((y-y_hat_two_features)**2))}")
+print(f"The RMSE of the model is {np.sqrt(np.mean((Y-Y_hat_two_features)**2))}")
 ```
 
 We can also see that we obtain the same predictions using `sklearn` as we did when applying the ordinary least squares formula before! 
 
 ```{python}
 #| code-fold: true
-pd.DataFrame({"Y_hat from OLS":np.squeeze(y_hat), "Y_hat from sklearn":y_hat_two_features}).head()
+pd.DataFrame({"Y_hat from OLS":np.squeeze(Y_hat), "Y_hat from sklearn":Y_hat_two_features}).head()
 ```
 
 ## Feature Engineering
@@ -357,10 +357,10 @@ pd.options.mode.chained_assignment = None
 vehicles = sns.load_dataset("mpg").dropna().rename(columns = {"horsepower": "hp"}).sort_values("hp")
 
 X = vehicles[["hp"]]
-y = vehicles["mpg"]
+Y = vehicles["mpg"]
 
 hp_model = lm.LinearRegression()
-hp_model.fit(X, y)
+hp_model.fit(X, Y)
 hp_model_predictions = hp_model.predict(X)
 
 import matplotlib.pyplot as plt
@@ -368,7 +368,7 @@ import matplotlib.pyplot as plt
 sns.scatterplot(data=vehicles, x="hp", y="mpg")
 plt.plot(vehicles["hp"], hp_model_predictions, c="tab:red");
 
-print(f"MSE of model with (hp) feature: {np.mean((y-hp_model_predictions)**2)}")
+print(f"MSE of model with (hp) feature: {np.mean((Y-hp_model_predictions)**2)}")
 ```
 
 To capture non-linearity in a dataset, it makes sense to incorporate **non-linear** features. Let's introduce a **polynomial** term, $\text{hp}^2$, into our regression model. The model now takes the form:
@@ -385,13 +385,13 @@ X["hp^2"] = vehicles["hp"]**2
 
 # Use sklearn to fit the model
 hp2_model = lm.LinearRegression()
-hp2_model.fit(X, y)
+hp2_model.fit(X, Y)
 hp2_model_predictions = hp2_model.predict(X)
 
 sns.scatterplot(data=vehicles, x="hp", y="mpg")
 plt.plot(vehicles["hp"], hp2_model_predictions, c="tab:red");
 
-print(f"MSE of model with (hp^2) feature: {np.mean((y-hp2_model_predictions)**2)}")
+print(f"MSE of model with (hp^2) feature: {np.mean((Y-hp2_model_predictions)**2)}")
 ```
 
 Looking a lot better! By incorporating a squared feature, we are able to capture the curvature of the dataset. Our model is now a parabola centered on our data. Notice that our new model's error has decreased relative to the original model with linear features. .

@@ -227,6 +227,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Gradient Descent</span></span></a>
   </div>
 </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../feature_engineering/feature_engineering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Sklearn and Feature Engineering</span></span></a>
+  </div>
+</li>
     </ul>
     </div>
 </nav>
@@ -983,7 +989,13 @@ RMSE: 1.118
 <p>A key word above is <em>linear</em>. When we computed parameter estimates earlier, we assumed that <span class="math inline">\(x_i\)</span> and <span class="math inline">\(y_i\)</span> shared a roughly linear relationship. Data in the real world isn’t always so straightforward, but we can transform the data to try and obtain linearity.</p>
 <p>The <strong>Tukey-Mosteller Bulge Diagram</strong> is a useful tool for summarizing what transformations can linearize the relationship between two variables. To determine what transformations might be appropriate, trace the shape of the “bulge” made by your data. Find the quadrant of the diagram that matches this bulge. The transformations shown on the vertical and horizontal axes of this quadrant can help improve the fit between the variables.</p>
 <p><img src="images/bulge.png" alt="bulge" width="600"></p>
-<p>Note that: * There are multiple solutions. Some will fit better than others. * sqrt and log make a value “smaller.” * Raising to a power makes a value “bigger.” * Each of these transformations equates to increasing or decreasing the scale of an axis.</p>
+<p>Note that:</p>
+<ul>
+<li>There are multiple solutions. Some will fit better than others.</li>
+<li>sqrt and log make a value “smaller.”</li>
+<li>Raising to a power makes a value “bigger.”</li>
+<li>Each of these transformations equates to increasing or decreasing the scale of an axis.</li>
+</ul>
 <p>Other goals in addition to linearity are possible, for example, making data appear more symmetric. Linearity allows us to fit lines to the transformed data.</p>
 <p>Let’s revisit our dugongs example. The lengths and ages are plotted below:</p>
 <div class="cell" data-execution_count="17">
@@ -1977,94 +1989,95 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb27-639"><a href="#cb27-639" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/bulge.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'bulge'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'600'</span><span class="kw">&gt;</span></span>
 <span id="cb27-640"><a href="#cb27-640" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb27-641"><a href="#cb27-641" aria-hidden="true" tabindex="-1"></a>Note that: </span>
-<span id="cb27-642"><a href="#cb27-642" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>There are multiple solutions. Some will fit better than others. </span>
-<span id="cb27-643"><a href="#cb27-643" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>sqrt and log make a value “smaller.”</span>
-<span id="cb27-644"><a href="#cb27-644" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Raising to a power makes a value “bigger.”</span>
-<span id="cb27-645"><a href="#cb27-645" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Each of these transformations equates to increasing or decreasing the scale of an axis.</span>
-<span id="cb27-646"><a href="#cb27-646" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-647"><a href="#cb27-647" aria-hidden="true" tabindex="-1"></a>Other goals in addition to linearity are possible, for example, making data appear more symmetric.</span>
-<span id="cb27-648"><a href="#cb27-648" aria-hidden="true" tabindex="-1"></a>Linearity allows us to fit lines to the transformed data.</span>
-<span id="cb27-649"><a href="#cb27-649" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-650"><a href="#cb27-650" aria-hidden="true" tabindex="-1"></a>Let's revisit our dugongs example. The lengths and ages are plotted below: </span>
-<span id="cb27-651"><a href="#cb27-651" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-654"><a href="#cb27-654" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-655"><a href="#cb27-655" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb27-656"><a href="#cb27-656" aria-hidden="true" tabindex="-1"></a><span class="co"># `corrcoef` computes the correlation coefficient between two variables</span></span>
-<span id="cb27-657"><a href="#cb27-657" aria-hidden="true" tabindex="-1"></a><span class="co"># `std` finds the standard deviation</span></span>
-<span id="cb27-658"><a href="#cb27-658" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> dugongs[<span class="st">"Length"</span>]</span>
-<span id="cb27-659"><a href="#cb27-659" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> dugongs[<span class="st">"Age"</span>]</span>
-<span id="cb27-660"><a href="#cb27-660" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> np.corrcoef(x, y)[<span class="dv">0</span>, <span class="dv">1</span>]</span>
-<span id="cb27-661"><a href="#cb27-661" aria-hidden="true" tabindex="-1"></a>theta_1 <span class="op">=</span> r<span class="op">*</span>np.std(y)<span class="op">/</span>np.std(x)</span>
-<span id="cb27-662"><a href="#cb27-662" aria-hidden="true" tabindex="-1"></a>theta_0 <span class="op">=</span> np.mean(y) <span class="op">-</span> theta_1<span class="op">*</span>np.mean(x)</span>
-<span id="cb27-663"><a href="#cb27-663" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-664"><a href="#cb27-664" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, dpi<span class="op">=</span><span class="dv">200</span>, figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">3</span>))</span>
-<span id="cb27-665"><a href="#cb27-665" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].scatter(x, y)</span>
-<span id="cb27-666"><a href="#cb27-666" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].set_xlabel(<span class="st">"Length"</span>)</span>
-<span id="cb27-667"><a href="#cb27-667" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].set_ylabel(<span class="st">"Age"</span>)</span>
-<span id="cb27-668"><a href="#cb27-668" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-669"><a href="#cb27-669" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].scatter(x, y)</span>
-<span id="cb27-670"><a href="#cb27-670" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].plot(x, theta_0 <span class="op">+</span> theta_1<span class="op">*</span>x, <span class="st">"tab:red"</span>)</span>
-<span id="cb27-671"><a href="#cb27-671" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].set_xlabel(<span class="st">"Length"</span>)</span>
-<span id="cb27-672"><a href="#cb27-672" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].set_ylabel(<span class="st">"Age"</span>)<span class="op">;</span></span>
-<span id="cb27-673"><a href="#cb27-673" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-674"><a href="#cb27-674" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-675"><a href="#cb27-675" aria-hidden="true" tabindex="-1"></a>Looking at the plot on the left, we see that there is a slight curvature to the data points. Plotting the SLR curve on the right results in a poor fit.</span>
-<span id="cb27-676"><a href="#cb27-676" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-677"><a href="#cb27-677" aria-hidden="true" tabindex="-1"></a>For SLR to perform well, we'd like there to be a rough linear trend relating <span class="in">`"Age"`</span> and <span class="in">`"Length"`</span>. What is making the raw data deviate from a linear relationship? Notice that the data points with <span class="in">`"Length"`</span> greater than 2.6 have disproportionately high values of <span class="in">`"Age"`</span> relative to the rest of the data. If we could manipulate these data points to have lower <span class="in">`"Age"`</span> values, we'd "shift" these points downwards and reduce the curvature in the data. Applying a logarithmic transformation to $y_i$ (that is, taking $\log($ <span class="in">`"Age"`</span> $)$ ) would achieve just that.</span>
-<span id="cb27-678"><a href="#cb27-678" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-679"><a href="#cb27-679" aria-hidden="true" tabindex="-1"></a>An important word on $\log$: in Data 100 (and most upper-division STEM courses), $\log$ denotes the natural logarithm with base $e$. The base-10 logarithm, where relevant, is indicated by $\log_{10}$.</span>
-<span id="cb27-680"><a href="#cb27-680" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-683"><a href="#cb27-683" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-684"><a href="#cb27-684" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb27-685"><a href="#cb27-685" aria-hidden="true" tabindex="-1"></a>z <span class="op">=</span> np.log(y)</span>
-<span id="cb27-686"><a href="#cb27-686" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-687"><a href="#cb27-687" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> np.corrcoef(x, z)[<span class="dv">0</span>, <span class="dv">1</span>]</span>
-<span id="cb27-688"><a href="#cb27-688" aria-hidden="true" tabindex="-1"></a>theta_1 <span class="op">=</span> r<span class="op">*</span>np.std(z)<span class="op">/</span>np.std(x)</span>
-<span id="cb27-689"><a href="#cb27-689" aria-hidden="true" tabindex="-1"></a>theta_0 <span class="op">=</span> np.mean(z) <span class="op">-</span> theta_1<span class="op">*</span>np.mean(x)</span>
-<span id="cb27-690"><a href="#cb27-690" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-691"><a href="#cb27-691" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, dpi<span class="op">=</span><span class="dv">200</span>, figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">3</span>))</span>
-<span id="cb27-692"><a href="#cb27-692" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].scatter(x, z)</span>
-<span id="cb27-693"><a href="#cb27-693" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].set_xlabel(<span class="st">"Length"</span>)</span>
-<span id="cb27-694"><a href="#cb27-694" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].set_ylabel(<span class="vs">r"$\log{(Age)}$"</span>)</span>
-<span id="cb27-695"><a href="#cb27-695" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-696"><a href="#cb27-696" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].scatter(x, z)</span>
-<span id="cb27-697"><a href="#cb27-697" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].plot(x, theta_0 <span class="op">+</span> theta_1<span class="op">*</span>x, <span class="st">"tab:red"</span>)</span>
-<span id="cb27-698"><a href="#cb27-698" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].set_xlabel(<span class="st">"Length"</span>)</span>
-<span id="cb27-699"><a href="#cb27-699" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].set_ylabel(<span class="vs">r"$\log{(Age)}$"</span>)</span>
-<span id="cb27-700"><a href="#cb27-700" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-701"><a href="#cb27-701" aria-hidden="true" tabindex="-1"></a>plt.subplots_adjust(wspace<span class="op">=</span><span class="fl">0.3</span>)<span class="op">;</span></span>
-<span id="cb27-702"><a href="#cb27-702" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-703"><a href="#cb27-703" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-704"><a href="#cb27-704" aria-hidden="true" tabindex="-1"></a>Our SLR fit looks a lot better! We now have a new target variable: the SLR model is now trying to predict the *log* of `"Age"`, rather than the untransformed `"Age"`. In other words, we are applying the transformation $z_i = \log{(y_i)}$. Notice that the resulting model is still **linear in the parameters** $\theta = <span class="co">[</span><span class="ot">\theta_0, \theta_1</span><span class="co">]</span>$. The SLR model becomes:</span>
-<span id="cb27-705"><a href="#cb27-705" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-706"><a href="#cb27-706" aria-hidden="true" tabindex="-1"></a>$$\log{\hat{(y_i)}} = \theta_0 + \theta_1 x_i$$</span>
-<span id="cb27-707"><a href="#cb27-707" aria-hidden="true" tabindex="-1"></a>$$\hat{z}_i = \theta_0 + \theta_1 x_i$$</span>
-<span id="cb27-708"><a href="#cb27-708" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-709"><a href="#cb27-709" aria-hidden="true" tabindex="-1"></a>It turns out that this linearized relationship can help us understand the underlying relationship between $x_i$ and $y_i$. If we rearrange the relationship above, we find:</span>
-<span id="cb27-710"><a href="#cb27-710" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb27-711"><a href="#cb27-711" aria-hidden="true" tabindex="-1"></a>\log{(y_i)} = \theta_0 + \theta_1 x_i <span class="sc">\\</span></span>
-<span id="cb27-712"><a href="#cb27-712" aria-hidden="true" tabindex="-1"></a>y_i = e^{\theta_0 + \theta_1 x_i} <span class="sc">\\</span></span>
-<span id="cb27-713"><a href="#cb27-713" aria-hidden="true" tabindex="-1"></a>y_i = (e^{\theta_0})e^{\theta_1 x_i} <span class="sc">\\</span></span>
-<span id="cb27-714"><a href="#cb27-714" aria-hidden="true" tabindex="-1"></a>y_i = C e^{k x_i}</span>
-<span id="cb27-715"><a href="#cb27-715" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb27-716"><a href="#cb27-716" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-717"><a href="#cb27-717" aria-hidden="true" tabindex="-1"></a>For some constants $C$ and $k$.</span>
-<span id="cb27-718"><a href="#cb27-718" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-719"><a href="#cb27-719" aria-hidden="true" tabindex="-1"></a>$y_i$ is an *exponential* function of $x_i$. Applying an exponential fit to the untransformed variables corroborates this finding. </span>
-<span id="cb27-720"><a href="#cb27-720" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-723"><a href="#cb27-723" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-724"><a href="#cb27-724" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb27-725"><a href="#cb27-725" aria-hidden="true" tabindex="-1"></a>plt.figure(dpi<span class="op">=</span><span class="dv">120</span>, figsize<span class="op">=</span>(<span class="dv">4</span>, <span class="dv">3</span>))</span>
-<span id="cb27-726"><a href="#cb27-726" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-727"><a href="#cb27-727" aria-hidden="true" tabindex="-1"></a>plt.scatter(x, y)</span>
-<span id="cb27-728"><a href="#cb27-728" aria-hidden="true" tabindex="-1"></a>plt.plot(x, np.exp(theta_0)<span class="op">*</span>np.exp(theta_1<span class="op">*</span>x), <span class="st">"tab:red"</span>)</span>
-<span id="cb27-729"><a href="#cb27-729" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Length"</span>)</span>
-<span id="cb27-730"><a href="#cb27-730" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Age"</span>)<span class="op">;</span></span>
-<span id="cb27-731"><a href="#cb27-731" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-732"><a href="#cb27-732" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-733"><a href="#cb27-733" aria-hidden="true" tabindex="-1"></a>You may wonder: why did we choose to apply a log transformation specifically? Why not some other function to linearize the data?</span>
-<span id="cb27-734"><a href="#cb27-734" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-735"><a href="#cb27-735" aria-hidden="true" tabindex="-1"></a>Practically, many other mathematical operations that modify the relative scales of <span class="in">`"Age"`</span> and <span class="in">`"Length"`</span> could have worked here.</span>
+<span id="cb27-642"><a href="#cb27-642" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-643"><a href="#cb27-643" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>There are multiple solutions. Some will fit better than others. </span>
+<span id="cb27-644"><a href="#cb27-644" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>sqrt and log make a value “smaller.”</span>
+<span id="cb27-645"><a href="#cb27-645" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Raising to a power makes a value “bigger.”</span>
+<span id="cb27-646"><a href="#cb27-646" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Each of these transformations equates to increasing or decreasing the scale of an axis.</span>
+<span id="cb27-647"><a href="#cb27-647" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-648"><a href="#cb27-648" aria-hidden="true" tabindex="-1"></a>Other goals in addition to linearity are possible, for example, making data appear more symmetric.</span>
+<span id="cb27-649"><a href="#cb27-649" aria-hidden="true" tabindex="-1"></a>Linearity allows us to fit lines to the transformed data.</span>
+<span id="cb27-650"><a href="#cb27-650" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-651"><a href="#cb27-651" aria-hidden="true" tabindex="-1"></a>Let's revisit our dugongs example. The lengths and ages are plotted below: </span>
+<span id="cb27-652"><a href="#cb27-652" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-655"><a href="#cb27-655" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-656"><a href="#cb27-656" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb27-657"><a href="#cb27-657" aria-hidden="true" tabindex="-1"></a><span class="co"># `corrcoef` computes the correlation coefficient between two variables</span></span>
+<span id="cb27-658"><a href="#cb27-658" aria-hidden="true" tabindex="-1"></a><span class="co"># `std` finds the standard deviation</span></span>
+<span id="cb27-659"><a href="#cb27-659" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> dugongs[<span class="st">"Length"</span>]</span>
+<span id="cb27-660"><a href="#cb27-660" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> dugongs[<span class="st">"Age"</span>]</span>
+<span id="cb27-661"><a href="#cb27-661" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> np.corrcoef(x, y)[<span class="dv">0</span>, <span class="dv">1</span>]</span>
+<span id="cb27-662"><a href="#cb27-662" aria-hidden="true" tabindex="-1"></a>theta_1 <span class="op">=</span> r<span class="op">*</span>np.std(y)<span class="op">/</span>np.std(x)</span>
+<span id="cb27-663"><a href="#cb27-663" aria-hidden="true" tabindex="-1"></a>theta_0 <span class="op">=</span> np.mean(y) <span class="op">-</span> theta_1<span class="op">*</span>np.mean(x)</span>
+<span id="cb27-664"><a href="#cb27-664" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-665"><a href="#cb27-665" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, dpi<span class="op">=</span><span class="dv">200</span>, figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">3</span>))</span>
+<span id="cb27-666"><a href="#cb27-666" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].scatter(x, y)</span>
+<span id="cb27-667"><a href="#cb27-667" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].set_xlabel(<span class="st">"Length"</span>)</span>
+<span id="cb27-668"><a href="#cb27-668" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].set_ylabel(<span class="st">"Age"</span>)</span>
+<span id="cb27-669"><a href="#cb27-669" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-670"><a href="#cb27-670" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].scatter(x, y)</span>
+<span id="cb27-671"><a href="#cb27-671" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].plot(x, theta_0 <span class="op">+</span> theta_1<span class="op">*</span>x, <span class="st">"tab:red"</span>)</span>
+<span id="cb27-672"><a href="#cb27-672" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].set_xlabel(<span class="st">"Length"</span>)</span>
+<span id="cb27-673"><a href="#cb27-673" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].set_ylabel(<span class="st">"Age"</span>)<span class="op">;</span></span>
+<span id="cb27-674"><a href="#cb27-674" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb27-675"><a href="#cb27-675" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-676"><a href="#cb27-676" aria-hidden="true" tabindex="-1"></a>Looking at the plot on the left, we see that there is a slight curvature to the data points. Plotting the SLR curve on the right results in a poor fit.</span>
+<span id="cb27-677"><a href="#cb27-677" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-678"><a href="#cb27-678" aria-hidden="true" tabindex="-1"></a>For SLR to perform well, we'd like there to be a rough linear trend relating <span class="in">`"Age"`</span> and <span class="in">`"Length"`</span>. What is making the raw data deviate from a linear relationship? Notice that the data points with <span class="in">`"Length"`</span> greater than 2.6 have disproportionately high values of <span class="in">`"Age"`</span> relative to the rest of the data. If we could manipulate these data points to have lower <span class="in">`"Age"`</span> values, we'd "shift" these points downwards and reduce the curvature in the data. Applying a logarithmic transformation to $y_i$ (that is, taking $\log($ <span class="in">`"Age"`</span> $)$ ) would achieve just that.</span>
+<span id="cb27-679"><a href="#cb27-679" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-680"><a href="#cb27-680" aria-hidden="true" tabindex="-1"></a>An important word on $\log$: in Data 100 (and most upper-division STEM courses), $\log$ denotes the natural logarithm with base $e$. The base-10 logarithm, where relevant, is indicated by $\log_{10}$.</span>
+<span id="cb27-681"><a href="#cb27-681" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-684"><a href="#cb27-684" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-685"><a href="#cb27-685" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb27-686"><a href="#cb27-686" aria-hidden="true" tabindex="-1"></a>z <span class="op">=</span> np.log(y)</span>
+<span id="cb27-687"><a href="#cb27-687" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-688"><a href="#cb27-688" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> np.corrcoef(x, z)[<span class="dv">0</span>, <span class="dv">1</span>]</span>
+<span id="cb27-689"><a href="#cb27-689" aria-hidden="true" tabindex="-1"></a>theta_1 <span class="op">=</span> r<span class="op">*</span>np.std(z)<span class="op">/</span>np.std(x)</span>
+<span id="cb27-690"><a href="#cb27-690" aria-hidden="true" tabindex="-1"></a>theta_0 <span class="op">=</span> np.mean(z) <span class="op">-</span> theta_1<span class="op">*</span>np.mean(x)</span>
+<span id="cb27-691"><a href="#cb27-691" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-692"><a href="#cb27-692" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, dpi<span class="op">=</span><span class="dv">200</span>, figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">3</span>))</span>
+<span id="cb27-693"><a href="#cb27-693" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].scatter(x, z)</span>
+<span id="cb27-694"><a href="#cb27-694" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].set_xlabel(<span class="st">"Length"</span>)</span>
+<span id="cb27-695"><a href="#cb27-695" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].set_ylabel(<span class="vs">r"$\log{(Age)}$"</span>)</span>
+<span id="cb27-696"><a href="#cb27-696" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-697"><a href="#cb27-697" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].scatter(x, z)</span>
+<span id="cb27-698"><a href="#cb27-698" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].plot(x, theta_0 <span class="op">+</span> theta_1<span class="op">*</span>x, <span class="st">"tab:red"</span>)</span>
+<span id="cb27-699"><a href="#cb27-699" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].set_xlabel(<span class="st">"Length"</span>)</span>
+<span id="cb27-700"><a href="#cb27-700" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">1</span>].set_ylabel(<span class="vs">r"$\log{(Age)}$"</span>)</span>
+<span id="cb27-701"><a href="#cb27-701" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-702"><a href="#cb27-702" aria-hidden="true" tabindex="-1"></a>plt.subplots_adjust(wspace<span class="op">=</span><span class="fl">0.3</span>)<span class="op">;</span></span>
+<span id="cb27-703"><a href="#cb27-703" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb27-704"><a href="#cb27-704" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-705"><a href="#cb27-705" aria-hidden="true" tabindex="-1"></a>Our SLR fit looks a lot better! We now have a new target variable: the SLR model is now trying to predict the *log* of `"Age"`, rather than the untransformed `"Age"`. In other words, we are applying the transformation $z_i = \log{(y_i)}$. Notice that the resulting model is still **linear in the parameters** $\theta = <span class="co">[</span><span class="ot">\theta_0, \theta_1</span><span class="co">]</span>$. The SLR model becomes:</span>
+<span id="cb27-706"><a href="#cb27-706" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-707"><a href="#cb27-707" aria-hidden="true" tabindex="-1"></a>$$\log{\hat{(y_i)}} = \theta_0 + \theta_1 x_i$$</span>
+<span id="cb27-708"><a href="#cb27-708" aria-hidden="true" tabindex="-1"></a>$$\hat{z}_i = \theta_0 + \theta_1 x_i$$</span>
+<span id="cb27-709"><a href="#cb27-709" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-710"><a href="#cb27-710" aria-hidden="true" tabindex="-1"></a>It turns out that this linearized relationship can help us understand the underlying relationship between $x_i$ and $y_i$. If we rearrange the relationship above, we find:</span>
+<span id="cb27-711"><a href="#cb27-711" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb27-712"><a href="#cb27-712" aria-hidden="true" tabindex="-1"></a>\log{(y_i)} = \theta_0 + \theta_1 x_i <span class="sc">\\</span></span>
+<span id="cb27-713"><a href="#cb27-713" aria-hidden="true" tabindex="-1"></a>y_i = e^{\theta_0 + \theta_1 x_i} <span class="sc">\\</span></span>
+<span id="cb27-714"><a href="#cb27-714" aria-hidden="true" tabindex="-1"></a>y_i = (e^{\theta_0})e^{\theta_1 x_i} <span class="sc">\\</span></span>
+<span id="cb27-715"><a href="#cb27-715" aria-hidden="true" tabindex="-1"></a>y_i = C e^{k x_i}</span>
+<span id="cb27-716"><a href="#cb27-716" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb27-717"><a href="#cb27-717" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-718"><a href="#cb27-718" aria-hidden="true" tabindex="-1"></a>For some constants $C$ and $k$.</span>
+<span id="cb27-719"><a href="#cb27-719" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-720"><a href="#cb27-720" aria-hidden="true" tabindex="-1"></a>$y_i$ is an *exponential* function of $x_i$. Applying an exponential fit to the untransformed variables corroborates this finding. </span>
+<span id="cb27-721"><a href="#cb27-721" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-724"><a href="#cb27-724" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-725"><a href="#cb27-725" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb27-726"><a href="#cb27-726" aria-hidden="true" tabindex="-1"></a>plt.figure(dpi<span class="op">=</span><span class="dv">120</span>, figsize<span class="op">=</span>(<span class="dv">4</span>, <span class="dv">3</span>))</span>
+<span id="cb27-727"><a href="#cb27-727" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-728"><a href="#cb27-728" aria-hidden="true" tabindex="-1"></a>plt.scatter(x, y)</span>
+<span id="cb27-729"><a href="#cb27-729" aria-hidden="true" tabindex="-1"></a>plt.plot(x, np.exp(theta_0)<span class="op">*</span>np.exp(theta_1<span class="op">*</span>x), <span class="st">"tab:red"</span>)</span>
+<span id="cb27-730"><a href="#cb27-730" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Length"</span>)</span>
+<span id="cb27-731"><a href="#cb27-731" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Age"</span>)<span class="op">;</span></span>
+<span id="cb27-732"><a href="#cb27-732" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb27-733"><a href="#cb27-733" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-734"><a href="#cb27-734" aria-hidden="true" tabindex="-1"></a>You may wonder: why did we choose to apply a log transformation specifically? Why not some other function to linearize the data?</span>
+<span id="cb27-735"><a href="#cb27-735" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-736"><a href="#cb27-736" aria-hidden="true" tabindex="-1"></a>Practically, many other mathematical operations that modify the relative scales of <span class="in">`"Age"`</span> and <span class="in">`"Length"`</span> could have worked here.</span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
