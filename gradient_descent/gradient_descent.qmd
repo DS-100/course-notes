@@ -32,12 +32,13 @@ One thing to note, however, is that the techniques we used above can only be app
 
 > **BIG IDEA**: use an algorithm instead of solving for an exact answer
 
-# Minimizing a 1D Function
+## Minimizing a 1D Function
 
 Let's consider an arbitrary function. Our goal is to find the value of $x$ that minimizes this function.
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 import pandas as pd
 import seaborn as sns
 import plotly.express as px
@@ -47,23 +48,26 @@ pd.options.mode.chained_assignment = None  # default='warn'
 ```
 
 ```{python}
+#| vscode: {languageId: python}
 def arbitrary(x):
     return (x**4 - 15*x**3 + 80*x**2 - 180*x + 144)/10
 ```
 
 <img src="images/arbitrary.png" alt='arbitrary' width='600'>
 
-## The Naive Approach: Guess and Check
+### The Naive Approach: Guess and Check
 
 Above, we saw that the minimum is somewhere around 5.3. Let's see if we can figure out how to find the exact minimum algorithmically from scratch. One very slow (and terrible) way would be manual guess-and-check.
 
 ```{python}
+#| vscode: {languageId: python}
 arbitrary(6)
 ```
 
 A somewhat better (but still slow) approach is to use brute force to try out a bunch of x values and return the one that yields the lowest loss.
 
 ```{python}
+#| vscode: {languageId: python}
 def simple_minimize(f, xs):
     # Takes in a function f and a set of values xs. 
     # Calculates the value of the function f at all values x in xs
@@ -79,6 +83,7 @@ This process is essentially the same as before where we made a graphical plot, i
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 xs = np.linspace(1, 7, 200)
 sparse_xs = np.linspace(1, 7, 5)
 
@@ -97,11 +102,12 @@ This basic approach suffers from three major flaws:
 2. Even if our range of guesses is correct, if the guesses are too coarse, our answer will be inaccurate.
 3. It is absurdly computationally inefficient, considering potentially vast numbers of guesses that are useless.
 
-## Scipy.optimize.minimize
+### Scipy.optimize.minimize
 
 One way to minimize this mathematical function is to use the `scipy.optimize.minimize` function. It takes a function and a starting guess and tries to find the minimum.
 
 ```{python}
+#| vscode: {languageId: python}
 from scipy.optimize import minimize
 
 # takes a function f and a starting point x0 and returns a readout 
@@ -116,7 +122,7 @@ It turns out that under the hood, the `fit` method for `LinearRegression` models
 In Data 100, the gradient descent process will usually be invisible to us, hidden beneath an abstraction layer. However, to be good data scientists, it's important that we know the underlying principles that optimization functions harness to find optimal parameters.
 
 
-# Digging into Gradient Descent
+## Digging into Gradient Descent
 Looking at the function across this domain, it is clear that the function's minimum value occurs around $\theta = 5.3$. Let's pretend for a moment that we *couldn't* see the full view of the cost function. How would we guess the value of $\theta$ that minimizes the function? 
 
 It turns out that the first derivative of the function can give us a clue. In the plots below, the line indicates the value of the derivative of each value of $\theta$. The derivative is negative where it is red and positive where it is green.
@@ -159,7 +165,7 @@ In other words, the derivative of the function at each point tells us the direct
 * A negative slope means we want to step to the right, or move in the *positive* direction. 
 * A positive slope means we want to step to the left, or move in the *negative* direction.
 
-## Algorithm Attempt 1
+### Algorithm Attempt 1
 Armed with this knowledge, let's try to see if we can use the derivative to optimize the function.
 
 We start by making some guess for the minimizing value of $x$. Then, we look at the derivative of the function at this value of $x$, and step downhill in the *opposite* direction. We can express our new rule as a recurrence relation:
@@ -192,7 +198,7 @@ Looking pretty good! We do have a problem though – once we arrive close to the
 
 In other words, each step we take when updating our guess moves us too far. We can address this by decreasing the size of each step. 
 
-## Algorithm Attempt 2
+### Algorithm Attempt 2
 Let's update our algorithm to use a **learning rate** (also sometimes called the step size), which controls how far we move with each update. We represent the learning rate with $\alpha$. 
 
 $$x^{(t+1)} = x^{(t)} - \alpha \frac{d}{dx} f(x^{(t)})$$
@@ -210,7 +216,7 @@ Updating our function to use $\alpha=0.3$, our algorithm successfully **converge
   </table>
 </div>
 
-## Convexity
+### Convexity
 In our analysis above, we focused our attention on the global minimum of the loss function. You may be wondering: what about the local minimum that's just to the left? 
 
 If we had chosen a different starting guess for $\theta$, or a different value for the learning rate $\alpha$, our algorithm may have gotten "stuck" and converged on the local minimum, rather than on the true optimum value of loss. 
@@ -241,7 +247,7 @@ To put this into words: if you drew a line between any two points on the curve, 
 
 In summary, non-convex loss functions can cause problems with optimization. This means that our choice of loss function is a key factor in our modeling process. It turns out that MSE *is* convex, which is a major reason why it is such a popular choice of loss function.
 
-# Gradient Descent in 1 Dimension
+## Gradient Descent in 1 Dimension
 
 > **Terminology clarification**: In past lectures, we have used “loss” to refer to the error incurred on a *single* datapoint. In applications, we usually care more about the average error across *all* datapoints. Going forward, we will take the “model’s loss” to mean the model’s average error across the dataset. This is sometimes also known as the empirical risk, cost function, or objective function. $$L(\theta) = R(\theta) = \frac{1}{n} \sum_{i=1}^{n} L(y, \hat{y})$$
 
@@ -262,7 +268,7 @@ We can "translate" our gradient descent rule from before by replacing $x$ with $
 
 $$\theta^{(t+1)} = \theta^{(t)} - \alpha \frac{d}{d\theta} L(\theta^{(t)})$$
 
-## Gradient Descent on the `tips` Dataset 
+### Gradient Descent on the `tips` Dataset 
 To see this in action, let's consider a case where we have a linear model with no offset. We want to predict the tip (y) given the price of a meal (x). To do this, we
 
 * Choose a model: $\hat{y} = \theta_1 x$,
@@ -271,6 +277,7 @@ To see this in action, let's consider a case where we have a linear model with n
 Let's apply our `gradient_descent` function from before to optimize our model on the `tips` dataset. We will try to select the best parameter $\theta_i$ to predict the `tip` $y$ from the `total_bill` $x$.
 
 ```{python}
+#| vscode: {languageId: python}
 df = sns.load_dataset("tips")
 df.head()
 ```
@@ -279,6 +286,7 @@ We can visualize the value of the MSE on our dataset for different possible choi
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 import plotly.graph_objects as go
 
 def derivative_arbitrary(x):
@@ -311,6 +319,7 @@ Implementing this in code, we can visualize the MSE loss on the `tips` data. **M
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 def gradient_descent(df, initial_guess, alpha, n):
     """Performs n steps of gradient descent on df using learning rate alpha starting
        from initial_guess. Returns a numpy array of all guesses over time."""
@@ -350,7 +359,7 @@ plt.ylabel(r"$L(\theta_1)$");
 print(f"Final guess for theta_1: {trajectory[-1]}")
 ```
 
-# Gradient Descent on Multi-Dimensional Models
+## Gradient Descent on Multi-Dimensional Models
 The function we worked with above was one-dimensional – we were only minimizing the function with respect to a single parameter, $\theta$. However, models usually have a cost function with multiple parameters that need to be optimized. For example, simple linear regression has 2 parameters: $\hat{y} + \theta_0 + \theta_1x$, and multiple linear regression has $p+1$ parameters: $\mathbb{Y} = \theta_0 + \theta_1 \Bbb{X}_{:,1} + \theta_2 \Bbb{X}_{:,2} + \cdots + \theta_p \Bbb{X}_{:,p}$
 
 We'll need to expand gradient descent so we can update our guesses for all model parameters, all in one go.
@@ -359,6 +368,7 @@ With multiple parameters to optimize, we consider a **loss surface**, or the mod
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 import plotly.graph_objects as go
 
 
@@ -400,6 +410,7 @@ fig.show()
 We can also visualize a bird's-eye view of the loss surface from above using a contour plot:
 
 ```{python}
+#| vscode: {languageId: python}
 contour = go.Contour(x=u[0], y=v[:, 0], z=np.reshape(MSE, u.shape))
 fig = go.Figure(contour)
 fig.update_layout(
@@ -409,7 +420,7 @@ fig.update_layout(
 fig.show()
 ```
 
-## The Gradient Vector
+### The Gradient Vector
 As before, the derivative of the loss function tells us the best way towards the minimum value.
 
 On a 2D (or higher) surface, the best way to go down (gradient) is described by a *vector*.
@@ -465,7 +476,7 @@ $$\begin{bmatrix}
   * $\vec{\theta}^{(t+1)}$ is the next value of $\theta$
   * $\nabla_{\vec{\theta}} L(\theta^{(t)})$ is the gradient of the loss function evaluated at the current $\vec{\theta}^{(t)}$
 
-# Batch, Mini-Batch Gradient Descent and Stochastic Gradient Descent
+## Batch, Mini-Batch Gradient Descent and Stochastic Gradient Descent
 
 Formally, the algorithm we derived above is called **batch gradient descent.** For each iteration of the algorithm, the derivative of loss is computed across the *entire* batch of all $n$ datapoints. While this update rule works well in theory, it is not practical in most circumstances. For large datasets (with perhaps billions of datapoints), finding the gradient across all the data is incredibly computationally taxing; gradient descent will converge slowly because each individual update is slow.
 
