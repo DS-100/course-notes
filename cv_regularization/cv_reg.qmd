@@ -20,9 +20,9 @@ jupyter: python3
 * Understand the conceptual basis for L1 and L2 regularization
 :::
 
-At the end of the Feature Engineering lecture (Lecture 14), we arrived at the issue of fine-tuning model complexity. We identified that too complex of a model can lead to overfitting, while too simple of a model can lead to underfitting. This brings us to a natural question: how do we control model complexity to avoid under- and overfitting? 
+At the end of the Feature Engineering lecture (Lecture 14), we arrived at the issue of fine-tuning model complexity. We identified that a model that's too complex can lead to overfitting, while a model that's too simple can lead to underfitting. This brings us to a natural question: how do we control model complexity to avoid under- and overfitting? 
 
-To answer this question, we will need to address two things. First, we need to understand *when* our model begins to overfit by assessing its performance on unseen data. We can achieve this through **cross-validation**. Secondly, we need to introduce a technique to adjust the complexity of our models ourselves – to do so, we will apply **regularization**.
+To answer this question, we will need to address two things: first, we need to understand *when* our model begins to overfit by assessing its performance on unseen data. We can achieve this through **cross-validation**. Secondly, we need to introduce a technique to adjust the complexity of our models ourselves – to do so, we will apply **regularization**.
 
 ## Training, Test, and Validation Sets
 
@@ -34,12 +34,12 @@ How should we proceed? In this section, we will build up a viable solution to th
 
 ### Test Sets
 
-The simplest approach to avoid overfitting is to keep some of our data "secret" from ourselves. We can set aside a random portion of our full dataset to use only for testing purposes. The datapoints in this **test set** will not be used in the model fitting process. Instead, we will:
+The simplest approach to avoid overfitting is to keep some of our data "secret" from ourselves. We can set aside a random portion of our full dataset to use only for testing purposes. The datapoints in this **test set** will *not* be used in the model fitting process. Instead, we will:
 
 * Use the remaining portion of our dataset – now called the **training set** – to run ordinary least squares, gradient descent, or some other technique to fit model parameters
 * Take the fitted model and use it to make predictions on datapoints in the test set. The model's performance on the test set (expressed as the MSE, RMSE, etc.) is now indicative of how well it can make predictions on unseen data
 
-Importantly, the optimal model parameters were found by *only* considering the data in the training set. After the model has been fitted to the training data, we do not change any parameters before making predictions on the test set. Importantly, we only ever make predictions on the test set **once**, after all model design has been completely finalized. We treat the test set performance as the final test of how well a model does.
+Importantly, the optimal model parameters were found by *only* considering the data in the training set. After the model has been fitted to the training data, we do not change any parameters before making predictions on the test set. Importantly, we only ever make predictions on the test set **once** after all model design has been completely finalized. We treat the test set performance as the final test of how well a model does.
 
 The process of sub-dividing our dataset into training and test sets is known as a **train-test split**. Typically, between 10% and 20% of the data is allocated to the test set.
 
@@ -96,15 +96,15 @@ test_predictions = model.predict(X_test)
 
 ### Validation Sets
 
-Now, what if we were dissatisfied with our test seg performance? With our current framework, we'd be stuck. As outlined previously, assessing model performance on the test set is the *final* stage of the model design process. We can't go back and adjust our model based on the new discovery that it is overfitting – if we did, then we would be *factoring in information from the test set* to design our model. The test error would no longer be a true representation of the model's performance on unseen data! 
+Now, what if we were dissatisfied with our test set performance? With our current framework, we'd be stuck. As outlined previously, assessing model performance on the test set is the *final* stage of the model design process. We can't go back and adjust our model based on the new discovery that it is overfitting – if we did, then we would be *factoring in information from the test set* to design our model. The test error would no longer be a true representation of the model's performance on unseen data! 
 
 Our solution is to introduce a **validation set**. A validation set is a random portion of the *training set* that is set aside for assessing model performance while the model is *still being developed*. The process for using a validation set is:
 
-* Perform a train-test split. Set the test set aside; we will not touch it until the very end of the model design process
-* Set aside a portion of the training set to be used for validation
-* Fit the model parameters to the datapoints contained in the remaining portion of the training set
+* Perform a train-test split. Set the test set aside; we will not touch it until the very end of the model design process.
+* Set aside a portion of the training set to be used for validation.
+* Fit the model parameters to the datapoints contained in the remaining portion of the training set.
 * Assess the model's performance on the validation set. Adjust the model as needed, re-fit it to the remaining portion of the training set, then re-evaluate it on the validation set. Repeat as necessary until you are satisfied.
-* After *all* model development is complete, assess the model's performance on the test set. This is the final test of how well the model performs on unseen data. No further modifications should be made to the model
+* After *all* model development is complete, assess the model's performance on the test set. This is the final test of how well the model performs on unseen data. No further modifications should be made to the model.
 
 The process of creating a validation set is called a **validation split**.
 
@@ -174,7 +174,7 @@ In most machine learning problems, complexity is defined differently from what w
 
 ### Constraining Model Parameters
 
-Think back to our work using gradient descent to descend down a loss surface. You may find it helpful to refer back to the Gradient Descent note to refresh your memory. Our aim was to find the combination of model parameters that led to the model having minimum loss. We visualized this using a contour map – we plotted possible parameter values on the horizontal and vertical axes, which allows us to take a bird's eye view above the loss surface. We want to find the model parameters corresponding to the lowest point on the loss surface.
+Think back to our work using gradient descent to descend down a loss surface. You may find it helpful to refer back to the Gradient Descent note to refresh your memory. Our aim was to find the combination of model parameters that led to the model having minimum loss. We visualized this using a contour map by plotting possible parameter values on the horizontal and vertical axes, which allows us to take a bird's eye view above the loss surface. We want to find the model parameters corresponding to the lowest point on the loss surface.
 
 <center><img src="images/unconstrained.png" alt='unconstrained' width='450'></center>
 
@@ -198,9 +198,9 @@ $$\sum_{i=1}^p |\theta_i| \leq Q$$
 
 where $p$ is the total number of parameters in the model. You can think of this as us giving our model a "budget" for how it distributes the magnitudes of each parameter. If the model assigns a large value to some $\theta_i$, it may have to assign a small value to some other $\theta_j$. This has the effect of increasing feature $\phi_i$'s influence on the predictions while decreasing the influence of feature $\phi_j$. The model will need to be strategic about how the parameter weights are distributed – ideally, more "important" features will receive greater weighting. 
 
-Notice that the intercept term, $\theta_0$, is excluded from this constraint. We typically **do not regularize the intercept term**.
+Notice that the intercept term, $\theta_0$, is excluded from this constraint. **We typically do not regularize the intercept term**.
 
-Now, let's think back to gradient descent and visualize the loss surface as a contour map. As a refresher, loss surface means that each point represents the model's loss for a particular combination of $\theta_1$, $\theta_2$. Let's say our goal is to find the combination of parameters that gives us the lowest loss. 
+Now, let's think back to gradient descent and visualize the loss surface as a contour map. As a refresher, a loss surface means that each point represents the model's loss for a particular combination of $\theta_1$, $\theta_2$. Let's say our goal is to find the combination of parameters that gives us the lowest loss. 
 
 <center><img src="images/constrained_gd.png" alt='constrained_gd' width='450'></center>
 </br>
@@ -244,14 +244,13 @@ How do we actually apply our constraint $\sum_{i=1}^p |\theta_i| \leq Q$? We wil
 
 Recall our ordinary least squares objective function: our goal was to find parameters that minimize the model's mean squared error.
 
-$$\frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2 = \frac{1}{n} \sum_{i=1}^n (y_i - (\theta_0 + \theta_1 \phi_{i, 1} + \theta_2 
-phi_{i, 2} + \ldots + \theta_p \phi_{i, p}))^2$$
+$$\frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2 = \frac{1}{n} \sum_{i=1}^n (y_i - (\theta_0 + \theta_1 \phi_{i, 1} + \theta_2 \phi_{i, 2} + \ldots + \theta_p \phi_{i, p}))^2$$
 
 To apply our constraint, we need to rephrase our minimization goal. 
 
 $$\frac{1}{n} \sum_{i=1}^n (y_i - (\theta_0 + \theta_1 \phi_{i, 1} + \theta_2 \phi_{i, 2} + \ldots + \theta_p \phi_{i, p}))^2\:\text{such that} \sum_{i=1}^p |\theta_i| \leq Q$$
 
-Unfortunately, we can't directly use this formulation as our objective function – it's not easy to mathematically optimize over a constraint. Instead, we will apply the magic of the [Lagrangian Duality](https://en.wikipedia.org/wiki/Duality_(optimization)). The details of this are out of scope (take EECS 127 if you're interested in learning more), but the end result is very useful. It turns out that minimizing the following *augmented* objective function is equivalent to our minimization goal above.
+Unfortunately, we can't directly use this formulation as our objective function – it's not easy to mathematically optimize over a constraint. Instead, we will apply the magic of the [Lagrangian Duality](https://en.wikipedia.org/wiki/Duality_(optimization)). The details of this are out of scope (take EECS 127 if you're interested in learning more), but the end result is very useful. It turns out that minimizing the following *augmented* objective function is *equivalent* to our minimization goal above.
 
 $$\frac{1}{n} \sum_{i=1}^n (y_i - (\theta_0 + \theta_1 \phi_{i, 1} + \theta_2 \phi_{i, 2} + \ldots + \theta_p \phi_{i, p}))^2 + \lambda \sum_{i=1}^p \vert \theta_i \vert = ||\mathbb{Y} - \mathbb{X}\theta||_2^2 + \lambda \sum_{i=1}^p |\theta_i|$$
 
@@ -268,14 +267,13 @@ The $\lambda$ factor controls the degree of regularization. Roughly speaking, $\
 
 - Assume $\lambda \rightarrow 0$. Then, $\lambda \sum_{j=1}^{d} \vert \theta_j \vert$ is 0. Minimizing the cost function is equivalent to $\min_{\theta} \frac{1}{n} || Y - X\theta ||_2^2$, our usual MSE loss function. The act of minimizing MSE loss is just our familiar OLS, and the optimal solution is the global minimum $\hat{\theta} = \hat\theta_{No Reg.}$. We showed that the global optimum is achieved when the L2 norm ball radius $Q \rightarrow \infty$.
 
-We call $\lambda$ the **regularization penalty hyperparameter**. We select its value via cross-validation.
+We call $\lambda$ the **regularization penalty hyperparameter** and select its value via cross-validation.
 
-The process of finding the optimal $\hat{\theta}$ to minimize our new objective function is called **L1 regularization**. It is also sometimes known by the acronym "LASSO", which stands for "least absolute shrinkage and selection operator."
+The process of finding the optimal $\hat{\theta}$ to minimize our new objective function is called **L1 regularization**. It is also sometimes known by the acronym "LASSO", which stands for "Least Absolute Shrinkage and Selection Operator."
 
 Unlike ordinary least squares, which can be solved via the closed-form solution $\hat{\theta}_{OLS} = (\mathbb{X}^{\top}\mathbb{X})^{-1}\mathbb{X}^{\top}\mathbb{Y}$, there is no closed-form solution for the optimal parameter vector under L1 regularization. Instead, we use the `Lasso` model class of `sklearn`.
 
 ```{python}
-#| vscode: {languageId: python}
 import sklearn.linear_model as lm
 
 # The alpha parameter represents our lambda term
@@ -330,7 +328,7 @@ $$\frac{1}{n} \sum_{i=1}^n (y_i - (\theta_0 + \theta_1 \phi_{i, 1} + \theta_2 \p
 
 Notice that all we have done is change the constraint on the model parameters. The first term in the expression, the MSE, has not changed.
 
-Using the Lagrangian Duality, we can re-express our objective function as:
+Using Lagrangian Duality, we can re-express our objective function as:
 $$\frac{1}{n} \sum_{i=1}^n (y_i - (\theta_0 + \theta_1 \phi_{i, 1} + \theta_2 \phi_{i, 2} + \ldots + \theta_p \phi_{i, p}))^2 + \lambda \sum_{i=1}^p \theta_i^2 = ||\mathbb{Y} - \mathbb{X}\theta||_2^2 + \lambda \sum_{i=1}^p \theta_i^2$$
 
 When applying L2 regularization, our goal is to minimize this updated objective function.
@@ -339,7 +337,7 @@ Unlike L1 regularization, L2 regularization *does* have a closed-form solution f
 
 $$\hat\theta_{\text{ridge}} = (\mathbb{X}^{\top}\mathbb{X} + n\lambda I)^{-1}\mathbb{X}^{\top}\mathbb{Y}$$
 
-This solution exists **even if** $\mathbb{X}$ is not full column rank. This is a major reason why L2 regularization is often used – it can produce a solution even when there is colinearity in the features. We will discuss the concept of colinearity in a future lecture. We will not derive this result in Data 100, as it involves a fair bit of matrix calculus.
+This solution exists **even if $\mathbb{X}$ is not full column rank**. This is a major reason why L2 regularization is often used – it can produce a solution even when there is colinearity in the features. We will discuss the concept of colinearity in a future lecture. We will not derive this result in Data 100, as it involves a fair bit of matrix calculus.
 
 In `sklearn`, we perform L2 regularization using the `Ridge` class. Notice that we scale the data before regularizing.
 
