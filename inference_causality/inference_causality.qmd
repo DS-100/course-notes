@@ -186,7 +186,7 @@ The model bias is not random; it's an average measure for a specific individual 
 
 An **unbiased model** has a $\text{model bias } = 0$. In other words, our model predicts $g(x)$ on average. 
 
-Similarly, we can define bias for estimators, like the mean, as well. The sample mean is an **unbiased estimator** of the population mean, as by CLT, $\mathbb{E}[\bar{X}_n] = \mu$. Therefore, the $\text{estimator bias } = \mathbb{E}[\bar{X}_n] - \mu = 0$.
+Similarly, we can define bias for estimators like the mean. The sample mean is an **unbiased estimator** of the population mean, as by CLT, $\mathbb{E}[\bar{X}_n] = \mu$. Therefore, the $\text{estimator bias } = \mathbb{E}[\bar{X}_n] - \mu = 0$.
 :::
 
 There are two main reasons for large model biases:
@@ -199,6 +199,7 @@ To fix this, we increase model complexity (but we don't want to overfit!) or con
 
 ### The Decomposition
 To summarize: 
+
 * The **model risk**, $\mathbb{E}\left[(Y(x)-\hat{Y}(x))^2\right]$, is the mean squared prediction error of the model.
 * The **observation variance**, $\sigma^2$, is the variance of the random noise in the observations. It describes how variable the random error $\epsilon$ is for each observation.
 * The **model bias**, $\mathbb{E}\left[\hat{Y}(x)\right]-g(x)$, is how "off" the $\hat{Y}(x)$ is as an estimator of the true underlying relationship $g(x)$. 
@@ -209,13 +210,15 @@ The above definitions enable us to simplify the decomposition of model risk befo
 $$ E[(Y(x) - \hat{Y}(x))^2] = \sigma^2 + (E[\hat{Y}(x)] - g(x))^2 + \text{Var}(\hat{Y}(x)) $$
 $$\text{model risk } = \text{observation variance} + (\text{model bias})^2 \text{+ model variance}$$
 
-This is known as the **bias-variance tradeoff**. What does it mean? Remember that the model risk is a measure of the model's performance. Our goal in building models is to keep model risk low; this means that we will want to ensure that each component of model risk is kept at a low value. 
+This is known as the **bias-variance tradeoff**. What does it mean? Remember that the model risk is a measure of the model's performance. Our goal in building models is to keep model risk low; this means that we will want to ensure that each component of model risk is kept at a small value. 
 
 Observation variance is an inherent, random part of the data collection process. We aren't able to reduce the observation variance, so we'll focus our attention on the model bias and model variance. 
 
-In the Feature Engineering lecture, we considered the issue of overfitting. We saw that the model's error or bias tends to decrease as model complexity increases — if we design a highly complex model, it will tend to make predictions that are closer to the true relationship $g$. At the same time, model variance tends to *increase* as model complexity increases: a complex model may overfit to the training data, meaning that small differences in the random samples used for training lead to large differences in the fitted model. We have a problem. To decrease model bias, we could increase the model's complexity, which would lead to overfitting and an increase in model variance. Alternatively, we could decrease model variance by decreasing the model's complexity—at the cost of increased model bias due to underfitting. 
+In the Feature Engineering lecture, we considered the issue of overfitting. We saw that the model's error or bias tends to decrease as model complexity increases — if we design a highly complex model, it will tend to make predictions that are closer to the true relationship $g$. At the same time, model variance tends to *increase* as model complexity increases; a complex model may overfit to the training data, meaning that small differences in the random samples used for training lead to large differences in the fitted model. We have a problem. To decrease model bias, we could increase the model's complexity, which would lead to overfitting and an increase in model variance. Alternatively, we could decrease model variance by decreasing the model's complexity at the cost of increased model bias due to underfitting. 
 
+<p align="center">
 <img src="images/bvt.png" alt='bvt' width='600'>
+</p>
 
 We need to strike a balance. Our goal in model creation is to use a complexity level that is high enough to keep bias low, but not so high that model variance is large.
 
@@ -225,23 +228,25 @@ Recall the framework we established earlier in this lecture. If we assume that t
 
 $$f_{\theta}(x) = g(x) + \epsilon = \theta_0 + \theta_1 x_1 + \ldots + \theta_p x_p + \epsilon$$
 
-Our model attempts to estimate each true parameter $\theta_i$ using the estimates $\hat{\theta}_i$ calculated from the design matrix $\Bbb{X}$ and response vector $Bbb{Y}$.
+Our model attempts to estimate each true parameter $\theta_i$ using the estimates $\hat{\theta}_i$ calculated from the design matrix $\Bbb{X}$ and response vector $\Bbb{Y}$.
 
 $$f_{\hat{\theta}}(x) = \hat{\theta}_0 + \hat{\theta}_1 x_1 + \ldots + \hat{\theta}_p x_p$$
 
 Let's pause for a moment. At this point, we're very used to working with the idea of a model parameter. But what exactly does each coefficient $\theta_i$ actually *mean*? We can think of each $\theta_i$ as a *slope* of the linear model – if all other variables are held constant, a unit change in $x_i$ will result in a $\theta_i$ change in $f_{\theta}(x)$. Broadly speaking, a large value of $\theta_i$ means that the feature $x_i$ has a large effect on the response; conversely, a small value of $\theta_i$ means that $x_i$ has little effect on the response. In the extreme case, if the true parameter $\theta_i$ is 0, then the feature $x_i$ has **no effect** on $Y(x)$. 
 
-If the true parameter $\theta_i$ for a particular feature is 0, this tells us something pretty significant about the world – there is no underlying relationship between $x_i$ and $Y(x)$! How then, can we test if a parameter is 0? As a baseline, we go through our usual process of drawing a sample, using this data to fit a model, and computing an estimate $\hat{\theta}_i$. However, we need to also consider the fact that if our random sample had come out differently, we may have found a different result for $\hat{\theta}_i$. To infer if the true parameter $\theta_i$ is 0, we want to draw our conclusion from the distribution of $\hat{\theta}_i$ estimates we could have drawn across all other random samples. This is where [hypothesis testing](https://inferentialthinking.com/chapters/11/Testing_Hypotheses.html) comes in handy! 
+If the true parameter $\theta_i$ for a particular feature is 0, this tells us something pretty significant about the world: there is no underlying relationship between $x_i$ and $Y(x)$! How then, can we test if a parameter is 0? As a baseline, we go through our usual process of drawing a sample, using this data to fit a model, and computing an estimate $\hat{\theta}_i$. However, we need to also consider the fact that if our random sample had come out differently, we may have found a different result for $\hat{\theta}_i$. To infer if the true parameter $\theta_i$ is 0, we want to draw our conclusion from the distribution of $\hat{\theta}_i$ estimates we could have drawn across all other random samples. This is where [hypothesis testing](https://inferentialthinking.com/chapters/11/Testing_Hypotheses.html) comes in handy! 
 
 To test if the true parameter $\theta_i$ is 0, we construct a **hypothesis test** where our null hypothesis states that the true parameter $\theta_i$ is 0 and the alternative hypothesis states that the true parameter $\theta_i$ is *not* 0. If our p-value is smaller than our cutoff value (usually p=0.05), we reject the null hypothesis. 
 
 ## Hypothesis Testing through Bootstrap: PurpleAir Demo
 
-An equivalent way to execute the hypothesis test described above is through **bootstrapping** (this equivalence can be proven through the [duality argument](https://stats.stackexchange.com/questions/179902/confidence-interval-p-value-duality-vs-frequentist-interpretation-of-cis), which is out of scope for this class). To execute this hypothesis test, we use bootstrapping to compute approximate 95% confidence intervals for each $\theta_i$. If the interval doesn't contain 0, we reject the null hypothesis at the 5% level. Otherwise, the data is consistent with the null, as the true parameter *could* be 0.
+An equivalent way to execute the hypothesis test described above is through **bootstrapping** (this equivalence can be proven through the [duality argument](https://stats.stackexchange.com/questions/179902/confidence-interval-p-value-duality-vs-frequentist-interpretation-of-cis), which is out of scope for this class). We use bootstrapping to compute approximate 95% confidence intervals for each $\theta_i$. If the interval doesn't contain 0, we reject the null hypothesis at the 5% level. Otherwise, the data is consistent with the null, as the true parameter *could* be 0.
 
 To show an example of this hypothesis testing process, we'll work with the [snowy plover](https://www.audubon.org/field-guide/bird/snowy-plover) dataset throughout this section. The data are about the eggs and newly-hatched chicks of the Snowy Plover. The data were collected at the Point Reyes National Seashore by a former [student at Berkeley](https://openlibrary.org/books/OL2038693M/BLSS_the_Berkeley_interactive_statistical_system). Here's a [parent bird and some eggs](http://cescos.fau.edu/jay/eps/articles/snowyplover.html).
 
-![plover and eggs](images/plover_eggs.jpg)
+<p align="center">
+<img src="images/plover_eggs.jpg" alt='bvt' width='550'>
+</p>
 
 Note that `Egg Length` and `Egg Breadth` (widest diameter) are measured in millimeters, and `Egg Weight` and `Bird Weight` are measured in grams; for comparison, a standard paper clip weighs about one gram.
 
@@ -463,6 +468,7 @@ Let us now consider a more interpretable model: we instead assume a true relatio
 $$f_\theta(x) = \theta_0 + \theta_1 \text{egg\_weight} + \epsilon$$
 
 ```{python}
+from sklearn.linear_model import LinearRegression
 X_int = eggs[["egg_weight"]]
 Y_int = eggs["bird_weight"]
 
@@ -543,7 +549,7 @@ All inference assumes that the regression model holds.
 * If the model doesn’t hold, the inference might not be valid.
 * If the [assumptions of the bootstrap](https://inferentialthinking.com/chapters/13/3/Confidence_Intervals.html?highlight=p%20value%20confidence%20interval#care-in-using-the-bootstrap-percentile-method) don’t hold…
     * Sample size n is large
-    * Sample is representative of population distribution (drawn IID, unbiased)
+    * Sample is representative of population distribution (drawn i.i.d., unbiased)
     
     …then the results of the bootstrap might not be valid.
 
@@ -698,7 +704,7 @@ Observational Study:
 
 <img src="images/observational.png" alt='observational' width='600'>
 
-## Covariate Adjustment
+### Covariate Adjustment
 
 What to do about confounders?
 
@@ -717,7 +723,7 @@ This approach can work but is **fragile**. Breaks if:
 
 <img src="images/ignorability.png" alt='ignorability' width='600'>
 
-### Covariate adjustment without parametric assumptions
+#### Covariate adjustment without parametric assumptions
 
 What to do about confounders?
 
