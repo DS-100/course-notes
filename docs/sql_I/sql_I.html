@@ -1,0 +1,1816 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Principles and Techniques of Data Science - 20&nbsp; SQL I</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../inference_causality/inference_causality.html" rel="prev">
+<link href="../data100_logo.png" rel="icon" type="image/png">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../sql_I/sql_I.html"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">SQL I</span></a></li></ol></nav>
+      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+      </a>
+      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="../index.html" class="sidebar-logo-link">
+      <img src="../data100_logo.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Principles and Techniques of Data Science</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/DS-100/course-notes" rel="" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+    <a href="../Principles-and-Techniques-of-Data-Science.pdf" rel="" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Welcome</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../intro_lec/introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pandas_1/pandas_1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Pandas I</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pandas_2/pandas_2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Pandas II</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pandas_3/pandas_3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Pandas III</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../eda/eda.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Data Cleaning and EDA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../regex/regex.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Regular Expressions</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../visualization_1/visualization_1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Visualization I</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../visualization_2/visualization_2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Visualization II</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sampling/sampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Sampling</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../intro_to_modeling/intro_to_modeling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Introduction to Modeling</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../constant_model_loss_transformations/loss_transformations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Constant Model, Loss, and Transformations</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ols/ols.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Ordinary Least Squares</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../gradient_descent/gradient_descent.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Gradient Descent</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../feature_engineering/feature_engineering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Sklearn and Feature Engineering</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../case_study_HCE/case_study_HCE.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Case Study in Human Contexts and Ethics</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../cv_regularization/cv_reg.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Cross Validation and Regularization</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../probability_1/probability_1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Random Variables</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../probability_2/probability_2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Estimators, Bias, and Variance</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../inference_causality/inference_causality.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Bias, Variance, and Inference</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sql_I/sql_I.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">SQL I</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">SQL I</h2>
+   
+  <ul>
+  <li><a href="#databases" id="toc-databases" class="nav-link active" data-scroll-target="#databases"><span class="header-section-number">20.1</span> Databases</a></li>
+  <li><a href="#structured-query-language-and-database-schema" id="toc-structured-query-language-and-database-schema" class="nav-link" data-scroll-target="#structured-query-language-and-database-schema"><span class="header-section-number">20.2</span> Structured Query Language and Database Schema</a></li>
+  <li><a href="#selecting-from-tables" id="toc-selecting-from-tables" class="nav-link" data-scroll-target="#selecting-from-tables"><span class="header-section-number">20.3</span> <code>SELECT</code>ing From Tables</a></li>
+  <li><a href="#applying-where-conditions" id="toc-applying-where-conditions" class="nav-link" data-scroll-target="#applying-where-conditions"><span class="header-section-number">20.4</span> Applying <code>WHERE</code> Conditions</a></li>
+  <li><a href="#sorting-and-restricting-output" id="toc-sorting-and-restricting-output" class="nav-link" data-scroll-target="#sorting-and-restricting-output"><span class="header-section-number">20.5</span> Sorting and Restricting Output</a></li>
+  <li><a href="#aggregating-with-group-by" id="toc-aggregating-with-group-by" class="nav-link" data-scroll-target="#aggregating-with-group-by"><span class="header-section-number">20.6</span> Aggregating with <code>GROUP BY</code></a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content column-body" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">SQL I</span></h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<div class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="true" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Learning Outcomes
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse show">
+<div class="callout-body-container callout-body">
+<ul>
+<li>Identify situations where a database may be preferred over a CSV file</li>
+<li>Write basic SQL queries using <code>SELECT</code>, <code>FROM</code>, <code>WHERE</code>, <code>ORDER BY</code>, <code>LIMIT</code>, and <code>OFFSET</code></li>
+<li>Perform aggregations using <code>GROUP BY</code></li>
+</ul>
+</div>
+</div>
+</div>
+<p>So far in the course, we have made our way through the entire data science lifecycle: we learned how to load and explore a dataset, formulate questions, and use the tools of prediction and inference to come up with answers. For the remaining weeks of the semester, we are going to make a second pass through the lifecycle, this time doing so with a different set of tools, ideas, and abstractions.</p>
+<section id="databases" class="level2" data-number="20.1">
+<h2 data-number="20.1" class="anchored" data-anchor-id="databases"><span class="header-section-number">20.1</span> Databases</h2>
+<p>With this goal in mind, let’s go back to the very beginning of the lifecycle. We first started our work in data analysis by looking at the <code>pandas</code> library, which offered us powerful tools to manipulate tabular data stored in (primarily) CSV files. CSVs work well when analyzing relatively small datasets that don’t need to be shared across many users. In research and industry, however, data scientists often need to access enormous bodies of data that cannot be easily stored in a CSV format. Collaborating with others when working with CSVs can also be tricky – a real-world data scientist may run into problems when multiple users try to make modifications, or, even worse, security issues with who should and should not have access to the data.</p>
+<p>A <strong>database</strong> is a large, organized collection of data. Databases are administered by <strong>Database Management Systems (DBMS)</strong>, which are software systems that store, manage, and facilitate access to one or more databases. Databases help mitigate many of the issues that come with using CSVs for data storage: they provide reliable storage that can survive system crashes or disk failures, are optimized to compute on data that does not fit into memory, and contain special data structures to improve performance. Using databases rather than CSVs offers further benefits from the standpoint of data management. A DBMS can apply settings that configure how data is organized, block certain data anomalies (for example, enforcing non-negative weights or ages), and determine who is allowed access to the data. It can also ensure safe concurrent operations where multiple users reading and writing to the database will not lead to fatal errors.</p>
+<p>As you may have guessed, we can’t use our usual <code>pandas</code> methods to work with data in a database. Instead, we’ll turn to Structured Query Language.</p>
+</section>
+<section id="structured-query-language-and-database-schema" class="level2" data-number="20.2">
+<h2 data-number="20.2" class="anchored" data-anchor-id="structured-query-language-and-database-schema"><span class="header-section-number">20.2</span> Structured Query Language and Database Schema</h2>
+<p><strong>Structured Query Language</strong>, or <strong>SQL</strong> (commonly pronounced “sequel,” though this is the subject of <a href="https://patorjk.com/blog/2012/01/26/pronouncing-sql-s-q-l-or-sequel/">fierce debate</a>), is a special programming language designed to communicate with databases. You may have encountered it in classes like CS 61A or Data C88C before. Unlike Python, it is a <strong>declarative programming language</strong> – this means that rather than writing the exact logic needed to complete a task, a piece of SQL code “declares” what the desired final output should be and leaves the program to determine what logic should be implemented.</p>
+<p>It is important to reiterate that SQL is an entirely different language from Python. However, Python <em>does</em> have special engines that allow us to run SQL code in a Jupyter notebook. While this is typically not how SQL is used outside of an educational setting, we will be using this workflow to illustrate how SQL queries are constructed using the tools we’ve already worked with this semester. You will learn more about how to run SQL queries in Jupyter in Lab 10.</p>
+<p>The syntax below will seem unfamiliar to you; for now, just focus on understanding the output displayed. We will clarify the SQL code in a bit.</p>
+<p>To start, we’ll look at a database called <code>basic_examples.db</code>.</p>
+<div class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the SQL Alchemy Python library</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sqlalchemy</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># load %%sql cell magic</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>load_ext sql</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Connect to the SQLite database basic_examples.db</p>
+<div class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>sqlite:<span class="op">///</span>data<span class="op">/</span>basic_examples.db </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>SELECT <span class="op">*</span> </span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>FROM sqlite_master</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>WHERE <span class="bu">type</span><span class="op">=</span><span class="st">"table"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * sqlite:///data/basic_examples.db
+Done.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">type</th>
+<th data-quarto-table-cell-role="th">name</th>
+<th data-quarto-table-cell-role="th">tbl_name</th>
+<th data-quarto-table-cell-role="th">rootpage</th>
+<th data-quarto-table-cell-role="th">sql</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>table</td>
+<td>sqlite_sequence</td>
+<td>sqlite_sequence</td>
+<td>7</td>
+<td>CREATE TABLE sqlite_sequence(name,seq)</td>
+</tr>
+<tr class="even">
+<td>table</td>
+<td>Dragon</td>
+<td>Dragon</td>
+<td>2</td>
+<td>CREATE TABLE Dragon (<br>
+name TEXT PRIMARY KEY,<br>
+year INTEGER CHECK (year &gt;= 2000),<br>
+cute INTEGER<br>
+)</td>
+</tr>
+<tr class="odd">
+<td>table</td>
+<td>Dish</td>
+<td>Dish</td>
+<td>4</td>
+<td>CREATE TABLE Dish (<br>
+name TEXT PRIMARY KEY,<br>
+type TEXT,<br>
+cost INTEGER CHECK (cost &gt;= 0)<br>
+)</td>
+</tr>
+<tr class="even">
+<td>table</td>
+<td>Scene</td>
+<td>Scene</td>
+<td>6</td>
+<td>CREATE TABLE Scene (<br>
+id INTEGER PRIMARY KEY AUTOINCREMENT,<br>
+biome TEXT NOT NULL,<br>
+city TEXT NOT NULL,<br>
+visitors INTEGER CHECK (visitors &gt;= 0),<br>
+created_at DATETIME DEFAULT (DATETIME('now'))<br>
+)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>The summary above displays information about the database. The database contains four tables, named <code>sqlite_sequence</code>, <code>Dragon</code>, <code>Dish</code>, and <code>Scene</code>. The rightmost column above lists the command that was used to construct each table.</p>
+<p>Let’s look more closely at the command used to create the <code>Dragon</code> table (the second entry above).</p>
+<pre><code>CREATE TABLE Dragon (name TEXT PRIMARY KEY,
+                     year INTEGER CHECK (year &gt;= 2000),
+                     cute INTEGER)</code></pre>
+<p>The statement <code>CREATE TABLE</code> is used to specify the <strong>schema</strong> of the table – a description of what logic is used to organize the table. Schema follow a set format:</p>
+<ul>
+<li><code>ColName</code>: the name of a column</li>
+<li><code>DataType</code>: the type of data to be stored in a column. Some of the most common SQL data types are <code>INT</code> (integers), <code>FLOAT</code> (floating point numbers), <code>TEXT</code> (strings), <code>BLOB</code> (arbitrary data, such as audio/video files), and <code>DATETIME</code> (a date and time).</li>
+<li><code>Constraint</code>: some restriction on the data to be stored in the column. Common constraints are <code>CHECK</code> (data must obey a certain condition), <code>PRIMARY KEY</code> (designate a column as the table’s primary key), <code>NOT NULL</code> (data cannot be null), and <code>DEFAULT</code> (a default fill value if no specific entry is given).</li>
+</ul>
+<p>We see that <code>Dragon</code> contains five columns. The first of these, <code>"name"</code>, contains text data. It is designated as the <strong>primary key</strong> of the table; that is, the data contained in <code>"name"</code> uniquely identifies each entry in the table. Because <code>"name"</code> is the primary key of the table, no two entries in the table can have the same name – a given value of <code>"name"</code> is unique to each dragon. The <code>"year"</code> column contains integer data, with the constraint that year values must be greater than or equal to 2000. The final column, <code>"cute"</code>, contains integer data with no restrictions on allowable values.</p>
+<p>We can verify this by viewing <code>Dragon</code> itself.</p>
+<div class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>SELECT <span class="op">*</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * sqlite:///data/basic_examples.db
+Done.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">name</th>
+<th data-quarto-table-cell-role="th">year</th>
+<th data-quarto-table-cell-role="th">cute</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>hiccup</td>
+<td>2010</td>
+<td>10</td>
+</tr>
+<tr class="even">
+<td>drogon</td>
+<td>2011</td>
+<td>-100</td>
+</tr>
+<tr class="odd">
+<td>dragon 2</td>
+<td>2019</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Database tables (also referred to as <strong>relations</strong>) are structured much like <code>DataFrame</code>s in <code>pandas</code>. Each row, sometimes called a <strong>tuple</strong>, represents a single record in the dataset. Each column, sometimes called an <strong>attribute</strong> or <strong>field</strong>, describes some feature of the record.</p>
+</section>
+<section id="selecting-from-tables" class="level2" data-number="20.3">
+<h2 data-number="20.3" class="anchored" data-anchor-id="selecting-from-tables"><span class="header-section-number">20.3</span> <code>SELECT</code>ing From Tables</h2>
+<p>To extract and manipulate data stored in a SQL table, we will need to familiarize ourselves with the syntax to write pieces of SQL code, which we call <strong>queries</strong>.</p>
+<p>The basic unit of a SQL query is the <code>SELECT</code> statement. <code>SELECT</code> specifies what columns we would like to extract from a given table. We use <code>FROM</code> to tell SQL the table from which we want to <code>SELECT</code> our data.</p>
+<div class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>SELECT <span class="op">*</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * sqlite:///data/basic_examples.db
+Done.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">name</th>
+<th data-quarto-table-cell-role="th">year</th>
+<th data-quarto-table-cell-role="th">cute</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>hiccup</td>
+<td>2010</td>
+<td>10</td>
+</tr>
+<tr class="even">
+<td>drogon</td>
+<td>2011</td>
+<td>-100</td>
+</tr>
+<tr class="odd">
+<td>dragon 2</td>
+<td>2019</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>In SQL, <code>*</code> means “everything.” The query above grabs <em>all</em> the columns in <code>Dragon</code> and displays them in the outputted table. We can also specify a specific subset of columns to be <code>SELECT</code>ed.&nbsp;Notice that the outputted columns appear in the order that they were <code>SELECT</code>ed.</p>
+<div class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>SELECT cute, year</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * sqlite:///data/basic_examples.db
+Done.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="7">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">cute</th>
+<th data-quarto-table-cell-role="th">year</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>10</td>
+<td>2010</td>
+</tr>
+<tr class="even">
+<td>-100</td>
+<td>2011</td>
+</tr>
+<tr class="odd">
+<td>0</td>
+<td>2019</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>And just like that, we’ve already written two SQL queries. There are a few points of note in the queries above. Firstly, notice that every “verb” is written in uppercase. It is convention to write SQL operations in capital letters, but your code will run just fine even if you choose to keep things in lowercase. Second, the query above separates each statement with a new line. SQL queries are not impacted by whitespace within the query; this means that SQL code is typically written with a new line after each statement to make things more readable. The semicolon (<code>;</code>) indicates the end of a query. There are some “flavors” of SQL in which a query will not run if no semicolon is present; however, in Data 100, the SQL version we will use works with or without an ending semicolon. Queries in these notes will end with semicolons to build up good habits.</p>
+<p>The <code>AS</code> keyword allows us to give a column a new name (called an <strong>alias</strong>) after it has been <code>SELECT</code>ed.&nbsp;The general syntax is:</p>
+<pre><code>SELECT column_name_in_database_table AS new_name_in_output_table</code></pre>
+<div class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>SELECT cute AS cuteness, year AS birth</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * sqlite:///data/basic_examples.db
+Done.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">cuteness</th>
+<th data-quarto-table-cell-role="th">birth</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>10</td>
+<td>2010</td>
+</tr>
+<tr class="even">
+<td>-100</td>
+<td>2011</td>
+</tr>
+<tr class="odd">
+<td>0</td>
+<td>2019</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>To <code>SELECT</code> only the <em>unique</em> values in a column, we use the <code>DISTINCT</code> keyword. This will cause any any duplicate entries in a column to be removed. If we want to find only the unique years in <code>Dragon</code>, without any repeats, we would write:</p>
+<div class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>SELECT DISTINCT year</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * sqlite:///data/basic_examples.db
+Done.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="9">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">year</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2010</td>
+</tr>
+<tr class="even">
+<td>2011</td>
+</tr>
+<tr class="odd">
+<td>2019</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><strong>Every</strong> SQL query must include both a <code>SELECT</code> and <code>FROM</code> statement. Intuitively, this makes sense – we know that we’ll want to extract some piece of information from the table; to do so, we also need to indicate what table we want to consider.</p>
+<p>It is important to note that SQL enforces a strict “order of operations” – SQL clauses must <em>always</em> follow the same sequence. For example, the <code>SELECT</code> statement must always precede <code>FROM</code>. This means that any SQL query will follow the same structure.</p>
+<pre><code>SELECT &lt;column list&gt;
+FROM &lt;table&gt;
+[additional clauses]</code></pre>
+<p>The additional clauses that we use depend on the specific task trying to be achieved. We may refine our query to filter on a certain condition, aggregate a particular column, or join several tables together. We will spend the rest of this lecture outlining some useful clauses to build up our understanding of the order of operations.</p>
+</section>
+<section id="applying-where-conditions" class="level2" data-number="20.4">
+<h2 data-number="20.4" class="anchored" data-anchor-id="applying-where-conditions"><span class="header-section-number">20.4</span> Applying <code>WHERE</code> Conditions</h2>
+<p>The <code>WHERE</code> keyword is used to select only some rows of a table, filtered on a given Boolean condition.</p>
+<div class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>SELECT name, year</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>WHERE cute <span class="op">&gt;</span> <span class="dv">0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * sqlite:///data/basic_examples.db
+Done.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="10">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">name</th>
+<th data-quarto-table-cell-role="th">year</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>hiccup</td>
+<td>2010</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>We can add complexity to the <code>WHERE</code> condition using the keywords <code>AND</code>, <code>OR</code>, and <code>NOT</code>, much like we would in Python.</p>
+<div class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>SELECT name, year</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>WHERE cute <span class="op">&gt;</span> <span class="dv">0</span> OR year <span class="op">&gt;</span> <span class="dv">2013</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * sqlite:///data/basic_examples.db
+Done.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="11">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">name</th>
+<th data-quarto-table-cell-role="th">year</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>hiccup</td>
+<td>2010</td>
+</tr>
+<tr class="even">
+<td>dragon 2</td>
+<td>2019</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>To spare ourselves needing to write complicated logical expressions by combining several conditions, we can also filter for entries that are <code>IN</code> a specified list of values. This is similar to the use of <code>in</code> or <code>.isin</code> in Python.</p>
+<div class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>SELECT name, year</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>WHERE name IN (<span class="st">"hiccup"</span>, <span class="st">"puff"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * sqlite:///data/basic_examples.db
+Done.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="12">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">name</th>
+<th data-quarto-table-cell-role="th">year</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>hiccup</td>
+<td>2010</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>You may have noticed earlier that our table actually has a missing value. In SQL, missing data is given the special value <code>NULL</code>. <code>NULL</code> behaves in a fundamentally different way to other data types. We can’t use the typical operators (=, &gt;, and &lt;) on <code>NULL</code> values (in fact, <code>NULL == NULL</code> returns <code>False</code>!); instead, we check to see if a value <code>IS</code> or <code>IS NOT</code> <code>NULL</code>.</p>
+<div class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>SELECT <span class="op">*</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>WHERE cute IS NOT NULL</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * sqlite:///data/basic_examples.db
+Done.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="13">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">name</th>
+<th data-quarto-table-cell-role="th">year</th>
+<th data-quarto-table-cell-role="th">cute</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>hiccup</td>
+<td>2010</td>
+<td>10</td>
+</tr>
+<tr class="even">
+<td>drogon</td>
+<td>2011</td>
+<td>-100</td>
+</tr>
+<tr class="odd">
+<td>dragon 2</td>
+<td>2019</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="sorting-and-restricting-output" class="level2" data-number="20.5">
+<h2 data-number="20.5" class="anchored" data-anchor-id="sorting-and-restricting-output"><span class="header-section-number">20.5</span> Sorting and Restricting Output</h2>
+<p>What if we want the output table to appear in a certain order? The <code>ORDER BY</code> keyword behaves similarly to <code>.sort_values()</code> in <code>pandas</code>.</p>
+<div class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>SELECT <span class="op">*</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>ORDER BY cute</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * sqlite:///data/basic_examples.db
+Done.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="14">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">name</th>
+<th data-quarto-table-cell-role="th">year</th>
+<th data-quarto-table-cell-role="th">cute</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>drogon</td>
+<td>2011</td>
+<td>-100</td>
+</tr>
+<tr class="even">
+<td>dragon 2</td>
+<td>2019</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td>hiccup</td>
+<td>2010</td>
+<td>10</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>By default, <code>ORDER BY</code> will display results in ascending order (with the lowest values at the top of the table). To sort in descending order, we use the <code>DESC</code> keyword after specifying the column to be used for ordering.</p>
+<div class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>SELECT <span class="op">*</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>ORDER BY cute DESC</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * sqlite:///data/basic_examples.db
+Done.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="15">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">name</th>
+<th data-quarto-table-cell-role="th">year</th>
+<th data-quarto-table-cell-role="th">cute</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>hiccup</td>
+<td>2010</td>
+<td>10</td>
+</tr>
+<tr class="even">
+<td>dragon 2</td>
+<td>2019</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td>drogon</td>
+<td>2011</td>
+<td>-100</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>We can also tell SQL to <code>ORDER BY</code> two columns at once. This will sort the table by the first listed column, then use the values in the second listed column to break any ties.</p>
+<div class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>SELECT <span class="op">*</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>ORDER BY name, cute</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * sqlite:///data/basic_examples.db
+Done.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="16">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">name</th>
+<th data-quarto-table-cell-role="th">year</th>
+<th data-quarto-table-cell-role="th">cute</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>dragon 2</td>
+<td>2019</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>drogon</td>
+<td>2011</td>
+<td>-100</td>
+</tr>
+<tr class="odd">
+<td>hiccup</td>
+<td>2010</td>
+<td>10</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>In many instances, we are only concerned with a certain number of rows in the output table (for example, wanting to find the first two dragons in the table). The <code>LIMIT</code> keyword restricts the output to a specified number of rows. It serves a function similar to that of <code>.head()</code> in <code>pandas</code>.</p>
+<div class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>SELECT <span class="op">*</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>LIMIT <span class="dv">2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * sqlite:///data/basic_examples.db
+Done.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="17">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">name</th>
+<th data-quarto-table-cell-role="th">year</th>
+<th data-quarto-table-cell-role="th">cute</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>hiccup</td>
+<td>2010</td>
+<td>10</td>
+</tr>
+<tr class="even">
+<td>drogon</td>
+<td>2011</td>
+<td>-100</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>The <code>OFFSET</code> keyword indicates the index at which <code>LIMIT</code> should start. In other words, we can use <code>OFFSET</code> to shift where the <code>LIMIT</code>ing begins by a specified number of rows. For example, we might care about the dragons that are at positions #2 and #3 in the table.</p>
+<div class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>SELECT <span class="op">*</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>LIMIT <span class="dv">2</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>OFFSET <span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * sqlite:///data/basic_examples.db
+Done.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="18">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">name</th>
+<th data-quarto-table-cell-role="th">year</th>
+<th data-quarto-table-cell-role="th">cute</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>drogon</td>
+<td>2011</td>
+<td>-100</td>
+</tr>
+<tr class="even">
+<td>dragon 2</td>
+<td>2019</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Let’s summarize what we’ve learned so far. We know that <code>SELECT</code> and <code>FROM</code> are the fundamental building blocks of any SQL query. We can augment these two keywords with additional clauses to refine the data in our output table.</p>
+<p>Any clauses that we include must follow a strict ordering within the query:</p>
+<pre><code>SELECT &lt;column list&gt;
+FROM &lt;table&gt;
+[WHERE &lt;predicate&gt;]
+[ORDER BY &lt;column list&gt;]
+[LIMIT &lt;number of rows&gt;]
+[OFFSET &lt;number of rows&gt;]</code></pre>
+<p>Here, any clause contained in square brackets <code>[ ]</code> is optional – we only need to use the keyword if it is relevant to the table operation we want to perform. Also note that by convention, we use all caps for keywords in SQL statements and use newlines to make code more readable.</p>
+</section>
+<section id="aggregating-with-group-by" class="level2" data-number="20.6">
+<h2 data-number="20.6" class="anchored" data-anchor-id="aggregating-with-group-by"><span class="header-section-number">20.6</span> Aggregating with <code>GROUP BY</code></h2>
+<p>At this point, we’ve seen that SQL offers much of the same functionality that was given to us by <code>pandas</code>. We can extract data from a table, filter it, and reorder it to suit our needs.</p>
+<p>In <code>pandas</code>, much of our analysis work relied heavily on being able to use <code>.groupby()</code> to aggregate across the rows of our dataset. SQL’s answer to this task is the (very conveniently named) <code>GROUP BY</code> clause. While the outputs of <code>GROUP BY</code> are similar to those of <code>.groupby()</code> – in both cases, we obtain an output table where some column has been used for grouping – the syntax and logic used to group data in SQL are fairly different to the <code>pandas</code> implementation.</p>
+<p>To illustrate <code>GROUP BY</code>, we will consider the <code>Dish</code> table from the <code>basic_examples.db</code> database.</p>
+<div class="cell" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>SELECT <span class="op">*</span> </span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>FROM Dish</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * sqlite:///data/basic_examples.db
+Done.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="19">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">name</th>
+<th data-quarto-table-cell-role="th">type</th>
+<th data-quarto-table-cell-role="th">cost</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>ravioli</td>
+<td>entree</td>
+<td>10</td>
+</tr>
+<tr class="even">
+<td>ramen</td>
+<td>entree</td>
+<td>13</td>
+</tr>
+<tr class="odd">
+<td>taco</td>
+<td>entree</td>
+<td>7</td>
+</tr>
+<tr class="even">
+<td>edamame</td>
+<td>appetizer</td>
+<td>4</td>
+</tr>
+<tr class="odd">
+<td>fries</td>
+<td>appetizer</td>
+<td>4</td>
+</tr>
+<tr class="even">
+<td>potsticker</td>
+<td>appetizer</td>
+<td>4</td>
+</tr>
+<tr class="odd">
+<td>ice cream</td>
+<td>dessert</td>
+<td>5</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Say we wanted to find the total costs of dishes of a certain <code>type</code>. To accomplish this, we would write the following code.</p>
+<div class="cell" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>SELECT <span class="bu">type</span>, SUM(cost)</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>FROM Dish</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>GROUP BY <span class="bu">type</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * sqlite:///data/basic_examples.db
+Done.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="20">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">type</th>
+<th data-quarto-table-cell-role="th">SUM(cost)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>appetizer</td>
+<td>12</td>
+</tr>
+<tr class="even">
+<td>dessert</td>
+<td>5</td>
+</tr>
+<tr class="odd">
+<td>entree</td>
+<td>30</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>What is going on here? The statement <code>GROUP BY type</code> tells SQL to group the data based on the value contained in the <code>type</code> column (whether a record is an appetizer, entree, or dessert). <code>SUM(cost)</code> sums up the costs of dishes in each <code>type</code> and displays the result in the output table.</p>
+<p>You may be wondering: why does <code>SUM(cost)</code> come before the command to <code>GROUP BY type</code>? Don’t we need to form groups before we can count the number of entries in each?</p>
+<p>Remember that SQL is a <em>declarative</em> programming language – a SQL programmer simply states what end result they would like to see, and leaves the task of figuring out <em>how</em> to obtain this result to SQL itself. This means that SQL queries sometimes don’t follow what a reader sees as a “logical” sequence of thought. Instead, SQL requires that we follow its set order of operations when constructing queries. So long as we follow this ordering, SQL will handle the underlying logic.</p>
+<p>In practical terms: our goal with this query was to output the total <code>cost</code>s of each <code>type</code>. To communicate this to SQL, we say that we want to <code>SELECT</code> the <code>SUM</code>med <code>cost</code> values for each <code>type</code> group.</p>
+<p>There are many aggregation functions that can be used to aggregate the data contained in each group. Some common examples are:</p>
+<ul>
+<li><code>COUNT</code>: count the number of rows associated with each group</li>
+<li><code>MIN</code>: find the minimum value of each group</li>
+<li><code>MAX</code>: find the maximum value of each group</li>
+<li><code>SUM</code>: sum across all records in each group</li>
+<li><code>AVG</code>: find the average value of each group</li>
+</ul>
+<p>We can easily compute multiple aggregations, all at once (a task that was very tricky in <code>pandas</code>).</p>
+<div class="cell" data-execution_count="21">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>SELECT <span class="bu">type</span>, SUM(cost), MIN(cost), MAX(name)</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>FROM Dish</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>GROUP BY <span class="bu">type</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * sqlite:///data/basic_examples.db
+Done.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="21">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">type</th>
+<th data-quarto-table-cell-role="th">SUM(cost)</th>
+<th data-quarto-table-cell-role="th">MIN(cost)</th>
+<th data-quarto-table-cell-role="th">MAX(name)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>appetizer</td>
+<td>12</td>
+<td>4</td>
+<td>potsticker</td>
+</tr>
+<tr class="even">
+<td>dessert</td>
+<td>5</td>
+<td>5</td>
+<td>ice cream</td>
+</tr>
+<tr class="odd">
+<td>entree</td>
+<td>30</td>
+<td>7</td>
+<td>taco</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>To count the number of rows associated with each group, we use the <code>COUNT</code> keyword. Calling <code>COUNT(*)</code> will compute the total number of rows in each group, including rows with null values. Its <code>pandas</code> equivalent is <code>.groupby().size()</code>.</p>
+<div class="cell" data-execution_count="22">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>SELECT <span class="bu">type</span>, COUNT(<span class="op">*</span>)</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>FROM Dish</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>GROUP BY <span class="bu">type</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * sqlite:///data/basic_examples.db
+Done.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="22">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">type</th>
+<th data-quarto-table-cell-role="th">COUNT(*)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>appetizer</td>
+<td>3</td>
+</tr>
+<tr class="even">
+<td>dessert</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td>entree</td>
+<td>3</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>To exclude <code>NULL</code> values when counting the rows in each group, we explicitly call <code>COUNT</code> on a column in the table. This is similar to calling <code>.groupby().count()</code> in <code>pandas</code>.</p>
+<div class="cell" data-execution_count="23">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>SELECT year, COUNT(cute)</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>GROUP BY year</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * sqlite:///data/basic_examples.db
+Done.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="23">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">year</th>
+<th data-quarto-table-cell-role="th">COUNT(cute)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2010</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td>2011</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td>2019</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>With this definition of <code>GROUP BY</code> in hand, let’s update our SQL order of operations. Remember: <em>every</em> SQL query must list clauses in this order.</p>
+<pre><code>SELECT &lt;column expression list&gt;
+FROM &lt;table&gt;
+[WHERE &lt;predicate&gt;]
+[GROUP BY &lt;column list&gt;]
+[ORDER BY &lt;column list&gt;]
+[LIMIT &lt;number of rows&gt;]
+[OFFSET &lt;number of rows&gt;];</code></pre>
+<p>Note that we can use the <code>AS</code> keyword to rename columns during the selection process and that column expressions may include aggregation functions (<code>MAX</code>, <code>MIN</code>, etc.).</p>
+
+
+<!-- -->
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation column-body">
+  <div class="nav-page nav-page-previous">
+      <a href="../inference_causality/inference_causality.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Bias, Variance, and Inference</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb49" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> SQL I</span></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a><span class="an">execute:</span></span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a><span class="co">  echo: true</span></span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a><span class="co">    code-fold: false</span></span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools: true</span></span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a><span class="co">    toc: true</span></span>
+<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a><span class="co">    toc-title: SQL I</span></span>
+<span id="cb49-11"><a href="#cb49-11" aria-hidden="true" tabindex="-1"></a><span class="co">    page-layout: full</span></span>
+<span id="cb49-12"><a href="#cb49-12" aria-hidden="true" tabindex="-1"></a><span class="co">    theme:</span></span>
+<span id="cb49-13"><a href="#cb49-13" aria-hidden="true" tabindex="-1"></a><span class="co">      - cosmo</span></span>
+<span id="cb49-14"><a href="#cb49-14" aria-hidden="true" tabindex="-1"></a><span class="co">      - cerulean</span></span>
+<span id="cb49-15"><a href="#cb49-15" aria-hidden="true" tabindex="-1"></a><span class="co">    callout-icon: false</span></span>
+<span id="cb49-16"><a href="#cb49-16" aria-hidden="true" tabindex="-1"></a><span class="an">jupyter:</span><span class="co"> python3</span></span>
+<span id="cb49-17"><a href="#cb49-17" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb49-18"><a href="#cb49-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-19"><a href="#cb49-19" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="false"}</span>
+<span id="cb49-20"><a href="#cb49-20" aria-hidden="true" tabindex="-1"></a><span class="fu">## Learning Outcomes</span></span>
+<span id="cb49-21"><a href="#cb49-21" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Identify situations where a database may be preferred over a CSV file</span>
+<span id="cb49-22"><a href="#cb49-22" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Write basic SQL queries using <span class="in">`SELECT`</span>, <span class="in">`FROM`</span>, <span class="in">`WHERE`</span>, <span class="in">`ORDER BY`</span>, <span class="in">`LIMIT`</span>, and <span class="in">`OFFSET`</span></span>
+<span id="cb49-23"><a href="#cb49-23" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Perform aggregations using <span class="in">`GROUP BY`</span></span>
+<span id="cb49-24"><a href="#cb49-24" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb49-25"><a href="#cb49-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-26"><a href="#cb49-26" aria-hidden="true" tabindex="-1"></a>So far in the course, we have made our way through the entire data science lifecycle: we learned how to load and explore a dataset, formulate questions, and use the tools of prediction and inference to come up with answers. For the remaining weeks of the semester, we are going to make a second pass through the lifecycle, this time doing so with a different set of tools, ideas, and abstractions. </span>
+<span id="cb49-27"><a href="#cb49-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-28"><a href="#cb49-28" aria-hidden="true" tabindex="-1"></a><span class="fu">## Databases</span></span>
+<span id="cb49-29"><a href="#cb49-29" aria-hidden="true" tabindex="-1"></a>With this goal in mind, let's go back to the very beginning of the lifecycle. We first started our work in data analysis by looking at the <span class="in">`pandas`</span> library, which offered us powerful tools to manipulate tabular data stored in (primarily) CSV files. CSVs work well when analyzing relatively small datasets that don't need to be shared across many users. In research and industry, however, data scientists often need to access enormous bodies of data that cannot be easily stored in a CSV format. Collaborating with others when working with CSVs can also be tricky – a real-world data scientist may run into problems when multiple users try to make modifications, or, even worse, security issues with who should and should not have access to the data. </span>
+<span id="cb49-30"><a href="#cb49-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-31"><a href="#cb49-31" aria-hidden="true" tabindex="-1"></a>A **database** is a large, organized collection of data. Databases are administered by **Database Management Systems (DBMS)**, which are software systems that store, manage, and facilitate access to one or more databases. Databases help mitigate many of the issues that come with using CSVs for data storage: they provide reliable storage that can survive system crashes or disk failures, are optimized to compute on data that does not fit into memory, and contain special data structures to improve performance. Using databases rather than CSVs offers further benefits from the standpoint of data management. A DBMS can apply settings that configure how data is organized, block certain data anomalies (for example, enforcing non-negative weights or ages), and determine who is allowed access to the data. It can also ensure safe concurrent operations where multiple users reading and writing to the database will not lead to fatal errors.</span>
+<span id="cb49-32"><a href="#cb49-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-33"><a href="#cb49-33" aria-hidden="true" tabindex="-1"></a>As you may have guessed, we can't use our usual <span class="in">`pandas`</span> methods to work with data in a database. Instead, we'll turn to Structured Query Language.</span>
+<span id="cb49-34"><a href="#cb49-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-35"><a href="#cb49-35" aria-hidden="true" tabindex="-1"></a><span class="fu">## Structured Query Language and Database Schema</span></span>
+<span id="cb49-36"><a href="#cb49-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-37"><a href="#cb49-37" aria-hidden="true" tabindex="-1"></a>**Structured Query Language**, or **SQL** (commonly pronounced "sequel," though this is the subject of [fierce debate](https://patorjk.com/blog/2012/01/26/pronouncing-sql-s-q-l-or-sequel/)), is a special programming language designed to communicate with databases. You may have encountered it in classes like CS 61A or Data C88C before. Unlike Python, it is a **declarative programming language** – this means that rather than writing the exact logic needed to complete a task, a piece of SQL code "declares" what the desired final output should be and leaves the program to determine what logic should be implemented. </span>
+<span id="cb49-38"><a href="#cb49-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-39"><a href="#cb49-39" aria-hidden="true" tabindex="-1"></a>It is important to reiterate that SQL is an entirely different language from Python. However, Python *does* have special engines that allow us to run SQL code in a Jupyter notebook. While this is typically not how SQL is used outside of an educational setting, we will be using this workflow to illustrate how SQL queries are constructed using the tools we've already worked with this semester. You will learn more about how to run SQL queries in Jupyter in Lab 10.</span>
+<span id="cb49-40"><a href="#cb49-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-41"><a href="#cb49-41" aria-hidden="true" tabindex="-1"></a>The syntax below will seem unfamiliar to you; for now, just focus on understanding the output displayed. We will clarify the SQL code in a bit.</span>
+<span id="cb49-42"><a href="#cb49-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-43"><a href="#cb49-43" aria-hidden="true" tabindex="-1"></a>To start, we'll look at a database called <span class="in">`basic_examples.db`</span>.</span>
+<span id="cb49-44"><a href="#cb49-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-47"><a href="#cb49-47" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb49-48"><a href="#cb49-48" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the SQL Alchemy Python library</span></span>
+<span id="cb49-49"><a href="#cb49-49" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sqlalchemy</span>
+<span id="cb49-50"><a href="#cb49-50" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb49-51"><a href="#cb49-51" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb49-52"><a href="#cb49-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-55"><a href="#cb49-55" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb49-56"><a href="#cb49-56" aria-hidden="true" tabindex="-1"></a><span class="co"># load %%sql cell magic</span></span>
+<span id="cb49-57"><a href="#cb49-57" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>load_ext sql</span>
+<span id="cb49-58"><a href="#cb49-58" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb49-59"><a href="#cb49-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-60"><a href="#cb49-60" aria-hidden="true" tabindex="-1"></a>Connect to the SQLite database basic_examples.db</span>
+<span id="cb49-61"><a href="#cb49-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-64"><a href="#cb49-64" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb49-65"><a href="#cb49-65" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb49-66"><a href="#cb49-66" aria-hidden="true" tabindex="-1"></a>sqlite:<span class="op">///</span>data<span class="op">/</span>basic_examples.db </span>
+<span id="cb49-67"><a href="#cb49-67" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb49-68"><a href="#cb49-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-71"><a href="#cb49-71" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb49-72"><a href="#cb49-72" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb49-73"><a href="#cb49-73" aria-hidden="true" tabindex="-1"></a>SELECT <span class="op">*</span> </span>
+<span id="cb49-74"><a href="#cb49-74" aria-hidden="true" tabindex="-1"></a>FROM sqlite_master</span>
+<span id="cb49-75"><a href="#cb49-75" aria-hidden="true" tabindex="-1"></a>WHERE <span class="bu">type</span><span class="op">=</span><span class="st">"table"</span></span>
+<span id="cb49-76"><a href="#cb49-76" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb49-77"><a href="#cb49-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-78"><a href="#cb49-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-79"><a href="#cb49-79" aria-hidden="true" tabindex="-1"></a>The summary above displays information about the database. The database contains four tables, named <span class="in">`sqlite_sequence`</span>, <span class="in">`Dragon`</span>, <span class="in">`Dish`</span>, and <span class="in">`Scene`</span>. The rightmost column above lists the command that was used to construct each table. </span>
+<span id="cb49-80"><a href="#cb49-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-81"><a href="#cb49-81" aria-hidden="true" tabindex="-1"></a>Let's look more closely at the command used to create the <span class="in">`Dragon`</span> table (the second entry above). </span>
+<span id="cb49-82"><a href="#cb49-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-83"><a href="#cb49-83" aria-hidden="true" tabindex="-1"></a><span class="in">    CREATE TABLE Dragon (name TEXT PRIMARY KEY,</span></span>
+<span id="cb49-84"><a href="#cb49-84" aria-hidden="true" tabindex="-1"></a><span class="in">                         year INTEGER CHECK (year &gt;= 2000),</span></span>
+<span id="cb49-85"><a href="#cb49-85" aria-hidden="true" tabindex="-1"></a><span class="in">                         cute INTEGER)</span></span>
+<span id="cb49-86"><a href="#cb49-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-87"><a href="#cb49-87" aria-hidden="true" tabindex="-1"></a>The statement <span class="in">`CREATE TABLE`</span> is used to specify the **schema** of the table – a description of what logic is used to organize the table. Schema follow a set format:</span>
+<span id="cb49-88"><a href="#cb49-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-89"><a href="#cb49-89" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span><span class="in">`ColName`</span>: the name of a column</span>
+<span id="cb49-90"><a href="#cb49-90" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span><span class="in">`DataType`</span>: the type of data to be stored in a column. Some of the most common SQL data types are <span class="in">`INT`</span> (integers), <span class="in">`FLOAT`</span> (floating point numbers), <span class="in">`TEXT`</span> (strings), <span class="in">`BLOB`</span> (arbitrary data, such as audio/video files), and <span class="in">`DATETIME`</span> (a date and time).</span>
+<span id="cb49-91"><a href="#cb49-91" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span><span class="in">`Constraint`</span>: some restriction on the data to be stored in the column. Common constraints are <span class="in">`CHECK`</span> (data must obey a certain condition), <span class="in">`PRIMARY KEY`</span> (designate a column as the table's primary key), <span class="in">`NOT NULL`</span> (data cannot be null), and <span class="in">`DEFAULT`</span> (a default fill value if no specific entry is given).</span>
+<span id="cb49-92"><a href="#cb49-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-93"><a href="#cb49-93" aria-hidden="true" tabindex="-1"></a>We see that <span class="in">`Dragon`</span> contains five columns. The first of these, <span class="in">`"name"`</span>, contains text data. It is designated as the **primary key** of the table; that is, the data contained in <span class="in">`"name"`</span> uniquely identifies each entry in the table. Because <span class="in">`"name"`</span> is the primary key of the table, no two entries in the table can have the same name – a given value of <span class="in">`"name"`</span> is unique to each dragon. The <span class="in">`"year"`</span> column contains integer data, with the constraint that year values must be greater than or equal to 2000. The final column, <span class="in">`"cute"`</span>, contains integer data with no restrictions on allowable values. </span>
+<span id="cb49-94"><a href="#cb49-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-95"><a href="#cb49-95" aria-hidden="true" tabindex="-1"></a>We can verify this by viewing <span class="in">`Dragon`</span> itself.</span>
+<span id="cb49-96"><a href="#cb49-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-99"><a href="#cb49-99" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb49-100"><a href="#cb49-100" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb49-101"><a href="#cb49-101" aria-hidden="true" tabindex="-1"></a>SELECT <span class="op">*</span></span>
+<span id="cb49-102"><a href="#cb49-102" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span>
+<span id="cb49-103"><a href="#cb49-103" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb49-104"><a href="#cb49-104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-105"><a href="#cb49-105" aria-hidden="true" tabindex="-1"></a>Database tables (also referred to as **relations**) are structured much like `DataFrame`s in `pandas`. Each row, sometimes called a **tuple**, represents a single record in the dataset. Each column, sometimes called an **attribute** or **field**, describes some feature of the record. </span>
+<span id="cb49-106"><a href="#cb49-106" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-107"><a href="#cb49-107" aria-hidden="true" tabindex="-1"></a><span class="fu">## `SELECT`ing From Tables</span></span>
+<span id="cb49-108"><a href="#cb49-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-109"><a href="#cb49-109" aria-hidden="true" tabindex="-1"></a>To extract and manipulate data stored in a SQL table, we will need to familiarize ourselves with the syntax to write pieces of SQL code, which we call **queries**. </span>
+<span id="cb49-110"><a href="#cb49-110" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-111"><a href="#cb49-111" aria-hidden="true" tabindex="-1"></a>The basic unit of a SQL query is the <span class="in">`SELECT`</span> statement. <span class="in">`SELECT`</span> specifies what columns we would like to extract from a given table. We use <span class="in">`FROM`</span> to tell SQL the table from which we want to <span class="in">`SELECT`</span> our data. </span>
+<span id="cb49-112"><a href="#cb49-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-115"><a href="#cb49-115" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb49-116"><a href="#cb49-116" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb49-117"><a href="#cb49-117" aria-hidden="true" tabindex="-1"></a>SELECT <span class="op">*</span></span>
+<span id="cb49-118"><a href="#cb49-118" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span>
+<span id="cb49-119"><a href="#cb49-119" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb49-120"><a href="#cb49-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-121"><a href="#cb49-121" aria-hidden="true" tabindex="-1"></a>In SQL, <span class="in">`*`</span> means "everything." The query above grabs *all* the columns in <span class="in">`Dragon`</span> and displays them in the outputted table. We can also specify a specific subset of columns to be <span class="in">`SELECT`</span>ed. Notice that the outputted columns appear in the order that they were <span class="in">`SELECT`</span>ed.</span>
+<span id="cb49-122"><a href="#cb49-122" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-125"><a href="#cb49-125" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb49-126"><a href="#cb49-126" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb49-127"><a href="#cb49-127" aria-hidden="true" tabindex="-1"></a>SELECT cute, year</span>
+<span id="cb49-128"><a href="#cb49-128" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span>
+<span id="cb49-129"><a href="#cb49-129" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb49-130"><a href="#cb49-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-131"><a href="#cb49-131" aria-hidden="true" tabindex="-1"></a>And just like that, we've already written two SQL queries. There are a few points of note in the queries above. Firstly, notice that every "verb" is written in uppercase. It is convention to write SQL operations in capital letters, but your code will run just fine even if you choose to keep things in lowercase. Second, the query above separates each statement with a new line. SQL queries are not impacted by whitespace within the query; this means that SQL code is typically written with a new line after each statement to make things more readable. The semicolon (<span class="in">`;`</span>) indicates the end of a query. There are some "flavors" of SQL in which a query will not run if no semicolon is present; however, in Data 100, the SQL version we will use works with or without an ending semicolon. Queries in these notes will end with semicolons to build up good habits.</span>
+<span id="cb49-132"><a href="#cb49-132" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-133"><a href="#cb49-133" aria-hidden="true" tabindex="-1"></a>The <span class="in">`AS`</span> keyword allows us to give a column a new name (called an **alias**) after it has been <span class="in">`SELECT`</span>ed. The general syntax is:</span>
+<span id="cb49-134"><a href="#cb49-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-135"><a href="#cb49-135" aria-hidden="true" tabindex="-1"></a><span class="in">    SELECT column_name_in_database_table AS new_name_in_output_table</span></span>
+<span id="cb49-136"><a href="#cb49-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-139"><a href="#cb49-139" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb49-140"><a href="#cb49-140" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb49-141"><a href="#cb49-141" aria-hidden="true" tabindex="-1"></a>SELECT cute AS cuteness, year AS birth</span>
+<span id="cb49-142"><a href="#cb49-142" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span>
+<span id="cb49-143"><a href="#cb49-143" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb49-144"><a href="#cb49-144" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-145"><a href="#cb49-145" aria-hidden="true" tabindex="-1"></a>To <span class="in">`SELECT`</span> only the *unique* values in a column, we use the <span class="in">`DISTINCT`</span> keyword. This will cause any any duplicate entries in a column to be removed. If we want to find only the unique years in <span class="in">`Dragon`</span>, without any repeats, we would write:</span>
+<span id="cb49-146"><a href="#cb49-146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-149"><a href="#cb49-149" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb49-150"><a href="#cb49-150" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb49-151"><a href="#cb49-151" aria-hidden="true" tabindex="-1"></a>SELECT DISTINCT year</span>
+<span id="cb49-152"><a href="#cb49-152" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span>
+<span id="cb49-153"><a href="#cb49-153" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb49-154"><a href="#cb49-154" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-155"><a href="#cb49-155" aria-hidden="true" tabindex="-1"></a>**Every** SQL query must include both a <span class="in">`SELECT`</span> and <span class="in">`FROM`</span> statement. Intuitively, this makes sense – we know that we'll want to extract some piece of information from the table; to do so, we also need to indicate what table we want to consider. </span>
+<span id="cb49-156"><a href="#cb49-156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-157"><a href="#cb49-157" aria-hidden="true" tabindex="-1"></a>It is important to note that SQL enforces a strict "order of operations" – SQL clauses must *always* follow the same sequence. For example, the <span class="in">`SELECT`</span> statement must always precede <span class="in">`FROM`</span>. This means that any SQL query will follow the same structure. </span>
+<span id="cb49-158"><a href="#cb49-158" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-159"><a href="#cb49-159" aria-hidden="true" tabindex="-1"></a><span class="in">    SELECT &lt;column list&gt;</span></span>
+<span id="cb49-160"><a href="#cb49-160" aria-hidden="true" tabindex="-1"></a><span class="in">    FROM &lt;table&gt;</span></span>
+<span id="cb49-161"><a href="#cb49-161" aria-hidden="true" tabindex="-1"></a><span class="in">    [additional clauses]</span></span>
+<span id="cb49-162"><a href="#cb49-162" aria-hidden="true" tabindex="-1"></a><span class="in">    </span></span>
+<span id="cb49-163"><a href="#cb49-163" aria-hidden="true" tabindex="-1"></a>The additional clauses that we use depend on the specific task trying to be achieved. We may refine our query to filter on a certain condition, aggregate a particular column, or join several tables together. We will spend the rest of this lecture outlining some useful clauses to build up our understanding of the order of operations.</span>
+<span id="cb49-164"><a href="#cb49-164" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-165"><a href="#cb49-165" aria-hidden="true" tabindex="-1"></a><span class="fu">## Applying `WHERE` Conditions</span></span>
+<span id="cb49-166"><a href="#cb49-166" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-167"><a href="#cb49-167" aria-hidden="true" tabindex="-1"></a>The <span class="in">`WHERE`</span> keyword is used to select only some rows of a table, filtered on a given Boolean condition. </span>
+<span id="cb49-168"><a href="#cb49-168" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-171"><a href="#cb49-171" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb49-172"><a href="#cb49-172" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb49-173"><a href="#cb49-173" aria-hidden="true" tabindex="-1"></a>SELECT name, year</span>
+<span id="cb49-174"><a href="#cb49-174" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span>
+<span id="cb49-175"><a href="#cb49-175" aria-hidden="true" tabindex="-1"></a>WHERE cute <span class="op">&gt;</span> <span class="dv">0</span></span>
+<span id="cb49-176"><a href="#cb49-176" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb49-177"><a href="#cb49-177" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-178"><a href="#cb49-178" aria-hidden="true" tabindex="-1"></a>We can add complexity to the <span class="in">`WHERE`</span> condition using the keywords <span class="in">`AND`</span>, <span class="in">`OR`</span>, and <span class="in">`NOT`</span>, much like we would in Python.</span>
+<span id="cb49-179"><a href="#cb49-179" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-182"><a href="#cb49-182" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb49-183"><a href="#cb49-183" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb49-184"><a href="#cb49-184" aria-hidden="true" tabindex="-1"></a>SELECT name, year</span>
+<span id="cb49-185"><a href="#cb49-185" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span>
+<span id="cb49-186"><a href="#cb49-186" aria-hidden="true" tabindex="-1"></a>WHERE cute <span class="op">&gt;</span> <span class="dv">0</span> OR year <span class="op">&gt;</span> <span class="dv">2013</span></span>
+<span id="cb49-187"><a href="#cb49-187" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb49-188"><a href="#cb49-188" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-189"><a href="#cb49-189" aria-hidden="true" tabindex="-1"></a>To spare ourselves needing to write complicated logical expressions by combining several conditions, we can also filter for entries that are <span class="in">`IN`</span> a specified list of values. This is similar to the use of <span class="in">`in`</span> or <span class="in">`.isin`</span> in Python.</span>
+<span id="cb49-190"><a href="#cb49-190" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-193"><a href="#cb49-193" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb49-194"><a href="#cb49-194" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb49-195"><a href="#cb49-195" aria-hidden="true" tabindex="-1"></a>SELECT name, year</span>
+<span id="cb49-196"><a href="#cb49-196" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span>
+<span id="cb49-197"><a href="#cb49-197" aria-hidden="true" tabindex="-1"></a>WHERE name IN (<span class="st">"hiccup"</span>, <span class="st">"puff"</span>)</span>
+<span id="cb49-198"><a href="#cb49-198" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb49-199"><a href="#cb49-199" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-200"><a href="#cb49-200" aria-hidden="true" tabindex="-1"></a>You may have noticed earlier that our table actually has a missing value. In SQL, missing data is given the special value <span class="in">`NULL`</span>. <span class="in">`NULL`</span> behaves in a fundamentally different way to other data types. We can't use the typical operators (=, &gt;, and &lt;) on <span class="in">`NULL`</span> values (in fact, <span class="in">`NULL == NULL`</span> returns <span class="in">`False`</span>!); instead, we check to see if a value <span class="in">`IS`</span> or <span class="in">`IS NOT`</span> <span class="in">`NULL`</span>.</span>
+<span id="cb49-201"><a href="#cb49-201" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-204"><a href="#cb49-204" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb49-205"><a href="#cb49-205" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb49-206"><a href="#cb49-206" aria-hidden="true" tabindex="-1"></a>SELECT <span class="op">*</span></span>
+<span id="cb49-207"><a href="#cb49-207" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span>
+<span id="cb49-208"><a href="#cb49-208" aria-hidden="true" tabindex="-1"></a>WHERE cute IS NOT NULL</span>
+<span id="cb49-209"><a href="#cb49-209" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb49-210"><a href="#cb49-210" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-211"><a href="#cb49-211" aria-hidden="true" tabindex="-1"></a><span class="fu">## Sorting and Restricting Output</span></span>
+<span id="cb49-212"><a href="#cb49-212" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb49-213"><a href="#cb49-213" aria-hidden="true" tabindex="-1"></a>What if we want the output table to appear in a certain order? The <span class="in">`ORDER BY`</span> keyword behaves similarly to <span class="in">`.sort_values()`</span> in <span class="in">`pandas`</span>. </span>
+<span id="cb49-214"><a href="#cb49-214" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-217"><a href="#cb49-217" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb49-218"><a href="#cb49-218" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb49-219"><a href="#cb49-219" aria-hidden="true" tabindex="-1"></a>SELECT <span class="op">*</span></span>
+<span id="cb49-220"><a href="#cb49-220" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span>
+<span id="cb49-221"><a href="#cb49-221" aria-hidden="true" tabindex="-1"></a>ORDER BY cute</span>
+<span id="cb49-222"><a href="#cb49-222" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb49-223"><a href="#cb49-223" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-224"><a href="#cb49-224" aria-hidden="true" tabindex="-1"></a>By default, <span class="in">`ORDER BY`</span> will display results in ascending order (with the lowest values at the top of the table). To sort in descending order, we use the <span class="in">`DESC`</span> keyword after specifying the column to be used for ordering.</span>
+<span id="cb49-225"><a href="#cb49-225" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-228"><a href="#cb49-228" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb49-229"><a href="#cb49-229" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb49-230"><a href="#cb49-230" aria-hidden="true" tabindex="-1"></a>SELECT <span class="op">*</span></span>
+<span id="cb49-231"><a href="#cb49-231" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span>
+<span id="cb49-232"><a href="#cb49-232" aria-hidden="true" tabindex="-1"></a>ORDER BY cute DESC</span>
+<span id="cb49-233"><a href="#cb49-233" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb49-234"><a href="#cb49-234" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-235"><a href="#cb49-235" aria-hidden="true" tabindex="-1"></a>We can also tell SQL to <span class="in">`ORDER BY`</span> two columns at once. This will sort the table by the first listed column, then use the values in the second listed column to break any ties.</span>
+<span id="cb49-236"><a href="#cb49-236" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-239"><a href="#cb49-239" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb49-240"><a href="#cb49-240" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb49-241"><a href="#cb49-241" aria-hidden="true" tabindex="-1"></a>SELECT <span class="op">*</span></span>
+<span id="cb49-242"><a href="#cb49-242" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span>
+<span id="cb49-243"><a href="#cb49-243" aria-hidden="true" tabindex="-1"></a>ORDER BY name, cute</span>
+<span id="cb49-244"><a href="#cb49-244" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb49-245"><a href="#cb49-245" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-246"><a href="#cb49-246" aria-hidden="true" tabindex="-1"></a>In many instances, we are only concerned with a certain number of rows in the output table (for example, wanting to find the first two dragons in the table). The <span class="in">`LIMIT`</span> keyword restricts the output to a specified number of rows. It serves a function similar to that of <span class="in">`.head()`</span> in <span class="in">`pandas`</span>.</span>
+<span id="cb49-247"><a href="#cb49-247" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-250"><a href="#cb49-250" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb49-251"><a href="#cb49-251" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb49-252"><a href="#cb49-252" aria-hidden="true" tabindex="-1"></a>SELECT <span class="op">*</span></span>
+<span id="cb49-253"><a href="#cb49-253" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span>
+<span id="cb49-254"><a href="#cb49-254" aria-hidden="true" tabindex="-1"></a>LIMIT <span class="dv">2</span></span>
+<span id="cb49-255"><a href="#cb49-255" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb49-256"><a href="#cb49-256" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-257"><a href="#cb49-257" aria-hidden="true" tabindex="-1"></a>The <span class="in">`OFFSET`</span> keyword indicates the index at which <span class="in">`LIMIT`</span> should start. In other words, we can use <span class="in">`OFFSET`</span> to shift where the <span class="in">`LIMIT`</span>ing begins by a specified number of rows. For example, we might care about the dragons that are at positions #2 and #3 in the table. </span>
+<span id="cb49-258"><a href="#cb49-258" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-261"><a href="#cb49-261" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb49-262"><a href="#cb49-262" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb49-263"><a href="#cb49-263" aria-hidden="true" tabindex="-1"></a>SELECT <span class="op">*</span></span>
+<span id="cb49-264"><a href="#cb49-264" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span>
+<span id="cb49-265"><a href="#cb49-265" aria-hidden="true" tabindex="-1"></a>LIMIT <span class="dv">2</span></span>
+<span id="cb49-266"><a href="#cb49-266" aria-hidden="true" tabindex="-1"></a>OFFSET <span class="dv">1</span></span>
+<span id="cb49-267"><a href="#cb49-267" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb49-268"><a href="#cb49-268" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-269"><a href="#cb49-269" aria-hidden="true" tabindex="-1"></a>Let's summarize what we've learned so far. We know that <span class="in">`SELECT`</span> and <span class="in">`FROM`</span> are the fundamental building blocks of any SQL query. We can augment these two keywords with additional clauses to refine the data in our output table. </span>
+<span id="cb49-270"><a href="#cb49-270" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-271"><a href="#cb49-271" aria-hidden="true" tabindex="-1"></a>Any clauses that we include must follow a strict ordering within the query:</span>
+<span id="cb49-272"><a href="#cb49-272" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-273"><a href="#cb49-273" aria-hidden="true" tabindex="-1"></a><span class="in">    SELECT &lt;column list&gt;</span></span>
+<span id="cb49-274"><a href="#cb49-274" aria-hidden="true" tabindex="-1"></a><span class="in">    FROM &lt;table&gt;</span></span>
+<span id="cb49-275"><a href="#cb49-275" aria-hidden="true" tabindex="-1"></a><span class="in">    [WHERE &lt;predicate&gt;]</span></span>
+<span id="cb49-276"><a href="#cb49-276" aria-hidden="true" tabindex="-1"></a><span class="in">    [ORDER BY &lt;column list&gt;]</span></span>
+<span id="cb49-277"><a href="#cb49-277" aria-hidden="true" tabindex="-1"></a><span class="in">    [LIMIT &lt;number of rows&gt;]</span></span>
+<span id="cb49-278"><a href="#cb49-278" aria-hidden="true" tabindex="-1"></a><span class="in">    [OFFSET &lt;number of rows&gt;]</span></span>
+<span id="cb49-279"><a href="#cb49-279" aria-hidden="true" tabindex="-1"></a><span class="in">    </span></span>
+<span id="cb49-280"><a href="#cb49-280" aria-hidden="true" tabindex="-1"></a>Here, any clause contained in square brackets <span class="in">`[ ]`</span> is optional – we only need to use the keyword if it is relevant to the table operation we want to perform. Also note that by convention, we use all caps for keywords in SQL statements and use newlines to make code more readable.</span>
+<span id="cb49-281"><a href="#cb49-281" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-282"><a href="#cb49-282" aria-hidden="true" tabindex="-1"></a><span class="fu">## Aggregating with `GROUP BY`</span></span>
+<span id="cb49-283"><a href="#cb49-283" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-284"><a href="#cb49-284" aria-hidden="true" tabindex="-1"></a>At this point, we've seen that SQL offers much of the same functionality that was given to us by <span class="in">`pandas`</span>. We can extract data from a table, filter it, and reorder it to suit our needs.</span>
+<span id="cb49-285"><a href="#cb49-285" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-286"><a href="#cb49-286" aria-hidden="true" tabindex="-1"></a>In <span class="in">`pandas`</span>, much of our analysis work relied heavily on being able to use <span class="in">`.groupby()`</span> to aggregate across the rows of our dataset. SQL's answer to this task is the (very conveniently named) <span class="in">`GROUP BY`</span> clause. While the outputs of <span class="in">`GROUP BY`</span> are similar to those of <span class="in">`.groupby()`</span> – in both cases, we obtain an output table where some column has been used for grouping – the syntax and logic used to group data in SQL are fairly different to the <span class="in">`pandas`</span> implementation.</span>
+<span id="cb49-287"><a href="#cb49-287" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-288"><a href="#cb49-288" aria-hidden="true" tabindex="-1"></a>To illustrate <span class="in">`GROUP BY`</span>, we will consider the <span class="in">`Dish`</span> table from the <span class="in">`basic_examples.db`</span> database.</span>
+<span id="cb49-289"><a href="#cb49-289" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-292"><a href="#cb49-292" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb49-293"><a href="#cb49-293" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb49-294"><a href="#cb49-294" aria-hidden="true" tabindex="-1"></a>SELECT <span class="op">*</span> </span>
+<span id="cb49-295"><a href="#cb49-295" aria-hidden="true" tabindex="-1"></a>FROM Dish</span>
+<span id="cb49-296"><a href="#cb49-296" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb49-297"><a href="#cb49-297" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-298"><a href="#cb49-298" aria-hidden="true" tabindex="-1"></a>Say we wanted to find the total costs of dishes of a certain <span class="in">`type`</span>. To accomplish this, we would write the following code.</span>
+<span id="cb49-299"><a href="#cb49-299" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-302"><a href="#cb49-302" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb49-303"><a href="#cb49-303" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb49-304"><a href="#cb49-304" aria-hidden="true" tabindex="-1"></a>SELECT <span class="bu">type</span>, SUM(cost)</span>
+<span id="cb49-305"><a href="#cb49-305" aria-hidden="true" tabindex="-1"></a>FROM Dish</span>
+<span id="cb49-306"><a href="#cb49-306" aria-hidden="true" tabindex="-1"></a>GROUP BY <span class="bu">type</span></span>
+<span id="cb49-307"><a href="#cb49-307" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb49-308"><a href="#cb49-308" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-309"><a href="#cb49-309" aria-hidden="true" tabindex="-1"></a>What is going on here? The statement <span class="in">`GROUP BY type`</span> tells SQL to group the data based on the value contained in the <span class="in">`type`</span> column (whether a record is an appetizer, entree, or dessert). <span class="in">`SUM(cost)`</span> sums up the costs of dishes in each <span class="in">`type`</span> and displays the result in the output table.</span>
+<span id="cb49-310"><a href="#cb49-310" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-311"><a href="#cb49-311" aria-hidden="true" tabindex="-1"></a>You may be wondering: why does <span class="in">`SUM(cost)`</span> come before the command to <span class="in">`GROUP BY type`</span>? Don't we need to form groups before we can count the number of entries in each?</span>
+<span id="cb49-312"><a href="#cb49-312" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-313"><a href="#cb49-313" aria-hidden="true" tabindex="-1"></a>Remember that SQL is a *declarative* programming language – a SQL programmer simply states what end result they would like to see, and leaves the task of figuring out *how* to obtain this result to SQL itself. This means that SQL queries sometimes don't follow what a reader sees as a "logical" sequence of thought. Instead, SQL requires that we follow its set order of operations when constructing queries. So long as we follow this ordering, SQL will handle the underlying logic.</span>
+<span id="cb49-314"><a href="#cb49-314" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-315"><a href="#cb49-315" aria-hidden="true" tabindex="-1"></a>In practical terms: our goal with this query was to output the total <span class="in">`cost`</span>s of each <span class="in">`type`</span>. To communicate this to SQL, we say that we want to <span class="in">`SELECT`</span> the <span class="in">`SUM`</span>med <span class="in">`cost`</span> values for each <span class="in">`type`</span> group. </span>
+<span id="cb49-316"><a href="#cb49-316" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-317"><a href="#cb49-317" aria-hidden="true" tabindex="-1"></a>There are many aggregation functions that can be used to aggregate the data contained in each group. Some common examples are:</span>
+<span id="cb49-318"><a href="#cb49-318" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-319"><a href="#cb49-319" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span><span class="in">`COUNT`</span>: count the number of rows associated with each group</span>
+<span id="cb49-320"><a href="#cb49-320" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span><span class="in">`MIN`</span>: find the minimum value of each group</span>
+<span id="cb49-321"><a href="#cb49-321" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span><span class="in">`MAX`</span>: find the maximum value of each group</span>
+<span id="cb49-322"><a href="#cb49-322" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span><span class="in">`SUM`</span>: sum across all records in each group</span>
+<span id="cb49-323"><a href="#cb49-323" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span><span class="in">`AVG`</span>: find the average value of each group</span>
+<span id="cb49-324"><a href="#cb49-324" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-325"><a href="#cb49-325" aria-hidden="true" tabindex="-1"></a>We can easily compute multiple aggregations, all at once (a task that was very tricky in <span class="in">`pandas`</span>).</span>
+<span id="cb49-326"><a href="#cb49-326" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-329"><a href="#cb49-329" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb49-330"><a href="#cb49-330" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb49-331"><a href="#cb49-331" aria-hidden="true" tabindex="-1"></a>SELECT <span class="bu">type</span>, SUM(cost), MIN(cost), MAX(name)</span>
+<span id="cb49-332"><a href="#cb49-332" aria-hidden="true" tabindex="-1"></a>FROM Dish</span>
+<span id="cb49-333"><a href="#cb49-333" aria-hidden="true" tabindex="-1"></a>GROUP BY <span class="bu">type</span></span>
+<span id="cb49-334"><a href="#cb49-334" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb49-335"><a href="#cb49-335" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-336"><a href="#cb49-336" aria-hidden="true" tabindex="-1"></a>To count the number of rows associated with each group, we use the <span class="in">`COUNT`</span> keyword. Calling <span class="in">`COUNT(*)`</span> will compute the total number of rows in each group, including rows with null values. Its <span class="in">`pandas`</span> equivalent is <span class="in">`.groupby().size()`</span>.</span>
+<span id="cb49-337"><a href="#cb49-337" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-340"><a href="#cb49-340" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb49-341"><a href="#cb49-341" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb49-342"><a href="#cb49-342" aria-hidden="true" tabindex="-1"></a>SELECT <span class="bu">type</span>, COUNT(<span class="op">*</span>)</span>
+<span id="cb49-343"><a href="#cb49-343" aria-hidden="true" tabindex="-1"></a>FROM Dish</span>
+<span id="cb49-344"><a href="#cb49-344" aria-hidden="true" tabindex="-1"></a>GROUP BY <span class="bu">type</span></span>
+<span id="cb49-345"><a href="#cb49-345" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb49-346"><a href="#cb49-346" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-347"><a href="#cb49-347" aria-hidden="true" tabindex="-1"></a>To exclude <span class="in">`NULL`</span> values when counting the rows in each group, we explicitly call <span class="in">`COUNT`</span> on a column in the table. This is similar to calling <span class="in">`.groupby().count()`</span> in <span class="in">`pandas`</span>.</span>
+<span id="cb49-348"><a href="#cb49-348" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-351"><a href="#cb49-351" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb49-352"><a href="#cb49-352" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb49-353"><a href="#cb49-353" aria-hidden="true" tabindex="-1"></a>SELECT year, COUNT(cute)</span>
+<span id="cb49-354"><a href="#cb49-354" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span>
+<span id="cb49-355"><a href="#cb49-355" aria-hidden="true" tabindex="-1"></a>GROUP BY year</span>
+<span id="cb49-356"><a href="#cb49-356" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb49-357"><a href="#cb49-357" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-358"><a href="#cb49-358" aria-hidden="true" tabindex="-1"></a>With this definition of <span class="in">`GROUP BY`</span> in hand, let's update our SQL order of operations. Remember: *every* SQL query must list clauses in this order. </span>
+<span id="cb49-359"><a href="#cb49-359" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-360"><a href="#cb49-360" aria-hidden="true" tabindex="-1"></a><span class="in">    SELECT &lt;column expression list&gt;</span></span>
+<span id="cb49-361"><a href="#cb49-361" aria-hidden="true" tabindex="-1"></a><span class="in">    FROM &lt;table&gt;</span></span>
+<span id="cb49-362"><a href="#cb49-362" aria-hidden="true" tabindex="-1"></a><span class="in">    [WHERE &lt;predicate&gt;]</span></span>
+<span id="cb49-363"><a href="#cb49-363" aria-hidden="true" tabindex="-1"></a><span class="in">    [GROUP BY &lt;column list&gt;]</span></span>
+<span id="cb49-364"><a href="#cb49-364" aria-hidden="true" tabindex="-1"></a><span class="in">    [ORDER BY &lt;column list&gt;]</span></span>
+<span id="cb49-365"><a href="#cb49-365" aria-hidden="true" tabindex="-1"></a><span class="in">    [LIMIT &lt;number of rows&gt;]</span></span>
+<span id="cb49-366"><a href="#cb49-366" aria-hidden="true" tabindex="-1"></a><span class="in">    [OFFSET &lt;number of rows&gt;];</span></span>
+<span id="cb49-367"><a href="#cb49-367" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-368"><a href="#cb49-368" aria-hidden="true" tabindex="-1"></a>Note that we can use the <span class="in">`AS`</span> keyword to rename columns during the selection process and that column expressions may include aggregation functions (<span class="in">`MAX`</span>, <span class="in">`MIN`</span>, etc.).</span>
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+</body></html>
