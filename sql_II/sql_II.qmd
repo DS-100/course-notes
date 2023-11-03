@@ -16,7 +16,7 @@ format:
 jupyter: python3
 ---
 
-::: {.callout-note collapse="true"}
+::: {.callout-note collapse="false"}
 ## Learning Outcomes
 * Introduce the ability to filter groups
 * Perform data cleaning and text manipulation in SQL
@@ -39,7 +39,7 @@ import pandas as pd
 
 ```{python}
 %%sql
-sqlite:///data/basic_examples.db
+sqlite:///data/basic_examples.db 
 ```
 
 ## Filtering Groups
@@ -51,24 +51,28 @@ Let's take a look at the `Dish` table to see how we can use `HAVING`.
 ```{python}
 %%sql
 SELECT *
-FROM Dish
+FROM Dish;
 ```
 
 The code below groups the different dishes by type, and only keeps those groups wherein the max cost is still than 8.
 
+```{python}
 %%sql
 SELECT type, COUNT(*)
 FROM Dish
 GROUP BY type
 HAVING MAX(cost) < 8;
+```
 
-In contrast, the code below first filters for rows where the cost is less than 8, and then does the grouping. Note the difference in outputs - in this case, 'taco' is also included, whereas other entries in the same group having cost >= 8 are not included.
+In contrast, the code below first filters for rows where the cost is less than 8, and then does the grouping. Note the difference in outputs - in this case, "taco" is also included, whereas other entries in the same group having cost greater than or equal to 8 are not included.
 
+```{python}
 %%sql
 SELECT type, COUNT(*)
 FROM Dish
 WHERE cost < 8
 GROUP BY type;
+```
 
 ## EDA in SQL
 In the last lecture, we mostly worked under the assumption that our data had already been cleaned. However, as we saw in our first pass through the data science lifecycle, we're very unlikely to be given data that is free of formatting issues. With this in mind, we'll want to learn how to clean and transform data in SQL. 
@@ -76,7 +80,7 @@ In the last lecture, we mostly worked under the assumption that our data had alr
 Our typical workflow when working with "big data" is:
 
 1. Use SQL to query data from a database
-2. Use Python (with pandas) to analyze this data in detail
+2. Use `python` (with `pandas`) to analyze this data in detail
 
 We can, however, still perform simple data cleaning and re-structuring using SQL directly. To do so, we'll use the `Title` table from the `imdbmini` database.
 
@@ -85,6 +89,11 @@ We can, however, still perform simple data cleaning and re-structuring using SQL
 One common task we encountered in our first look at EDA was needing to match string data. For example, we might want to remove entries beginning with the same prefix as part of the data cleaning process.
 
 In SQL, we use the `LIKE` operator to (you guessed it) look for strings that are *like* a given string pattern. 
+
+```{python}
+%%sql
+sqlite:///data/imdbmini.db 
+```
 
 ```{python}
 %%sql
@@ -100,6 +109,7 @@ What if we wanted to find *all* Star Wars movies? `%` is the wildcard operator, 
 SELECT titleType, primaryTitle
 FROM Title
 WHERE primaryTitle LIKE "%Star Wars%"
+LIMIT 10;
 ```
 
 ```{python}
@@ -143,7 +153,7 @@ In SQL, conditional operations are performed using a `CASE` clause. Conceptually
          ELSE <yet another value>
     END
 
-Scanning through the skeleton code above, you can see that the logic is similar to that of an `if` statement in Python. The conditional statement is first opened by calling `CASE`. Each new condition is specified by `WHEN`, with `THEN` indicating what value should be filled if the condition is met. `ELSE` specifies the value that should be filled if no other conditions are met. Lastly, `END` indicates the end of the conditional statement; once `END` has been called, SQL will continue evaluating the query as usual. 
+Scanning through the skeleton code above, you can see that the logic is similar to that of an `if` statement in `python`. The conditional statement is first opened by calling `CASE`. Each new condition is specified by `WHEN`, with `THEN` indicating what value should be filled if the condition is met. `ELSE` specifies the value that should be filled if no other conditions are met. Lastly, `END` indicates the end of the conditional statement; once `END` has been called, SQL will continue evaluating the query as usual. 
 
 Let's see this in action. In the example below, we give the new column created by the `CASE` statement the name `movie_age`.
 
@@ -158,7 +168,8 @@ CASE WHEN startYear < 1950 THEN "old"
      WHEN startYear < 2000 THEN "mid-aged"
      ELSE "new"
      END AS movie_age
-FROM Title;
+FROM Title
+LIMIT 10;
 ```
 
 ## `JOIN`ing Tables
@@ -169,15 +180,21 @@ A common way of organizing a database is by using a **star schema**. A star sche
 
 Say we were working with a database about boba offerings in Berkeley. The dimension tables of the database might contain information about tea varieties and boba toppings. The fact table would be used to link this information across the various dimension tables.
 
-<img src="images/multidimensional.png" alt='multidimensional' width='600'>
+<div style="text-align: center;">
+<img src="images/multidimensional.png" alt='multidimensional' width='850'>
+</div> 
 
 If we explicitly mark the relationships between tables, we start to see the star-like structure of the star schema.
 
-<img src="images/star.png" alt='star' width='600'>
+<div style="text-align: center;">
+<img src="images/star.png" alt='star' width='650'>
+</div> 
 
 To join data across multiple tables, we'll use the (creatively named) `JOIN` keyword. We'll make things easier for now by first considering the simpler `cats` dataset, which consists of the tables `s` and `t`.
 
-<img src="images/cats.png" alt='cats' width='400'>
+<div style="text-align: center;">
+<img src="images/cats.png" alt='cats' width='500'>
+</div> 
 
 To perform a join, we amend the `FROM` clause. You can think of this as saying, "`SELECT` my data `FROM` tables that have  been `JOIN`ed together." 
 
@@ -192,33 +209,47 @@ We also need to specify what column from each table should be used to determine 
 
 In a **cross join**, *all* possible combinations of rows appear in the output table, regardless of whether or not rows share a matching key. Because all rows are joined, even if there is no matching key, it is not necessary to specify what keys to consider in an `ON` statement. A cross join is also known as a cartesian product.
 
-<img src="images/cross.png" alt='cross' width='600'>
+<div style="text-align: center;">
+<img src="images/cross.png" alt='cross' width='800'>
+</div> 
 
 The most commonly used type of SQL `JOIN` is the **inner join**. It turns out you're already familiar with what an inner join does, and how it works – this is the type of join we've been using in `pandas` all along! In an inner join, we combine every row in our first table with its matching entry in the second table. If a row from either table does not have a match in the other table, it is omitted from the output. 
 
-<img src="images/inner.png" alt='inner' width='600'>
+<div style="text-align: center;">
+<img src="images/inner.png" alt='inner' width='800'>
+</div> 
 
 Another way of interpreting the inner join: perform a cross join, then remove all rows that do not share a matching key. Notice that the output of the inner join above contains all rows of the cross join example that contain a single color across the entire row.
 
 In a **full outer join**, all rows that have a match between the two tables are joined together. If a row has no match in the second table, then the values of the columns for that second table are filled with null. In other words, a full outer join performs an inner join *while still keeping* rows that have no match in the other table. This is best understood visually:
 
-<img src="images/full.png" alt='full' width='600'>
+<div style="text-align: center;">
+<img src="images/full.png" alt='full' width='800'>
+</div> 
 
 We have kept the same output achieved using an inner join, with the addition of partially-null rows for entries in `s` and `t` that had no match in the second table. Note that `FULL OUTER JOIN` is not supported by SQLite, the "flavor" of SQL that will be used in lab and homework.
 
 A **left outer join** is similar to a full outer join. In a left outer join, *all* rows in the left table are kept in the output table. If a row in the right table shares a match with the left table, this row will be kept; otherwise, the rows in the right table are omitted from the output. 
 
-<img src="images/left.png" alt='left' width='600'>
+<div style="text-align: center;">
+<img src="images/left.png" alt='left' width='800'>
+</div> 
 
 A **right outer join** keeps all rows in the right table. Rows in the left table are only kept if they share a match in the right table. Right outer joins are not supported by SQLite. 
 
-<img src="images/right.png" alt='right' width='600'>
+<div style="text-align: center;">
+<img src="images/right.png" alt='right' width='800'>
+</div> 
 
 In the examples above, we performed our joins by checking for equality between the two tables (i.e., by setting `s.id = t.id`). SQL also supports joining rows on *inequalities*, which is something we weren't able to do when working in `pandas`. Consider a new dataset that contains information about students and teachers.
 
+<div style="text-align: center;">
 <img src="images/student.png" alt='student' width='400'>
+</div> 
 
 Often, we wish to compare the relative values of rows in different tables, rather than check that they are exactly equal. For example, we may want to join rows where students are older than the corresponding teacher. We can do so by specifying an inequality in our `ON` statement.
 
-<img src="images/inequality.png" alt='inequality' width='600'>
+<div style="text-align: center;">
+<img src="images/inequality.png" alt='inequality' width='800'>
+</div> 
 
