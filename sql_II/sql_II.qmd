@@ -4,7 +4,7 @@ execute:
   echo: true
 format:
   html:
-    code-fold: true
+    code-fold: false
     code-tools: true
     toc: true
     toc-title: SQL II
@@ -18,33 +18,95 @@ jupyter: python3
 
 ::: {.callout-note collapse="true"}
 ## Learning Outcomes
+* Introduce the ability to filter groups
 * Perform data cleaning and text manipulation in SQL
 * Join data across tables
 :::
 
 In this lecture, we'll continue our work from last time to introduce some advanced SQL syntax. 
 
-## EDA in SQL
-In the last lecture, we mostly worked under the assumption that our data had already been cleaned. However, as we saw in our first pass through the data science lifecycle, we're very unlikely to be given data that is free of formatting issues. With this in mind, we'll want to learn how to clean and transform data in SQL.
-
-Let's consider the `Title` table from the `imdbmini` database.
+First, let's load in the database from last lecture.
 
 ```{python}
 # Load the SQL Alchemy Python library
 import sqlalchemy
 import pandas as pd
+```
 
-# Create a SQL Alchemy connection to the database
-engine = sqlalchemy.create_engine("sqlite:///data/imdbmini.db")
-connection = engine.connect()
+```{python}
+%load_ext sql
+```
 
-query = """
+```{python}
+%%sql
+sqlite:///data/basic_examples.db
+```
+
+## Filtering Groups
+
+`HAVING` filters groups by applying some condition across all rows in each group. We interpret it as a a way to keep only the groups `HAVING` some condition. Note the difference between `WHERE` and `HAVING`: we use `WHERE` to filter rows, whereas we use `HAVING` to filter groups. `WHERE` precedes `HAVING` in terms of how SQL executes a query.
+
+Let's take a look at the `Dish` table to see how we can use `HAVING`.
+
+```{python}
+%%sql
 SELECT *
-FROM Title
-LIMIT 5;
-"""
+FROM Dish
+```
 
-pd.read_sql(query, engine)
+The code below groups the different dishes by type, and only keeps those groups wherein the max cost is still than 8.
+
+%%sql
+SELECT type, COUNT(*)
+FROM Dish
+GROUP BY type
+HAVING MAX(cost) < 8;
+
+In contrast, the code below first filters for rows where the cost is less than 8, and then does the grouping. Note the difference in outputs - in this case, 'taco' is also included, whereas other entries in the same group having cost >= 8 are not included.
+
+%%sql
+SELECT type, COUNT(*)
+FROM Dish
+WHERE cost < 8
+GROUP BY type;
+
+## EDA in SQL
+In the last lecture, we mostly worked under the assumption that our data had already been cleaned. However, as we saw in our first pass through the data science lifecycle, we're very unlikely to be given data that is free of formatting issues. With this in mind, we'll want to learn how to clean and transform data in SQL. 
+
+Our typical workflow when working with "big data" is:
+
+1. Use SQL to query data from a database
+2. Use Python (with pandas) to analyze this data in detail
+
+We can, however, still perform simple data cleaning and re-structuring using SQL directly. To do so, we'll use the `Title` table from the `imdbmini` database.
+
+### Matching Text using `LIKE`
+
+One common task we encountered in our first look at EDA was needing to match string data. For example, we might want to remove entries beginning with the same prefix as part of the data cleaning process.
+
+In SQL, we use the `LIKE` operator to (you guessed it) look for strings that are *like* a given string pattern. 
+
+```{python}
+%%sql
+SELECT titleType, primaryTitle
+FROM Title
+WHERE primaryTitle LIKE "Star Wars: Episode I - The Phantom Menace"
+```
+
+What if we wanted to find *all* Star Wars movies? `%` is the wildcard operator, it means "look for any character, any number of times". This makes it helpful for identifying strings that are similar to our desired pattern, even when we don't know the full text of what we aim to extract. In contrast, you `_` means "look for exactly 1 character", as you can see in the Harry Potter example that follows.
+
+```{python}
+%%sql
+SELECT titleType, primaryTitle
+FROM Title
+WHERE primaryTitle LIKE "%Star Wars%"
+```
+
+```{python}
+%%sql
+SELECT titleType, primaryTitle
+FROM Title
+WHERE primaryTitle LIKE "Harry Potter and the Deathly Hallows: Part _"
 ```
 
 ### `CAST`ing Data Types
@@ -52,14 +114,10 @@ pd.read_sql(query, engine)
 A common data cleaning task is converting data to the correct variable type. The `CAST` keyword is used to generate a new output column. Each entry in this output column is the result of converting the data in an existing column to a new data type. For example, we may wish to convert numeric data stored as a string to an integer.
 
 ```{python}
-#| code-fold: false
-query = """
+%%sql
 SELECT primaryTitle, CAST(runtimeMinutes AS INT), CAST(startYear AS INT)
 FROM Title
-LIMIT 5;
-"""
-
-pd.read_sql(query, engine)
+LIMIT 5
 ```
 
 We use `CAST` when `SELECT`ing colunns for our output table. In the example above, we want to `SELECT` the columns of integer year and runtime data that is created by the `CAST`. 
@@ -67,14 +125,10 @@ We use `CAST` when `SELECT`ing colunns for our output table. In the example abov
 SQL will automatically name a new column according to the command used to `SELECT` it, which can lead to unwieldy column names. We can rename the `CAST`ed column using the `AS` keyword.
 
 ```{python}
-#| code-fold: false
-query = """
+%%sql
 SELECT primaryTitle AS title, CAST(runtimeMinutes AS INT) AS minutes, CAST(startYear AS INT) AS year
 FROM Title
 LIMIT 5;
-"""
-
-pd.read_sql(query, engine)
 ```
 
 ### Using Conditional Statements with `CASE`
@@ -94,54 +148,17 @@ Scanning through the skeleton code above, you can see that the logic is similar 
 Let's see this in action. In the example below, we give the new column created by the `CASE` statement the name `movie_age`.
 
 ```{python}
-#| code-fold: false
+%%sql
+/* If a movie was filmed before 1950, it is "old"
+Otherwise, if a movie was filmed before 2000, it is "mid-aged"
+Else, a movie is "new" */
 
-#If a movie was filmed before 1950, it is "old"
-#Otherwise, if a movie was filmed before 2000, it is "mid-aged"
-#Else, a movie is "new"
-
-query = """
 SELECT titleType, startYear,
 CASE WHEN startYear < 1950 THEN "old"
      WHEN startYear < 2000 THEN "mid-aged"
      ELSE "new"
      END AS movie_age
 FROM Title;
-"""
-
-pd.read_sql(query, engine)
-```
-
-### Matching Strings with `LIKE`
-
-One other common task we encountered in our first look at EDA was needing to match string data. For example, we might want to remove entries beginning with the same prefix as part of the data cleaning process.
-
-In SQL, we use the `LIKE` operator to (you guessed it) look for strings that are *like* a given string pattern. 
-
-```{python}
-#| code-fold: false
-
-query = """
-SELECT titleType, primaryTitle
-FROM Title
-WHERE primaryTitle LIKE "Star Wars: Episode I - The Phantom Menace"
-"""
-
-pd.read_sql(query, engine)
-```
-
-What if we wanted to find *all* Star Wars movies? `%` is the wildcard operator. It serves a similar function to `.` in regex – it means "match any character." This makes it helpful for identifying strings that are similar to our desired pattern, even when we don't know the full text of what we aim to extract. 
-
-```{python}
-#| code-fold: false
-
-query = """
-SELECT titleType, primaryTitle
-FROM Title
-WHERE primaryTitle LIKE "%Star Wars%"
-"""
-
-pd.read_sql(query, engine)
 ```
 
 ## `JOIN`ing Tables
