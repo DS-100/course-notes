@@ -17,12 +17,13 @@ jupyter: python3
 ## Learning Outcomes
 * Understand the difference between regression and classification
 * Derive the logistic regression model for classifying data
+* Quantify the error of our logistic regression model with cross-entropy loss
 :::
 
 
 Up until this point in the class , we've focused on **regression** tasks - that is, predicting a *numerical* quantity from a given dataset. We discussed optimization, feature engineering, and regularization all in the context of performing regression to predict some quantity. 
 
-Now that we have this deep understanding of the modeling process, let's expand our knowledge of possible modeling *tasks*. 
+Now that we have this deep understanding of the modeling process, let's expand our knowledge of possible modeling tasks. 
 
 
 ## Classification
@@ -41,20 +42,18 @@ There are a couple of different types of classification:
 
 In Data 100, we will mostly deal with **binary classification**, where we are attempting to classify data into one of two classes. 
 
-To build a classification model, we need to modify our modeling workflow slightly.
-
-Recall that in regression we:
+To build a classification model, we need to modify our modeling workflow slightly. Recall that in regression we:
 
 1. Created a design matrix of numeric features
 2. Defined our model as a linear combination of these numeric features
 3. Used the model to output numeric predictions
 
-In classification, we no longer want to output numeric predictions; instead, we want to predict the class to which a datapoint belongs. This means that we need to update our workflow. To build a classification model, we will:
+In classification, however, we no longer want to output numeric predictions; instead, we want to predict the class to which a datapoint belongs. This means that we need to update our workflow. To build a classification model, we will:
 
-1. Create a design matrix of numeric features
+1. Create a design matrix of numeric features.
 2. Define our model as a linear combination of these numeric features, transformed by a non-linear **sigmoid function**. This outputs a numeric quantity.
-3. Apply a **decision rule** to interpret the outputted quantity and decide a classification
-4. Output a predicted class
+3. Apply a **decision rule** to interpret the outputted quantity and decide a classification.
+4. Output a predicted class.
 
 There are two key differences: as we'll soon see, we need to incorporate a non-linear transformation to capture non-linear relationships hidden in our data. We do so by applying the sigmoid function to a linear combination of the features. Secondly, we must apply a decision rule to convert the numeric quantities computed by our model into an actual class prediction. This can be as simple as saying that any datapoint with a feature greater than some number $x$ belongs to Class 1.
 
@@ -143,7 +142,7 @@ Let's think more about what we've just done.
 
 To find the average $y$ value for each bin, we computed:
 
-$$\frac{1 \times \text{(\# Y = 1)} + 0 \times \text{(\# Y = 0)}}{\text{\# datapoints in bin}} = \frac{\text{\# Y = 1}}{\text{\# datapoints in bin}} = P(\text{Y = 1} | \text{bin})$$
+$$\frac{1 \text{(\# Y = 1 in bin)} + 0 \text{(\# Y = 0 in bin)}}{\text{\# datapoints in bin}} = \frac{\text{\# Y = 1 in bin}}{\text{\# datapoints in bin}} = P(\text{Y = 1} | \text{bin})$$
 
 This is simply the probability of a datapoint in that bin belonging to Class 1! This aligns with our observation from earlier: all of our predictions lie between 0 and 1, just as we would expect for a probability.
 
@@ -202,11 +201,11 @@ $$\log{(\frac{p}{1-p})} = x^{\top} \theta$$
 Remember that our goal is to predict the probability of a datapoint belonging to Class 1, $p$. Let's rearrange this relationship to uncover the original relationship between $p$ and our input data, $x^{\top}$.
 
 \begin{align}
-x^T \theta &= \log{(\frac{p}{1-p})}\\
-e^{x^T \theta} &= \frac{p}{1-p}\\
-(1-p)e^{x^T \theta} &= p\\
-e^{x^T \theta}- p e^{x^T \theta} &= p\\
-e^{x^T \theta} &= p(1 + e^{x^T \theta})\\
+\log{(\frac{p}{1-p})} &= x^T \theta\\
+\frac{p}{1-p} &= e^{x^T \theta}\\
+p &= (1-p)e^{x^T \theta}\\
+p &= e^{x^T \theta}- p e^{x^T \theta}\\
+p(1 + e^{x^T \theta}) &= e^{x^T \theta} \\
 p &= \frac{e^{x^T \theta}}{1+e^{x^T \theta}}\\
 p &= \frac{1}{1+e^{-x^T \theta}}\\
 \end{align}
@@ -242,19 +241,13 @@ The S-shaped curve is formally known as the **sigmoid function** and is typicall
 
 $$\sigma(t) = \frac{1}{1+e^{-t}}$$
 
-::: {.callout collapse="true"}
+::: {.callout-tip}
 ## Properties of the Sigmoid
-Reflection/Symmetry: $1-\sigma(t) = \frac{e^{-t}}{1+e^{-t}}=\sigma(-t)$
-
-Inverse: $t=\sigma^{-1}(p)=\log{(\frac{p}{1-p})}$
-
-Derivative: $\frac{d}{dz} \sigma(t) = \sigma(t) (1-\sigma(t))=\sigma(t)\sigma(-t)$
-
-Domain: $-\infty < t < \infty$
-
-Range: $0 < \sigma(t) < 1$
-
-
+* Reflection/Symmetry: $1-\sigma(t) = \frac{e^{-t}}{1+e^{-t}}=\sigma(-t)$
+* Inverse: $t=\sigma^{-1}(p)=\log{(\frac{p}{1-p})}$
+* Derivative: $\frac{d}{dz} \sigma(t) = \sigma(t) (1-\sigma(t))=\sigma(t)\sigma(-t)$
+* Domain: $-\infty < t < \infty$
+* Range: $0 < \sigma(t) < 1$
 :::
 
 In the context of our modeling process, the sigmoid is considered an **activation function**. It takes in a linear combination of the features and applies a non-linear transformation.
@@ -281,6 +274,23 @@ More commonly, the logistic regression model is written as:
 \hat{P}_{\theta}(Y = 1 | x) = \sigma(x^{\top}\theta)
 \end{align}
 
+
+::: {.callout-tip}
+## Properties of the Logistic Model
+Consider a logistic regression model with one feature and an intercept term:
+
+\begin{align}
+p = P(Y = 1 | x) = \frac{1}{1+e^{-(\theta_0 + \theta_1 x)}}
+\end{align}
+
+Properties:
+
+* $\theta_0$ controls the position of the curve along the horizontal axis
+* The magnitude of $\theta_1$ controls the "steepness" of the sigmoid
+* The sign of $\theta_1$ controls the orientation of the curve
+
+:::
+
 ::: {.callout collapse="true"}
 ## Example Calculation
 Suppose we want to predict the probability that a team wins a game, given `"GOAL_DIFF"` (first feature) and the number of free throws (second feature). Let's say we fit a logistic regression model (with no intercept) using the training data and estimate the optimal parameters. Now we want to predict the probability that a new team will win their game.
@@ -298,21 +308,6 @@ We see that the response is more likely to be 1 than 0, indicating that a reason
 
 :::
 
-::: {.callout collapse="true"}
-## Properties of the Logistic Model
-consider a logistic regression model with one feature and an intercept term:
-
-\begin{align}
-p = P(Y = 1 | x) = \frac{1}{1+e^{-(\theta_0 + \theta_1 x)}}
-\end{align}
-
-Properties:
-
-* $\theta_0$ controls the position of the curve along the horizontal axis
-* The magnitude of $\theta_1$ controls the "steepness" of the sigmoid
-* The sign of $\theta_1$ controls the orientation of the curve
-
-:::
 
 ## Cross-Entropy Loss
 
@@ -354,7 +349,7 @@ plt.ylabel('MSE');
 This looks nothing like the parabola we found when plotting the MSE of a linear regression model! In particular, we can identify two flaws with using the MSE for logistic regression:
 
 1. The MSE loss surface is *non-convex*. There is both a global minimum and a (barely perceptible) local minimum in the loss surface above. This means that there is the risk of gradient descent converging on the local minimum of the loss surface, missing the true optimum parameter $\theta_1$.
-2. Squared loss is *bounded* for a classification task. Recall that each true $y$ has a value of either 0 or 1. This means that even if our model makes the worst possible prediction (e.g. predicting $p=0$ for $y=1$), the squared loss for an observation will be no greater than 1: $(y-p)^2=(1-0)^2=1$. The MSE does not strongly penalize poor predictions.
+2. Squared loss is *bounded* for a classification task. Recall that each true $y$ has a value of either 0 or 1. This means that even if our model makes the worst possible prediction (e.g. predicting $p=0$ for $y=1$), the squared loss for an observation will be no greater than 1: $$(y-p)^2=(1-0)^2=1$$ The MSE does not strongly penalize poor predictions.
 
 ### Motivating Cross-Entropy Loss
 Suffice to say, we don't want to use the MSE when working with logistic regression. Instead, we'll consider what kind of behavior we would *like* to see in a loss function.
@@ -460,13 +455,13 @@ plt.ylabel(r'Mean Cross-Entropy Loss($\theta$)')
 plt.xlabel(r'$\theta$');
 ```
 
-### Bonus: Maximum Likelihood Estimation
+## (Bonus) Maximum Likelihood Estimation
 
 It may have seemed like we pulled cross-entropy loss out of thin air. How did we know that taking the negative logarithms of our probabilities would work so well? It turns out that cross-entropy loss is justified by probability theory.
 
 The following section is out of scope, but is certainly an interesting read!
 
-#### Building Intuition: The Coin Flip
+### Building Intuition: The Coin Flip
 To build some intuition for logistic regression, let’s look at an introductory example to classification: the coin flip. Suppose we observe some outcomes of a coin flip (1 = Heads, 0 = Tails).
 
 ```{python}
@@ -478,7 +473,7 @@ A reasonable model is to assume all flips are IID (independent and identically d
 
 You may be inclined to say $0.5$ is the best choice for $\theta$. However, notice that we made no assumption about the coin itself. The coin may be biased, so we should make our decision based only on the data. We know that exactly $\frac{4}{10}$ of the flips were heads, so we might guess $\hat \theta = 0.4$. In the next section, we will mathematically prove why this is the best possible estimate.
 
-#### Likelihood of Data
+### Likelihood of Data
 
 Let's call the result of the coin flip a random variable $Y$. This is a Bernoulli random variable with two outcomes. $Y$ has the following distribution: 
 
