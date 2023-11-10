@@ -20,7 +20,7 @@ jupyter: python3
 * Introduce new metrics for model performance
 ::: 
 
-Today, we will continue studying the Logistic Regression model. We'll discussion decision boundaries that help inform the classification of a particular prediction. Then, we'll pick up from last lecture's discussion of cross-entropy loss, study a few of its pitfalls, and learn potential remedies. We will also provide an implementation of `sklearn`'s logistic regression model. Lastly, we'll return to decision rules and discus metrics that allow us to determine our model's performance in different scenarios. 
+Today, we will continue studying the Logistic Regression model. We'll discuss decision boundaries that help inform the classification of a particular prediction. Then, we'll pick up from last lecture's discussion of cross-entropy loss, study a few of its pitfalls, and learn potential remedies. We will also provide an implementation of `sklearn`'s logistic regression model. Lastly, we'll return to decision rules and discuss metrics that allow us to determine our model's performance in different scenarios. 
 
 This will introduce us to the process of **thresholding** -- a technique used to *classify* data from our model's predicted probabilities, or $P(Y=1|x)$. In doing so, we'll focus on how these thresholding decisions affect the behavior of our model. We will learn various evaluation metrics useful for binary classification, and apply them to our study of logistic regression.
 
@@ -40,42 +40,42 @@ $$\hat y = \text{classify}(x) = \begin{cases}
     
 The threshold is often set to $T = 0.5$, but *not always*. We'll discuss why we might want to use other thresholds  $T \neq 0.5$ later in this lecture.
 
-Using our decision rule, we can define a **decision boundary** as the “line” the splits the data into classes based on its features. For logistic regression, the decision boundary is a **hyperplane** -- a linear combination of the features in p-dimensions -- and we can recover it from the final logistic regression model. For example, if we have a model with 2 features (2D), we have $\theta = [\theta_0 \theta_1 \theta_2]$ (including the intercept term), and we can solve for the decision boundary like so: 
+Using our decision rule, we can define a **decision boundary** as the “line” that splits the data into classes based on its features. For logistic regression, the decision boundary is a **hyperplane** -- a linear combination of the features in p-dimensions -- and we can recover it from the final logistic regression model. For example, if we have a model with 2 features (2D), we have $\theta = [\theta_0, \theta_1, \theta_2]$ including the intercept term, and we can solve for the decision boundary like so: 
 
 $$
 \begin{align}
 T &= \frac{1}{1 + e^{\theta_0 + \theta_1 * \text{feature1} +  \theta_2 * \text{feature2}}} \\
-1 + e^{\theta_0 + \theta_1 * \text{feature1} +  \theta_2 * \text{feature2}} &= \frac{1}{T} \\
-e^{\theta_0 + \theta_1 * \text{feature1} +  \theta_2 * \text{feature2}} &= \frac{1}{T} - 1 \\
-\theta_0 + \theta_1 * \text{feature1} +  \theta_2 * \text{feature2} &= log(\frac{1}{T} - 1)
+1 + e^{\theta_0 + \theta_1 \cdot \text{feature1} +  \theta_2  \cdot  \text{feature2}} &= \frac{1}{T} \\
+e^{\theta_0 + \theta_1  \cdot  \text{feature1} +  \theta_2  \cdot  \text{feature2}} &= \frac{1}{T} - 1 \\
+\theta_0 + \theta_1  \cdot  \text{feature1} +  \theta_2  \cdot  \text{feature2} &= \log(\frac{1}{T} - 1)
 \end{align} 
 $$
 
-For a model with 2 features, the decision boundary is a line in terms of it's features. To make it easier to visualize, we've included an example of a 1-dimensional and a 2-dimensional decision boundary below. Notice how the decision boundary predicted by our logistic regression model perfectly separates the points into two classes. 
+For a model with 2 features, the decision boundary is a line in terms of its features. To make it easier to visualize, we've included an example of a 1-dimensional and a 2-dimensional decision boundary below. Notice how the decision boundary predicted by our logistic regression model perfectly separates the points into two classes. 
 
 <center><img src="images/decision_boundary.png" alt='varying_threshold' width='800'></center>
 
-In real life, however, that is often not the case, and we often see some overlap between points of different classes across the decision boundary. The *true* classes of the 2D data is shown below: 
+In real life, however, that is often not the case, and we often see some overlap between points of different classes across the decision boundary. The *true* classes of the 2D data are shown below: 
 
 <center><img src="images/decision_boundary_true.png" alt='varying_threshold' width='400'></center>
 
 As you can see, the decision boundary predicted by our logistic regression does not perfectly separate the two classes. There's a “muddled” region near the decision boundary where our classifier predicts the wrong class. What would the data have to look like for the classifier to make perfect predictions?
 
-## Linear Seperability and Regularization
+## Linear Separability and Regularization
 
 A classification dataset is said to be **linearly separable** if there exists a hyperplane among input features $x$ that separates the two classes $y$. 
 
-Linear seperability in 1D can be found with a rugplot of a single feature. For example, notice how the plot on the bottom left is linearly seperable along the vertical line $x=0$. However, no such line perfectly seperates the two classes on the bottom right.
+Linear separability in 1D can be found with a rugplot of a single feature. For example, notice how the plot on the bottom left is linearly separable along the vertical line $x=0$. However, no such line perfectly separates the two classes on the bottom right.
 
-<center><img src="images/linear_seperability_1D.png" alt='linear_seperability_1D' width='800'></center>
+<center><img src="images/linear_separability_1D.png" alt='linear_separability_1D' width='800'></center>
 
-This same definition holds in higher dimensions. If there are two features, the seperating hyperplane must exist in two dimensions (any line of the form $y=mx+b$). We can visualize this using a scatter plot.
+This same definition holds in higher dimensions. If there are two features, the separating hyperplane must exist in two dimensions (any line of the form $y=mx+b$). We can visualize this using a scatter plot.
 
-<center><img src="images/linear_seperability_2D.png" alt='linear_seperability_1D' width='800'></center>
+<center><img src="images/linear_separability_2D.png" alt='linear_separability_1D' width='800'></center>
 
-This sounds great! When the dataset is linearly separable, a logistic regression classifier can perfectly assign datapoints into classes. However, (unexpected) complications may arise when data is linearly separable. Consider the toy dataset with 2 points and only a single feature $x$:
+This sounds great! When the dataset is linearly separable, a logistic regression classifier can perfectly assign datapoints into classes. However, (unexpected) complications may arise. Consider the `toy` dataset with 2 points and only a single feature $x$:
 
-<center><img src="images/toy_2_point.png" alt='toy_linear_seperability' width='500'></center>
+<center><img src="images/toy_2_point.png" alt='toy_linear_separability' width='500'></center>
 
 The optimal $\theta$ value that minimizes loss pushes the predicted probabilities of the data points to their true class.
 
@@ -89,9 +89,9 @@ $$P(Y=1|x) = \sigma(\theta x) \rightarrow \begin{cases}
         0, \text{if }  x \ge 0
     \end{cases}$$
 
-The diverging weights cause the model to be overconfident. For example, consider the new point $(x, y) = (0.5, 1)$. Following the behavior above, our model will incorrectly predict $p=0$, and a thus, $\hat y = 0$.
+The diverging weights cause the model to be overconfident. For example, consider the new point $(x, y) = (0.5, 1)$. Following the behavior above, our model will incorrectly predict $p=0$, and thus, $\hat y = 0$.
 
-<center><img src="images/toy_3_point.png" alt='toy_linear_seperability' width='500'></center>
+<center><img src="images/toy_3_point.png" alt='toy_linear_separability' width='500'></center>
 
 The loss incurred by this misclassified point is infinite.
 
@@ -107,9 +107,9 @@ Though it's very difficult to see, the plateau for negative values of $\theta$ i
 
 ### Regularized Logistic Regression
 
-To avoid large weights and infinite loss (particularly on linearly separable data), we use regularizaiton. The same principles apply as with linear regression - make sure to standardize your features first.
+To avoid large weights and infinite loss (particularly on linearly separable data), we use regularization. The same principles apply as with linear regression - make sure to standardize your features first.
 
-For example, L2 (Ridge) Logistic Regression takes on the form
+For example, $L2$ (Ridge) Logistic Regression takes on the form:
 
 $$\min_{\theta} -\frac{1}{n} \sum_{i=1}^{n} (y_i \text{log}(\sigma(x_i^T\theta)) + (1-y_i)\text{log}(1-\sigma(x_i^T\theta))) + \lambda \sum_{i=1}^{d} \theta_j^2$$
 
@@ -121,7 +121,7 @@ Now, let us compare the loss functions of un-regularized and regularized logisti
 
 As we can see, $L2$ regularization helps us prevent diverging weights and deters against "overconfidence."
 
-`sklearn`'s logistic regression defaults to L2 regularization and `C=1.0`; `C` is the inverse of $\lambda$: $C = \frac{1}{\lambda}$. Setting `C` to a large value, for example `C=300.0` results in minimal regularization.
+`sklearn`'s logistic regression defaults to L2 regularization and `C=1.0`; `C` is the inverse of $\lambda$: $C = \frac{1}{\lambda}$. Setting `C` to a large value, for example, `C=300.0`, results in minimal regularization.
 
     # sklearn defaults
     model = LogisticRegression(penalty='l2', C=1.0, …)
@@ -139,7 +139,7 @@ $$\hat y = \begin{cases}
 ## Performance Metrics
 You might be thinking, if we've already introduced cross-entropy loss, why do we need additional ways of assessing how well our models perform? In linear regression, we made numerical predictions and used a loss function to determine how “good” these predictions were. In logistic regression, our ultimate goal is to classify data – we are much more concerned with whether or not each datapoint was assigned the correct class using the decision rule. As such, we are interested in the *quality* of classifications, not the predicted probabilities.
 
-The most basic evaluation metric is **accuracy** -- the proportion of correctly classified points.
+The most basic evaluation metric is **accuracy**, that is, the proportion of correctly classified points.
 
 $$\text{accuracy} = \frac{\# \text{ of points classified correctly}}{\# \text{ of total points}}$$
 
@@ -155,7 +155,7 @@ However, accuracy is not always a great metric for classification. To understand
 - **Model 1**: Our first model classifies every email as non-spam. The model's accuracy is high ($\frac{95}{100} = 0.95$), but it doesn't detect any spam emails. Despite the high accuracy, this is a bad model.
 - **Model 2**: The second model classifies every email as spam. The accuracy is low ($\frac{5}{100} = 0.05$), but the model correctly labels every spam email. Unfortunately, it also misclassifies every non-spam email.
 
-As this example illustrates, accuracy is not always a good metric for classification, particularly when your data have class imbalance (e.g., very few 1’s compared to 0’s).
+As this example illustrates, accuracy is not always a good metric for classification, particularly when your data could exhibit class imbalance (e.g., very few 1’s compared to 0’s).
 
 ### Types of Classification
 There are 4 different different classifications that our model might make:
@@ -182,13 +182,7 @@ In `sklearn`, we use the following syntax
     from sklearn.metrics import confusion_matrix
     cm = confusion_matrix(Y_true, Y_pred)
 
-```{python}
-#| vscode: {languageId: python}
-from sklearn.metrics import confusion_matrix
-
-y_pred = model.predict(X)
-confusion_matrix(y, y_pred)
-```
+<center><img src="images/confusion_matrix_sklearn.png" alt='confusion_matrix' width='300'></center>
 
 ### Accuracy, Precision, and Recall
 
@@ -198,22 +192,21 @@ The purpose of our discussion of the confusion matrix was to motivate better per
 
 $$\text{precision} = \frac{\text{TP}}{\text{TP + FP}}$$
 
-Precision answers the question: "of all observations that were predicted to be $1$, what proportion were actually $1$?" It measures how accurate the classifier is when its predictions are positive.
+Precision answers the question: "Of all observations that were predicted to be $1$, what proportion was actually $1$?" It measures how accurate the classifier is when its predictions are positive.
 
 **Recall** (or **sensitivity**) is defined as 
 
 $$\text{recall} = \frac{\text{TP}}{\text{TP + FN}}$$
 
-Recall aims to answer: "of all observations that were actually $1$, what proportion were predicted to be $1$?" It measures how many positive predictions were missed.
+Recall aims to answer: "Of all observations that were actually $1$, what proportion was predicted to be $1$?" It measures how many positive predictions were missed.
 
 Here's a helpful graphic that summarizes our discussion above.
-
 
 <center><img src="images/precision_recall_graphic.png" alt='confusion_matrix' width='700'></center>
 
 ### Example Calculation
 
-In this section, we will calculate the accuracy, precision, and recall performance metrics for our earlier spam classification example. As a reminder, we had a 100 emails, 5 of which were spam. We designed two models:
+In this section, we will calculate the accuracy, precision, and recall performance metrics for our earlier spam classification example. As a reminder, we had 100 emails, 5 of which were spam. We designed two models:
 
 - Model 1: Predict that every email is *non-spam*
 - Model 2: Predict that every email is *spam*
@@ -256,13 +249,13 @@ $$\text{recall} = \frac{5}{5 + 0} = 1$$
 
 Our precision is low because we have many false positives, and our recall is perfect - we correctly classified all spam emails (we never predicted class $0$).
 
-#### Precision vs. Recall
+### Precision vs. Recall
 
 Precision ($\frac{\text{TP}}{\text{TP} + \textbf{ FP}}$) penalizes false positives, while recall ($\frac{\text{TP}}{\text{TP} + \textbf{ FN}}$) penalizes false negatives.
 
 In fact, precision and recall are *inversely related*. This is evident in our second model -- we observed a high recall and low precision. Usually, there is a tradeoff in these two (most models can either minimize the number of FP or FN; and in rare cases, both). 
 
-The specific performance metric(s) to prioritize depends on the context. In many medical settings, there might be a much higher cost to missing positive cases. For instance, in our breast cancer example, it is more costly to misclassify malignant tumors (false negatives) than it is to incorrectly classify a benign tumor as malignant (false positives). In the case of the latter, pathologists can conduct further study to verify malignant tumors. As such, we should minimize the number of false negatives. This is equivalent to maximizing recall.
+The specific performance metric(s) to prioritize depends on the context. In many medical settings, there might be a much higher cost to missing positive cases. For instance, in our breast cancer example, it is more costly to misclassify malignant tumors (false negatives) than it is to incorrectly classify a benign tumor as malignant (false positives). In the case of the latter, pathologists can conduct further studies to verify malignant tumors. As such, we should minimize the number of false negatives. This is equivalent to maximizing recall.
 
 
 
@@ -270,17 +263,17 @@ The specific performance metric(s) to prioritize depends on the context. In many
 
 The **True Positive Rate (TPR)** is defined as
 
-$$\frac{\text{TP}}{\text{TP + FN}}$$
+$$\text{true positive rate} = \frac{\text{TP}}{\text{TP + FN}}$$
 
-You'll notice this is equivalent to *recall*. In the context of our spam email classifier, it answers the question: "what proportion of spam did I mark correctly?". We'd like this to be close to $1$
+You'll notice this is equivalent to *recall*. In the context of our spam email classifier, it answers the question: "What proportion of spam did I mark correctly?". We'd like this to be close to $1$
 
 The **False Positive Rate (FPR)** is defined as
 
-$$\frac{\text{FP}}{\text{FP + TN}}$$
+$$\text{false positive rate} = \frac{\text{FP}}{\text{FP + TN}}$$
 
-Another word for FPR is *specificity*. This answers the question: "what proportion of regular email did I mark as spam?". We'd like this to be close to $0$
+Another word for FPR is *specificity*. This answers the question: "What proportion of regular email did I mark as spam?". We'd like this to be close to $0$
 
-As we increase threshold $T$, both TPR and FPR decrease. We've plotted this relationship below for some model on a toy dataset.
+As we increase threshold $T$, both TPR and FPR decrease. We've plotted this relationship below for some model on a `toy` dataset.
 
 <center><img src="images/tpr_fpr.png" alt='tpr_fpr' width='800'></center>
 
@@ -321,7 +314,7 @@ Let's first consider how precision and recall change as a function of the thresh
 
 <center><img src="images/precision-recall-thresh.png" alt='precision-recall-thresh' width='750'></center>
 
-Displayed below is the PR-Curve for the same toy dataset. Notice how threshold values increase as we move to the left.
+Displayed below is the PR Curve for the same `toy` dataset. Notice how threshold values increase as we move to the left.
 
 <center><img src="images/pr_curve_thresholds.png" alt='pr_curve_thresholds' width='685'></center>
 
@@ -329,7 +322,7 @@ Once again, the perfect classifier will resemble the orange curve, this time, fa
 
 <center><img src="images/pr_curve_perfect.png" alt='pr_curve_perfect' width='675'></center>
 
-We want our PR-Curve to be as close to the “top right” of this graph as possible. Again, we use the AUC to determine "closeness", with the perfect classifier exhibiting an AUC = 1 (and the worst with an AUC = 0.5).
+We want our PR curve to be as close to the “top right” of this graph as possible. Again, we use the AUC to determine "closeness", with the perfect classifier exhibiting an AUC = 1 (and the worst with an AUC = 0.5).
 
 ### The ROC Curve
 
@@ -346,8 +339,8 @@ We want our model to be as close to this orange curve as possible. How do we qua
 We can compute the **area under curve (AUC)** of the ROC curve. Notice how the perfect classifier has an AUC = 1. The closer our model's AUC is to 1, the better it is. 
 
 
-#### [Extra] What is the “worst” AUC and why is it 0.5? 
-On the other hand, a terrible model will have an AUC closer to 0.5. Random predictors randomly predicts P(Y = 1 | x) to be uniformly between 0 and 1. This indicates the classifier is not able to distinguish between positive and negative classes, and thus, randomly predicts one of the two.
+#### [Extra] What is the “worst” AUC, and why is it 0.5? 
+On the other hand, a terrible model will have an AUC closer to 0.5. Random predictors randomly predict $P(Y = 1 | x)$ to be uniformly between 0 and 1. This indicates the classifier is not able to distinguish between positive and negative classes, and thus, randomly predicts one of the two.
 
 <center><img src="images/roc_curve_worst_predictor.png" alt='roc_curve_worst_predictor' width='900'></center>
 
@@ -356,7 +349,7 @@ Let's define the following:
 $$
 t_i = \phi(x_i)^T \theta \\
 p_i = \sigma(t_i) \\
-t_i = log(\frac{p_i}{1 - p_i}) \\
+t_i = \log(\frac{p_i}{1 - p_i}) \\
 1 - \sigma(t_i) = \sigma(-t_i) \\
 \frac{d}{dt}  \sigma(t) =  \sigma(t) \sigma(-t)
 $$
@@ -364,28 +357,28 @@ $$
 Now, we can simplify the cross-entropy loss
 $$
 \begin{align}
-y_i log(p_i) + (1 - y_i)log(1 - p_i) &= y_i log(\frac{p_i}{1 - p_i}) + log(1 - p_i) \\
-&= y_i \phi(x_i)^T + log(\sigma(-\phi(x_i)^T \theta))
+y_i \log(p_i) + (1 - y_i) \log(1 - p_i) &= y_i \log(\frac{p_i}{1 - p_i}) + \log(1 - p_i) \\
+&= y_i \phi(x_i)^T + \log(\sigma(-\phi(x_i)^T \theta))
 \end{align}
 $$
 
 Hence, the optimal $\hat{\theta}$ is 
-$$\argmin_{\theta} - \frac{1}{n} \sum_{i=1}^n (y_i \phi(x_i)^T + log(\sigma(-\phi(x_i)^T \theta)))$$ 
+$$\text{argmin}_{\theta} - \frac{1}{n} \sum_{i=1}^n (y_i \phi(x_i)^T + \log(\sigma(-\phi(x_i)^T \theta)))$$ 
 
-We want to minimize $$L(\theta) = - \frac{1}{n} \sum_{i=1}^n (y_i \phi(x_i)^T + log(\sigma(-\phi(x_i)^T \theta)))$$
+We want to minimize $$L(\theta) = - \frac{1}{n} \sum_{i=1}^n (y_i \phi(x_i)^T + \log(\sigma(-\phi(x_i)^T \theta)))$$
 
 So we take the derivative 
 $$ 
 \begin{align}
-\triangledown_{\theta} L(\theta) &= - \frac{1}{n} \sum_{i=1}^n \triangledown_{\theta} y_i \phi(x_i)^T + \triangledown_{\theta} log(\sigma(-\phi(x_i)^T \theta)) \\
-&= - \frac{1}{n} \sum_{i=1}^n y_i \phi(x_i) + \triangledown_{\theta} log(\sigma(-\phi(x_i)^T \theta)) \\
+\triangledown_{\theta} L(\theta) &= - \frac{1}{n} \sum_{i=1}^n \triangledown_{\theta} y_i \phi(x_i)^T + \triangledown_{\theta} \log(\sigma(-\phi(x_i)^T \theta)) \\
+&= - \frac{1}{n} \sum_{i=1}^n y_i \phi(x_i) + \triangledown_{\theta} \log(\sigma(-\phi(x_i)^T \theta)) \\
 &= - \frac{1}{n} \sum_{i=1}^n y_i \phi(x_i) + \frac{1}{\sigma(-\phi(x_i)^T \theta)} \triangledown_{\theta} \sigma(-\phi(x_i)^T \theta) \\
 &= - \frac{1}{n} \sum_{i=1}^n y_i \phi(x_i) + \frac{\sigma(-\phi(x_i)^T \theta)}{\sigma(-\phi(x_i)^T \theta)} \sigma(\phi(x_i)^T \theta)\triangledown_{\theta} \sigma(-\phi(x_i)^T \theta) \\
 &= - \frac{1}{n} \sum_{i=1}^n (y_i - \sigma(\phi(x_i)^T \theta)\phi(x_i))
 \end{align}
 $$
 
-Setting the derivative to 0 and solving for $\hat{\theta}$, we find that there's no general analytic solution. Therefore, we must solve using numeric methods. 
+Setting the derivative equal to 0 and solving for $\hat{\theta}$, we find that there's no general analytic solution. Therefore, we must solve using numeric methods. 
 
 ### Gradient Descent Update Rule
 $$\theta^{(0)} \leftarrow \text{initial vector (random, zeros, ...)} $$
@@ -396,6 +389,6 @@ $$ \theta^{(\tau + 1)} \leftarrow \theta^{(\tau)} + \rho(\tau)\left( \frac{1}{n}
 ### Stochastic Gradient Descent Update Rule
 $$\theta^{(0)} \leftarrow \text{initial vector (random, zeros, ...)} $$
 
-For $\tau$ from 0 to convergence, let $B ~ \text{Random subset of indices}$. 
+For $\tau$ from 0 to convergence, let $B$ ~ $\text{Random subset of indices}$. 
 $$ \theta^{(\tau + 1)} \leftarrow \theta^{(\tau)} + \rho(\tau)\left( \frac{1}{|B|} \sum_{i \in B} \triangledown_{\theta} L_i(\theta) \mid_{\theta = \theta^{(\tau)}}\right) $$
 
