@@ -96,7 +96,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#sigma" id="toc-sigma" class="nav-link" data-scroll-target="#sigma"><span class="math inline">\(\Sigma\)</span></a></li>
   <li><a href="#vt" id="toc-vt" class="nav-link" data-scroll-target="#vt"><span class="math inline">\(V^T\)</span></a></li>
   <li><a href="#svd-geometric-perspective" id="toc-svd-geometric-perspective" class="nav-link" data-scroll-target="#svd-geometric-perspective">SVD: Geometric Perspective</a></li>
-  <li><a href="#svd-in-numpy" id="toc-svd-in-numpy" class="nav-link" data-scroll-target="#svd-in-numpy">SVD in <code>numpy</code></a></li>
+  <li><a href="#svd-in-numpy" id="toc-svd-in-numpy" class="nav-link" data-scroll-target="#svd-in-numpy">SVD in <code>NumPy</code></a></li>
   </ul></li>
   <li><a href="#pca-with-svd" id="toc-pca-with-svd" class="nav-link" data-scroll-target="#pca-with-svd">PCA with SVD</a></li>
   <li><a href="#bonus-pca-vs.-regression" id="toc-bonus-pca-vs.-regression" class="nav-link" data-scroll-target="#bonus-pca-vs.-regression">(Bonus) PCA vs.&nbsp;Regression</a>
@@ -135,85 +135,96 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Learning Outcomes TODO
+Learning Outcomes
 </div>
 </div>
 <div class="callout-body-container callout-body">
 <ul>
-<li>Define and carry out procedure of PCA</li>
-<li>Understand connection between PCA and SVD</li>
+<li>Discuss the dimensionality of a dataset and strategies for dimensionality reduction</li>
+<li>Define and carry out the procedure of PCA</li>
+<li>Understand the connection between PCA and SVD</li>
 </ul>
 </div>
 </div>
 <section id="dimensionality" class="level2">
 <h2 class="anchored" data-anchor-id="dimensionality">Dimensionality</h2>
-<p>So far, we’ve used visualizations like rugplots or scatterplots to help us identify clusters in our dataset. Since we humans are 3D beings, we can’t visualize beyond three dimensions, but many datasets come with more than three features. In order to visualize multidimensional data, we can reduce the dataset to lower dimensions through <strong>dimensionality reduction</strong>.</p>
-<p>Previously, we have been working with data tables with rows and columns. These rows and columns corresponded to observations and attributes about said observations. Now, we have to be a bit more clear with our wording to follow the language of linear algebra.</p>
-<p>Suppose we have a dataset of: - N observations (data points/rows) - d attributes (features/columns).</p>
-<p>In Linear Algebra, we think of data being a collection of vectors. Vectors have a <em>dimension</em>, meaning they have some number of unique elements. Row and column now denotes the direction a vector is written (horizontally, like a row, or vertically, like a column):</p>
-<p>Linear Algebra views our data as a matrix: - N row vectors in a d-Dimensions, OR - d column vectors in an N-Dimensions.</p>
+<p>Previously, we have been working with data tables with rows and columns. These rows and columns correspond to observations and attributes about said observations. Now, we have to be a bit more clear with our wording to follow the language of linear algebra.</p>
+<p>Suppose we have a dataset of:</p>
+<ul>
+<li>N observations (data points/rows)</li>
+<li>d attributes (features/columns)</li>
+</ul>
+<p>In Linear Algebra, we think of data being a collection of vectors. Vectors have a <em>dimension</em>, meaning they have some number of unique elements. Row and column now denote the direction a vector is written (horizontally, like a row, or vertically, like a column):</p>
+<p>Linear Algebra views our data as a matrix:</p>
+<ul>
+<li>N row vectors in a d-Dimensions, OR</li>
+<li>d column vectors in an N-Dimensions</li>
+</ul>
 <p><strong>Dimensionality</strong> of data is a complex topic. Sometimes, it is clear from looking at the number of rows/columns, but other times it is not.</p>
 <center>
-<img src="images/dataset_dims.png">
+<img src="images/dataset_dims.png" width="600vw">
 </center>
+<p><br> So far, we’ve used visualizations like rugplots or scatterplots to help us identify clusters in our dataset. Since we humans are 3D beings, we can’t visualize beyond three dimensions, but many datasets come with more than three features. In order to visualize multidimensional data, we can reduce the dataset to lower dimensions through <strong>dimensionality reduction</strong>.</p>
 <p>For example, the dataset below has 4 columns, but the <code>Weight (lbs)</code> column is actually just a linear transformation of the <code>Weight (kg)</code> column. Thus, no new information is captured, and the matrix of our dataset has a (column) rank of 3! Despite having 4 columns, we still say that this data is 3-dimensional.</p>
 <center>
-<img src="images/dataset4.png">
+<img src="images/dataset4.png" width="400vw">
 </center>
-<p>Plotting the weight columns together reveals the key visual intuition. While the two columns visually span a 2-d space as a line, the data does not deviate at all from that singular line. This means that one of the weight columns are redundant! Even given the option to cover the whole 2d space, the data below does not. It might as well not have this dimension, which is why we still do not consider the data below to span more than 1 dimension.</p>
+<p>Plotting the weight columns together reveals the key visual intuition. While the two columns visually span a 2D space as a line, the data does not deviate at all from that singular line. This means that one of the weight columns is redundant! Even given the option to cover the whole 2D space, the data below does not. It might as well not have this dimension, which is why we still do not consider the data below to span more than 1 dimension.</p>
 <center>
 <img src="images/dataset3.png" width="400vw">
 </center>
-<p>What happens when there are outliers? Below, we’ve added one outlier point to the dataset above, and just that is enough toi change the rank of the matrix from 1 to 2 dimensions. However, the data is still very much 1-dimensional.</p>
+<p>What happens when there are outliers? Below, we’ve added one outlier point to the dataset above, and just that is enough to change the rank of the matrix from 1 to 2 dimensions. However, the data is still very much 1-dimensional.</p>
 <center>
 <img src="images/dataset3_outlier.png" width="400vw">
 </center>
-<p>As such, dimensionality reduction is generally an <em>approximation</em> of the original data that’s achieved through projecting the data onto a desired dimension. However, there are many ways to project a dataset onto a lower dimension. How do we choose the best one?</p>
+<p>As such, dimensionality reduction is generally an <em>approximation</em> of the original data that’s achieved by projecting the data onto a desired dimension. However, there are many ways to project a dataset onto a lower dimension. How do we choose the best one?</p>
 <center>
-<img src="images/diff_reductions.png" width="1000vw">
+<img src="images/diff_reductions.png" width="800vw">
 </center>
-<p>In general, we want the projection that is the best approximation for the original data (the graph on the right). In other words, we want the projection that capture the most variance of the original data. In the next section, we’ll see how this is calculated.</p>
+<p><br> In general, we want the projection that is the best approximation for the original data (the graph on the right). In other words, we want the projection that captures the most variance of the original data. In the next section, we’ll see how this is calculated.</p>
 </section>
 <section id="matrix-as-transformation" class="level2">
 <h2 class="anchored" data-anchor-id="matrix-as-transformation">Matrix as Transformation</h2>
 <p>Consider the matrix multiplication example below:</p>
 <center>
-<img src="images/matmul.png">
+<img src="images/matmul.png" width="700vw">
 </center>
 <ul>
-<li>For table 1, each row of the fruits matrix represents one bowl of fruit; the first bowl/row has 2 apples, 2 lemons, and 2 melons.</li>
-<li>For table 2, each column of the dollars matrix represents the cost of fruit at a store; the first store/column charges 2 dollars for an apple, 1 dollar for a lemon, and 4 dollars for a melon.</li>
-<li>The output is the cost of each bowl at each store</li>
+<li>For table 1, each row of the fruits matrix represents one bowl of fruit; for example, the first bowl/row has 2 apples, 2 lemons, and 2 melons.</li>
+<li>For table 2, each column of the dollars matrix represents the cost of fruit at a store; for example, the first store/column charges 2 dollars for an apple, 1 dollar for a lemon, and 4 dollars for a melon.</li>
+<li>The output is the cost of each bowl at each store.</li>
 </ul>
-In general, there are two ways to interpret matrix multiplication: 1. Row dot column to get each datapoint. In this view, we perform multiple linear operations on the data
+<p>In general, there are two ways to interpret matrix multiplication:</p>
+<ol type="1">
+<li>Row dot column to get each datapoint. In this view, we perform multiple linear operations on the data
 <center>
-<img src="images/matmul2.png">
-</center>
-<ol start="2" type="1">
+<img src="images/matmul2.png" width="550vw">
+</center></li>
 <li>Linear transformation of columns
 <center>
-<img src="images/matmul3.png">
+<img src="images/matmul3.png" width="550vw">
 </center></li>
 </ol>
 </section>
 <section id="principal-component-analysis-pca" class="level2">
 <h2 class="anchored" data-anchor-id="principal-component-analysis-pca">Principal Component Analysis (PCA)</h2>
-<p>In PCA, our goal is to transform observations from high-dimensional data down to low dimensions (often 2, as most visualizations are 2D) through linear transformations. In other words, we want to find a linear transformation that creates a low-dimension representation which captures as much of the original data’s <em>total variance</em> as possible.</p>
+<p>In PCA, our goal is to transform observations from high-dimensional data down to low dimensions (often 2, as most visualizations are 2D) through linear transformations. In other words, we want to find a linear transformation that creates a low-dimension representation that captures as much of the original data’s <em>total variance</em> as possible.</p>
 <center>
-<img src="images/PCA_1.png">
+<img src="images/PCA_1.png" width="600vw">
 </center>
-<p>We often perform PCA during the Exploratory Data Analysis (EDA) stage of our data science lifecycle when we don’t know what model to use; it helps us with</p>
+<p>We often perform PCA during the Exploratory Data Analysis (EDA) stage of our data science lifecycle when we don’t know what model to use. It helps us with:</p>
 <ul>
 <li>Visually identifying clusters of similar observations in high dimensions.</li>
-<li>Removing irrelevant dimensions if we suspect that the dataset is inherently low rank. For example, if the columns are collinear: there are many attributes but only a few mostly determine the rest through linear associations.</li>
+<li>Removing irrelevant dimensions if we suspect that the dataset is inherently low rank. For example, if the columns are collinear, there are many attributes but only a few mostly determine the rest through linear associations.</li>
 <li>Finding a small basis for representing variations in complex things, e.g., images, genes.</li>
-<li>Reducing the number of dimensions to make some computation cheaper.</li>
+<li>Reducing the number of dimensions to make some computations cheaper.</li>
 </ul>
 <center>
-<img src="images/pca_example.png">
+<img src="images/pca_example.png" width="550vw">
 </center>
 <section id="pca-procedure-overview" class="level3">
 <h3 class="anchored" data-anchor-id="pca-procedure-overview">PCA Procedure (Overview)</h3>
+<p>To perform PCA on a matrix:</p>
 <ol type="1">
 <li>Center the data matrix by subtracting the mean of each attribute column.</li>
 <li>To find the <span class="math inline">\(i\)</span>-th principal component <span class="math inline">\(v_i\)</span>:
@@ -224,13 +235,13 @@ In general, there are two ways to interpret matrix multiplication: 1. Row dot co
 <li>Choose <span class="math inline">\(v\)</span> such that it is orthogonal to all previous principal components.</li>
 </ol></li>
 </ol>
-<p><span class="math inline">\(k\)</span> principal components capture the most variance of any <span class="math inline">\(k\)</span>-dimensional reduction of the data matrix.</p>
-<p>In practice, however, we don’t carry out the procedures in step 2 because it takes too long to compute. Instead, we use singular value decomposition (SVD) to efficiently find all principal components.</p>
+<p>The <span class="math inline">\(k\)</span> principal components capture the most variance of any <span class="math inline">\(k\)</span>-dimensional reduction of the data matrix.</p>
+<p>In practice, however, we don’t carry out the procedures in step 2 because they take too long to compute. Instead, we use singular value decomposition (SVD) to efficiently find all principal components.</p>
 </section>
 </section>
 <section id="singular-value-decomposition-svd" class="level2">
 <h2 class="anchored" data-anchor-id="singular-value-decomposition-svd">Singular Value Decomposition (SVD)</h2>
-<p>Singular value decomposition (SVD) is an important concept in linear algebra. Since this class requires a linear algebra course (MATH 54, 56 or EECS 16A) as a pre/co-requisite, we assume you have taken (or are taking) a linear algebra course and will not explain SVD in its entirety. In particular, we will go over:</p>
+<p>Singular value decomposition (SVD) is an important concept in linear algebra. Since this class requires a linear algebra course (MATH 54, 56 or EECS 16A) as a pre/co-requisite, we assume you have taken or are taking a linear algebra course, so we won’t explain SVD in its entirety. In particular, we will go over:</p>
 <ul>
 <li>Why SVD is a valid decomposition of rectangular matrices</li>
 <li>Why PCA is an application of SVD.</li>
@@ -246,11 +257,16 @@ In general, there are two ways to interpret matrix multiplication: 1. Row dot co
 </div>
 </div>
 <div class="callout-body-container callout-body">
-Orthonormal is a combination of two words: orthogonal and normal. When we say the columns of a matrix are orthonormal, we say that (1) the columns are all orthogonal to each other (all pairs of columns have a dot product of zero) and (2) all columns are unit vectors (he length of each column vector is 1)
+<p>Orthonormal is a combination of two words: orthogonal and normal.</p>
+When we say the columns of a matrix are orthonormal, we say that 1. The columns are all orthogonal to each other (all pairs of columns have a dot product of zero) 2. All columns are unit vectors (the length of each column vector is 1)
 <center>
-<img src="images/orthonormal.png">
+<img src="images/orthonormal.png" width="400vw">
 </center>
-<p>Orthonormal matrices have a few important properties * <strong>Orthonormal inverse</strong>: If an <span class="math inline">\(m \times n\)</span> matrix <span class="math inline">\(Q\)</span> has orthonormal columns, <span class="math inline">\(QQ^T= Iₘ\)</span> and <span class="math inline">\(Q^TQ=Iₙ\)</span>. * <strong>Rotation of coordinates</strong>: the linear transformation represented by an orthonormal matrix is often a rotation (and less often a reflection). We can imagine columns of the matrix as where the unit vectors of the original space will land.</p>
+<p>Orthonormal matrices have a few important properties</p>
+<ul>
+<li><strong>Orthonormal inverse</strong>: If an <span class="math inline">\(m \times n\)</span> matrix <span class="math inline">\(Q\)</span> has orthonormal columns, <span class="math inline">\(QQ^T= Iₘ\)</span> and <span class="math inline">\(Q^TQ=Iₙ\)</span>.</li>
+<li><strong>Rotation of coordinates</strong>: the linear transformation represented by an orthonormal matrix is often a rotation (and less often a reflection). We can imagine columns of the matrix as where the unit vectors of the original space will land.</li>
+</ul>
 </div>
 </div>
 <div class="callout callout-style-default callout-tip no-icon callout-titled">
@@ -266,65 +282,71 @@ Orthonormal is a combination of two words: orthogonal and normal. When we say th
 <p><strong>Diagonal matrices</strong> are square matrices with non-zero values on the diagonal axis and zero everywhere else.</p>
 <p>Right-multiplied diagonal matrices scale each column up or down by a constant factor. Geometrically, this transformation can be viewed as scaling the coordinate system.</p>
 <center>
-<img src="images/diag_matrix.png">
+<img src="images/diag_matrix.png" width="600vw">
 </center>
 </div>
 </div>
 <p>Singular value decomposition (SVD) describes a matrix <span class="math inline">\(X\)</span>’s decomposition into three matrices: <span class="math display">\[ X = U \Sigma V^T \]</span></p>
-<p>Let’s break down each of these terms one-by-one</p>
+<p>Let’s break down each of these terms one by one.</p>
 <section id="u" class="level3">
 <h3 class="anchored" data-anchor-id="u"><span class="math inline">\(U\)</span></h3>
 <ul>
-<li><span class="math inline">\(U\)</span> is an <span class="math inline">\(n\)</span> by <span class="math inline">\(d\)</span> matrix: <span class="math inline">\(U \in \mathbb{R}^{n \times d}\)</span>.</li>
-<li>Its columns are <strong>orthonormal</strong>: <span class="math inline">\(\bar{u_i}^T\bar{u_j} = 0\)</span> for all pairs <span class="math inline">\(i, j\)</span>, and all vectors <span class="math inline">\(\bar{u_i}\)</span> are unit vectors with length = 1.</li>
+<li><span class="math inline">\(U\)</span> is an <span class="math inline">\(n \times d\)</span> matrix: <span class="math inline">\(U \in \mathbb{R}^{n \times d}\)</span>.</li>
+<li>Its columns are <strong>orthonormal</strong>
+<ul>
+<li><span class="math inline">\(\bar{u_i}^T\bar{u_j} = 0\)</span> for all pairs <span class="math inline">\(i, j\)</span></li>
+<li>all vectors <span class="math inline">\(\bar{u_i}\)</span> are unit vectors with length = 1.</li>
+</ul></li>
 <li>Columns of U are called the <strong>left singular vectors</strong>.</li>
 <li><span class="math inline">\(UU^T = I_n\)</span> and <span class="math inline">\(U^TU = I_d\)</span>.</li>
 <li>We can think of <span class="math inline">\(U\)</span> as a rotation.</li>
 </ul>
 <center>
-<img src="images/u.png">
+<img src="images/u.png" width="600vw">
 </center>
 </section>
 <section id="sigma" class="level3">
 <h3 class="anchored" data-anchor-id="sigma"><span class="math inline">\(\Sigma\)</span></h3>
 <ul>
-<li><span class="math inline">\(\Sigma\)</span> is a <span class="math inline">\(d\)</span> by <span class="math inline">\(d\)</span> matrix: <span class="math inline">\(\Sigma \in \mathbb{R}^{d \times d}\)</span>.</li>
+<li><span class="math inline">\(\Sigma\)</span> is a <span class="math inline">\(d \times d\)</span> matrix: <span class="math inline">\(\Sigma \in \mathbb{R}^{d \times d}\)</span>.</li>
 <li>The majority of the matrix is zero</li>
 <li>It has <span class="math inline">\(r\)</span> <strong>non-zero</strong> <strong>singular values</strong>, and <span class="math inline">\(r\)</span> is the rank of <span class="math inline">\(X\)</span></li>
 <li>Diagonal values (<strong>singular values</strong> <span class="math inline">\(\sigma_1, \sigma_2, ... \sigma_r\)</span>), are ordered from greatest to least <span class="math inline">\(\sigma_1 &gt; \sigma_2 &gt; ... &gt; \sigma_r\)</span></li>
 <li>We can think of <span class="math inline">\(\Sigma\)</span> as a rotation.</li>
 </ul>
 <center>
-<img src="images/sigma.png">
+<img src="images/sigma.png" width="400vw">
 </center>
 </section>
 <section id="vt" class="level3">
 <h3 class="anchored" data-anchor-id="vt"><span class="math inline">\(V^T\)</span></h3>
 <ul>
-<li><span class="math inline">\(V^T\)</span> is an <span class="math inline">\(d\)</span> by <span class="math inline">\(d\)</span> matrix: <span class="math inline">\(U \in \mathbb{R}^{d \times d}\)</span>.</li>
+<li><span class="math inline">\(V^T\)</span> is an <span class="math inline">\(d \times d\)</span> matrix: <span class="math inline">\(U \in \mathbb{R}^{d \times d}\)</span>.</li>
 <li>Columns of <span class="math inline">\(V\)</span> are orthonormal, so the rows of <span class="math inline">\(V^T\)</span> are orthonormal</li>
 <li>Columns of <span class="math inline">\(V\)</span> are called the <strong>right singular vectors</strong>.</li>
 <li><span class="math inline">\(VV^T = V^TV = I_d\)</span></li>
-<li>WE can think of <span class="math inline">\(V\)</span> as a rotation.</li>
+<li>We can think of <span class="math inline">\(V\)</span> as a rotation.</li>
 </ul>
 <center>
-<img src="images/v.png">
+<img src="images/v.png" width="300vw">
 </center>
 </section>
 <section id="svd-geometric-perspective" class="level3">
 <h3 class="anchored" data-anchor-id="svd-geometric-perspective">SVD: Geometric Perspective</h3>
 <center>
-<img src="images/svd.png">
+<img src="images/svd.png" width="500vw">
 </center>
-We’ve seen that <span class="math inline">\(U\)</span> and <span class="math inline">\(V\)</span> represent rotations, and <span class="math inline">\(\Sigma\)</span> represents scaling. Therefore, SVD says that any matrix can be decomposed into a rotation, then a scaling, and another rotation.
+<br> We’ve seen that <span class="math inline">\(U\)</span> and <span class="math inline">\(V\)</span> represent rotations, and <span class="math inline">\(\Sigma\)</span> represents scaling. Therefore, SVD says that any matrix can be decomposed into a rotation, then a scaling, and another rotation.
 <center>
-<img src="images/svd_geo.png">
+<img src="images/svd_geo.png" width="600vw">
 </center>
 </section>
 <section id="svd-in-numpy" class="level3">
-<h3 class="anchored" data-anchor-id="svd-in-numpy">SVD in <code>numpy</code></h3>
+<h3 class="anchored" data-anchor-id="svd-in-numpy">SVD in <code>NumPy</code></h3>
 <p>For this demo, we’ll continue working with our rectangular dataset from before with <span class="math inline">\(n=100\)</span> rows and <span class="math inline">\(d=4\)</span> columns.</p>
-<div class="cell" data-execution_count="1">
+<div class="cell" data-execution_count="2">
+<details>
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -337,7 +359,8 @@ We’ve seen that <span class="math inline">\(U\)</span> and <span class="math i
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>rectangle <span class="op">=</span> pd.read_csv(<span class="st">"data/rectangle_data.csv"</span>)</span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>rectangle.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="1">
+</details>
+<div class="cell-output cell-output-display" data-execution_count="2">
 <div>
 
 
@@ -393,21 +416,21 @@ We’ve seen that <span class="math inline">\(U\)</span> and <span class="math i
 </div>
 </div>
 </div>
-<p>In <code>numpy</code>, the SVD algorith is already written and can be called with <code>np.linalg.svd</code> (<a href="https://numpy.org/doc/stable/reference/generated/numpy.linalg.svd.html">documentation</a>). There are multiple versions of SVD; to get the version that we will follow, we need to set the <code>full_matrices</code> parameter to <code>False</code>.</p>
-<div class="cell" data-execution_count="2">
+<p>In <code>NumPy</code>, the SVD algorithm is already written and can be called with <code>np.linalg.svd</code> (<a href="https://numpy.org/doc/stable/reference/generated/numpy.linalg.svd.html">documentation</a>). There are multiple versions of SVD; to get the version that we will follow, we need to set the <code>full_matrices</code> parameter to <code>False</code>.</p>
+<div class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>U, S, Vt <span class="op">=</span> np.linalg.svd(rectangle, full_matrices <span class="op">=</span> <span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>First, let’s examine <code>U</code>. As we can see, it’s dimensions are <span class="math inline">\(n \times d\)</span></p>
-<div class="cell" data-execution_count="3">
+<p>First, let’s examine <code>U</code>. As we can see, it’s dimensions are <span class="math inline">\(n \times d\)</span>.</p>
+<div class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>U.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="3">
+<div class="cell-output cell-output-display" data-execution_count="4">
 <pre><code>(100, 4)</code></pre>
 </div>
 </div>
-<p>The first 5 rows of <code>U</code> are shown below</p>
-<div class="cell" data-execution_count="4">
+<p>The first 5 rows of <code>U</code> are shown below.</p>
+<div class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>pd.DataFrame(U).head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="4">
+<div class="cell-output cell-output-display" data-execution_count="5">
 <div>
 
 
@@ -427,35 +450,35 @@ We’ve seen that <span class="math inline">\(U\)</span> and <span class="math i
 <td>-0.155151</td>
 <td>0.064830</td>
 <td>-0.029935</td>
-<td>0.638430</td>
+<td>0.383675</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">1</td>
 <td>-0.038370</td>
 <td>-0.089155</td>
 <td>0.062019</td>
-<td>-0.351010</td>
+<td>-0.544421</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">2</td>
 <td>-0.020357</td>
 <td>-0.081138</td>
 <td>0.058997</td>
-<td>0.018831</td>
+<td>0.053418</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">3</td>
 <td>-0.101519</td>
 <td>-0.076203</td>
 <td>-0.148160</td>
-<td>-0.199067</td>
+<td>-0.122119</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">4</td>
 <td>-0.218973</td>
 <td>0.206423</td>
 <td>0.007274</td>
-<td>-0.079833</td>
+<td>-0.058722</td>
 </tr>
 </tbody>
 </table>
@@ -465,40 +488,40 @@ We’ve seen that <span class="math inline">\(U\)</span> and <span class="math i
 </div>
 <p><span class="math inline">\(\Sigma\)</span> is a little different in <code>NumPy</code>. Since the only useful values in the diagonal matrix <span class="math inline">\(\Sigma\)</span> are the singular values on the diagonal axis, only those values are returned and they are stored in an array.</p>
 <p>Our <code>rectangle_data</code> has a rank of <span class="math inline">\(3\)</span>, so we should have 3 non-zero singular values, <strong>sorted from largest to smallest</strong>.</p>
-<div class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>S</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="5">
-<pre><code>array([3.62932568e+02, 6.29904732e+01, 2.56544651e+01, 2.56949990e-15])</code></pre>
-</div>
-</div>
-<p>While none of the values are 0, notice that the last value is so small (<span class="math inline">\(10^{-15}\)</span>) that it’s practically <span class="math inline">\(0\)</span>, and we can round the values.</p>
 <div class="cell" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>np.<span class="bu">round</span>(S)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>S</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
+<pre><code>array([3.62932568e+02, 6.29904732e+01, 2.56544651e+01, 2.86529477e-15])</code></pre>
+</div>
+</div>
+<p>It seems like we have 4 non-zero values instead of 3, but notice that the last value is so small (<span class="math inline">\(10^{-15}\)</span>) that it’s practically <span class="math inline">\(0\)</span>. Hence, we can round the values to get 3 singular values.</p>
+<div class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>np.<span class="bu">round</span>(S)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="7">
 <pre><code>array([363.,  63.,  26.,   0.])</code></pre>
 </div>
 </div>
 <p>To get <code>S</code> in matrix format, we use <code>np.diag</code>.</p>
-<div class="cell" data-execution_count="7">
+<div class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>Sm <span class="op">=</span> np.diag(S)</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>Sm</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="7">
+<div class="cell-output cell-output-display" data-execution_count="8">
 <pre><code>array([[3.62932568e+02, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00],
        [0.00000000e+00, 6.29904732e+01, 0.00000000e+00, 0.00000000e+00],
        [0.00000000e+00, 0.00000000e+00, 2.56544651e+01, 0.00000000e+00],
-       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 2.56949990e-15]])</code></pre>
+       [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 2.86529477e-15]])</code></pre>
 </div>
 </div>
-<p>Finally, we can see that <code>Vt</code> is indeed a <span class="math inline">\(d \times d\)</span> matrix</p>
-<div class="cell" data-execution_count="8">
+<p>Finally, we can see that <code>Vt</code> is indeed a <span class="math inline">\(d \times d\)</span> matrix.</p>
+<div class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>Vt.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="8">
+<div class="cell-output cell-output-display" data-execution_count="9">
 <pre><code>(4, 4)</code></pre>
 </div>
 </div>
-<div class="cell" data-execution_count="9">
+<div class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>pd.DataFrame(Vt)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="9">
+<div class="cell-output cell-output-display" data-execution_count="10">
 <div>
 
 
@@ -536,10 +559,10 @@ We’ve seen that <span class="math inline">\(U\)</span> and <span class="math i
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">3</td>
-<td>-0.666667</td>
-<td>-0.666667</td>
-<td>-5.257886e-17</td>
-<td>0.333333</td>
+<td>0.666667</td>
+<td>0.666667</td>
+<td>-5.551115e-17</td>
+<td>-0.333333</td>
 </tr>
 </tbody>
 </table>
@@ -547,10 +570,10 @@ We’ve seen that <span class="math inline">\(U\)</span> and <span class="math i
 </div>
 </div>
 </div>
-<p>To check that this SVD is a valid decomposition, we can reverse it and see if it matches our original table (it does yay!).</p>
-<div class="cell" data-execution_count="10">
+<p>To check that this SVD is a valid decomposition, we can reverse it and see if it matches our original table (it does, yay!).</p>
+<div class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>pd.DataFrame(U <span class="op">@</span> Sm <span class="op">@</span> Vt).head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="10">
+<div class="cell-output cell-output-display" data-execution_count="11">
 <div>
 
 
@@ -610,16 +633,19 @@ We’ve seen that <span class="math inline">\(U\)</span> and <span class="math i
 </section>
 <section id="pca-with-svd" class="level2">
 <h2 class="anchored" data-anchor-id="pca-with-svd">PCA with SVD</h2>
-<p>Principle Component Analysis PCA and Singular Value Decomposition can be easily mixed up, especially when you have to keep track of so many acronyms. Here is a quick summary:</p>
+<p>Principal Component Analysis (PCA) and Singular Value Decomposition (SVD) can be easily mixed up, especially when you have to keep track of so many acronyms. Here is a quick summary:</p>
 <ul>
 <li>SVD: a linear algebra algorithm that splits a matrix into 3 component parts.</li>
 <li>PCA: a data science procedure used for dimensionality reduction that <em>uses</em> SVD as one of the steps.</li>
 </ul>
-<p>In order to get the first <span class="math inline">\(k\)</span> principal components from an <span class="math inline">\(n \times d\)</span> matrix <span class="math inline">\(X\)</span>, we: 1. Center <span class="math inline">\(X\)</span> by subtracting the mean of each column</p>
-<div class="cell" data-execution_count="11">
+<p>In order to get the first <span class="math inline">\(k\)</span> principal components from an <span class="math inline">\(n \times d\)</span> matrix <span class="math inline">\(X\)</span>, we:</p>
+<ol type="1">
+<li>Center <span class="math inline">\(X\)</span> by subtracting the mean from each column. Notice how we specify <code>axis=0</code> so that the mean is computed per column.</li>
+</ol>
+<div class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>centered_df <span class="op">=</span> rectangle <span class="op">-</span> np.mean(rectangle, axis <span class="op">=</span> <span class="dv">0</span>)</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>centered_df.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="11">
+<div class="cell-output cell-output-display" data-execution_count="12">
 <div>
 
 
@@ -678,75 +704,16 @@ We’ve seen that <span class="math inline">\(U\)</span> and <span class="math i
 <ol start="2" type="1">
 <li>Get the Singular Value Decomposition of centered <span class="math inline">\(X\)</span>: <span class="math inline">\(U\)</span>, <span class="math inline">\(Σ\)</span> and <span class="math inline">\(V^T\)</span></li>
 </ol>
-<div class="cell" data-execution_count="12">
+<div class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>U, S, Vt <span class="op">=</span> np.linalg.svd(centered_df, full_matrices <span class="op">=</span> <span class="va">False</span>)</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>Sm <span class="op">=</span> pd.DataFrame(np.diag(np.<span class="bu">round</span>(S, <span class="dv">1</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ol start="3" type="1">
-<li>Multiply either <span class="math inline">\(UΣ\)</span> or <span class="math inline">\(XV\)</span></li>
+<li>Multiply either <span class="math inline">\(UΣ\)</span> or <span class="math inline">\(XV\)</span>. Mathematically, these give the same result, but computationally, floating point approximation results in slightly different numbers for very small values (check out the right-most column in the cells below).</li>
 </ol>
-<div class="cell" data-execution_count="13">
+<div class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># UΣ </span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>pd.DataFrame(U <span class="op">@</span> np.diag(S)).head(<span class="dv">5</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="13">
-<div>
-
-
-<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">0</th>
-<th data-quarto-table-cell-role="th">1</th>
-<th data-quarto-table-cell-role="th">2</th>
-<th data-quarto-table-cell-role="th">3</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">0</td>
-<td>-26.432217</td>
-<td>0.162686</td>
-<td>0.807998</td>
-<td>-1.447811e-15</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">1</td>
-<td>17.045285</td>
-<td>-2.181451</td>
-<td>0.347732</td>
-<td>3.893239e-15</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">2</td>
-<td>23.245695</td>
-<td>-3.538040</td>
-<td>1.995334</td>
-<td>-4.901321e-16</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">3</td>
-<td>-5.383546</td>
-<td>5.025395</td>
-<td>0.253448</td>
-<td>-3.544636e-16</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">4</td>
-<td>-51.085217</td>
-<td>-2.586948</td>
-<td>2.099919</td>
-<td>-4.133102e-16</td>
-</tr>
-</tbody>
-</table>
-
-</div>
-</div>
-</div>
-<div class="cell" data-execution_count="14">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># XV</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>pd.DataFrame(centered_df <span class="op">@</span> Vt.T).head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="14">
 <div>
 
@@ -767,35 +734,94 @@ We’ve seen that <span class="math inline">\(U\)</span> and <span class="math i
 <td>-26.432217</td>
 <td>0.162686</td>
 <td>0.807998</td>
-<td>-1.539509e-15</td>
+<td>-3.181800e-15</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">1</td>
 <td>17.045285</td>
 <td>-2.181451</td>
 <td>0.347732</td>
-<td>-2.072416e-16</td>
+<td>3.801660e-15</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">2</td>
 <td>23.245695</td>
 <td>-3.538040</td>
 <td>1.995334</td>
-<td>4.588922e-16</td>
+<td>-4.708642e-16</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">3</td>
 <td>-5.383546</td>
 <td>5.025395</td>
 <td>0.253448</td>
-<td>-4.292862e-16</td>
+<td>-2.239496e-16</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">4</td>
 <td>-51.085217</td>
 <td>-2.586948</td>
 <td>2.099919</td>
-<td>-1.650532e-15</td>
+<td>-4.449071e-16</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># XV</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>pd.DataFrame(centered_df <span class="op">@</span> Vt.T).head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="15">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">0</th>
+<th data-quarto-table-cell-role="th">1</th>
+<th data-quarto-table-cell-role="th">2</th>
+<th data-quarto-table-cell-role="th">3</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>-26.432217</td>
+<td>0.162686</td>
+<td>0.807998</td>
+<td>-2.664535e-15</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>17.045285</td>
+<td>-2.181451</td>
+<td>0.347732</td>
+<td>1.332268e-15</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>23.245695</td>
+<td>-3.538040</td>
+<td>1.995334</td>
+<td>2.220446e-15</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>-5.383546</td>
+<td>5.025395</td>
+<td>0.253448</td>
+<td>-2.220446e-15</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>-51.085217</td>
+<td>-2.586948</td>
+<td>2.099919</td>
+<td>-3.552714e-15</td>
 </tr>
 </tbody>
 </table>
@@ -806,11 +832,11 @@ We’ve seen that <span class="math inline">\(U\)</span> and <span class="math i
 <ol start="4" type="1">
 <li>Take the first <span class="math inline">\(k\)</span> columns of <span class="math inline">\(UΣ\)</span> (or <span class="math inline">\(XV\)</span>). These are the first <span class="math inline">\(k\)</span> principal components of <span class="math inline">\(X\)</span>.</li>
 </ol>
-<div class="cell" data-execution_count="15">
+<div class="cell" data-execution_count="16">
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>two_PCs <span class="op">=</span> (U <span class="op">@</span> np.diag(S))[:, :<span class="dv">2</span>] <span class="co"># using UΣ </span></span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>two_PCs <span class="op">=</span> (centered_df <span class="op">@</span> Vt.T).iloc[:, :<span class="dv">2</span>] <span class="co"># using XV</span></span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>pd.DataFrame(two_PCs).head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="15">
+<div class="cell-output cell-output-display" data-execution_count="16">
 <div>
 
 
@@ -859,25 +885,25 @@ We’ve seen that <span class="math inline">\(U\)</span> and <span class="math i
 <h2 class="anchored" data-anchor-id="bonus-pca-vs.-regression">(Bonus) PCA vs.&nbsp;Regression</h2>
 <section id="regression-minimizing-horizontalverticle-error" class="level3">
 <h3 class="anchored" data-anchor-id="regression-minimizing-horizontalverticle-error">Regression: Minimizing Horizontal/Verticle Error</h3>
-<p>Suppose we know the child mortality rate of a given country. Linear regression tries to predict the fertility rate from the mortality rate; for example, if the mortality is 6, we might guess the fertility is near 4. The regression line tells us the “best” prediction of fertility given all possible mortality values by minimizeing the root mean squared error [see vertical red lines, only some shown].</p>
+<p>Suppose we know the child mortality rate of a given country. Linear regression tries to predict the fertility rate from the mortality rate; for example, if the mortality is 6, we might guess the fertility is near 4. The regression line tells us the “best” prediction of fertility given all possible mortality values by minimizing the root mean squared error [see vertical red lines, only some shown].</p>
 <center>
-<img src="images/lin_reg.png">
+<img src="images/lin_reg.png" width="400vw">
 </center>
-<p>We can also perform a regression in the reverse direction, that is, given the fertility, we try to predict the mortality. In this case, we get a different regression line which minimizes the root mean squared length of the horizontal lines.</p>
+<p><br> We can also perform a regression in the reverse direction, that is, given the fertility, we try to predict the mortality. In this case, we get a different regression line which minimizes the root mean squared length of the horizontal lines.</p>
 <center>
-<img src="images/lin_reg_reverse.png">
+<img src="images/lin_reg_reverse.png" width="400vw">
 </center>
 </section>
 <section id="svd-minimizing-perpendicular-error" class="level3">
 <h3 class="anchored" data-anchor-id="svd-minimizing-perpendicular-error">SVD: Minimizing Perpendicular Error</h3>
 <p>The rank 1 approximation is close but not the same as the mortality regression line. Instead of minimizing <em>horizontal</em> or <em>vertical</em> error, our rank 1 approximation minimizes the error <em>perpendicular</em> to the subspace onto which we’re projecting. That is, SVD finds the line such that if we project our data onto that line, the error between the projection and our original data is minimized. The similarity of the rank 1 approximation and the fertility was just a coincidence. Looking at adiposity and bicep size from our body measurements dataset, we see the 1D subspace onto which we are projecting is between the two regression lines.</p>
 <center>
-<img src="images/rank1.png">
+<img src="images/rank1.png" width="400vw">
 </center>
 </section>
 <section id="beyond-1d-and-2d" class="level3">
 <h3 class="anchored" data-anchor-id="beyond-1d-and-2d">Beyond 1D and 2D</h3>
-<p>In higher dimensions, the idea behind principal components is just the same! Suppose we have 30 dimensional data and decide to use the first 5 principal components. Our procedure minimizes the error between the original 30 dimensional data and the projection of that 30 dimensional data on to the “best” 5 dimensional subspace. See <a href="https://www.eecs189.org/static/notes/n10.pdf">CS189</a> for more details.</p>
+<p>In higher dimensions, the idea behind principal components is just the same! Suppose we have 30-dimensional data and decide to use the first 5 principal components. Our procedure minimizes the error between the original 30-dimensional data and the projection of that 30-dimensional data on to the “best” 5-dimensional subspace. See <a href="https://www.eecs189.org/static/notes/n10.pdf">CS189</a> for more details.</p>
 </section>
 </section>
 <section id="bonus-automatic-factorization" class="level2">
@@ -885,15 +911,15 @@ We’ve seen that <span class="math inline">\(U\)</span> and <span class="math i
 <p>One key fact to remember is that the decomposition are not arbitrary. The <em>rank</em> of a matrix limits how small our inner dimensions can be if we want to perfectly recreate our matrix. The proof for this is out of scope.</p>
 <p>Even if we know we have to factorize our matrix using an inner dimension of R, that still leaves a large space of solutions to traverse. What if we have a procedure to automatically factorize a rank R matrix into an R dimensional representation with some transformation matrix?</p>
 <ul>
-<li><p>Lower dimensional representation avoids redundant features.</p></li>
-<li><p>Imagine a 1000 dimensional dataset: If the rank is only 5, it’s much easier to do EDA after this mystery procedure.</p></li>
+<li>Lower dimensional representation avoids redundant features.</li>
+<li>Imagine a 1000-dimensional dataset: If the rank is only 5, it’s much easier to do EDA after this mystery procedure.</li>
 </ul>
-<p>What if we wanted a 2-D representation? Its valuable to compress all of the data that is relevant onto as few dimensions as possible in order to plot it efficiently. Some 2D matrices yield better approximations than others. How well can we do?</p>
+<p>What if we wanted a 2D representation? It’s valuable to compress all of the data that is relevant onto as few dimensions as possible in order to plot it efficiently. Some 2D matrices yield better approximations than others. How well can we do?</p>
 </section>
 <section id="bonus-proof-of-component-score" class="level2">
 <h2 class="anchored" data-anchor-id="bonus-proof-of-component-score">(Bonus) Proof of Component Score</h2>
-<p>The proof defining component score out of scope for this class, but it is included below for your convenience.</p>
-<p><em>Setup</em>: Consider the design matrix <span class="math inline">\(X \in \mathbb{R}^{n \times d}\)</span>, where the <span class="math inline">\(j\)</span>-th column (corresponding to the <span class="math inline">\(j\)</span>-th feature) is <span class="math inline">\(x_j \in \mathbb{R}^n\)</span> and the element in row <span class="math inline">\(i\)</span>, column <span class="math inline">\(j\)</span> is <span class="math inline">\(x_{ij}\)</span>. Further define <span class="math inline">\(\tilde{X}\)</span> as the <strong>centered</strong> design matrix. The <span class="math inline">\(j\)</span>-th column is <span class="math inline">\(\tilde{x}_j \in \mathbb{R}^n\)</span> and the element in row <span class="math inline">\(i\)</span>, column <span class="math inline">\(j\)</span> is <span class="math inline">\(\tilde{x}_{ij} = x_{ij} - \bar{x_j}\)</span>, where <span class="math inline">\(\bar{x_j}\)</span> is the mean of the <span class="math inline">\(x_j\)</span> column vector from the original <span class="math inline">\(X\)</span>.</p>
+<p>The proof defining component score is out of scope for this class, but it is included below for your convenience.</p>
+<p><em>Setup</em>: Consider the design matrix <span class="math inline">\(X \in \mathbb{R}^{n \times d}\)</span>, where the <span class="math inline">\(j\)</span>-th column (corresponding to the <span class="math inline">\(j\)</span>-th feature) is <span class="math inline">\(x_j \in \mathbb{R}^n\)</span> and the element in row <span class="math inline">\(i\)</span>, column <span class="math inline">\(j\)</span> is <span class="math inline">\(x_{ij}\)</span>. Further, define <span class="math inline">\(\tilde{X}\)</span> as the <strong>centered</strong> design matrix. The <span class="math inline">\(j\)</span>-th column is <span class="math inline">\(\tilde{x}_j \in \mathbb{R}^n\)</span> and the element in row <span class="math inline">\(i\)</span>, column <span class="math inline">\(j\)</span> is <span class="math inline">\(\tilde{x}_{ij} = x_{ij} - \bar{x_j}\)</span>, where <span class="math inline">\(\bar{x_j}\)</span> is the mean of the <span class="math inline">\(x_j\)</span> column vector from the original <span class="math inline">\(X\)</span>.</p>
 <p><em>Variance</em>: Construct the <strong>covariance matrix</strong>: <span class="math inline">\(\frac{1}{n} \tilde{X}^T \tilde{X} \in \mathbb{R}^{d \times d}\)</span>. The <span class="math inline">\(j\)</span>-th element along the diagonal is the <strong>variance</strong> of the <span class="math inline">\(j\)</span>-th column of the original design matrix <span class="math inline">\(X\)</span>:</p>
 <p><span class="math display">\[\left( \frac{1}{n} \tilde{X}^T \tilde{X} \right)_{jj} = \frac{1}{n} \tilde{x}_j ^T \tilde{x}_j = \frac{1}{n} \sum_{i=i}^n (\tilde{x}_{ij} )^2 = \frac{1}{n} \sum_{i=i}^n (x_{ij} - \bar{x_j})^2\]</span></p>
 <p><em>SVD</em>: Suppose singular value decomposition of the <em>centered</em> design matrix <span class="math inline">\(\tilde{X}\)</span> yields <span class="math inline">\(\tilde{X} = U \Sigma V^T\)</span>, where <span class="math inline">\(U \in \mathbb{R}^{n \times d}\)</span> and <span class="math inline">\(V \in \mathbb{R}^{d \times d}\)</span> are matrices with orthonormal columns, and <span class="math inline">\(\Sigma \in \mathbb{R}^{d \times d}\)</span> is a diagonal matrix with singular values of <span class="math inline">\(\tilde{X}\)</span>.</p>
