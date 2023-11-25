@@ -13,19 +13,7 @@ format:
 jupyter: python3
 ---
 
-## Data Variance and Centering
-
-We define the total variance of a data matrix as the sum of variances of attributes.
-
-Formally, the $i$-th singular value tells us the **component score**, i.e., how much of the data variance is captured by the $i$-th principal component. Supposing the number of datapoints is $n$:
-
-$$\text{i-th component score} = \frac{(\text{i-th singular value}^2)}{n}$$
-
-Summing up the component scores is equivalent to computing the total variance.
-
-**Data Centering**: PCA has a data centering step that precedes any singular value decomposition, where if implemented defines the component score as above.
-
-::: {.callout-note collapse="true"}
+::: {.callout-note}
 ## Learning Outcomes
 
 - Develop a deeper understanding of how to interpret Principal Components Analysis (PCA).
@@ -33,77 +21,6 @@ Summing up the component scores is equivalent to computing the total variance.
 :::
 
 ## PCA Review
-
-### Using Principal Components
-
-Steps to obtain Principal Components via SVD:
-
-1. Center the data matrix by subtracting the mean of each attribute column.
-
-2. To find the $k$ **principal components**:
- - Compute the SVD of the data matrix ($X = U{\Sigma}V^{T}$)
- - The first $k$ columns of $U{\Sigma}$ (or equivalently, $XV$) contain the $k$ principal components of $X$.
- 
-The principal components are a low-dimension representation that capture as much of the original data's total variance as possible. 
-
-The **component scores** sum to the total variance if we center our data.
-$$\text{component score}_i = \frac{\sigma_i^{2}}{N}$$
-
-We can also use the SVD to get a rank-$k$ approximation of $X$, $X_k$.
-
-$$X_k = \sum_{j = 1}^{k} \sigma_ju_jv_j^{T} $$
-
-where $\sigma_j$ is the $j$-th singular value of $X$, $u_j$ is the $j$-th column of $U$, and $v_j$ is the $j$-th column of $V$.
-
-If you want to dive deeper into PCA, [Steve Brunton's SVD Video Series](https://www.youtube.com/playlist?list=PLMrJAkhIeNNSVjnsviglFoY2nXildDCcv) is a great resource.
-
-
-## Case Study: House of Representatives Voting
-
-Let's examine how the House of Representatives (of the 116th Congress, 1st session) voted in the month of September 2019.
-
-Specifically, we’ll look at the records of Roll call votes. From the U.S. Senate ([link](https://www.senate.gov/reference/Index/Votes.htm)):
-
-- Roll call votes occur when a representative or senator votes "yea" or "nay," so that the names of members voting on each side are recorded. A voice vote is a vote in which those in favor or against a measure say "yea" or "nay," respectively, without the names or tallies of members voting on each side being recorded.
-
-
-**Do legislators' roll call votes show a relationship with their political party?**
-
-Please visit this [link](https://data100.datahub.berkeley.edu/hub/user-redirect/git-pull?repo=https%3A%2F%2Fgithub.com%2FDS-100%2Ffa23-student&urlpath=lab%2Ftree%2Ffa23-student%2Flecture%2Flec26%2Flec26-votes.ipynb&branch=main) to see the full Jupyter notebook demo. 
-
-As shown in the demo, the primary goal of PCA is to transform observations from high-dimensional data down to low dimensions through linear transformations. 
-
-A related goal of PCA connects back to the idea that a low-dimension representation of the data should capture the variability of the original data. For example, if the first two singular values are large and the others are relatively small, then two dimensions are probably enough to describe most of what distinguishes one observation from another. However, if this is not the case, then a PCA scatter plot is probably omitting lots of information. 
-
-We can use the following formulas to quantify the amount each principal component contributes to the total variance:
-
-$$ \text{component score} = \frac{\sigma_i^{2}}{N}$$
-
-$$ \text{total variance} = \text{sum of all the component scores} = \sum_{i=1}^k \frac{\sigma_i^{2}}{N} $$
-
-$$ \text{variance ratio of principal component i} = \frac{\text{component score i}}{\text{total variance}} = \frac{\sigma_i^{2} / N}{\sum_{i=1}^k \sigma_i^{2} / N}$$
-
-In Python, assuming you had a 1D `NumPy` array of singular values `s` returned by `np.linalg.svd`, you could compute the list of variances ratios with `s**2 / sum(s**2)`. 
-
-## Interpreting PCA
-
-### PCA Plot
-
-We often plot the first two principal components using a scatter plot, with PC1 on the $x$-axis and PC2 on the $y$-axis. This is often called a PCA plot.
-
-If the first two singular values are large and all others are small, then two dimensions are enough to describe most of what distinguishes one observation from another. If not, then a PCA plot is omitting lots of information.
-
-PCA plots help us assess similarities between our data points and if there are any clusters in our dataset. In the case study before, for example, we could create the following PCA plot:
-
-<center><img src="images/pca_plot.png" alt='pca_plot' width='500'></center>
-
-### Scree Plots
-
-A scree plot shows the **variance ratio** captured by each principal component, with the largest variance ratio first. 
-
-Scree plots help us visually determine the number of dimensions needed to describe the data reasonably. The singular values that fall in the region of the plot after a large drop-off correspond to principal components that are **not** needed to describe the data since they explain a relatively low proportion of the total variance of the data. For example, in the below plot, we could use the "elbow method" just described to figure out that the first 2 PCs capture the bulk of the information. 
-
-<center><img src="images/scree_plot.png" alt='scree_plot' width='500'></center>
 
 ### PCA with SVD
 
@@ -130,15 +47,76 @@ Coupled together, this interpretation also allows us to understand that:
 2. Principal components are **axis-aligned**. That is, if you plot two PCs on a 2D plane, one will lie on the x-axis, the other on the y-axis.
 3. Principal components are **linear combinations** of columns in our data X
 
+### Using Principal Components
 
+Let's summarize the steps to obtain Principal Components via SVD:
+
+1. Center the data matrix by subtracting the mean of each attribute column.
+
+2. To find the $k$ **principal components**:
+
+    a. Compute the SVD of the data matrix ($X = U{\Sigma}V^{T}$)
+    b. The first $k$ columns of $U{\Sigma}$ (or equivalently, $XV$) contain the $k$ **principal components** of $X$.
+
+## Data Variance and Centering
+
+We define the total variance of a data matrix as the sum of variances of attributes. The principal components are a low-dimension representation that capture as much of the original data's total variance as possible. Formally, the $i$-th singular value tells us the **component score**, i.e., how much of the data variance is captured by the $i$-th principal component. Supposing the number of datapoints is $n$:
+
+$$\text{i-th component score} = \frac{(\text{i-th singular value}^2)}{n}$$
+
+Summing up the component scores is equivalent to computing the total variance *if we center our data*.
+
+**Data Centering**: PCA has a data centering step that precedes any singular value decomposition, where if implemented defines the component score as above.
+
+If you want to dive deeper into PCA, [Steve Brunton's SVD Video Series](https://www.youtube.com/playlist?list=PLMrJAkhIeNNSVjnsviglFoY2nXildDCcv) is a great resource.
+
+## Interpreting PCA
+
+
+### Case Study: House of Representatives Voting
+
+Let's examine how the House of Representatives (of the 116th Congress, 1st session) voted in the month of September 2019.
+
+Specifically, we’ll look at the records of Roll call votes. From the U.S. Senate ([link](https://www.senate.gov/reference/Index/Votes.htm)): Roll call votes occur when a representative or senator votes "yea" or "nay" so that the names of members voting on each side are recorded. A voice vote is a vote in which those in favor or against a measure say "yea" or "nay," respectively, without the names or tallies of members voting on each side being recorded.
+
+**Do legislators' roll call votes show a relationship with their political party?**
+
+Please visit this [link](https://data100.datahub.berkeley.edu/hub/user-redirect/git-pull?repo=https%3A%2F%2Fgithub.com%2FDS-100%2Ffa23-student&urlpath=lab%2Ftree%2Ffa23-student%2Flecture%2Flec26%2Flec26-votes.ipynb&branch=main) to see the full Jupyter notebook demo. 
+
+As shown in the demo, the primary goal of PCA is to transform observations from high-dimensional data down to low dimensions through linear transformations. 
+
+A related goal of PCA connects back to the idea that a low-dimension representation of the data should capture the variability of the original data. For example, if the first two singular values are large and the others are relatively small, then two dimensions are probably enough to describe most of what distinguishes one observation from another. However, if this is not the case, then a PCA scatter plot is probably omitting lots of information. 
+
+We can use the following formulas to quantify the amount each principal component contributes to the total variance:
+
+$$ \text{component score} = \frac{\sigma_i^{2}}{N}$$
+
+$$ \text{total variance} = \text{sum of all the component scores} = \sum_{i=1}^k \frac{\sigma_i^{2}}{N} $$
+
+$$ \text{variance ratio of principal component i} = \frac{\text{component score i}}{\text{total variance}} = \frac{\sigma_i^{2} / N}{\sum_{i=1}^k \sigma_i^{2} / N}$$
+
+In Python, assuming you had a 1D `NumPy` array of singular values `s` returned by `np.linalg.svd`, you could compute the list of variances ratios with `s**2 / sum(s**2)`. 
+
+
+### PCA Plot
+
+We often plot the first two principal components using a scatter plot, with PC1 on the $x$-axis and PC2 on the $y$-axis. This is often called a PCA plot.
+
+If the first two singular values are large and all others are small, then two dimensions are enough to describe most of what distinguishes one observation from another. If not, then a PCA plot is omitting lots of information.
+
+PCA plots help us assess similarities between our data points and if there are any clusters in our dataset. In the case study before, for example, we could create the following PCA plot:
+
+<center><img src="images/pca_plot.png" alt='pca_plot' width='500'></center>
+
+### Scree Plots
+
+A scree plot shows the **variance ratio** captured by each principal component, with the largest variance ratio first. They help us visually determine the number of dimensions needed to describe the data reasonably. The singular values that fall in the region of the plot after a large drop-off correspond to principal components that are **not** needed to describe the data since they explain a relatively low proportion of the total variance of the data. For example, in the below plot, we could use the "elbow method" just described to figure out that the first 2 PCs capture the bulk of the information. 
+
+<center><img src="images/scree_plot.png" alt='scree_plot' width='500'></center>
 
 ### Biplots
 
-Biplots superimpose the directions onto the plot of PC2 vs PC1. 
-
-Vector $j$ corresponds to the direction for feature $j$ (e.g. $v_{1j}, v_{2j}$).
- - There are several ways to scale biplot vectors; in this course, we plot the direction itself. 
- - For other scalings, which can lead to more interpretable directions/loadings, see [SAS biplots](https://blogs.sas.com/content/iml/2019/11/06/what-are-biplots.html)
+Biplots superimpose the directions onto the plot of PC2 vs PC1, where vector $j$ corresponds to the direction for feature $j$ (e.g. $v_{1j}, v_{2j}$). There are several ways to scale biplot vectors -- in this course, we plot the direction itself. For other scalings, which can lead to more interpretable directions/loadings, see [SAS biplots](https://blogs.sas.com/content/iml/2019/11/06/what-are-biplots.html)
  
 Through biplots, we can interpret how features correlate with the principal components shown: positively, negatively, or not much at all. 
 
@@ -147,12 +125,10 @@ Through biplots, we can interpret how features correlate with the principal comp
 
 The directions of the arrow are ($v_1$, $v_2$) where $v_1$ and $v_2$ are how that specific feature column contributes to PC1 and PC2, respectively. $v_1$ and $v_2$ are elements of the first and second columns of $V$, respectively (i.e., the first two rows of $V^T$).
 
-Say we were considering feature 3, and say that was the green arrow here (pointing bottom right).
+Say we were considering feature 3, and say that was the purple arrow labeled "520" here (pointing bottom right).
 
 * $v_1$ and $v_2$ are the third elements of the respective columns in $V$. They are scale feature 3's column vector in the linear transformation to PC1 and PC2, respectively.
-
 * Here we would infer that $v_1$ (in the $x$/PC1-direction) is positive, meaning that a linear increase in feature 3 would correspond to a linear increase of PC1, meaning feature 3 and PC1 are positively correlated.
-
 * $v_2$ (in the $y$/pc2-direction) is negative, meaning a linear increase in feature 3 would result correspond to a linear decrease in PC2, meaning feature 3 and PC2 are negatively correlated.
 
 ## Applications of PCA
@@ -162,8 +138,16 @@ Say we were considering feature 3, and say that was the green arrow here (pointi
 PCA is commonly used in biomedical contexts, which have many named variables!
 
 1. To cluster data ([Paper 1](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-019-2680-1), [Paper 2](https://www.science.org/doi/10.1126/scirobotics.abk2378))
-
 2. To identify correlated variables ([interpret](https://docs.google.com/presentation/d/1-aDu0ILCkPx3iCcJGB3YXci-L4g90Q6AarXU6wffLB8/edit#slide=id.g62cb86badb_0_1128) rows of $V^{T}$ as linear coefficients) ([Paper 3](https://www.nature.com/articles/s41598-017-05714-1)). Uses [biplots](https://www.google.com/url?q=https://www.geo.fu-berlin.de/en/v/soga/Geodata-analysis/Principal-Component-Analysis/principal-components-basics/Interpretation-and-visualization/index.html%23:~:text%3DThe%2520biplot%2520is%2520a%2520very,in%2520a%2520single%2520biplot%2520display.%26text%3DThe%2520plot%2520shows%2520the%2520observations,principal%2520components%2520(synthetic%2520variables).&sa=D&source=editors&ust=1682131633152964&usg=AOvVaw2H9SOeMP5kUS890Fkhfthx).
+
+### Why Perform PCA
+We often perform PCA during the Exploratory Data Analysis (EDA) stage of our data science lifecycle (if we already know what to model, we probably don't need PCA); it helps us with: 
+
+* Visually identifying clusters of similar observations in high dimensions.
+* Removing irrelevant dimensions if we suspect that the dataset is inherently low rank. For example, if the columns are collinear: there are many attributes but only a few mostly determine the rest through linear associations.
+* Finding a small basis for representing variations in complex things, e.g., images, genes.
+* Reducing the number of dimensions to make some computation cheaper.
+
 
 ### Image Classification
 
@@ -171,6 +155,9 @@ In machine learning, PCA is often used as a preprocessing step prior to training
 
 See the following [demo](https://data100.datahub.berkeley.edu/hub/user-redirect/git-pull?repo=https%3A%2F%2Fgithub.com%2FDS-100%2Ffa23-student&urlpath=lab%2Ftree%2Ffa23-student%2Flecture%2Flec26%2Flec26-fashion-mnist.ipynb&branch=main) to see how PCA is useful for building an image classification model based on the MNIST-Fashion dataset.
 
+<center><img src="images/mnist.png" alt='slide21' width='500'></center>
+
+<br>
 The demo shows how we can use PCA during the Exploratory Data Analysis stage of our data science lifecycle to:
 - visually identify clusters of similar observations in high dimensions.
 - find a small basis for representing variations in complex things.
@@ -182,5 +169,4 @@ The demo shows how we can use PCA during the Exploratory Data Analysis stage of 
 2. Avoids multicollinearity in the new features created (i.e. the principal components)
 
 <center><img src="images/slide21.png" alt='slide21' width='500'></center>
-
 
