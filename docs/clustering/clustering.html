@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Principles and Techniques of Data Science - 26&nbsp; Clustering</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../pca_2/pca_2.html" rel="prev">
+<link href="../data100_logo.png" rel="icon" type="image/png">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../clustering/clustering.html"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Clustering</span></a></li></ol></nav>
+      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+      </a>
+      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="../index.html" class="sidebar-logo-link">
+      <img src="../data100_logo.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Principles and Techniques of Data Science</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/DS-100/course-notes" rel="" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Welcome</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../intro_lec/introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pandas_1/pandas_1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Pandas I</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pandas_2/pandas_2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Pandas II</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pandas_3/pandas_3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Pandas III</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../eda/eda.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Data Cleaning and EDA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../regex/regex.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Regular Expressions</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../visualization_1/visualization_1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Visualization I</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../visualization_2/visualization_2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Visualization II</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sampling/sampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Sampling</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../intro_to_modeling/intro_to_modeling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Introduction to Modeling</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../constant_model_loss_transformations/loss_transformations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Constant Model, Loss, and Transformations</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ols/ols.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Ordinary Least Squares</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../gradient_descent/gradient_descent.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Gradient Descent</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../feature_engineering/feature_engineering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Sklearn and Feature Engineering</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../case_study_HCE/case_study_HCE.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Case Study in Human Contexts and Ethics</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../cv_regularization/cv_reg.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Cross Validation and Regularization</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../probability_1/probability_1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Random Variables</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../probability_2/probability_2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Estimators, Bias, and Variance</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../inference_causality/inference_causality.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Bias, Variance, and Inference</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sql_I/sql_I.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">SQL I</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sql_II/sql_II.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">SQL II</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../logistic_regression_1/logistic_reg_1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Logistic Regression I</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../logistic_regression_2/logistic_reg_2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Logistic Regression II</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pca_1/pca_1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">PCA I</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pca_2/pca_2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">PCA II</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../clustering/clustering.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Clustering</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#review-taxonomy-of-machine-learning" id="toc-review-taxonomy-of-machine-learning" class="nav-link active" data-scroll-target="#review-taxonomy-of-machine-learning"><span class="header-section-number">26.1</span> Review: Taxonomy of Machine Learning</a>
+  <ul>
+  <li><a href="#supervised-learning" id="toc-supervised-learning" class="nav-link" data-scroll-target="#supervised-learning"><span class="header-section-number">26.1.1</span> Supervised Learning</a></li>
+  <li><a href="#unsupervised-learning" id="toc-unsupervised-learning" class="nav-link" data-scroll-target="#unsupervised-learning"><span class="header-section-number">26.1.2</span> Unsupervised Learning</a></li>
+  <li><a href="#clustering-examples" id="toc-clustering-examples" class="nav-link" data-scroll-target="#clustering-examples"><span class="header-section-number">26.1.3</span> Clustering Examples</a>
+  <ul>
+  <li><a href="#example-1" id="toc-example-1" class="nav-link" data-scroll-target="#example-1"><span class="header-section-number">26.1.3.1</span> Example 1</a></li>
+  <li><a href="#example-2-netflix" id="toc-example-2-netflix" class="nav-link" data-scroll-target="#example-2-netflix"><span class="header-section-number">26.1.3.2</span> Example 2: Netflix</a></li>
+  <li><a href="#example-3-education" id="toc-example-3-education" class="nav-link" data-scroll-target="#example-3-education"><span class="header-section-number">26.1.3.3</span> Example 3: Education</a></li>
+  <li><a href="#example-4-reverse-engineering-biology" id="toc-example-4-reverse-engineering-biology" class="nav-link" data-scroll-target="#example-4-reverse-engineering-biology"><span class="header-section-number">26.1.3.4</span> Example 4: Reverse Engineering Biology</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#taxonomy-of-clustering-approaches" id="toc-taxonomy-of-clustering-approaches" class="nav-link" data-scroll-target="#taxonomy-of-clustering-approaches"><span class="header-section-number">26.2</span> Taxonomy of Clustering Approaches</a></li>
+  <li><a href="#k-means-clustering" id="toc-k-means-clustering" class="nav-link" data-scroll-target="#k-means-clustering"><span class="header-section-number">26.3</span> K-Means Clustering</a>
+  <ul>
+  <li><a href="#note" id="toc-note" class="nav-link" data-scroll-target="#note"><span class="header-section-number">26.3.0.1</span> Note</a></li>
+  </ul></li>
+  <li><a href="#minimizing-inertia" id="toc-minimizing-inertia" class="nav-link" data-scroll-target="#minimizing-inertia"><span class="header-section-number">26.4</span> Minimizing Inertia</a></li>
+  <li><a href="#hierarchical-agglomerative-clustering" id="toc-hierarchical-agglomerative-clustering" class="nav-link" data-scroll-target="#hierarchical-agglomerative-clustering"><span class="header-section-number">26.5</span> Hierarchical Agglomerative Clustering</a>
+  <ul>
+  <li><a href="#clustering-dendrograms-and-intuition" id="toc-clustering-dendrograms-and-intuition" class="nav-link" data-scroll-target="#clustering-dendrograms-and-intuition"><span class="header-section-number">26.5.1</span> Clustering, Dendrograms, and Intuition</a></li>
+  </ul></li>
+  <li><a href="#picking-k" id="toc-picking-k" class="nav-link" data-scroll-target="#picking-k"><span class="header-section-number">26.6</span> Picking K</a>
+  <ul>
+  <li><a href="#silhouette-scores" id="toc-silhouette-scores" class="nav-link" data-scroll-target="#silhouette-scores"><span class="header-section-number">26.6.1</span> Silhouette Scores</a></li>
+  <li><a href="#silhouette-plot" id="toc-silhouette-plot" class="nav-link" data-scroll-target="#silhouette-plot"><span class="header-section-number">26.6.2</span> Silhouette Plot</a></li>
+  <li><a href="#picking-k-real-world-metrics" id="toc-picking-k-real-world-metrics" class="nav-link" data-scroll-target="#picking-k-real-world-metrics"><span class="header-section-number">26.6.3</span> Picking K: Real World Metrics</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">26.7</span> Conclusion</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Clustering</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<div class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="true" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Learning Outcomes
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse show">
+<div class="callout-body-container callout-body">
+<ul>
+<li>Introduction to clustering</li>
+<li>Assessing the taxonomy of clustering approaches</li>
+<li>K-Means clustering</li>
+<li>Clustering with no explicit loss function: minimizing inertia</li>
+<li>Hierarchical Agglomerative Clustering</li>
+<li>Picking K: a hyperparameter</li>
+</ul>
+</div>
+</div>
+</div>
+<p>Last time, we began our journey into unsupervised learning by discussing Principal Component Analysis (PCA).</p>
+<p>In this lecture, we will explore another very popular unsupervised learning concept: clustering. Clustering allows us to “group” similar datapoints together without being given labels of what “class” or where each point explicitly comes from. We will discuss two clustering algorithms: K-Means clustering and hierarchical agglomerative clustering, and we’ll examine the assumptions, strengths, and drawbacks of each one.</p>
+<section id="review-taxonomy-of-machine-learning" class="level2" data-number="26.1">
+<h2 data-number="26.1" class="anchored" data-anchor-id="review-taxonomy-of-machine-learning"><span class="header-section-number">26.1</span> Review: Taxonomy of Machine Learning</h2>
+<section id="supervised-learning" class="level3" data-number="26.1.1">
+<h3 data-number="26.1.1" class="anchored" data-anchor-id="supervised-learning"><span class="header-section-number">26.1.1</span> Supervised Learning</h3>
+<p>In “Supervised Learning”, our goal is to create a function that maps inputs to outputs. Each model is learned from example input/output pairs (training set), validated using input/output pairs, and eventually tested on more input/output pairs. Each pair consists of:</p>
+<ul>
+<li>Input vector</li>
+<li>Output value (<strong>label</strong>)</li>
+</ul>
+<p>In regression, our output value is quantitative, and in classification, our output value is categorical.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/ml_taxonomy.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">ML taxonomy</figcaption>
+</figure>
+</div>
+</section>
+<section id="unsupervised-learning" class="level3" data-number="26.1.2">
+<h3 data-number="26.1.2" class="anchored" data-anchor-id="unsupervised-learning"><span class="header-section-number">26.1.2</span> Unsupervised Learning</h3>
+<p>In unsupervised learning, our goal is to identify patterns in unlabeled data. In this type of learning, we do not have input/output pairs. Sometimes we may have labels but choose to ignore them (e.g.&nbsp;PCA on labeled data). Instead, we are more interested in the inherent structure of the data we have rather than trying to simply predict a label using that structure of data. For example, if we are interested in dimensionality reduction, we can use PCA to reduce our data to a lower dimension.</p>
+<p>Now let us consider a new problem: clustering.</p>
+</section>
+<section id="clustering-examples" class="level3" data-number="26.1.3">
+<h3 data-number="26.1.3" class="anchored" data-anchor-id="clustering-examples"><span class="header-section-number">26.1.3</span> Clustering Examples</h3>
+<section id="example-1" class="level4" data-number="26.1.3.1">
+<h4 data-number="26.1.3.1" class="anchored" data-anchor-id="example-1"><span class="header-section-number">26.1.3.1</span> Example 1</h4>
+<p>Consider this figure from Fall 2019 Midterm 2. The original dataset was 8 dimensions, but we have used PCA to reduce our data down to 2 dimensions.</p>
+<center>
+<img src="images/blobs.png" alt="blobs" width="600">
+</center>
+<p>Each point represents the 1st and 2nd principal component of how much time patrons spent at 8 different zoo exhibits. Visually and intuitively, we could potentially guess that this data belongs to 3 groups: one for each cluster. The goal of clustering is now to assign each point (in the 2 dimensional PCA representation) to a cluster.</p>
+<center>
+<img src="images/clusters_ex1.png" alt="clusters_ex1" width="600">
+</center>
+<p>This is an unsupervised task, as:</p>
+<ul>
+<li>We don’t have labels for each visitor.</li>
+<li>Want to infer patterns even without labels.</li>
+</ul>
+</section>
+<section id="example-2-netflix" class="level4" data-number="26.1.3.2">
+<h4 data-number="26.1.3.2" class="anchored" data-anchor-id="example-2-netflix"><span class="header-section-number">26.1.3.2</span> Example 2: Netflix</h4>
+<p>Now suppose you’re Netflix and are looking at information on customer viewing habits. Clustering can come in handy here. We can assign each person or show to a “cluster”. (Note: while we don’t know for sure that Netflix actually uses ML clustering to identify these categories, they could in principle.)</p>
+<p>Keep in mind that with clustering, we don’t need to define clusters in advance. This marks one of the key differences between clustering and classification, whereas with classification, we have to decide on labels in advance whereas clustering discovers groups automatically.</p>
+</section>
+<section id="example-3-education" class="level4" data-number="26.1.3.3">
+<h4 data-number="26.1.3.3" class="anchored" data-anchor-id="example-3-education"><span class="header-section-number">26.1.3.3</span> Example 3: Education</h4>
+<p>Let’s say we’re working with student-generated materials and pass them into the S-BERT module to extract sentence embeddings. Features from clusters are extracted to:</p>
+<ul>
+<li>Detect anomalies in group activities</li>
+<li>Predict the group’s median quiz grade</li>
+</ul>
+<center>
+<img src="images/outline-ex3.png" alt="outline-ex3" width="600">
+</center>
+<p>Here we can see the outline of the anomaly detection module. It consists of:</p>
+<ul>
+<li>S-BERT feature extraction</li>
+<li>Topic extraction</li>
+<li>Feature extraction</li>
+<li>16D <span class="math inline">\(\rightarrow\)</span> 2D PCA dimensionality reduction and 2D <span class="math inline">\(\rightarrow\)</span> 16D reconstruction</li>
+<li>Anomaly detection based on reconstruction error</li>
+</ul>
+<p>Looking more closely at our clustering, we can better understand the different components as represented by centers. Below we have two examples.</p>
+<center>
+<img src="images/components.png" alt="components" width="800">
+</center>
+<p>Note that the details for this example are not in scope.</p>
+</section>
+<section id="example-4-reverse-engineering-biology" class="level4" data-number="26.1.3.4">
+<h4 data-number="26.1.3.4" class="anchored" data-anchor-id="example-4-reverse-engineering-biology"><span class="header-section-number">26.1.3.4</span> Example 4: Reverse Engineering Biology</h4>
+<p>Now, consider the plot below:</p>
+<center>
+<img src="images/genes.png" alt="genes" width="600">
+</center>
+<p>The rows of this plot are conditions (e.g.&nbsp;a row might be: “poured acid on the cells”) and the columns are genes. The green coloration indicates that the gene was “off” (red indicates the gene was “on”). For example, the ~9 genes in the top left corner of the plot were all turned off by the 6 experiments (rows) at the top.</p>
+<p>In a clustering lens, we might be interested in clustering similar observations together based on the reactions (on/off) to certain experiments.</p>
+<p>For example, here is a look at our data before and after clustering.</p>
+<center>
+<img src="images/beforeandafter4.png" alt="beforeandafter4" width="400">
+</center>
+<p>Note: apologies if you can’t differentiate red from green by eye! Historical visualizations are not always the best.</p>
+</section>
+</section>
+</section>
+<section id="taxonomy-of-clustering-approaches" class="level2" data-number="26.2">
+<h2 data-number="26.2" class="anchored" data-anchor-id="taxonomy-of-clustering-approaches"><span class="header-section-number">26.2</span> Taxonomy of Clustering Approaches</h2>
+<center>
+<img src="images/taxonomy.png" alt="taxonomy" width="600">
+</center>
+<p>There are many types of clustering algorithms, and they all have strengths, inherent weaknesses, and different use cases. We will first focus on a partitional approach: K-Means clustering.</p>
+</section>
+<section id="k-means-clustering" class="level2" data-number="26.3">
+<h2 data-number="26.3" class="anchored" data-anchor-id="k-means-clustering"><span class="header-section-number">26.3</span> K-Means Clustering</h2>
+<p>The most popular clustering approach is K-Means. The algorithm itself entails the following:</p>
+<ol type="1">
+<li><p>Pick an arbitrary <span class="math inline">\(K\)</span>, and randomly place <span class="math inline">\(K\)</span> “centers”, each a different color.</p></li>
+<li><p>Repeat until convergence:</p>
+<ol type="a">
+<li>Color points according to the closest center.</li>
+<li>Move the center for each color to the center of points with that color.</li>
+</ol></li>
+</ol>
+<p>Consider the following data with an arbitrary <span class="math inline">\(K = 2\)</span> and randomly placed “centers” denoted by the different colors (blue, orange):</p>
+<center>
+<img src="images/init_cluster.png" alt="init_cluster" width="600">
+</center>
+<p>Now, we will follow the rest of the algorithm. First, let us color each point according to the closest center:</p>
+<center>
+<img src="images/cluster_class.png" alt="cluster_class" width="600">
+</center>
+<p>Next, we will move the center for each color to the center of points with that color. Notice how the centers are generally well-centered amongst the data that shares its color.</p>
+<center>
+<img src="images/cluster_iter1.png" alt="cluster_iter1" width="600">
+</center>
+<p>Assume this process (re-color, re-set centers) repeats for a few more iterations, and we’ve ended up at this state.</p>
+<center>
+<img src="images/cluster_iter5.png" alt="cluster_iter5" width="600">
+</center>
+<p>After this iteration, the center stays still and does not move at all. Thus, we have converged, and the clustering is complete!</p>
+<section id="note" class="level4" data-number="26.3.0.1">
+<h4 data-number="26.3.0.1" class="anchored" data-anchor-id="note"><span class="header-section-number">26.3.0.1</span> Note</h4>
+<p>A quick note: K-Means is a totally different algorithm than K-Nearest Neighbors. K-means is used for <em>clustering</em>, where each point is assigned to one of <span class="math inline">\(K\)</span> clusters. On the other hand, K-Nearest Neighbors is used for <em>classification</em> (or less often, regression), and the predicted value is typically the most common class among the <span class="math inline">\(K\)</span>-nearest data points in the training set. The names may be similar, but there isn’t really anything in common.</p>
+</section>
+</section>
+<section id="minimizing-inertia" class="level2" data-number="26.4">
+<h2 data-number="26.4" class="anchored" data-anchor-id="minimizing-inertia"><span class="header-section-number">26.4</span> Minimizing Inertia</h2>
+<p>Consider the following example where <span class="math inline">\(K = 4\)</span>:</p>
+<center>
+<img src="images/four_cluster.png" alt="four_cluster" width="500">
+</center>
+<p>Due to the randomness of where the <span class="math inline">\(K\)</span> centers initialize/start, you will get a different output/clustering every time you run K-Means. Consider three possible K-Means outputs; the algorithm has converged, and the colors denote the final cluster they are clustered as.</p>
+<center>
+<img src="images/random_outputs.png" alt="random_outputs" width="800">
+</center>
+<p><br> Which clustering output is the best? To evaluate different clustering results, we need a loss function.</p>
+<p>The two common loss functions are:</p>
+<ul>
+<li><strong>Inertia</strong>: Sum of squared distances from each data point to its center.</li>
+<li><strong>Distortion</strong>: Weighted sum of squared distances from each data point to its center.</li>
+</ul>
+<center>
+<img src="images/inertia_distortion.png" alt="inertia_distortion" width="500">
+</center>
+<p>In the example above:</p>
+<ul>
+<li>Calculated inertia: <span class="math inline">\(0.47^2 + 0.19^2 + 0.34^2 + 0.25^2 + 0.58^2 + 0.36^2 + 0.44^2\)</span></li>
+<li>Calculated distortion: <span class="math inline">\(\frac{0.47^2 + 0.19^2 + 0.34^2}{3} + \frac{0.25^2 + 0.58^2 + 0.36^2 + 0.44^2}{4}\)</span></li>
+</ul>
+<p>Switching back to the four-cluster example at the beginning of this section, <code>random.seed(25)</code> had an inertia of <code>44.96</code>, <code>random.seed(29)</code> had an inertia of <code>45.95</code>, and <code>random.seed(40)</code> had an inertia of <code>54.35</code>. It seems that the best clustering output was <code>random.seed(25)</code> with an inertia of <code>44.96</code>!</p>
+<p>It turns out that the function K-Means is trying to minimize is inertia, but often fails to find global optimum. Why does this happen? We can think of K-means as a pair of optimizers that take turns. The first optimizer holds <em>center positions</em> constant and optimizes <em>data colors</em>. The second optimizers holds <em>data colors</em> constant and optimizes <em>center positions</em>. Neither optimizer gets full control!</p>
+<p>This is a hard problem: give an algorithm that optimizes inertia FOR A GIVEN <span class="math inline">\(K\)</span>; <span class="math inline">\(K\)</span> is picked in advance. Your algorithm should return the EXACT best centers and colors, but you don’t need to worry about runtime.</p>
+<p><em>Note: This is a bit of a CS61B/CS70/CS170 problem, so do not worry about completely understanding the tricky predicament we are in too much!</em></p>
+<p>A potential algorithm:</p>
+<ul>
+<li>For all possible <span class="math inline">\(k^n\)</span> colorings:
+<ul>
+<li>Compute the <span class="math inline">\(k\)</span> centers for that coloring.</li>
+<li>Compute the inertia for the <span class="math inline">\(k\)</span> centers.
+<ul>
+<li>If current inertia is better than best known, write down the current centers and coloring and call that the new best known.</li>
+</ul></li>
+</ul></li>
+</ul>
+<p>No better algorithm has been found for solving the problem of minimizing inertia exactly.</p>
+</section>
+<section id="hierarchical-agglomerative-clustering" class="level2" data-number="26.5">
+<h2 data-number="26.5" class="anchored" data-anchor-id="hierarchical-agglomerative-clustering"><span class="header-section-number">26.5</span> Hierarchical Agglomerative Clustering</h2>
+<p>Now, let us consider hierarchical agglomerative clustering.</p>
+<center>
+<img src="images/hierarchical_approach.png" alt="hierarchical_approach" width="600">
+</center>
+<p><br> Consider the following results of two K-Means clustering outputs:</p>
+<center>
+<img src="images/clustering_comparison.png" alt="clustering_comparison" width="600">
+</center>
+<p><br> Which clustering result do you like better? It seems K-Means likes the one on the right better because it has lower inertia (the sum of squared distances from each data point to its center), but this raises some questions:</p>
+<ul>
+<li>Why is the inertia on the right lower? K-Means optimizes for distance, not “blobbiness”.</li>
+<li>Is clustering on the right “wrong”? Good question!</li>
+</ul>
+<p>Now, let us introduce Hierarchical Agglomerative Clustering! We start with every data point in a separate cluster, and we’ll keep merging the most similar pairs of data points/clusters until we have one big cluster left. This is called a <strong>bottom-up</strong> or <strong>agglomerative method</strong>.</p>
+<p>There are various ways to decide the order of combining clusters called <strong>Linkage Criterion</strong>:</p>
+<ul>
+<li><strong>Single linkage</strong> (similarity of the most similar): the distance between two clusters as the <strong>minimum</strong> distance between a point in the first cluster and a point in the second.</li>
+<li><strong>Complete linkage</strong> (similarity of the least similar): the distance between two clusters as the <strong>maximum</strong> distance between a point in the first cluster and a point in the second.</li>
+<li><strong>Average linkage</strong>: <strong>average</strong> similarity of pairs of points in clusters.</li>
+</ul>
+<center>
+<img src="images/linkage.png" alt="linkage" width="600">
+</center>
+<p>When the algorithm starts, every data point is in its own cluster. In the plot below, there are 12 data points, so the algorithm starts with 12 clusters. As the clustering begins, it begins to assess which clusters are the closest together.</p>
+<center>
+<img src="images/agg1.png" alt="agg1" width="400">
+</center>
+<p>The closest clusters are 10 and 11, so they are merged together.</p>
+<center>
+<img src="images/agg2.png" alt="agg2" width="400">
+</center>
+<p>Next, points 0 and 4 are merged together because they are closest.</p>
+<center>
+<img src="images/agg3.png" alt="agg3" width="400">
+</center>
+<p>At this point, we have 10 clusters: 8 with a single point (clusters 1, 2, 3, 4, 5, 6, 7, 8, and 9) and 2 with 2 points (clusters 0 and 10).</p>
+<p>Although clusters 0 and 3 are not the closest, let us consider if we were trying to merge them. A tricky question arises: what is the distance between clusters 0 and 3? We can use the <strong>Complete-Link</strong> approach that uses the <strong>max</strong> distance among all pairs of points between groups.</p>
+<center>
+<img src="images/agg4.png" alt="agg4" width="400">
+</center>
+<p>Let us assume the algorithm runs a little longer, and we have reached the following state. Clusters 0 and 7 are up next, but why? The <strong>max line between any member of 0 and 6</strong> is longer than the <strong>max line between any member of 0 and 7</strong>.</p>
+<center>
+<img src="images/agg5.png" alt="agg5" width="600">
+</center>
+<p>Thus, 0 and 7 are merged into 0.</p>
+<p>After more iterations, we finally converge to the plot on the left. There are two clusters (0, 1), and the agglomerative algorithm has converged.</p>
+<center>
+<img src="images/agg6.png" alt="agg6" width="700">
+</center>
+<p><br> Notice that on the full dataset, our agglomerative clustering algorithm achieves the more “correct” output.</p>
+<section id="clustering-dendrograms-and-intuition" class="level3" data-number="26.5.1">
+<h3 data-number="26.5.1" class="anchored" data-anchor-id="clustering-dendrograms-and-intuition"><span class="header-section-number">26.5.1</span> Clustering, Dendrograms, and Intuition</h3>
+Agglomerative clustering is one form of “hierarchical clustering.” It is interpretable because we can keep track of when two clusters got merged (each cluster is a tree), and we can visualize merging hierarchy, resulting in a “dendrogram.” Won’t discuss this any further for this course, but you might see these in the wild. Here are some examples:
+<p float="left">
+<img src="images/dendro_1.png" alt="dendro_1" width="300"> <img src="images/dendro_2.png" alt="dendro_2" width="300">
+</p>
+<p>Some professors use agglomerative clustering for grading bins; if there is a big gap between two people, draw a grading threshold there. The idea is that grade clustering should be more like the figure below on the left, not the right.</p>
+<center>
+<img src="images/grading.png" alt="grading" width="600">
+</center>
+</section>
+</section>
+<section id="picking-k" class="level2" data-number="26.6">
+<h2 data-number="26.6" class="anchored" data-anchor-id="picking-k"><span class="header-section-number">26.6</span> Picking K</h2>
+<p>The algorithms we’ve discussed require us to pick a <span class="math inline">\(K\)</span> before we start. But how do we pick <span class="math inline">\(K\)</span>? Often, the best <span class="math inline">\(K\)</span> is subjective. For example, consider the state plot below.</p>
+<center>
+<img src="images/states.png" alt="states" width="600">
+</center>
+<p>How many clusters are there here? For K-Means, one approach to determine this is to plot inertia versus many different <span class="math inline">\(K\)</span> values. We’d pick the <span class="math inline">\(K\)</span> in the <strong>elbow</strong>, where we get diminishing returns afterward (note that big, complicated data often lacks an elbow, so this method is not foolproof). Here, we would likely select <span class="math inline">\(K = 2\)</span>.</p>
+<center>
+<img src="images/elbow.png" alt="elbow" width="500">
+</center>
+<section id="silhouette-scores" class="level3" data-number="26.6.1">
+<h3 data-number="26.6.1" class="anchored" data-anchor-id="silhouette-scores"><span class="header-section-number">26.6.1</span> Silhouette Scores</h3>
+<p>To evaluate how “well-clustered” a specific data point is, we can use the <strong>silhouette score</strong>, a.k.a. the <strong>silhouette width</strong>. A high silhouette score indicates that a point is near the other points in its cluster; a low score means that it’s far from the other points in its cluster.</p>
+<center>
+<img src="images/high_low.png" alt="high_low" width="600">
+</center>
+<p>For a data point <span class="math inline">\(X\)</span>, score <span class="math inline">\(S\)</span> is: <span class="math display">\[S =\frac{B - A}{max(A, B)}\]</span> where <span class="math inline">\(A\)</span> is the distance to <em>other</em> points in the cluster, and <span class="math inline">\(B\)</span> is the average distance to points in the <em>closest</em> cluster.</p>
+<p>Consider what the highest possible value of <span class="math inline">\(S\)</span> is and how that value can occur. The highest possible value of <span class="math inline">\(S\)</span> is 1, which happens if every point in <span class="math inline">\(X\)</span>’s cluster is right on top of <span class="math inline">\(X\)</span>; the average distance to other points in <span class="math inline">\(X\)</span>’s cluster is <span class="math inline">\(0\)</span>, so <span class="math inline">\(A = 0\)</span>. Thus, <span class="math inline">\(S = \frac{B}{max(0, B)} = \frac{B}{B} = 1\)</span>. Another case where <span class="math inline">\(S = 1\)</span> could happen is if <span class="math inline">\(B\)</span> is <em>much</em> greater than <span class="math inline">\(A\)</span> (we denote this as <span class="math inline">\(B &gt;&gt; A\)</span>).</p>
+<p>Can <span class="math inline">\(S\)</span> be negative? The answer is yes. If the average distance to X’s clustermates is larger than the distance to the closest cluster, then this is possible. For example, the “low score” point on the right of the image above has <span class="math inline">\(S = -0.13\)</span></p>
+</section>
+<section id="silhouette-plot" class="level3" data-number="26.6.2">
+<h3 data-number="26.6.2" class="anchored" data-anchor-id="silhouette-plot"><span class="header-section-number">26.6.2</span> Silhouette Plot</h3>
+<p>We can plot the <strong>silhouette scores</strong> for all of our datapoints. Points with large silhouette widths are deeply embedded in their cluster; the red dotted line shows the average. Below, we plot the silhouette score for our plot with <span class="math inline">\(K=2\)</span>.</p>
+<p float="left">
+<img src="images/high_low.png" alt="dendro_1" width="350"> <img src="images/silhouette_2.png" alt="dendro_2" width="350">
+</p>
+<p>Similarly, we can plot the silhouette score for the same dataset but with <span class="math inline">\(K=3\)</span>:</p>
+<p float="left">
+<img src="images/cluster_3.png" alt="dendro_1" width="350"> <img src="images/silhouette_scores.png" alt="dendro_2" width="350">
+</p>
+<p>The average silhouette score is lower with 3 clusters, so <span class="math inline">\(K=2\)</span> is a better choice. This aligns with our visual intuition as well.</p>
+</section>
+<section id="picking-k-real-world-metrics" class="level3" data-number="26.6.3">
+<h3 data-number="26.6.3" class="anchored" data-anchor-id="picking-k-real-world-metrics"><span class="header-section-number">26.6.3</span> Picking K: Real World Metrics</h3>
+<p>Sometimes you can rely on real-world metrics to guide your choice of <span class="math inline">\(K\)</span>. For t-shirts, we can either</p>
+<ul>
+<li>Cluster heights and weights of customers with <span class="math inline">\(K = 3\)</span> to design Small, Medium, and Large shirts.</li>
+<li>Cluster heights and weights of customers with <span class="math inline">\(K = 5\)</span> to design XS, S, M, L, and XL shirts.</li>
+</ul>
+<p>To pick <span class="math inline">\(K\)</span>, consider projected costs and sales for the 2 different <span class="math inline">\(K\)</span>s, and pick the one that maximizes profit.</p>
+</section>
+</section>
+<section id="conclusion" class="level2" data-number="26.7">
+<h2 data-number="26.7" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">26.7</span> Conclusion</h2>
+<p>We’ve now discussed a new machine learning goal – clustering – and explored two solutions:</p>
+<ul>
+<li>K-Means tries to optimize a loss function called inertia (no known algorithm to find the optimal answer in an efficient manner)</li>
+<li>Hierarchical Agglomerative</li>
+</ul>
+<p>Our version of these algorithms required a hyperparameter <span class="math inline">\(K\)</span>. There are 4 ways to pick <span class="math inline">\(K\)</span>: intuitively, elbow method, silhouette scores, and harnessing real-world metrics.</p>
+<p>There are many machine learning problems. Each can be addressed by many different solution techniques. Each has many metrics for evaluating success / loss. Many techniques can be used to solve different problem types. For example, linear models can be used for regression and classification.</p>
+<p>We’ve only scratched the surface and haven’t discussed many important ideas, such as neural networks / deep learning. We’ll provide some specific course recommendations on how to further explore these topics in the last lecture.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../pca_2/pca_2.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">PCA II</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>
