@@ -19,14 +19,17 @@ jupyter: python3
 
 ::: {.callout-note collapse="false"}
 ## Learning Outcomes
+
 * Perform advanced aggregation using `.groupby()`
 * Use the `pd.pivot_table` method to construct a pivot table
 * Perform simple merges between DataFrames using `pd.merge()`
 :::
 
-Last time, we introduced the concept of aggregating data – we familiarized ourselves with `GroupBy` objects and used them as tools to consolidate and summarize a DataFrame. In this lecture, we will explore working with the different aggregation functions and dive into some advanced `.groupby` methods to show just how powerful of a resource they can be for understanding our data. We will also introduce other techniques for data aggregation to provide flexibility in how we manipulate our tables. 
+We will introduce the concept of aggregating data – we will familiarize ourselves with `GroupBy` objects and used them as tools to consolidate and summarize a DataFrame. In this lecture, we will explore working with the different aggregation functions and dive into some advanced `.groupby` methods to show just how powerful of a resource they can be for understanding our data. We will also introduce other techniques for data aggregation to provide flexibility in how we manipulate our tables. 
 
-## Revisiting the `.agg()` Function
+## Custom Sorts
+
+First, let's finish our discussion about sorting. Let's try to solve a sorting problem using different approaches. Assume we want to find the longest baby names and sort our data accordingly.
 
 We'll start by loading the `babynames` dataset. Note that this dataset is filtered to only contain data from California.
 
@@ -56,39 +59,129 @@ with zf.open(ca_name) as fh:
 babynames.tail(10)
 ```
 
-Let's begin by using `.agg` to find the total number of babies born in each year. Recall that using `.agg` with `.groupby()` follows the format: `df.groupby(column_name).agg(aggregation_function)`. The line of code below gives us the total number of babies born in each year.
+### Approach 1: Create a Temporary Column
+
+One method to do this is to first start by creating a column that contains the lengths of the names.
+
+```{python}
+# Create a Series of the length of each name
+babyname_lengths = babynames["Name"].str.len()
+
+# Add a column named "name_lengths" that includes the length of each name
+babynames["name_lengths"] = babyname_lengths
+babynames.head(5)
+```
+
+We can then sort the `DataFrame` by that column using `.sort_values()`:
+
+```{python}
+# Sort by the temporary column
+babynames = babynames.sort_values(by="name_lengths", ascending=False)
+babynames.head(5)
+```
+
+Finally, we can drop the `name_length` column from `babynames` to prevent our table from getting cluttered.
+
+```{python}
+# Drop the 'name_length' column
+babynames = babynames.drop("name_lengths", axis='columns')
+babynames.head(5)
+```
+
+### Approach 2: Sorting using the `key` Argument
+
+Another way to approach this is to use the `key` argument of `.sort_values()`. Here we can specify that we want to sort `"Name"` values by their length.
+
+```{python}
+babynames.sort_values("Name", key=lambda x: x.str.len(), ascending=False).head()
+```
+
+### Approach 3: Sorting using the `map` Function
+
+We can also use the `map` function on a `Series` to solve this. Say we want to sort the `babynames` table by the number of `"dr"`'s and `"ea"`s in each `"Name"`. We'll define the function `dr_ea_count` to help us out.
+
+```{python}
+# First, define a function to count the number of times "dr" or "ea" appear in each name
+def dr_ea_count(string):
+    return string.count('dr') + string.count('ea')
+
+# Then, use `map` to apply `dr_ea_count` to each name in the "Name" column
+babynames["dr_ea_count"] = babynames["Name"].map(dr_ea_count)
+
+# Sort the DataFrame by the new "dr_ea_count" column so we can see our handiwork
+babynames = babynames.sort_values(by="dr_ea_count", ascending=False)
+babynames.head()
+```
+
+We can drop the `dr_ea_count` once we're done using it to maintain a neat table.
+
+```{python}
+# Drop the `dr_ea_count` column
+babynames = babynames.drop("dr_ea_count", axis = 'columns')
+babynames.head(5)
+```
+
+## Aggregating Data with `.groupby`
+
+Up until this point, we have been working with individual rows of `DataFrame`s. As data scientists, we often wish to investigate trends across a larger *subset* of our data. For example, we may want to compute some summary statistic (the mean, median, sum, etc.) for a group of rows in our `DataFrame`. To do this, we'll use `pandas` `GroupBy` objects. Our goal is to group together rows that fall under the same category and perform an operation that aggregates across all rows in the category. 
+
+Let's say we wanted to aggregate all rows in `babynames` for a given year. 
 
 ```{python}
 #| code-fold: false
+babynames.groupby("Year")
+```
+
+What does this strange output mean? Calling `.groupby` [(documentation)](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.groupby.html) has generated a `GroupBy` object. You can imagine this as a set of "mini" sub-DataFrames, where each subframe contains all of the rows from `babynames` that correspond to a particular year. 
+
+The diagram below shows a simplified view of `babynames` to help illustrate this idea.
+
+<center><img src = "images/gb.png" width = "600"></img></a></center>
+
+We can't work with a `GroupBy` object directly – that is why you saw that strange output earlier rather than a standard view of a `DataFrame`. To actually manipulate values within these "mini" DataFrames, we'll need to call an *aggregation method*. This is a method that tells `pandas` how to aggregate the values within the `GroupBy` object. Once the aggregation is applied, `pandas` will return a normal (now grouped) `DataFrame`.
+
+The first aggregation method we'll consider is `.agg`. The `.agg` method takes in a function as its argument; this function is then applied to each column of a "mini" grouped DataFrame. We end up with a new `DataFrame` with one aggregated row per subframe. Let's see this in action by finding the `sum` of all counts for each year in `babynames` – this is equivalent to finding the number of babies born in each year. 
+
+```{python}
+#| code-fold: false
+babynames[["Year", "Count"]].groupby("Year").agg(sum).head(5)
+```
+
+We can relate this back to the diagram we used above. Remember that the diagram uses a simplified version of `babynames`, which is why we see smaller values for the summed counts.
+
+![Performing an aggregation](images/agg.png)
+
+Calling `.agg` has condensed each subframe back into a single row. This gives us our final output: a `DataFrame` that is now indexed by `"Year"`, with a single row for each unique year in the original `babynames` DataFrame.
+
+There are many different aggregation functions we can use, all of which are useful in different applications.
+
+```{python}
+#| code-fold: false
+babynames[["Year", "Count"]].groupby("Year").agg(min).head(5)
+```
+
+```{python}
+#| code-fold: false
+babynames[["Year", "Count"]].groupby("Year").agg(max).head(5)
+```
+
+```{python}
+#| code-fold: false
+# Same result, but now we explicitly tell pandas to only consider the "Count" column when summing
 babynames.groupby("Year")[["Count"]].agg(sum).head(5)
 ```
 
-Here's an illustration of the process: 
+There are many different aggregations that can be applied to the grouped data. The primary requirement is that an aggregation function must:
 
-<img src="images/aggregation.png" alt='aggregation' width='600'>
+* Take in a `Series` of data (a single column of the grouped subframe).
+* Return a single value that aggregates this `Series`.
 
-Let's now dive deeper into `groupby`. As we learned last lecture, a `groupby` operation involves some combination of **splitting a DataFrame into grouped subframes**, **applying a function**, and **combining the results**. 
-
-For some arbitrary DataFrame `df` below, the code `df.groupby("year").agg(sum)` does the following:
-
-- **Splits** the `DataFrame` into sub-`DataFrame`s with rows belonging to the same year.
-- **Applies** the `sum` function to each column of each sub-`DataFrame`.
-- **Combines** the results of `sum` into a single `DataFrame`, indexed by `year`.
-
-<img src="images/groupby_demo.png" alt='groupby_demo' width='600'>
 
 ### Aggregation Functions
 
-There are many different aggregations that can be applied to the grouped data. `.agg()` can take in any function that aggregates several values into one summary value.
-
 Because of this fairly broad requirement, `pandas` offers many ways of computing an aggregation.
 
-**In-built** Python operations are automatically recognized by `pandas`. For example:
-
-
-* `.agg(sum)`
-* `.agg(max)`
-* `.agg(min)`
+**In-built** Python operations – such as `sum`, `max`, and `min` – are automatically recognized by `pandas`.
 
 ```{python}
 # What is the minimum count for each name in any year?
@@ -100,13 +193,7 @@ babynames.groupby("Name")[["Count"]].agg(min).head()
 babynames.groupby("Name")[["Count"]].agg(max).head()
 ```
 
-**`NumPy`** functions are also fair game in `pandas`:
-
-
-* `.agg(np.sum)`
-* `.agg(np.max)`
-* `.agg(np.min)`
-* `.agg("mean")`
+As mentioned previously, functions from the `NumPy` library, such as `np.mean`, `np.max`, `np.min`, and `np.sum`, are also fair game in `pandas`.
 
 ```{python}
 #| code-fold: false
@@ -114,8 +201,7 @@ babynames.groupby("Name")[["Count"]].agg(max).head()
 babynames.groupby("Name")[["Count"]].agg(np.mean).head()
 ```
 
-
-`pandas` also offers a number of in-built functions, including:
+`pandas` also offers a number of in-built functions. Functions that are native to `pandas` can be referenced using their string name within a call to `.agg`. Some examples include:
 
 * `.agg("sum")`
 * `.agg("max")`
@@ -126,7 +212,72 @@ babynames.groupby("Name")[["Count"]].agg(np.mean).head()
 
 The latter two entries in this list – `"first"` and `"last"` – are unique to `pandas`. They return the first or last entry in a subframe column. Why might this be useful? Consider a case where *multiple* columns in a group share identical information. To represent this information in the grouped output, we can simply grab the first or last entry, which we know will be identical to all other entries.
 
-Some commonly-used aggregation functions can even be called directly, without explicit use of `.agg()`. For example, we can call `.mean()` on `.groupby()`: 
+Let's illustrate this with an example. Say we add a new column to `babynames` that contains the first letter of each name. 
+
+```{python}
+#| code-fold: false
+# Imagine we had an additional column, "First Letter". We'll explain this code next week
+babynames["First Letter"] = babynames["Name"].str[0]
+
+# We construct a simplified DataFrame containing just a subset of columns
+babynames_new = babynames[["Name", "First Letter", "Year"]]
+babynames_new.head()
+```
+
+If we form groups for each name in the dataset, `"First Letter"` will be the same for all members of the group. This means that if we simply select the first entry for `"First Letter"` in the group, we'll represent all data in that group. 
+
+We can use a dictionary to apply different aggregation functions to each column during grouping.
+
+![Aggregating using "first"](images/first.png)
+
+```{python}
+#| code-fold: false
+babynames_new.groupby("Name").agg({"First Letter":"first", "Year":"max"}).head()
+```
+
+### Plotting Birth Counts
+
+Let's use `.agg` to find the total number of babies born in each year. Recall that using `.agg` with `.groupby()` follows the format: `df.groupby(column_name).agg(aggregation_function)`. The line of code below gives us the total number of babies born in each year.
+
+```{python}
+#| code-fold: true
+babynames.groupby("Year")[["Count"]].agg(sum).head(5)
+# Alternative 1
+# babynames.groupby("Year")[["Count"]].sum()
+# Alternative 2
+# babynames.groupby("Year").sum(numeric_only=True)
+```
+
+Here's an illustration of the process: 
+
+<img src="images/aggregation.png" alt='aggregation' width='600'>
+
+Plotting the `Dataframe` we obtain tells an interesting story.
+
+```{python}
+#| code-fold: true
+import plotly.express as px
+puzzle2 = babynames.groupby("Year")[["Count"]].agg(sum)
+px.line(puzzle2, y = "Count")
+```
+
+**A word of warning**: we made an enormous assumption when we decided to use this dataset to estimate birth rate. According to [this article from the Legistlative Analyst Office](https://lao.ca.gov/LAOEconTax/Article/Detail/691), the true number of babies born in California in 2020 was 421,275. However, our plot shows 362,882 babies -- what happened? 
+
+### Summary of the `.groupby()` Function
+
+A `groupby` operation involves some combination of **splitting a DataFrame into grouped subframes**, **applying a function**, and **combining the results**. 
+
+For some arbitrary DataFrame `df` below, the code `df.groupby("year").agg(sum)` does the following:
+
+- **Splits** the `DataFrame` into sub-`DataFrame`s with rows belonging to the same year.
+- **Applies** the `sum` function to each column of each sub-`DataFrame`.
+- **Combines** the results of `sum` into a single `DataFrame`, indexed by `year`.
+
+<img src="images/groupby_demo.png" alt='groupby_demo' width='600'>
+
+### Revisiting the `.agg()` Function
+
+`.agg()` can take in any function that aggregates several values into one summary value. Some commonly-used aggregation functions can even be called directly, without explicit use of `.agg()`. For example, we can call `.mean()` on `.groupby()`: 
 
     babynames.groupby("Year").mean().head()
 
@@ -225,31 +376,6 @@ babynames.groupby("Name")[["Count"]].agg(sum).head()
 # babynames.groupby("Name")[["Count"]].sum()
 ```
 
-Now, let's think about the code to compute the total number of babies born each *year*. You'll see that there are multiple ways to achieve this, some of which are listed below. 
-
-```{python}
-#| code-fold: true
-babynames.groupby("Year")[["Count"]].agg(sum).head()
-# Alternative 1
-# babynames.groupby("Year")[["Count"]].sum()
-# Alternative 2
-# babynames.groupby("Year").sum(numeric_only=True)
-```
-
-For the second alternative, note how we can avoid the error we faced earlier with aggregating non-numeric colums by passing in the `numeric_only=True` argument to `groupby`. 
-
-### Plotting Birth Counts
-Plotting the `Dataframe` we obtain tells an interesting story.
-
-```{python}
-#| code-fold: true
-import plotly.express as px
-puzzle2 = babynames.groupby("Year")[["Count"]].agg(sum)
-px.line(puzzle2, y = "Count")
-```
-
-**A word of warning**: we made an enormous assumption when we decided to use this dataset to estimate birth rate. According to [this article from the Legistlative Analyst Office](https://lao.ca.gov/LAOEconTax/Article/Detail/691), the true number of babies born in California in 2020 was 421,275. However, our plot shows 362,882 babies -- what happened? 
-
 ## `GroupBy()`, Continued
 
 
@@ -339,9 +465,14 @@ Another common use for `GroupBy` objects is to filter data by group.
 `groupby.filter` takes an argument `func`, where `func` is a function that:
 
 - Takes a `DataFrame` object as input
-- Returns a single `True` or `False` for the each sub-DataFrame
+- Returns a single `True` or `False`.
 
-Sub-`DataFrames` that correspond to `True` are returned in the final result, whereas those with a `False` value are not. Importantly, `groupby.filter` is different from `groupby.agg` in that an *entire* sub-`DataFrame` is returned in the final `DataFrame`, not just a single row. As a result, `groupby.filter` preserves the original indices.
+`groupby.filter` applies `func` to each group/sub-`DataFrame`:
+
+- If `func` returns `True` for a group, then all rows belonging to the group are preserved.
+- If `func` returns `False` for a group, then all rows belonging to that group are filtered out.
+
+In other words, sub-`DataFrames` that correspond to `True` are returned in the final result, whereas those with a `False` value are not. Importantly, `groupby.filter` is different from `groupby.agg` in that an *entire* sub-`DataFrame` is returned in the final `DataFrame`, not just a single row. As a result, `groupby.filter` preserves the original indices.
 
 <img src="images/filter_demo.png" alt='groupby_demo' width='600'>
 
@@ -479,7 +610,7 @@ Let's take a closer look at the code implemented above.
 * `values = "Count"` indicates what values from the original `DataFrame` should be used to populate the entry for each index-column combination
 * `aggfunc = np.sum` tells `pandas` what function to use when aggregating the data specified by `values`. Here, we are summing the name counts for each pair of `"Year"` and `"Sex"`
 
-We can even include multiple values in the index or columns of our pivot tables.
+We can even include multiple values in the index or columns of our pivot tables. 
 
 ```{python}
 #| code-fold: false
@@ -491,6 +622,8 @@ babynames_pivot = babynames.pivot_table(
 )
 babynames_pivot.head(6)
 ```
+
+Note that each row provides the number of girls and number of boys having that year's most common name, and also lists the alphabetically largest girl name and boy name. The counts for number of girls/boys in the resulting `DataFrame` do not correspond to the names listed. For example, in 1910, the most popular girl name is given to 295 girls, but that name was likely not Yvonne. 
 
 ## Joining Tables 
 
@@ -523,7 +656,6 @@ babynames_2022.head()
 Now, we're ready to join the two tables. [`pd.merge`](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.merge.html) is the `pandas` method used to join DataFrames together.
 
 ```{python}
-#| tags: []
 merged = pd.merge(left = elections, right = babynames_2022, \
                   left_on = "First Name", right_on = "Name")
 merged.head()
