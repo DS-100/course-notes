@@ -14,7 +14,17 @@ format:
       - cosmo
       - cerulean
     callout-icon: false
-jupyter: python3
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .qmd
+      format_name: quarto
+      format_version: '1.0'
+      jupytext_version: 1.16.1
+  kernelspec:
+    display_name: Python 3 (ipykernel)
+    language: python
+    name: python3
 ---
 
 ::: {.callout-note collapse="false"}
@@ -25,7 +35,7 @@ jupyter: python3
 * Perform simple merges between DataFrames using `pd.merge()`
 :::
 
-We will introduce the concept of aggregating data – we will familiarize ourselves with `GroupBy` objects and used them as tools to consolidate and summarize a DataFrame. In this lecture, we will explore working with the different aggregation functions and dive into some advanced `.groupby` methods to show just how powerful of a resource they can be for understanding our data. We will also introduce other techniques for data aggregation to provide flexibility in how we manipulate our tables. 
+We will introduce the concept of aggregating data – we will familiarize ourselves with `GroupBy` objects and used them as tools to consolidate and summarize a`DataFrame`. In this lecture, we will explore working with the different aggregation functions and dive into some advanced `.groupby` methods to show just how powerful of a resource they can be for understanding our data. We will also introduce other techniques for data aggregation to provide flexibility in how we manipulate our tables. 
 
 ## Custom Sorts
 
@@ -98,7 +108,7 @@ babynames.sort_values("Name", key=lambda x: x.str.len(), ascending=False).head()
 
 ### Approach 3: Sorting using the `map` Function
 
-We can also use the `map` function on a `Series` to solve this. Say we want to sort the `babynames` table by the number of `"dr"`'s and `"ea"`s in each `"Name"`. We'll define the function `dr_ea_count` to help us out.
+We can also use the `map` function on a `Series` to solve this. Say we want to sort the `babynames` table by the number of `"dr"`'s and `"ea"`'s in each `"Name"`. We'll define the function `dr_ea_count` to help us out.
 
 ```{python}
 # First, define a function to count the number of times "dr" or "ea" appear in each name
@@ -132,13 +142,13 @@ Let's say we wanted to aggregate all rows in `babynames` for a given year.
 babynames.groupby("Year")
 ```
 
-What does this strange output mean? Calling `.groupby` [(documentation)](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.groupby.html) has generated a `GroupBy` object. You can imagine this as a set of "mini" sub-DataFrames, where each subframe contains all of the rows from `babynames` that correspond to a particular year. 
+What does this strange output mean? Calling `.groupby` [(documentation)](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.groupby.html) has generated a `GroupBy` object. You can imagine this as a set of "mini" sub-`DataFrame`s, where each subframe contains all of the rows from `babynames` that correspond to a particular year. 
 
 The diagram below shows a simplified view of `babynames` to help illustrate this idea.
 
 <center><img src = "images/gb.png" width = "600"></img></a></center>
 
-We can't work with a `GroupBy` object directly – that is why you saw that strange output earlier rather than a standard view of a `DataFrame`. To actually manipulate values within these "mini" DataFrames, we'll need to call an *aggregation method*. This is a method that tells `pandas` how to aggregate the values within the `GroupBy` object. Once the aggregation is applied, `pandas` will return a normal (now grouped) `DataFrame`.
+We can't work with a `GroupBy` object directly – that is why you saw that strange output earlier rather than a standard view of a `DataFrame`. To actually manipulate values within these "mini" `DataFrame`s, we'll need to call an *aggregation method*. This is a method that tells `pandas` how to aggregate the values within the `GroupBy` object. Once the aggregation is applied, `pandas` will return a normal (now grouped) `DataFrame`.
 
 The first aggregation method we'll consider is `.agg`. The `.agg` method takes in a function as its argument; this function is then applied to each column of a "mini" grouped DataFrame. We end up with a new `DataFrame` with one aggregated row per subframe. Let's see this in action by finding the `sum` of all counts for each year in `babynames` – this is equivalent to finding the number of babies born in each year. 
 
@@ -261,13 +271,13 @@ puzzle2 = babynames.groupby("Year")[["Count"]].agg(sum)
 px.line(puzzle2, y = "Count")
 ```
 
-**A word of warning**: we made an enormous assumption when we decided to use this dataset to estimate birth rate. According to [this article from the Legistlative Analyst Office](https://lao.ca.gov/LAOEconTax/Article/Detail/691), the true number of babies born in California in 2020 was 421,275. However, our plot shows 362,882 babies -- what happened? 
+**A word of warning**: we made an enormous assumption when we decided to use this dataset to estimate birth rate. According to [this article from the Legistlative Analyst Office](https://lao.ca.gov/LAOEconTax/Article/Detail/691), the true number of babies born in California in 2020 was 421,275. However, our plot shows 362,882 babies —— what happened? 
 
 ### Summary of the `.groupby()` Function
 
-A `groupby` operation involves some combination of **splitting a DataFrame into grouped subframes**, **applying a function**, and **combining the results**. 
+A `groupby` operation involves some combination of **splitting a `DataFrame` into grouped subframes**, **applying a function**, and **combining the results**. 
 
-For some arbitrary DataFrame `df` below, the code `df.groupby("year").agg(sum)` does the following:
+For some arbitrary `DataFrame` `df` below, the code `df.groupby("year").agg(sum)` does the following:
 
 - **Splits** the `DataFrame` into sub-`DataFrame`s with rows belonging to the same year.
 - **Applies** the `sum` function to each column of each sub-`DataFrame`.
@@ -346,7 +356,7 @@ rtp_table = rtp_table.rename(columns = {"Count": "Count RTP"})
 rtp_table.sort_values("Count RTP").head()
 ```
 
-To visualize the above `Dataframe`, let's look at the line plot below:
+To visualize the above `DataFrame`, let's look at the line plot below:
 
 ```{python}
 #| code-fold: true
@@ -376,10 +386,10 @@ babynames.groupby("Name")[["Count"]].agg(sum).head()
 # babynames.groupby("Name")[["Count"]].sum()
 ```
 
-## `GroupBy()`, Continued
+## `.groupby()`, Continued
 
 
-We'll work with the `elections` DataFrame again.
+We'll work with the `elections` `DataFrame` again.
 
 ```{python}
 #| code-fold: true
@@ -420,8 +430,8 @@ There are many aggregation methods we can use with `.agg`. Some useful options a
 * [`.sum`](https://pandas.pydata.org/docs/reference/api/pandas.core.groupby.DataFrameGroupBy.sum.html#pandas.core.groupby.DataFrameGroupBy.sum): creates a new `DataFrame` with the sum of each group
 * [`.max`](https://pandas.pydata.org/docs/reference/api/pandas.core.groupby.DataFrameGroupBy.max.html#pandas.core.groupby.DataFrameGroupBy.max) and [`.min`](https://pandas.pydata.org/docs/reference/api/pandas.core.groupby.DataFrameGroupBy.min.html#pandas.core.groupby.DataFrameGroupBy.min): creates a new `DataFrame` with the maximum/minimum value of each group
 * [`.first`](https://pandas.pydata.org/docs/reference/api/pandas.core.groupby.DataFrameGroupBy.first.html#pandas.core.groupby.DataFrameGroupBy.first) and [`.last`](https://pandas.pydata.org/docs/reference/api/pandas.core.groupby.DataFrameGroupBy.last.html#pandas.core.groupby.DataFrameGroupBy.last): creates a new `DataFrame` with the first/last row in each group
-* [`.size`](https://pandas.pydata.org/docs/reference/api/pandas.core.groupby.DataFrameGroupBy.size.html#pandas.core.groupby.DataFrameGroupBy.size): creates a new **Series** with the number of entries in each group
-* [`.count`](https://pandas.pydata.org/docs/reference/api/pandas.core.groupby.DataFrameGroupBy.count.html#pandas.core.groupby.DataFrameGroupBy.count): creates a new **DataFrame** with the number of entries, excluding missing values. 
+* [`.size`](https://pandas.pydata.org/docs/reference/api/pandas.core.groupby.DataFrameGroupBy.size.html#pandas.core.groupby.DataFrameGroupBy.size): creates a new **`Series`** with the number of entries in each group
+* [`.count`](https://pandas.pydata.org/docs/reference/api/pandas.core.groupby.DataFrameGroupBy.count.html#pandas.core.groupby.DataFrameGroupBy.count): creates a new **`DataFrame`** with the number of entries, excluding missing values. 
 
 Let's illustrate some examples by creating a `DataFrame` called `df`. 
 
@@ -472,11 +482,11 @@ Another common use for `GroupBy` objects is to filter data by group.
 - If `func` returns `True` for a group, then all rows belonging to the group are preserved.
 - If `func` returns `False` for a group, then all rows belonging to that group are filtered out.
 
-In other words, sub-`DataFrames` that correspond to `True` are returned in the final result, whereas those with a `False` value are not. Importantly, `groupby.filter` is different from `groupby.agg` in that an *entire* sub-`DataFrame` is returned in the final `DataFrame`, not just a single row. As a result, `groupby.filter` preserves the original indices.
+In other words, sub-`DataFrame`s that correspond to `True` are returned in the final result, whereas those with a `False` value are not. Importantly, `groupby.filter` is different from `groupby.agg` in that an *entire* sub-`DataFrame` is returned in the final `DataFrame`, not just a single row. As a result, `groupby.filter` preserves the original indices.
 
 <img src="images/filter_demo.png" alt='groupby_demo' width='600'>
 
-To illustrate how this happens, let's go back to the `elections` dataset. Say we want to identify "tight" election years – that is, we want to find all rows that correspond to elections years where all candidates in that year won a similar portion of the total vote. Specifically, let's find all rows corresponding to a year where no candidate won more than 45% of the total vote. 
+To illustrate how this happens, let's go back to the `elections` dataset. Say we want to identify "tight" election years – that is, we want to find all rows that correspond to election years where all candidates in that year won a similar portion of the total vote. Specifically, let's find all rows corresponding to a year where no candidate won more than 45% of the total vote. 
 
 In other words, we want to: 
 
@@ -517,10 +527,10 @@ Why is this happening? Here, the `max` aggregation function is taken over every 
 
 Instead, let's try a different approach. We will:
 
-1. Sort the DataFrame so that rows are in descending order of `%`
-2. Group by `Party` and select the first row of each sub-DataFrame
+1. Sort the `DataFrame` so that rows are in descending order of `%`
+2. Group by `Party` and select the first row of each sub-`DataFrame`
 
-While it may seem unintuitive, sorting `elections` by descending order of `%` is extremely helpful. If we then group by `Party`, the first row of each groupby object will contain information about the `Candidate` with the highest voter `%`.
+While it may seem unintuitive, sorting `elections` by descending order of `%` is extremely helpful. If we then group by `Party`, the first row of each `GroupBy` object will contain information about the `Candidate` with the highest voter `%`.
 
 ```{python}
 elections_sorted_by_percent = elections.sort_values("%", ascending=False)
@@ -561,7 +571,7 @@ best_per_party2.head(5)
 
 ## Aggregating Data with Pivot Tables
 
-We know now that `.groupby` gives us the ability to group and aggregate data across our DataFrame. The examples above formed groups using just one column in the `DataFrame`. It's possible to group by multiple columns at once by passing in a list of column names to `.groupby`. 
+We know now that `.groupby` gives us the ability to group and aggregate data across our `DataFrame`. The examples above formed groups using just one column in the `DataFrame`. It's possible to group by multiple columns at once by passing in a list of column names to `.groupby`. 
 
 Let's consider the `babynames` dataset again. In this problem, we will find the total number of baby names associated with each sex for each year. To do this, we'll group by *both* the `"Year"` and `"Sex"` columns.
 
@@ -576,7 +586,7 @@ babynames.head()
 babynames.groupby(["Year", "Sex"])[["Count"]].agg(sum).head(6)
 ```
 
-Notice that both `"Year"` and `"Sex"` serve as the index of the `DataFrame` (they are both rendered in bold). We've created a *multi-index* DataFrame where two different index values, the year and sex, are used to uniquely identify each row. 
+Notice that both `"Year"` and `"Sex"` serve as the index of the `DataFrame` (they are both rendered in bold). We've created a *multi-index* `DataFrame` where two different index values, the year and sex, are used to uniquely identify each row. 
 
 This isn't the most intuitive way of representing this data – and, because multi-indexed DataFrames have multiple dimensions in their index, they can often be difficult to use. 
 
@@ -601,7 +611,7 @@ babynames.pivot_table(
 ).head(5)
 ```
 
-Looks a lot better! Now, our DataFrame is structured with clear index-column combinations. Each entry in the pivot table represents the summed count of names for a given combination of `"Year"` and `"Sex"`.
+Looks a lot better! Now, our `DataFrame` is structured with clear index-column combinations. Each entry in the pivot table represents the summed count of names for a given combination of `"Year"` and `"Sex"`.
 
 Let's take a closer look at the code implemented above. 
 
@@ -627,7 +637,7 @@ Note that each row provides the number of girls and number of boys having that y
 
 ## Joining Tables 
 
-When working on data science projects, we're unlikely to have absolutely all the data we want contained in a single `DataFrame` – a real-world data scientist needs to grapple with data coming from multiple sources. If we have access to multiple datasets with related information, we can join two or more tables into a single DataFrame. 
+When working on data science projects, we're unlikely to have absolutely all the data we want contained in a single `DataFrame` – a real-world data scientist needs to grapple with data coming from multiple sources. If we have access to multiple datasets with related information, we can join two or more tables into a single `DataFrame`. 
 
 To put this into practice, we'll revisit the `elections` dataset.
 
@@ -653,7 +663,7 @@ babynames_2022 = babynames[babynames["Year"]==2020]
 babynames_2022.head()
 ```
 
-Now, we're ready to join the two tables. [`pd.merge`](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.merge.html) is the `pandas` method used to join DataFrames together.
+Now, we're ready to join the two tables. [`pd.merge`](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.merge.html) is the `pandas` method used to join `DataFrame`s together.
 
 ```{python}
 merged = pd.merge(left = elections, right = babynames_2022, \
@@ -665,13 +675,12 @@ merged.head()
 
 Let's take a closer look at the parameters:
 
-* `left` and `right` parameters are used to specify the DataFrames to be joined.
-* `left_on` and `right_on` parameters are assigned to the string names of the columns to be used when performing the join. These two `on` parameters tell `pandas` what values should act as pairing keys to determine which rows to merge across the DataFrames. We'll talk more about this idea of a pairing key next lecture.
+* `left` and `right` parameters are used to specify the `DataFrame`s to be joined.
+* `left_on` and `right_on` parameters are assigned to the string names of the columns to be used when performing the join. These two `on` parameters tell `pandas` what values should act as pairing keys to determine which rows to merge across the `DataFrame`s. We'll talk more about this idea of a pairing key next lecture.
 
 
 ## Parting Note
 
-Congratulations! We finally tackled `pandas`. Don't worry if you are still not feeling very comfortable with it—you will have plenty of chance to practice over the next few weeks.
+Congratulations! We finally tackled `pandas`. Don't worry if you are still not feeling very comfortable with it—you will have plenty of chances to practice over the next few weeks.
 
 Next, we will get our hands dirty with some real-world datasets and use our `pandas` knowledge to conduct some exploratory data analysis.
-
