@@ -45,6 +45,7 @@ We'll start by loading the `babynames` dataset. Note that this dataset is filter
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 # This code pulls census data and loads it into a DataFrame
 # We won't cover it explicitly in this class, but you are welcome to explore it on your own
 import pandas as pd
@@ -74,6 +75,7 @@ babynames.tail(10)
 One method to do this is to first start by creating a column that contains the lengths of the names.
 
 ```{python}
+#| vscode: {languageId: python}
 # Create a Series of the length of each name
 babyname_lengths = babynames["Name"].str.len()
 
@@ -85,6 +87,7 @@ babynames.head(5)
 We can then sort the `DataFrame` by that column using `.sort_values()`:
 
 ```{python}
+#| vscode: {languageId: python}
 # Sort by the temporary column
 babynames = babynames.sort_values(by="name_lengths", ascending=False)
 babynames.head(5)
@@ -93,6 +96,7 @@ babynames.head(5)
 Finally, we can drop the `name_length` column from `babynames` to prevent our table from getting cluttered.
 
 ```{python}
+#| vscode: {languageId: python}
 # Drop the 'name_length' column
 babynames = babynames.drop("name_lengths", axis='columns')
 babynames.head(5)
@@ -103,6 +107,7 @@ babynames.head(5)
 Another way to approach this is to use the `key` argument of `.sort_values()`. Here we can specify that we want to sort `"Name"` values by their length.
 
 ```{python}
+#| vscode: {languageId: python}
 babynames.sort_values("Name", key=lambda x: x.str.len(), ascending=False).head()
 ```
 
@@ -111,6 +116,7 @@ babynames.sort_values("Name", key=lambda x: x.str.len(), ascending=False).head()
 We can also use the `map` function on a `Series` to solve this. Say we want to sort the `babynames` table by the number of `"dr"`'s and `"ea"`'s in each `"Name"`. We'll define the function `dr_ea_count` to help us out.
 
 ```{python}
+#| vscode: {languageId: python}
 # First, define a function to count the number of times "dr" or "ea" appear in each name
 def dr_ea_count(string):
     return string.count('dr') + string.count('ea')
@@ -126,6 +132,7 @@ babynames.head()
 We can drop the `dr_ea_count` once we're done using it to maintain a neat table.
 
 ```{python}
+#| vscode: {languageId: python}
 # Drop the `dr_ea_count` column
 babynames = babynames.drop("dr_ea_count", axis = 'columns')
 babynames.head(5)
@@ -139,6 +146,7 @@ Let's say we wanted to aggregate all rows in `babynames` for a given year.
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 babynames.groupby("Year")
 ```
 
@@ -154,6 +162,7 @@ The first aggregation method we'll consider is `.agg`. The `.agg` method takes i
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 babynames[["Year", "Count"]].groupby("Year").agg(sum).head(5)
 ```
 
@@ -167,16 +176,19 @@ There are many different aggregation functions we can use, all of which are usef
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 babynames[["Year", "Count"]].groupby("Year").agg(min).head(5)
 ```
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 babynames[["Year", "Count"]].groupby("Year").agg(max).head(5)
 ```
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 # Same result, but now we explicitly tell pandas to only consider the "Count" column when summing
 babynames.groupby("Year")[["Count"]].agg(sum).head(5)
 ```
@@ -194,11 +206,13 @@ Because of this fairly broad requirement, `pandas` offers many ways of computing
 **In-built** Python operations – such as `sum`, `max`, and `min` – are automatically recognized by `pandas`.
 
 ```{python}
+#| vscode: {languageId: python}
 # What is the minimum count for each name in any year?
 babynames.groupby("Name")[["Count"]].agg(min).head()
 ```
 
 ```{python}
+#| vscode: {languageId: python}
 # What is the largest single-year count of each name?
 babynames.groupby("Name")[["Count"]].agg(max).head()
 ```
@@ -207,6 +221,7 @@ As mentioned previously, functions from the `NumPy` library, such as `np.mean`, 
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 # What is the average count for each name across all years?
 babynames.groupby("Name")[["Count"]].agg(np.mean).head()
 ```
@@ -226,6 +241,7 @@ Let's illustrate this with an example. Say we add a new column to `babynames` th
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 # Imagine we had an additional column, "First Letter". We'll explain this code next week
 babynames["First Letter"] = babynames["Name"].str[0]
 
@@ -242,6 +258,7 @@ We can use a dictionary to apply different aggregation functions to each column 
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 babynames_new.groupby("Name").agg({"First Letter":"first", "Year":"max"}).head()
 ```
 
@@ -251,6 +268,7 @@ Let's use `.agg` to find the total number of babies born in each year. Recall th
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 babynames.groupby("Year")[["Count"]].agg(sum).head(5)
 # Alternative 1
 # babynames.groupby("Year")[["Count"]].sum()
@@ -266,6 +284,7 @@ Plotting the `Dataframe` we obtain tells an interesting story.
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 import plotly.express as px
 puzzle2 = babynames.groupby("Year")[["Count"]].agg(sum)
 px.line(puzzle2, y = "Count")
@@ -288,7 +307,7 @@ For some arbitrary `DataFrame` `df` below, the code `df.groupby("year").agg(sum)
 ### Revisiting the `.agg()` Function
 
 `.agg()` can take in any function that aggregates several values into one summary value. Some commonly-used aggregation functions can even be called directly, without explicit use of `.agg()`. For example, we can call `.mean()` on `.groupby()`: 
-
+    
     babynames.groupby("Year").mean().head()
 
 We can now put this all into practice. Say we want to find the baby name with sex "F" that has fallen in popularity the most in California. To calculate this, we can first create a metric: "Ratio to Peak" (RTP). The RTP is the ratio of babies born with a given name in 2022 to the *maximum* number of babies born with the name in *any* year. 
@@ -297,6 +316,7 @@ Let's start with calculating this for one baby, "Jennifer".
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 # We filter by babies with sex "F" and sort by "Year"
 f_babynames = babynames[babynames["Sex"] == "F"]
 f_babynames = f_babynames.sort_values(["Year"])
@@ -316,6 +336,7 @@ By creating a function to calculate RTP and applying it to our `DataFrame` by us
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 def ratio_to_peak(series):
     return series.iloc[-1] / max(series)
 
@@ -342,6 +363,7 @@ By default, `.groupby` will not rename any aggregated columns. As we can see in 
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 rtp_table = rtp_table.rename(columns = {"Count": "Count RTP"})
 rtp_table
 ```
@@ -352,6 +374,7 @@ By sorting `rtp_table`, we can see the names whose popularity has decreased the 
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 rtp_table = rtp_table.rename(columns = {"Count": "Count RTP"})
 rtp_table.sort_values("Count RTP").head()
 ```
@@ -360,6 +383,7 @@ To visualize the above `DataFrame`, let's look at the line plot below:
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 import plotly.express as px
 px.line(f_babynames[f_babynames["Name"] == "Debra"], x = "Year", y = "Count")
 ```
@@ -368,6 +392,7 @@ We can get the list of the top 10 names and then plot popularity with the follow
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 top10 = rtp_table.sort_values("Count RTP").head(10).index
 px.line(
     f_babynames[f_babynames["Name"].isin(top10)], 
@@ -381,6 +406,7 @@ As a quick exercise, consider what code would compute the total number of babies
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 babynames.groupby("Name")[["Count"]].agg(sum).head()
 # alternative solution: 
 # babynames.groupby("Name")[["Count"]].sum()
@@ -393,6 +419,7 @@ We'll work with the `elections` `DataFrame` again.
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 
 import pandas as pd
 import numpy as np
@@ -407,6 +434,7 @@ The result of `groupby` applied to a `DataFrame` is a `DataFrameGroupBy` object,
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 grouped_by_year = elections.groupby("Year")
 type(grouped_by_year)
 ```
@@ -414,11 +442,13 @@ type(grouped_by_year)
 There are several ways to look into `DataFrameGroupBy` objects: 
 
 ```{python}
+#| vscode: {languageId: python}
 grouped_by_party = elections.groupby("Party")
 grouped_by_party.groups
 ```
 
 ```{python}
+#| vscode: {languageId: python}
 grouped_by_party.get_group("Socialist")
 ```
 
@@ -436,6 +466,7 @@ There are many aggregation methods we can use with `.agg`. Some useful options a
 Let's illustrate some examples by creating a `DataFrame` called `df`. 
 
 ```{python}
+#| vscode: {languageId: python}
 df = pd.DataFrame({'letter':['A','A','B','C','C','C'], 
                    'num':[1,2,3,4,np.NaN,4], 
                    'state':[np.NaN, 'tx', 'fl', 'hi', np.NaN, 'ak']})
@@ -445,16 +476,19 @@ df
 Note the slight difference between `.size()` and `.count()`: while `.size()` returns a `Series` and counts the number of entries including the missing values, `.count()` returns a `DataFrame` and counts the number of entries in each column *excluding missing values*. 
 
 ```{python}
+#| vscode: {languageId: python}
 df.groupby("letter").size()
 ```
 
 ```{python}
+#| vscode: {languageId: python}
 df.groupby("letter").count()
 ```
 
 You might recall that the `value_counts()` function in the previous note does something similar. It turns out `value_counts()` and `groupby.size()` are the same, except `value_counts()` sorts the resulting `Series` in descending order automatically.
 
 ```{python}
+#| vscode: {languageId: python}
 df["letter"].value_counts()
 ```
 
@@ -482,7 +516,7 @@ Another common use for `GroupBy` objects is to filter data by group.
 - If `func` returns `True` for a group, then all rows belonging to the group are preserved.
 - If `func` returns `False` for a group, then all rows belonging to that group are filtered out.
 
-In other words, sub-`DataFrame`s that correspond to `True` are returned in the final result, whereas those with a `False` value are not. Importantly, `groupby.filter` is different from `groupby.agg` in that an *entire* sub-`DataFrame` is returned in the final `DataFrame`, not just a single row. As a result, `groupby.filter` preserves the original indices.
+In other words, sub-`DataFrame`s that correspond to `True` are returned in the final result, whereas those with a `False` value are not. Importantly, `groupby.filter` is different from `groupby.agg` in that an *entire* sub-`DataFrame` is returned in the final `DataFrame`, not just a single row. As a result, `groupby.filter` preserves the original indices and the column we grouped on does **NOT** become the index!
 
 <img src="images/filter_demo.png" alt='groupby_demo' width='600'>
 
@@ -496,6 +530,7 @@ In other words, we want to:
 For each year, we need to find the maximum `%` among *all* rows for that year. If this maximum `%` is lower than 45%, we will tell `pandas` to keep all rows corresponding to that year. 
 
 ```{python}
+#| vscode: {languageId: python}
 elections.groupby("Year").filter(lambda sf: sf["%"].max() < 45).head(9)
 ```
 
@@ -514,6 +549,7 @@ Let's first consider a puzzle to jog our memory. We will attempt to find the `Ca
 A naive approach may be to group by the `Party` column and aggregate by the maximum.
 
 ```{python}
+#| vscode: {languageId: python}
 elections.groupby("Party").agg(max).head(10)
 ```
 
@@ -533,11 +569,13 @@ Instead, let's try a different approach. We will:
 While it may seem unintuitive, sorting `elections` by descending order of `%` is extremely helpful. If we then group by `Party`, the first row of each `GroupBy` object will contain information about the `Candidate` with the highest voter `%`.
 
 ```{python}
+#| vscode: {languageId: python}
 elections_sorted_by_percent = elections.sort_values("%", ascending=False)
 elections_sorted_by_percent.head(5)
 ```
 
 ```{python}
+#| vscode: {languageId: python}
 elections_sorted_by_percent.groupby("Party").agg(lambda x : x.iloc[0]).head(10)
 
 # Equivalent to the below code
@@ -558,12 +596,14 @@ In fact, there's a few different ways to approach this problem. Each approach ha
 **Note**: Understanding these alternative solutions is not required. They are given to demonstrate the vast number of problem-solving approaches in `pandas`.
 
 ```{python}
+#| vscode: {languageId: python}
 # Using the idxmax function
 best_per_party = elections.loc[elections.groupby('Party')['%'].idxmax()]
 best_per_party.head(5)
 ```
 
 ```{python}
+#| vscode: {languageId: python}
 # Using the .drop_duplicates function
 best_per_party2 = elections.sort_values('%').drop_duplicates(['Party'], keep='last')
 best_per_party2.head(5)
@@ -576,11 +616,13 @@ We know now that `.groupby` gives us the ability to group and aggregate data acr
 Let's consider the `babynames` dataset again. In this problem, we will find the total number of baby names associated with each sex for each year. To do this, we'll group by *both* the `"Year"` and `"Sex"` columns.
 
 ```{python}
+#| vscode: {languageId: python}
 babynames.head()
 ```
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 # Find the total number of baby names associated with each sex for each 
 # year in the data
 babynames.groupby(["Year", "Sex"])[["Count"]].agg(sum).head(6)
@@ -601,13 +643,14 @@ The best way to understand pivot tables is to see one in action. Let's return to
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 # The `pivot_table` method is used to generate a Pandas pivot table
 import numpy as np
 babynames.pivot_table(
-    index = "Year", 
-    columns = "Sex", 
+    index = "Year",
+    columns = "Sex",    
     values = "Count", 
-    aggfunc = np.sum,
+    aggfunc = np.sum, 
 ).head(5)
 ```
 
@@ -624,11 +667,12 @@ We can even include multiple values in the index or columns of our pivot tables.
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 babynames_pivot = babynames.pivot_table(
     index="Year",     # the rows (turned into index)
     columns="Sex",    # the column values
     values=["Count", "Name"], 
-    aggfunc=max,   # group operation
+    aggfunc=max,      # group operation
 )
 babynames_pivot.head(6)
 ```
@@ -642,6 +686,7 @@ When working on data science projects, we're unlikely to have absolutely all the
 To put this into practice, we'll revisit the `elections` dataset.
 
 ```{python}
+#| vscode: {languageId: python}
 elections.head(5)
 ```
 
@@ -651,26 +696,33 @@ We'll start by creating a new column containing the first name of each president
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 # This `str` operation splits each candidate's full name at each 
-# blank space, then takes just the candidiate's first name
+# blank space, then takes just the candidate's first name
 elections["First Name"] = elections["Candidate"].str.split().str[0]
 elections.head(5)
 ```
 
 ```{python}
+#| vscode: {languageId: python}
 # Here, we'll only consider `babynames` data from 2022
-babynames_2022 = babynames[babynames["Year"]==2020]
+babynames_2022 = babynames[babynames["Year"]==2022]
 babynames_2022.head()
 ```
 
 Now, we're ready to join the two tables. [`pd.merge`](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.merge.html) is the `pandas` method used to join `DataFrame`s together.
 
 ```{python}
+#| vscode: {languageId: python}
 merged = pd.merge(left = elections, right = babynames_2022, \
                   left_on = "First Name", right_on = "Name")
 merged.head()
 # Notice that pandas automatically specifies `Year_x` and `Year_y` 
 # when both merged DataFrames have the same column name to avoid confusion
+
+# Second option
+# merged = elections.merge(right = babynames_2022, \
+    # left_on = "First Name", right_on = "Name")
 ```
 
 Let's take a closer look at the parameters:
@@ -684,3 +736,4 @@ Let's take a closer look at the parameters:
 Congratulations! We finally tackled `pandas`. Don't worry if you are still not feeling very comfortable with it—you will have plenty of chances to practice over the next few weeks.
 
 Next, we will get our hands dirty with some real-world datasets and use our `pandas` knowledge to conduct some exploratory data analysis.
+
