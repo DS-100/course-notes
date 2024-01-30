@@ -13,7 +13,17 @@ format:
       - cosmo
       - cerulean
     callout-icon: false
-jupyter: python3
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .qmd
+      format_name: quarto
+      format_version: '1.0'
+      jupytext_version: 1.16.1
+  kernelspec:
+    display_name: Python 3 (ipykernel)
+    language: python
+    name: python3
 ---
 
 ```{python}
@@ -170,7 +180,7 @@ with open(covid_file, "r") as f:
 
 ###### Unix Commands
 As part of the EDA workflow, Unix commands can come in very handy. In fact, there's an entire book called ["Data Science at the Command Line"](https://datascienceatthecommandline.com/) that explores this idea in depth! 
-In Jupyter/IPython, you can prefix lines with `!` to execute arbitrary Unix commands, and within those lines, you can refer to `Python` variables and expressions with the syntax `{expr}`.
+In Jupyter/IPython, you can prefix lines with `!` to execute arbitrary Unix commands, and within those lines, you can refer to Python variables and expressions with the syntax `{expr}`.
 
 Here, we use the `ls` command to list files, using the `-lh` flags, which request "long format with information in human-readable form." We also use the `wc` command for "word count," but with the `-l` flag, which asks for line counts instead of words.
 
@@ -200,7 +210,7 @@ We can use the `head` Unix command (which is where `pandas`' `head` method comes
 !head -5 {covid_file}
 ```
 
-In order to load the JSON file into `pandas`, Let's first do some EDA with `Python`'s `json` package to understand the particular structure of this JSON file so that we can decide what (if anything) to load into `pandas`. `Python` has relatively good support for JSON data since it closely matches the internal python object model. In the following cell we import the entire JSON datafile into a python dictionary using the `json` package.
+In order to load the JSON file into `pandas`, Let's first do some EDA with Oython's `json` package to understand the particular structure of this JSON file so that we can decide what (if anything) to load into `pandas`. Python has relatively good support for JSON data since it closely matches the internal python object model. In the following cell we import the entire JSON datafile into a python dictionary using the `json` package.
 
 ```{python}
 #| code-fold: false
@@ -217,24 +227,24 @@ The `covid_json` variable is now a dictionary encoding the data in the file:
 type(covid_json)
 ```
 
-We can examine what keys are in the top level json object by listing out the keys. 
+We can examine what keys are in the top level JSON object by listing out the keys. 
 
 ```{python}
 #| code-fold: false
 covid_json.keys()
 ```
 
-**Observation**: The JSON dictionary contains a `meta` key which likely refers to meta data (data about the data).  Meta data often maintained with the data and can be a good source of additional information.
+**Observation**: The JSON dictionary contains a `meta` key which likely refers to metadata (data about the data).  Metadata is often maintained with the data and can be a good source of additional information.
 
 
-We can investigate the meta data further by examining the keys associated with the metadata.
+We can investigate the metadata further by examining the keys associated with the metadata.
 
 ```{python}
 #| code-fold: false
 covid_json['meta'].keys()
 ```
 
-The `meta` key contains another dictionary called `view`.  This likely refers to meta-data about a particular "view" of some underlying database.  We will learn more about views when we study SQL later in the class.    
+The `meta` key contains another dictionary called `view`.  This likely refers to metadata about a particular "view" of some underlying database. We will learn more about views when we study SQL later in the class.    
 
 ```{python}
 #| code-fold: false
@@ -566,7 +576,7 @@ Whoa, what's going on with the TB cases in 2019, 2020, and 2021? Check out the c
 tb_df.dtypes
 ```
 
-Since there are commas in the values for TB cases, the numbers are read as the `object` datatype, or **storage type** (close to the `Python` string datatype), so `pandas` is concatenating strings instead of adding integers (recall that `Python` can "sum", or concatenate, strings together: `"data" + "100"` evaluates to `"data100"`). 
+Since there are commas in the values for TB cases, the numbers are read as the `object` datatype, or **storage type** (close to the `Python` string datatype), so `pandas` is concatenating strings instead of adding integers (recall that Python can "sum", or concatenate, strings together: `"data" + "100"` evaluates to `"data100"`). 
 
 
 Fortunately `read_csv` also has a `thousands` parameter ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html)):
@@ -586,7 +596,7 @@ tb_df.head(5)
 tb_df.sum()
 ```
 
-The Total TB cases look right. Phew!
+The total TB cases look right. Phew!
 
 Let's just look at the records with **state-level granularity**:
 
@@ -712,7 +722,7 @@ tb_census_df.head(5)
 
 Awesome!!!
 
-Let's use a for-loop and `Python` format strings to compute TB incidence for all years. `Python` f-strings are just used for the purposes of this demo, but they're handy to know when you explore data beyond this course ([documentation](https://docs.python.org/3/tutorial/inputoutput.html)).
+Let's use a for-loop and Python format strings to compute TB incidence for all years. Python f-strings are just used for the purposes of this demo, but they're handy to know when you explore data beyond this course ([documentation](https://docs.python.org/3/tutorial/inputoutput.html)).
 
 ```{python}
 #| code-fold: false
@@ -836,28 +846,25 @@ $\text{percent change} = \frac{B - A}{A} \times 100$.
 
 ```{python}
 #| code-fold: false
-#| tags: []
 incidence_2020 = tb_census_df.loc['Total', 'recompute incidence 2020']
 incidence_2020
 ```
 
 ```{python}
 #| code-fold: false
-#| tags: []
 incidence_2021 = tb_census_df.loc['Total', 'recompute incidence 2021']
 incidence_2021
 ```
 
 ```{python}
 #| code-fold: false
-#| tags: []
 difference = (incidence_2021 - incidence_2020)/incidence_2020 * 100
 difference
 ```
 
 # EDA Demo 2: Mauna Loa CO<sub>2</sub> Data -- A Lesson in Data Faithfulness
 
-[Mauna Loa Observatory](https://gml.noaa.gov/ccgg/trends/data.html) has been monitoring CO<sub>2</sub> concentrations since 1958
+[Mauna Loa Observatory](https://gml.noaa.gov/ccgg/trends/data.html) has been monitoring CO<sub>2</sub> concentrations since 1958.
 
 ```{python}
 #| code-fold: false
@@ -866,7 +873,7 @@ co2_file = "data/co2_mm_mlo.txt"
 
 Let's do some **EDA**!!
 
-## Reading this file into Pandas?
+## Reading this file into `Pandas`?
 Let's instead check out this `.txt` file. Some questions to keep in mind: Do we trust this file extension? What structure is it? 
 
 Lines 71-78 (inclusive) are shown below: 
@@ -924,7 +931,7 @@ co2.head()
 ```
 
 ## Visualizing CO<sub>2</sub>
-Scientific studies tend to have very clean data, right...? Let's jump right in and make a time series plot of CO2 monthly averages.
+Scientific studies tend to have very clean data, right...? Let's jump right in and make a time series plot of CO<sub>2</sub> monthly averages.
 
 ```{python}
 #| code-fold: true
@@ -969,9 +976,7 @@ First, we consider the shape of the data. How many rows should we have?
 co2.shape
 ```
 
-Nice!! The number of rows (i.e. records) match our expectations.\
-
-<br/>
+Nice!! The number of rows (i.e. records) match our expectations.
 
 
 Let's now check the quality of each feature.
@@ -1022,12 +1027,12 @@ plt.title("Day field by Year"); # the ; suppresses output
 **Potential Next Steps**:
 
 * Confirm these explanations through documentation about the historical readings.
-* Maybe drop earliest recordings? However, we would want to delay such action until after we have examined the time trends and assess whether there are any potential problems.
+* Maybe drop the earliest recordings? However, we would want to delay such action until after we have examined the time trends and assess whether there are any potential problems.
 
 <br/>
 
 ## Understanding Missing Value 2: `Avg`
-Next, let's return to the -99.99 values in `Avg` to analyze the overall quality of the CO2 measurements. We'll plot a histogram of the average CO<sub>2</sub> measurements
+Next, let's return to the -99.99 values in `Avg` to analyze the overall quality of the CO<sub>2</sub> measurements. We'll plot a histogram of the average CO<sub>2</sub> measurements
 
 ```{python}
 #| code-fold: true
@@ -1035,7 +1040,7 @@ Next, let's return to the -99.99 values in `Avg` to analyze the overall quality 
 sns.displot(co2['Avg']);
 ```
 
-The non-missing values are in the 300-400 range (a regular range of CO2 levels).
+The non-missing values are in the 300-400 range (a regular range of CO<sub>2</sub> levels).
 
 We also see that there are only a few missing `Avg` values (**<1% of values**). Let's examine all of them:
 
@@ -1068,12 +1073,9 @@ Since we are plotting `Avg` vs `DecDate`, we should just focus on dealing with m
 Let's consider a few options:
 1. Drop those records
 2. Replace -99.99 with NaN
-3. Substitute it with a likely value for the average CO2?
+3. Substitute it with a likely value for the average CO<sub>2</sub>?
 
 What do you think are the pros and cons of each possible action?
-
-<br/>
-
 
 Let's examine each of these three options.
 
@@ -1147,12 +1149,10 @@ plt.tight_layout()
 
 In the big picture since there are only 7 `Avg` values missing (**<1%** of 738 months), any of these approaches would work.
 
-However there is some appeal to **option C: Imputing**:
+However there is some appeal to **option C, Imputing**:
 
-* Shows seasonal trends for CO2
+* Shows seasonal trends for CO<sub>2</sub>
 * We are plotting all months in our data as a line plot
-
-<br/>
 
 
 Let's replot our original figure with option 3:
@@ -1169,16 +1169,16 @@ Looks pretty close to what we see on the NOAA [website](https://gml.noaa.gov/ccg
 
 From the description:
 
-* monthly measurements are averages of average day measurements.
+* Monthly measurements are averages of average day measurements.
 * The NOAA GML website has datasets for daily/hourly measurements too.
 
 The data you present depends on your research question.
 
-**How do CO2 levels vary by season?**
+**How do CO<sub>2</sub> levels vary by season?**
 
 * You might want to keep average monthly data.
 
-**Are CO2 levels rising over the past 50+ years, consistent with global warming predictions?**
+**Are CO<sub>2</sub> levels rising over the past 50+ years, consistent with global warming predictions?**
 
 * You might be happier with a **coarser granularity** of average year data!
 
@@ -1189,7 +1189,7 @@ sns.lineplot(x='Yr', y='Avg', data=co2_year)
 plt.title("CO2 Average By Year");
 ```
 
-Indeed, we see a rise by nearly 100 ppm of CO2 since Mauna Loa began recording in 1958.
+Indeed, we see a rise by nearly 100 ppm of CO<sub>2</sub> since Mauna Loa began recording in 1958.
 
 # Summary
 We went over a lot of content this lecture; let's summarize the most important points: 
