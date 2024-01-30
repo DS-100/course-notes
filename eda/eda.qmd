@@ -470,14 +470,14 @@ A third method to address missing data is to perform **imputation**: infer the m
 
 Regardless of the strategy used to deal with missing data, we should think carefully about *why* particular records or fields may be missing – this can help inform whether or not the absence of these values is significant or meaningful.
 
-# EDA Demo 1: Tuberculosis in the United States
+## EDA Demo 1: Tuberculosis in the United States
 
 Now, let's walk through the data-cleaning and EDA workflow to see what can we learn about the presence of Tuberculosis in the United States!
 
 We will examine the data included in the [original CDC article](https://www.cdc.gov/mmwr/volumes/71/wr/mm7112a1.htm?s_cid=mm7112a1_w#T1_down) published in 2021.
 
 
-## CSVs and Field Names
+### CSVs and Field Names
 Suppose Table 1 was saved as a CSV file located in `data/cdc_tuberculosis.csv`.
 
 We can then explore the CSV (which is a text file, and does not contain binary-encoded data) in many ways:
@@ -554,7 +554,7 @@ tb_df = tb_df.rename(columns=rename_dict)
 tb_df.head(5)
 ```
 
-## Record Granularity
+### Record Granularity
 
 You might already be wondering: what's up with that first record?
 
@@ -606,7 +606,7 @@ state_tb_df = tb_df[1:]
 state_tb_df.head(5)
 ```
 
-## Gather Census Data
+### Gather Census Data
 
 U.S. Census population estimates [source](https://www.census.gov/data/tables/time-series/demo/popest/2010s-state-total.html) (2019), [source](https://www.census.gov/data/tables/time-series/demo/popest/2020s-state-total.html) (2020-2021).
 
@@ -666,7 +666,7 @@ census_2020s_df['Geographic Area'] = census_2020s_df['Geographic Area'].str.stri
 census_2020s_df.head(5)
 ```
 
-## Joining Data (Merging `DataFrame`s)
+### Joining Data (Merging `DataFrame`s)
 
 Time to `merge`! Here we use the `DataFrame` method `df1.merge(right=df2, ...)` on `DataFrame` `df1` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.merge.html)). Contrast this with the function `pd.merge(left=df1, right=df2, ...)` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.merge.html?highlight=pandas%20merge#pandas.merge)). Feel free to use either.
 
@@ -700,7 +700,7 @@ tb_census_df = (
 tb_census_df.head(5)
 ```
 
-## Reproducing Data: Compute Incidence
+### Reproducing Data: Compute Incidence
 
 Let's recompute incidence to make sure we know where the original CDC numbers came from.
 
@@ -739,7 +739,7 @@ These numbers look pretty close!!! There are a few errors in the hundredths plac
 tb_census_df.describe()
 ```
 
-## Bonus EDA: Reproducing the Reported Statistic
+### Bonus EDA: Reproducing the Reported Statistic
 
 
 **How do we reproduce that reported statistic in the original [CDC report](https://www.cdc.gov/mmwr/volumes/71/wr/mm7112a1.htm?s_cid=mm7112a1_w)?**
@@ -862,7 +862,7 @@ difference = (incidence_2021 - incidence_2020)/incidence_2020 * 100
 difference
 ```
 
-# EDA Demo 2: Mauna Loa CO<sub>2</sub> Data -- A Lesson in Data Faithfulness
+## EDA Demo 2: Mauna Loa CO<sub>2</sub> Data -- A Lesson in Data Faithfulness
 
 [Mauna Loa Observatory](https://gml.noaa.gov/ccgg/trends/data.html) has been monitoring CO<sub>2</sub> concentrations since 1958.
 
@@ -873,7 +873,7 @@ co2_file = "data/co2_mm_mlo.txt"
 
 Let's do some **EDA**!!
 
-## Reading this file into `Pandas`?
+### Reading this file into `Pandas`?
 Let's instead check out this `.txt` file. Some questions to keep in mind: Do we trust this file extension? What structure is it? 
 
 Lines 71-78 (inclusive) are shown below: 
@@ -914,7 +914,7 @@ Congratulations! You've wrangled the data!
 ...But our columns aren't named.
 **We need to do more EDA.**
 
-## Exploring Variable Feature Types
+### Exploring Variable Feature Types
 
 The NOAA [webpage](https://gml.noaa.gov/ccgg/trends/) might have some useful tidbits (in this case it doesn't).
 
@@ -930,7 +930,7 @@ co2 = pd.read_csv(
 co2.head()
 ```
 
-## Visualizing CO<sub>2</sub>
+### Visualizing CO<sub>2</sub>
 Scientific studies tend to have very clean data, right...? Let's jump right in and make a time series plot of CO<sub>2</sub> monthly averages.
 
 ```{python}
@@ -964,7 +964,7 @@ How can we fix this? First, let's explore other aspects of our data. Understandi
 <br/>
 
 
-## Sanity Checks: Reasoning about the data
+### Sanity Checks: Reasoning about the data
 First, we consider the shape of the data. How many rows should we have?
 
 * If chronological order, we should have one record per month.
@@ -981,7 +981,7 @@ Nice!! The number of rows (i.e. records) match our expectations.
 
 Let's now check the quality of each feature.
 
-## Understanding Missing Value 1: `Days`
+### Understanding Missing Value 1: `Days`
 `Days` is a time field, so let's analyze other time fields to see if there is an explanation for missing values of days of operation.
 
 Let's start with **months**, `Mo`.
@@ -1031,7 +1031,7 @@ plt.title("Day field by Year"); # the ; suppresses output
 
 <br/>
 
-## Understanding Missing Value 2: `Avg`
+### Understanding Missing Value 2: `Avg`
 Next, let's return to the -99.99 values in `Avg` to analyze the overall quality of the CO<sub>2</sub> measurements. We'll plot a histogram of the average CO<sub>2</sub> measurements
 
 ```{python}
@@ -1051,7 +1051,7 @@ co2[co2["Avg"] < 0]
 
 There doesn't seem to be a pattern to these values, other than that most records also were missing `Days` data.
 
-## Drop, `NaN`, or Impute Missing `Avg` Data?
+### Drop, `NaN`, or Impute Missing `Avg` Data?
 
 How should we address the invalid `Avg` data?
 
@@ -1165,7 +1165,7 @@ plt.title("CO2 Average By Month, Imputed");
 
 Looks pretty close to what we see on the NOAA [website](https://gml.noaa.gov/ccgg/trends/)!
 
-## Presenting the data: A Discussion on Data Granularity
+### Presenting the Data: A Discussion on Data Granularity
 
 From the description:
 
@@ -1191,17 +1191,17 @@ plt.title("CO2 Average By Year");
 
 Indeed, we see a rise by nearly 100 ppm of CO<sub>2</sub> since Mauna Loa began recording in 1958.
 
-# Summary
+## Summary
 We went over a lot of content this lecture; let's summarize the most important points: 
 
-## Dealing with Missing Values
+### Dealing with Missing Values
 There are a few options we can take to deal with missing data:
 
 * Drop missing records
 * Keep `NaN` missing values
 * Impute using an interpolated column
 
-## EDA and Data Wrangling
+### EDA and Data Wrangling
 There are several ways to approach EDA and Data Wrangling: 
 
 * Examine the **data and metadata**: what is the date, size, organization, and structure of the data? 
@@ -1213,4 +1213,3 @@ There are several ways to approach EDA and Data Wrangling:
     * Identify and **address anomalies**.
     * Apply data transformations and corrections (we'll cover this in the upcoming lecture).
     * **Record everything you do!** Developing in Jupyter Notebook promotes *reproducibility* of your own work!
-
