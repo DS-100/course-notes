@@ -10,4 +10,4 @@ This text offers supplementary resources to accompany lectures presented in the 
 
 New notes will be added each week to accompany live lectures. See the full calendar of lectures on the [course website](https://ds100.org/sp24/). 
 
-If you spot any typos or would like to suggest any changes, please email us. <br /> <br /> **Email**: data100.instructors@berkeley.edu
+If you spot any typos or would like to suggest any changes, please fill out the [Data 100 Content Feedback Form (Spring 2024)](https://forms.gle/UL4xMNZVmjTbBLea9). Note that this link will only work if you have an @berkeley.edu email address. If you’re not a student at Berkeley and would like to provide feedback, please email us at **data100.instructors@berkeley.edu**.
