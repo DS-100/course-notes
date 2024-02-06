@@ -15,12 +15,12 @@ jupyter: python3
 
 ::: {.callout-note collapse="false"}
 ## Learning Outcomes
+- Understand the theories behind effective visualizations and start to generate plots of our own
 - Use `matplotlib` and `seaborn` to create data visualizations.
 - Analyze histograms and identify the skewness, potential outliers, and the mode.
 - Use `boxplot` and `violinplot` to compare two distributions.
+- Understanding KDE for plotting distributions and estimating density curves.
 :::
-
-**This content is covered in lecture 7.**
 
 In our journey of the data science lifecycle, we have begun to explore the vast world of exploratory data analysis. More recently, we learned how to pre-process data using various data manipulation techniques. As we work towards understanding our data, there is one key component missing in our arsenal — the ability to visualize and discern relationships in existing data.
 
@@ -28,90 +28,56 @@ These next two lectures will introduce you to various examples of data visualiza
 
 ## Visualizations in Data 8 and Data 100 (so far)
 
-You've likely encountered several forms of data visualizations in your studies. You may remember two such examples from Data 8: line plots and histograms. Each of these served a unique purpose. For example, line plots displayed how numerical quantities changed over time, while histograms were useful in understanding a variable's distribution. 
+You've likely encountered several forms of data visualizations in your studies. You may remember two such examples from Data 8: line plots, scatter plots, and histograms. Each of these served a unique purpose. For example, line plots displayed how numerical quantities changed over time, while histograms were useful in understanding a variable's distribution. 
 
-:::: {.columns}
+| Line Chart | Scatter Plot | 
+| --- | --- | 
+| <img src="images/line_chart_viz.png" alt='bad_distro' width='300'> |  <img src="images/scatter.png" alt='bad_distro' width='300'> | 
 
-::: {.column width="30%"}
-**Line Chart**
-
-<img src="images/line_chart_viz.png" alt='line_chart_viz' width='300'>
-:::
-
-::: {.column width="30%"}
-<!-- empty column to create gap -->
-:::
-
-::: {.column width="30%"}
-**Histogram**
-
-<img src="images/histogram_viz.png" alt='histogram_viz' width='300'>
-:::
-
-::::
+| Histogram | 
+| --- |
+| <img src="images/histogram_viz.png" alt='bad_distro' width='400'> |
 
 ## Goals of Visualization
 
 Visualizations are useful for a number of reasons. In Data 100, we consider two areas in particular:
 
-1. To broaden your understanding of the data
-    - Key part in exploratory data analysis.
-    - Useful in investigating relationships between variables.
-2. To communicate results/conclusions to others 
-    - Visualization theory is especially important here.
+1. To broaden your understanding of the data. Summarizing trends visually before in-depth analysis is a key part of exploratory data analysis. Creating these graphs is a lightweight, iterative and flexible process that helps us investigate relationships between variables.
+2. To communicate results/conclusions to others. These visualizations are highly editorial, selective, and fine-tuned to achieve a communications goal, so be thoughtful and careful about its clarity, accessibility, and necessary context.
 
-One of the most common applications of visualizations is in understanding a distribution of data.
+Altogether, these goals emphasize the fact that visualizations aren't a matter of making "pretty" pictures; we need to do a lot of thinking about what stylistic choices communicate ideas most effectively.
 
 This course note will focus on the first half of visualization topics in Data 100. The goal here is to understand how to choose the "right" plot depending on different variable types and, secondly, how to generate these plots using code.
 
 ## An Overview of Distributions
 
-A distribution describes the frequency of unique values in a variable. Distributions must satisfy two properties:
+A distribution describes both the set of values that a single variable can take and the frequency of unique values in a single variable. For example, if we're interested in the distribution of students across Data 100 discussion sections, the set of possible values is a list of discussion sections (10-11am, 11-12pm, etc.), and the frequency that each of those values occur is the number of students enrolled in each section. In other words, the we're interested in how a variable is distributed across it's possible values. Therefore, distributions must satisfy two properties:
 
-   1. Each data point must belong to only one category.
-   2. The total frequency of all categories must sum to 100%. In other words, their total count should equal the number of values in consideration.
+   1. The total frequency of all categories must sum to 100%
+   2. Total count should sum to the total number of datapoints if we're using raw counts.
    
-:::: {.columns}
-
-::: {.column width="30%"}
-**Not a Valid Distribution**
-
-<img src="images/bad_distro.png" alt='bad_distro' width='300'>
-:::
-
-::: {.column width="30%"}
-<!-- empty column to create gap -->
-:::
-
-::: {.column width="30%"}
-**Valid Distribution**
-
-<img src="images/good_distro.png" alt='good_distro' width='300'>
-:::
-
-::::
-
-Left Diagram: This is not a valid distribution since individuals can be associated with more than one category and the bar values demonstrate values in minutes and not probability. 
-
-Right Diagram: This example satisfies the two properties of distributions, so it is a valid distribution.
+| Not a Valid Distribution | Valid Distribution | 
+| --- | --- | 
+| <img src="images/bad_distro.png" alt='bad_distro' width='350'> | <img src="images/good_distro.png" alt='good_distro' width='300'> | 
+| This is not a valid distribution since individuals can be associated with more than one category and the bar values demonstrate values in minutes and not probability. | This example satisfies the two properties of distributions, so it is a valid distribution. | 
 
 ## Variable Types Should Inform Plot Choice
 
 Different plots are more or less suited for displaying particular types of variables, laid out in the diagram below:
 
-<img src="images/variable_types_vis_1.png" alt='variable_types_diagram' width='600'>
+<center><img src = "images/variable_types_vis_1.png" width = "700"></img></a></center>
 
+The first step of any visualization is to identify the type(s) of variables we're working with. From here, we can select an appropriate plot type: 
 
 ## Bar Plots
 
-As we saw above, a **bar plot** is one of the most common ways of displaying the distribution of a **qualitative** (categorical) variable. The length of a bar plot encodes the frequency of a category; the width encodes no useful information. The color *could* indicate a sub-category, but this is not necessarily the case. 
+A **bar plot** is one of the most common ways of displaying the **distribution** of a **qualitative** (categorical) variable. The length of a bar plot encodes the frequency of a category; the width encodes no useful information. The color *could* indicate a sub-category, but this is not necessarily the case. 
 
 Let's contextualize this in an example. We will use the World Bank dataset (`wb`) in our analysis.
 
 ```{python}
 #| code-fold: true
 #| tags: []
-#| vscode: {languageId: python}
 import pandas as pd
 import numpy as np
 
@@ -125,18 +91,16 @@ We can visualize the distribution of the `Continent` column using a bar plot. Th
 
 ```{python}
 #| tags: []
-#| vscode: {languageId: python}
-wb['Continent'].value_counts().plot(kind = 'bar');
+wb['Continent'].value_counts().plot(kind='bar');
 ```
 
-Recall that `.value_counts()` returns a `Series` with the total count of each unique value. We call `.plot(kind = 'bar')` on this result to visualize these counts as a bar plot.
+Recall that `.value_counts()` returns a `Series` with the total count of each unique value. We call `.plot(kind='bar')` on this result to visualize these counts as a bar plot.
 
 Plotting methods in `pandas` are the least preferred and not supported in Data 100, as their functionality is limited. Instead, future examples will focus on other libraries built specifically for visualizing data. The most well-known library here is `matplotlib`.
 
 ### Plotting in Matplotlib
 
 ```{python}
-#| vscode: {languageId: python}
 import matplotlib.pyplot as plt # matplotlib is typically given the alias plt
 
 continent = wb['Continent'].value_counts()
@@ -147,18 +111,17 @@ plt.ylabel('Count');
 
 While more code is required to achieve the same result, `matplotlib` is often used over `pandas` for its ability to plot more complex visualizations, some of which are discussed shortly.
 
-However, note how we needed to label the axes with `plt.xlabel` and `plt.ylabel` - `matplotlib` does not support automatic axis labeling. To get around these inconveniences, we can use a more efficient plotting library, `seaborn`.
+However, note how we needed to label the axes with `plt.xlabel` and `plt.ylabel`, as `matplotlib` does not support automatic axis labeling. To get around these inconveniences, we can use a more efficient plotting library: `seaborn`.
 
-### Plotting in Seaborn
+### Plotting in `Seaborn`
 
 ```{python}
 #| tags: []
-#| vscode: {languageId: python}
 import seaborn as sns # seaborn is typically given the alias sns
 sns.countplot(data = wb, x = 'Continent');
 ```
 
-`seaborn.countplot` both counts and visualizes the number of unique values in a given column. This column is specified by the `x` argument to `sns.countplot`, while the `DataFrame` is specified by the `data` argument. In contrast to `matplotlib`, the general structure of a `seaborn` call involves passing in an entire `DataFrame`, and then specifying what column(s) to plot.
+In contrast to `matplotlib`, the general structure of a `seaborn` call involves passing in an entire `DataFrame`, and then specifying what column(s) to plot. `seaborn.countplot` both counts and visualizes the number of unique values in a given column. This column is specified by the `x` argument to `sns.countplot`, while the `DataFrame` is specified by the `data` argument. 
 
 For the vast majority of visualizations, `seaborn` is far more concise and aesthetically pleasing than `matplotlib`. However, the color scheme of this particular bar plot is arbitrary - it encodes no additional information about the categories themselves. This is not always true; color may signify meaningful detail in other visualizations. We'll explore this more in-depth during the next lecture.
 
@@ -191,7 +154,6 @@ Revisiting our example with the `wb` DataFrame, let's plot the distribution of `
 
 ```{python}
 #| code-fold: true
-#| vscode: {languageId: python}
 wb.head(5)
 ```
 
@@ -200,11 +162,10 @@ How should we define our categories for this variable? In the previous example, 
 Under this assumption, let's plot this distribution using the `seaborn.countplot` function.
 
 ```{python}
-#| vscode: {languageId: python}
 sns.countplot(data = wb, x = 'Gross national income per capita, Atlas method: $: 2016');
 ```
 
-What happened? A bar plot (either `plt.bar` or `sns.countplot`) will create a separate bar for each unique value of a variable. With a continuous variable, we may not have a finite number of possible values, which can lead to situations where we would need many, many bars to display each unique value.
+What happened? A bar plot (either `plt.bar` or `sns.countplot`) will create a separate bar for each unique value of a variable. With a continuous variable, we may not have a finite number of possible values, which can lead to situations like above where we would need many, many bars to display each unique value.
 
 Specifically, we can say this histogram suffers from **overplotting** as we are unable to interpret the plot and gain any meaningful insight. 
 
@@ -216,30 +177,28 @@ Rather than bar plots, to visualize the distribution of a continuous variable, w
 
 ## Box Plots and Violin Plots
 
-Box plots and violin plots are two very similar kinds of visualizations. Both display the distribution of a variable using information about quartiles.
+Box plots and violin plots are two very similar kinds of visualizations. Both display the distribution of a variable using information about **quartiles**.
 
 In a box plot, the width of the box at any point does not encode meaning. In a violin plot, the width of the plot indicates the density of the distribution at each possible value.
 
 ```{python}
-#| vscode: {languageId: python}
 sns.boxplot(data=wb, y='Gross national income per capita, Atlas method: $: 2016');
 ```
 
 ```{python}
-#| vscode: {languageId: python}
 sns.violinplot(data=wb, y="Gross national income per capita, Atlas method: $: 2016");
 ```
 
 A quartile represents a 25% portion of the data. We say that:
 
-- The first quartile (Q1) represents the 25th percentile – 25% of the data lies below the first quartile.
-- The second quartile (Q2) represents the 50th percentile, also known as the median – 50% of the data lies below the second quartile.
-- The third quartile (Q3) represents the 75th percentile – 75% of the data lies below the third quartile.
+- The first quartile (Q1) represents the 25th percentile – 25% of the data is smaller than or equal to the first quartile.
+- The second quartile (Q2) represents the 50th percentile, also known as the median – 50% of the data is smaller than or equal to the second quartile.
+- The third quartile (Q3) represents the 75th percentile – 75% of the data is smaller than or equal to the third quartile.
 
 This means that the middle 50% of the data lies between the first and third quartiles. This is demonstrated in the histogram below. The three quartiles are marked with red vertical bars.
 
 ```{python}
-#| vscode: {languageId: python}
+#| code-fold: true
 gdp = wb['Gross domestic product: % growth : 2016']
 gdp = gdp[~gdp.isna()]
 
@@ -257,7 +216,6 @@ sns.rugplot([q1, q2, q3], c="firebrick", lw=6, height=0.1);
 In a box plot, the lower extent of the box lies at Q1, while the upper extent of the box lies at Q3. The horizontal line in the middle of the box corresponds to Q2 (equivalently, the median).
 
 ```{python}
-#| vscode: {languageId: python}
 sns.boxplot(data=wb, y='Gross domestic product: % growth : 2016');
 ```
 
@@ -265,12 +223,12 @@ The **whiskers** of a box-plot are the two points that lie at the \[$1^{st}$ Qua
 
 The different forms of information contained in a box plot can be summarised as follows:
 
-<img src="images/box_plot_diagram.png" alt='box_plot_diagram' width='600'>
+<center><img src = "images/box_plot_diagram.png" width = "600"></img></a></center>
 
-A violin plot displays quartile information, albeit a bit more subtly. Look closely at the center vertical bar of the violin plot below!
+
+A violin plot displays quartile information, albeit a bit more subtly through smoothed density curves. Look closely at the center vertical bar of the violin plot below; the three quartiles and "whiskers" are still present!
 
 ```{python}
-#| vscode: {languageId: python}
 sns.violinplot(data=wb, y='Gross domestic product: % growth : 2016');
 ```
 
@@ -281,16 +239,14 @@ Plotting side-by-side box or violin plots allows us to compare distributions acr
 With `seaborn`, we can easily create side-by-side plots by specifying both an x and y column.
 
 ```{python}
-#| vscode: {languageId: python}
 sns.boxplot(data=wb, x="Continent", y='Gross domestic product: % growth : 2016');
 ```
 
 ## Plotting Histograms
 
-You are likely familiar with histograms from Data 8. A histogram collects continuous data into bins, then plots this binned data. Each bin reflects the density of datapoints with values that lie between the left and right ends of the bin.
+You are likely familiar with histograms from Data 8. A histogram collects continuous data into bins, then plots this binned data. Each bin reflects the density of datapoints with values that lie between the left and right ends of the bin; in other words, the **area** of each bin is proportional to the **percentage** of datapoints it contains. Below, we plot a histogram using matplotlib and seaborn. Which graph do you prefer? 
 
 ```{python}
-#| vscode: {languageId: python}
 # The `edgecolor` argument controls the color of the bin edges
 gni = wb["Gross national income per capita, Atlas method: $: 2016"]
 plt.hist(gni, density=True, edgecolor="white")
@@ -302,7 +258,6 @@ plt.title("Distribution of gross national income per capita");
 ```
 
 ```{python}
-#| vscode: {languageId: python}
 sns.histplot(data=wb, x="Gross national income per capita, Atlas method: $: 2016", stat="density")
 plt.title("Distribution of gross national income per capita");
 ```
@@ -316,7 +271,6 @@ The `hue` parameter of `sns.histplot` specifies the column that should be used t
 Notice that the resulting plot includes a legend describing which color corresponds to each hemisphere – a legend should always be included if color is used to encode information in a visualization!
 
 ```{python}
-#| vscode: {languageId: python}
 # Create a new variable to store the hemisphere in which each country is located
 north = ["Asia", "Europe", "N. America"]
 south = ["Africa", "Oceania", "S. America"]
@@ -325,15 +279,13 @@ wb.loc[wb["Continent"].isin(south), "Hemisphere"] = "Southern"
 ```
 
 ```{python}
-#| vscode: {languageId: python}
 sns.histplot(data=wb, x="Gross national income per capita, Atlas method: $: 2016", hue="Hemisphere", stat="density")
 plt.title("Distribution of gross national income per capita");
 ```
 
-Each bin of a histogram is scaled such that its area is equal to the percentage of all datapoints that it contains.
+Again, each bin of a histogram is scaled such that its **area** is proportional to the **percentage** of all datapoints that it contains.
 
 ```{python}
-#| vscode: {languageId: python}
 densities, bins, _ = plt.hist(gni, density=True, edgecolor="white", bins=5)
 plt.xlabel("Gross national income per capita")
 plt.ylabel("Density")
@@ -358,18 +310,17 @@ Histograms allow us to assess a distribution by their shape. There are a few pro
 
 The skew of a histogram describes the direction in which its "tail" extends.
 - A distribution with a long right tail is **skewed right** (such as `Gross national income per capita`). In a right-skewed distribution, the few large outliers "pull" the mean to the **right** of the median. 
+
+```{python}
+sns.histplot(data = wb, x = 'Gross national income per capita, Atlas method: $: 2016', stat = 'density');
+plt.title('Distribution with a long right tail')
+```
+
 - A distribution with a long left tail is **skewed left** (such as `Access to an improved water source`). In a left-skewed distribution, the few small outliers "pull" the mean to the **left** of the median. 
 
 In the case where a distribution has equal-sized right and left tails, it is **symmetric**. The mean is approximately **equal** to the median. Think of mean as the balancing point of the distribution.
 
 ```{python}
-#| vscode: {languageId: python}
-sns.histplot(data = wb, x = 'Gross national income per capita, Atlas method: $: 2016', stat = 'density');
-plt.title('Distribution with a long right tail')
-```
-
-```{python}
-#| vscode: {languageId: python}
 sns.histplot(data = wb, x = 'Access to an improved water source: % of population: 2015', stat = 'density');
 plt.title('Distribution with a long left tail')
 ```
@@ -385,7 +336,6 @@ In Data 100, we describe a "mode" of a histogram as a peak in the distribution. 
 If we set the number of bins to 5, the distribution appears unimodal.
 
 ```{python}
-#| vscode: {languageId: python}
 # Rename the very long column name for convenience
 wb = wb.rename(columns={'Antiretroviral therapy coverage: % of people living with HIV: 2015':"HIV rate"})
 # With 5 bins, it seems that there is only one peak
@@ -394,7 +344,6 @@ plt.title("5 histogram bins");
 ```
 
 ```{python}
-#| vscode: {languageId: python}
 # With 10 bins, there seem to be two peaks
 
 sns.histplot(data=wb, x="HIV rate", stat="density", bins=10)
@@ -402,12 +351,265 @@ plt.title("10 histogram bins");
 ```
 
 ```{python}
-#| vscode: {languageId: python}
 # And with 20 bins, it becomes hard to say what counts as a "peak"!
 
 sns.histplot(data=wb, x ="HIV rate", stat="density", bins=20)
 plt.title("20 histogram bins");
 ```
 
-In part, it is these ambiguities that motivate us to consider using Kernel Density Estimation (KDE), which we will explore more in the next lecture.
+In part, it is these ambiguities that motivate us to consider using Kernel Density Estimation (KDE).
+
+
+## Kernel Density Estimation
+Often, we want to identify general trends across a distribution, rather than focus on detail. Smoothing a distribution helps generalize the structure of the data and eliminate noise.
+
+### KDE Theory
+
+A **kernel density estimate (KDE)** is a smooth, continuous function that approximates a curve. It allows us to represent general trends in a distribution without focusing on the details, which is useful for analyzing the broad structure of a dataset. 
+
+More formally, a KDE attempts to approximate the underlying **probability distribution** from which our dataset was drawn. You may have encountered the idea of a probability distribution in your other classes; if not, we'll discuss it at length in the next lecture. For now, you can think of a probability distribution as a description of how likely it is for us to sample a particular value in our dataset. 
+
+A KDE curve estimates the probability density function of a random variable. Consider the example below, where we have used `sns.displot` to plot both a histogram (containing the data points we actually collected) and a KDE curve (representing the *approximated* probability distribution from which this data was drawn) using data from the World Bank dataset (`wb`).
+
+```{python}
+#| code-fold: true
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+wb = pd.read_csv("data/world_bank.csv", index_col=0)
+wb = wb.rename(columns={'Antiretroviral therapy coverage: % of people living with HIV: 2015':"HIV rate",
+                       'Gross national income per capita, Atlas method: $: 2016':'gni'})
+wb.head()
+```
+
+```{python}
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+sns.displot(data = wb, x = 'HIV rate', \
+                       kde = True, stat = "density")
+
+plt.title("Distribution of HIV rates");
+```
+
+Notice that the smooth KDE curve is higher when the histogram bins are taller. You can think of the height of the KDE curve as representing how "probable" it is that we randomly sample a datapoint with the corresponding value. This intuitively makes sense – if we have already collected more datapoints with a particular value (resulting in a tall histogram bin), it is more likely that, if we randomly sample another datapoint, we will sample one with a similar value (resulting in a high KDE curve).
+
+The area under a probability density function should always integrate to 1, representing the fact that the total probability of a distribution should always sum to 100%. Hence, a KDE curve will always have an area under the curve of 1.
+
+### Constructing a KDE
+
+We perform kernel density estimation using three steps.
+
+1. Place a kernel at each datapoint.
+2. Normalize the kernels to have a total area of 1 (across all kernels).
+3. Sum the normalized kernels.
+
+We'll explain what a "kernel" is momentarily.
+
+To make things simpler, let's construct a KDE for a small, artificially generated dataset of 5 datapoints: $[2.2, 2.8, 3.7, 5.3, 5.7]$. In the plot below, each vertical bar represents one data point.
+
+```{python}
+#| code-fold: true
+data = [2.2, 2.8, 3.7, 5.3, 5.7]
+
+sns.rugplot(data, height=0.3)
+
+plt.xlabel("Data")
+plt.ylabel("Density")
+plt.xlim(-3, 10)
+plt.ylim(0, 0.5);
+```
+
+Our goal is to create the following KDE curve, which was generated automatically by `sns.kdeplot`.
+
+```{python}
+#| code-fold: true
+sns.kdeplot(data)
+
+plt.xlabel("Data")
+plt.xlim(-3, 10)
+plt.ylim(0, 0.5);
+```
+
+#### Step 1: Place a Kernel at Each Data Point
+
+To begin generating a density curve, we need to choose a **kernel** and **bandwidth value ($\alpha$)**. What are these exactly? 
+
+A **kernel** is a density curve. It is the mathematical function that attempts to capture the randomness of each data point in our sampled data. To explain what this means, consider just *one* of the datapoints in our dataset: $2.2$. We obtained this datapoint by randomly sampling some information out in the real world (you can imagine $2.2$ as representing a single measurement taken in an experiment, for example). If we were to sample a new datapoint, we may obtain a slightly different value. It could be higher than $2.2$; it could also be lower than $2.2$. We make the assumption that any future sampled datapoints will likely be similar in value to the data we've already drawn. This means that our *kernel* – our description of the probability of randomly sampling any new value – will be greatest at the datapoint we've already drawn but still have non-zero probability above and below it. The area under any kernel should integrate to 1, representing the total probability of drawing a new datapoint.
+
+A **bandwidth value**, usually denoted by $\alpha$, represents the width of the kernel. A large value of $\alpha$ will result in a wide, short kernel function, while a small value with result in a narrow, tall kernel.
+
+Below, we place a **Gaussian kernel**, plotted in orange, over the datapoint $2.2$. A Gaussian kernel is simply the normal distribution, which you may have called a bell curve in Data 8. 
+
+```{python}
+#| code-fold: true
+
+def gaussian_kernel(x, z, a):
+    # We'll discuss where this mathematical formulation came from later
+    return (1/np.sqrt(2*np.pi*a**2)) * np.exp((-(x - z)**2 / (2 * a**2)))
+
+# Plot our datapoint
+sns.rugplot([2.2], height=0.3)
+
+# Plot the kernel
+x = np.linspace(-3, 10, 1000)
+plt.plot(x, gaussian_kernel(x, 2.2, 1))
+
+plt.xlabel("Data")
+plt.ylabel("Density")
+plt.xlim(-3, 10)
+plt.ylim(0, 0.5);
+```
+
+To begin creating our KDE, we place a kernel on *each* datapoint in our dataset. For our dataset of 5 points, we will have 5 kernels.
+
+```{python}
+#| code-fold: true
+
+# You will work with the functions below in Lab 4
+def create_kde(kernel, pts, a):
+    # Takes in a kernel, set of points, and alpha
+    # Returns the KDE as a function
+    def f(x):
+        output = 0
+        for pt in pts:
+            output += kernel(x, pt, a)
+        return output / len(pts) # Normalization factor
+    return f
+
+def plot_kde(kernel, pts, a):
+    # Calls create_kde and plots the corresponding KDE
+    f = create_kde(kernel, pts, a)
+    x = np.linspace(min(pts) - 5, max(pts) + 5, 1000)
+    y = [f(xi) for xi in x]
+    plt.plot(x, y);
+    
+def plot_separate_kernels(kernel, pts, a, norm=False):
+    # Plots individual kernels, which are then summed to create the KDE
+    x = np.linspace(min(pts) - 5, max(pts) + 5, 1000)
+    for pt in pts:
+        y = kernel(x, pt, a)
+        if norm:
+            y /= len(pts)
+        plt.plot(x, y)
+    
+    plt.show();
+    
+plt.xlim(-3, 10)
+plt.ylim(0, 0.5)
+plt.xlabel("Data")
+plt.ylabel("Density")
+
+plot_separate_kernels(gaussian_kernel, data, a = 1)
+```
+
+#### Step 2: Normalize Kernels to Have a Total Area of 1
+
+Above, we said that *each* kernel has an area of 1. Earlier, we also said that our goal is to construct a KDE curve using these kernels with a *total* area of 1. If we were to directly sum the kernels as they are, we would produce a KDE curve with an integrated area of (5 kernels) $\times$ (area of 1 each) = 5. To avoid this, we will **normalize** each of our kernels. This involves multiplying each kernel by $\frac{1}{\#\:\text{datapoints}}$. 
+
+In the cell below, we multiply each of our 5 kernels by $\frac{1}{5}$ to apply normalization.
+
+```{python}
+#| code-fold: true
+plt.xlim(-3, 10)
+plt.ylim(0, 0.5)
+plt.xlabel("Data")
+plt.ylabel("Density")
+
+# The `norm` argument specifies whether or not to normalize the kernels
+plot_separate_kernels(gaussian_kernel, data, a = 1, norm = True)
+```
+
+#### Step 3: Sum the Normalized Kernels
+
+Our KDE curve is the sum of the normalized kernels. Notice that the final curve is identical to the plot generated by `sns.kdeplot` we saw earlier!
+
+```{python}
+#| code-fold: true
+plt.xlim(-3, 10)
+plt.ylim(0, 0.5)
+plt.xlabel("Data")
+plt.ylabel("Density")
+
+plot_kde(gaussian_kernel, data, a = 1)
+```
+
+### Kernel Functions and Bandwidths
+
+<center><img src = "images/kde_function.png" width = "345"></img></a></center>
+
+A general “KDE formula” function is given above.
+
+1. $K_{\alpha}(x, x_i)$ is the kernel centered on the observation `i`. 
+    - Each kernel individually has area 1.
+    - x represents any number on the number line. It is the input to our function.
+2. $n$ is the number of observed datapoints that we have.
+    - We multiply by $\frac{1}{n}$ so that the total area of the KDE is still 1.
+3. Each $x_i \in \{x_1, x_2, \dots, x_n\}$ represents an observed datapoint. 
+    - These are what we use to create our KDE by summing multiple shifted kernels centered at these points.
+
+* $\alpha$ (alpha) is the bandwidth or smoothing parameter. 
+
+A **kernel** (for our purposes) is a valid density function. This means it:
+
+- Must be non-negative for all inputs.
+- Must integrate to 1.
+
+#### Gaussian Kernel
+
+The most common kernel is the **Gaussian kernel**. The Gaussian kernel is equivalent to the Gaussian probability density function (the Normal distribution), centered at the observed value with a standard deviation of (this is known as the **bandwidth** parameter).
+
+$$K_a(x, x_i) = \frac{1}{\sqrt{2\pi\alpha^{2}}}e^{-\frac{(x-x_i)^{2}}{2\alpha^{2}}}$$
+
+In this formula:
+
+* $x$ (no subscript) represents any value along the x-axis of our plot
+* $x_i$ represents the $i$ -th datapoint in our dataset. It is one of the values that we have actually collected in our data sampling process. In our example earlier, $x_i=2.2$. Those of you who have taken a probability class may recognize $x_i$ as the **mean** of the normal distribution.
+* Each kernel is **centered** on our observed values, so its distribution mean is $x_i$.
+* $\alpha$ is the bandwidth parameter, representing the width of our kernel. More formally, $\alpha$ is the **standard deviation** of the Gaussian curve.
+    * A large value of $\alpha$ will produce a kernel that is wider and shorter – this leads to a smoother KDE when the kernels are summed together.
+    * A small value of $\alpha$ will produce a narrower, taller kernel, and, with it, a noisier KDE.
+
+The details of this (admittedly intimidating) formula are less important than understanding its role in kernel density estimation – this equation gives us the shape of each kernel.
+
+| Gaussian Kernel, $\alpha$ = 0.1 | Gaussian Kernel, $\alpha$ = 1 | 
+| --- | --- |
+| <img src="images/gaussian_0.1.png" alt='gaussian_0.1' width='345'> | <img src="images/gaussian_1.png" alt='gaussian_1' width='345'> | 
+
+| Gaussian Kernel, $\alpha$ = 2 | Gaussian Kernel, $\alpha$ = 10 | 
+|  --- | --- | 
+| <img src="images/gaussian_2.png" alt='gaussian_2' width='345'> | <img src="images/gaussian_10.png" alt='gaussian_10' width='345'> | 
+
+#### Boxcar Kernel
+
+Another example of a kernel is the **Boxcar kernel**. The boxcar kernel assigns a uniform density to points within a "window" of the observation, and a density of 0 elsewhere. The equation below is a boxcar kernel with the center at $x_i$ and the bandwidth of $\alpha$.
+
+$$K_a(x, x_i) = \begin{cases}
+        \frac{1}{\alpha}, & |x - x_i| \le \frac{\alpha}{2}\\
+        0, & \text{else }
+    \end{cases}$$
+    
+The boxcar kernel is seldom used in practice – we include it here to demonstrate that a kernel function can take whatever form you would like, provided it integrates to 1 and does not output negative values.
+
+```{python}
+#| code-fold: true
+#| fig-cap: The Boxcar kernel centered at 0 with bandwidth $\alpha$ = 1.
+
+def boxcar_kernel(alpha, x, z):
+    return (((x-z)>=-alpha/2)&((x-z)<=alpha/2))/alpha
+
+xs = np.linspace(-5, 5, 200)
+alpha=1
+kde_curve = [boxcar_kernel(alpha, x, 0) for x in xs]
+plt.plot(xs, kde_curve);
+```
+
+The diagram on the right is how the density curve for our 5 point dataset would have looked had we used the Boxcar kernel with bandwidth $\alpha$ = 1.
+
+| KDE | Boxcar | 
+| --- | --- | 
+| <img src="images/gaussian_kernel.png" alt='kde_step_3' width='350'> | <img src="images/boxcar_kernel.png" alt='boxcar_kernel' width='350'> | 
+
 
