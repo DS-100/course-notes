@@ -13,7 +13,17 @@ format:
       - cosmo
       - cerulean
     callout-icon: false
-jupyter: python3
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .qmd
+      format_name: quarto
+      format_version: '1.0'
+      jupytext_version: 1.16.1
+  kernelspec:
+    display_name: Python 3 (ipykernel)
+    language: python
+    name: python3
 ---
 
 ::: {.callout-note collapse="false"}
@@ -37,6 +47,15 @@ To illustrate this process, we derived the optimal model parameters under simple
 </div>
 
 In this lecture, we'll dive deeper into step 4 - evaluating model performance - using SLR as an example. Additionally, we'll also explore the modeling process with new models, continue familiarizing ourselves with the modeling process by finding the best model parameters under a new model, the constant model, and test out two different loss functions to understand how our choice of loss influences model design. Later on, we'll consider what happens when a linear model isn't the best choice to capture trends in our data and what solutions there are to create better models.
+
+Before we get into Step 4, let's quickly review some important terminology. 
+
+### Prediction vs. Estimation
+The terms prediction and estimation are often used somewhat interchangeably, but there is a subtle difference between them. **Estimation** is the task of using data to calculate model parameters. **Prediction** is the task of using a model to predict outputs for unseen data. In our simple linear regression model 
+
+$$\hat{y} = \hat{\theta_0} + \hat{\theta_1}$$
+
+we **estimate** the parameters by minimizing average loss; then, we **predict** using these estimations. **Least Squares Estimation** is when we choose the parameters that minimize MSE.
 
 ## Step 4: Evaluating the SLR Model
 Now that we've explored the mathematics behind (1) choosing a model, (2) choosing a loss function, and (3) fitting the model, we're left with one final question – how "good" are the predictions made by this "best" fitted model? To determine this, we can: 
@@ -221,13 +240,6 @@ for i, dataset in enumerate(['I', 'II', 'III', 'IV']):
 plt.show()
 ```
 
-### Prediction vs. Estimation
-The terms prediction and estimation are often used somewhat interchangeably, but there is a subtle difference between them. **Estimation** is the task of using data to calculate model parameters. **Prediction** is the task of using a model to predict outputs for unseen data. In our simple linear regression model 
-
-$$\hat{y} = \hat{\theta_0} + \hat{\theta_1}$$
-
-we **estimate** the parameters by minimizing average loss; then, we **predict** using these estimations. **Least Squares Estimation** is when we choose the parameters that minimize MSE.
-
 ## Constant Model + MSE
 
 Now, we'll shift from the SLR model to the **constant model**, also known as a summary statistic. The constant model is slightly different from the simple linear regression model we've explored previously. Rather than generating predictions from an inputted feature variable, the constant model always *predicts the same constant number*. This ignores any relationships between variables. For example, let's say we want to predict the number of drinks a boba shop sells in a day. Boba tea sales likely depend on the time of year, the weather, how the customers feel, whether school is in session, etc., but the constant model ignores these factors in favor of a simpler model. In other words, the constant model employs a **simplifying assumption**. 
@@ -244,7 +256,7 @@ Our task now is to determine what value of $\theta_0$ best represents the optima
 
 Like before, we'll use Mean Squared Error (MSE). Recall that the MSE is average squared loss (L2 loss) over the data $D = \{y_1, y_2, ..., y_n\}$.
 
-$$R(\theta) = \frac{1}{n}\sum^{n}_{i=1} (y_i - \hat{y_i})^2 $$
+$$\hat{R}(\theta) = \frac{1}{n}\sum^{n}_{i=1} (y_i - \hat{y_i})^2 $$
 
 Our modeling process now looks like this: 
 
@@ -256,7 +268,7 @@ Our modeling process now looks like this:
 
 Given the **constant model** $\hat{y}_i = \theta_0$, we can rewrite the MSE equation as 
 
-$$R(\theta) = \frac{1}{n}\sum^{n}_{i=1} (y_i - \theta_0)^2 $$
+$$\hat{R}(\theta) = \frac{1}{n}\sum^{n}_{i=1} (y_i - \theta_0)^2 $$
 
 We can fit **the model** by finding the optimal $\theta_0$ that minimizes the MSE using a calculus approach. 
 
@@ -273,33 +285,33 @@ $$
 
 2. Set equal to 0
 $$
-0 = {\frac{-2}{n}}\sum^{n}_{i=1} (y_i - \theta_0)
+0 = {\frac{-2}{n}}\sum^{n}_{i=1} (y_i - \hat{\theta_0})
 $$
 
-3. Solve for $\theta_0$
+3. Solve for $\hat{\theta_0}$
 
 $$
 \begin{align}
-0 &= {\frac{-2}{n}}\sum^{n}_{i=1} (y_i - \theta_0)
-\\ &= \sum^{n}_{i=1} (y_i - \theta_0) \quad \quad \text{divide both sides by} \frac{-2}{n} 
+0 &= {\frac{-2}{n}}\sum^{n}_{i=1} (y_i - \hat{\theta_0})
+\\ &= \sum^{n}_{i=1} (y_i - \hat{\theta_0}) \quad \quad \text{divide both sides by} \frac{-2}{n} 
 \\ &= \sum^{n}_{i=1} y_i - \sum^{n}_{i=1} \theta_0 \quad \quad \text{separate sums}
-\\ &= \sum^{n}_{i=1} y_i - n * \theta_0 \quad \quad  \text{c + c + … + c = nc}
-\\ n * \theta_0 &= \sum^{n}_{i=1} y_i 
-\\ \theta_0 &= \frac{1}{n} \sum^{n}_{i=1} y_i 
-\\ \theta_0 &= \bar{y}
+\\ &= \sum^{n}_{i=1} y_i - n * \hat{\theta_0} \quad \quad  \text{c + c + … + c = nc}
+\\ n * \hat{\theta_0} &= \sum^{n}_{i=1} y_i 
+\\ \hat{\theta_0} &= \frac{1}{n} \sum^{n}_{i=1} y_i 
+\\ \hat{\theta_0} &= \bar{y}
 \end{align}
 $$
 
-Let's take a moment to interpret this result. $\hat{\theta} = \bar{y}$ is the optimal parameter for constant model + MSE.
+Let's take a moment to interpret this result. $\hat{\theta_0} = \bar{y}$ is the optimal parameter for constant model + MSE.
 It holds true regardless of what data sample you have, and it provides some formal reasoning as to why the mean is such a common summary statistic.
 
 Our optimal model parameter is the value of the parameter that minimizes the cost function. This minimum value of the cost function can be expressed:
 
-$$R(\hat{\theta}) = \min_{\theta} R(\theta)$$
+$$R(\hat{\theta_0}) = \min_{\theta_0} R(\theta_0)$$
 
-To restate the above in plain English: we are looking at the value of the cost function when it takes the best parameter as input. This optimal model parameter, $\hat{\theta}$, is the value of $\theta$ that minimizes the cost $R$.
+To restate the above in plain English: we are looking at the value of the cost function when it takes the best parameter as input. This optimal model parameter, $\hat{\theta_0}$, is the value of $\theta_0$ that minimizes the cost $R$.
 
-For modeling purposes, we care less about the minimum value of cost, $R(\hat{\theta})$, and more about the *value of $\theta$* that results in this lowest average loss. In other words, we concern ourselves with finding the best parameter value such that:
+For modeling purposes, we care less about the minimum value of cost, $R(\hat{\theta_0})$, and more about the *value of $\theta$* that results in this lowest average loss. In other words, we concern ourselves with finding the best parameter value such that:
 
 $$\hat{\theta} = \underset{\theta}{\operatorname{\arg\min}}\:R(\theta)$$
 
@@ -697,3 +709,78 @@ You may wonder: why did we choose to apply a log transformation specifically? Wh
 
 Practically, many other mathematical operations that modify the relative scales of `"Age"` and `"Length"` could have worked here.
 
+## Terminology for Multiple Linear Regression
+
+There are several equivalent terms in the context of regression. The ones we use most often for this course are bolded.
+
+* $x$ can be called a
+  - **Feature(s)**
+  - Covariate(s)
+  - **Independent variable(s)**
+  - Explanatory variable(s)
+  - Predictor(s)
+  - Input(s)
+  - Regressor(s)
+* $y$ can be called an
+  - **Output**
+  - Outcome
+  - **Response**
+  - Dependent variable
+* $\hat{y}$ can be called a
+  - **Prediction**
+  - Predicted response
+  - Estimated value
+* $\theta$ can be called a
+  - **Weight(s)**
+  - **Parameter(s)**
+  - Coefficient(s)
+* $\hat{\theta}$ can be called a
+  - **Estimator(s)**
+  - **Optimal parameter(s)**
+* A datapoint $(x, y)$ is also called an observation.
+
+## Multiple Linear Regression
+
+Multiple linear regression is an extension of simple linear regression that adds additional features to the model. The multiple linear regression model takes the form:
+
+$$\hat{y} = \theta_0\:+\:\theta_1x_{1}\:+\:\theta_2 x_{2}\:+\:...\:+\:\theta_p x_{p}$$
+
+Our predicted value of $y$, $\hat{y}$, is a linear combination of the single **observations** (features), $x_i$, and the parameters, $\theta_i$. 
+
+We'll dive deeper into Multiple Linear Regression in the next lecture.
+
+## Bonus: Calculating Constant Model MSE Using an Algebraic Trick
+
+Earlier, we calculated the constant model MSE using calculus. It turns out that there is a much more elegant way of performing this same minimization algebraically, without using calculus at all. 
+
+In this calculation, we use the fact that the **sum of deviations from the mean is 0** or that $\sum_{i=1}^{n} (y_i - \bar{y}) = 0$.
+
+Let's quickly walk through the proof for this:
+$$\sum_{i=1}^{n} (y_i - \bar{y}) = \sum_{i=1}^{n} y_i - \sum_{i=1}^{n} \bar{y}$$
+
+$$ = \sum_{i=1}^{n} y_i - n\bar{y}$$
+
+$$ = \sum_{i=1}^{n} y_i - n\frac{1}{n}\sum_{i=1}^{n}y$$
+
+$$ = \sum_{i=1}^{n} y_i - \sum_{i=1}^{n}y_i$$
+
+In our calculations, we'll also be using the definition of the variance as a sample. As a refresher:
+
+$$\sigma_y^2 = \frac{1}{n}\sum_{i=1}^{n} (y_i - \bar{y})^2$$
+
+Getting into our calculation for MSE minimization:
+
+$$
+\begin{align}
+R(\theta) &= {\frac{1}{n}}\sum^{n}_{i=1} (y_i - \theta)^2
+\\ &= \frac{1}{n}\sum^{n}_{i=1} [(y_i - \bar{y}) + (\bar{y} - \theta)]^2\quad \quad \text{using trick that a-b can be written as (a-c) + (c-b) where a, b, and c are any numbers}
+\\ &= \frac{1}{n}\sum^{n}_{i=1} [(y_i - \bar{y})^2 + 2(y_i - \bar{y})(\bar{y} - \theta) + (\bar{y} - \theta)^2] 
+\\ &= \frac{1}{n}[\sum^{n}_{i=1}(y_i - \bar{y})^2 + 2(\bar{y} - \theta)\sum^{n}_{i=1}(y_i - \bar{y}) + n(\bar{y} - \theta)^2 \quad \quad  \text{distribute the sum to individual terms}
+\\ &= \frac{1}{n}\sum^{n}_{i=1}(y_i - \bar{y})^2 + \frac{2}{n}(\bar{y} - \theta)\cdot0 + (\bar{y} - \theta)^2 \quad \quad  \text{using property that sum of deviations from mean is 0}
+\\ &= \sigma_y^2 + (\bar{y} - \theta)^2 
+\end{align}
+$$
+
+Since variance can't be negative, we know that our first term, $\sigma_y^2$ is greater than or equal to 0. Also note, that the first term doesn't involve $\theta$ at all, meaning changing our model won't change this value. For the purposes of determining $\hat{\theta}#, we can essentially then ignore this term.
+
+Looking at the second term, $(\bar{y} - \theta)^2$, since it is squared, we know it must be greater than or equal to 0. As this term does involve $\theta$, picking the value of $\theta$ that minimizes this term will allow us to minimize our average loss. For the second term to equal 0, $\theta = \bar{y}$, or in other words, $\hat{\theta} = \bar{y} = mean(y)$.
