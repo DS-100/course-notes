@@ -94,14 +94,12 @@ We can explore this idea further by looking at a dataset containing aggregate pe
 
 ```{python}
 #| code-fold: true
-#| vscode: {languageId: python}
 import pandas as pd
 nba = pd.read_csv('data/nba18-19.csv', index_col=0)
 nba.index.name = None # Drops name of index (players are ordered by rank)
 ```
 
 ```{python}
-#| vscode: {languageId: python}
 nba.head(5)
 ```
 
@@ -109,12 +107,11 @@ Let's say we are interested in predicting the number of points (`PTS`) an athlet
 
 Suppose we want to fit a linear model by using some characteristics, or **features** of a player. Specifically, we'll focus on field goals, assists, and 3-point attempts.
 
-* `FG`, the number of (2-point) field goals per game
+* `FG`, the average number of (2-point) field goals per game
 * `AST`, the average number of assists per game
-* `3PA`, the number of 3-point field goals attempted per game
+* `3PA`, the average number of 3-point field goals attempted per game
 
 ```{python}
-#| vscode: {languageId: python}
 nba[['FG', 'AST', '3PA', 'PTS']].head()
 ```
 
@@ -149,7 +146,7 @@ In statistics, this model + loss is called **Ordinary Least Squares (OLS)**. The
 
 We now know how to generate a single prediction from multiple observed features. Data scientists usually work at scale – that is, they want to build models that can produce many predictions, all at once. The vector notation we introduced above gives us a hint on how we can expedite multiple linear regression. We want to use the tools of linear algebra.
 
-Let's think about how we can apply what we did above. To accomodate for the fact that we're considering several feature variables, we'll adjust our notation slightly. Each observation can now be thought of as a row vector with an entry for each of $p$ features.
+Let's think about how we can apply what we did above. To accommodate for the fact that we're considering several feature variables, we'll adjust our notation slightly. Each observation can now be thought of as a row vector with an entry for each of $p$ features.
 
 
 
@@ -162,7 +159,7 @@ Let's think about how we can apply what we did above. To accomodate for the fact
   </table>
 </div>
 
-To make a prediction from the first observation in the data, we take the dot product of the parameter vector and first observation vector. To make a prediction from the *second* observation, we would repeat this process to find the dot product of the parameter vector and the *second* observation vector. If we wanted to find the model predictions for each observation in the dataset, we'd repeat this process for all $n$ observations in the data. 
+To make a prediction from the *first* observation in the data, we take the dot product of the parameter vector and *first* observation vector. To make a prediction from the *second* observation, we would repeat this process to find the dot product of the parameter vector and the *second* observation vector. If we wanted to find the model predictions for each observation in the dataset, we'd repeat this process for all $n$ observations in the data. 
 
 $$\hat{y}_1 = \theta_0 + \theta_1 x_{11} + \theta_2 x_{12} + ... + \theta_p x_{1p} = [1,\:x_{11},\:x_{12},\:x_{13},\:...,\:x_{1p}] \theta$$
 $$\hat{y}_2 = \theta_0 + \theta_1 x_{21} + \theta_2 x_{22} + ... + \theta_p x_{2p} = [1,\:x_{21},\:x_{22},\:x_{23},\:...,\:x_{2p}] \theta$$
@@ -202,7 +199,7 @@ $$
 \mathbb{\hat{Y}} = \mathbb{X} \theta
 $$
 
-Here, $\mathbb{\hat{Y}}$ is the **prediction vector** with $n$ elements ($\mathbb{\hat{Y}} \in \mathbb{R}^{n}$); it contains the prediction made by the model for each of the $n$ input observations. $\mathbb{X}$ is the **design matrix** with dimensions $\mathbb{X} \in \mathbb{R}^(n \times (p + 1))$, and $\theta$ is the **parameter vector** with dimensions $\theta \in \mathbb{R}^{(p + 1)}$
+Here, $\mathbb{\hat{Y}}$ is the **prediction vector** with $n$ elements ($\mathbb{\hat{Y}} \in \mathbb{R}^{n}$); it contains the prediction made by the model for each of the $n$ input observations. $\mathbb{X}$ is the **design matrix** with dimensions $\mathbb{X} \in \mathbb{R}^{n \times (p + 1)}$, and $\theta$ is the **parameter vector** with dimensions $\theta \in \mathbb{R}^{(p + 1)}$. Note that our **true output** $\mathbb{Y}$ is also a vector with $n$ elements ($\mathbb{Y} \in \mathbb{R}^{n}$).
 
 As a refresher, let's also review the **dot product (or inner product)**. This is a vector operation that:
 
@@ -238,11 +235,11 @@ The L2 vector norm is a generalization of the Pythagorean theorem in $n$ dimensi
 
 We can express the MSE as a squared L2 norm if we rewrite it in terms of the prediction vector, $\hat{\mathbb{Y}}$, and true target vector, $\mathbb{Y}$:
 
-$$R(\theta) = \frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2 = \frac{1}{n} ||\mathbb{Y} - \hat{\mathbb{Y}}||_2^2$$
+$$R(\theta) = \frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2 = \frac{1}{n} (||\mathbb{Y} - \hat{\mathbb{Y}}||_2)^2$$
 
-Here, the superscript 2 outside of the norm double bars means that we are *squaring* the norm. If we plug in our linear model $\hat{\mathbb{Y}} = \mathbb{X} \theta$, we find the MSE cost function in vector notation:
+Here, the superscript 2 outside of the parentheses means that we are *squaring* the norm. If we plug in our linear model $\hat{\mathbb{Y}} = \mathbb{X} \theta$, we find the MSE cost function in vector notation:
 
-$$R(\theta) = \frac{1}{n} ||\mathbb{Y} - \mathbb{X} \theta||_2^2$$
+$$R(\theta) = \frac{1}{n} (||\mathbb{Y} - \mathbb{X} \theta||_2)^2$$
 
 Under the linear algebra perspective, our new task is to fit the optimal parameter vector $\theta$ such that the cost function is minimized. Equivalently, we wish to minimize the norm $$||\mathbb{Y} - \mathbb{X} \theta||_2 = ||\mathbb{Y} - \hat{\mathbb{Y}}||_2.$$ 
 
@@ -335,7 +332,7 @@ $$M^Tv = \vec{0}$$
 
 Note that $\vec{0}$ represents the **zero vector**, a $d$-length vector full of 0s.
 
-Remember our goal is to find $\hat{\theta}$ such that we minimize the objective function $R(\theta)$. Equivalently, this is the $\hat{\theta}$ such that the residual vector $e = \mathbb{Y} - \mathbb{X} \theta$ is orthogonal to $\text{Span}(\mathbb{X})$. 
+Remember our goal is to find $\hat{\theta}$ such that we minimize the objective function $R(\theta)$. Equivalently, this is the $\hat{\theta}$ such that the residual vector $e = \mathbb{Y} - \mathbb{X} \hat{\theta}$ is orthogonal to $\text{Span}(\mathbb{X})$. 
 
 Looking at the definition of orthogonality of $\mathbb{Y} - \mathbb{X}\hat{\theta}$ to $span(\mathbb{X})$ (0 is the $\vec{0}$ vector), we can write: 
 $$\mathbb{X}^T (\mathbb{Y} - \mathbb{X}\hat{\theta}) = \vec{0}$$ 
@@ -376,13 +373,13 @@ When working with SLR, we generated plots of the residuals against a single feat
 </div>
 
 
-For SLR, we used the correlation coefficient to capture the association between the target variable and a single feature variable. In a multiple linear model setting, we will need a performance metric that can account for multiple features at once. **Multiple $R^2$**, also called the **coefficient of determination**, is the **proportion of variance** of our **fitted values** (predictions) $\hat{y}_i$ to our true values $y_i$. It ranges from 0 to 1 and is effectively the *proportion* of variance in the observations the **model explains**. 
+For SLR, we used the correlation coefficient to capture the association between the target variable and a single feature variable. In a multiple linear model setting, we will need a performance metric that can account for multiple features at once. **Multiple $R^2$**, also called the **coefficient of determination**, is the **proportion of variance** of our **fitted values** (predictions) $\hat{y}_i$ to our true values $y_i$. It ranges from 0 to 1 and is effectively the *proportion* of variance in the observations that the **model explains**. 
 
 $$R^2 = \frac{\text{variance of } \hat{y}_i}{\text{variance of } y_i} = \frac{\sigma^2_{\hat{y}}}{\sigma^2_y}$$
 
-Note that for OLS with an intercept term, for example $\hat{y} = \theta_0 + \theta_1x_1 + \theta_2x_2 + \cdots + \theta_px_p$, $\mathbb{R}^2$ is equal to the square of the correlation between $y$ and $\hat{y}$. On the other hand for SLR, $\mathbb{R}^2$ is equal to $r^2$, the correlation between $x$ and $y$. The proof of these last two properties is out of scope for this course.
+Note that for OLS with an intercept term, for example $\hat{y} = \theta_0 + \theta_1x_1 + \theta_2x_2 + \cdots + \theta_px_p$, $R^2$ is equal to the square of the correlation between $y$ and $\hat{y}$. On the other hand for SLR, $R^2$ is equal to $r^2$, the correlation between $x$ and $y$. The proof of these last two properties is out of scope for this course.
 
-Additionally, as we add more features, our fitted values tend to become closer and closer to our actual values. Thus, $\mathbb{R}^2$ increases.
+Additionally, as we add more features, our fitted values tend to become closer and closer to our actual values. Thus, $R^2$ increases.
 
 Adding more features doesn't always mean our model is better though! We'll see why later in the course.
 
@@ -395,7 +392,7 @@ $$\mathbb{X}^Te = 0 $$
 ::: {.callout}
 Proof: 
 
-* The optimal parameter vector, $\hat{\theta}$, solves the normal equations $\implies \hat{\theta} = \mathbb{X}^T\mathbb{X}^{-1}\mathbb{X}^T\mathbb{Y}$
+* The optimal parameter vector, $\hat{\theta}$, solves the normal equations $\implies \hat{\theta} = (\mathbb{X}^T\mathbb{X})^{-1}\mathbb{X}^T\mathbb{Y}$
 
 $$\mathbb{X}^Te = \mathbb{X}^T (\mathbb{Y} - \mathbb{\hat{Y}}) $$
 
@@ -439,7 +436,8 @@ To summarize:
 
 |   | Model | Estimate | Unique? |
 | -- | -- | -- |  -- | 
-| Constant Model + MSE | $\hat{y} = \theta_0$| $\hat{\theta_0} = mean(y) = \bar{y}$ | **Yes**. Any set of values has a unique mean.
-| Constant Model + MAE | $\hat{y} = \theta_0$  | $\hat{\theta_0} = median(y)$ | **Yes**, if odd. **No**, if even. Return the average of the middle 2 values.
-| Simple Linear Regression + MSE | $\hat{y} = \theta_0 + \theta_1x$| $\hat{\theta_0} = \bar{y} - \hat{\theta_1}\hat{x}$ $\hat{\theta_1} = r\frac{\sigma_y}{\sigma_x}$| **Yes**. Any set of non-constant* values has a unique mean, SD, and correlation coefficient.
-| **OLS** (Linear Model + MSE) | $\mathbb{\hat{Y}} = \mathbb{X}\mathbb{\theta}$| $\hat{\theta} = \mathbb{X}^T\mathbb{X}^{-1}\mathbb{X}^T\mathbb{Y}$  | **Yes**, if $\mathbb{X}$ is full column rank (all columns are linearly independent, # of datapoints >>> # of features).
+| Constant Model + MSE | $\hat{y} = \theta_0$| $\hat{\theta}_0 = mean(y) = \bar{y}$ | **Yes**. Any set of values has a unique mean.
+| Constant Model + MAE | $\hat{y} = \theta_0$  | $\hat{\theta}_0 = median(y)$ | **Yes**, if odd. **No**, if even. Return the average of the middle 2 values.
+| Simple Linear Regression + MSE | $\hat{y} = \theta_0 + \theta_1x$| $\hat{\theta}_0 = \bar{y} - \hat{\theta}_1\hat{x}$ $\hat{\theta}_1 = r\frac{\sigma_y}{\sigma_x}$| **Yes**. Any set of non-constant* values has a unique mean, SD, and correlation coefficient.
+| **OLS** (Linear Model + MSE) | $\mathbb{\hat{Y}} = \mathbb{X}\mathbb{\theta}$| $\hat{\theta} = (\mathbb{X}^T\mathbb{X})^{-1}\mathbb{X}^T\mathbb{Y}$  | **Yes**, if $\mathbb{X}$ is full column rank (all columns are linearly independent, # of datapoints >>> # of features).
+
