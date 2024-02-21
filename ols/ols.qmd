@@ -350,7 +350,7 @@ $$\hat{\theta} = (\mathbb{X}^T \mathbb{X})^{-1} \mathbb{X}^T \mathbb{Y}$$
 
 This is called the **least squares estimate** of $\theta$: it is the value of $\theta$ that minimizes the squared loss. 
 
-Note that the least squares estimate was derived under the assumption that $\mathbb{X}^T \mathbb{X}$ is *invertible*. This condition holds true when $\mathbb{X}^T \mathbb{X}$ is full column rank, which, in turn, happens when $\mathbb{X}$ is full column rank. We will explore the consequences of this fact in lab and homework.
+Note that the least squares estimate was derived under the assumption that $\mathbb{X}^T \mathbb{X}$ is *invertible*. This condition holds true when $\mathbb{X}^T \mathbb{X}$ is full column rank, which, in turn, happens when $\mathbb{X}$ is full column rank. The proof for why $\mathbb{X}$ needs to be full column rank is optional and in the Bonus section at the end.
 
 ## Evaluating Model Performance
 
@@ -418,20 +418,6 @@ $$\sum_i^n e_i = \sum_i^n y_i - \sum_i^n\hat{y}_i$$
 $$\sum_i^n e_i = n\bar{y} - n\bar{y} = n(\bar{y} - \bar{y}) = 0$$
 :::
 
-3. The Least Squares estimate $\hat{\theta}$ is **unique** if and only if $\mathbb{X}$ is **full column rank**.
-
-::: {.callout}
-Proof: 
-
-* We know the solution to the normal equation $\mathbb{X}^T\mathbb{X}\hat{\theta} = \mathbb{Y}$ is the least square estimate that fulfills the prior equality.
-* $\hat{\theta}$ has a **unique** solution $\iff$ the square matrix $\mathbb{X}^T\mathbb{X}$ is **invertible**.
-  * The **column** rank of a square matrix is the number of linearly independent columns it contains.
-  * An $n$ x $n$ square matrix is deemed full column rank when all of its columns are linearly independent. That is, its rank would be equal to $n$.
-  * $\mathbb{X}^T\mathbb{X}$ has shape $(p + 1) \times (p + 1)$, and therefore has max rank $p + 1$. 
-* $rank(\mathbb{X}^T\mathbb{X})$ = $rank(\mathbb{X})$ (proof out of scope).
-* Therefore, $\mathbb{X}^T\mathbb{X}$ has rank $p + 1$ $\iff$  $\mathbb{X}$ has rank $p + 1$ $\iff \mathbb{X}$ is full column rank.
-:::
-
 To summarize:
 
 |   | Model | Estimate | Unique? |
@@ -440,4 +426,33 @@ To summarize:
 | Constant Model + MAE | $\hat{y} = \theta_0$  | $\hat{\theta}_0 = median(y)$ | **Yes**, if odd. **No**, if even. Return the average of the middle 2 values.
 | Simple Linear Regression + MSE | $\hat{y} = \theta_0 + \theta_1x$| $\hat{\theta}_0 = \bar{y} - \hat{\theta}_1\hat{x}$ $\hat{\theta}_1 = r\frac{\sigma_y}{\sigma_x}$| **Yes**. Any set of non-constant* values has a unique mean, SD, and correlation coefficient.
 | **OLS** (Linear Model + MSE) | $\mathbb{\hat{Y}} = \mathbb{X}\mathbb{\theta}$| $\hat{\theta} = (\mathbb{X}^T\mathbb{X})^{-1}\mathbb{X}^T\mathbb{Y}$  | **Yes**, if $\mathbb{X}$ is full column rank (all columns are linearly independent, # of datapoints >>> # of features).
+
+## Bonus: Uniqueness of the Solution
+
+The Least Squares estimate $\hat{\theta}$ is **unique** if and only if $\mathbb{X}$ is **full column rank**.
+
+::: {.callout}
+Proof: 
+
+* We know the solution to the normal equation $\mathbb{X}^T\mathbb{X}\hat{\theta} = \mathbb{X}^T\mathbb{Y}$ is the least square estimate that minimizes the squared loss.
+* $\hat{\theta}$ has a **unique** solution $\iff$ the square matrix $\mathbb{X}^T\mathbb{X}$ is **invertible** $\iff$ $\mathbb{X}^T\mathbb{X}$ is full rank.
+  * The **column** rank of a square matrix is the max number of linearly independent columns it contains.
+  * An $n$ x $n$ square matrix is deemed full column rank when all of its columns are linearly independent. That is, its rank would be equal to $n$.
+  * $\mathbb{X}^T\mathbb{X}$ has shape $(p + 1) \times (p + 1)$, and therefore has max rank $p + 1$. 
+* $rank(\mathbb{X}^T\mathbb{X})$ = $rank(\mathbb{X})$ (proof out of scope).
+* Therefore, $\mathbb{X}^T\mathbb{X}$ has rank $p + 1$ $\iff$  $\mathbb{X}$ has rank $p + 1$ $\iff \mathbb{X}$ is full column rank.
+:::
+
+Therefore, if $\mathbb{X}$ is not full column rank, we will not have unique estimates. This can happen for two major reasons.
+
+1. If our design matrix $\mathbb{X}$ is "**wide**":
+    * If n < p, then we have way more features (columns) than observations (rows).
+    * Then $rank(\mathbb{X})$ = min(n, p+1) < p+1, so $\hat{\theta}$ is not unique.
+    * Typically we have n >> p so this is less of an issue.
+
+2. If our design matrix $\mathbb{X}$ has features that are **linear combinations** of other features:
+    * By definition, rank of $\mathbb{X}$ is number of linearly independent columns in $\mathbb{X}$.
+    * Example: If “Width”, “Height”, and “Perimeter” are all columns,
+      * Perimeter = 2 * Width + 2 * Height  $\rightarrow$  $\mathbb{X}$ is not full rank.
+    * Important with one-hot encoding (to discuss later).
 
