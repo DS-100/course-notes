@@ -43,7 +43,7 @@ window.document.addEventListener("DOMContentLoaded", function (_event) {
   const mainEl = window.document.querySelector("main");
 
   // highlight matches on the page
-  if (query && mainEl) {
+  if (query !== null && mainEl) {
     // perform any highlighting
     highlight(escapeRegExp(query), mainEl);
 
@@ -57,7 +57,7 @@ window.document.addEventListener("DOMContentLoaded", function (_event) {
   // (e.g. if the user edits the query or clears it)
   let highlighting = true;
   const resetHighlighting = (searchTerm) => {
-    if (mainEl && highlighting && query && searchTerm !== query) {
+    if (mainEl && highlighting && query !== null && searchTerm !== query) {
       clearHighlight(query, mainEl);
       highlighting = false;
     }
@@ -98,7 +98,6 @@ window.document.addEventListener("DOMContentLoaded", function (_event) {
     classNames: {
       form: "d-flex",
     },
-    placeholder: language["search-text-placeholder"],
     translations: {
       clearButtonTitle: language["search-clear-button-title"],
       detachedCancelButtonText: language["search-detached-cancel-button-title"],
@@ -111,8 +110,6 @@ window.document.addEventListener("DOMContentLoaded", function (_event) {
       return item.href;
     },
     onStateChange({ state }) {
-      // If this is a file URL, note that
-
       // Perhaps reset highlighting
       resetHighlighting(state.query);
 
@@ -362,8 +359,7 @@ window.document.addEventListener("DOMContentLoaded", function (_event) {
                 state,
                 setActiveItemId,
                 setContext,
-                refresh,
-                quartoSearchOptions
+                refresh
               );
             },
           },
@@ -378,32 +374,6 @@ window.document.addEventListener("DOMContentLoaded", function (_event) {
     focusSearchInput();
   };
 
-  document.addEventListener("keyup", (event) => {
-    const { key } = event;
-    const kbds = quartoSearchOptions["keyboard-shortcut"];
-    const focusedEl = document.activeElement;
-
-    const isFormElFocused = [
-      "input",
-      "select",
-      "textarea",
-      "button",
-      "option",
-    ].find((tag) => {
-      return focusedEl.tagName.toLowerCase() === tag;
-    });
-
-    if (
-      kbds &&
-      kbds.includes(key) &&
-      !isFormElFocused &&
-      !document.activeElement.isContentEditable
-    ) {
-      event.preventDefault();
-      window.quartoOpenSearch();
-    }
-  });
-
   // Remove the labeleledby attribute since it is pointing
   // to a non-existent label
   if (quartoSearchOptions.type === "overlay") {
@@ -415,30 +385,11 @@ window.document.addEventListener("DOMContentLoaded", function (_event) {
     }
   }
 
-  function throttle(func, wait) {
-    let waiting = false;
-    return function () {
-      if (!waiting) {
-        func.apply(this, arguments);
-        waiting = true;
-        setTimeout(function () {
-          waiting = false;
-        }, wait);
-      }
-    };
-  }
-
   // If the main document scrolls dismiss the search results
   // (otherwise, since they're floating in the document they can scroll with the document)
-  window.document.body.onscroll = throttle(() => {
-    // Only do this if we're not detached
-    // Bug #7117
-    // This will happen when the keyboard is shown on ios (resulting in a scroll)
-    // which then closed the search UI
-    if (!window.matchMedia(detachedMediaQuery).matches) {
-      setIsOpen(false);
-    }
-  }, 50);
+  window.document.body.onscroll = () => {
+    setIsOpen(false);
+  };
 
   if (showSearchResults) {
     setIsOpen(true);
@@ -478,27 +429,15 @@ function configurePlugins(quartoSearchOptions) {
         const algoliaInsightsPlugin = createAlgoliaInsightsPlugin({
           insightsClient: window.aa,
           onItemsChange({ insights, insightsEvents }) {
-            const events = insightsEvents.flatMap((event) => {
-              // This API limits the number of items per event to 20
-              const chunkSize = 20;
-              const itemChunks = [];
-              const eventItems = event.items;
-              for (let i = 0; i < eventItems.length; i += chunkSize) {
-                itemChunks.push(eventItems.slice(i, i + chunkSize));
-              }
-              // Split the items into multiple events that can be sent
-              const events = itemChunks.map((items) => {
-                return {
-                  ...event,
-                  items,
-                };
-              });
-              return events;
+            const events = insightsEvents.map((event) => {
+              const maxEvents = event.objectIDs.slice(0, 20);
+              return {
+                ...event,
+                objectIDs: maxEvents,
+              };
             });
 
-            for (const event of events) {
-              insights.viewedObjectIDs(event);
-            }
+            insights.viewedObjectIDs(...events);
           },
         });
         return algoliaInsightsPlugin;
@@ -674,17 +613,9 @@ function showCopyLink(query, options) {
 /* Search Index Handling */
 // create the index
 var fuseIndex = undefined;
-var shownWarning = false;
 async function readSearchData() {
   // Initialize the search index on demand
   if (fuseIndex === undefined) {
-    if (window.location.protocol === "file:" && !shownWarning) {
-      window.alert(
-        "Search requires JavaScript features disabled when running in file://... URLs. In order to use search, please run this document in a web server."
-      );
-      shownWarning = true;
-      return;
-    }
     // create fuse index
     const options = {
       keys: [
@@ -715,7 +646,6 @@ async function readSearchData() {
       );
     }
   }
-
   return fuseIndex;
 }
 
@@ -744,8 +674,7 @@ function renderItem(
   state,
   setActiveItemId,
   setContext,
-  refresh,
-  quartoSearchOptions
+  refresh
 ) {
   switch (item.type) {
     case kItemTypeDoc:
@@ -755,9 +684,7 @@ function renderItem(
         item.title,
         item.section,
         item.text,
-        item.href,
-        item.crumbs,
-        quartoSearchOptions
+        item.href
       );
     case kItemTypeMore:
       return createMoreCard(
@@ -782,46 +709,15 @@ function renderItem(
   }
 }
 
-function createDocumentCard(
-  createElement,
-  icon,
-  title,
-  section,
-  text,
-  href,
-  crumbs,
-  quartoSearchOptions
-) {
+function createDocumentCard(createElement, icon, title, section, text, href) {
   const iconEl = createElement("i", {
     class: `bi bi-${icon} search-result-icon`,
   });
   const titleEl = createElement("p", { class: "search-result-title" }, title);
-  const titleContents = [iconEl, titleEl];
-  const showParent = quartoSearchOptions["show-item-context"];
-  if (crumbs && showParent) {
-    let crumbsOut = undefined;
-    const crumbClz = ["search-result-crumbs"];
-    if (showParent === "root") {
-      crumbsOut = crumbs.length > 1 ? crumbs[0] : undefined;
-    } else if (showParent === "parent") {
-      crumbsOut = crumbs.length > 1 ? crumbs[crumbs.length - 2] : undefined;
-    } else {
-      crumbsOut = crumbs.length > 1 ? crumbs.join(" > ") : undefined;
-      crumbClz.push("search-result-crumbs-wrap");
-    }
-
-    const crumbEl = createElement(
-      "p",
-      { class: crumbClz.join(" ") },
-      crumbsOut
-    );
-    titleContents.push(crumbEl);
-  }
-
   const titleContainerEl = createElement(
     "div",
     { class: "search-result-title-container" },
-    titleContents
+    [iconEl, titleEl]
   );
 
   const textEls = [];
@@ -1203,19 +1099,17 @@ function algoliaSearch(query, limit, algoliaOptions) {
         const remappedHits = response.hits.map((hit) => {
           return hit.map((item) => {
             const newItem = { ...item };
-            ["href", "section", "title", "text", "crumbs"].forEach(
-              (keyName) => {
-                const mappedName = indexFields[keyName];
-                if (
-                  mappedName &&
-                  item[mappedName] !== undefined &&
-                  mappedName !== keyName
-                ) {
-                  newItem[keyName] = item[mappedName];
-                  delete newItem[mappedName];
-                }
+            ["href", "section", "title", "text"].forEach((keyName) => {
+              const mappedName = indexFields[keyName];
+              if (
+                mappedName &&
+                item[mappedName] !== undefined &&
+                mappedName !== keyName
+              ) {
+                newItem[keyName] = item[mappedName];
+                delete newItem[mappedName];
               }
-            );
+            });
             newItem.text = highlightMatch(query, newItem.text);
             return newItem;
           });
@@ -1241,7 +1135,6 @@ function fuseSearch(query, fuse, fuseOptions) {
       section: result.item.section,
       href: addParam(result.item.href, kQueryArg, query),
       text: highlightMatch(query, result.item.text),
-      crumbs: result.item.crumbs,
     };
   });
 }
