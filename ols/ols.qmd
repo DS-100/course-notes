@@ -39,50 +39,9 @@ We've now spent a number of lectures exploring how to build effective models –
 
 Throughout all of this, we considered models of one feature ($\hat{y}_i = \theta_0 + \theta_1 x_i$) or zero features ($\hat{y}_i = \theta_0$). As data scientists, we usually have access to datasets containing *many* features. To make the best models we can, it will be beneficial to consider all of the variables available to us as inputs to a model, rather than just one. In today's lecture, we'll introduce **multiple linear regression** as a framework to incorporate multiple features into a model. We will also learn how to accelerate the modeling process – specifically, we'll see how linear algebra offers us a powerful set of tools for understanding model performance.
 
-## Linearity 
+## OLS Problem Formulation
 
-An expression is **linear in $\theta$** (a set of parameters) if it is a linear combination of the elements of the set. Checking if an expression can separate into a matrix product of two terms -- a **vector of $\theta$** s, and a matrix/vector **not involving $\theta$** -- is a good indicator of linearity.
-
-
-For example, consider the vector $\theta = [\theta_0, \theta_1, \theta_2]$
-
-1. $\hat{y} = \theta_0 + 2\theta_1 + 3\theta_2$ is linear in theta, and we can separate it into a matrix product of two terms:
-
-$$\hat{y} = \begin{bmatrix} 1 \space 2 \space 3 \end{bmatrix} \begin{bmatrix} \theta_0 \\ \theta_1 \\ \theta_2 \end{bmatrix}$$
-
-2. $\hat{y} = \theta_0\theta_1 + 2\theta_1^2 + 3log(\theta_2)$ is *not* linear in theta, as the $\theta_1$ term is squared, and the $\theta_2$ term is logged. We cannot separate it into a matrix product of two terms.
-
-## Terminology for Multiple Linear Regression
-
-There are several equivalent terms in the context of regression. The ones we use most often for this course are bolded.
-
-* $x$ can be called a
-  - **Feature(s)**
-  - Covariate(s)
-  - **Independent variable(s)**
-  - Explanatory variable(s)
-  - Predictor(s)
-  - Input(s)
-  - Regressor(s)
-* $y$ can be called an
-  - **Output**
-  - Outcome
-  - **Response**
-  - Dependent variable
-* $\hat{y}$ can be called a
-  - **Prediction**
-  - Predicted response
-  - Estimated value
-* $\theta$ can be called a
-  - **Weight(s)**
-  - **Parameter(s)**
-  - Coefficient(s)
-* $\hat{\theta}$ can be called a
-  - **Estimator(s)**
-  - **Optimal parameter(s)**
-* A datapoint $(x, y)$ is also called an observation.
-
-## Multiple Linear Regression
+### Multiple Linear Regression
 
 Multiple linear regression is an extension of simple linear regression that adds additional features to the model. The multiple linear regression model takes the form:
 
@@ -142,7 +101,36 @@ Our features are represented by $x_1$ (`FG`), $x_2$ (`AST`), and $x_3$ (`3PA`) w
 
 In statistics, this model + loss is called **Ordinary Least Squares (OLS)**. The solution to OLS is the minimizing loss for parameters $\hat{\theta}$, also called the **least squares estimate**.
 
-## Linear Algebra Approach
+### Linear Algebra Approach
+
+::: {.callout-tip collapse="false"}
+#### Linear Algebra Review: Vector Dot Product
+The **dot product (or inner product)** is a vector operation that:
+
+* Can only be carried out on two vectors of the **same length**
+* Sums up the products of the corresponding entries of the two vectors
+* Returns a single number
+
+For example, let 
+$$ 
+\begin{align}
+\vec{u} = \begin{bmatrix}1 \\ 2 \\ 3\end{bmatrix}, \vec{v} = \begin{bmatrix}1 \\ 1 \\ 1\end{bmatrix}
+\end{align}
+$$ 
+
+The dot product between $\vec{u}$ and $\vec{v}$ is 
+$$
+\begin{align}
+\vec{u} \cdot \vec{v} &= \vec{u}^T \vec{v} = \vec{v}^T \vec{u} \\
+  &= 1 \cdot 1 + 2 \cdot 1 + 3 \cdot 1 \\ 
+  &= 6
+\end{align}
+$$
+
+While not in scope, note that we can also interpret the dot product geometrically:
+
+* It is the product of three things: the **magnitude** of both vectors, and the **cosine** of the angles between them: $$\vec{u} \cdot \vec{v} = ||\vec{u}|| \cdot ||\vec{v}|| \cdot {cos \theta}$$
+:::
 
 We now know how to generate a single prediction from multiple observed features. Data scientists usually work at scale – that is, they want to build models that can produce many predictions, all at once. The vector notation we introduced above gives us a hint on how we can expedite multiple linear regression. We want to use the tools of linear algebra.
 
@@ -201,17 +189,22 @@ $$
 
 Here, $\mathbb{\hat{Y}}$ is the **prediction vector** with $n$ elements ($\mathbb{\hat{Y}} \in \mathbb{R}^{n}$); it contains the prediction made by the model for each of the $n$ input observations. $\mathbb{X}$ is the **design matrix** with dimensions $\mathbb{X} \in \mathbb{R}^{n \times (p + 1)}$, and $\theta$ is the **parameter vector** with dimensions $\theta \in \mathbb{R}^{(p + 1)}$. Note that our **true output** $\mathbb{Y}$ is also a vector with $n$ elements ($\mathbb{Y} \in \mathbb{R}^{n}$).
 
-As a refresher, let's also review the **dot product (or inner product)**. This is a vector operation that:
+::: {.callout-tip collaps="false"}
+#### Linear Algebra Review: Linearity 
 
-* Can only be carried out on two vectors of the **same length**
-* Sums up the products of the corresponding entries of the two vectors
-* Returns a single number
+An expression is **linear in $\theta$** (a set of parameters) if it is a linear combination of the elements of the set. Checking if an expression can separate into a matrix product of two terms -- a **vector of $\theta$** s, and a matrix/vector **not involving $\theta$** -- is a good indicator of linearity.
 
-While this is not in scope, note that we can also interpret the dot product geometrically:
 
-* It is the product of three things: the **magnitude** of both vectors, and the **cosine** of the angles between them: $$\vec{u} \cdot \vec{v} = ||\vec{u}|| \cdot ||\vec{v}|| \cdot {cos \theta}$$
+For example, consider the vector $\theta = [\theta_0, \theta_1, \theta_2]$
 
-## Mean Squared Error
+* $\hat{y} = \theta_0 + 2\theta_1 + 3\theta_2$ is linear in theta, and we can separate it into a matrix product of two terms:
+
+$$\hat{y} = \begin{bmatrix} 1 \space 2 \space 3 \end{bmatrix} \begin{bmatrix} \theta_0 \\ \theta_1 \\ \theta_2 \end{bmatrix}$$
+
+* $\hat{y} = \theta_0\theta_1 + 2\theta_1^2 + 3log(\theta_2)$ is *not* linear in theta, as the $\theta_1$ term is squared, and the $\theta_2$ term is logged. We cannot separate it into a matrix product of two terms.
+:::
+
+### Mean Squared Error
 
 We now have a new approach to understanding models in terms of vectors and matrices. To accompany this new convention, we should update our understanding of risk functions and model fitting.
 
@@ -220,6 +213,8 @@ $$R(\theta) = \frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2$$
 
 At its heart, the MSE is a measure of *distance* – it gives an indication of how "far away" the predictions are from the true values, on average. 
 
+::: {.callout-tip collaps="false"}
+#### Linear Algebra: L2 Norm
 When working with vectors, this idea of "distance" or the vector's **size/length** is represented by the **norm**. More precisely, the distance between two vectors $\vec{a}$ and $\vec{b}$ can be expressed as:
 $$||\vec{a} - \vec{b}||_2 = \sqrt{(a_1 - b_1)^2 + (a_2 - b_2)^2 + \ldots + (a_n - b_n)^2} = \sqrt{\sum_{i=1}^n (a_i - b_i)^2}$$
 
@@ -227,11 +222,12 @@ The double bars are mathematical notation for the norm. The subscript 2 indicate
 
 The two norms we need to know for Data 100 are the L1 and L2 norms (sound familiar?). In this note, we'll focus on L2 norm. We'll dive into L1 norm in future lectures. 
 
-For the n-dimensional vector $$\vec{x} = \begin{bmatrix} x_1 \\ x_2 \\ \vdots \\ x_n \end{bmatrix}$$, the **L2 vector norm** is
+For the n-dimensional vector $$\vec{x} = \begin{bmatrix} x_1 \\ x_2 \\ \vdots \\ x_n \end{bmatrix}$$ its **L2 vector norm** is
 
 $$||\vec{x}||_2 = \sqrt{(x_1)^2 + (x_2)^2 + \ldots + (x_n)^2} = \sqrt{\sum_{i=1}^n (x_i)^2}$$
 
 The L2 vector norm is a generalization of the Pythagorean theorem in $n$ dimensions. Thus, it can be used as a measure of the **length** of a vector or even as a measure of the **distance** between two vectors. 
+::: 
 
 We can express the MSE as a squared L2 norm if we rewrite it in terms of the prediction vector, $\hat{\mathbb{Y}}$, and true target vector, $\mathbb{Y}$:
 
@@ -254,9 +250,68 @@ $$e = \mathbb{Y} - \mathbb{\hat{Y}} = \begin{bmatrix}
            y_n - \hat{y}_n
          \end{bmatrix}$$
 
-## Geometric Perspective
+### A Note on Terminology for Multiple Linear Regression
 
-To derive the best parameter vector to meet this goal, we can turn to the geometric properties of our modeling setup.
+There are several equivalent terms in the context of regression. The ones we use most often for this course are bolded.
+
+* $x$ can be called a
+  - **Feature(s)**
+  - Covariate(s)
+  - **Independent variable(s)**
+  - Explanatory variable(s)
+  - Predictor(s)
+  - Input(s)
+  - Regressor(s)
+* $y$ can be called an
+  - **Output**
+  - Outcome
+  - **Response**
+  - Dependent variable
+* $\hat{y}$ can be called a
+  - **Prediction**
+  - Predicted response
+  - Estimated value
+* $\theta$ can be called a
+  - **Weight(s)**
+  - **Parameter(s)**
+  - Coefficient(s)
+* $\hat{\theta}$ can be called a
+  - **Estimator(s)**
+  - **Optimal parameter(s)**
+* A datapoint $(x, y)$ is also called an observation.
+
+
+## Geometric Derivation
+::: {.callout-tip collaps="false"}
+### Linear Algebra: Span 
+Recall that the **span** or **column space** of a matrix $\mathbb{X}$ (denoted $span(\mathbb{X})$) is the set of all possible linear combinations of the matrix's columns. In other words, the span represents every point in space that could possibly be reached by adding and scaling some combination of the matrix columns. Additionally, if each column of $\mathbb{X}$ has length $n$, $span(\mathbb{X})$ is a subspace of $\mathbb{R}^{n}$.
+:::
+
+::: {.callout-tip collaps="false"}
+### Linear Algebra: Matrix-Vector Multiplication
+There are 2 ways we can think about matrix-vector multiplication 
+
+1. So far, we’ve thought of our model as horizontally stacked predictions per datapoint
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/matmul1.png" alt='row_col' width='300'>
+      </td>
+    </tr>
+  </table>
+</div>
+2. However, it is helpful sometimes to think of matrix-vector multiplication as performed by columns. We can also think of $\mathbb{Y}$ as a *linear combination of feature vectors*, scaled by *parameters*.
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/matmul2.png" alt='row_col' width='500'>
+      </td>
+    </tr>
+  </table>
+</div>
+:::
 
 Up until now, we've mostly thought of our model as a scalar product between horizontally stacked observations and the parameter vector. We can also think of $\hat{\mathbb{Y}}$ as a **linear combination of feature vectors**, scaled by the **parameters**. We use the notation $\mathbb{X}_{:, i}$ to denote the $i$th column of the design matrix. You can think of this as following the same convention as used when calling `.iloc` and `.loc`. ":" means that we are taking all entries in the $i$th column.
 
@@ -292,8 +347,6 @@ $$
 
 This new approach is useful because it allows us to take advantage of the properties of linear combinations.
 
-Recall that the **span** or **column space** of a matrix $\mathbb{X}$ (denoted $span(\mathbb{X})$) is the set of all possible linear combinations of the matrix's columns. In other words, the span represents every point in space that could possibly be reached by adding and scaling some combination of the matrix columns. Additionally, if each column of $\mathbb{X}$ has length $n$, $span(\mathbb{X})$ is a subspace of $\mathbb{R}^{n}$.
-
 Because the prediction vector, $\hat{\mathbb{Y}} = \mathbb{X} \theta$, is a **linear combination** of the columns of $\mathbb{X}$, we know that the **predictions are contained in the span of $\mathbb{X}$**. That is, we know that $\mathbb{\hat{Y}} \in \text{Span}(\mathbb{X})$.
 
 The diagram below is a simplified view of $\text{Span}(\mathbb{X})$, assuming that each column of $\mathbb{X}$ has length $n$. Notice that the columns of $\mathbb{X}$ define a subspace of $\mathbb{R}^n$, where each point in the subspace can be reached by a linear combination of $\mathbb{X}$'s columns. The prediction vector $\mathbb{\hat{Y}}$ lies somewhere in this subspace.
@@ -326,15 +379,20 @@ Another way of rephrasing this goal is to say that we wish to minimize the lengt
 
 The vector in $\text{Span}(\mathbb{X})$ that is closest to $\mathbb{Y}$ is always the **orthogonal projection** of $\mathbb{Y}$ onto $\text{Span}(\mathbb{X}).$ Thus, we should choose the parameter vector $\theta$ that makes the **residual vector orthogonal to any vector in $\text{Span}(\mathbb{X})$**. You can visualize this as the vector created by dropping a perpendicular line from $\mathbb{Y}$ onto the span of $\mathbb{X}$. 
 
-How does this help us identify the optimal parameter vector, $\hat{\theta}$? Recall that two vectors $a$ and $b$ are orthogonal if their dot product is zero: ${a}^{T}b = 0$. A vector $v$ is **orthogonal** to the span of a matrix $M$ if and only if $v$ is orthogonal to **each column** in $M$. Put together, a vector $v$ is orthogonal to $\text{Span}(M)$ if:
+::: {.callout-tip collaps="false"}
+### Linear Algebra: Orthogonality
+Recall that two vectors $\vec{a}$ and $\vec{b}$ are orthogonal if their dot product is zero: $\vec{a}^{T}\vec{b} = 0$. 
+
+A vector $v$ is **orthogonal** to the span of a matrix $M$ if and only if $v$ is orthogonal to **each column** in $M$. Put together, a vector $v$ is orthogonal to $\text{Span}(M)$ if:
 
 $$M^Tv = \vec{0}$$
 
 Note that $\vec{0}$ represents the **zero vector**, a $d$-length vector full of 0s.
+:::
 
 Remember our goal is to find $\hat{\theta}$ such that we minimize the objective function $R(\theta)$. Equivalently, this is the $\hat{\theta}$ such that the residual vector $e = \mathbb{Y} - \mathbb{X} \hat{\theta}$ is orthogonal to $\text{Span}(\mathbb{X})$. 
 
-Looking at the definition of orthogonality of $\mathbb{Y} - \mathbb{X}\hat{\theta}$ to $span(\mathbb{X})$ (0 is the $\vec{0}$ vector), we can write: 
+Looking at the definition of orthogonality of $\mathbb{Y} - \mathbb{X}\hat{\theta}$ to $span(\mathbb{X})$, we can write: 
 $$\mathbb{X}^T (\mathbb{Y} - \mathbb{X}\hat{\theta}) = \vec{0}$$ 
 
 Let's then rearrange the terms: 
@@ -354,12 +412,14 @@ Note that the least squares estimate was derived under the assumption that $\mat
 
 ## Evaluating Model Performance
 
-Our geometric view of multiple linear regression has taken us far! We have identified the optimal set of parameter values to minimize MSE in a model of multiple features.
+Our geometric view of multiple linear regression has taken us far! We have identified the optimal set of parameter values to minimize MSE in a model of multiple features. Now, we want to understand how well our fitted model performs. 
 
-Now, we want to understand how well our fitted model performs. One measure of model performance is the **Root Mean Squared Error**, or RMSE. The RMSE is simply the square root of MSE. Taking the square root converts the value back into the original, non-squared units of $y_i$, which is useful for understanding the model's performance. A low RMSE indicates more "accurate" predictions – that there is a lower average loss across the dataset.
+### RMSE
+One measure of model performance is the **Root Mean Squared Error**, or RMSE. The RMSE is simply the square root of MSE. Taking the square root converts the value back into the original, non-squared units of $y_i$, which is useful for understanding the model's performance. A low RMSE indicates more "accurate" predictions – that there is a lower average loss across the dataset.
 
 $$\text{RMSE} = \sqrt{\frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2}$$
 
+### Residual Plots
 When working with SLR, we generated plots of the residuals against a single feature to understand the behavior of residuals. When working with several features in multiple linear regression, it no longer makes sense to consider a single feature in our residual plots. Instead, multiple linear regression is evaluated by making plots of the residuals against the predicted values. As was the case with SLR, a multiple linear model performs well if its residual plot shows no patterns.
 
 <div align="middle">
@@ -372,7 +432,7 @@ When working with SLR, we generated plots of the residuals against a single feat
   </table>
 </div>
 
-
+### Multiple $R^2$
 For SLR, we used the correlation coefficient to capture the association between the target variable and a single feature variable. In a multiple linear model setting, we will need a performance metric that can account for multiple features at once. **Multiple $R^2$**, also called the **coefficient of determination**, is the **proportion of variance** of our **fitted values** (predictions) $\hat{y}_i$ to our true values $y_i$. It ranges from 0 to 1 and is effectively the *proportion* of variance in the observations that the **model explains**. 
 
 $$R^2 = \frac{\text{variance of } \hat{y}_i}{\text{variance of } y_i} = \frac{\sigma^2_{\hat{y}}}{\sigma^2_y}$$
