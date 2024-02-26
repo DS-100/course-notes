@@ -46,7 +46,7 @@ Last time, we introduced the modeling process. We set up a framework to predict 
 To illustrate this process, we derived the optimal model parameters under simple linear regression (SLR) with mean squared error (MSE) as the cost function. A summary of the SLR modeling process is shown below:
 
 <div align="middle">
-<img src="images/slr_modeling_process.png" alt='error' width='600'>
+<img src="images/slr_modeling.png" alt='modeling' width='600'>
 </div>
 
 In this lecture, we'll dive deeper into step 4 - evaluating model performance - using SLR as an example. Additionally, we'll also explore the modeling process with new models, continue familiarizing ourselves with the modeling process by finding the best model parameters under a new model, the constant model, and test out two different loss functions to understand how our choice of loss influences model design. Later on, we'll consider what happens when a linear model isn't the best choice to capture trends in our data and what solutions there are to create better models.
@@ -55,7 +55,7 @@ Before we get into Step 4, let's quickly review some important terminology.
 
 ### Prediction vs. Estimation
 
-The terms prediction and estimation are often used somewhat interchangeably, but there is a subtle difference between them. **Estimation** is the task of using data to calculate model parameters. **Prediction** is the task of using a model to predict outputs for unseen data. In our simple linear regression model
+The terms prediction and estimation are often used somewhat interchangeably, but there is a subtle difference between them. **Estimation** is the task of using data to calculate model parameters. **Prediction** is the task of using a model to predict outputs for unseen data. In our simple linear regression model,
 
 $$\hat{y} = \hat{\theta_0} + \hat{\theta_1}$$
 
@@ -68,7 +68,8 @@ Now that we've explored the mathematics behind (1) choosing a model, (2) choosin
 1. Visualize data and compute statistics:
    - Plot the original data.
    - Compute each column's mean and standard deviation. If the mean and standard deviation of our predictions are close to those of the original observed $y_i$s, we might be inclined to say that our model has done well.
-   - (If we're fitting a linear model) compute the correlation $r$. A large magnitude for the correlation coefficient between the feature and response variables could also indicate that our model has done well.
+   - (If we're fitting a linear model) compute the correlation $r$. A large magnitude for the correlation coefficient between the feature and response variables could also indicate that our model has done well.    
+
 2. Performance metrics:
 
    - We can take the **Root Mean Squared Error (RMSE)**.
@@ -269,14 +270,14 @@ plt.show()
 
 ## Constant Model + MSE
 
-Now, we'll shift from the SLR model to the **constant model**, also known as a summary statistic. The constant model is slightly different from the simple linear regression model we've explored previously. Rather than generating predictions from an inputted feature variable, the constant model always _predicts the same constant number_. This ignores any relationships between variables. For example, let's say we want to predict the number of drinks a boba shop sells in a day. Boba tea sales likely depend on the time of year, the weather, how the customers feel, whether school is in session, etc., but the constant model ignores these factors in favor of a simpler model. In other words, the constant model employs a **simplifying assumption**.
+Now, we'll shift from the SLR model to the **constant model**, also known as a summary statistic. The constant model is slightly different from the simple linear regression model we've explored previously. Rather than generating predictions from an inputted feature variable, the constant model always *predicts the same constant number*. This ignores any relationships between variables. For example, let's say we want to predict the number of drinks a boba shop sells in a day. Boba tea sales likely depend on the time of year, the weather, how the customers feel, whether school is in session, etc., but the constant model ignores these factors in favor of a simpler model. In other words, the constant model employs a **simplifying assumption**.
 
 It is also a parametric, statistical model:
 
-$$\hat{y}_i = \theta_0$$
+$$\hat{y} = \theta_0$$
 
 $\theta_0$ is the parameter of the constant model, just as $\theta_0$ and $\theta_1$ were the parameters in SLR.
-Since our parameter $\theta_0$ is 1-dimensional ($\theta_0 \in \mathbb{R}$), we now have no input to our model and will always predict $\hat{y}_i = \theta_0$.
+Since our parameter $\theta_0$ is 1-dimensional ($\theta_0 \in \mathbb{R}$), we now have no input to our model and will always predict $\hat{y} = \theta_0$.
 
 ### Deriving the optimal $\theta_0$
 
@@ -293,19 +294,19 @@ Our modeling process now looks like this:
 3. Fit the model
 4. Evaluate model performance
 
-Given the **constant model** $\hat{y}_i = \theta_0$, we can rewrite the MSE equation as
+Given the **constant model** $\hat{y} = \theta_0$, we can rewrite the MSE equation as
 
 $$\hat{R}(\theta) = \frac{1}{n}\sum^{n}_{i=1} (y_i - \theta_0)^2 $$
 
-We can fit **the model** by finding the optimal $\theta_0$ that minimizes the MSE using a calculus approach.
+We can fit **the model** by finding the optimal $\hat{\theta_0}$ that minimizes the MSE using a calculus approach.
 
 1. Differentiate with respect to $\theta_0$
 
 $$
 \begin{align}
-\frac{d}{d\theta_0}\text{R}(\theta) & = \frac{d}{d\theta_0}\frac{1}{n}\sum^{n}_{i=1} (y_i - \theta_0)^2
-\\ &= {n}\sum^{n}_{i=1} \frac{d}{d\theta_0}  (y_i - \theta_0)^2 \quad \quad \text{derivative of sum is a sum of derivatives}
-\\ &= {n}\sum^{n}_{i=1} 2 (y_i - \theta_0) (-1) \quad \quad \text{chain rule}
+\frac{d}{d\theta_0}\text{R}(\theta) & = \frac{d}{d\theta_0}(\frac{1}{n}\sum^{n}_{i=1} (y_i - \theta_0)^2)
+\\ &= \frac{1}{n}\sum^{n}_{i=1} \frac{d}{d\theta_0}  (y_i - \theta_0)^2 \quad \quad \text{derivative of sum is a sum of derivatives}
+\\ &= \frac{1}{n}\sum^{n}_{i=1} 2 (y_i - \theta_0) (-1) \quad \quad \text{chain rule}
 \\ &= {\frac{-2}{n}}\sum^{n}_{i=1} (y_i - \theta_0) \quad \quad \text{simply constants}
 \end{align}
 $$
@@ -323,8 +324,8 @@ $$
 0 &= {\frac{-2}{n}}\sum^{n}_{i=1} (y_i - \hat{\theta_0})
 \\ &= \sum^{n}_{i=1} (y_i - \hat{\theta_0}) \quad \quad \text{divide both sides by} \frac{-2}{n}
 \\ &= \sum^{n}_{i=1} y_i - \sum^{n}_{i=1} \theta_0 \quad \quad \text{separate sums}
-\\ &= \sum^{n}_{i=1} y_i - n * \hat{\theta_0} \quad \quad  \text{c + c + … + c = nc}
-\\ n * \hat{\theta_0} &= \sum^{n}_{i=1} y_i
+\\ &= \sum^{n}_{i=1} y_i - n \cdot \hat{\theta_0} \quad \quad  \text{c + c + … + c = nc}
+\\ n \cdot \hat{\theta_0} &= \sum^{n}_{i=1} y_i
 \\ \hat{\theta_0} &= \frac{1}{n} \sum^{n}_{i=1} y_i
 \\ \hat{\theta_0} &= \bar{y}
 \end{align}
@@ -339,7 +340,7 @@ $$R(\hat{\theta_0}) = \min_{\theta_0} R(\theta_0)$$
 
 To restate the above in plain English: we are looking at the value of the cost function when it takes the best parameter as input. This optimal model parameter, $\hat{\theta_0}$, is the value of $\theta_0$ that minimizes the cost $R$.
 
-For modeling purposes, we care less about the minimum value of cost, $R(\hat{\theta_0})$, and more about the _value of $\theta$_ that results in this lowest average loss. In other words, we concern ourselves with finding the best parameter value such that:
+For modeling purposes, we care less about the minimum value of cost, $R(\hat{\theta_0})$, and more about the *value of $\theta$* that results in this lowest average loss. In other words, we concern ourselves with finding the best parameter value such that:
 
 $$\hat{\theta} = \underset{\theta}{\operatorname{\arg\min}}\:R(\theta)$$
 
@@ -352,10 +353,10 @@ Now that we've explored the constant model with an L2 loss, we can compare it to
 |                        | Constant Model                                                   | Simple Linear Regression                                                        |
 | ---------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | model                  | $\hat{y} = \theta_0$                                             | $\hat{y} = \theta_0 + \theta_1 x$                                                |
-| data                   | sample of ages $D = \{y_1, y_2, ..., y_m\}$                      | sample of ages $D = \{(x_1, y_1), (x_2, y_2), ..., (x_n, y_n)\}$                |
+| data                   | sample of ages $D = \{y_1, y_2, ..., y_n\}$                      | sample of ages $D = \{(x_1, y_1), (x_2, y_2), ..., (x_n, y_n)\}$                |
 | dimensions             | $\hat{\theta_0}$ is 1-D                                          | $\hat{\theta} = [\hat{\theta_0}, \hat{\theta_1}]$ is 2-D                        |
 | loss surface           | 2-D ![](images/constant_loss_surface.png)                        | 3-D ![](images/slr_loss_surface.png)                                            |
-| Loss Model             | $\hat{R}(\theta) = \frac{1}{n}\sum^{n}_{i=1} (y_i - \theta_0)^2$ | $\hat{R}(\theta) = \frac{1}{n}\sum^{n}_{i=1} (y_i - (\theta_0 + \theta_1 x))^2$ |
+| Loss Model             | $\hat{R}(\theta) = \frac{1}{n}\sum^{n}_{i=1} (y_i - \theta_0)^2$ | $\hat{R}(\theta_0, \theta_1) = \frac{1}{n}\sum^{n}_{i=1} (y_i - (\theta_0 + \theta_1 x))^2$ |
 | RMSE                   | 7.72                                                             | 4.31                                                                            |
 | predictions visualized | rug plot ![](images/dugong_rug.png)                              | scatter plot ![](images/dugong_scatter.png)                                     |
 
@@ -499,11 +500,11 @@ plt.plot(xs, yhats_linear, color='red', lw=4);
 
 Interpreting the RMSE (Root Mean Squared Error):
 
-- The constant error is HIGHER than the linear error.
+- The constant error is **HIGHER** than the linear error.
 
 Hence,
 
-- The constant model is WORSE than the linear model (at least for this metric).
+- The constant model is **WORSE** than the linear model (at least for this metric).
 
 ## Constant Model + MAE
 
@@ -518,57 +519,57 @@ This time, we will consider the constant model with L1 (absolute loss) as the lo
 
 ### Deriving the optimal $\theta_0$
 
-Recall that the MAE is average **absolute** loss (L1 loss) over the data $D = \{y_1, y_2, ..., y_m\}$.
+Recall that the MAE is average **absolute** loss (L1 loss) over the data $D = \{y_1, y_2, ..., y_n\}$.
 
-$$\hat{R}(\theta) = \frac{1}{n}\sum^{n}_{i=1} |y_i - \hat{y_i}| $$
+$$\hat{R}(\theta_0) = \frac{1}{n}\sum^{n}_{i=1} |y_i - \hat{y_i}| $$
 
 Given the constant model $\hat{y} = \theta_0$, we can write the MAE as:
 
-$$\hat{R}(\theta) = \frac{1}{n}\sum^{n}_{i=1} |y_i - \theta_0| $$
+$$\hat{R}(\theta_0) = \frac{1}{n}\sum^{n}_{i=1} |y_i - \theta_0| $$
 
-To fit the model, we find the optimal parameter value $\hat{\theta}$ by differentiating using a calculus approach:
+To fit the model, we find the optimal parameter value $\hat{\theta_0}$ that minimizes the MAE by differentiating using a calculus approach:
 
 1. Differentiate with respect to $\hat{\theta_0}$.
 
-$$\hat{R}(\theta) = \frac{1}{n}\sum^{n}_{i=1} |y_i - \theta| $$
+$$\hat{R}(\theta_0) = \frac{1}{n}\sum^{n}_{i=1} |y_i - \theta_0| $$
 
-$$\frac{d}{d\theta} R(\theta) = \frac{d}{d\theta} \left(\frac{1}{n} \sum^{n}_{i=1} |y_i - \theta| \right)$$
+$$\frac{d}{d\theta_0} R(\theta_0) = \frac{d}{d\theta_0} \left(\frac{1}{n} \sum^{n}_{i=1} |y_i - \theta_0| \right)$$
 
 $$
-= \frac{1}{n} \sum^{n}_{i=1} \frac{d}{d\theta} |y_i - \theta|
+= \frac{1}{n} \sum^{n}_{i=1} \frac{d}{d\theta_0} |y_i - \theta_0|
 $$
 
-- Here, we seem to have run into a problem: the derivative of an absolute value is undefined when the argument is 0 (i.e. when $y_i = \theta$). For now, we'll ignore this issue. It turns out that disregarding this case doesn't influence our final result.
-- To perform the derivative, consider two cases. When $\theta$ is _less than or equal to_ $y_i$, the term $y_i - \theta$ will be positive and the absolute value has no impact. When $\theta$ is _greater than_ $y_i$, the term $y_i - \theta$ will be negative. Applying the absolute value will convert this to a positive value, which we can express by saying $-(y_i - \theta) = \theta - y_i$.
+- Here, we seem to have run into a problem: the derivative of an absolute value is undefined when the argument is 0 (i.e. when $y_i = \theta_0$). For now, we'll ignore this issue. It turns out that disregarding this case doesn't influence our final result.
+- To perform the derivative, consider two cases. When $\theta_0$ is *less than or equal to* $y_i$, the term $y_i - \theta_0$ will be positive and the absolute value has no impact. When $\theta_0$ is *greater than* $y_i$, the term $y_i - \theta_0$ will be negative. Applying the absolute value will convert this to a positive value, which we can express by saying $-(y_i - \theta_0) = \theta_0 - y_i$.
 
-$$|y_i - \theta| = \begin{cases} y_i - \theta \quad \text{ if } \theta \le y_i \\ \theta - y_i \quad \text{if }\theta > y_i \end{cases}$$
+$$|y_i - \theta_0| = \begin{cases} y_i - \theta_0 \quad \text{ if } \theta_0 \le y_i \\ \theta_0 - y_i \quad \text{if }\theta_0 > y_i \end{cases}$$
 
 - Taking derivatives:
 
-$$\frac{d}{d\theta} |y_i - \theta| = \begin{cases} \frac{d}{d\theta} (y_i - \theta) = -1 \quad \text{if }\theta < y_i \\ \frac{d}{d\theta} (\theta - y_i) = 1 \quad \text{if }\theta > y_i \end{cases}$$
+$$\frac{d}{d\theta_0} |y_i - \theta_0| = \begin{cases} \frac{d}{d\theta_0} (y_i - \theta_0) = -1 \quad \text{if }\theta_0 < y_i \\ \frac{d}{d\theta_0} (\theta_0 - y_i) = 1 \quad \text{if }\theta_0 > y_i \end{cases}$$
 
-- This means that we obtain a different value for the derivative for data points where $\theta < y_i$ and where $\theta > y_i$. We can summarize this by saying:
+- This means that we obtain a different value for the derivative for data points where $\theta_0 < y_i$ and where $\theta_0 > y_i$. We can summarize this by saying:
 
 $$
-\frac{d}{d\theta} R(\theta) = \frac{1}{n} \sum^{n}_{i=1} \frac{d}{d\theta} |y_i - \theta| \\
-= \frac{1}{n} \left[\sum_{\hat{\theta_0} < y_i} (-1) + \sum_{\hat{\theta_0} > y_i} (+1) \right]
+\frac{d}{d\theta_0} R(\theta_0) = \frac{1}{n} \sum^{n}_{i=1} \frac{d}{d\theta_0} |y_i - \theta_0| \\
+= \frac{1}{n} \left[\sum_{\theta_0 < y_i} (-1) + \sum_{\theta_0 > y_i} (+1) \right]
 $$
 
 - In other words, we take the sum of values for $i = 1, 2, ..., n$:
-  - $-1$ if our observation $y_i$ is _greater than_ our prediction $\hat{\theta_0}$
-  - $+1$ if our observation $y_i$ is _smaller than_ our prediction $\hat{\theta_0}$
+  - $-1$ if our observation $y_i$ is *greater than* our prediction $\hat{\theta_0}$
+  - $+1$ if our observation $y_i$ is *smaller than* our prediction $\hat{\theta_0}$
 
 2. Set equal to 0.
-   $$ 0 = \frac{1}{n}\sum*{\hat{\theta_0} < y_i} (-1) + \frac{1}{n}\sum*{\hat{\theta_0} > y_i} (+1) $$
+   $$ 0 = \frac{1}{n}\sum_{\hat{\theta_0} < y_i} (-1) + \frac{1}{n}\sum_{\hat{\theta_0} > y_i} (+1) $$
 
 3. Solve for $\hat{\theta_0}$.
-   $$ 0 = -\frac{1}{n}\sum*{\hat{\theta_0} < y_i} (1) + \frac{1}{n}\sum*{\hat{\theta_0} > y_i} (1)$$
+   $$ 0 = -\frac{1}{n}\sum_{\hat{\theta_0} < y_i} (1) + \frac{1}{n}\sum_{\hat{\theta_0} > y_i} (1)$$
 
 $$\sum_{\hat{\theta_0} < y_i} (1) = \sum_{\hat{\theta_0} > y_i} (1) $$
 
 Thus, the constant model parameter $\theta = \hat{\theta_0}$ that minimizes MAE must satisfy:
 
-$$ \sum*{\hat{\theta_0} < y_i} (1) = \sum*{\hat{\theta_0} > y_i} (1) $$
+$$ \sum_{\hat{\theta_0} < y_i} (1) = \sum_{\hat{\theta_0} > y_i} (1) $$
 
 In other words, the number of observations greater than $\theta_0$ must be equal to the number of observations less than $\theta_0$; there must be an equal number of points on the left and right sides of the equation. This is the definition of median, so our optimal value is
 $$ \hat{\theta_0} = median(y) $$
@@ -630,6 +631,8 @@ display(drinks_with_outlier)
 np.mean(drinks_with_outlier), np.median(drinks_with_outlier)
 ```
 
+<img src="images/outliers.png" alt='outliers' width='700'>
+
 This means that under the MSE, the optimal model parameter $\hat{\theta}$ is strongly affected by the presence of outliers. Under the MAE, the optimal parameter is not as influenced by outlying data. We can generalize this by saying that the MSE is **sensitive** to outliers, while the MAE is **robust** to outliers.
 
 Let's try another experiment. This time, we'll add an additional, non-outlying datapoint to the data.
@@ -643,30 +646,18 @@ drinks_with_additional_observation
 
 When we again visualize the cost functions, we find that the MAE now plots a horizontal line between 22 and 29. This means that there are _infinitely_ many optimal values for the model parameter: any value $\hat{\theta} \in [22, 29]$ will minimize the MAE. In contrast, the MSE still has a single best value for $\hat{\theta}$. In other words, the MSE has a **unique** solution for $\hat{\theta}$; the MAE is not guaranteed to have a single unique solution.
 
-<!-- <div align="middle">
-<table style="width:100%">
-      <tr align="center">
-        <td><img src="images/mse_loss.png" align="middle" width="300vw" />
-        </td>
-        <td><img src="images/mae_loss.png" align="middle" width="300vw" />
-        </td>
-      </tr>
-    </table>
-</div> -->
-
-![](images/mse_loss.png) ![](images/mae_loss_infinite.png)
+<img src="images/mse_loss_26.png" width='350'> <img src="images/mae_loss_infinite.png" width='350'>
 
 To summarize our example,
 
 |                        | MSE (Mean Squared Loss)                                                   | MAE (Mean Absolute Loss)                                                        |
 | ---------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| Loss Function                  | $\hat{R}(\theta) = \frac{1}{n}\sum^{n}_{i=1} (y_i - \theta_0)^2$                                            | $\hat{R}(\theta) = \frac{1}{n}\sum^{n}_{i=1} (y_i - \theta_0)$                                               |
+| Loss Function                  | $\hat{R}(\theta) = \frac{1}{n}\sum^{n}_{i=1} (y_i - \theta_0)^2$                                            | $\hat{R}(\theta) = \frac{1}{n}\sum^{n}_{i=1} |y_i - \theta_0|$                                               |
 | Optimal $\hat{\theta_0}$                   | $\hat{\theta_0} = mean(y) = \bar{y}$                      | $\hat{\theta_0} = median(y)$                 |
-| Dimensions             | $\hat{\theta_0}$ is 1-D                                          | $\hat{\theta} = [\hat{\theta_0}, \hat{\theta_1}]$ is 2-D                        |
-| Loss Surface           | ![](images/mse_loss.png)                         | 3![](images/mae_loss.png)                                          |
+| Loss Surface           | <img src="images/mse_loss_26.png" width='250'>                        | <img src="images/mae_loss_infinite.png" width='250'>                                          |
 | Shape            | **Smooth** - easy to minimize using numerical methods (in a few weeks)  | **Piecewise** - at each of the “kinks,” it’s not differentiable. Harder to minimize. |
 | Outliers                   | **Sensitive** to outliers (since they change mean substantially). Sensitivity also depends on the dataset size.                                                            | **More robust** to outliers.                                                                           |
-| $\hat{\theta_0}$ Uniqueness | **Unique** $\hat{\theta_0}$                              | **Infinitely many** $\hat{\theta_0}$                                     |
+| $\hat{\theta_0}$ Uniqueness | **Unique** $\hat{\theta_0}$                              | **Infinitely many** $\hat{\theta_0}$s                                    |
 
 ## Transformations to fit Linear Models
 
@@ -742,21 +733,21 @@ plt.subplots_adjust(wspace=0.3)
 
 Our SLR fit looks a lot better! We now have a new target variable: the SLR model is now trying to predict the _log_ of `"Age"`, rather than the untransformed `"Age"`. In other words, we are applying the transformation $z_i = \log{(y_i)}$. Notice that the resulting model is still **linear in the parameters** $\theta = [\theta_0, \theta_1]$. The SLR model becomes:
 
-$$\log{\hat{(y_i)}} = \theta_0 + \theta_1 x_i$$
-$$\hat{z}_i = \theta_0 + \theta_1 x_i$$
+$$\hat{\log{y}} = \theta_0 + \theta_1 x$$
+$$\hat{z} = \theta_0 + \theta_1 x$$
 
-It turns out that this linearized relationship can help us understand the underlying relationship between $x_i$ and $y_i$. If we rearrange the relationship above, we find:
+It turns out that this linearized relationship can help us understand the underlying relationship between $x$ and $y$. If we rearrange the relationship above, we find:
 
 $$
-\log{(y_i)} = \theta_0 + \theta_1 x_i \\
-y_i = e^{\theta_0 + \theta_1 x_i} \\
-y_i = (e^{\theta_0})e^{\theta_1 x_i} \\
-y_i = C e^{k x_i}
+\log{(y)} = \theta_0 + \theta_1 x \\
+y = e^{\theta_0 + \theta_1 x} \\
+y = (e^{\theta_0})e^{\theta_1 x} \\
+y_i = C e^{k x}
 $$
 
 For some constants $C$ and $k$.
 
-$y_i$ is an _exponential_ function of $x_i$. Applying an exponential fit to the untransformed variables corroborates this finding.
+$y$ is an *exponential* function of $x$. Applying an exponential fit to the untransformed variables corroborates this finding.
 
 ```{python}
 #| code-fold: true
@@ -817,16 +808,16 @@ We'll dive deeper into Multiple Linear Regression in the next lecture.
 
 Earlier, we calculated the constant model MSE using calculus. It turns out that there is a much more elegant way of performing this same minimization algebraically, without using calculus at all.
 
-In this calculation, we use the fact that the **sum of deviations from the mean is 0** or that $\sum_{i=1}^{n} (y_i - \bar{y}) = 0$.
+In this calculation, we use the fact that the **sum of deviations from the mean is $0$** or that $\sum_{i=1}^{n} (y_i - \bar{y}) = 0$.
 
 Let's quickly walk through the proof for this:
 $$\sum_{i=1}^{n} (y_i - \bar{y}) = \sum_{i=1}^{n} y_i - \sum_{i=1}^{n} \bar{y}$$
 
 $$ = \sum_{i=1}^{n} y_i - n\bar{y}$$
 
-$$ = \sum_{i=1}^{n} y_i - n\frac{1}{n}\sum_{i=1}^{n}y$$
+$$ = \sum_{i=1}^{n} y_i - n\frac{1}{n}\sum_{i=1}^{n}y_i$$
 
-$$ = \sum_{i=1}^{n} y_i - \sum_{i=1}^{n}y_i$$
+$$ = \sum_{i=1}^{n} y_i - \sum_{i=1}^{n}y_i = 0$$
 
 In our calculations, we'll also be using the definition of the variance as a sample. As a refresher:
 
@@ -839,15 +830,15 @@ $$
 R(\theta) &= {\frac{1}{n}}\sum^{n}_{i=1} (y_i - \theta)^2
 \\ &= \frac{1}{n}\sum^{n}_{i=1} [(y_i - \bar{y}) + (\bar{y} - \theta)]^2\quad \quad \text{using trick that a-b can be written as (a-c) + (c-b) where a, b, and c are any numbers}
 \\ &= \frac{1}{n}\sum^{n}_{i=1} [(y_i - \bar{y})^2 + 2(y_i - \bar{y})(\bar{y} - \theta) + (\bar{y} - \theta)^2]
-\\ &= \frac{1}{n}[\sum^{n}_{i=1}(y_i - \bar{y})^2 + 2(\bar{y} - \theta)\sum^{n}_{i=1}(y_i - \bar{y}) + n(\bar{y} - \theta)^2 \quad \quad  \text{distribute the sum to individual terms}
+\\ &= \frac{1}{n}[\sum^{n}_{i=1}(y_i - \bar{y})^2 + 2(\bar{y} - \theta)\sum^{n}_{i=1}(y_i - \bar{y}) + n(\bar{y} - \theta)^2] \quad \quad  \text{distribute the sum to individual terms}
 \\ &= \frac{1}{n}\sum^{n}_{i=1}(y_i - \bar{y})^2 + \frac{2}{n}(\bar{y} - \theta)\cdot0 + (\bar{y} - \theta)^2 \quad \quad  \text{using property that sum of deviations from mean is 0}
 \\ &= \sigma_y^2 + (\bar{y} - \theta)^2
 \end{align}
 $$
 
-Since variance can't be negative, we know that our first term, $\sigma_y^2$ is greater than or equal to 0. Also note, that the first term doesn't involve $\theta$ at all, meaning changing our model won't change this value. For the purposes of determining $\hat{\theta}#, we can essentially then ignore this term.
+Since variance can't be negative, we know that our first term, $\sigma_y^2$ is greater than or equal to $0$. Also note, that **the first term doesn't involve $\theta$ at all**, meaning changing our model won't change this value. For the purposes of determining $\hat{\theta}#, we can then essentially ignore this term.
 
-Looking at the second term, $(\bar{y} - \theta)^2$, since it is squared, we know it must be greater than or equal to 0. As this term does involve $\theta$, picking the value of $\theta$ that minimizes this term will allow us to minimize our average loss. For the second term to equal 0, $\theta = \bar{y}$, or in other words, $\hat{\theta} = \bar{y} = mean(y)$.
+Looking at the second term, $(\bar{y} - \theta)^2$, since it is squared, we know it must be greater than or equal to $0$. As this term does involve $\theta$, picking the value of $\theta$ that minimizes this term will allow us to minimize our average loss. For the second term to equal $0$, $\theta = \bar{y}$, or in other words, $\hat{\theta} = \bar{y} = mean(y)$.
 
 ##### Note
 
@@ -855,4 +846,4 @@ In the derivation above, we decompose the expected loss, $R(\theta)$, into two k
 
 - **Variance, $\sigma_y^2$**: This term represents the spread of the data points around their mean, $\bar{y}$, and is a measure of the data's inherent variability. Importantly, it does not depend on the choice of $\theta$, meaning it's a fixed property of the data. Variance serves as an indicator of the data's dispersion and is crucial in understanding the dataset's structure, but it remains constant regardless of how we adjust our model parameter $\theta$.
 
-- **Bias Squared, $(\bar{y} - \theta)^2$**: This term captures the bias of the estimator, defined as the square of the difference between the mean of the data points, $\bar{y}$, and the parameter $\theta$. The bias quantifies the systematic error introduced when estimating $\theta$. Minimizing this term is essential for improving the accuracy of the estimator. When $\theta = \bar{y}$, the bias is zero, indicating that the estimator is unbiased for the parameter it estimates. This highlights a critical principle in statistical estimation: choosing $\theta$ to be the sample mean, $\bar{y}$, minimizes the average loss, rendering the estimator both efficient and unbiased for the population mean.
+- **Bias Squared, $(\bar{y} - \theta)^2$**: This term captures the bias of the estimator, defined as the square of the difference between the mean of the data points, $\bar{y}$, and the parameter $\theta$. The bias quantifies the systematic error introduced when estimating $\theta$. Minimizing this term is essential for improving the accuracy of the estimator. When $\theta = \bar{y}$, the bias is $0$, indicating that the estimator is unbiased for the parameter it estimates. This highlights a critical principle in statistical estimation: choosing $\theta$ to be the sample mean, $\bar{y}$, minimizes the average loss, rendering the estimator both efficient and unbiased for the population mean.
