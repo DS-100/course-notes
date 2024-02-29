@@ -58,7 +58,7 @@ For the *vector* of parameter values $\vec{\theta} = \begin{bmatrix}
 The **gradient vector** would then be the 2D vector: 
 $$\nabla_{\vec{\theta}} L =  \begin{bmatrix} \frac{\partial L}{\partial \theta_0} \\ \frac{\partial L}{\partial \theta_1} \end{bmatrix}$$
 
-Note that $$\nabla_{\vec{\theta}} L$$ always points in the **downhill direction** of the surface. 
+Note that $-\nabla_{\vec{\theta}} L$ always points in the **downhill direction** of the surface. 
 
 Recall that we also discussed the gradient descent update rule, where we nudge $\theta$ in a negative gradient direction until $\theta$ converges. 
 
@@ -69,7 +69,7 @@ The rule is as follows: $$\vec{\theta}^{(t+1)} = \vec{\theta}^{(t)} - \alpha \na
   * $\alpha$ is the learning rate (ours is constant, but other techniques use an $\alpha$ that decreases over time)
   * $\vec{\theta}^{(t)}$ is the current value of $\theta$
   * $\vec{\theta}^{(t+1)}$ is the next value of $\theta$
-  * $\nabla_{\vec{\theta}} L(\theta^{(t)})$ is the gradient of the loss function evaluated at the current $\theta$: $\frac{1}{n}\sum_{i=1}^{n}\nabla_{\vec{\theta}} l(y_i, f_{\vec{\theta}(t)}(X_i))$
+  * $\nabla_{\vec{\theta}} L(\theta^{(t)})$ is the gradient of the loss function evaluated at the current $\theta$: $\frac{1}{n}\sum_{i=1}^{n}\nabla_{\vec{\theta}} l(y_i, f_{\vec{\theta}^{(t)}}(X_i))$
 
 Let's now walk through an example of calculating and updating the gradient vector. If our model and loss are:
 $$\begin{align}
@@ -89,9 +89,11 @@ $$\nabla_{\vec{\theta}} l(\vec{\theta}, \vec{x}, y_i) =  \begin{bmatrix} 2(y_i -
 
 Remember that we need to keep updating $\theta$ until the algorithm **converges** to a solution and stops updating significantly (or at all). Typically, when updating $\theta$, we'll have a fixed number of updates and subsequent updates will be quite small (we won't change $\theta$ by much).
 
-### Stochastic (Minibatch) Gradient Descent (TO FINISH)
+### Stochastic (Minibatch) Gradient Descent
 
-Let's look at the computational complexity for the solution to the normal equations.
+Let's now dive deeper into gradient and stochastic gradient descent. In the last lecture, we discussed how finding the gradient across all the data is incredibly computationally taxing.
+
+We know that the solution to the normal equation is $\hat{\theta} = (\mathbb{X}^T\mathbb{X})^{-1}\mathbb{X}^T\mathbb{Y}$. Let's break this down and determine the computational complexity for this solution.
 <div align="middle">
   <table style="width:100%">
     <tr align="center">
@@ -101,7 +103,9 @@ Let's look at the computational complexity for the solution to the normal equati
   </table>
 </div>
 
-Computing $(\mathbb{X}^{\top}\mathbb{X})^{-1}$ takes $O(nd^2) + O(d^3)$ while $\mathbb{X}^{\top}\mathbb{Y}$ takes $O(nd)$ time complexity where $n$ is the number of samples and $d$ is the number of features. The first term dominates the complexity and can be problematic for high dimensional models.
+Computing $(\mathbb{X}^{\top}\mathbb{X})^{-1}$ takes $O(nd^2) + O(d^3)$ time while $\mathbb{X}^{\top}\mathbb{Y}$ takes $O(nd)$ time where $n$ is the number of samples and $d$ is the number of features. We can see that the first term clearly dominates the complexity — this can be problematic for high-dimensional models.
+
+Looking back at the complexity for gradient descent, we can see it takes $O(nd)$ time. 
 
 <div align="middle">
   <table style="width:100%">
@@ -112,24 +116,30 @@ Computing $(\mathbb{X}^{\top}\mathbb{X})^{-1}$ takes $O(nd^2) + O(d^3)$ while $\
   </table>
 </div>
 
-Looking back at the complexity for gradient descent, suppose we run $T$ iterations then the final complexity is $O(Tnd)$. Typically $n$ is much larger than $T$ or $d$. How can we reduce the cost of this algorithm using a technique in Data 100?
+Now suppose we run $T$ iterations. The final complexity would be $O(Tnd)$. Typically, $n$ is much larger than $T$ or $d$. How can we reduce the cost of this algorithm using a technique in Data 100? Do we really need $n$ data points? 
 
+We can use stochastic gradient descent! Let's  compare the time complexity between batch gradient descent and stochastic gradient descent.
 
-Let's now compare the time complexity between batch gradient descent and stochastic gradient descent.
+We know that our true gradient is $\nabla_{\vec{\theta}} L (\vec{\theta^{(t)}}) = \frac{1}{n}\sum_{i=1}^{n}\nabla_{\vec{\theta}} l(y_i, f_{\vec{\theta}^{(t)}}(X_i))$ and has a time complexity of $O(nd)$. 
 
+Let's use a sample of our data to approximate the true gradient of the loss surface. Say we sample $b$ records ($s_1, \cdots, s_b$). Our new (stochastic) gradient descent function will be $\nabla_{\vec{\theta}} L (\vec{\theta^{(t)}}) = \frac{1}{b}\sum_{i=1}^{b}\nabla_{\vec{\theta}} l(y_{s_i}, f_{\vec{\theta}^{(t)}}(X_{s_i}))$ and will now have a time complexity of $O(bd)$ (much faster!).
 
-<div align="middle">
-  <table style="width:100%">
-    <tr align="center">
-      <td><img src="images/time-complexity-compare.png" alt='time-complexity-compare' width='600'>
-      </td>
-    </tr>
-  </table>
-</div>
-As shown above, the time complexity scales with the number of data points selected in the sample. Stochastic gradient descent helps approximate the gradient while also reducing the computation cost, leading to this tradeoff. As the batch-size increases, it will be a better estimate of the true gradient. 
+Stochastic gradient descent helps approximate the gradient while also reducing the time complexity and computational cost. The time complexity scales with the number of data points selected in the sample. To sample data, there are two approaches we can use:
 
-A few notes on the **batch size, b.** It is typically small and the original stochastic gradient descent algorithm proposed a batch size of 1. Today the choice of b depends on several factors. A larger batch size can lead to better gradient estimate and can be parallelized. However, there is diminishing returns. A smaller batch size means that there will be more frequent updates.
+1. Shuffle the data and select samples one at a time.
+2. Take a simple random sample for each gradient computation.
 
+But how would we decide how our mini-batch size ($b$), the number of data points in our sample? Originally, the stochastic gradient descent algorithm set $b=1$. Although we don't use such a small mini-batch size often, $b$ typically is small. When choosing $b$, there are several factors to consider (as we saw in the last lecture). A larger batch size results in a better gradient estimate, parallelism, and other systems factors. But there are diminishing returns — there is a tradeoff between batch size and time complexity. On the other hand, a smaller batch size will be faster and have more frequent updates.
+
+Summarizing our two gradient descent techniques:
+
+- **(Batch) Gradient Descent**: Gradient descent computes the **true** descent and always descends towards the true minimum of the loss.
+
+<center><img src="images/gd.png" alt='batch_grad_descent' width='300'></center>
+
+- **(Minibatch) Stochastic gradient descent**: Stochastic gradient descent **approximates** the true gradient descent. It may not descend towards the true minimum with each update.
+
+<center><img src="images/sgd.png" alt='stochastic_grad_descent' width='300'></center>
 
 ## Feature Engineering
 
