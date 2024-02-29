@@ -27,6 +27,7 @@ jupyter: python3
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 import pandas as pd
 import seaborn as sns
 import plotly.express as px
@@ -43,6 +44,7 @@ Throughout this lecture, we'll refer to the `penguins` dataset.
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 import pandas as pd
 import seaborn as sns
 import numpy as np
@@ -55,6 +57,7 @@ penguins.head()
 Our goal will be to predict the value of the `"bill_depth_mm"` for a particular penguin given its `"flipper_length_mm"` and `"body_mass_g"`. We'll also add a bias column of all ones to represent the intercept term of our models.
 
 ```{python}
+#| vscode: {languageId: python}
 # Add a bias column of all ones to `penguins`
 penguins["bias"] = np.ones(len(penguins), dtype=int) 
 
@@ -87,6 +90,7 @@ Putting this all together, we can compute the OLS estimate for the optimal model
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 theta_hat = np.linalg.inv(X.T @ X) @ X.T @ Y
 theta_hat
 ```
@@ -97,6 +101,7 @@ $$\hat{\mathbb{Y}} = \mathbb{X}\theta$$
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 Y_hat = X @ theta_hat
 pd.DataFrame(Y_hat).head()
 ```
@@ -154,6 +159,7 @@ For now, let's create a linear regression model using `LinearRegression`.
 `my_model` is now an instance of the `LinearRegression` class. You can think of it as the "idea" of a linear regression model. We haven't trained it yet, so it doesn't know any model parameters and cannot be used to make predictions. In fact, we haven't even told it what data to use for modeling! It simply waits for further instructions.
 
 ```{python}
+#| vscode: {languageId: python}
 my_model = LinearRegression()
 ```
 
@@ -166,6 +172,7 @@ All `sklearn` model classes include a `.fit` method, which is used to fit the mo
 Let's start by fitting a model with just one feature: the flipper length. We create a design matrix `X` by pulling out the `"flipper_length_mm"` column from the `DataFrame`. 
 
 ```{python}
+#| vscode: {languageId: python}
 # .fit expects a 2D data design matrix, so we use double brackets to extract a DataFrame
 X = penguins[["flipper_length_mm"]]
 Y = penguins["bill_depth_mm"]
@@ -185,11 +192,13 @@ The fitted model parameters are stored as attributes of the model instance. `my_
 \hat{\theta}_1, ...$ in an array. Because our model only contains one feature, we see just the value of $\hat{\theta}_1$ in the cell below.
 
 ```{python}
+#| vscode: {languageId: python}
 # The intercept term, theta_0
 my_model.intercept_
 ```
 
 ```{python}
+#| vscode: {languageId: python}
 # All parameters theta_1, ..., theta_p
 my_model.coef_
 ```
@@ -201,6 +210,7 @@ Now that the model has been trained, we can use it to make predictions! To do so
 Below, we call `.predict` to generate model predictions on the original training data. As before, we use double brackets to ensure that we extract 2-dimensional data.
 
 ```{python}
+#| vscode: {languageId: python}
 Y_hat_one_feature = my_model.predict(penguins[["flipper_length_mm"]])
 
 print(f"The RMSE of the model is {np.sqrt(np.mean((Y-Y_hat_one_feature)**2))}")
@@ -213,6 +223,7 @@ $$\text{bill depth} = \theta_0 + \theta_1 \text{flipper length} + \theta_2 \text
 We repeat this three-step process by intializing a new model object, then calling `.fit` and `.predict` as before.
 
 ```{python}
+#| vscode: {languageId: python}
 # Step 1: initialize LinearRegression model
 two_feature_model = LinearRegression()
 
@@ -232,6 +243,7 @@ We can also see that we obtain the same predictions using `sklearn` as we did wh
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 pd.DataFrame({"Y_hat from OLS":np.squeeze(Y_hat), "Y_hat from sklearn":Y_hat_two_features}).head()
 ```
 
@@ -251,6 +263,7 @@ One thing to note, however, is that the techniques we used above can only be app
 Let's consider an arbitrary function. Our goal is to find the value of $x$ that minimizes this function.
 
 ```{python}
+#| vscode: {languageId: python}
 def arbitrary(x):
     return (x**4 - 15*x**3 + 80*x**2 - 180*x + 144)/10
 ```
@@ -262,12 +275,14 @@ def arbitrary(x):
 Above, we saw that the minimum is somewhere around 5.3. Let's see if we can figure out how to find the exact minimum algorithmically from scratch. One very slow (and terrible) way would be manual guess-and-check.
 
 ```{python}
+#| vscode: {languageId: python}
 arbitrary(6)
 ```
 
 A somewhat better (but still slow) approach is to use brute force to try out a bunch of x values and return the one that yields the lowest loss.
 
 ```{python}
+#| vscode: {languageId: python}
 def simple_minimize(f, xs):
     # Takes in a function f and a set of values xs. 
     # Calculates the value of the function f at all values x in xs
@@ -283,6 +298,7 @@ This process is essentially the same as before where we made a graphical plot, i
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 xs = np.linspace(1, 7, 200)
 sparse_xs = np.linspace(1, 7, 5)
 
@@ -307,6 +323,7 @@ This basic approach suffers from three major flaws:
 One way to minimize this mathematical function is to use the `scipy.optimize.minimize` function. It takes a function and a starting guess and tries to find the minimum.
 
 ```{python}
+#| vscode: {languageId: python}
 from scipy.optimize import minimize
 
 # takes a function f and a starting point x0 and returns a readout 
@@ -479,6 +496,7 @@ To see this in action, let's consider a case where we have a linear model with n
 Let's apply our `gradient_descent` function from before to optimize our model on the `tips` dataset. We will try to select the best parameter $\theta_i$ to predict the `tip` $y$ from the `total_bill` $x$.
 
 ```{python}
+#| vscode: {languageId: python}
 df = sns.load_dataset("tips")
 df.head()
 ```
@@ -487,6 +505,7 @@ We can visualize the value of the MSE on our dataset for different possible choi
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 import plotly.graph_objects as go
 
 def derivative_arbitrary(x):
@@ -519,6 +538,7 @@ Implementing this in code, we can visualize the MSE loss on the `tips` data. **M
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 def gradient_descent(df, initial_guess, alpha, n):
     """Performs n steps of gradient descent on df using learning rate alpha starting
        from initial_guess. Returns a numpy array of all guesses over time."""
@@ -570,6 +590,7 @@ With multiple parameters to optimize, we consider a **loss surface**, or the mod
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 import plotly.graph_objects as go
 
 
@@ -612,6 +633,7 @@ We can also visualize a bird's-eye view of the loss surface from above using a c
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 contour = go.Contour(x=u[0], y=v[:, 0], z=np.reshape(MSE, u.shape))
 fig = go.Figure(contour)
 fig.update_layout(
@@ -694,9 +716,33 @@ $$\begin{bmatrix}
 
 Formally, the algorithm we derived above is called **batch gradient descent.** For each iteration of the algorithm, the derivative of loss is computed across the *entire* batch of all $n$ datapoints. While this update rule works well in theory, it is not practical in most circumstances. For large datasets (with perhaps billions of datapoints), finding the gradient across all the data is incredibly computationally taxing; gradient descent will converge slowly because each individual update is slow.
 
+For example, let's look at the computational complexity for the solution to the normal equations.
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td><img src="images/complexity_normal_solution.png" alt='complexity_normal_solution' width='600'>
+      </td>
+    </tr>
+  </table>
+</div>
+
+Computing $(\mathbb{X}^{\top}\mathbb{X})^{-1}$ takes $O(nd^2) + O(d^3)$ while $\mathbb{X}^{\top}\mathbb{Y}$ takes $O(nd)$ time complexity where $n$ is the number of samples and $d$ is the number of features. The first term dominates the complexity and can be problematic for high dimensional models.
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td><img src="images/complexity_grad_descent.png" alt='complexity_grad_descent' width='600'>
+      </td>
+    </tr>
+  </table>
+</div>
+
+Looking back at the complexity for gradient descent, suppose we run $T$ iterations then the final complexity is $O(Tnd)$. Typically $n$ is much larger than $T$ or $d$. How should we reduce the cost of this algorithm using a technique in DATA 100?
+
 **Stochastic (mini-batch) gradient descent** tries to address this issue. In stochastic descent, only a *sample* of the full dataset is used at each update. We estimate the true gradient of the loss surface using just that sample of data. The **batch size** is the number of data points used in each sample. The sampling strategy is generally without replacement (data is shuffled and batch size examples are selected one at a time.)
 
 Each complete "pass" through the data is known as a **training epoch**. After shuffling the data, in a single **training epoch** of stochastic gradient descent, we
+
 * Compute the gradient on the first x% of the data. Update the parameter guesses.
 * Compute the gradient on the next x% of the data. Update the parameter guesses.
 * $\dots$
@@ -716,6 +762,21 @@ The diagrams below represent a "bird's eye view" of a loss surface from above. N
     </tr>
   </table>
 </div>
+
+Let's now compare the time complexity between batch gradient descent and stochastic gradient descent.
+
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td><img src="images/time-complexity-compare.png" alt='time-complexity-compare' width='600'>
+      </td>
+    </tr>
+  </table>
+</div>
+As shown above, the time complexity scales with the number of data points selected in the sample. Stochastic gradient descent helps approximate the gradient while also reducing the computation cost, leading to this tradeoff. As the batch-size increases, it will be a better estimate of the true gradient. 
+
+A few notes on the **batch size, b.** It is typically small and the original stochastic gradient descent algorithm proposed a batch size of 1. Today the choice of b depends on several factors. A larger batch size can lead to better gradient estimate and can be parallelized. However, there is diminishing returns. A smaller batch size means that there will be more frequent updates.
 
 To summarize the tradeoffs of batch size: 
 
