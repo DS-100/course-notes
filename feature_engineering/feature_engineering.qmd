@@ -112,7 +112,7 @@ Computing $(\mathbb{X}^{\top}\mathbb{X})^{-1}$ takes $O(nd^2) + O(d^3)$ while $\
   </table>
 </div>
 
-Looking back at the complexity for gradient descent, suppose we run $T$ iterations then the final complexity is $O(Tnd)$. Typically $n$ is much larger than $T$ or $d$. How should we reduce the cost of this algorithm using a technique in DATA 100?
+Looking back at the complexity for gradient descent, suppose we run $T$ iterations then the final complexity is $O(Tnd)$. Typically $n$ is much larger than $T$ or $d$. How can we reduce the cost of this algorithm using a technique in Data 100?
 
 
 Let's now compare the time complexity between batch gradient descent and stochastic gradient descent.
@@ -155,8 +155,8 @@ For example, we might design a feature function that computes the square of an e
 
 The new features introduced by the feature function can then be used in modeling. Often, we use the symbol $\phi_i$ to represent transformed features after feature engineering. 
 
-$$\hat{y} = \theta_1 x + \theta_2 x^2$$
-$$\hat{y}= \theta_1 \phi_1 + \theta_2 \phi_2$$
+$$\hat{y} = \theta_0 + \theta_1 x + \theta_2 x^2$$
+$$\hat{y}= \theta_0 + \theta_1 \phi_1 + \theta_2 \phi_2$$
 
 In matrix notation, the symbol $\Phi$ is sometimes used to denote the design matrix after feature engineering has been performed. Note that in the usage below, $\Phi$ is now a feature-engineered matrix, rather than a function.
 
@@ -246,7 +246,7 @@ ohe_model.fit(data_w_ohe, tips["tip"])
 pd.DataFrame({"Feature":data_w_ohe.columns, "Model Coefficient":ohe_model.coef_})
 ```
 
-For example, when looking at the coefficient for `day_Fri`, we can understand how much the fact that it is Friday impacts the predicted tip. 
+For example, when looking at the coefficient for `day_Fri`, we can now understand the impact of it being Friday on the predicted tip — if it is a Friday, the predicted tip increases by approximately $0.75.
 
 When one-hot encoding, keep in mind that any set of one-hot encoded columns will always sum to a column of all ones, representing the bias column. More formally, the bias column is a linear combination of the OHE columns.
 
@@ -319,15 +319,15 @@ Looking a lot better! By incorporating a squared feature, we are able to capture
 
 We've seen now that feature engineering allows us to build all sorts of features to improve the performance of the model. In particular, we saw that designing a more complex feature (squaring `hp` in the `vehicles` data previously) substantially improved the model's ability to capture non-linear relationships. To take full advantage of this, we might be inclined to design increasingly complex features. Consider the following three models, each of different order (the maximum exponent power of each model):
 
-* Model with order 2: $\hat{\text{mpg}} = \theta_0 + \theta_1 (\text{hp}) + \theta_2 (\text{hp}^2)$
-* Model with order 3: $\hat{\text{mpg}} = \theta_0 + \theta_1 (\text{hp}) + \theta_2 (\text{hp}^2) + \theta_3 (\text{hp}^3)$
-* Model with order 4: $\hat{\text{mpg}} = \theta_0 + \theta_1 (\text{hp}) + \theta_2 (\text{hp}^2) + \theta_3 (\text{hp}^3) + \theta_4 (\text{hp}^4)$
+* Model with order 2: $\hat{y} = \theta_0 + \theta_1 (\text{hp}) + \theta_2 (\text{hp}^2)$
+* Model with order 3: $\hat{y} = \theta_0 + \theta_1 (\text{hp}) + \theta_2 (\text{hp}^2) + \theta_3 (\text{hp}^3)$
+* Model with order 4: $\hat{y} = \theta_0 + \theta_1 (\text{hp}) + \theta_2 (\text{hp}^2) + \theta_3 (\text{hp}^3) + \theta_4 (\text{hp}^4)$
 
 <br/>
 
 <center><img src="images/degree_comparison.png" alt='degree_comparison' width='900'></center>
 
-As we can see in the plots above, MSE continues to decrease with each additional polynomial term. To visualize it further, let's plot models as the complexity increases from 0 to 6: 
+As we can see in the plots above, MSE continues to decrease with each additional polynomial term. To visualize it further, let's plot models as the complexity increases from 0 to 7: 
 
 <center><img src="images/degree_comparison2.png" alt='degree_comparison' width='900'></center>
 
@@ -339,7 +339,7 @@ This seems like good news – when working on the **training data**, we can impr
 
 >**Math Fact**: given $N$ overlapping data points, we can always find a polynomial of degree $N-1$ that goes through all those points.
 > 
-> For example: there always exists a degree-4 polynomial curve that can perfectly model a dataset of 5 datapoints
+> For example, there always exists a degree-4 polynomial curve that can perfectly model a dataset of 5 datapoints:
 > <center><img src="images/perfect_poly_fits.png" alt='train_error' width='600'></center>
 
 
@@ -349,7 +349,7 @@ Let's walk through a more realistic example. Say we are given a training dataset
 
 <center><img src="images/complex.png" alt='complex' width='600'></center>
 
-The phenomenon above is called **overfitting**. The model effectively just memorized the training data it encountered when it was fitted, leaving it unable to **generalize** well to data it didn't encounter during training. This is a problem: we want models that are generalizable to “unseen” data.
+This phenomenon called **overfitting**. The model effectively just memorized the training data it encountered when it was fitted, leaving it unable to **generalize** well to data it didn't encounter during training. This is a problem: we want models that are generalizable to “unseen” data.
 
 
 Additionally, since complex models are sensitive to the specific dataset used to train them, they have high **variance**. A model with high variance tends to *vary* more dramatically when trained on different datasets. Going back to our example above, we can see our degree-5 model varies erratically when we fit it to different samples of 6 points from `vehicles`. 
@@ -364,4 +364,4 @@ We can see that there is a clear trade-off that comes from the complexity of our
 
 The takeaway here: we need to strike a balance in the complexity of our models; we want models that are generalizable to "unseen" data. A model that is too simple won't be able to capture the key relationships between our variables of interest; a model that is too complex runs the risk of overfitting. 
 
-This begs the question: how do we control the complexity of a model? Stay tuned for our Lecture 17 on Cross-Validation and Regularization!
+This begs the question: how do we control the complexity of a model? Stay tuned for Lecture 17 on Cross-Validation and Regularization!
