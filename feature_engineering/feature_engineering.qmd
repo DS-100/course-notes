@@ -1,5 +1,5 @@
 ---
-title: Sklearn and Feature Engineering
+title: Feature Engineering
 execute:
   echo: true
   warning: false
@@ -8,7 +8,7 @@ format:
     code-fold: false
     code-tools: true
     toc: true
-    toc-title: Sklearn and Feature Engineering
+    toc-title: Feature Engineering
     page-layout: full
     theme:
       - cosmo
@@ -45,11 +45,11 @@ Feature engineering allows you to:
 
 * Capture domain knowledge 
 * Express non-linear relationships using linear models
-* Use non-numeric features in models
+* Use non-numeric (qualitative) features in models
 
 ## Feature Functions
 
-A **feature function** describes the transformations we apply to raw features in a dataset to create a design matrix of transformed features. We typically denote the feature function as $\Phi$ (think to yourself: "phi"-ture function). When we apply the feature function to our original dataset $\mathbb{X}$, the result, $\Phi(\mathbb{X})$, is a transformed design matrix ready to be used in modeling. 
+A **feature function** describes the transformations we apply to raw features in a dataset to create a design matrix of transformed features. We typically denote the feature function as $\Phi$ (think to yourself: "phi"-true function). When we apply the feature function to our original dataset $\mathbb{X}$, the result, $\Phi(\mathbb{X})$, is a transformed design matrix ready to be used in modeling. 
 
 For example, we might design a feature function that computes the square of an existing feature and adds it to the design matrix. In this case, our existing matrix $[x]$ is transformed to $[x, x^2]$. Its *dimension* increases from 1 to 2. Often, the dimension of the *featurized* dataset increases as seen here.
 
@@ -77,7 +77,11 @@ To illustrate how this works, we'll refer back to the `tips` dataset from previo
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 import numpy as np
+import seaborn as sns
+import pandas as pd
+import sklearn.linear_model as lm
 tips = sns.load_dataset("tips")
 tips.head()
 ```
@@ -90,10 +94,21 @@ To resolve this, we instead create a new table with a feature for each unique va
 
 <br> 
 
-The `OneHotEncoder` class of `sklearn` ([documentation](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OneHotEncoder.html#sklearn.preprocessing.OneHotEncoder.get_feature_names_out)) offers a quick way to perform this one-hot encoding. You will explore its use in detail in the lab. For now, recognize that we follow a very similar workflow to when we were working with the `LinearRegression` class: we initialize a `OneHotEncoder` object, fit it to our data, then use `.transform` to apply the fitted encoder.
+In short, each category of a categorical variable gets its own feature
+<ul>
+   <li>
+      Value = 1 if a row belongs to the category
+   </li>
+   <li>
+      Value = 0 otherwise
+   </li>
+</ul>
+
+The `OneHotEncoder` class of `sklearn` ([documentation](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OneHotEncoder.html#sklearn.preprocessing.OneHotEncoder.get_feature_names_out)) offers a quick way to perform this one-hot encoding. You will explore its use in detail in the lab. For now, recognize that we follow a very similar workflow to when we were working with the `LinearRegression` class: we initialize a `OneHotEncoder` object, fit it to our data, and finally use `.transform` to apply the fitted encoder.
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 from sklearn.preprocessing import OneHotEncoder
 
 # Initialize a OneHotEncoder object
@@ -113,17 +128,18 @@ The one-hot encoded features can then be used in the design matrix to train a mo
 
 <center><img src="images/ohemodel.png" alt='ohemodel' width='600'></center>
 
-$$\hat{y} = \theta_1 (\text{total}\textunderscore\text{bill}) + \theta_2 (\text{size}) + \theta_3 (\text{day}\textunderscore\text{Fri}) + \theta_4 (\text{day}\textunderscore\text{Sat}) + \theta_5 (\text{day}\textunderscore\text{Sun}) + \theta_6 (\text{day}\textunderscore\text{Thur})$$
+$$\hat{y} = \theta_1 (\text{total}\_\text{bill}) + \theta_2 (\text{size}) + \theta_3 (\text{day}\_\text{Fri}) + \theta_4 (\text{day}\_\text{Sat}) + \theta_5 (\text{day}\_\text{Sun}) + \theta_6 (\text{day}\_\text{Thur})$$
 
 Or in shorthand:
 
-$$\hat{y} = \theta_1\phi_1 + \theta_2\phi_2 + \theta_3\phi_3 + \theta_4\phi_4 + \theta_5\phi_5 + \theta_6\phi_6$$
+$$\hat{y} = \theta_{1}\phi_{1} + \theta_{2}\phi_{2} + \theta_{3}\phi_{3} + \theta_{4}\phi_{4} + \theta_{5}\phi_{5} + \theta_{6}\phi_{6}$$
 
 Now, the `day` feature (or rather, the four new boolean features that represent day) can be used to fit a model.
 
 Using `sklearn` to fit the new model, we can determine the model coefficients, allowing us to understand how each feature impacts the predicted tip.
 
 ```{python}
+#| vscode: {languageId: python}
 from sklearn.linear_model import LinearRegression
 data_w_ohe = tips[["total_bill", "size", "day"]].join(encoded_day_df).drop(columns = "day")
 ohe_model = lm.LinearRegression(fit_intercept=False) #Tell sklearn to not add an additional bias column. Why?
@@ -138,9 +154,9 @@ When one-hot encoding, keep in mind that any set of one-hot encoded columns will
 
 <center><img src="images/bias.png" alt='bias' width='600'></center>
 
-We must be careful not to include this bias column in our design matrix. Otherwise, there will be linear dependence in the model, meaning $\mathbb{X}^T\mathbb{X}$ would no longer be invertible, and our OLS estimate $\hat{\theta} = (\mathbb{X}^T\mathbb{X})^{-1}\mathbb{X}^T\mathbb{Y}$ fails.
+We must be careful not to include this bias column in our design matrix. Otherwise, there will be linear dependence in the model, meaning $\mathbb{X}^{\top}\mathbb{X}$ would no longer be invertible, and our OLS estimate $\hat{\theta} = (\mathbb{X}^{\top}\mathbb{X})^{-1}\mathbb{X}^{\top}\mathbb{Y}$ fails.
 
-To resolve this issue, we simply omit one of the one-hot encoded columns *or* do not include an intercept term. 
+To resolve this issue, we simply omit one of the one-hot encoded columns *or* do not include an intercept term. The adjusted design matrices are shown below.
 
 <center><img src="images/remove.png" alt='remove' width='600'></center>
 
@@ -156,6 +172,7 @@ $$\hat{y} = \theta_0 + \theta_1 (\text{hp})$$
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 pd.options.mode.chained_assignment = None 
 vehicles = sns.load_dataset("mpg").dropna().rename(columns = {"horsepower": "hp"}).sort_values("hp")
 
@@ -182,6 +199,7 @@ $$\hat{y} = \theta_0 + \theta_1 \phi_1 + \theta_2 \phi_2$$
 How can we fit a model with non-linear features? We can use the exact same techniques as before: ordinary least squares, gradient descent, or `sklearn`. This is because our new model is still a **linear model**. Although it contains non-linear *features*, it is linear with respect to the model *parameters*. All of our previous work on fitting models was done under the assumption that we were working with linear models. Because our new model is still linear, we can apply our existing methods to determine the optimal parameters. 
 
 ```{python}
+#| vscode: {languageId: python}
 # Add a hp^2 feature to the design matrix
 X = vehicles[["hp"]]
 X["hp^2"] = vehicles["hp"]**2
@@ -197,7 +215,7 @@ plt.plot(vehicles["hp"], hp2_model_predictions, c="tab:red");
 print(f"MSE of model with (hp^2) feature: {np.mean((Y-hp2_model_predictions)**2)}")
 ```
 
-Looking a lot better! By incorporating a squared feature, we are able to capture the curvature of the dataset. Our model is now a parabola centered on our data. Notice that our new model's error has decreased relative to the original model with linear features. .
+Looking a lot better! By incorporating a squared feature, we are able to capture the curvature of the dataset. Our model is now a parabola centered on our data. Notice that our new model's error has decreased relative to the original model with linear features.
 
 ## Complexity and Overfitting
 
@@ -233,7 +251,8 @@ Let's walk through a more realistic example. Say we are given a training dataset
 
 <center><img src="images/complex.png" alt='complex' width='600'></center>
 
-The phenomenon above is called **overfitting**. The model effectively just memorized the training data it encountered when it was fitted, leaving it unable to **generalize** well to data it didn't encounter during training.
+The phenomenon above is called **overfitting**. The model effectively just memorized the training data it encountered when it was fitted, leaving it unable to **generalize** well to data it didn't encounter during training. This is a problem: we want models that are generalizable to “unseen” data.
+
 
 Additionally, since complex models are sensitive to the specific dataset used to train them, they have high **variance**. A model with high variance tends to *vary* more dramatically when trained on different datasets. Going back to our example above, we can see our degree-5 model varies erratically when we fit it to different samples of 6 points from `vehicles`. 
 
@@ -247,5 +266,5 @@ We can see that there is a clear trade-off that comes from the complexity of our
 
 The takeaway here: we need to strike a balance in the complexity of our models; we want models that are generalizable to "unseen" data. A model that is too simple won't be able to capture the key relationships between our variables of interest; a model that is too complex runs the risk of overfitting. 
 
-This begs the question: how do we control the complexity of a model? Stay tuned for our Lecture 16 on Cross-Validation and Regularization!
+This begs the question: how do we control the complexity of a model? Stay tuned for our Lecture 17 on Cross-Validation and Regularization!
 
