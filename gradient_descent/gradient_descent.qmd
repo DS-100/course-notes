@@ -14,7 +14,17 @@ format:
       - cosmo
       - cerulean
     callout-icon: false
-jupyter: python3
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .qmd
+      format_name: quarto
+      format_version: '1.0'
+      jupytext_version: 1.16.1
+  kernelspec:
+    display_name: Python 3 (ipykernel)
+    language: python
+    name: python3
 ---
 
 ::: {.callout-note collapse="false"}
@@ -62,11 +72,11 @@ Our goal will be to predict the value of the `"bill_depth_mm"` for a particular 
 penguins["bias"] = np.ones(len(penguins), dtype=int) 
 
 # Define the design matrix, X...
-# Note that we use .to_numpy() to convert our DataFrame into a NumPy array so it's in Matrix form
+# Note that we use .to_numpy() to convert our DataFrame into a NumPy array so it is in Matrix form
 X = penguins[["bias", "flipper_length_mm", "body_mass_g"]].to_numpy()
 
 # ...as well as the target variable, Y
-# Again, we use .to_numpy() to convert our DataFrame into a NumPy array so it's in Matrix form
+# Again, we use .to_numpy() to convert our DataFrame into a NumPy array so it is in Matrix form
 Y = penguins[["bill_depth_mm"]].to_numpy()
 ```
 
@@ -318,7 +328,7 @@ This basic approach suffers from three major flaws:
 2. Even if our range of guesses is correct, if the guesses are too coarse, our answer will be inaccurate.
 3. It is *very* computationally inefficient, considering potentially vast numbers of guesses that are useless.
 
-#### Scipy.optimize.minimize
+#### `Scipy.optimize.minimize`
 
 One way to minimize this mathematical function is to use the `scipy.optimize.minimize` function. It takes a function and a starting guess and tries to find the minimum.
 
@@ -716,29 +726,6 @@ $$\begin{bmatrix}
 
 Formally, the algorithm we derived above is called **batch gradient descent.** For each iteration of the algorithm, the derivative of loss is computed across the *entire* batch of all $n$ datapoints. While this update rule works well in theory, it is not practical in most circumstances. For large datasets (with perhaps billions of datapoints), finding the gradient across all the data is incredibly computationally taxing; gradient descent will converge slowly because each individual update is slow.
 
-For example, let's look at the computational complexity for the solution to the normal equations.
-<div align="middle">
-  <table style="width:100%">
-    <tr align="center">
-      <td><img src="images/complexity_normal_solution.png" alt='complexity_normal_solution' width='600'>
-      </td>
-    </tr>
-  </table>
-</div>
-
-Computing $(\mathbb{X}^{\top}\mathbb{X})^{-1}$ takes $O(nd^2) + O(d^3)$ while $\mathbb{X}^{\top}\mathbb{Y}$ takes $O(nd)$ time complexity where $n$ is the number of samples and $d$ is the number of features. The first term dominates the complexity and can be problematic for high dimensional models.
-
-<div align="middle">
-  <table style="width:100%">
-    <tr align="center">
-      <td><img src="images/complexity_grad_descent.png" alt='complexity_grad_descent' width='600'>
-      </td>
-    </tr>
-  </table>
-</div>
-
-Looking back at the complexity for gradient descent, suppose we run $T$ iterations then the final complexity is $O(Tnd)$. Typically $n$ is much larger than $T$ or $d$. How should we reduce the cost of this algorithm using a technique in DATA 100?
-
 **Stochastic (mini-batch) gradient descent** tries to address this issue. In stochastic descent, only a *sample* of the full dataset is used at each update. We estimate the true gradient of the loss surface using just that sample of data. The **batch size** is the number of data points used in each sample. The sampling strategy is generally without replacement (data is shuffled and batch size examples are selected one at a time.)
 
 Each complete "pass" through the data is known as a **training epoch**. After shuffling the data, in a single **training epoch** of stochastic gradient descent, we
@@ -762,21 +749,6 @@ The diagrams below represent a "bird's eye view" of a loss surface from above. N
     </tr>
   </table>
 </div>
-
-Let's now compare the time complexity between batch gradient descent and stochastic gradient descent.
-
-
-<div align="middle">
-  <table style="width:100%">
-    <tr align="center">
-      <td><img src="images/time-complexity-compare.png" alt='time-complexity-compare' width='600'>
-      </td>
-    </tr>
-  </table>
-</div>
-As shown above, the time complexity scales with the number of data points selected in the sample. Stochastic gradient descent helps approximate the gradient while also reducing the computation cost, leading to this tradeoff. As the batch-size increases, it will be a better estimate of the true gradient. 
-
-A few notes on the **batch size, b.** It is typically small and the original stochastic gradient descent algorithm proposed a batch size of 1. Today the choice of b depends on several factors. A larger batch size can lead to better gradient estimate and can be parallelized. However, there is diminishing returns. A smaller batch size means that there will be more frequent updates.
 
 To summarize the tradeoffs of batch size: 
 

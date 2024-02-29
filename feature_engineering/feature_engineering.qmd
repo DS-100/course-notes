@@ -14,7 +14,17 @@ format:
       - cosmo
       - cerulean
     callout-icon: false
-jupyter: python3
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .qmd
+      format_name: quarto
+      format_version: '1.0'
+      jupytext_version: 1.16.1
+  kernelspec:
+    display_name: Python 3 (ipykernel)
+    language: python
+    name: python3
 ---
 
 ::: {.callout-note collapse="false"}
@@ -32,6 +42,47 @@ In this lecture, we'll explore two techniques for model fitting:
 2. Using `python`'s `sklearn` package
 
 With our new programming frameworks in hand, we will also add sophistication to our models by introducing more complex features to enhance model performance. 
+
+
+For example, let's look at the computational complexity for the solution to the normal equations.
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td><img src="images/complexity_normal_solution.png" alt='complexity_normal_solution' width='600'>
+      </td>
+    </tr>
+  </table>
+</div>
+
+Computing $(\mathbb{X}^{\top}\mathbb{X})^{-1}$ takes $O(nd^2) + O(d^3)$ while $\mathbb{X}^{\top}\mathbb{Y}$ takes $O(nd)$ time complexity where $n$ is the number of samples and $d$ is the number of features. The first term dominates the complexity and can be problematic for high dimensional models.
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td><img src="images/complexity_grad_descent.png" alt='complexity_grad_descent' width='600'>
+      </td>
+    </tr>
+  </table>
+</div>
+
+Looking back at the complexity for gradient descent, suppose we run $T$ iterations then the final complexity is $O(Tnd)$. Typically $n$ is much larger than $T$ or $d$. How should we reduce the cost of this algorithm using a technique in DATA 100?
+
+
+Let's now compare the time complexity between batch gradient descent and stochastic gradient descent.
+
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td><img src="images/time-complexity-compare.png" alt='time-complexity-compare' width='600'>
+      </td>
+    </tr>
+  </table>
+</div>
+As shown above, the time complexity scales with the number of data points selected in the sample. Stochastic gradient descent helps approximate the gradient while also reducing the computation cost, leading to this tradeoff. As the batch-size increases, it will be a better estimate of the true gradient. 
+
+A few notes on the **batch size, b.** It is typically small and the original stochastic gradient descent algorithm proposed a batch size of 1. Today the choice of b depends on several factors. A larger batch size can lead to better gradient estimate and can be parallelized. However, there is diminishing returns. A smaller batch size means that there will be more frequent updates.
+
 
 ## Feature Engineering
 
@@ -267,4 +318,3 @@ We can see that there is a clear trade-off that comes from the complexity of our
 The takeaway here: we need to strike a balance in the complexity of our models; we want models that are generalizable to "unseen" data. A model that is too simple won't be able to capture the key relationships between our variables of interest; a model that is too complex runs the risk of overfitting. 
 
 This begs the question: how do we control the complexity of a model? Stay tuned for our Lecture 17 on Cross-Validation and Regularization!
-
