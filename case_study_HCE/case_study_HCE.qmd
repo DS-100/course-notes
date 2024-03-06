@@ -26,44 +26,46 @@ jupyter:
     name: python3
 ---
 
+**Note:** Given the nuanced nature of some of the arguments made in the lecture, it is highly recommended that you view the lecture recording given by Professor Ari Edmundson to fully engage and understand the material. The course notes will have the same broader structure but are by no means comprehensive.
+
 ::: {.callout-note collapse="false"}
 ## Learning Outcomes
 * Learn about the ethical dilemmas that data scientists face.
+* Examine the Cook County Assessor’s Office and Property Appraisal case study for fairness in housing appraisal.
 * Know how to critique models using contextual knowledge about data.
 :::
 
 > **Disclaimer**: The following note discusses issues of structural racism. Some of the items in this note may be sensitive and may or may not be the opinions, ideas, and beliefs of the students who collected the materials. The Data 100 course staff tries its best to only present information that is relevant for teaching the lessons at hand.
 
-**Note:** Given the nuanced nature of some of the arguments made in the lecture, it is highly recommended that you view the lecture recording to fully engage and understand the material. The course notes will have the same broader structure but are by no means comprehensive.
+As data scientists, our goal is to wrangle data, recognize patterns, and use them to make predictions within a certain context. However, it is often easy to abstract the data away from it's original context. In previous lectures, we've explored datasets like `elections`, `babynames`, and `world_bank` to learn fundamental techniques for working with data, but rarely stop to ask questions like "How/when was this data collected?" or "Are there any inherent biases in the data that could affect results?". It turns out that inquires like these have a profound affect on the way that data scientists approach a task and how we choose to convey our findings. This lecture explores these ethical dilemmas through the lense of a case study. 
 
-
-Let's immerse ourselves in the real-world story of data scientists working for an organization called the Cook County Assessor's Office (CCAO). Their job is to **estimate the values of houses** in order to **assign property taxes**. This is because the tax burden in this area is determined by the estimated **value** of a house rather than its price. Since values change over time and there are no obvious indicators of value, they created a **model** to estimate the values of houses. In this note, we will dig deep into biases that arose in the models, the consequences to human lives, and what we can learn from this example to avoid the same mistakes in the future.
+Let's immerse ourselves in the real-world story of data scientists working for an organization called the Cook County Assessor's Office (CCAO) located in Chicago, Illinois. Their job is to **estimate the values of houses** in order to **assign property taxes**. This is because the tax burden in this area is determined by the estimated **value** of a house rather than its price. Since values change over time and there are no obvious indicators of value, they created a **model** to estimate the values of houses. In this note, we will dig deep into biases that arose in the models, the consequences to human lives, and what we can learn from this example to avoid the same mistakes in the future.
 
 
 ## The Problem
 
-So what prompted the formation of the CCAO and led to the development of this model? In 2017, an [investigative report](https://apps.chicagotribune.com/news/watchdog/cook-county-property-tax-divide/assessments.html) by the Chicago Tribune uncovered a major scandal in the property assessment system managed by the CCAO. Working with experts from the University of Chicago, the journalists that the model perpetuated a highly regressive tax system that disproportionately burdened African-American and Latinx homeowners in Cook County. How did they know? 
+What prompted the formation of the CCAO and led to the development of this model? In 2017, an [investigative report](https://apps.chicagotribune.com/news/watchdog/cook-county-property-tax-divide/assessments.html) by the Chicago Tribune uncovered a major scandal in the property assessment system managed by the CCAO under the watch of former County Assessor Joseph Berrios. Working with experts from the University of Chicago, the journalists found that the CCAO's model for estimating house value perpetuated a highly regressive tax system that disproportionately burdened African-American and Latinx homeowners in Cook County. How did the journalists demonstrate this disparity? 
 
 <center><a href="https://apps.chicagotribune.com/news/watchdog/cook-county-property-tax-divide/assessments.html">
 <img src = "images/vis_1.png"></img></a></center>
 
-When conducting housing assessments, there are standard metrics that assessors use across the world to estimate the fairness of assessments, most notably the [coefficient of dispersion](https://www.realestateagent.com/real-estate-glossary/real-estate/coefficient-of-dispersion.html) and [price-related differential](https://leg.wa.gov/House/Committees/FIN/Documents/2009/RatioText.pdf). These metrics have been rigorously tested by experts in the field and are out of scope for our class. Calculating these metrics for the Cook County prices revealed that the pricing created by the CCAO did not fall in acceptable ranges (see figure above). This by itself is **not the entire** story, but a good indicator that **something fishy was going on**.
+The image above shows 2 standard metrics to estimate the fairness of assessments: the [coefficient of dispersion](https://www.realestateagent.com/real-estate-glossary/real-estate/coefficient-of-dispersion.html) and [price-related differential](https://leg.wa.gov/House/Committees/FIN/Documents/2009/RatioText.pdf). How they're calculated is out of scope for this class, but you can assume that these metrics have been rigorously tested by experts in the field and are a good indication of fairness. Calculating these metrics for the Cook County prices revealed that the pricing created by the CCAO did not fall in acceptable ranges (see figure above). This by itself is **not the entire** story, but a good indicator that **something fishy was going on**.
 
 <center><a href="https://apps.chicagotribune.com/news/watchdog/cook-county-property-tax-divide/assessments.html">
 <img src = "images/vis_2.png" width = "300"></img></a></center>
 
-This prompted them to investigate if the model itself was producing fair tax rates. Evidently, when accounting for the home owner's income, they found that the model actually produced a **regressive** tax rate (see figure above). To clarify, a tax rate is **regressive** if the percentage tax rate is higher for individuals with lower net income. It is **progressive** if the percentage tax rate is higher for individuals with higher net income. 
+This prompted journalists to investigate if the CCAO's model itself was producing fair tax rates. Evidently, when accounting for the home owner's income, they found that the model actually produced a **regressive** tax rate (see figure above). A tax rate is **regressive** if the percentage tax rate is higher for individuals with lower net income; it is **progressive** if the percentage tax rate is higher for individuals with higher net income. 
 
 <center><a href="https://www.clccrul.org/bpnc-v-berrios-facts?rq=berrios">
 <img src = "images/vis_3.jpg" width = "600"></img>
 </a></center>
 <br>
 
-Further digging suggests that not only was the system regressive and unfair to lower-income individuals, but it was also unfair to non-white homeowners (see figure above). The likelihood of a property being under- or over-assessed was highly dependent on the owner's race, and that did not sit well with many homeowners.
+Digging further, journalists found that the model was not only regressive and unfair to lower-income individuals, but it was also unfair to non-white homeowners (see figure above). The likelihood of a property being under- or over-assessed was highly dependent on the owner's race, and that did not sit well with many homeowners.
 
 ### Spotlight: Appeals
 
-So clearly, there was a major issue. What actually caused this to happen? You might think that perhaps this was just the result of a biased model. Although there were faulty, regressive models in use, at the end of the day, these are real systems that have a lot of moving parts. One of which was the **appeals system**. Homeowners are mailed the value of their home assessed by CCAO, and the homeowner can choose to appeal to a board of elected officials to try and change the listed value of their home and thus how much they are taxed. In theory, this sounds like a very fair system: someone oversees the final pricing of houses rather than just an algorithm. However, it ended up exacerbating the problems.   
+What was the cause of such a major issue? It might be easy to blame "biased" algorithms as a scapegoat, but the main issue was not a faulty model. Instead, it was largely due to the **appeals system** which enabled the wealthy and privileged to more easily and successfully challenge their assessments. Homeowners were mailed the value of their home assessed by CCAO and could choose to appeal to a board of elected officials to try and change the listed value of their home and consequently how much they are taxed. In theory, this sounds like a very fair system: a human being oversees the final pricing of houses rather than a computer algorithm. However, this ended up exacerbating the problems.   
 
 > “Appeals are a good thing,” Thomas Jaconetty, deputy assessor for valuation and appeals, said in an interview. “The goal here is fairness. We made the numbers. We can change them.”
 
@@ -72,14 +74,14 @@ So clearly, there was a major issue. What actually caused this to happen? You mi
 
 <br />
 
-Here we can borrow lessons from [Critical Race Theory](https://www.britannica.com/topic/critical-race-theory). On the surface, everyone having the legal right to try and appeal the value of their home is undeniable. However, not everyone has an equal ability to do so. Those who have the money to hire tax lawyers to appeal for them have a drastically higher chance of trying and succeeding in their appeal (see above figure). The model is part of a deeper institutional pattern rife with potential corruption.
+We can borrow lessons from [Critical Race Theory](https://www.britannica.com/topic/critical-race-theory) -- on the surface, everyone has the legal right to try and appeal the value of their home. However, not everyone has an *equal ability* to do so. Those who have the money to hire tax lawyers to appeal for them have a drastically higher chance of trying and succeeding in their appeal (see above figure). The model is part of a deeper institutional pattern rife with potential corruption. 
 
 
 <center><a href = "https://apps.chicagotribune.com/news/watchdog/cook-county-property-tax-divide/appeals.html"> <img src = "images/vis_5.png"></img>
 </a></center>
 <br />
 
-Homeowners who appealed were generally under-assessed relative to homeowners who did not (see above figure). Those with higher incomes pay less in property tax, tax lawyers can grow their business due to their role in appeals, and politicians are socially connected to the aforementioned tax lawyers and wealthy homeowners. All these stakeholders have reasons to advertise the appeals system as an integral part of a fair system. Here lies the value in asking questions: a system that seems fair on the surface may in reality be unfair upon taking a closfer look.  
+Homeowners who appealed were generally under-assessed compared to homeowners who did not (see above figure). In fact, Chicago boasts a large and thriving tax attorney industry dedicated precisely to appealing property assessments, reflected in the growing number of appeals in Cook County across the first decades of the 21st century. And wealthier, whiter neighborhoods appealed more often and won reductions far more often than their less wealthy neighbors. In other words, those with higher incomes pay less in property tax, tax lawyers can grow their business due to their role in appeals, and politicians are socially connected to the aforementioned tax lawyers and wealthy homeowners. All these stakeholders have reasons to advertise the appeals system as an integral part of a fair system. Here lies the value in asking questions: a system that seems fair on the surface may, in reality, be unfair upon taking a closer look.  
 
 ### Human Impacts
 
@@ -87,26 +89,23 @@ Homeowners who appealed were generally under-assessed relative to homeowners who
 </a></center>
 <br />
 
-As the Tribune reported, many Black and Latino homeowners purchased affordable houses one year only to find their houses appraised at levels far higher than what they paid. They were suddenly responsible for paying thousands of dollars more every year than budgeted in taxes, putting them at risk of no longer being able to afford their homes and losing them. 
+As the Tribune reported, many Black and Latino homeowners purchased homes only to find their houses were later appraised at levels far higher than what they paid. Responsible for paying significantly more in taxes every year than initially budgeted, this puts homeowners at risk of not being able to afford their homes and losing them. 
 
-The impact of the housing model extends beyond the realm of home ownership and taxation though —— the issues of justice go much deeper here. This model perpetrated much older patterns of racially discriminatory practices in Chicago and across the United States. Unfortunately, it comes as no surprise that this happened in Chicago. To this day, Chicago is one of the most segregated cities in the United States ([source](https://fivethirtyeight.com/features/the-most-diverse-cities-are-often-the-most-segregated/)). These factors are central to informing us, as data scientists, about what is at stake.
+The impact of the housing model extends beyond the realm of home ownership and taxation —— the issues of *justice* go much deeper. This model perpetrated much older patterns of racially discriminatory practices in Chicago and across the United States. Unfortunately, it is no accident that this happened in Chicago, one of the most segregated cities in the United States ([source](https://fivethirtyeight.com/features/the-most-diverse-cities-are-often-the-most-segregated/)). These factors are central to informing us, as data scientists, about what is at stake.
 
 
 ### Spotlight: Intersection of Real Estate and Race
 
-Before we dive into how CCAO used data science to solve this problem, let's briefly go through the history of racist housing practices to give more context on the gravity and urgency of this situation. 
+Before we dive into how CCAO used data science to "solve" this problem, let's briefly go through the history of discriminatory housing practices in the United States to give more context on the gravity and urgency of this situation. 
 
-Housing has been a persistent source of structural racism and racial inequality throughout US history, amongst other factors. It is one of the main areas where inequalities are created and reproduced. In the beginning, [Jim Crow](https://www.history.com/topics/early-20th-century-us/jim-crow-laws) laws were explicit in forbidding people of color from schools, public utilities, etc. Through a set of overlapping practices driven by the private real estate industry and government actors, neighborhoods became increasingly segregated.
+Housing and real estate, in fact, has been one of the most significant and enduring drivers of structural racism and racial inequality in the history of the United States since the Civil War, amongst other factors. It is one of the main areas where inequalities are created and reproduced. In the early 20th century, [Jim Crow](https://www.history.com/topics/early-20th-century-us/jim-crow-laws) laws were explicit in forbidding people of color from utlizing the same facilities as whites--such as buses, bathrooms and pools. But it was also a story of how neighborhoods became increasingly segregated through a set of overlapping practices driven by the private real estate industry and government actors. 
 
 <center><a href = "https://dsl.richmond.edu/panorama/redlining/#loc=11/41.84/-87.674"><img src = "images/vis_7.png"></img></a></center>
 <br />
 
-Today, while advancements in civil rights have been made, the spirit of the laws is alive in many parts of the US. In the 1920s and 1930s, the real estate industry was “professionalized” to follow the specific standardized methods and principles outlined below:
+Today, while advancements in civil rights have been made, the spirit of the laws is alive in many parts of the US. In the 1920s and 1930s, it was illegal for governments to actively segregate neighborhoods according to race, but other methods were available for achieving the same ends. One of the most notorious practices was redlining: the federal housing agencies process of distinguishing neighborhoods in a city in terms of relative risk. The goal was to increase access to home ownership for low income Americans. In practice, however, it made it nearly impossible for African Americans to own a home. Those who made these maps deemed these neighborhoods as high risk, colored in red--hence the name redlining-due to their racial composition, allowing real estate professionals to legally perpetuate segregation. 
 
-- Redlining: making it difficult or impossible to get a federally-backed mortgage to buy a house in specific neighborhoods coded as “risky” (reflected by the red areas in the map above).
-    - Those who made these maps deemed these neighborhoods as “risky” due to their racial composition.
-    - Segregation was not only a result of federal policy but was also perpetuated by real estate professionals.
-- The methods centered on creating objective rating systems (information technologies) for the appraisal of property values encoded **race** as a factor of valuation (see figure below). This, in turn, influenced federal policy and practice.
+The origins of the data that made these maps possible lay in a kind of “racial data revolution” in the private real estate industry beginning in the 1920’s. In other words, segregation was established and reinforced in part through the work of real estate agents who were also very concerned with establishing reliable methods for predicting the value of a home. The effects of these practices continue to resonate today.
 
 <center><img src = "images/vis_8.png"></img><figcaption>Source: Colin Koopman, How We Became Our Data (2019) p. 137</figcaption></center>
 <br />
@@ -123,7 +122,24 @@ He wanted to not only create a more accurate algorithmic model but also to desig
 <center><img src = "images/vis_9.png" width=300px></img></center>
 <br />
 
-### Question/Problem Formulation
+Let's frame this problem through the lense of the data science lifecycle
+
+<center><img src = "images/data_life_cycle.PNG" width=300px></img></center>
+
+
+### 1. Question/Problem Formulation
+
+The old system was unfair because it was systemically inaccurate; it made one kind of error for one group, and another kind of error for another. 
+
+The old system defined the task as “create a robust pipeline that accurately assesses property values at scale and is fair”, and in turn, they defined fairness as accuracy: “the ability of our pipeline to accurately assess all residential property values, accounting for disparities in geography, information, etc.” Thus the problem - make the system more fair - was already framed in terms of a task appropriate to a data scientist: make the assessments more accurate (or more precisely, minimize errors in a particular way). 
+
+The idea here is that if the model is more accurate it will also (necessarily?) become more fair. 
+But there are, in a sense, two different problems: (1) make accurate assessments, and (2) make a fair system. The fact that they’re being made equivalent is important and telling. It’s an equation that’s not just given by nature, but one they are trying to make work–to make two different problems into one; fairness-as-accuracy makes a social problem (public opinion: system is unfair) into a more straightforward technical one. Or so it seems. 
+
+For now let’s just talk about the technical part of this, the “accuracy” part. For you, the data scientist, this part might feel more comfortable. Easy to determine some metrics of success, and frame a social problem as a data science problem. 
+
+TODO 
+
 ::: {.callout-note}
 ## Driving Questions
 
