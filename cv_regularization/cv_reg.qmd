@@ -10,7 +10,17 @@ format:
       - cosmo
       - cerulean
     callout-icon: false
-jupyter: python3
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .qmd
+      format_name: quarto
+      format_version: '1.0'
+      jupytext_version: 1.16.1
+  kernelspec:
+    display_name: Python 3 (ipykernel)
+    language: python
+    name: python3
 ---
 
 ::: {.callout-note collapse="false"}
@@ -20,7 +30,7 @@ jupyter: python3
 * Understand the conceptual basis for L1 and L2 regularization
 :::
 
-At the end of the Feature Engineering lecture (Lecture 14), we arrived at the issue of fine-tuning model complexity. We identified that a model that's too complex can lead to overfitting, while a model that's too simple can lead to underfitting. This brings us to a natural question: how do we control model complexity to avoid under- and overfitting? 
+At the end of the Feature Engineering lecture (Lecture 15), we arrived at the issue of fine-tuning model complexity. We identified that a model that's too complex can lead to overfitting, while a model that's too simple can lead to underfitting. This brings us to a natural question: how do we control model complexity to avoid under- and overfitting? 
 
 To answer this question, we will need to address two things: first, we need to understand *when* our model begins to overfit by assessing its performance on unseen data. We can achieve this through **cross-validation**. Secondly, we need to introduce a technique to adjust the complexity of our models ourselves – to do so, we will apply **regularization**.
 
@@ -39,7 +49,7 @@ The simplest approach to avoid overfitting is to keep some of our data "secret" 
 * Use the remaining portion of our dataset – now called the **training set** – to run ordinary least squares, gradient descent, or some other technique to fit model parameters
 * Take the fitted model and use it to make predictions on datapoints in the test set. The model's performance on the test set (expressed as the MSE, RMSE, etc.) is now indicative of how well it can make predictions on unseen data
 
-Importantly, the optimal model parameters were found by *only* considering the data in the training set. After the model has been fitted to the training data, we do not change any parameters before making predictions on the test set. Importantly, we only ever make predictions on the test set **once** after all model design has been completely finalized. We treat the test set performance as the final test of how well a model does.
+Importantly, the optimal model parameters were found by *only* considering the data in the training set. After the model has been fitted to the training data, we do not change any parameters before making predictions on the test set. Importantly, we only ever make predictions on the test set **once** after all model design has been completely finalized. We treat the test set performance as the final test of how well a model does. The test set is only ever touched once: to compute the performance of the model after all fine-tuning has been completed.
 
 The process of sub-dividing our dataset into training and test sets is known as a **train-test split**. Typically, between 10% and 20% of the data is allocated to the test set.
 
@@ -110,13 +120,13 @@ The process of creating a validation set is called a **validation split**.
 
 <center><img src="images/validation-split.png" alt='validation-split' width='600'></center>
 
-Note that the validation error behaves quite differently from the training error explored previously. Recall that the training error decreased monotonically with increasing model degree – as the model became more complex, it made better and better predictions on the training data. The validation error, in contrast, decreases *then increases* as we increase model complexity. This reflects the transition from under- to overfitting. At low model complexity, the model underfits because it is not complex enough to capture the main trends in the data. At high model complexity, the model overfits because it "memorizes" the training data too closely.
+Note that the validation error behaves quite differently from the training error explored previously. Recall that the training error decreased monotonically with increasing model degree – as the model became more complex, it made better and better predictions on the training data. The variance of the model typically increases as model complexity increases. The validation error decreases *then increases* as we increase model complexity. This reflects the transition from under- to overfitting. At low model complexity, the model underfits because it is not complex enough to capture the main trends in the data. At high model complexity, the model overfits because it "memorizes" the training data too closely. 
 
 We can update our understanding of the relationships between error, complexity, and model variance:
 
 <center><img src="images/training_validation_curve.png" alt='training_validation_curve' width='500'></center>
 
-Our goal is to train a model with complexity near the orange dotted line – this is where our model achieves minimum error on the validation set. Note that this relationship is a simplification of the real-world. But for the purposes of Data 100, this is good enough.
+Our goal is to train a model with complexity near the orange dotted line – this is where our model minimizes the validation error. Note that this relationship is a simplification of the real-world. But for the purposes of Data 100, this is good enough.
 
 ## K-Fold Cross-Validation
 
@@ -141,7 +151,7 @@ In **cross-validation**, we perform validation splits for each fold in the train
 * Compute the model's error on the validation fold and record it
 * Repeat for all $K$ folds
 
-The **cross-validation error** is then the *average* error across all $K$ validation folds. 
+The **cross-validation error** is then the *average* error across all $K$ validation folds. In the example below, the cross-validation error is the mean of validation errors #1 to #5.
 <center><img src="images/cross_validation.png" alt='cross_validation' width='800'></center>
 
 ### Model Selection Workflow
@@ -168,7 +178,7 @@ For example, we may wish to use cross-validation to decide what value we should 
 
 We've now addressed the first of our two goals for today: creating a framework to assess model performance on unseen data. Now, we'll discuss our second objective: developing a technique to adjust model complexity. This will allow us to directly tackle the issues of under- and overfitting.
 
-Earlier, we adjusted the complexity of our polynomial model by tuning a hyperparameter – the degree of the polynomial. We trialed several different polynomial degrees, computed the validation error for each, and selected the value that minimized the validation error. Tweaking the "complexity" was simple; it was only a matter of adjusting the polynomial degree.
+Earlier, we adjusted the complexity of our polynomial model by tuning a hyperparameter – the degree of the polynomial. We tested out several different polynomial degrees, computed the validation error for each, and selected the value that minimized the validation error. Tweaking the "complexity" was simple; it was only a matter of adjusting the polynomial degree.
 
 In most machine learning problems, complexity is defined differently from what we have seen so far. Today, we'll explore two different definitions of complexity: the *squared* and *absolute* magnitude of $\theta_i$ coefficients.
 
@@ -285,7 +295,7 @@ lasso_model.coef_
 
 Notice that all model coefficients are very small in magnitude. In fact, some of them are so small that they are essentially 0. An important characteristic of L1 regularization is that many model parameters are set to 0. In other words, LASSO effectively **selects only a subset** of the features. The reason for this comes back to our loss surface and allowed "diamond" regions from earlier – we can often get closer to the lowest loss contour at a corner of the diamond than along an edge. 
 
-When a model parameter is set to 0 or close to 0, its corresponding feature is essentially removed from the model. We say that L1 regularization performs **feature selection** because, by setting the parameters of unimportant features to 0, LASSO "selects" which features are more useful for modeling. 
+When a model parameter is set to 0 or close to 0, its corresponding feature is essentially removed from the model. We say that L1 regularization performs **feature selection** because, by setting the parameters of unimportant features to 0, LASSO "selects" which features are more useful for modeling. L1 regularization indicates that the features with non-zero parameters are more informative for modeling than those with parameters set to zero. 
 
 ## Scaling Features for Regularization
 
@@ -339,7 +349,7 @@ $$\hat\theta_{\text{ridge}} = (\mathbb{X}^{\top}\mathbb{X} + n\lambda I)^{-1}\ma
 
 This solution exists **even if $\mathbb{X}$ is not full column rank**. This is a major reason why L2 regularization is often used – it can produce a solution even when there is colinearity in the features. We will discuss the concept of colinearity in a future lecture. We will not derive this result in Data 100, as it involves a fair bit of matrix calculus.
 
-In `sklearn`, we perform L2 regularization using the `Ridge` class. Notice that we scale the data before regularizing.
+In `sklearn`, we perform L2 regularization using the `Ridge` class. It runs gradient descent to minimize the L2 objective function. Notice that we scale the data before regularizing.
 
 ```{python}
 ridge_model = lm.Ridge(alpha=1) # alpha represents the hyperparameter lambda
@@ -357,4 +367,3 @@ Our regression models are summarized below. Note the objective function is what 
 | OLS             | $\hat{\mathbb{Y}} = \mathbb{X}\theta$  | MSE           | None           | $\frac{1}{n} \|\mathbb{Y}-\mathbb{X} \theta\|^2_2$                                     | $\hat{\theta}_{OLS} = (\mathbb{X}^{\top}\mathbb{X})^{-1}\mathbb{X}^{\top}\mathbb{Y}$ if $\mathbb{X}$ is full column rank               |
 | Ridge           | $\hat{\mathbb{Y}} = \mathbb{X} \theta$ | MSE           | L2             | $\frac{1}{n} \|\mathbb{Y}-\mathbb{X}\theta\|^2_2 + \lambda \sum_{i=1}^p \theta_i^2$   | $\hat{\theta}_{ridge} = (\mathbb{X}^{\top}\mathbb{X} + n \lambda I)^{-1}\mathbb{X}^{\top}\mathbb{Y}$ |
 | LASSO           | $\hat{\mathbb{Y}} = \mathbb{X} \theta$ | MSE           | L1             | $\frac{1}{n} \|\mathbb{Y}-\mathbb{X}\theta\|^2_2 + \lambda \sum_{i=1}^p \vert \theta_i \vert$ | No closed form                                                                                       |                                                                                   |
-
