@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.450">
+<meta name="generator" content="quarto-1.4.545">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Random Variables</title>
+<title>Principles and Techniques of Data Science - 17&nbsp; Random Variables</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -22,7 +22,7 @@ ul.task-list li input[type="checkbox"] {
 }
 /* CSS for syntax highlighting */
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -57,65 +57,281 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 
 
-<script src="probability_1_files/libs/clipboard/clipboard.min.js"></script>
-<script src="probability_1_files/libs/quarto-html/quarto.js"></script>
-<script src="probability_1_files/libs/quarto-html/popper.min.js"></script>
-<script src="probability_1_files/libs/quarto-html/tippy.umd.min.js"></script>
-<script src="probability_1_files/libs/quarto-html/anchor.min.js"></script>
-<link href="probability_1_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="probability_1_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="probability_1_files/libs/bootstrap/bootstrap.min.js"></script>
-<link href="probability_1_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="probability_1_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../cv_regularization/cv_reg.html" rel="prev">
+<link href="../data100_logo.png" rel="icon" type="image/png">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
 
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
 </head>
 
-<body>
+<body class="nav-sidebar floating">
 
-<div id="quarto-content" class="page-columns page-rows-contents page-layout-full">
-<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-  <nav id="TOC" role="doc-toc" class="toc-active">
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../probability_1/probability_1.html"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Random Variables</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="../index.html" class="sidebar-logo-link">
+      <img src="../data100_logo.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Principles and Techniques of Data Science</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/DS-100/course-notes" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Welcome</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../intro_lec/introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pandas_1/pandas_1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Pandas I</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pandas_2/pandas_2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Pandas II</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pandas_3/pandas_3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Pandas III</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../eda/eda.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Data Cleaning and EDA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../regex/regex.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Regular Expressions</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../visualization_1/visualization_1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Visualization I</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../visualization_2/visualization_2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Visualization II</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sampling/sampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Sampling</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../intro_to_modeling/intro_to_modeling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Introduction to Modeling</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../constant_model_loss_transformations/loss_transformations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Constant Model, Loss, and Transformations</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ols/ols.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Ordinary Least Squares</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../gradient_descent/gradient_descent.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">sklearn and Gradient Descent</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../feature_engineering/feature_engineering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Feature Engineering</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../case_study_HCE/case_study_HCE.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Case Study in Human Contexts and Ethics</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../cv_regularization/cv_reg.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Cross Validation and Regularization</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../probability_1/probability_1.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Random Variables</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
     <h2 id="toc-title">Random Variables</h2>
    
   <ul>
-  <li><a href="#random-variables-and-distributions" id="toc-random-variables-and-distributions" class="nav-link active" data-scroll-target="#random-variables-and-distributions">Random Variables and Distributions</a>
-  <ul class="collapse">
-  <li><a href="#example-tossing-a-coin" id="toc-example-tossing-a-coin" class="nav-link" data-scroll-target="#example-tossing-a-coin">Example: Tossing a Coin</a></li>
-  <li><a href="#example-sampling-data-100-students" id="toc-example-sampling-data-100-students" class="nav-link" data-scroll-target="#example-sampling-data-100-students">Example: Sampling Data 100 Students</a></li>
-  <li><a href="#distributions" id="toc-distributions" class="nav-link" data-scroll-target="#distributions">Distributions</a></li>
+  <li><a href="#random-variables-and-distributions" id="toc-random-variables-and-distributions" class="nav-link active" data-scroll-target="#random-variables-and-distributions"><span class="header-section-number">17.1</span> Random Variables and Distributions</a>
+  <ul>
+  <li><a href="#example-tossing-a-coin" id="toc-example-tossing-a-coin" class="nav-link" data-scroll-target="#example-tossing-a-coin"><span class="header-section-number">17.1.1</span> Example: Tossing a Coin</a></li>
+  <li><a href="#example-sampling-data-100-students" id="toc-example-sampling-data-100-students" class="nav-link" data-scroll-target="#example-sampling-data-100-students"><span class="header-section-number">17.1.2</span> Example: Sampling Data 100 Students</a></li>
+  <li><a href="#distributions" id="toc-distributions" class="nav-link" data-scroll-target="#distributions"><span class="header-section-number">17.1.3</span> Distributions</a></li>
   </ul></li>
-  <li><a href="#expectation-and-variance" id="toc-expectation-and-variance" class="nav-link" data-scroll-target="#expectation-and-variance">Expectation and Variance</a>
-  <ul class="collapse">
-  <li><a href="#expectation" id="toc-expectation" class="nav-link" data-scroll-target="#expectation">Expectation</a></li>
-  <li><a href="#variance" id="toc-variance" class="nav-link" data-scroll-target="#variance">Variance</a></li>
-  <li><a href="#example-die" id="toc-example-die" class="nav-link" data-scroll-target="#example-die">Example: Die</a></li>
+  <li><a href="#expectation-and-variance" id="toc-expectation-and-variance" class="nav-link" data-scroll-target="#expectation-and-variance"><span class="header-section-number">17.2</span> Expectation and Variance</a>
+  <ul>
+  <li><a href="#expectation" id="toc-expectation" class="nav-link" data-scroll-target="#expectation"><span class="header-section-number">17.2.1</span> Expectation</a>
+  <ul>
+  <li><a href="#example-1-coin-toss" id="toc-example-1-coin-toss" class="nav-link" data-scroll-target="#example-1-coin-toss"><span class="header-section-number">17.2.1.1</span> Example 1: Coin Toss</a></li>
+  <li><a href="#example-2" id="toc-example-2" class="nav-link" data-scroll-target="#example-2"><span class="header-section-number">17.2.1.2</span> Example 2</a></li>
   </ul></li>
-  <li><a href="#sums-of-random-variables" id="toc-sums-of-random-variables" class="nav-link" data-scroll-target="#sums-of-random-variables">Sums of Random Variables</a>
-  <ul class="collapse">
-  <li><a href="#properties-of-expectation" id="toc-properties-of-expectation" class="nav-link" data-scroll-target="#properties-of-expectation">Properties of Expectation</a></li>
-  <li><a href="#properties-of-variance" id="toc-properties-of-variance" class="nav-link" data-scroll-target="#properties-of-variance">Properties of Variance</a></li>
-  <li><a href="#covariance-and-correlation" id="toc-covariance-and-correlation" class="nav-link" data-scroll-target="#covariance-and-correlation">Covariance and Correlation</a></li>
-  <li><a href="#equal-vs.-identically-distributed-vs.-i.i.d" id="toc-equal-vs.-identically-distributed-vs.-i.i.d" class="nav-link" data-scroll-target="#equal-vs.-identically-distributed-vs.-i.i.d">Equal vs.&nbsp;Identically Distributed vs.&nbsp;i.i.d</a></li>
-  <li><a href="#example-bernoulli-random-variable" id="toc-example-bernoulli-random-variable" class="nav-link" data-scroll-target="#example-bernoulli-random-variable">Example: Bernoulli Random Variable</a></li>
-  <li><a href="#example-binomial-random-variable" id="toc-example-binomial-random-variable" class="nav-link" data-scroll-target="#example-binomial-random-variable">Example: Binomial Random Variable</a></li>
-  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
+  <li><a href="#variance" id="toc-variance" class="nav-link" data-scroll-target="#variance"><span class="header-section-number">17.2.2</span> Variance</a></li>
+  <li><a href="#example-die" id="toc-example-die" class="nav-link" data-scroll-target="#example-die"><span class="header-section-number">17.2.3</span> Example: Die</a></li>
+  </ul></li>
+  <li><a href="#sums-of-random-variables" id="toc-sums-of-random-variables" class="nav-link" data-scroll-target="#sums-of-random-variables"><span class="header-section-number">17.3</span> Sums of Random Variables</a>
+  <ul>
+  <li><a href="#properties-of-expectation" id="toc-properties-of-expectation" class="nav-link" data-scroll-target="#properties-of-expectation"><span class="header-section-number">17.3.1</span> Properties of Expectation</a></li>
+  <li><a href="#properties-of-variance" id="toc-properties-of-variance" class="nav-link" data-scroll-target="#properties-of-variance"><span class="header-section-number">17.3.2</span> Properties of Variance</a></li>
+  <li><a href="#covariance-and-correlation" id="toc-covariance-and-correlation" class="nav-link" data-scroll-target="#covariance-and-correlation"><span class="header-section-number">17.3.3</span> Covariance and Correlation</a></li>
+  <li><a href="#equal-vs.-identically-distributed-vs.-i.i.d" id="toc-equal-vs.-identically-distributed-vs.-i.i.d" class="nav-link" data-scroll-target="#equal-vs.-identically-distributed-vs.-i.i.d"><span class="header-section-number">17.3.4</span> Equal vs.&nbsp;Identically Distributed vs.&nbsp;i.i.d</a></li>
+  <li><a href="#example-bernoulli-random-variable" id="toc-example-bernoulli-random-variable" class="nav-link" data-scroll-target="#example-bernoulli-random-variable"><span class="header-section-number">17.3.5</span> Example: Bernoulli Random Variable</a></li>
+  <li><a href="#example-binomial-random-variable" id="toc-example-binomial-random-variable" class="nav-link" data-scroll-target="#example-binomial-random-variable"><span class="header-section-number">17.3.6</span> Example: Binomial Random Variable</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">17.3.7</span> Summary</a></li>
   </ul></li>
   </ul>
 </nav>
-</div>
-<main class="content column-page-left" id="quarto-document-content">
+    </div>
+<!-- main -->
+<main class="content column-body" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<div class="quarto-title-block"><div><h1 class="title">Random Variables</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
+<div class="quarto-title-block"><div><h1 class="title"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Random Variables</span></h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
 </div>
 
 
 
-<div class="quarto-title-meta">
+<div class="quarto-title-meta column-body">
 
     
   
@@ -123,7 +339,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </div>
   
 
+
 </header>
+
 
 <div class="callout callout-style-default callout-note no-icon callout-titled">
 <div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="true" aria-label="Toggle callout">
@@ -183,21 +401,21 @@ Data 8 Recap
 <li><strong>Population parameter</strong>: a number that describes something about the population</li>
 <li><strong>Sample statistic</strong>: an estimate of the number computed on a sample</li>
 </ul>
-<section id="random-variables-and-distributions" class="level2">
-<h2 class="anchored" data-anchor-id="random-variables-and-distributions">Random Variables and Distributions</h2>
+<section id="random-variables-and-distributions" class="level2" data-number="17.1">
+<h2 data-number="17.1" class="anchored" data-anchor-id="random-variables-and-distributions"><span class="header-section-number">17.1</span> Random Variables and Distributions</h2>
 <p>Suppose we generate a set of random data, like a random sample from some population. A <strong>random variable</strong> is a <em>function</em> from the outcome of a random event to a number.</p>
 <p>It is <em>random</em> since our sample was drawn at random; it is <em>variable</em> because its exact value depends on how this random sample came out. As such, the domain or input of our random variable is all possible outcomes for some random event in a <em>sample space</em>, and its range or output is the real number line. We typically denote random variables with uppercase letters, such as <span class="math inline">\(X\)</span> or <span class="math inline">\(Y\)</span>. In contrast, note that regular variables tend to be denoted using lowercase letters. Sometimes we also use uppercase letters to refer to matrices (such as your design matrix <span class="math inline">\(\mathbb{X}\)</span>), but we will do our best to be clear with the notation.</p>
 <p>To motivate what this (rather abstract) definition means, let’s consider the following examples:</p>
-<section id="example-tossing-a-coin" class="level3">
-<h3 class="anchored" data-anchor-id="example-tossing-a-coin">Example: Tossing a Coin</h3>
+<section id="example-tossing-a-coin" class="level3" data-number="17.1.1">
+<h3 data-number="17.1.1" class="anchored" data-anchor-id="example-tossing-a-coin"><span class="header-section-number">17.1.1</span> Example: Tossing a Coin</h3>
 <p>Let’s formally define a fair coin toss. A fair coin can land on heads (<span class="math inline">\(H\)</span>) or tails (<span class="math inline">\(T\)</span>), each with a probability of 0.5. With these possible outcomes, we can define a random variable <span class="math inline">\(X\)</span> as: <span class="math display">\[X = \begin{cases}
       1, \text{if the coin lands heads} \\
       0, \text{if the coin lands tails}
    \end{cases}\]</span></p>
 <p><span class="math inline">\(X\)</span> is a function with a domain, or input, of <span class="math inline">\(\{H, T\}\)</span> and a range, or output, of <span class="math inline">\(\{1, 0\}\)</span>. In practice, while we don’t use the following function notation, you could write the above as <span class="math display">\[X = \begin{cases}  X(H) = 1 \\ X(T) = 0 \end{cases}\]</span></p>
 </section>
-<section id="example-sampling-data-100-students" class="level3">
-<h3 class="anchored" data-anchor-id="example-sampling-data-100-students">Example: Sampling Data 100 Students</h3>
+<section id="example-sampling-data-100-students" class="level3" data-number="17.1.2">
+<h3 data-number="17.1.2" class="anchored" data-anchor-id="example-sampling-data-100-students"><span class="header-section-number">17.1.2</span> Example: Sampling Data 100 Students</h3>
 <p>Suppose we draw a random sample <span class="math inline">\(s\)</span> of size 3 from all students enrolled in Data 100.</p>
 <p>We can define <span class="math inline">\(Y\)</span> as the number of data science students in our sample. Its domain is all possible samples of size 3, and its range is <span class="math inline">\(\{0, 1, 2, 3\}\)</span>.</p>
 <p align="center">
@@ -213,8 +431,8 @@ Data 8 Recap
 </ul>
 <p>But, what exactly is a distribution? Let’s dive into this!</p>
 </section>
-<section id="distributions" class="level3">
-<h3 class="anchored" data-anchor-id="distributions">Distributions</h3>
+<section id="distributions" class="level3" data-number="17.1.3">
+<h3 data-number="17.1.3" class="anchored" data-anchor-id="distributions"><span class="header-section-number">17.1.3</span> Distributions</h3>
 <p>To define any random variable <span class="math inline">\(X\)</span>, we need to be able to specify 2 things:</p>
 <ol type="1">
 <li><strong>Possible values</strong>: the set of values the random variable can take on.</li>
@@ -270,11 +488,11 @@ Data 8 Recap
 </ol>
 </section>
 </section>
-<section id="expectation-and-variance" class="level2">
-<h2 class="anchored" data-anchor-id="expectation-and-variance">Expectation and Variance</h2>
+<section id="expectation-and-variance" class="level2" data-number="17.2">
+<h2 data-number="17.2" class="anchored" data-anchor-id="expectation-and-variance"><span class="header-section-number">17.2</span> Expectation and Variance</h2>
 <p>There are several ways to describe a random variable. The methods shown above —— a table of all samples <span class="math inline">\(s, X(s)\)</span>, distribution table <span class="math inline">\(P(X=x)\)</span>, and histograms —— are all definitions that <em>fully describe</em> a random variable. Often, it is easier to describe a random variable using some <em>numerical summary</em> rather than fully defining its distribution. These numerical summaries are numbers that characterize some properties of the random variable. Because they give a “summary” of how the variable tends to behave, they are <em>not</em> random. Instead, think of them as a static number that describes a certain property of the random variable. In Data 100, we will focus our attention on the expectation and variance of a random variable.</p>
-<section id="expectation" class="level3">
-<h3 class="anchored" data-anchor-id="expectation">Expectation</h3>
+<section id="expectation" class="level3" data-number="17.2.1">
+<h3 data-number="17.2.1" class="anchored" data-anchor-id="expectation"><span class="header-section-number">17.2.1</span> Expectation</h3>
 <p>The <strong>expectation</strong> of a random variable <span class="math inline">\(X\)</span> is the <strong>weighted average</strong> of the values of <span class="math inline">\(X\)</span>, where the weights are the probabilities of each value occurring. There are two equivalent ways to compute the expectation:</p>
 <ol type="1">
 <li>Apply the weights one <em>sample</em> at a time: <span class="math display">\[\mathbb{E}[X] = \sum_{\text{all possible } s} X(s) P(s)\]</span>.</li>
@@ -282,8 +500,8 @@ Data 8 Recap
 </ol>
 <p>The latter is more commonly used as we are usually just given the distribution, not all possible samples.</p>
 <p>We want to emphasize that the expectation is a <em>number</em>, not a random variable. Expectation is a generalization of the average, and it has the same units as the random variable. It is also the center of gravity of the probability distribution histogram, meaning if we simulate the variable many times, it is the long-run average of the simulated values.</p>
-<section id="example-1-coin-toss" class="level4">
-<h4 class="anchored" data-anchor-id="example-1-coin-toss">Example 1: Coin Toss</h4>
+<section id="example-1-coin-toss" class="level4" data-number="17.2.1.1">
+<h4 data-number="17.2.1.1" class="anchored" data-anchor-id="example-1-coin-toss"><span class="header-section-number">17.2.1.1</span> Example 1: Coin Toss</h4>
 <p>Going back to our coin toss example, we define a random variable <span class="math inline">\(X\)</span> as: <span class="math display">\[X = \begin{cases}
       1, \text{if the coin lands heads} \\
       0, \text{if the coin lands tails}
@@ -295,8 +513,8 @@ Data 8 Recap
 \end{align}\]</span></p>
 <p>Note that <span class="math inline">\(\mathbb{E}[X] = 0.5\)</span> is not a possible value of <span class="math inline">\(X\)</span>; it’s an average. <strong>The expectation of X does not need to be a possible value of X</strong>.</p>
 </section>
-<section id="example-2" class="level4">
-<h4 class="anchored" data-anchor-id="example-2">Example 2</h4>
+<section id="example-2" class="level4" data-number="17.2.1.2">
+<h4 data-number="17.2.1.2" class="anchored" data-anchor-id="example-2"><span class="header-section-number">17.2.1.2</span> Example 2</h4>
 <p>Consider the random variable <span class="math inline">\(X\)</span>:</p>
 <table class="table">
 <thead>
@@ -333,12 +551,12 @@ Data 8 Recap
 <p>Again, note that <span class="math inline">\(\mathbb{E}[X] = 5.9\)</span> is not a possible value of <span class="math inline">\(X\)</span>; it’s an average. <strong>The expectation of X does not need to be a possible value of X</strong>.</p>
 </section>
 </section>
-<section id="variance" class="level3">
-<h3 class="anchored" data-anchor-id="variance">Variance</h3>
+<section id="variance" class="level3" data-number="17.2.2">
+<h3 data-number="17.2.2" class="anchored" data-anchor-id="variance"><span class="header-section-number">17.2.2</span> Variance</h3>
 <p>The <strong>variance</strong> of a random variable is a measure of its chance error. It is defined as the expected squared deviation from the expectation of <span class="math inline">\(X\)</span>. Put more simply, variance asks: how far does <span class="math inline">\(X\)</span> typically vary from its average value, just by chance? What is the spread of <span class="math inline">\(X\)</span>’s distribution?</p>
 <p><span class="math display">\[\text{Var}(X) = \mathbb{E}[(X-\mathbb{E}[X])^2]\]</span></p>
 <p>The units of variance are the square of the units of <span class="math inline">\(X\)</span>. To get it back to the right scale, use the standard deviation of <span class="math inline">\(X\)</span>: <span class="math display">\[\text{SD}(X) = \sqrt{\text{Var}(X)}\]</span></p>
-<p>Like with expectation, <strong>variance and standard deviation are numbers, not random variables</strong>! Variance helps us describe the variability of a random variable and can be viewed as the chance error between a sample <span class="math inline">\(X\)</span> and the population mean.</p>
+<p>Like with expectation, <strong>variance and standard deviation are numbers, not random variables</strong>! Variance helps us describe the variability of a random variable. It is the expected squared error between the random variable and its expected value. As you will see shortly, we can use variance to help us quantify the chance error that arises when using a sample <span class="math inline">\(X\)</span> to estimate the population mean.</p>
 <p>By <a href="https://www.inferentialthinking.com/chapters/14/2/Variability.html#Chebychev's-Bounds">Chebyshev’s inequality</a>, which you saw in Data 8, no matter what the shape of the distribution of <span class="math inline">\(X\)</span> is, the vast majority of the probability lies in the interval “expectation plus or minus a few SDs.”</p>
 <p>If we expand the square and use properties of expectation, we can re-express variance as the <strong>computational formula for variance</strong>.</p>
 <p><span class="math display">\[\text{Var}(X) = \mathbb{E}[X^2] - (\mathbb{E}[X])^2\]</span></p>
@@ -367,8 +585,8 @@ Proof
 <p>How do we compute <span class="math inline">\(\mathbb{E}[X^2]\)</span>? Any function of a random variable is <em>also</em> a random variable. That means that by squaring <span class="math inline">\(X\)</span>, we’ve created a new random variable. To compute <span class="math inline">\(\mathbb{E}[X^2]\)</span>, we can simply apply our definition of expectation to the random variable <span class="math inline">\(X^2\)</span>.</p>
 <p><span class="math display">\[\mathbb{E}[X^2] = \sum_{x} x^2 P(X = x)\]</span></p>
 </section>
-<section id="example-die" class="level3">
-<h3 class="anchored" data-anchor-id="example-die">Example: Die</h3>
+<section id="example-die" class="level3" data-number="17.2.3">
+<h3 data-number="17.2.3" class="anchored" data-anchor-id="example-die"><span class="header-section-number">17.2.3</span> Example: Die</h3>
 <p>Let <span class="math inline">\(X\)</span> be the outcome of a single fair die roll. <span class="math inline">\(X\)</span> is a random variable defined as <span class="math display">\[X = \begin{cases}
       \frac{1}{6}, \text{if } x \in \{1,2,3,4,5,6\} \\
       0, \text{otherwise}
@@ -419,8 +637,8 @@ What’s the variance, <span class="math inline">\(\text{Var}(X)?\)</span>
 </p>
 </section>
 </section>
-<section id="sums-of-random-variables" class="level2">
-<h2 class="anchored" data-anchor-id="sums-of-random-variables">Sums of Random Variables</h2>
+<section id="sums-of-random-variables" class="level2" data-number="17.3">
+<h2 data-number="17.3" class="anchored" data-anchor-id="sums-of-random-variables"><span class="header-section-number">17.3</span> Sums of Random Variables</h2>
 <p>Often, we will work with multiple random variables at the same time. A function of a random variable is also a random variable. If you create multiple random variables based on your sample, then functions of those random variables are also random variables.</p>
 <p>For example, if <span class="math inline">\(X_1, X_2, ..., X_n\)</span> are random variables, then so are all of these:</p>
 <ul>
@@ -431,8 +649,8 @@ What’s the variance, <span class="math inline">\(\text{Var}(X)?\)</span>
 <li><span class="math inline">\(\frac{1}{n} \sum_{i=1}^n X_i\)</span></li>
 </ul>
 <p>Many functions of random variables that we are interested in (e.g., counts, means) involve sums of random variables, so let’s dive deeper into the properties of sums of random variables.</p>
-<section id="properties-of-expectation" class="level3">
-<h3 class="anchored" data-anchor-id="properties-of-expectation">Properties of Expectation</h3>
+<section id="properties-of-expectation" class="level3" data-number="17.3.1">
+<h3 data-number="17.3.1" class="anchored" data-anchor-id="properties-of-expectation"><span class="header-section-number">17.3.1</span> Properties of Expectation</h3>
 <p>Instead of simulating full distributions, we often just compute expectation and variance directly. Recall the definition of expectation: <span class="math display">\[\mathbb{E}[X] = \sum_{x} x P(X=x)\]</span></p>
 <p>From it, we can derive some useful properties:</p>
 <ol type="1">
@@ -489,8 +707,8 @@ Proof
 <li>If <span class="math inline">\(g\)</span> is a non-linear function, then in general, <span class="math display">\[\mathbb{E}[g(X)] \neq g(\mathbb{E}[X])\]</span> For example, if <span class="math inline">\(X\)</span> is -1 or 1 with equal probability, then <span class="math inline">\(\mathbb{E}[X] = 0\)</span>, but <span class="math inline">\(\mathbb{E}[X^2] = 1 \neq 0\)</span>.</li>
 </ol>
 </section>
-<section id="properties-of-variance" class="level3">
-<h3 class="anchored" data-anchor-id="properties-of-variance">Properties of Variance</h3>
+<section id="properties-of-variance" class="level3" data-number="17.3.2">
+<h3 data-number="17.3.2" class="anchored" data-anchor-id="properties-of-variance"><span class="header-section-number">17.3.2</span> Properties of Variance</h3>
 <p>Let’s now get into the properties of variance. Recall the definition of variance: <span class="math display">\[\text{Var}(X) = \mathbb{E}[(X-\mathbb{E}[X])^2]\]</span></p>
 <p>Combining it with the properties of expectation, we can derive some useful properties:</p>
 <ol type="1">
@@ -559,16 +777,16 @@ Proof
 </div>
 </div>
 </section>
-<section id="covariance-and-correlation" class="level3">
-<h3 class="anchored" data-anchor-id="covariance-and-correlation">Covariance and Correlation</h3>
+<section id="covariance-and-correlation" class="level3" data-number="17.3.3">
+<h3 data-number="17.3.3" class="anchored" data-anchor-id="covariance-and-correlation"><span class="header-section-number">17.3.3</span> Covariance and Correlation</h3>
 <p>We define the <strong>covariance</strong> of two random variables as the expected product of deviations from expectation. Put more simply, covariance is a generalization of variance to variance: <span class="math inline">\(\text{Cov}(X, X) = \mathbb{E}[(X - \mathbb{E}[X])^2] = \text{Var}(X)\)</span></p>
 <p><span class="math display">\[\text{Cov}(X, Y) = \mathbb{E}[(X - \mathbb{E}[X])(Y - \mathbb{E}[Y])]\]</span></p>
 <p>We can treat the covariance as a measure of association. Remember the definition of correlation given when we first established SLR?</p>
 <p><span class="math display">\[r(X, Y) = \mathbb{E}\left[\left(\frac{X-\mathbb{E}[X]}{\text{SD}(X)}\right)\left(\frac{Y-\mathbb{E}[Y]}{\text{SD}(Y)}\right)\right] = \frac{\text{Cov}(X, Y)}{\text{SD}(X)\text{SD}(Y)}\]</span></p>
 <p>It turns out we’ve been quietly using covariance for some time now! If <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> are independent, then <span class="math inline">\(\text{Cov}(X, Y) =0\)</span> and <span class="math inline">\(r(X, Y) = 0\)</span>. Note, however, that the converse is not always true: <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> could have <span class="math inline">\(\text{Cov}(X, Y) = r(X, Y) = 0\)</span> but not be independent.</p>
 </section>
-<section id="equal-vs.-identically-distributed-vs.-i.i.d" class="level3">
-<h3 class="anchored" data-anchor-id="equal-vs.-identically-distributed-vs.-i.i.d">Equal vs.&nbsp;Identically Distributed vs.&nbsp;i.i.d</h3>
+<section id="equal-vs.-identically-distributed-vs.-i.i.d" class="level3" data-number="17.3.4">
+<h3 data-number="17.3.4" class="anchored" data-anchor-id="equal-vs.-identically-distributed-vs.-i.i.d"><span class="header-section-number">17.3.4</span> Equal vs.&nbsp;Identically Distributed vs.&nbsp;i.i.d</h3>
 <p>Suppose that we have two random variables <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>:</p>
 <ul>
 <li><span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> are <strong>equal</strong> if <span class="math inline">\(X(s) = Y(s)\)</span> for every sample <span class="math inline">\(s\)</span>. Regardless of the exact sample drawn, <span class="math inline">\(X\)</span> is always equal to <span class="math inline">\(Y\)</span>.</li>
@@ -589,15 +807,15 @@ Proof
 <img src="images/yz.png" alt="distribution" width="200">
 </p>
 </section>
-<section id="example-bernoulli-random-variable" class="level3">
-<h3 class="anchored" data-anchor-id="example-bernoulli-random-variable">Example: Bernoulli Random Variable</h3>
+<section id="example-bernoulli-random-variable" class="level3" data-number="17.3.5">
+<h3 data-number="17.3.5" class="anchored" data-anchor-id="example-bernoulli-random-variable"><span class="header-section-number">17.3.5</span> Example: Bernoulli Random Variable</h3>
 <p>To get some practice with the formulas discussed so far, let’s derive the expectation and variance for a Bernoulli(<span class="math inline">\(p\)</span>) random variable. If <span class="math inline">\(X\)</span> ~ Bernoulli(<span class="math inline">\(p\)</span>),</p>
 <p><span class="math inline">\(\mathbb{E}[X] = 1 \cdot p + 0 \cdot (1 - p) = p\)</span></p>
 <p>To compute the variance, we will use the computational formula. We first find that: <span class="math inline">\(\mathbb{E}[X^2] = 1^2 \cdot p + 0^2 \cdot (1 - p) = p\)</span></p>
 <p>From there, let’s calculate our variance: <span class="math inline">\(\text{Var}(X) = \mathbb{E}[X^2] - \mathbb{E}[X]^2 = p - p^2 = p(1-p)\)</span></p>
 </section>
-<section id="example-binomial-random-variable" class="level3">
-<h3 class="anchored" data-anchor-id="example-binomial-random-variable">Example: Binomial Random Variable</h3>
+<section id="example-binomial-random-variable" class="level3" data-number="17.3.6">
+<h3 data-number="17.3.6" class="anchored" data-anchor-id="example-binomial-random-variable"><span class="header-section-number">17.3.6</span> Example: Binomial Random Variable</h3>
 <p>Let <span class="math inline">\(Y\)</span> ~ Binomial(<span class="math inline">\(n\)</span>, <span class="math inline">\(p\)</span>). We can think of <span class="math inline">\(Y\)</span> as being the sum of <span class="math inline">\(n\)</span> i.i.d. Bernoulli(<span class="math inline">\(p\)</span>) random variables. Mathematically, this translates to</p>
 <p><span class="math display">\[Y = \sum_{i=1}^n X_i\]</span></p>
 <p>where <span class="math inline">\(X_i\)</span> is the indicator of a success on trial <span class="math inline">\(i\)</span>.</p>
@@ -606,8 +824,8 @@ Proof
 <p>For the variance, since each <span class="math inline">\(X_i\)</span> is independent of the other, <span class="math inline">\(\text{Cov}(X_i, X_j) = 0\)</span>,</p>
 <p><span class="math display">\[\text{Var}(Y) =  \sum_{i=1}^n \text{Var}[X_i] = np(1-p)\]</span></p>
 </section>
-<section id="summary" class="level3">
-<h3 class="anchored" data-anchor-id="summary">Summary</h3>
+<section id="summary" class="level3" data-number="17.3.7">
+<h3 data-number="17.3.7" class="anchored" data-anchor-id="summary"><span class="header-section-number">17.3.7</span> Summary</h3>
 <ul>
 <li>Let <span class="math inline">\(X\)</span> be a random variable with distribution <span class="math inline">\(P(X=x)\)</span>.
 <ul>
@@ -626,13 +844,14 @@ Proof
 </ul></li>
 </ul>
 <p>Note that <span class="math inline">\(\text{Cov}(X,Y)\)</span> would equal 0 if <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> are independent.</p>
+
+
 <!-- -->
 
 </section>
 </section>
 
-</main>
-<!-- /main column -->
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
@@ -763,10 +982,9 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   if (showAllCode) {
     showAllCode.addEventListener("click", toggleCodeHandler(true));
   }
-  function tippyHover(el, contentFn) {
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
-      content: contentFn,
       maxWidth: 500,
       delay: 100,
       arrow: false,
@@ -776,8 +994,17 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       interactive: true,
       interactiveBorder: 10,
       theme: 'quarto',
-      placement: 'bottom-start'
+      placement: 'bottom-start',
     };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
     window.tippy(el, config); 
   }
   const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
@@ -790,6 +1017,125 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
       return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
     });
   }
       let selectedAnnoteEl;
@@ -833,6 +1179,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             }
             div.style.top = top - 2 + "px";
             div.style.height = height + 4 + "px";
+            div.style.left = 0;
             let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
             if (gutterDiv === null) {
               gutterDiv = window.document.createElement("div");
@@ -858,6 +1205,32 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         });
         selectedAnnoteEl = undefined;
       };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
       // Attach click handler to the DT
       const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
       for (const annoteDlNode of annoteDls) {
@@ -916,7 +1289,16 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
   }
 });
-</script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+</script>
+<nav class="page-navigation column-body">
+  <div class="nav-page nav-page-previous">
+      <a href="../cv_regularization/cv_reg.html" class="pagination-link  aria-label=" &lt;span="" validation="" and="" regularization&lt;="" span&gt;"="">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Cross Validation and Regularization</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
 <div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> Random Variables</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="an">execute:</span></span>
@@ -1007,9 +1389,9 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb1-88"><a href="#cb1-88" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-89"><a href="#cb1-89" aria-hidden="true" tabindex="-1"></a>We can define $Y$ as the number of data science students in our sample. Its domain is all possible samples of size 3, and its range is $<span class="sc">\{</span>0, 1, 2, 3<span class="sc">\}</span>$.</span>
 <span id="cb1-90"><a href="#cb1-90" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-91"><a href="#cb1-91" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;p</span> <span class="er">align</span><span class="ot">=</span><span class="st">"center"</span><span class="kw">&gt;</span></span>
-<span id="cb1-92"><a href="#cb1-92" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/rv.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'rv'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'600'</span> <span class="er">class</span><span class="ot">=</span><span class="st">"center"</span><span class="kw">&gt;</span></span>
-<span id="cb1-93"><a href="#cb1-93" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/p&gt;</span></span>
+<span id="cb1-91"><a href="#cb1-91" aria-hidden="true" tabindex="-1"></a>&lt;p align="center"&gt;</span>
+<span id="cb1-92"><a href="#cb1-92" aria-hidden="true" tabindex="-1"></a>  &lt;img src="images/rv.png" alt='rv' width='600' class="center"&gt;</span>
+<span id="cb1-93"><a href="#cb1-93" aria-hidden="true" tabindex="-1"></a>&lt;/p&gt;</span>
 <span id="cb1-94"><a href="#cb1-94" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-95"><a href="#cb1-95" aria-hidden="true" tabindex="-1"></a>Note that we can use random variables in mathematical expressions to create new random variables. </span>
 <span id="cb1-96"><a href="#cb1-96" aria-hidden="true" tabindex="-1"></a></span>
@@ -1046,25 +1428,25 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb1-127"><a href="#cb1-127" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-128"><a href="#cb1-128" aria-hidden="true" tabindex="-1"></a>The distribution of a discrete random variable can also be represented using a histogram. If a variable is **continuous**, meaning it can take on infinitely many values, we can illustrate its distribution using a density curve. </span>
 <span id="cb1-129"><a href="#cb1-129" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-130"><a href="#cb1-130" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;p</span> <span class="er">align</span><span class="ot">=</span><span class="st">"center"</span><span class="kw">&gt;</span></span>
-<span id="cb1-131"><a href="#cb1-131" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/discrete_continuous.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'discrete_continuous'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'700'</span><span class="kw">&gt;</span></span>
-<span id="cb1-132"><a href="#cb1-132" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/p&gt;</span></span>
+<span id="cb1-130"><a href="#cb1-130" aria-hidden="true" tabindex="-1"></a>&lt;p align="center"&gt;</span>
+<span id="cb1-131"><a href="#cb1-131" aria-hidden="true" tabindex="-1"></a>&lt;img src="images/discrete_continuous.png" alt='discrete_continuous' width='700'&gt;</span>
+<span id="cb1-132"><a href="#cb1-132" aria-hidden="true" tabindex="-1"></a>&lt;/p&gt;</span>
 <span id="cb1-133"><a href="#cb1-133" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-134"><a href="#cb1-134" aria-hidden="true" tabindex="-1"></a>We often don’t know the (true) distribution and instead compute an empirical distribution. If you flip a coin 3 times and get {H, H, T}, you may ask —— what is the probability that the coin will land heads? We can come up with an **empirical estimate** of $\frac{2}{3}$, though the true probability might be $\frac{1}{2}$.</span>
 <span id="cb1-135"><a href="#cb1-135" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-136"><a href="#cb1-136" aria-hidden="true" tabindex="-1"></a>Probabilities are areas. For discrete random variables, the *area of the red bars* represents the probability that a discrete random variable $X$ falls within those values. For continuous random variables, the *area under the curve* represents the probability that a discrete random variable $Y$ falls within those values.</span>
 <span id="cb1-137"><a href="#cb1-137" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-138"><a href="#cb1-138" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;p</span> <span class="er">align</span><span class="ot">=</span><span class="st">"center"</span><span class="kw">&gt;</span></span>
-<span id="cb1-139"><a href="#cb1-139" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/probability_areas.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'discrete_continuous'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'600'</span><span class="kw">&gt;</span></span>
-<span id="cb1-140"><a href="#cb1-140" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/p&gt;</span></span>
+<span id="cb1-138"><a href="#cb1-138" aria-hidden="true" tabindex="-1"></a>&lt;p align="center"&gt;</span>
+<span id="cb1-139"><a href="#cb1-139" aria-hidden="true" tabindex="-1"></a>&lt;img src="images/probability_areas.png" alt='discrete_continuous' width='600'&gt;</span>
+<span id="cb1-140"><a href="#cb1-140" aria-hidden="true" tabindex="-1"></a>&lt;/p&gt;</span>
 <span id="cb1-141"><a href="#cb1-141" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-142"><a href="#cb1-142" aria-hidden="true" tabindex="-1"></a>If we sum up the total area of the bars/under the density curve, we should get 100%, or 1.</span>
 <span id="cb1-143"><a href="#cb1-143" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-144"><a href="#cb1-144" aria-hidden="true" tabindex="-1"></a>We can show the distribution of $Y$ in the following tables. The table on the left lists all possible samples of $s$ and the number of times they can appear ($Y(s)$). We can use this to calculate the values for the table on the right, a **probability distribution table**. </span>
 <span id="cb1-145"><a href="#cb1-145" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-146"><a href="#cb1-146" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;p</span> <span class="er">align</span><span class="ot">=</span><span class="st">"center"</span><span class="kw">&gt;</span></span>
-<span id="cb1-147"><a href="#cb1-147" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/distribution.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'distribution'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'600'</span><span class="kw">&gt;</span></span>
-<span id="cb1-148"><a href="#cb1-148" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/p&gt;</span></span>
+<span id="cb1-146"><a href="#cb1-146" aria-hidden="true" tabindex="-1"></a>&lt;p align="center"&gt;</span>
+<span id="cb1-147"><a href="#cb1-147" aria-hidden="true" tabindex="-1"></a>&lt;img src="images/distribution.png" alt='distribution' width='600'&gt;</span>
+<span id="cb1-148"><a href="#cb1-148" aria-hidden="true" tabindex="-1"></a>&lt;/p&gt;</span>
 <span id="cb1-149"><a href="#cb1-149" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-150"><a href="#cb1-150" aria-hidden="true" tabindex="-1"></a>Rather than fully write out a probability distribution or show a histogram, there are some common distributions that come up frequently when doing data science. These distributions are specified by some **parameters**, which are constants that specify the shape of the distribution. In terms of notation, the '~' means "has the probability distribution of". </span>
 <span id="cb1-151"><a href="#cb1-151" aria-hidden="true" tabindex="-1"></a></span>
@@ -1133,7 +1515,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb1-214"><a href="#cb1-214" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-215"><a href="#cb1-215" aria-hidden="true" tabindex="-1"></a>The units of variance are the square of the units of $X$. To get it back to the right scale, use the standard deviation of $X$: $$\text{SD}(X) = \sqrt{\text{Var}(X)}$$</span>
 <span id="cb1-216"><a href="#cb1-216" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-217"><a href="#cb1-217" aria-hidden="true" tabindex="-1"></a>Like with expectation, **variance and standard deviation are numbers, not random variables**! Variance helps us describe the variability of a random variable and can be viewed as the chance error between a sample $X$ and the population mean.</span>
+<span id="cb1-217"><a href="#cb1-217" aria-hidden="true" tabindex="-1"></a>Like with expectation, **variance and standard deviation are numbers, not random variables**! Variance helps us describe the variability of a random variable. It is the expected squared error between the random variable and its expected value. As you will see shortly, we can use variance to help us quantify the chance error that arises when using a sample $X$ to estimate the population mean.</span>
 <span id="cb1-218"><a href="#cb1-218" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-219"><a href="#cb1-219" aria-hidden="true" tabindex="-1"></a>By <span class="co">[</span><span class="ot">Chebyshev’s inequality</span><span class="co">](https://www.inferentialthinking.com/chapters/14/2/Variability.html#Chebychev's-Bounds)</span>, which you saw in Data 8, no matter what the shape of the distribution of $X$ is, the vast majority of the probability lies in the interval “expectation plus or minus a few SDs.”</span>
 <span id="cb1-220"><a href="#cb1-220" aria-hidden="true" tabindex="-1"></a></span>
@@ -1191,9 +1573,9 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb1-272"><a href="#cb1-272" aria-hidden="true" tabindex="-1"></a>We can summarize our discussion so far in the following diagram:</span>
 <span id="cb1-273"><a href="#cb1-273" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-274"><a href="#cb1-274" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-275"><a href="#cb1-275" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;p</span> <span class="er">align</span><span class="ot">=</span><span class="st">"center"</span><span class="kw">&gt;</span></span>
-<span id="cb1-276"><a href="#cb1-276" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/exp_var.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'distribution'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'800'</span><span class="kw">&gt;</span></span>
-<span id="cb1-277"><a href="#cb1-277" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/p&gt;</span></span>
+<span id="cb1-275"><a href="#cb1-275" aria-hidden="true" tabindex="-1"></a>&lt;p align="center"&gt;</span>
+<span id="cb1-276"><a href="#cb1-276" aria-hidden="true" tabindex="-1"></a>&lt;img src="images/exp_var.png" alt='distribution' width='800'&gt;</span>
+<span id="cb1-277"><a href="#cb1-277" aria-hidden="true" tabindex="-1"></a>&lt;/p&gt;</span>
 <span id="cb1-278"><a href="#cb1-278" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-279"><a href="#cb1-279" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-280"><a href="#cb1-280" aria-hidden="true" tabindex="-1"></a><span class="fu">## Sums of Random Variables</span></span>
@@ -1275,9 +1657,9 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb1-356"><a href="#cb1-356" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Shifting the distribution by $b$ *does not* impact the *spread* of the distribution. Thus, $\text{Var}(aX+b) = \text{Var}(aX)$.</span>
 <span id="cb1-357"><a href="#cb1-357" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Scaling the distribution by $a$ *does* impact the spread of the distribution.</span>
 <span id="cb1-358"><a href="#cb1-358" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-359"><a href="#cb1-359" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;p</span> <span class="er">align</span><span class="ot">=</span><span class="st">"center"</span><span class="kw">&gt;</span></span>
-<span id="cb1-360"><a href="#cb1-360" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/transformation.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'transformation'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'600'</span><span class="kw">&gt;</span></span>
-<span id="cb1-361"><a href="#cb1-361" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/p&gt;</span></span>
+<span id="cb1-359"><a href="#cb1-359" aria-hidden="true" tabindex="-1"></a>&lt;p align="center"&gt;</span>
+<span id="cb1-360"><a href="#cb1-360" aria-hidden="true" tabindex="-1"></a>&lt;img src="images/transformation.png" alt='transformation' width='600'&gt;</span>
+<span id="cb1-361"><a href="#cb1-361" aria-hidden="true" tabindex="-1"></a>&lt;/p&gt;</span>
 <span id="cb1-362"><a href="#cb1-362" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-363"><a href="#cb1-363" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Variance of sums of random variables is affected by the (in)dependence of the random variables.</span>
 <span id="cb1-364"><a href="#cb1-364" aria-hidden="true" tabindex="-1"></a>$$\text{Var}(X + Y) = \text{Var}(X) + \text{Var}(Y) + 2\text{cov}(X,Y)$$</span>
@@ -1324,15 +1706,15 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb1-405"><a href="#cb1-405" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-406"><a href="#cb1-406" aria-hidden="true" tabindex="-1"></a>Now let's walk through an example. Say $X_1$ and $X_2$ be numbers on rolls of two fair die. $X_1$ and $X_2$ are i.i.d, so  $X_1$ and $X_2$ have the same distribution. However, the sums $Y = X_1 + X_1 = 2X_1$ and $Z=X_1+X_2$ have different distributions but the same expectation.</span>
 <span id="cb1-407"><a href="#cb1-407" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-408"><a href="#cb1-408" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;p</span> <span class="er">align</span><span class="ot">=</span><span class="st">"center"</span><span class="kw">&gt;</span></span>
-<span id="cb1-409"><a href="#cb1-409" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/yz_distribution.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'distribution'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'=500'</span><span class="kw">&gt;</span></span>
-<span id="cb1-410"><a href="#cb1-410" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/p&gt;</span></span>
+<span id="cb1-408"><a href="#cb1-408" aria-hidden="true" tabindex="-1"></a>&lt;p align="center"&gt;</span>
+<span id="cb1-409"><a href="#cb1-409" aria-hidden="true" tabindex="-1"></a>&lt;img src="images/yz_distribution.png" alt='distribution' width='=500'&gt;</span>
+<span id="cb1-410"><a href="#cb1-410" aria-hidden="true" tabindex="-1"></a>&lt;/p&gt;</span>
 <span id="cb1-411"><a href="#cb1-411" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-412"><a href="#cb1-412" aria-hidden="true" tabindex="-1"></a>However, $Y = X_1$ has a larger variance.</span>
 <span id="cb1-413"><a href="#cb1-413" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-414"><a href="#cb1-414" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;p</span> <span class="er">align</span><span class="ot">=</span><span class="st">"center"</span><span class="kw">&gt;</span></span>
-<span id="cb1-415"><a href="#cb1-415" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/yz.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'distribution'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'200'</span><span class="kw">&gt;</span></span>
-<span id="cb1-416"><a href="#cb1-416" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/p&gt;</span></span>
+<span id="cb1-414"><a href="#cb1-414" aria-hidden="true" tabindex="-1"></a>&lt;p align="center"&gt;</span>
+<span id="cb1-415"><a href="#cb1-415" aria-hidden="true" tabindex="-1"></a>&lt;img src="images/yz.png" alt='distribution' width='200'&gt;</span>
+<span id="cb1-416"><a href="#cb1-416" aria-hidden="true" tabindex="-1"></a>&lt;/p&gt;</span>
 <span id="cb1-417"><a href="#cb1-417" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-418"><a href="#cb1-418" aria-hidden="true" tabindex="-1"></a><span class="fu">### Example: Bernoulli Random Variable</span></span>
 <span id="cb1-419"><a href="#cb1-419" aria-hidden="true" tabindex="-1"></a></span>
@@ -1376,6 +1758,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb1-457"><a href="#cb1-457" aria-hidden="true" tabindex="-1"></a>Note that $\text{Cov}(X,Y)$ would equal 0 if $X$ and $Y$ are independent.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
+
 
 
 
