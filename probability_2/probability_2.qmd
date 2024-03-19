@@ -32,16 +32,16 @@ In this lecture, we will delve more deeply into the idea of fitting a model to a
 ## Common Random Variables
 There are several cases of random variables that appear often and have useful properties. Below are the ones we will explore further in this course. The numbers in parentheses are the parameters of a random variable, which are constants. Parameters define a random variable’s shape (i.e., distribution) and its values. For this lecture, we'll focus more heavily on the bolded random variables and their special properties, but you should familiarize yourself with all the ones listed below: 
 
-* **Bernoulli(p)**
-  * Takes on <u>value 1 with probability p</u>, and <u>0 with probability 1 - p</u>.
+* **Bernoulli($p$)**
+  * Takes on value 1 with probability $p$, and 0 with probability $(1 - p)$.
   * AKA the “indicator” random variable.
   * Let X be a Bernoulli(p) random variable
     * $\mathbb{E}[X] = 1 * p + 0 * (1-p) = p$
         * $\mathbb{E}[X^2] = 1^2 * p + 0 * (1-p) = p$
     * $\text{Var}(X) = \mathbb{E}[X^2] - (\mathbb{E}[X])^2 = p - p^2 = p(1-p)$
-* **Binomial(n, p)**
+* **Binomial($n$, $p$)**
   * Number of 1s in $n$ independent Bernoulli(p) trials.
-  * Let $Y$ be a Binomial(n, p) random variable.
+  * Let $Y$ be a Binomial($n$, $p$) random variable.
     * The distribution of $Y$ is given by the binomial formula, and we can write $Y = \sum_{i=1}^n X_i$ where:
         * $X_i$ s the indicator of success on trial i. $X_i = 1$ if trial i is a success, else 0.
         * All $X_i$ are i.i.d. and Bernoulli(p).
@@ -49,7 +49,7 @@ There are several cases of random variables that appear often and have useful pr
     * $\text{Var}(X) = \sum_{i=1}^n \text{Var}(X_i) = np(1-p)$ 
       * $X_i$'s are independent, so $\text{Cov}(X_i, X_j) = 0$ for all i, j.
 * Uniform on a finite set of values
-  * Probability of each value is 1 / (number of possible values).
+  * The probability of each value is $\frac{1}{\text{(number of possible values)}}$.
   * For example, a standard/fair die.
 * Uniform on the unit interval (0, 1)
   * Density is flat at 1 on (0, 1) and 0 elsewhere.
@@ -87,7 +87,7 @@ Note that:
 * The distribution of a *population* describes how a random variable behaves across *all* individuals of interest. 
 * The distribution of a *sample* describes how a random variable behaves in a *specific sample* from the population. 
 
-In Data Science, however, we often do not have access to the whole population, so we don’t know its distribution. As such, we need to collect a sample and use its distribution to estimate or infer properties of the population. In cases like these, we can take several samples of size $n$ from the population (an easy way to do this is using `df.sample(n, replace=True)`), and compute the mean of each *sample*. When sampling, we make the (big) assumption that we sample uniformly at random with replacement from the population; each observation in our sample is a random variable drawn i.i.d from our population distribution. Remember that our sample mean is a random variable since it depends on our randomly drawn sample! On the other hand, our population mean is simply a number (a fixed value).
+In Data Science, however, we often do not have access to the whole population, so we don’t know its distribution. As such, we need to collect a sample and use its distribution to estimate or infer properties of the population. In cases like these, we can take several samples of size $n$ from the population (an easy way to do this is using `df.sample(n, replace=True)`), and compute the mean of each *sample*. When sampling, we make the (big) assumption that we sample uniformly at random *with replacement* from the population; each observation in our sample is a random variable drawn i.i.d from our population distribution. Remember that our sample mean is a random variable since it depends on our randomly drawn sample! On the other hand, our population mean is simply a number (a fixed value).
 
 ### Sample Mean 
 Consider an i.i.d. sample $X_1, X_2, ..., X_n$ drawn from a population with mean 𝜇 and SD 𝜎.
@@ -140,7 +140,7 @@ Applying the CLT allows us to make sense of all of this and resolve this issue. 
 Given this potential variance, it is also important that we consider the **average value and spread** of all possible sample means, and what this means for how big $n$ should be. For every sample size, the expected value of the sample mean is the population mean: $$\mathbb{E}[\bar{X}_n] = \mu$$. We call the sample mean an **unbiased estimator** of the population mean and will explore this idea more in the next lecture. 
 
 
-::: {.callout-tip collapse="true"}
+::: {.callout-tip collapse="false"}
 ## Data 8 Recap: Square Root Law
 
 The square root law ([Data 8](https://inferentialthinking.com/chapters/14/5/Variability_of_the_Sample_Mean.html#the-square-root-law)) states that if you increase the sample size by a factor, the SD decreases by the square root of the factor. $$\text{SD}(\bar{X_n}) = \frac{\sigma}{\sqrt{n}}$$ The sample mean is more likely to be close to the population mean if we have a larger sample size.
@@ -156,9 +156,15 @@ Since the sample represents a *random* subset of the population, any statistic w
 
 To address our inference question, we aim to construct estimators that closely estimate the value of the population parameter. We evaluate how "good" an estimator is by answering three questions:
 
-* Do we get the right answer for the parameter, on average? **(Bias)** 
-* How variable is the answer? **(Variance)**
 * How close is our answer to the parameter? **(Risk / MSE)**
+  $$ MSE(\hat{\theta}) = E[(\hat{\theta} - \theta)]^2$$
+* Do we get the right answer for the parameter, on average? **(Bias)** 
+  $$\text{Bias}(\hat{\theta}) = E[\hat{\theta} - \theta] = E[\hat{\theta}] - \theta$$
+* How variable is the answer? **(Variance)**
+  $$Var(\hat{\theta}) = E[(\theta - E[\theta])^2] $$
+
+This relationship can be illustrated with an archery analogy. Imagine that the center of the target is the $\theta$ and each arrow corresponds to a separate parameter estimate $\hat{\theta}$
+
 
 <p align="center">
 <img src="images/bias_v_variance.png" width='600'>
@@ -170,9 +176,9 @@ Ideally, we want our estimator to have low bias and low variance, but how can we
 
 Now that we've established the idea of an estimator, let's see how we can apply this learning to the modeling process. To do so, we'll take a moment to formalize our data collection and models in the language of random variables.
 
-Say we are working with an input variable, $x$, and a response variable, $Y$. We assume that $Y$ and $x$ are linked by some relationship $g$; in other words, $Y = g(x)$. $g$ represents some "universal truth" or "law of nature" that defines the underlying relationship between $x$ and $Y$. In the image below, $g$ is denoted by the red line.
+Say we are working with an input variable, $x$, and a response variable, $Y$. We assume that $Y$ and $x$ are linked by some relationship $g$; in other words, $Y = g(x)$ where $g$ represents some "universal truth" or "law of nature" that defines the underlying relationship between $x$ and $Y$. In the image below, $g$ is denoted by the red line.
 
-As data scientists, however, we have no way of directly "seeing" the underlying relationship $g$. The best we can do is collect observed data out in the real world to try to understand this relationship. Unfortunately, the data collection process will always have some inherent error (think of the randomness you might encounter when taking measurements in a scientific experiment). We say that each observation comes with some random error or **noise** term, $\epsilon$. This error is assumed to be a random variable with expectation $\mathbb{E}(\epsilon)=0$, variance $\text{Var}(\epsilon) = \sigma^2$, and be i.i.d. across each observation. The existence of this random noise means that our observations, $Y(x)$, are *random variables*.
+As data scientists, however, we have no way of directly "seeing" the underlying relationship $g$. The best we can do is collect observed data out in the real world to try to understand this relationship. Unfortunately, the data collection process will always have some inherent error (think of the randomness you might encounter when taking measurements in a scientific experiment). We say that each observation comes with some random error or **noise** term, $\epsilon$ (read: "epsilon"). This error is assumed to be a random variable with expectation $\mathbb{E}(\epsilon)=0$, variance $\text{Var}(\epsilon) = \sigma^2$, and be i.i.d. across each observation. The existence of this random noise means that our observations, $Y(x)$, are *random variables*.
 
 <p align="center">
 <img src="images/data.png" alt='data' width='700'>
@@ -201,17 +207,17 @@ If we assume that the true relationship $g$ is linear, we can express the respon
 $$Y = g(x) + \epsilon$$
 $$ f_{\theta}(x) = Y = \theta_0 + \sum_{j=1}^p \theta_j x_j + \epsilon$$
 
-::: {.callout-warning}
-##### Which Expressions are random? 
+::: {.callout-warning collapse="true"}
+##### Which expressions are random? 
 In our two equations above, the true relationship $g(x) = \theta_0 + \sum_{j=1}^p \theta_j x_j$ is not random, but $\epsilon$ is random. Hence, $Y = f_{\theta}(x)$ is also random. 
 :::
 
 This true relationship has true, unobservable parameters $\theta$, and it has random noise $\epsilon$, so we can never observe the true relationship. Instead, the next best thing we can do is obtain a sample $\Bbb{X}$, $\Bbb{Y}$ of $n$ observed relationships, $(x, Y)$ and use it to train a model and obtain an estimate of $\hat{\theta}$
 $$\hat{Y}(x) = f_{\hat{\theta}}(x) = \hat{\theta_0} + \sum_{j=1}^p \hat{\theta_j} x_j$$
 
-::: {.callout-warning}
-##### Which Expressions are random? 
-In our estimating equation above, our sample $\Bbb{X}$, $\Bbb{Y}$ are random. Hence, the estimates we calculate from our samples $\hat{\theta}$ are also random, so our predictor $\hat{Y}(x)$ is also random. 
+::: {.callout-warning collapse="true"}
+##### Which expressions are random? 
+In our estimating equation above, our sample $\Bbb{X}$, $\Bbb{Y}$ are random (often due to human error). Hence, the estimates we calculate from our samples $\hat{\theta}$ are also random, so our predictor $\hat{Y}(x)$ is also random. 
 :::
 
 Now taking a look at our original equations, we can see that they both have differing sources of randomness. For our observed relationship, $Y = g(x) + \epsilon$, $\epsilon$ represents measurement errors and reflects randomness from the future. For the estimation model, the data we have is a random sample collected from the population, so the randomness from the past.
@@ -347,8 +353,8 @@ To fix this, we increase model complexity (but we don't want to overfit!) or con
 ### The Decomposition
 To summarize: 
 
-* The **model risk**, $\mathbb{E}\left[(Y(x)-\hat{Y}(x))^2\right]$, is the mean squared prediction error of the model.
-* The **observation variance**, $\sigma^2$, is the variance of the random noise in the observations. It describes how variable the random error $\epsilon$ is for each observation.
+* The **model risk**, $\mathbb{E}\left[(Y(x)-\hat{Y}(x))^2\right]$, is the mean squared prediction error of the model. It is an expectation and is therefore a **fixed number** (for a given x).
+* The **observation variance**, $\sigma^2$, is the variance of the random noise in the observations. It describes how variable the random error $\epsilon$ is for each observation and **cannot be addressed by modeling**.
 * The **model bias**, $\mathbb{E}\left[\hat{Y}(x)\right]-g(x)$, is how "off" the $\hat{Y}(x)$ is as an estimator of the true underlying relationship $g(x)$. 
 * The **model variance**, $\text{Var}(\hat{Y}(x))$, describes how much the prediction $\hat{Y}(x)$ tends to vary when we fit the model on different samples. 
 
