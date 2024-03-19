@@ -156,11 +156,17 @@ Since the sample represents a *random* subset of the population, any statistic w
 
 To address our inference question, we aim to construct estimators that closely estimate the value of the population parameter. We evaluate how "good" an estimator is by answering three questions:
 
-* Do we get the right answer for the parameter, on average?
-* How variable is the answer?
-* How close is our answer to the parameter?
+* Do we get the right answer for the parameter, on average? **(Bias)** 
+* How variable is the answer? **(Variance)**
+* How close is our answer to the parameter? **(Risk / MSE)**
 
-### Modeling as Estimation
+<p align="center">
+<img src="images/bias_v_variance.png" width='600'>
+</p>
+
+Ideally, we want our estimator to have low bias and low variance, but how can we mathematically quantify that? See @sec-bias-variance-tradeoff for more detail.
+
+### Prediction as Estimation
 
 Now that we've established the idea of an estimator, let's see how we can apply this learning to the modeling process. To do so, we'll take a moment to formalize our data collection and models in the language of random variables.
 
@@ -184,6 +190,12 @@ $$\text{Prediction: }\hat{Y}(x)$$
 <img src="images/y_hat.png" alt='y_hat' width='600'>
 </p>
 
+When building models it is also important to note that our choice of features will also signficantly impact our estimation. In the plot below, you can see how the different models (green and purple) can lead to different estimates.
+
+<p align="center">
+<img src="images/y_hat2.png" alt='y_hat' width='400'>
+</p>
+
 #### Estimating a Linear Relationship
 If we assume that the true relationship $g$ is linear, we can express the response as $Y = f_{\theta}(x)$, where our true relationship is modeled by 
 $$Y = g(x) + \epsilon$$
@@ -202,53 +214,157 @@ $$\hat{Y}(x) = f_{\hat{\theta}}(x) = \hat{\theta_0} + \sum_{j=1}^p \hat{\theta_j
 In our estimating equation above, our sample $\Bbb{X}$, $\Bbb{Y}$ are random. Hence, the estimates we calculate from our samples $\hat{\theta}$ are also random, so our predictor $\hat{Y}(x)$ is also random. 
 :::
 
-
 Now taking a look at our original equations, we can see that they both have differing sources of randomness. For our observed relationship, $Y = g(x) + \epsilon$, $\epsilon$ represents measurement errors and reflects randomness from the future. For the estimation model, the data we have is a random sample collected from the population, so the randomness from the past.
 
-## Bootstrap Resampling (Review)
+## Bias-Variance Tradeoff {#sec-bias-variance-tradeoff}
 
-To determine properties of the sampling distribution of an estimator like variance, we’d need to have access to the population so that we can consider all possible samples and compute an estimate for each sample. 
+Recall the model and the data we generated from that model in the last section:
+
+$$\text{True relationship: } g(x)$$
+
+$$\text{Observed relationship: }Y = g(x) + \epsilon$$
+
+$$\text{Prediction: }\hat{Y}(x)$$
+
+With this reformulated modeling goal, we can now revisit the Bias-Variance Tradeoff from two lectures ago (shown below): 
 
 <p align="center">
-<img src="images/population_samples.png" alt='y_hat' width='650'>
+<img src="images/bvt_old.png" width='600'>
 </p>
 
-However, we don’t have access to the population; we only have *one* random sample from the population. How can we consider all possible samples if we only have one? 
+In today's lecture, we'll explore a more mathematical version of the graph you see above by introducing the terms model risk, observation variance, model bias, and model variance. Eventually, we'll work our way up to an updated version of the Bias-Variance Tradeoff graph that you see below 
 
-The idea of bootstrapping is to treat our random sample as a "population" and resample from it *with replacement*. Intuitively, a random sample resembles the population, so a random *resample* also resamples a random sample. 
 <p align="center">
-<img src="images/bootstrap.png" alt='y_hat' width='700'>
+<img src="images/bvt.png" width='600'>
 </p>
 
-Bootstrap resampling is a technique for estimating the sampling distribution of an estimator. To execute it, we can follow the pseudocode below: 
-```
-collect a random sample of size n (called the bootstrap population)
+### Model Risk
 
-initiate list of estimates
+**Model risk** is defined as the mean square prediction error of the random variable $\hat{Y}$. It is an expectation across *all* samples we could have possibly gotten when fitting the model, which we can denote as random variables $X_1, X_2, \ldots, X_n, Y$. Model risk considers the model's performance on any sample that is theoretically possible, rather than the specific data that we have collected. 
 
-repeat 10,000 times:
-	resample with replacement n times from bootstrap population
+$$\text{model risk }=E\left[(Y-\hat{Y(x)})^2\right]$$ 
 
-apply estimator f to resample
+What is the origin of the error encoded by model risk? Note that there are two types of errors:
 
-store in list
+* Chance errors: happen due to randomness alone
+    * Source 1 **(Observation Variance)**: randomness in new observations $Y$ due to random noise $\epsilon$
+    * Source 2 **(Model Variance)**: randomness in the sample we used to train the models, as samples $X_1, X_2, \ldots, X_n, Y$ are random
+* **(Model Bias)**: non-random error due to our model being different from the true underlying function $g$
 
-list of estimates is the bootstrapped sampling distribution of f
-```
+Recall the data-generating process we established earlier. There is a true underlying relationship $g$, observed data (with random noise) $Y$, and model $\hat{Y}$. 
 
-::: {.callout-warning collapse="true"}
-### Why must we resample *with replacement*? 
-Given an original sample of size $n$, we want a resample that has the same size $n$ as the original. Sampling *without* replacement will give us the original sample with shuffled rows. Hence, when we calculate summary statistics like the average, our sample *without* replacement will always have the same average as the original sample, defeating the purpose of a bootstrap. 
+<p align="center">
+<img src="images/errors.png" alt='errors' width='600'>
+</p>
+
+To better understand model risk, we'll zoom in on a single data point in the plot above.
+
+<p align="center">
+<img src="images/breakdown.png" alt='breakdown' width='600'>
+</p>
+
+Remember that $\hat{Y}(x)$ is a random variable – it is the prediction made for $x$ after being fit on the specific sample used for training. If we had used a different sample for training, a different prediction might have been made for this value of $x$. To capture this, the diagram above considers both the prediction $\hat{Y}(x)$ made for a particular random training sample, and the *expected* prediction across all possible training samples, $E[\hat{Y}(x)]$. 
+
+We can use this simplified diagram to break down the prediction error into smaller components. First, start by considering the error on a single prediction, $Y(x)-\hat{Y}(x)$.
+
+<p align="center">
+<img src="images/error.png" alt='error' width='600'>
+</p>
+
+We can identify three components of this error.
+
+<p align="center">
+<img src="images/decomposition.png" alt='decomposition' width='600'>
+</p>
+
+That is, the error can be written as:
+
+$$Y(x)-\hat{Y}(x) = \epsilon + \left(g(x)-E\left[\hat{Y}(x)\right]\right) + \left(E\left[\hat{Y}(x)\right] - \hat{Y}(x)\right)$$
+$$\newline   $$
+
+The model risk is the expected square of the expression above, $E\left[(Y(x)-\hat{Y}(x))^2\right]$. If we square both sides and then take the expectation, we will get the following decomposition of model risk:
+
+$$E\left[(Y(x)-\hat{Y}(x))^2\right] = E[\epsilon^2] + \left(g(x)-E\left[\hat{Y}(x)\right]\right)^2 + E\left[\left(E\left[\hat{Y}(x)\right] - \hat{Y}(x)\right)^2\right]$$
+
+It looks like we are missing some cross-product terms when squaring the right-hand side, but it turns out that all of those cross-product terms are zero. The detailed derivation is out of scope for this class, but a proof is included at the end of this note for your reference.
+
+This expression may look complicated at first glance, but we've actually already defined each term earlier in this lecture! Let's look at them term by term.
+
+
+#### Observation Variance
+
+The first term in the above decomposition is $E[\epsilon^2]$. Remember $\epsilon$ is the random noise when observing $Y$, with expectation $\mathbb{E}(\epsilon)=0$ and variance $\text{Var}(\epsilon) = \sigma^2$. We can show that $E[\epsilon^2]$ is the variance of $\epsilon$:
+$$
+\begin{align*}
+\text{Var}(\epsilon) &= E[\epsilon^2] + \left(E[\epsilon]\right)^2\\
+&= E[\epsilon^2] + 0^2\\
+&= \sigma^2.
+\end{align*}
+$$
+
+This term describes how variable the random error $\epsilon$ (and $Y$) is for each observation. This is called the **observation variance**. It exists due to the randomness in our observations $Y$. It is a form of *chance error* we talked about in the Sampling lecture.
+
+$$\text{observation variance} = \text{Var}(\epsilon) = \sigma^2.$$
+
+The observation variance results from measurement errors when observing data or missing information that acts like noise. To reduce this observation variance, we could try to get more precise measurements, but it is often beyond the control of data scientists. Because of this, the observation variance $\sigma^2$ is sometimes called "irreducible error."
+
+#### Model Variance
+
+We will then look at the last term: $E\left[\left(E\left[\hat{Y}(x)\right] - \hat{Y}(x)\right)^2\right]$. If you recall the definition of variance from the last lecture, this is precisely $\text{Var}(\hat{Y}(x))$. We call this the **model variance**.
+
+It describes how much the prediction $\hat{Y}(x)$ tends to vary when we fit the model on different samples. Remember the sample we collect can come out very differently, thus the prediction $\hat{Y}(x)$ will also be different. The model variance describes this variability due to the randomness in our sampling process. Like observation variance, it is also a form of *chance error*—even though the sources of randomness are different.
+
+$$\text{model variance} = \text{Var}(\hat{Y}(x)) = E\left[\left(\hat{Y}(x) - E\left[\hat{Y}(x)\right]\right)^2\right]$$
+
+The main reason for the large model variance is because of **overfitting**: we paid too much attention to the details in our sample that small differences in our random sample lead to large differences in the fitted model. To remediate this, we try to reduce model complexity (e.g. take out some features and limit the magnitude of estimated model coefficients) and not fit our model on the noises.
+
+#### Model Bias
+
+Finally, the second term is $\left(g(x)-E\left[\hat{Y}(x)\right]\right)^2$. What is this? The term $E\left[\hat{Y}(x)\right] - g(x)$ is called the **model bias**.
+
+Remember that $g(x)$ is the fixed underlying truth and $\hat{Y}(x)$ is our fitted model, which is random. Model bias therefore measures how far off $g(x)$ and $\hat{Y}(x)$ are on average over all possible samples.
+
+$$\text{model bias} = E\left[\hat{Y}(x) - g(x)\right] = E\left[\hat{Y}(x)\right] - g(x)$$
+
+The model bias is not random; it's an average measure for a specific individual $x$. If bias is positive, our model tends to overestimate $g(x)$; if it's negative, our model tends to underestimate $g(x)$. And if it's 0, we can say that our model is **unbiased**.
+
+::: {.callout-tip}
+##### Unbiased Estimators 
+
+An **unbiased model** has a $\text{model bias } = 0$. In other words, our model predicts $g(x)$ on average. 
+
+Similarly, we can define bias for estimators like the mean. The sample mean is an **unbiased estimator** of the population mean, as by CLT, $\mathbb{E}[\bar{X}_n] = \mu$. Therefore, the $\text{estimator bias } = \mathbb{E}[\bar{X}_n] - \mu = 0$.
 :::
 
-How well does bootstrapping actually represent our population? The bootstrapped sampling distribution of an estimator does not exactly match the sampling distribution of that estimator, but it is often close. Similarly, the variance of the bootstrapped distribution is often close to the true variance of the estimator. The example below displays the results from different bootstraps from a *known* population using a sample size of $n=50$.
+There are two main reasons for large model biases:
+
+- Underfitting: our model is too simple for the data
+- Lack of domain knowledge: we don't understand what features are useful for the response variable
+
+To fix this, we increase model complexity (but we don't want to overfit!) or consult domain experts to see which models make sense. You can start to see a tradeoff here: if we increase model complexity, we decrease the model bias, but we also risk increasing the model variance.
+
+
+### The Decomposition
+To summarize: 
+
+* The **model risk**, $\mathbb{E}\left[(Y(x)-\hat{Y}(x))^2\right]$, is the mean squared prediction error of the model.
+* The **observation variance**, $\sigma^2$, is the variance of the random noise in the observations. It describes how variable the random error $\epsilon$ is for each observation.
+* The **model bias**, $\mathbb{E}\left[\hat{Y}(x)\right]-g(x)$, is how "off" the $\hat{Y}(x)$ is as an estimator of the true underlying relationship $g(x)$. 
+* The **model variance**, $\text{Var}(\hat{Y}(x))$, describes how much the prediction $\hat{Y}(x)$ tends to vary when we fit the model on different samples. 
+
+The above definitions enable us to simplify the decomposition of model risk before as:
+
+$$ E[(Y(x) - \hat{Y}(x))^2] = \sigma^2 + (E[\hat{Y}(x)] - g(x))^2 + \text{Var}(\hat{Y}(x)) $$
+$$\text{model risk } = \text{observation variance} + (\text{model bias})^2 \text{+ model variance}$$
+
+This is known as the **bias-variance tradeoff**. What does it mean? Remember that the model risk is a measure of the model's performance. Our goal in building models is to keep model risk low; this means that we will want to ensure that each component of model risk is kept at a small value. 
+
+Observation variance is an inherent, random part of the data collection process. We aren't able to reduce the observation variance, so we'll focus our attention on the model bias and model variance. 
+
+In the Feature Engineering lecture, we considered the issue of overfitting. We saw that the model's error or bias tends to decrease as model complexity increases — if we design a highly complex model, it will tend to make predictions that are closer to the true relationship $g$. At the same time, model variance tends to *increase* as model complexity increases; a complex model may overfit to the training data, meaning that small differences in the random samples used for training lead to large differences in the fitted model. We have a problem. To decrease model bias, we could increase the model's complexity, which would lead to overfitting and an increase in model variance. Alternatively, we could decrease model variance by decreasing the model's complexity at the cost of increased model bias due to underfitting. 
 
 <p align="center">
-<img src="images/bootstrapped_samples.png" alt='y_hat' width='600'>
+<img src="images/bvt.png" alt='bvt' width='600'>
 </p>
 
-In the real world, we don't know the population distribution. The center of the boostrapped distribution is the estimator applied to our original sample, so we have no way of recovering the estimator's true expected value. The quality of our bootstrapped distribution depends on the quality of our original sample; if our original sample was not representative of the population, bootstrap is next to useless.
-
-One thing to note is that the bootstrap often does not work well for some statistics, like the median or other quantile-based statistics, that depend heavily on a small number of observations out of a larger sample. **Bootstrapping does not overcome the weakness of small samples as a basis for inference**. Indeed, for the very smallest samples, it may be better to make additional assumptions such as a parametric family.  
-
-
+We need to strike a balance. Our goal in model creation is to use a complexity level that is high enough to keep bias low, but not so high that model variance is large.
