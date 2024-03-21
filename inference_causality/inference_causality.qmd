@@ -1,5 +1,5 @@
 ---
-title: 'Bias, Variance, and Inference'
+title: Causal Inference and the Bootstrap
 execute:
   echo: true
 format:
@@ -7,7 +7,7 @@ format:
     code-fold: true
     code-tools: true
     toc: true
-    toc-title: 'Bias, Variance, and Inference'
+    toc-title: Causal Inference and the Bootstrap
     page-layout: full
     theme:
       - cosmo
@@ -43,192 +43,24 @@ $$\begin{align}\text{MSE}(\hat{\theta}) = \mathbb{E}\left[(\hat{\theta} - \theta
 
 ::: {.callout-note collapse="false"}
 ## Learning Outcomes
-* Compute the bias, variance, and MSE of an estimator for a parameter
-* Introduction to model risk of fitted models
-* Decompose the model risk into bias and variance terms
 * Construct confidence intervals for hypothesis testing
 * Understand the assumptions we make and its impact on our regression inference
-* Compare regression and causation
+* Compare regression correlation and causation
 * Experiment setup, confounding variables, average treatment effect, and covariate adjustment
 :::
 
-Last time, we introduced the idea of random variables and its effect on the observed relationship we use to fit models.
+Last time, we introduced the idea of random variables and its effect on the observed relationship we use to fit models. We also demonstrated the decomposition of model risk from a fitted model.
 
-In this lecture, we will explore the decomposition of model risk from a fitted model, regression inference via hypothesis testing and considering the assumptions we make, and the environment of understanding causality in theory and in practice.
+In this lecture, we will explore regression inference via hypothesis testing, understand how to use bootstrapping under the right assumptions, and consider the environment of understanding causality in theory and in practice.
 
-## Bias-Variance Tradeoff
-
-Recall the model and the data we generated from that model in the last section:
-
-$$\text{True relationship: } g(x)$$
-
-$$\text{Observed relationship: }Y = g(x) + \epsilon$$
-
-$$\text{Prediction: }\hat{Y}(x)$$
-
-With this reformulated modeling goal, we can now revisit the Bias-Variance Tradeoff from two lectures ago (shown below): 
-
-<p align="center">
-<img src="images/bvt_old.png" width='600'>
-</p>
-
-In today's lecture, we'll explore a more mathematical version of the graph you see above by introducing the terms model risk, observation variance, model bias, and model variance. Eventually, we'll work our way up to an updated version of the Bias-Variance Tradeoff graph that you see below 
-
-<p align="center">
-<img src="images/bvt.png" width='600'>
-</p>
-
-### Performance of an Estimator
-Suppose we want to estimate a target $Y$ using an estimator $\hat{Y}(x)$. For every estimator that we train, we can determine how good a model is by asking the following questions: 
-
-* Do we get the right answer on average? **(Bias)** 
-* How variable is the answer? **(Variance)**
-* How close do we get to $Y$? **(Risk / MSE)**
-
-<p align="center">
-<img src="images/bias_v_variance.png" width='600'>
-</p>
-
-Ideally, we want our estimator to have low bias and low variance, but how can we mathematically quantify that? To do so, let's introduce a few terms.
-
-### Model Risk
-
-**Model risk** is defined as the mean square prediction error of the random variable $\hat{Y}$. It is an expectation across *all* samples we could have possibly gotten when fitting the model, which we can denote as random variables $X_1, X_2, \ldots, X_n, Y$. Model risk considers the model's performance on any sample that is theoretically possible, rather than the specific data that we have collected. 
-
-$$\text{model risk }=E\left[(Y-\hat{Y(x)})^2\right]$$ 
-
-What is the origin of the error encoded by model risk? Note that there are two types of errors:
-
-* Chance errors: happen due to randomness alone
-    * Source 1 **(Observation Variance)**: randomness in new observations $Y$ due to random noise $\epsilon$
-    * Source 2 **(Model Variance)**: randomness in the sample we used to train the models, as samples $X_1, X_2, \ldots, X_n, Y$ are random
-* **(Model Bias)**: non-random error due to our model being different from the true underlying function $g$
-
-Recall the data-generating process we established earlier. There is a true underlying relationship $g$, observed data (with random noise) $Y$, and model $\hat{Y}$. 
-
-<p align="center">
-<img src="images/errors.png" alt='errors' width='600'>
-</p>
-
-To better understand model risk, we'll zoom in on a single data point in the plot above.
-
-<p align="center">
-<img src="images/breakdown.png" alt='breakdown' width='600'>
-</p>
-
-Remember that $\hat{Y}(x)$ is a random variable – it is the prediction made for $x$ after being fit on the specific sample used for training. If we had used a different sample for training, a different prediction might have been made for this value of $x$. To capture this, the diagram above considers both the prediction $\hat{Y}(x)$ made for a particular random training sample, and the *expected* prediction across all possible training samples, $E[\hat{Y}(x)]$. 
-
-We can use this simplified diagram to break down the prediction error into smaller components. First, start by considering the error on a single prediction, $Y(x)-\hat{Y}(x)$.
-
-<p align="center">
-<img src="images/error.png" alt='error' width='600'>
-</p>
-
-We can identify three components of this error.
-
-<p align="center">
-<img src="images/decomposition.png" alt='decomposition' width='600'>
-</p>
-
-That is, the error can be written as:
-
-$$Y(x)-\hat{Y}(x) = \epsilon + \left(g(x)-E\left[\hat{Y}(x)\right]\right) + \left(E\left[\hat{Y}(x)\right] - \hat{Y}(x)\right)$$
-$$\newline   $$
-
-The model risk is the expected square of the expression above, $E\left[(Y(x)-\hat{Y}(x))^2\right]$. If we square both sides and then take the expectation, we will get the following decomposition of model risk:
-
-$$E\left[(Y(x)-\hat{Y}(x))^2\right] = E[\epsilon^2] + \left(g(x)-E\left[\hat{Y}(x)\right]\right)^2 + E\left[\left(E\left[\hat{Y}(x)\right] - \hat{Y}(x)\right)^2\right]$$
-
-It looks like we are missing some cross-product terms when squaring the right-hand side, but it turns out that all of those cross-product terms are zero. The detailed derivation is out of scope for this class, but a proof is included at the end of this note for your reference.
-
-This expression may look complicated at first glance, but we've actually already defined each term earlier in this lecture! Let's look at them term by term.
-
-
-#### Observation Variance
-
-The first term in the above decomposition is $E[\epsilon^2]$. Remember $\epsilon$ is the random noise when observing $Y$, with expectation $\mathbb{E}(\epsilon)=0$ and variance $\text{Var}(\epsilon) = \sigma^2$. We can show that $E[\epsilon^2]$ is the variance of $\epsilon$:
-$$
-\begin{align*}
-\text{Var}(\epsilon) &= E[\epsilon^2] + \left(E[\epsilon]\right)^2\\
-&= E[\epsilon^2] + 0^2\\
-&= \sigma^2.
-\end{align*}
-$$
-
-This term describes how variable the random error $\epsilon$ (and $Y$) is for each observation. This is called the **observation variance**. It exists due to the randomness in our observations $Y$. It is a form of *chance error* we talked about in the Sampling lecture.
-
-$$\text{observation variance} = \text{Var}(\epsilon) = \sigma^2.$$
-
-The observation variance results from measurement errors when observing data or missing information that acts like noise. To reduce this observation variance, we could try to get more precise measurements, but it is often beyond the control of data scientists. Because of this, the observation variance $\sigma^2$ is sometimes called "irreducible error."
-
-#### Model Variance
-
-We will then look at the last term: $E\left[\left(E\left[\hat{Y}(x)\right] - \hat{Y}(x)\right)^2\right]$. If you recall the definition of variance from the last lecture, this is precisely $\text{Var}(\hat{Y}(x))$. We call this the **model variance**.
-
-It describes how much the prediction $\hat{Y}(x)$ tends to vary when we fit the model on different samples. Remember the sample we collect can come out very differently, thus the prediction $\hat{Y}(x)$ will also be different. The model variance describes this variability due to the randomness in our sampling process. Like observation variance, it is also a form of *chance error*—even though the sources of randomness are different.
-
-$$\text{model variance} = \text{Var}(\hat{Y}(x)) = E\left[\left(\hat{Y}(x) - E\left[\hat{Y}(x)\right]\right)^2\right]$$
-
-The main reason for the large model variance is because of **overfitting**: we paid too much attention to the details in our sample that small differences in our random sample lead to large differences in the fitted model. To remediate this, we try to reduce model complexity (e.g. take out some features and limit the magnitude of estimated model coefficients) and not fit our model on the noises.
-
-#### Model Bias
-
-Finally, the second term is $\left(g(x)-E\left[\hat{Y}(x)\right]\right)^2$. What is this? The term $E\left[\hat{Y}(x)\right] - g(x)$ is called the **model bias**.
-
-Remember that $g(x)$ is the fixed underlying truth and $\hat{Y}(x)$ is our fitted model, which is random. Model bias therefore measures how far off $g(x)$ and $\hat{Y}(x)$ are on average over all possible samples.
-
-$$\text{model bias} = E\left[\hat{Y}(x) - g(x)\right] = E\left[\hat{Y}(x)\right] - g(x)$$
-
-The model bias is not random; it's an average measure for a specific individual $x$. If bias is positive, our model tends to overestimate $g(x)$; if it's negative, our model tends to underestimate $g(x)$. And if it's 0, we can say that our model is **unbiased**.
-
-::: {.callout-tip}
-##### Unbiased Estimators 
-
-An **unbiased model** has a $\text{model bias } = 0$. In other words, our model predicts $g(x)$ on average. 
-
-Similarly, we can define bias for estimators like the mean. The sample mean is an **unbiased estimator** of the population mean, as by CLT, $\mathbb{E}[\bar{X}_n] = \mu$. Therefore, the $\text{estimator bias } = \mathbb{E}[\bar{X}_n] - \mu = 0$.
-:::
-
-There are two main reasons for large model biases:
-
-- Underfitting: our model is too simple for the data
-- Lack of domain knowledge: we don't understand what features are useful for the response variable
-
-To fix this, we increase model complexity (but we don't want to overfit!) or consult domain experts to see which models make sense. You can start to see a tradeoff here: if we increase model complexity, we decrease the model bias, but we also risk increasing the model variance.
-
-
-### The Decomposition
-To summarize: 
-
-* The **model risk**, $\mathbb{E}\left[(Y(x)-\hat{Y}(x))^2\right]$, is the mean squared prediction error of the model.
-* The **observation variance**, $\sigma^2$, is the variance of the random noise in the observations. It describes how variable the random error $\epsilon$ is for each observation.
-* The **model bias**, $\mathbb{E}\left[\hat{Y}(x)\right]-g(x)$, is how "off" the $\hat{Y}(x)$ is as an estimator of the true underlying relationship $g(x)$. 
-* The **model variance**, $\text{Var}(\hat{Y}(x))$, describes how much the prediction $\hat{Y}(x)$ tends to vary when we fit the model on different samples. 
-
-The above definitions enable us to simplify the decomposition of model risk before as:
-
-$$ E[(Y(x) - \hat{Y}(x))^2] = \sigma^2 + (E[\hat{Y}(x)] - g(x))^2 + \text{Var}(\hat{Y}(x)) $$
-$$\text{model risk } = \text{observation variance} + (\text{model bias})^2 \text{+ model variance}$$
-
-This is known as the **bias-variance tradeoff**. What does it mean? Remember that the model risk is a measure of the model's performance. Our goal in building models is to keep model risk low; this means that we will want to ensure that each component of model risk is kept at a small value. 
-
-Observation variance is an inherent, random part of the data collection process. We aren't able to reduce the observation variance, so we'll focus our attention on the model bias and model variance. 
-
-In the Feature Engineering lecture, we considered the issue of overfitting. We saw that the model's error or bias tends to decrease as model complexity increases — if we design a highly complex model, it will tend to make predictions that are closer to the true relationship $g$. At the same time, model variance tends to *increase* as model complexity increases; a complex model may overfit to the training data, meaning that small differences in the random samples used for training lead to large differences in the fitted model. We have a problem. To decrease model bias, we could increase the model's complexity, which would lead to overfitting and an increase in model variance. Alternatively, we could decrease model variance by decreasing the model's complexity at the cost of increased model bias due to underfitting. 
-
-<p align="center">
-<img src="images/bvt.png" alt='bvt' width='600'>
-</p>
-
-We need to strike a balance. Our goal in model creation is to use a complexity level that is high enough to keep bias low, but not so high that model variance is large.
 
 ## Interpreting Regression Coefficients
 
-Recall the framework we established earlier in this lecture. If we assume that the underlying relationship between our observations and input features is linear, we can express this relationship in terms of the unknown, true model parameters $\theta$.
+Recall the framework we established in the last lecture. If we assume that the underlying relationship between our observations and input features is linear, we can express this relationship in terms of the unknown, true model parameters $\theta$.
 
 $$f_{\theta}(x) = g(x) + \epsilon = \theta_0 + \theta_1 x_1 + \ldots + \theta_p x_p + \epsilon$$
 
-Our model attempts to estimate each true parameter $\theta_i$ using the estimates $\hat{\theta}_i$ calculated from the design matrix $\Bbb{X}$ and response vector $\Bbb{Y}$.
+Our model attempts to estimate each true population parameter $\theta_i$ using the sample estimates $\hat{\theta}_i$ calculated from the design matrix $\Bbb{X}$ and response vector $\Bbb{Y}$.
 
 $$f_{\hat{\theta}}(x) = \hat{\theta}_0 + \hat{\theta}_1 x_1 + \ldots + \hat{\theta}_p x_p$$
 
@@ -238,9 +70,55 @@ If the true parameter $\theta_i$ for a particular feature is 0, this tells us so
 
 To test if the true parameter $\theta_i$ is 0, we construct a **hypothesis test** where our null hypothesis states that the true parameter $\theta_i$ is 0 and the alternative hypothesis states that the true parameter $\theta_i$ is *not* 0. If our p-value is smaller than our cutoff value (usually p=0.05), we reject the null hypothesis. 
 
-## Hypothesis Testing through Bootstrap: PurpleAir Demo
+## Bootstrap Resampling (Review)
 
-An equivalent way to execute the hypothesis test described above is through **bootstrapping** (this equivalence can be proven through the [duality argument](https://stats.stackexchange.com/questions/179902/confidence-interval-p-value-duality-vs-frequentist-interpretation-of-cis), which is out of scope for this class). We use bootstrapping to compute approximate 95% confidence intervals for each $\theta_i$. If the interval doesn't contain 0, we reject the null hypothesis at the 5% level. Otherwise, the data is consistent with the null, as the true parameter *could* be 0.
+To determine properties of the sampling distribution of an estimator like variance, we’d need to have access to the population so that we can consider all possible samples and compute an estimate for each sample.
+
+<p align="center">
+<img src="images/population_samples.png" alt='y_hat' width='650'>
+</p>
+
+However, we don’t have access to the population; we only have *one* random sample from the population. How can we consider all possible samples if we only have one?
+
+The idea of bootstrapping is to treat our random sample as a \"population\" and resample from it *with replacement*. Intuitively, a random sample resembles the population, so a random *resample* also resembles a random sample of the population.
+
+<p align="center">
+<img src="images/bootstrap.png" alt='y_hat' width='700'>
+</p>
+
+Bootstrap resampling is a technique for estimating the sampling distribution of an estimator. To execute it, we can follow the pseudocode below:
+```
+collect a random sample of size n (called the bootstrap population)
+
+initiate list of estimates
+
+repeat 10,000 times:
+    resample with replacement from bootstrap population
+    apply estimator f to the resample
+    store in list
+
+list of estimates is the bootstrapped sampling distribution of f
+```
+
+::: {.callout-warning collapse=\"true\"}
+### Why must we resample *with replacement*?
+Given an original sample of size $n$, we want a resample that has the same size $n$ as the original. Sampling *without* replacement will give us the original sample with shuffled rows. Hence, when we calculate summary statistics like the average, our sample *without* replacement will always have the same average as the original sample, defeating the purpose of a bootstrap.
+:::
+
+How well does bootstrapping actually represent our population? The bootstrapped sampling distribution of an estimator does not exactly match the sampling distribution of that estimator, but it is often close. Similarly, the variance of the bootstrapped distribution is often close to the true variance of the estimator. The example below displays the results of different bootstraps from a *known* population using a sample size of $n=50$.
+
+<p align="center">
+<img src="images/bootstrapped_samples.png" alt='y_hat' width='600'>
+</p>
+
+In the real world, we don't know the population distribution. The center of the boostrapped distribution is the estimator applied to our original sample, so we have no way of recovering the estimator's true expected value. The quality of our bootstrapped distribution depends on the quality of our original sample; if our original sample was not representative of the population (like Sample 5 in the image above), then the bootstrap is next to useless. In general, bootstrapping works better for *large samples*, when the population distribution is *not heavily skewed* (no outliers), and when the estimator is *“low variance”* (insensitive to extreme values).
+
+
+## Collinearity
+
+### Hypothesis Testing through Bootstrap: Snowy Plover Demo
+
+An equivalent way to execute the hypothesis test described earlier is through **bootstrapping** (this equivalence can be proven through the [duality argument](https://stats.stackexchange.com/questions/179902/confidence-interval-p-value-duality-vs-frequentist-interpretation-of-cis), which is out of scope for this class). We use bootstrapping to compute approximate 95% confidence intervals for each $\theta_i$. If the interval doesn't contain 0, we reject the null hypothesis at the 5% level. Otherwise, the data is consistent with the null, as the true parameter *could* be 0.
 
 To show an example of this hypothesis testing process, we'll work with the [snowy plover](https://www.audubon.org/field-guide/bird/snowy-plover) dataset throughout this section. The data are about the eggs and newly-hatched chicks of the Snowy Plover. The data were collected at the Point Reyes National Seashore by a former [student at Berkeley](https://openlibrary.org/books/OL2038693M/BLSS_the_Berkeley_interactive_statistical_system). Here's a [parent bird and some eggs](http://cescos.fau.edu/jay/eps/articles/snowyplover.html).
 
@@ -360,7 +238,7 @@ display(pd.DataFrame([model.intercept_] + list(model.coef_),
 print("RMSE", np.mean((Y - model.predict(X)) ** 2))
 ```
 
-We now have the value of $\hat{\theta}_1$ when considering the single sample of data that we have. To get a sense of how this estimate might vary if we were to draw different random samples, we will use **[bootstrapping](https://inferentialthinking.com/chapters/13/2/Bootstrap.html?)**. To construct a bootstrap sample, we will draw a resample from the collected data that:
+We now have the value of $\hat{\theta}_1$ ($0.431$) when considering the single sample of data that we have. To get a sense of how this estimate might vary if we were to draw different random samples, we will use **[bootstrapping](https://inferentialthinking.com/chapters/13/2/Bootstrap.html?)**. To construct a bootstrap sample, we will draw a resample from the collected data that:
 
 * Has the same sample size as the collected data
 * Is drawn with replacement (this ensures that we don't draw the exact same sample every time!)
@@ -401,8 +279,6 @@ conf_interval
 ```
 
 We find that our bootstrapped approximate 95% confidence interval for $\theta_1$ is $[-0.259, 1.103]$. Immediately, we can see that 0 *is* indeed contained in this interval – this means that we *cannot* conclude that $\theta_1$ is non-zero! More formally, we fail to reject the null hypothesis (that $\theta_1$ is 0) under a 5% p-value cutoff. 
-
-## Colinearity
 
 We can repeat this process to construct 95% confidence intervals for the other parameters of the model.
 
@@ -451,13 +327,13 @@ import seaborn as sns
 sns.pairplot(eggs[["egg_length", "egg_breadth", "egg_weight", 'bird_weight']]);
 ```
 
-This issue is known as **colinearity**, sometimes also called **multicolinearity**. Collinearity occurs when one feature can be predicted fairly accurately by a linear combination of the other features, which happens when one feature is highly correlated with the others. 
+This issue is known as **collinearity**, sometimes also called **multicollinearity**. Collinearity occurs when one feature can be predicted fairly accurately by a linear combination of the other features, which happens when one feature is highly correlated with the others. 
 
-Why is colinearity a problem? Its consequences span several aspects of the modeling process:
+Why is collinearity a problem? Its consequences span several aspects of the modeling process:
 
 * **Inference**: Slopes can't be interpreted for an inference task.
 * **Model Variance**: If features strongly influence one another, even small changes in the sampled data can lead to large changes in the estimated slopes.
-* **Unique Solution**: If one feature is a linear combination of the other features, the design matrix will not be full rank, and $\mathbb{X}^{\top}\mathbb{X}$ is not invertible. This means that least squares does not have a unique solution.
+* **Unique Solution**: If one feature is a linear combination of the other features, the design matrix will not be full rank, and $\mathbb{X}^{\top}\mathbb{X}$ is not invertible. This means that least squares does not have a unique solution. See [this section](https://ds100.org/course-notes/ols/ols.html#bonus-uniqueness-of-the-solution) of Course Note 12 for more on this.
 
 The take-home point is that we need to be careful with what features we select for modeling. If two features likely encode similar information, it is often a good idea to choose only one of them as an input variable.
 
@@ -553,7 +429,7 @@ All inference assumes that the regression model holds.
     
     …then the results of the bootstrap might not be valid.
 
-## (Bonus) Correlation and Causation
+## [Bonus] Correlation vs. Causation
 
 Let us consider some questions in an arbitrary regression problem. 
 
@@ -565,15 +441,6 @@ For simple linear regression, this boils down to the correlation coefficient
 
 * Does having more $x$ predict more $y$ (and by how much)?
 
-**Examples**:
-
-* Are homes with granite countertops worth more money?
-* Is college GPA higher for students who win a certain scholarship?
-* Are breastfed babies less likely to develop asthma?
-* Do cancer patients given some aggressive treatment have a higher 5-year survival rate?
-* Are people who smoke more likely to get cancer? 
-
-These sound like causal questions, but they are not!
 
 ### Prediction vs Causation
 The difference between correlation/prediction vs. causation is best illustrated through examples. 
@@ -585,6 +452,8 @@ Some questions about **correlation / prediction** include:
 * Are breastfed babies less likely to develop asthma?
 * Do cancer patients given some aggressive treatment have a higher 5-year survival rate?
 * Are people who smoke more likely to get cancer? 
+
+These sound like causal questions, but they are not!
 
 Some questions about **causality** include:
 
@@ -611,7 +480,7 @@ Let T represent a treatment (for example, alcohol use), and Y represent an outco
 
 <img src="images/confounder.png" alt='confounder' width='600'>
 
-A **confounder** is a variable that affects both T and Y, distorting the correlation between them. Using the example above. Confounders can be a measured covariate or an unmeasured variable we don’t know about, and they generally cause problems, as the relationship between T and Y is really affected by data we cannot see. 
+A **confounder** is a variable that affects both T and Y, distorting the correlation between them. Using the example above. Confounders can be a measured covariate (a feature) or an unmeasured variable we don’t know about, and they generally cause problems, as the relationship between T and Y is really affected by data we cannot see. 
 
 **Common assumption:** all confounders are observed (**ignorability**)
 
@@ -755,9 +624,9 @@ What if we don’t believe in ignorability? Other methods look for a
 
 - Favorite example: **regression discontinuity**
 
-## (Bonus) Proof of Bias-Variance Decomposition
+## [Bonus] Proof of Bias-Variance Decomposition
 
-This section walks through the detailed derivation of the Bias-Variance Decomposition in the Bias-Variance Tradeoff section earlier in this note.
+This section walks through the detailed derivation of the Bias-Variance Decomposition in the Bias-Variance Tradeoff section earlier in Note 18.
 
 :::{.callout collapse="true"}
 ### Click to show
