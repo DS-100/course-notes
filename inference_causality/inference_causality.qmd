@@ -7,7 +7,7 @@ format:
     code-fold: true
     code-tools: true
     toc: true
-    toc-title: Causal Inference and the Bootstrap
+    toc-title: Causal Inference and Confounding
     page-layout: full
     theme:
       - cosmo
@@ -120,7 +120,117 @@ How well does bootstrapping actually represent our population? The bootstrapped 
 In the real world, we don't know the population distribution. The center of the boostrapped distribution is the estimator applied to our original sample, so we have no way of recovering the estimator's true expected value; the center and spread of our bootstrap are *approximations*. The quality of our bootstrapped distribution also depends on the quality of our original sample; if our original sample was not representative of the population (like Sample 5 in the image above), then the bootstrap is next to useless. In general, bootstrapping works better for *large samples*, when the population distribution is *not heavily skewed* (no outliers), and when the estimator is *“low variance”* (insensitive to extreme values).
 
 ### Simple Bootstrap Example
-TODO
+Here we work through a simple example of the bootstrap when estimating the relationship between miles per gallon and the weight of a vehicle.
+
+Suppose we collected a sample of 20 cars from a population. For the purposes of this demo we will assume that the seaborn dataset is the population. The following is a visualization of our sample:
+
+```{python}
+#| code-fold: true
+#| vscode: {languageId: python}
+import numpy as np
+import pandas as pd
+import sklearn.linear_model as lm
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+np.random.seed(42)
+mpg_sample = sns.load_dataset('mpg').sample(20)
+sns.regplot(mpg_sample, x='weight', y='mpg',ci=False);
+```
+
+Fitting a linear model we get an estimate of the slope:
+
+```{python}
+#| code-fold: false
+#| vscode: {languageId: python}
+model = lm.LinearRegression().fit(mpg_sample[['weight']], mpg_sample['mpg'])
+model.coef_[0]
+```
+
+#### Bootstrap Implementation
+Now let's use bootstrapping to estimate the distribution of that coefficient. Here we will construct a bootstrap function that takes an estimator function and uses that function to construct many bootstrap estimates of the slope.
+
+```{python}
+#| code-fold: false
+#| vscode: {languageId: python}
+def estimator(sample):
+    model = lm.LinearRegression().fit(sample[['weight']], sample['mpg'])
+    return model.coef_[0]
+```
+
+The code below uses [```df.sample```](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.sample.html) to generate a bootstrap sample of the same size as the original sample.
+
+```{python}
+#| code-fold: false
+#| vscode: {languageId: python}
+def bootstrap(sample, statistic, num_repetitions):
+    """
+    Returns the statistic computed on a num_repetitions  
+    bootstrap samples from sample.
+    """
+    stats = []
+    for i in np.arange(num_repetitions):
+        # Step 1: Sample the Sample
+        bootstrap_sample = sample.sample(frac=1, replace=True)
+        # Step 2: compute statistics on the sample of the sample
+        bootstrap_stat = statistic(bootstrap_sample)
+        # Accumulate the statistics
+        stats.append(bootstrap_stat)
+    return stats    
+```
+
+After constructing MANY bootstrap slope estimates (in this case 10000), we can visualize the bootstrap distribution of the slope estimates.
+
+```{python}
+#| code-fold: true
+#| vscode: {languageId: python}
+bs_thetas = bootstrap(mpg_sample, estimator, 10000)
+fig = plt.subplots(dpi=120)
+sns.histplot(bs_thetas)
+plt.title('Bootstrap Distribution of the Slope');
+```
+
+#### Computing a Bootstrap CI
+We can now compute the confidence interval for the slope using the percentiles of the empirical distribution. Here, we are looking for a 95% confidence interval, so we are looking for the values at the 2.5 and 97.5 percentile in the bootstrap samples to be the bounds of our interval. We find the interval to be the range below:
+
+```{python}
+#| code-fold: true
+#| vscode: {languageId: python}
+def bootstrap_ci(bootstrap_samples, confidence_level=95):
+    """
+    Returns the confidence interval for the bootstrap samples.
+    """
+    lower_percentile = (100 - confidence_level) / 2
+    upper_percentile = 100 - lower_percentile
+    return np.percentile(bootstrap_samples, [lower_percentile, upper_percentile])
+print(bootstrap_ci(bs_thetas))
+```
+
+#### Comparing to the Population CIs
+In practice you don't have access to the population, but in this specific example we had taken a sample from a larger dataset that we can pretend is the population. Let's compare to resampling from the larger dataset. Here is the 95% confidence interval for the slope when sampling 10000 times from the whole data:
+
+```{python}
+#| code-fold: true
+#| vscode: {languageId: python}
+mpg_pop = sns.load_dataset('mpg')
+theta_est = [estimator(mpg_pop.sample(20)) for i in range(10000)]
+print(bootstrap_ci(theta_est))
+```
+
+Visualizing the two distributions:
+
+```{python}
+#| code-fold: true
+#| vscode: {languageId: python}
+fig = plt.subplots(dpi=120,figsize=(6,4))
+sns.histplot(bs_thetas, label='Bootstrap Thetas', alpha=0.7)
+sns.histplot(theta_est, label='Population Sampled Thetas', alpha=0.7)
+plt.legend()
+plt.xlabel('value')
+plt.title('Distribution of the Slope');
+```
+
+Comparing the two distributions, we see that our bootstrapped sample distribution does not exactly match the sampling distribution of the population, but it is relatively close. This demonstrates the benefit of bootstrapping, as without knowing the actual population distribution, we are able to roughly approximate the true slope for the model by using only a single random sample of 20 cars.
 
 <!-- #### PurpleAir (chose to skip this section because it's too complex for the amount of pedagogical value it adds)
 To show an example of this hypothesis testing process, we'll work with air quality measurement data. There are 2 common sources of air quality information: Air Quality System (AQS) and [PurpleAir sensors](https://www2.purpleair.com/). AQS is seen as the gold standard because it is high quality, well-calibrated, and publicly available. However, it is very expensive, and the sensors are far apart; reports are also delayed due to extensive calibration.  
@@ -150,7 +260,6 @@ PA - \theta_0 &\approx + \theta_1 \text{True Air Quality} \\
 $$
 :::
 
-```{python}
 #| code-fold: true
 import numpy as np
 import pandas as pd
@@ -195,7 +304,7 @@ GA = full_df.loc[(full_df['id'] == 'GA1') & (~full_df['date'].isin(bad_dates)) ,
 AQS, PA = GA[['pm25aqs']], GA['pm25pa']
 AQS.head()
 pd.DataFrame(PA).head()
-``` -->
+-->
 
 ## Collinearity
 
@@ -212,6 +321,8 @@ To show an example of this hypothesis testing process, we'll work with the [snow
 Note that `Egg Length` and `Egg Breadth` (widest diameter) are measured in millimeters, and `Egg Weight` and `Bird Weight` are measured in grams; for comparison, a standard paper clip weighs about one gram.
 
 ```{python}
+#| code-fold: true
+#| vscode: {languageId: python}
 import pandas as pd
 eggs = pd.read_csv("data/snowy_plover.csv")
 eggs.head(5)
@@ -235,6 +346,7 @@ Next, we use our data to fit a model $\hat{Y} = f_{\hat{\theta}}(x)$ that approx
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 from sklearn.linear_model import LinearRegression
 import numpy as np
 
@@ -266,6 +378,7 @@ We draw a bootstrap sample, use this sample to fit a model, and record the resul
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 # Set a random seed so you generate the same random sample as staff
 # In the "real world", we wouldn't do this
 import numpy as np
@@ -305,6 +418,7 @@ Our bootstrapped 95% confidence interval for $\theta_1$ is $[-0.259, 1.103]$. Im
 We can repeat this process to construct 95% confidence intervals for the other parameters of the model.
 
 ```{python}
+#| vscode: {languageId: python}
 np.random.seed(1337)
 
 theta_0_estimates = []
@@ -345,6 +459,7 @@ How can we explain this result? Think back to how we first interpreted the param
 To support this conclusion, we can visualize the relationships between our feature variables. Notice the strong positive association between the features.
 
 ```{python}
+#| vscode: {languageId: python}
 import seaborn as sns
 sns.pairplot(eggs[["egg_length", "egg_breadth", "egg_weight", 'bird_weight']]);
 ```
@@ -366,6 +481,7 @@ Let us now consider a more interpretable model: we instead assume a true relatio
 $$f_\theta(x) = \theta_0 + \theta_1 \text{egg\_weight} + \epsilon$$
 
 ```{python}
+#| vscode: {languageId: python}
 from sklearn.linear_model import LinearRegression
 X_int = eggs[["egg_weight"]]
 Y_int = eggs["bird_weight"]
@@ -383,6 +499,7 @@ pd.DataFrame({"theta_hat":[model_int.intercept_, thetas_int[0]]}, index=["theta_
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 import matplotlib.pyplot as plt
 
 # Set a random seed so you generate the same random sample as staff
@@ -417,6 +534,7 @@ plt.title(r"Bootstrapped estimates $\hat{\theta}_1$ Under the Interpretable Mode
 Notice how the interpretable model performs almost as well as our other model:
 
 ```{python}
+#| vscode: {languageId: python}
 from sklearn.metrics import mean_squared_error
 
 rmse = mean_squared_error(Y, model.predict(X))
@@ -428,6 +546,7 @@ print(f'RMSE of Interpretable Model: {rmse_int}')
 Yet, the confidence interval for the true parameter $\theta_{1}$ does not contain zero.
 
 ```{python}
+#| vscode: {languageId: python}
 lower_int = np.percentile(estimates_int, 2.5)
 upper_int = np.percentile(estimates_int, 97.5)
 
@@ -513,5 +632,4 @@ However, often, randomly assigning treatments is impractical or unethical. For e
 An alternative to bypass this issue is to utilize **observational studies**. This can be done by obtaining two participant groups separated based on some identified treatment variable. Unlike randomized experiments, however, we cannot assume ignorability: the participants could have separated into the two groups based on other covariates! In addition, there could also be unmeasured confounders.
 
 <img src="images/observational.png" alt='observational' width='600'>
-
 
