@@ -13,7 +13,17 @@ format:
       - cosmo
       - cerulean
     callout-icon: false
-jupyter: python3
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .qmd
+      format_name: quarto
+      format_version: '1.0'
+      jupytext_version: 1.16.1
+  kernelspec:
+    display_name: Python 3 (ipykernel)
+    language: python
+    name: python3
 ---
 
 <!-- 
@@ -56,12 +66,12 @@ In this lecture, we will explore regression inference via hypothesis testing, un
 
 
 ## Parameter Inference: Interpreting Regression Coefficients
-There are two main reasons why do we build models: 
+There are two main reasons why we build models: 
 
-* **Prediction**: using our model to make accurate predictions on unseen data, and (2) to understand complex phenomena occurring in the world we live in. 
-* **Inference**: using our model to draw conclusions about the underlying relationship(s) between our features and response. Its goal is to understand complex phenomena occurring in the world we live in. While training is the process of fiting a model, inference is the *process of making predictions*.
+1. **Prediction**: using our model to make accurate predictions about unseen data
+2. **Inference**: using our model to draw conclusions about the underlying relationship(s) between our features and response. We want to understand the complex phenomena occurring in the world we live in. While training is the process of fitting a model, inference is the *process of making predictions*.
 
-Recall the framework we established in the last lecture. The true underlying relationship between the data points is given by $Y = g(x) + \epsilon$, where $g(x)$ is the *true underlying relationship*, and $\epsilon$ represents randomness. If we assume $g(x)$ is linear, we can express this relationship in terms of the unknown, true model parameters $\theta$.
+Recall the framework we established in the last lecture. The relationship between datapoints is given by $Y = g(x) + \epsilon$, where $g(x)$ is the *true underlying relationship*, and $\epsilon$ represents randomness. If we assume $g(x)$ is linear, we can express this relationship in terms of the unknown, true model parameters $\theta$.
 
 $$f_{\theta}(x) = g(x) + \epsilon = \theta_0 + \theta_1 x_1 + \ldots + \theta_p x_p + \epsilon$$
 
@@ -69,23 +79,26 @@ Our model attempts to estimate each true population parameter $\theta_i$ using t
 
 $$f_{\hat{\theta}}(x) = \hat{\theta}_0 + \hat{\theta}_1 x_1 + \ldots + \hat{\theta}_p x_p$$
 
-Let's pause for a moment. At this point, we're very used to working with the idea of a model parameter. But what exactly does each coefficient $\theta_i$ actually *mean*? We can think of each $\theta_i$ as a *slope* of the linear model – if all other variables are held constant, a unit change in $x_i$ will result in a $\theta_i$ change in $f_{\theta}(x)$. Broadly speaking, a large value of $\theta_i$ means that the feature $x_i$ has a large effect on the response; conversely, a small value of $\theta_i$ means that $x_i$ has little effect on the response. In the extreme case, if the true parameter $\theta_i$ is 0, then the feature $x_i$ has **no effect** on $Y(x)$. 
+Let's pause for a moment. At this point, we're very used to working with the idea of a model parameter. But what exactly does each coefficient $\theta_i$ actually *mean*? We can think of each $\theta_i$ as a *slope* of the linear model. If all other variables are held constant, a unit change in $x_i$ will result in a $\theta_i$ change in $f_{\theta}(x)$. Broadly speaking, a large value of $\theta_i$ means that the feature $x_i$ has a large effect on the response; conversely, a small value of $\theta_i$ means that $x_i$ has little effect on the response. In the extreme case, if the true parameter $\theta_i$ is 0, then the feature $x_i$ has **no effect** on $Y(x)$. 
 
-If the true parameter $\theta_i$ for a particular feature is 0, this tells us something pretty significant about the world: there is no underlying relationship between $x_i$ and $Y(x)$! How then, can we test if a parameter is actually 0? As a baseline, we go through our usual process of drawing a sample, using this data to fit a model, and computing an estimate $\hat{\theta}_i$. However, we need to also consider the fact that if our random sample had come out differently, we may have found a different result for $\hat{\theta}_i$. To infer if the true parameter $\theta_i$ is 0, we want to draw our conclusion from the distribution of $\hat{\theta}_i$ estimates we could have drawn across all other random samples. This is where [hypothesis testing](https://inferentialthinking.com/chapters/11/Testing_Hypotheses.html) comes in handy! 
+If the true parameter $\theta_i$ for a particular feature is 0, this tells us something pretty significant about the world: there is no underlying relationship between $x_i$ and $Y(x)$! But how can we test if a parameter is actually 0? As a baseline, we go through our usual process of drawing a sample, using this data to fit a model, and computing an estimate $\hat{\theta}_i$. However, we also need to consider that if our random sample comes out differently, we may find a different result for $\hat{\theta}_i$. To infer if the true parameter $\theta_i$ is 0, we want to draw our conclusion from the distribution of $\hat{\theta}_i$ estimates we could have drawn across all other random samples. This is where [hypothesis testing](https://inferentialthinking.com/chapters/11/Testing_Hypotheses.html) comes in handy! 
 
-To test if the true parameter $\theta_i$ is 0, we construct a **hypothesis test** where our null hypothesis states that the true parameter $\theta_i$ is 0, and the alternative hypothesis states that the true parameter $\theta_i$ is *not* 0. If our p-value is smaller than our cutoff value (usually p=0.05), we reject the null hypothesis. 
+To test if the true parameter $\theta_i$ is 0, we construct a **hypothesis test** where our null hypothesis states that the true parameter $\theta_i$ is 0, and the alternative hypothesis states that the true parameter $\theta_i$ is *not* 0. If our p-value is smaller than our cutoff value (usually p = 0.05), we reject the null hypothesis in favor of the alternative hypothesis. 
 
-## Bootstrap Resampling (Review)
+## Review: Bootstrap Resampling
 
-To determine properties of the sampling distribution of an estimator like variance, we’d need to have access to the population so that we can consider all possible samples and compute an estimate for each sample.
+To determine the properties (e.g., variance) of the sampling distribution of an estimator, we’d need access to the population. Ideally, we'd want to consider all possible samples in the population, compute an estimate for each sample, and study the distribution of those estimates.
 
 <p align="center">
 <img src="images/population_samples.png" alt='y_hat' width='650'>
 </p>
 
-However, we don’t have access to the population; we only have *one* random sample from the population. How can we consider all possible samples if we only have one?
+However, this can be quite expensive and time-consuming. Even more importantly, we don’t have access to the population —— we only have *one* random sample from the population. How can we consider all possible samples if we only have one?
 
-The idea of bootstrapping is to treat our random sample as a \"population\" and resample from it *with replacement*. Intuitively, a random sample resembles the population, so a random *resample* also resembles a random sample of the population.
+Bootstrapping comes in handy here! With bootstrapping, we treat our random sample as a "population" and resample from it *with replacement*. Intuitively, a random sample resembles the population (if it is big enough), so a random *resample* also resembles a random sample of the population. When sampling, there are a couple things to keep in mind:
+
+* We need to sample the same way we constructed the original sample. Typically, this involves taking a simple random sample with replacement.
+* New samples must be the same size as the original sample. We need to accurately model the variability of our estimates.
 
 ::: {.callout-warning collapse=\"true\"}
 ### Why must we resample *with replacement*?
@@ -100,16 +113,15 @@ Bootstrap resampling is a technique for estimating the sampling distribution of 
 ```
 collect a random sample of size n (called the bootstrap population)
 
-initiate list of estimates
+initiate a list of estimates
 
 repeat 10,000 times:
-    resample with replacement from bootstrap population
+    resample with replacement from the bootstrap population
     apply estimator f to the resample
     store in list
 
 list of estimates is the bootstrapped sampling distribution of f
 ```
-
 
 How well does bootstrapping actually represent our population? The bootstrapped sampling distribution of an estimator does not exactly match the sampling distribution of that estimator, but it is often close. Similarly, the variance of the bootstrapped distribution is often close to the true variance of the estimator. The example below displays the results of different bootstraps from a *known* population using a sample size of $n=50$.
 
@@ -117,52 +129,43 @@ How well does bootstrapping actually represent our population? The bootstrapped 
 <img src="images/bootstrapped_samples.png" alt='y_hat' width='600'>
 </p>
 
-In the real world, we don't know the population distribution. The center of the boostrapped distribution is the estimator applied to our original sample, so we have no way of recovering the estimator's true expected value; the center and spread of our bootstrap are *approximations*. The quality of our bootstrapped distribution also depends on the quality of our original sample; if our original sample was not representative of the population (like Sample 5 in the image above), then the bootstrap is next to useless. In general, bootstrapping works better for *large samples*, when the population distribution is *not heavily skewed* (no outliers), and when the estimator is *“low variance”* (insensitive to extreme values).
+In the real world, we don't know the population distribution. The center of the bootstrapped distribution is the estimator applied to our original sample, so we have no way of understanding the estimator's true expected value; the center and spread of our bootstrap are *approximations*. The quality of our bootstrapped distribution also depends on the quality of our original sample. If our original sample was not representative of the population (like Sample 5 in the image above), then the bootstrap is next to useless. In general, bootstrapping works better for *large samples*, when the population distribution is *not heavily skewed* (no outliers), and when the estimator is *“low variance”* (insensitive to extreme values).
+
+<!-- #### TODO: Good to include this example but make sure to integrate well with the following example and ensure it flows. Following example is explained under the assumption that people haven't seen bootstrapping example before.
 
 ### Simple Bootstrap Example
-Here we work through a simple example of the bootstrap when estimating the relationship between miles per gallon and the weight of a vehicle.
+To get a better idea of how bootstrapping works in practice, let's walk through a simple example of bootstrapping to estimate the relationship between miles per gallon and the weight of a vehicle.
 
-Suppose we collected a sample of 20 cars from a population. For the purposes of this demo we will assume that the seaborn dataset is the population. The following is a visualization of our sample:
+Suppose we collected a sample of 20 cars from a population. For the purposes of this demo, we will assume that the seaborn dataset represents the entire population. The following is a visualization of our sample:
 
-```{python}
 #| code-fold: true
-#| vscode: {languageId: python}
 import numpy as np
 import pandas as pd
+import plotly.express as px
 import sklearn.linear_model as lm
 import seaborn as sns
-import matplotlib.pyplot as plt
 
 np.random.seed(42)
 mpg_sample = sns.load_dataset('mpg').sample(20)
-sns.regplot(mpg_sample, x='weight', y='mpg',ci=False);
-```
+px.scatter(mpg_sample, x='weight', y='mpg', trendline='ols', width=800)
 
-Fitting a linear model we get an estimate of the slope:
+Fitting a linear model, we get an estimate of the slope:
 
-```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 model = lm.LinearRegression().fit(mpg_sample[['weight']], mpg_sample['mpg'])
-model.coef_[0]
-```
+model.coef_[0] 
 
 #### Bootstrap Implementation
-Now let's use bootstrapping to estimate the distribution of that coefficient. Here we will construct a bootstrap function that takes an estimator function and uses that function to construct many bootstrap estimates of the slope.
+We can use bootstrapping to estimate the distribution of that coefficient. Here we construct a bootstrap function that takes an estimator function and uses that function to construct many bootstrap estimates of the slope.
 
-```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 def estimator(sample):
     model = lm.LinearRegression().fit(sample[['weight']], sample['mpg'])
     return model.coef_[0]
-```
+    
+The code below uses `df.sample` [(documentation)](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.sample.html) to generate a bootstrap sample that is the same size as the original sample.
 
-The code below uses [```df.sample```](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.sample.html) to generate a bootstrap sample of the same size as the original sample.
-
-```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 def bootstrap(sample, statistic, num_repetitions):
     """
     Returns the statistic computed on a num_repetitions  
@@ -177,25 +180,21 @@ def bootstrap(sample, statistic, num_repetitions):
         # Accumulate the statistics
         stats.append(bootstrap_stat)
     return stats    
-```
 
-After constructing MANY bootstrap slope estimates (in this case 10000), we can visualize the bootstrap distribution of the slope estimates.
+After constructing many bootstrap slope estimates (in this case, 10,000), we can visualize the distribution of these estimates.
 
-```{python}
 #| code-fold: true
-#| vscode: {languageId: python}
+#Construct 10,000 bootstrap slope estimates
 bs_thetas = bootstrap(mpg_sample, estimator, 10000)
-fig = plt.subplots(dpi=120)
-sns.histplot(bs_thetas)
-plt.title('Bootstrap Distribution of the Slope');
-```
+
+#Visualize the distribution of these estimates
+px.histogram(bs_thetas, title='Bootstrap Distribution of the Slope', 
+             width=800)
 
 #### Computing a Bootstrap CI
-We can now compute the confidence interval for the slope using the percentiles of the empirical distribution. Here, we are looking for a 95% confidence interval, so we are looking for the values at the 2.5 and 97.5 percentile in the bootstrap samples to be the bounds of our interval. We find the interval to be the range below:
+We can now compute the confidence interval for the slopes using the percentiles of the empirical distribution. Here, we are looking for a 95% confidence interval, so we want values at the 2.5 and 97.5 percentiles of the bootstrap samples to be the bounds of our interval. To find the interval, we can use the function defined below:
 
-```{python}
 #| code-fold: true
-#| vscode: {languageId: python}
 def bootstrap_ci(bootstrap_samples, confidence_level=95):
     """
     Returns the confidence interval for the bootstrap samples.
@@ -204,33 +203,25 @@ def bootstrap_ci(bootstrap_samples, confidence_level=95):
     upper_percentile = 100 - lower_percentile
     return np.percentile(bootstrap_samples, [lower_percentile, upper_percentile])
 print(bootstrap_ci(bs_thetas))
-```
 
 #### Comparing to the Population CIs
-In practice you don't have access to the population, but in this specific example we had taken a sample from a larger dataset that we can pretend is the population. Let's compare to resampling from the larger dataset. Here is the 95% confidence interval for the slope when sampling 10000 times from the whole data:
+In practice, you don't have access to the population. In this example, we took a sample from a larger dataset that we can treat as the population. Let's compare our results to what they would be if we had resampled from the larger dataset. Here is the 95% confidence interval for the slope when sampling 10,000 times from the entire dataset:
 
-```{python}
 #| code-fold: true
-#| vscode: {languageId: python}
 mpg_pop = sns.load_dataset('mpg')
 theta_est = [estimator(mpg_pop.sample(20)) for i in range(10000)]
 print(bootstrap_ci(theta_est))
-```
 
 Visualizing the two distributions:
-
-```{python}
 #| code-fold: true
-#| vscode: {languageId: python}
-fig = plt.subplots(dpi=120,figsize=(6,4))
-sns.histplot(bs_thetas, label='Bootstrap Thetas', alpha=0.7)
-sns.histplot(theta_est, label='Population Sampled Thetas', alpha=0.7)
-plt.legend()
-plt.xlabel('value')
-plt.title('Distribution of the Slope');
-```
+thetas = pd.DataFrame({"bs_thetas": bs_thetas, "thetas": theta_est})
+px.histogram(thetas.melt(), x='value', facet_row='variable', 
+             title='Distribution of the Slope', width=800)
 
-Comparing the two distributions, we see that our bootstrapped sample distribution does not exactly match the sampling distribution of the population, but it is relatively close. This demonstrates the benefit of bootstrapping, as without knowing the actual population distribution, we are able to roughly approximate the true slope for the model by using only a single random sample of 20 cars.
+Although our bootstrapped sample distribution does not exactly match the sampling distribution of the population, we can see that it is relatively close. This demonstrates the benefit of bootstrapping —— without knowing the actual population distribution, we can still roughly approximate the true slope for the model by using only a single random sample of 20 cars.
+-->
+
+Although our bootstrapped sample distribution does not exactly match the sampling distribution of the population, we can see that it is relatively close. This demonstrates the benefit of bootstrapping —— without knowing the actual population distribution, we can still roughly approximate the true slope for the model by using only a single random sample of 20 cars.
 
 <!-- #### PurpleAir (chose to skip this section because it's too complex for the amount of pedagogical value it adds)
 To show an example of this hypothesis testing process, we'll work with air quality measurement data. There are 2 common sources of air quality information: Air Quality System (AQS) and [PurpleAir sensors](https://www2.purpleair.com/). AQS is seen as the gold standard because it is high quality, well-calibrated, and publicly available. However, it is very expensive, and the sensors are far apart; reports are also delayed due to extensive calibration.  
@@ -308,17 +299,17 @@ pd.DataFrame(PA).head()
 
 ## Collinearity
 
-### Hypothesis Testing through Bootstrap: Snowy Plover Demo
+### Hypothesis Testing Through Bootstrap: Snowy Plover Demo
 
-An equivalent way to execute the hypothesis test described earlier is through **bootstrapping** (this equivalence can be proven through the [duality argument](https://stats.stackexchange.com/questions/179902/confidence-interval-p-value-duality-vs-frequentist-interpretation-of-cis), which is out of scope for this class). We use bootstrapping to compute approximate 95% confidence intervals for each $\theta_i$. If the interval doesn't contain 0, we reject the null hypothesis at the p=5% level. Otherwise, the data is consistent with the null, as the true parameter *could possibly* be 0.
+We can conduct the hypothesis testing described earlier through **bootstrapping** (this equivalence can be proven through the [duality argument](https://stats.stackexchange.com/questions/179902/confidence-interval-p-value-duality-vs-frequentist-interpretation-of-cis), which is out of scope for this class). We use bootstrapping to compute approximate 95% confidence intervals for each $\theta_i$. If the interval doesn't contain 0, we reject the null hypothesis at the p=5% level. Otherwise, the data is consistent with the null, as the true parameter *could possibly* be 0.
 
-To show an example of this hypothesis testing process, we'll work with the [snowy plover](https://www.audubon.org/field-guide/bird/snowy-plover) dataset throughout this section. The data are about the eggs and newly-hatched chicks of the Snowy Plover. The data were collected at the Point Reyes National Seashore by a former [student at Berkeley](https://openlibrary.org/books/OL2038693M/BLSS_the_Berkeley_interactive_statistical_system). Here's a [parent bird and some eggs](http://cescos.fau.edu/jay/eps/articles/snowyplover.html).
+To show an example of this hypothesis testing process, we'll work with the [snowy plover](https://www.audubon.org/field-guide/bird/snowy-plover) dataset throughout this section. The data are about the eggs and newly hatched chicks of the Snowy Plover. The data were collected at the Point Reyes National Seashore by a former [student at Berkeley](https://openlibrary.org/books/OL2038693M/BLSS_the_Berkeley_interactive_statistical_system). Here's a [parent bird and some eggs](http://cescos.fau.edu/jay/eps/articles/snowyplover.html).
 
 <p align="center">
 <img src="images/plover_eggs.jpg" alt='bvt' width='550'>
 </p>
 
-Note that `Egg Length` and `Egg Breadth` (widest diameter) are measured in millimeters, and `Egg Weight` and `Bird Weight` are measured in grams; for comparison, a standard paper clip weighs about one gram.
+Note that `Egg Length` and `Egg Breadth` (widest diameter) are measured in millimeters, and `Egg Weight` and `Bird Weight` are measured in grams. For reference, a standard paper clip weighs about one gram.
 
 ```{python}
 #| code-fold: true
@@ -332,8 +323,7 @@ Our goal will be to predict the weight of a newborn plover chick, which we assum
 
 $$\text{bird\_weight} = \theta_0 + \theta_1 \text{egg\_weight} + \theta_2 \text{egg\_length} + \theta_3 \text{egg\_breadth} + \epsilon$$
 
-- For each $i$, the parameter $\theta_i$ is a fixed number, but it is unobservable. We can only estimate it.
-- The random error $\epsilon$ is also unobservable, but it is assumed to have expectation 0 and be independent and identically distributed across eggs.
+Note that for each $i$, the parameter $\theta_i$ is a fixed number, but it is unobservable. We can only estimate it. The random error $\epsilon$ is also unobservable, but it is assumed to have expectation 0 and be independent and identically distributed across eggs.
 
 Say we wish to determine if the `egg_weight` impacts the `bird_weight` of a chick – we want to infer if $\theta_1$ is equal to 0.
 
@@ -342,7 +332,7 @@ First, we define our hypotheses:
 * **Null hypothesis**: the true parameter $\theta_1$ is 0; any variation is due to random chance.
 * **Alternative hypothesis**: the true parameter $\theta_1$ is not 0.
 
-Next, we use our data to fit a model $\hat{Y} = f_{\hat{\theta}}(x)$ that approximates the relationship above. This gives us the **observed value** of $\hat{\theta}_1$ found from our data.
+Next, we use our data to fit a model $\hat{Y} = f_{\hat{\theta}}(x)$ that approximates the relationship above. This gives us the **observed value** of $\hat{\theta}_1$ from our data.
 
 ```{python}
 #| code-fold: false
@@ -369,7 +359,7 @@ display(pd.DataFrame(
 print("RMSE", np.mean((Y - model.predict(X)) ** 2))
 ```
 
-Our single sample of data gives us the value of $\hat{\theta}_1=0.431$. To get a sense of how this estimate might vary if we were to draw different random samples, we will use [bootstrapping](https://inferentialthinking.com/chapters/13/2/Bootstrap.html?). To construct a bootstrap sample, we will draw a resample from the collected data that:
+Our single sample of data gives us the value of $\hat{\theta}_1=0.431$. To get a sense of how this estimate might vary if we were to draw different random samples, we will use [bootstrapping](https://inferentialthinking.com/chapters/13/2/Bootstrap.html?). As a refresher, to construct a bootstrap sample, we will draw a resample from the collected data that:
 
 * Has the same sample size as the collected data
 * Is drawn with replacement (this ensures that we don't draw the exact same sample every time!)
@@ -571,7 +561,7 @@ All inference assumes that the regression model holds.
     …then the results of the bootstrap might not be valid.
 
 ## [Bonus Content] 
-Note: the content in this section is not in scope.
+Note: the content in this section is out of scope.
 
 <!-- ### Correlation vs. Causation
 Let us consider some questions in an arbitrary regression problem. 
@@ -606,30 +596,29 @@ While these may sound like causal questions, they are not! Questions about **cau
 
 Note, however, that regression coefficients are sometimes called “effects”, which can be deceptive!
 
-When using data alone, **predictive questions** (i.e. are breastfed babies healthier?) can be answered, but **causal questions:** (i.e. does breastfeeding improve babies’ health?) cannot. The reason for this is that there are many possible causes for our predictive question. For example, possible explanations for why breastfed babies are healthier on average include:
+When using data alone, **predictive questions** (i.e., are breastfed babies healthier?) can be answered, but **causal questions** (i.e., does breastfeeding improve babies’ health?) cannot. The reason for this is that there are many possible causes for our predictive question. For example, possible explanations for why breastfed babies are healthier on average include:
 
 * **Causal effect:** breastfeeding makes babies healthier
 * **Reverse causality:** healthier babies more likely to successfully breastfeed
 * **Common cause:** healthier / richer parents have healthier babies and are more likely to breastfeed
 
-We cannot tell which explanations are true (or to what extent) just by observing ($x$,$y$) pairs.Additionally, causal questions implicitly involve **counterfactuals**, events that didn't happen. For example, we could ask, **would** the **same** breastfed babies have been less healthy **if** they hadn’t been breastfed? Explanation 1 from above implies they would be, but explanations 2 and 3 do not. 
+We cannot tell which explanations are true (or to what extent) just by observing ($x$,$y$) pairs. Additionally, causal questions implicitly involve **counterfactuals**, events that didn't happen. For example, we could ask, **would** the **same** breastfed babies have been less healthy **if** they hadn’t been breastfed? Explanation 1 from above implies they would be, but explanations 2 and 3 do not. 
 
 ### Confounders
-Let T represent a treatment (for example, alcohol use), and Y represent an outcome (for example, lung cancer).
+Let T represent a treatment (for example, alcohol use) and Y represent an outcome (for example, lung cancer).
 
 <img src="images/confounder.png" alt='confounder' width='600'>
 
-A **confounder** is a variable that affects both T and Y, distorting the correlation between them. Using the example above. Confounders can be a measured covariate (a feature) or an unmeasured variable we don’t know about, and they generally cause problems, as the relationship between T and Y is really affected by data we cannot see. We commonly *assume that all confounders are observed* (this is also called **ignorability**).
+A **confounder** is a variable that affects both T and Y, distorting the correlation between them. Using the example above, rich parents could be a confounder for breastfeeding and a baby's health. Confounders can be a measured covariate (a feature) or an unmeasured variable we don’t know about, and they generally cause problems, as the relationship between T and Y is affected by data we cannot see. We commonly *assume that all confounders are observed* (this is also called **ignorability**).
 
 ### How to perform causal inference?
 
-In a **randomized experiment**, participants are randomly assigned into two groups: treatment and control. A treatment is applied *only* to the treatment group; we assume ignorability and gather as many measurements as possible so that we can compare them between the control and treatment groups to determine whether or not the treatment is really the cause or just a confounding factor. 
+In a **randomized experiment**, participants are randomly assigned into two groups: treatment and control. A treatment is applied *only* to the treatment group. We assume ignorability and gather as many measurements as possible so that we can compare them between the control and treatment groups to determine whether or not the treatment has a true effect or is just a confounding factor. 
 
 <img src="images/experiment.png" alt='experiment' width='600'>
 
-However, often, randomly assigning treatments is impractical or unethical. For example, assigning a treatment of cigarettes to test the effect of smoking on lungs would not only be impractical but also unethical.
+However, often, randomly assigning treatments is impractical or unethical. For example, assigning a treatment of cigarettes to test the effect of smoking on the lungs would not only be impractical but also unethical.
 
-An alternative to bypass this issue is to utilize **observational studies**. This can be done by obtaining two participant groups separated based on some identified treatment variable. Unlike randomized experiments, however, we cannot assume ignorability: the participants could have separated into the two groups based on other covariates! In addition, there could also be unmeasured confounders.
+An alternative to bypass this issue is to utilize **observational studies**. This can be done by obtaining two participant groups separated based on some identified treatment variable. Unlike randomized experiments, however, we cannot assume ignorability here: the participants could have separated into two groups based on other covariates! In addition, there could also be unmeasured confounders.
 
 <img src="images/observational.png" alt='observational' width='600'>
-
