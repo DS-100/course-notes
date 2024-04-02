@@ -28,7 +28,11 @@ So far in the course, we have made our way through the entire data science lifec
 ## Databases
 With this goal in mind, let's go back to the very beginning of the lifecycle. We first started our work in data analysis by looking at the `pandas` library, which offered us powerful tools to manipulate tabular data stored in (primarily) CSV files. CSVs work well when analyzing relatively small datasets that don't need to be shared across many users. In research and industry, however, data scientists often need to access enormous bodies of data that cannot be easily stored in a CSV format. Collaborating with others when working with CSVs can also be tricky – a real-world data scientist may run into problems when multiple users try to make modifications, or, even worse, security issues with who should and should not have access to the data. 
 
-A **database** is a large, organized collection of data. Databases are administered by **Database Management Systems (DBMS)**, which are software systems that store, manage, and facilitate access to one or more databases. Databases help mitigate many of the issues that come with using CSVs for data storage: they provide reliable storage that can survive system crashes or disk failures, are optimized to compute on data that does not fit into memory, and contain special data structures to improve performance. Using databases rather than CSVs offers further benefits from the standpoint of data management. A DBMS can apply settings that configure how data is organized, block certain data anomalies (for example, enforcing non-negative weights or ages), and determine who is allowed access to the data. It can also ensure safe concurrent operations where multiple users reading and writing to the database will not lead to fatal errors.
+A **database** is a large, organized collection of data. Databases are administered by **Database Management Systems (DBMS)**, which are software systems that store, manage, and facilitate access to one or more databases. Databases help mitigate many of the issues that come with using CSVs for data storage: they provide reliable storage that can survive system crashes or disk failures, are optimized to compute on data that does not fit into memory, and contain special data structures to improve performance. Using databases rather than CSVs offers further benefits from the standpoint of data management. A DBMS can apply settings that configure how data is organized, block certain data anomalies (for example, enforcing non-negative weights or ages), and determine who is allowed access to the data. It can also ensure safe concurrent operations where multiple users reading and writing to the database will not lead to fatal errors. Below, you can see the functionality of the different types of data storage and management architectures. To learn more about these, consider taking [Data 101](https://www.data101.org/sp24/)!
+
+<p style="text-align:center">
+    <img src='images/data_storage.png' width="700px" />
+</p>
 
 As you may have guessed, we can't use our usual `pandas` methods to work with data in a database. Instead, we'll turn to Structured Query Language.
 
@@ -43,12 +47,14 @@ The syntax below will seem unfamiliar to you; for now, just focus on understandi
 To start, we'll look at a database called `basic_examples.db`.
 
 ```{python}
+#| vscode: {languageId: python}
 # Load the SQL Alchemy Python library
 import sqlalchemy
 import pandas as pd
 ```
 
 ```{python}
+#| vscode: {languageId: python}
 # load %%sql cell magic
 %load_ext sql
 ```
@@ -56,11 +62,13 @@ import pandas as pd
 Connect to the SQLite database `basic_examples.db`.
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 sqlite:///data/basic_examples.db 
 ```
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 SELECT * 
 FROM sqlite_master
@@ -81,11 +89,16 @@ The statement `CREATE TABLE` is used to specify the **schema** of the table – 
 * `DataType`: the type of data to be stored in a column. Some of the most common SQL data types are `INT` (integers), `FLOAT` (floating point numbers), `TEXT` (strings), `BLOB` (arbitrary data, such as audio/video files), and `DATETIME` (a date and time).
 * `Constraint`: some restriction on the data to be stored in the column. Common constraints are `CHECK` (data must obey a certain condition), `PRIMARY KEY` (designate a column as the table's primary key), `NOT NULL` (data cannot be null), and `DEFAULT` (a default fill value if no specific entry is given).
 
+<p style="text-align:center">
+    <img src='images/sql_terminology.png' width="700px" />
+</p>
+
 We see that `Dragon` contains three columns. The first of these, `"name"`, contains text data. It is designated as the **primary key** of the table; that is, the data contained in `"name"` uniquely identifies each entry in the table. Because `"name"` is the primary key of the table, no two entries in the table can have the same name – a given value of `"name"` is unique to each dragon. The `"year"` column contains integer data, with the constraint that year values must be greater than or equal to 2000. The final column, `"cute"`, contains integer data with no restrictions on allowable values. 
 
 We can verify this by viewing `Dragon` itself.
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 SELECT *
 FROM Dragon
@@ -100,6 +113,7 @@ To extract and manipulate data stored in a SQL table, we will need to familiariz
 The basic unit of a SQL query is the `SELECT` statement. `SELECT` specifies what columns we would like to extract from a given table. We use `FROM` to tell SQL the table from which we want to `SELECT` our data. 
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 SELECT *
 FROM Dragon
@@ -108,6 +122,7 @@ FROM Dragon
 In SQL, `*` means "everything." The query above grabs *all* the columns in `Dragon` and displays them in the outputted table. We can also specify a specific subset of columns to be `SELECT`ed. Notice that the outputted columns appear in the order that they were `SELECT`ed.
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 SELECT cute, year
 FROM Dragon
@@ -120,6 +135,7 @@ The `AS` keyword allows us to give a column a new name (called an **alias**) aft
     SELECT column_name_in_database_table AS new_name_in_output_table
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 SELECT cute AS cuteness, year AS birth
 FROM Dragon
@@ -128,6 +144,7 @@ FROM Dragon
 To `SELECT` only the *unique* values in a column, we use the `DISTINCT` keyword. This will cause any any duplicate entries in a column to be removed. If we want to find only the unique years in `Dragon`, without any repeats, we would write:
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 SELECT DISTINCT year
 FROM Dragon
@@ -148,6 +165,7 @@ The additional clauses that we use depend on the specific task trying to be achi
 The `WHERE` keyword is used to select only some rows of a table, filtered on a given Boolean condition. 
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 SELECT name, year
 FROM Dragon
@@ -157,6 +175,7 @@ WHERE cute > 0
 We can add complexity to the `WHERE` condition using the keywords `AND`, `OR`, and `NOT`, much like we would in Python.
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 SELECT name, year
 FROM Dragon
@@ -166,6 +185,7 @@ WHERE cute > 0 OR year > 2013
 To spare ourselves needing to write complicated logical expressions by combining several conditions, we can also filter for entries that are `IN` a specified list of values. This is similar to the use of `in` or `.isin` in Python.
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 SELECT name, year
 FROM Dragon
@@ -175,6 +195,7 @@ WHERE name IN ("hiccup", "puff")
 You may have noticed earlier that our table actually has a missing value. In SQL, missing data is given the special value `NULL`. `NULL` behaves in a fundamentally different way to other data types. We can't use the typical operators (=, >, and <) on `NULL` values (in fact, `NULL == NULL` returns `False`!); instead, we check to see if a value `IS` or `IS NOT` `NULL`.
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 SELECT *
 FROM Dragon
@@ -186,6 +207,7 @@ WHERE cute IS NOT NULL
 What if we want the output table to appear in a certain order? The `ORDER BY` keyword behaves similarly to `.sort_values()` in `pandas`. 
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 SELECT *
 FROM Dragon
@@ -195,6 +217,7 @@ ORDER BY cute
 By default, `ORDER BY` will display results in ascending order (with the lowest values at the top of the table). To sort in descending order, we use the `DESC` keyword after specifying the column to be used for ordering.
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 SELECT *
 FROM Dragon
@@ -204,6 +227,7 @@ ORDER BY cute DESC
 We can also tell SQL to `ORDER BY` two columns at once. This will sort the table by the first listed column, then use the values in the second listed column to break any ties.
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 SELECT *
 FROM Dragon
@@ -213,6 +237,7 @@ ORDER BY name, cute
 In many instances, we are only concerned with a certain number of rows in the output table (for example, wanting to find the first two dragons in the table). The `LIMIT` keyword restricts the output to a specified number of rows. It serves a function similar to that of `.head()` in `pandas`.
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 SELECT *
 FROM Dragon
@@ -222,6 +247,7 @@ LIMIT 2
 The `OFFSET` keyword indicates the index at which `LIMIT` should start. In other words, we can use `OFFSET` to shift where the `LIMIT`ing begins by a specified number of rows. For example, we might care about the dragons that are at positions #2 and #3 in the table. 
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 SELECT *
 FROM Dragon
@@ -251,6 +277,7 @@ In `pandas`, much of our analysis work relied heavily on being able to use `.gro
 To illustrate `GROUP BY`, we will consider the `Dish` table from the `basic_examples.db` database.
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 SELECT * 
 FROM Dish
@@ -259,6 +286,7 @@ FROM Dish
 Say we wanted to find the total costs of dishes of a certain `type`. To accomplish this, we would write the following code.
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 SELECT type, SUM(cost)
 FROM Dish
@@ -284,6 +312,7 @@ There are many aggregation functions that can be used to aggregate the data cont
 We can easily compute multiple aggregations, all at once (a task that was very tricky in `pandas`).
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 SELECT type, SUM(cost), MIN(cost), MAX(name)
 FROM Dish
@@ -293,6 +322,7 @@ GROUP BY type
 To count the number of rows associated with each group, we use the `COUNT` keyword. Calling `COUNT(*)` will compute the total number of rows in each group, including rows with null values. Its `pandas` equivalent is `.groupby().size()`.
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 SELECT type, COUNT(*)
 FROM Dish
@@ -302,6 +332,7 @@ GROUP BY type
 To exclude `NULL` values when counting the rows in each group, we explicitly call `COUNT` on a column in the table. This is similar to calling `.groupby().count()` in `pandas`.
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 SELECT year, COUNT(cute)
 FROM Dragon
