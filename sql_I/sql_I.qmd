@@ -13,7 +13,17 @@ format:
       - cosmo
       - cerulean
     callout-icon: false
-jupyter: python3
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .qmd
+      format_name: quarto
+      format_version: '1.0'
+      jupytext_version: 1.16.1
+  kernelspec:
+    display_name: Python 3 (ipykernel)
+    language: python
+    name: python3
 ---
 
 ::: {.callout-note collapse="false"}
@@ -23,12 +33,12 @@ jupyter: python3
 * Perform aggregations using `GROUP BY`
 :::
 
-So far in the course, we have made our way through the entire data science lifecycle: we learned how to load and explore a dataset, formulate questions, and use the tools of prediction and inference to come up with answers. For the remaining weeks of the semester, we are going to make a second pass through the lifecycle, this time doing so with a different set of tools, ideas, and abstractions. 
+So far in the course, we have made our way through the entire data science lifecycle: we learned how to load and explore a dataset, formulate questions, and use the tools of prediction and inference to come up with answers. For the remaining weeks of the semester, we are going to make a second pass through the lifecycle, this time with a different set of tools, ideas, and abstractions. 
 
 ## Databases
-With this goal in mind, let's go back to the very beginning of the lifecycle. We first started our work in data analysis by looking at the `pandas` library, which offered us powerful tools to manipulate tabular data stored in (primarily) CSV files. CSVs work well when analyzing relatively small datasets (less than 10GB) that don't need to be shared across many users. In research and industry, however, data scientists often need to access enormous bodies of data that cannot be easily stored in a CSV format. Collaborating with others when working with CSVs can also be tricky – a real-world data scientist may run into problems when multiple users try to make modifications, or more dire security issues regarding who should and should not have access to the data. 
+With this goal in mind, let's go back to the very beginning of the lifecycle. We first started our work in data analysis by looking at the `pandas` library, which offered us powerful tools to manipulate tabular data stored in (primarily) CSV files. CSVs work well when analyzing relatively small datasets (less than 10GB) that don't need to be shared across many users. In research and industry, however, data scientists often need to access enormous bodies of data that cannot be easily stored in a CSV format. Collaborating with others when working with CSVs can also be tricky —— a real-world data scientist may run into problems when multiple users try to make modifications or more dire security issues arise regarding who should and should not have access to the data. 
 
-A **database** is a large, organized collection of data. Databases are administered by **Database Management Systems (DBMS)**, which are software systems that store, manage, and facilitate access to one or more databases. Databases help mitigate many of the issues that come with using CSVs for data storage: they provide reliable storage that can survive system crashes or disk failures, are optimized to compute on data that does not fit into memory, and contain special data structures to improve performance. Using databases rather than CSVs offers further benefits from the standpoint of data management. A DBMS can apply settings that configure how data is organized, block certain data anomalies (for example, enforcing non-negative weights or ages), and determine who is allowed access to the data. It can also ensure safe concurrent operations where multiple users reading and writing to the database will not lead to fatal errors. Below, you can see the functionality of the different types of data storage and management architectures. To learn more about these, consider taking [Data 101](https://www.data101.org/sp24/)!
+A **database** is a large, organized collection of data. Databases are administered by **Database Management Systems (DBMS)**, which are software systems that store, manage, and facilitate access to one or more databases. Databases help mitigate many of the issues that come with using CSVs for data storage: they provide reliable storage that can survive system crashes or disk failures, are optimized to compute on data that does not fit into memory, and contain special data structures to improve performance. Using databases rather than CSVs offers further benefits from the standpoint of data management. A DBMS can apply settings that configure how data is organized, block certain data anomalies (for example, enforcing non-negative weights or ages), and determine who is allowed access to the data. It can also ensure safe concurrent operations where multiple users reading and writing to the database will not lead to fatal errors. Below, you can see the functionality of the different types of data storage and management architectures. In data science, common large-scale DBMS systems used are Google BigQuery, Amazon Redshift, Snowflake, Databricks, Microsoft SQL Server, and more. To learn more about these, consider taking [Data 101](https://www.data101.org/sp24/)!
 
 <p style="text-align:center">
     <img src='images/data_storage.png' width="700px" />
@@ -38,18 +48,19 @@ As you may have guessed, we can't use our usual `pandas` methods to work with da
 
 ## Intro to SQL
 
-**Structured Query Language**, or **SQL** (commonly pronounced "sequel," though this is the subject of [fierce debate](https://patorjk.com/blog/2012/01/26/pronouncing-sql-s-q-l-or-sequel/)), is a special programming language designed to communicate with databases, and it is the dominant language/technology for working with data. You may have encountered it in classes like CS 61A or Data C88C before, and you likely will encounter it in the future. It is a language of tables: all inputs and outputs are tables. Unlike Python, it is a **declarative programming language** – this means that rather than writing the exact logic needed to complete a task, a piece of SQL code "declares" what the desired final output should be and leaves the program to determine what logic should be implemented. This logic differs depending on the SQL code itself or on the system it's running on (ie. [MongoDB](https://www.mongodb.com/), [SQLite](https://www.sqlite.org/), [DuckDB](https://duckdb.org/), etc.). Most systems don’t follow the standards, and every system you work with will be a little different. For the purposes of Data 100, we use SQLite or DuckDB. SQLite is an easy to use library that allows users to directly manipulate a database file or an in-memory database with a simplified version of SQL. It's commonly used to store data for small apps on mobile devices and is optimized for simplicity and speed of simple data tasks. DuckDB is an easy to use library that lets you directly manipulate a database file, collection of table formatted files (e.g., CSV), or in-memory `pandas` `DataFrame` using a more complete version of SQL. It's optimized for simplicity and speed of advanced data analysis tasks and becoming increasingly popular for data analysis tasks on large datasets.
+**Structured Query Language**, or **SQL** (commonly pronounced "sequel," though this is the subject of [fierce debate](https://patorjk.com/blog/2012/01/26/pronouncing-sql-s-q-l-or-sequel/)), is a special programming language designed to communicate with databases, and it is the dominant language/technology for working with data. You may have encountered it in classes like CS 61A or Data C88C before, and you likely will encounter it in the future. It is a language of tables: all inputs and outputs are tables. Unlike Python, it is a **declarative programming language** – this means that rather than writing the exact logic needed to complete a task, a piece of SQL code "declares" what the desired final output should be and leaves the program to determine what logic should be implemented. This logic differs depending on the SQL code itself or on the system it's running on (ie. [MongoDB](https://www.mongodb.com/), [SQLite](https://www.sqlite.org/), [DuckDB](https://duckdb.org/), etc.). Most systems don’t follow the standards, and every system you work with will be a little different. 
 
+For the purposes of Data 100, we use SQLite or DuckDB. SQLite is an easy-to-use library that allows users to directly manipulate a database file or an in-memory database with a simplified version of SQL. It's commonly used to store data for small apps on mobile devices and is optimized for simplicity and speed of simple data tasks. DuckDB is an easy-to-use library that lets you directly manipulate a database file, collection of table formatted files (e.g., CSV), or in-memory `pandas` `DataFrame`s using a more complete version of SQL. It's optimized for simplicity and speed of advanced data analysis tasks and is becoming increasingly popular for data analysis tasks on large datasets.
 
-It is important to reiterate that SQL is an entirely different language from Python. However, Python *does* have special engines that allow us to run SQL code in a Jupyter notebook. While this is typically not how SQL is used outside of an educational setting, we will be using this workflow to illustrate how SQL queries are constructed using the tools we've already worked with this semester. You will learn more about how to run SQL queries in Jupyter in Lab 10.
+It is important to reiterate that SQL is an entirely different language from Python. However, Python *does* have special engines that allow us to run SQL code in a Jupyter notebook. While this is typically not how SQL is used outside of an educational setting, we will use this workflow to illustrate how SQL queries are constructed using the tools we've already worked with this semester. You will learn more about how to run SQL queries in Jupyter in Lab 10 and Homework 10.
 
 The syntax below will seem unfamiliar to you; for now, just focus on understanding the output displayed. We will clarify the SQL code in a bit.
 
 To start, we'll look at a database called `basic_examples.db` and connect to it using SQLite.
 
 ```{python}
-#| vscode: {languageId: python}
 #| code-fold: true
+#| vscode: {languageId: python}
 # Load the SQL Alchemy Python library
 import sqlalchemy
 import pandas as pd
@@ -57,17 +68,18 @@ import pandas as pd
 
 ```{python}
 #| vscode: {languageId: python}
-# load %%sql cell magic
+# Load %%sql cell magic
 %load_ext sql
 ```
 
 ```{python}
 #| vscode: {languageId: python}
-%%sql
-sqlite:///data/basic_examples.db 
+# Connect to the database
+%sql sqlite:///data/basic_examples.db 
 ```
 
 Now that we’re connected, let’s make some queries!
+
 ```{python}
 #| vscode: {languageId: python}
 %%sql
@@ -81,7 +93,7 @@ Thanks to the `pandas` magic, the resulting return data is displayed in a format
     <img src='images/sql_terminology.png' width="700px" />
 </p>
 
-Looking at the `Dragon` table above, we can see that it contains contains three columns. The first of these, `"name"`, contains text data. The `"year"` column contains integer data, with the constraint that year values must be greater than or equal to 2000. The final column, `"cute"`, contains integer data with no restrictions on allowable values. 
+Looking at the `Dragon` table above, we can see that it contains contains three columns. The first of these, `"name"`, contains text data. The `"year"` column contains integer data, with the constraint that year values must be greater than or equal to 2000. The final column, `"cute"`, contains integer data with no restrictions on allowable values.
 
 Now, let's look at the **schema** of our database. A schema describes the logical structure of a table. Whenever a new table is created, the creator must declare its schema.
 
@@ -117,7 +129,7 @@ The statement `CREATE TABLE` is used to specify the **schema** of the table – 
   * `NOT NULL` (data cannot be null)
   * `DEFAULT` (a default fill value if no specific entry is given)
 
-
+Note that different implementations of SQL (e.g., [DuckDB](https://duckdb.org/docs/sql/data_types/overview.html), [SQLite](https://www.sqlite.org/datatype3.html), [MySQL](https://dev.mysql.com/doc/refman/8.0/en/data-types.html)) will support different types. In Data 100, we'll primarily use DuckDB.
 
 Database tables (also referred to as **relations**) are structured much like `DataFrame`s in `pandas`. Each row, sometimes called a **tuple**, represents a single record in the dataset. Each column, sometimes called an **attribute** or **field**, describes some feature of the record. 
 
@@ -164,7 +176,7 @@ SELECT *
 FROM Dragon;
 ```
 
-In SQL, `*` means "everything." The query above grabs *all* the columns in `Dragon` and displays them in the outputted table. We can also specify a specific subset of columns to be `SELECT`ed. Notice that the outputted columns appear in the order that they were `SELECT`ed.
+In SQL, `*` means "everything." The query above grabs *all* the columns in `Dragon` and displays them in the outputted table. We can also specify a specific subset of columns to be `SELECT`ed. Notice that the outputted columns appear in the order they were `SELECT`ed.
 
 ```{python}
 #| vscode: {languageId: python}
@@ -173,18 +185,18 @@ SELECT cute, year
 FROM Dragon;
 ```
 
-**Every** SQL query must include both a `SELECT` and `FROM` statement. Intuitively, this makes sense – we know that we'll want to extract some piece of information from the table; to do so, we also need to indicate what table we want to consider. 
+**Every** SQL query must include both a `SELECT` and `FROM` statement. Intuitively, this makes sense —— we know that we'll want to extract some piece of information from the table; to do so, we also need to indicate what table we want to consider. 
 
-It is important to note that SQL enforces a strict "order of operations" – SQL clauses must *always* follow the same sequence. For example, the `SELECT` statement must always precede `FROM`. This means that any SQL query will follow the same structure. 
+It is important to note that SQL enforces a strict "order of operations" —— SQL clauses must *always* follow the same sequence. For example, the `SELECT` statement must always precede `FROM`. This means that any SQL query will follow the same structure. 
 
     SELECT <column list>
     FROM <table>
     [additional clauses]
     
-The additional clauses that we use depend on the specific task trying to be achieved. We may refine our query to filter on a certain condition, aggregate a particular column, or join several tables together. We will spend the rest of this lecture outlining some useful clauses to build up our understanding of the order of operations.
+The additional clauses we use depend on the specific task we're trying to achieve. We may refine our query to filter on a certain condition, aggregate a particular column, or join several tables together. We will spend the rest of this lecture outlining some useful clauses to build up our understanding of the order of operations.
 
-#### SQL style conventions
-And just like that, we've already written two SQL queries. There are a few points of note in the queries above. Firstly, notice that every "verb" is written in uppercase. It is convention to write SQL operations in capital letters, but your code will run just fine even if you choose to keep things in lowercase. Second, the query above separates each statement with a new line. SQL queries are not impacted by whitespace within the query; this means that SQL code is typically written with a new line after each statement to make things more readable. The semicolon (`;`) indicates the end of a query. There are some "flavors" of SQL in which a query will not run if no semicolon is present; however, in Data 100, the SQL version we will use works with or without an ending semicolon. Queries in these notes will end with semicolons to build up good habits.
+#### SQL Style Conventions
+And just like that, we've already written two SQL queries. There are a few things to note in the queries above. Firstly, notice that every "verb" is written in uppercase. It is convention to write SQL operations in capital letters, but your code will run just fine even if you choose to keep things in lowercase. Second, the query above separates each statement with a new line. SQL queries are not impacted by whitespace within the query; this means that SQL code is typically written with a new line after each statement to make things more readable. The semicolon (`;`) indicates the end of a query. There are some "flavors" of SQL in which a query will not run if no semicolon is present; however, in Data 100, the SQL version we will use works with or without an ending semicolon. Queries in these notes will end with semicolons to build up good habits.
 
 #### Aliasing with `AS`
 The `AS` keyword allows us to give a column a new name (called an **alias**) after it has been `SELECT`ed. The general syntax is:
@@ -207,7 +219,6 @@ To `SELECT` only the *unique* values in a column, we use the `DISTINCT` keyword.
 SELECT DISTINCT year
 FROM Dragon;
 ```
-
 
 ### Applying `WHERE` Conditions
 
@@ -243,14 +254,16 @@ WHERE name IN ("hiccup", "puff");
 
 #### Strings in SQL
 In `Python`, there is no distinction between double `""` and single quotes `''`. SQL, on the other hand, distinguishes double quotes `""` as *column names* and single quotes `''` as *strings*. For example, we can make the call
-
-  SELECT “birth weight” FROM patient WHERE “first name” = ‘Joey’
+  
+    SELECT "birth weight"
+    FROM patient
+    WHERE "first name" = 'Joey'
 
 to select the column `"birth weight"` from the `patient` table and only select rows where the column `"first name"` is equal to `'Joey'`.
 
 #### `WHERE` WITH `NULL` Values
 
-You may have noticed earlier that our table actually has a missing value. In SQL, missing data is given the special value `NULL`. `NULL` behaves in a fundamentally different way to other data types. We can't use the typical operators (=, >, and <) on `NULL` values (in fact, `NULL == NULL` returns `False`!); instead, we check to see if a value `IS` or `IS NOT` `NULL`.
+You may have noticed earlier that our table actually has a missing value. In SQL, missing data is given the special value `NULL`. `NULL` behaves in a fundamentally different way to other data types. We can't use the typical operators (=, >, and <) on `NULL` values (in fact, `NULL == NULL` returns `False`!). Instead, we check to see if a value `IS` or `IS NOT` `NULL`.
 
 ```{python}
 #| vscode: {languageId: python}
@@ -273,7 +286,7 @@ FROM Dragon
 ORDER BY cute;
 ```
 
-By default, `ORDER BY` will display results in ascending order with the lowest values at the top of the table, `ASC`. To sort in descending order, we use the `DESC` keyword after specifying the column to be used for ordering.
+By default, `ORDER BY` will display results in ascending order (`ASC`) with the lowest values at the top of the table. To sort in descending order, we use the `DESC` keyword after specifying the column to be used for ordering.
 
 ```{python}
 #| vscode: {languageId: python}
@@ -290,8 +303,10 @@ We can also tell SQL to `ORDER BY` two columns at once. This will sort the table
 %%sql
 SELECT *
 FROM Dragon
-ORDER BY name, cute;
+ORDER BY year, cute DESC;
 ```
+
+Note that in this example, `year` is sorted in ascending order and `cute` in descending order. If you want `year` to be ordered in descending order as well, you need to specify `year DESC, cute DESC;`.
 
 #### `LIMIT` vs. `OFFSET`
 In many instances, we are only concerned with a certain number of rows in the output table (for example, wanting to find the first two dragons in the table). The `LIMIT` keyword restricts the output to a specified number of rows. It serves a function similar to that of `.head()` in `pandas`.
@@ -304,7 +319,7 @@ FROM Dragon
 LIMIT 2;
 ```
 
-The `OFFSET` keyword indicates the index at which `LIMIT` should start. In other words, we can use `OFFSET` to shift where the `LIMIT`ing begins by a specified number of rows. For example, we might care about the dragons that are at positions #2 and #3 in the table. 
+The `OFFSET` keyword indicates the index at which `LIMIT` should start. In other words, we can use `OFFSET` to shift where the `LIMIT`ing begins by a specified number of rows. For example, we might care about the dragons that are at positions 2 and 3 in the table. 
 
 ```{python}
 #| vscode: {languageId: python}
@@ -319,7 +334,7 @@ OFFSET 1;
 
 At this point, we've seen that SQL offers much of the same functionality that was given to us by `pandas`. We can extract data from a table, filter it, and reorder it to suit our needs.
 
-In `pandas`, much of our analysis work relied heavily on being able to use `.groupby()` to aggregate across the rows of our dataset. SQL's answer to this task is the (very conveniently named) `GROUP BY` clause. While the outputs of `GROUP BY` are similar to those of `.groupby()` – in both cases, we obtain an output table where some column has been used for grouping – the syntax and logic used to group data in SQL are fairly different to the `pandas` implementation.
+In `pandas`, much of our analysis work relied heavily on being able to use `.groupby()` to aggregate across the rows of our dataset. SQL's answer to this task is the (very conveniently named) `GROUP BY` clause. While the outputs of `GROUP BY` are similar to those of `.groupby()` —— in both cases, we obtain an output table where some column has been used for grouping —— the syntax and logic used to group data in SQL are fairly different to the `pandas` implementation.
 
 To illustrate `GROUP BY`, we will consider the `Dish` table from the `basic_examples.db` database.
 
@@ -342,7 +357,7 @@ GROUP BY type;
 
 What is going on here? The statement `GROUP BY type` tells SQL to group the data based on the value contained in the `type` column (whether a record is an appetizer, entree, or dessert). `SUM(cost)` sums up the costs of dishes in each `type` and displays the result in the output table.
 
-You may be wondering: why does `SUM(cost)` come before the command to `GROUP BY type`? Don't we need to form groups before we can count the number of entries in each? Remember that SQL is a *declarative* programming language – a SQL programmer simply states what end result they would like to see, and leaves the task of figuring out *how* to obtain this result to SQL itself. This means that SQL queries sometimes don't follow what a reader sees as a "logical" sequence of thought. Instead, SQL requires that we follow its set order of operations when constructing queries. So long as we follow this ordering, SQL will handle the underlying logic.
+You may be wondering: why does `SUM(cost)` come before the command to `GROUP BY type`? Don't we need to form groups before we can count the number of entries in each? Remember that SQL is a *declarative* programming language —— a SQL programmer simply states what end result they would like to see, and leaves the task of figuring out *how* to obtain this result to SQL itself. This means that SQL queries sometimes don't follow what a reader sees as a "logical" sequence of thought. Instead, SQL requires that we follow its set order of operations when constructing queries. So long as we follow this order, SQL will handle the underlying logic.
 
 In practical terms: our goal with this query was to output the total `cost`s of each `type`. To communicate this to SQL, we say that we want to `SELECT` the `SUM`med `cost` values for each `type` group. 
 
@@ -354,7 +369,7 @@ There are many aggregation functions that can be used to aggregate the data cont
 * `SUM`: sum across all records in each group
 * `AVG`: find the average value of each group
 
-We can easily compute multiple aggregations, all at once (a task that was very tricky in `pandas`).
+We can easily compute multiple aggregations all at once (a task that was very tricky in `pandas`).
 
 ```{python}
 #| vscode: {languageId: python}
@@ -409,4 +424,4 @@ Any clauses that we include must follow a strict ordering within the query:
     [LIMIT <number of rows>]
     [OFFSET <number of rows>]
     
-Here, any clause contained in square brackets `[ ]` is optional – we only need to use the keyword if it is relevant to the table operation we want to perform. Also note that by convention, we use all caps for keywords in SQL statements and use newlines to make code more readable.
+Here, any clause contained in square brackets `[ ]` is optional —— we only need to use the keyword if it is relevant to the table operation we want to perform. Also note that by convention, we use all caps for keywords in SQL statements and use newlines to make code more readable.
