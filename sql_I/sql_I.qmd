@@ -61,9 +61,9 @@ To start, we'll look at a database called `basic_examples.db` and connect to it 
 ```{python}
 #| code-fold: true
 #| vscode: {languageId: python}
-# Load the SQL Alchemy Python library
+# Load the SQL Alchemy Python library and DuckDB
 import sqlalchemy
-import pandas as pd
+import duckdb
 ```
 
 ```{python}
@@ -75,7 +75,7 @@ import pandas as pd
 ```{python}
 #| vscode: {languageId: python}
 # Connect to the database
-%sql sqlite:///data/basic_examples.db 
+%sql duckdb:///data/basic_examples.db --alias duck
 ```
 
 Now that we’re connected, let’s make some queries!
@@ -102,7 +102,7 @@ Now, let's look at the **schema** of our database. A schema describes the logica
 %%sql
 SELECT * 
 FROM sqlite_master
-WHERE type="table"
+WHERE type='table'
 ```
 
 The summary above displays information about the database; it contains four tables named `sqlite_sequence`, `Dragon`, `Dish`, and `Scene`. The rightmost column above lists the command that was used to construct each table. 
@@ -249,7 +249,7 @@ To spare ourselves needing to write complicated logical expressions by combining
 %%sql
 SELECT name, year
 FROM Dragon
-WHERE name IN ("hiccup", "puff");
+WHERE name IN ('hiccup', 'puff');
 ```
 
 #### Strings in SQL
@@ -268,7 +268,7 @@ You may have noticed earlier that our table actually has a missing value. In SQL
 ```{python}
 #| vscode: {languageId: python}
 %%sql
-SELECT *
+SELECT name, cute
 FROM Dragon
 WHERE cute IS NOT NULL;
 ```
@@ -384,9 +384,9 @@ To count the number of rows associated with each group, we use the `COUNT` keywo
 ```{python}
 #| vscode: {languageId: python}
 %%sql
-SELECT type, COUNT(*)
-FROM Dish
-GROUP BY type;
+SELECT year, COUNT(*)
+FROM Dragon
+GROUP BY year;
 ```
 
 To exclude `NULL` values when counting the rows in each group, we explicitly call `COUNT` on a column in the table. This is similar to calling `.groupby().count()` in `pandas`.
