@@ -365,7 +365,7 @@ Learning Outcomes
 <p>For the purposes of Data 100, we use SQLite or DuckDB. SQLite is an easy-to-use library that allows users to directly manipulate a database file or an in-memory database with a simplified version of SQL. It’s commonly used to store data for small apps on mobile devices and is optimized for simplicity and speed of simple data tasks. DuckDB is an easy-to-use library that lets you directly manipulate a database file, collection of table formatted files (e.g., CSV), or in-memory <code>pandas</code> <code>DataFrame</code>s using a more complete version of SQL. It’s optimized for simplicity and speed of advanced data analysis tasks and is becoming increasingly popular for data analysis tasks on large datasets.</p>
 <p>It is important to reiterate that SQL is an entirely different language from Python. However, Python <em>does</em> have special engines that allow us to run SQL code in a Jupyter notebook. While this is typically not how SQL is used outside of an educational setting, we will use this workflow to illustrate how SQL queries are constructed using the tools we’ve already worked with this semester. You will learn more about how to run SQL queries in Jupyter in Lab 10 and Homework 10.</p>
 <p>The syntax below will seem unfamiliar to you; for now, just focus on understanding the output displayed. We will clarify the SQL code in a bit.</p>
-<p>To start, we’ll look at a database called <code>basic_examples.db</code> and connect to it using SQLite.</p>
+<p>To start, we’ll look at a database called <code>example_duck.db</code> and connect to it using SQLite.</p>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="1">
 <details>
 <summary>Code</summary>
@@ -380,7 +380,7 @@ Learning Outcomes
 </div>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Connect to the database</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>sql duckdb:<span class="op">///</span>data<span class="op">/</span>basic_examples.db <span class="op">--</span>alias duck</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>sql duckdb:<span class="op">///</span>data<span class="op">/</span>example_duck.db <span class="op">--</span>alias duck</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now that we’re connected, let’s make some queries!</p>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="4">
@@ -461,31 +461,24 @@ Learning Outcomes
 <tbody>
 <tr class="odd">
 <td>table</td>
-<td>sqlite_sequence</td>
-<td>sqlite_sequence</td>
+<td>dish</td>
+<td>dish</td>
 <td>0</td>
-<td>CREATE TABLE sqlite_sequence("name" BLOB, seq BLOB);</td>
+<td>CREATE TABLE dish("name" VARCHAR PRIMARY KEY, "type" VARCHAR, "cost" INTEGER, CHECK(("cost" &gt;= 0)));</td>
 </tr>
 <tr class="even">
 <td>table</td>
-<td>Dragon</td>
-<td>Dragon</td>
+<td>dragon</td>
+<td>dragon</td>
 <td>0</td>
-<td>CREATE TABLE Dragon("name" VARCHAR PRIMARY KEY, "year" BIGINT, cute BIGINT);</td>
+<td>CREATE TABLE dragon("name" VARCHAR PRIMARY KEY, "year" INTEGER, cute INTEGER, CHECK(("year" &gt;= 2000)));</td>
 </tr>
 <tr class="odd">
 <td>table</td>
-<td>Dish</td>
-<td>Dish</td>
+<td>scene</td>
+<td>scene</td>
 <td>0</td>
-<td>CREATE TABLE Dish("name" VARCHAR PRIMARY KEY, "type" VARCHAR, "cost" BIGINT);</td>
-</tr>
-<tr class="even">
-<td>table</td>
-<td>Scene</td>
-<td>Scene</td>
-<td>0</td>
-<td>CREATE TABLE Scene(id BIGINT PRIMARY KEY, biome VARCHAR NOT NULL, city VARCHAR NOT NULL, visitors BIGINT, created_at TIMESTAMP DEFAULT(datetime('now')));</td>
+<td>CREATE TABLE scene(id INTEGER PRIMARY KEY, biome VARCHAR NOT NULL, city VARCHAR NOT NULL, visitors INTEGER, created_at TIMESTAMP DEFAULT(current_date()), CHECK((visitors &gt;= 0)));</td>
 </tr>
 </tbody>
 </table>
@@ -720,10 +713,10 @@ FROM &lt;table&gt;
 </thead>
 <tbody>
 <tr class="odd">
-<td>2011</td>
+<td>2010</td>
 </tr>
 <tr class="even">
-<td>2010</td>
+<td>2011</td>
 </tr>
 <tr class="odd">
 <td>2019</td>
@@ -1204,12 +1197,12 @@ WHERE "first name" = 'Joey'</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>entree</td>
-<td>30</td>
-</tr>
-<tr class="even">
 <td>appetizer</td>
 <td>12</td>
+</tr>
+<tr class="even">
+<td>entree</td>
+<td>30</td>
 </tr>
 <tr class="odd">
 <td>dessert</td>
@@ -1259,16 +1252,16 @@ WHERE "first name" = 'Joey'</code></pre>
 <td>taco</td>
 </tr>
 <tr class="even">
-<td>appetizer</td>
-<td>12</td>
-<td>4</td>
-<td>potsticker</td>
-</tr>
-<tr class="odd">
 <td>dessert</td>
 <td>5</td>
 <td>5</td>
 <td>ice cream</td>
+</tr>
+<tr class="odd">
+<td>appetizer</td>
+<td>12</td>
+<td>4</td>
+<td>potsticker</td>
 </tr>
 </tbody>
 </table>
@@ -1295,11 +1288,11 @@ WHERE "first name" = 'Joey'</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>2011</td>
+<td>2010</td>
 <td>2</td>
 </tr>
 <tr class="even">
-<td>2010</td>
+<td>2011</td>
 <td>2</td>
 </tr>
 <tr class="odd">
@@ -1331,12 +1324,12 @@ WHERE "first name" = 'Joey'</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>2011</td>
-<td>1</td>
-</tr>
-<tr class="even">
 <td>2010</td>
 <td>2</td>
+</tr>
+<tr class="even">
+<td>2011</td>
+<td>1</td>
 </tr>
 <tr class="odd">
 <td>2019</td>
@@ -1728,7 +1721,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb32-56"><a href="#cb32-56" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb32-57"><a href="#cb32-57" aria-hidden="true" tabindex="-1"></a>The syntax below will seem unfamiliar to you; for now, just focus on understanding the output displayed. We will clarify the SQL code in a bit.</span>
 <span id="cb32-58"><a href="#cb32-58" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-59"><a href="#cb32-59" aria-hidden="true" tabindex="-1"></a>To start, we'll look at a database called <span class="in">`basic_examples.db`</span> and connect to it using SQLite.</span>
+<span id="cb32-59"><a href="#cb32-59" aria-hidden="true" tabindex="-1"></a>To start, we'll look at a database called <span class="in">`example_duck.db`</span> and connect to it using SQLite.</span>
 <span id="cb32-60"><a href="#cb32-60" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb32-63"><a href="#cb32-63" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
 <span id="cb32-64"><a href="#cb32-64" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
@@ -1747,7 +1740,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb32-81"><a href="#cb32-81" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
 <span id="cb32-82"><a href="#cb32-82" aria-hidden="true" tabindex="-1"></a><span class="co">#| vscode: {languageId: python}</span></span>
 <span id="cb32-83"><a href="#cb32-83" aria-hidden="true" tabindex="-1"></a><span class="co"># Connect to the database</span></span>
-<span id="cb32-84"><a href="#cb32-84" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>sql duckdb:<span class="op">///</span>data<span class="op">/</span>basic_examples.db <span class="op">--</span>alias duck</span>
+<span id="cb32-84"><a href="#cb32-84" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>sql duckdb:<span class="op">///</span>data<span class="op">/</span>example_duck.db <span class="op">--</span>alias duck</span>
 <span id="cb32-85"><a href="#cb32-85" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb32-86"><a href="#cb32-86" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb32-87"><a href="#cb32-87" aria-hidden="true" tabindex="-1"></a>Now that we’re connected, let’s make some queries!</span>
