@@ -39,16 +39,19 @@ In this lecture, we'll continue our work from last time to introduce some advanc
 First, let's load in the `basic_examples.db` database.
 
 ```{python}
+#| vscode: {languageId: python}
 %load_ext sql
 ```
 
 ```{python}
+#| vscode: {languageId: python}
 import duckdb
 conn = duckdb.connect()
 conn.query("INSTALL sqlite")
 ```
 
 ```{python}
+#| vscode: {languageId: python}
 %sql duckdb:///data/basic_examples.db --alias basic
 ```
 
@@ -61,6 +64,7 @@ In `pandas`, much of our analysis work relied heavily on being able to use `.gro
 To illustrate `GROUP BY`, we will consider the `Dish` table from our database.
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 SELECT * 
 FROM Dish;
@@ -69,6 +73,7 @@ FROM Dish;
 Notice that there are multiple dishes of the same `type`. What if we wanted to find the total costs of dishes of a certain `type`? To accomplish this, we would write the following code.
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 SELECT type, SUM(cost)
 FROM Dish
@@ -92,6 +97,7 @@ There are many aggregation functions that can be used to aggregate the data cont
 We can easily compute multiple aggregations all at once (a task that was very tricky in `pandas`).
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 SELECT type, SUM(cost), MIN(cost), MAX(name)
 FROM Dish
@@ -103,6 +109,7 @@ To count the number of rows associated with each group, we use the `COUNT` keywo
 Recall the `Dragon` table from the previous lecture:
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 SELECT * FROM Dragon;
 ```
@@ -110,6 +117,7 @@ SELECT * FROM Dragon;
 Notice that `COUNT(*)` and `COUNT(cute)` result in different outputs.
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 SELECT year, COUNT(*)
 FROM Dragon
@@ -117,6 +125,7 @@ GROUP BY year;
 ```
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 SELECT year, COUNT(cute)
 FROM Dragon
@@ -142,6 +151,7 @@ Now, what if we only want groups that meet a certain condition? `HAVING` filters
 Let's take a look at the `Dish` table to see how we can use `HAVING`. Say we want to group dishes with a cost greater than 4 by `type` and only keep groups where the max cost is less than 10.
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 SELECT type, COUNT(*)
 FROM Dish
@@ -178,6 +188,7 @@ We can, however, still perform simple data cleaning and re-structuring using SQL
 Let's load in the `imdb_duck` database.
 
 ```{python}
+#| vscode: {languageId: python}
 import os
 if os.path.exists("/home/jovyan/shared/sql/imdb_duck.db"):
     imdbpath = "duckdb:////home/jovyan/shared/sql/imdb_duck.db"
@@ -193,6 +204,7 @@ print(imdbpath)
 ```
 
 ```{python}
+#| vscode: {languageId: python}
 from sqlalchemy import create_engine
 imdb_engine = create_engine(imdbpath, connect_args={'read_only': True})
 %sql imdb_engine --alias imdb
@@ -201,6 +213,7 @@ imdb_engine = create_engine(imdbpath, connect_args={'read_only': True})
 Since we'll be working with the `Title` table, let's take a quick look at what it contains. 
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql imdb 
     
 SELECT *
@@ -216,6 +229,7 @@ One common task we encountered in our first look at EDA was needing to match str
 In SQL, we use the `LIKE` operator to (you guessed it) look for strings that are *like* a given string pattern. 
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 SELECT titleType, primaryTitle
 FROM Title
@@ -225,6 +239,7 @@ WHERE primaryTitle LIKE 'Star Wars: Episode I - The Phantom Menace'
 What if we wanted to find *all* Star Wars movies? `%` is the wildcard operator, it means "look for any character, any number of times". This makes it helpful for identifying strings that are similar to our desired pattern, even when we don't know the full text of what we aim to extract.
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 SELECT titleType, primaryTitle
 FROM Title
@@ -235,6 +250,7 @@ LIMIT 10;
 Alternatively, we can use RegEx! DuckDB and most real DBMSs allow for this. Note that here, we have to use the `SIMILAR TO` operater rather than `LIKE`.
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 SELECT titleType, primaryTitle
 FROM Title
@@ -247,6 +263,7 @@ LIMIT 10;
 A common data cleaning task is converting data to the correct variable type. The `CAST` keyword is used to generate a new output column. Each entry in this output column is the result of converting the data in an existing column to a new data type. For example, we may wish to convert numeric data stored as a string to an integer.
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 SELECT primaryTitle, CAST(runtimeMinutes AS INT)
 FROM Title;
@@ -257,6 +274,7 @@ We use `CAST` when `SELECT`ing colunns for our output table. In the example abov
 SQL will automatically name a new column according to the command used to `SELECT` it, which can lead to unwieldy column names. We can rename the `CAST`ed column using the `AS` keyword.
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 SELECT primaryTitle AS title, CAST(runtimeMinutes AS INT) AS minutes, CAST(startYear AS INT) AS year
 FROM Title
@@ -280,6 +298,7 @@ Scanning through the skeleton code above, you can see that the logic is similar 
 Let's see this in action. In the example below, we give the new column created by the `CASE` statement the name `movie_age`.
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 /* If a movie was filmed before 1950, it is "old"
 Otherwise, if a movie was filmed before 2000, it is "mid-aged"
@@ -365,11 +384,12 @@ We have kept the same output achieved using an inner join, with the addition of 
 
 ### Aliasing in `JOIN`s
 
-Generally, when joining tables, we often create aliases for table names (similarly to what we did with column names in the last lecture). It is typically easier to refer to aliases, especially when we are working with long table names, and can even reference columns using aliased table names.
+When joining tables, we often create aliases for table names (similarly to what we did with column names in the last lecture). We do this as it is typically easier to refer to aliases, especially when we are working with long table names. We can even reference columns using aliased table names.
 
 Let's say we want to determine the average rating of various movies:
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 
 SELECT primaryTitle, averageRating
@@ -380,9 +400,52 @@ ON T.tconst = R.tconst;
 Note that the `AS` is actually optional! We can create aliases for our tables even without it, but we usually include it for clarity.
 
 ```{python}
+#| vscode: {languageId: python}
 %%sql
 
 SELECT primaryTitle, averageRating
 FROM Title T INNER JOIN Rating R
 ON T.tconst = R.tconst;
 ```
+
+### Common Table Expression
+
+For more sophisticated data problems, the queries can become very complex. Common Table Expressions allow us to break down these complex queries into more manageable parts. This involves creating temporary tables which correspond to different aspects of the problem and then referencing them in the final query. The following format is an example of how we can create two temporary tables and then use them for further querying:
+
+    WITH 
+    table_name1 AS ( 
+        SELECT ...
+    ),
+    table_name2 AS ( 
+        SELECT ...
+    )
+    SELECT ... 
+    FROM 
+    table_name1, 
+    table_name2, ...
+
+Let's say we want to identify the top 10 action movies that are highly rated (with an average rating greater than 7) and popular (having more than 5000 votes), along with the primary actors who are the most popular, we can use Common Table Expression to break this query down into separate problems. Initially, we can filter to find good action movies and prolific actors separately. This way, in our final join, we only need to change the order.
+
+```{python}
+#| vscode: {languageId: python}
+%%sql
+WITH 
+good_action_movies AS (
+    SELECT *
+    FROM Title T JOIN Rating R ON T.tconst = R.tconst  
+    WHERE genres LIKE '%Action%' AND averageRating > 7 AND numVotes > 5000
+),
+prolific_actors AS (
+    SELECT N.nconst, primaryName, COUNT(*) as numRoles
+    FROM Name N JOIN Principal P ON N.nconst = P.nconst
+    WHERE category = 'actor'
+    GROUP BY N.nconst, primaryName
+)
+SELECT primaryTitle, primaryName, numRoles, ROUND(averageRating) AS rating
+FROM good_action_movies m, prolific_actors a, principal p
+WHERE p.tconst = m.tconst AND p.nconst = a.nconst
+ORDER BY rating DESC, numRoles DESC
+LIMIT 10;
+```
+
+

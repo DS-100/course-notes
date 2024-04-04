@@ -57,7 +57,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="sql_II_files/libs/clipboard/clipboard.min.js"></script>
+<script src="sql_II_files/libs/clipboard/clipboard.min.js"></script>
 <script src="sql_II_files/libs/quarto-html/quarto.js"></script>
 <script src="sql_II_files/libs/quarto-html/popper.min.js"></script>
 <script src="sql_II_files/libs/quarto-html/tippy.umd.min.js"></script>
@@ -67,9 +67,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="sql_II_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="sql_II_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="sql_II_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
-
-<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
 
 </head>
@@ -83,15 +80,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
   <li><a href="#aggregating-with-group-by" id="toc-aggregating-with-group-by" class="nav-link active" data-scroll-target="#aggregating-with-group-by">Aggregating with <code>GROUP BY</code></a></li>
-  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
   <li><a href="#filtering-groups" id="toc-filtering-groups" class="nav-link" data-scroll-target="#filtering-groups">Filtering Groups</a></li>
+  <li><a href="#summary-sql" id="toc-summary-sql" class="nav-link" data-scroll-target="#summary-sql">Summary: SQL</a></li>
   <li><a href="#eda-in-sql" id="toc-eda-in-sql" class="nav-link" data-scroll-target="#eda-in-sql">EDA in SQL</a>
   <ul class="collapse">
   <li><a href="#matching-text-using-like" id="toc-matching-text-using-like" class="nav-link" data-scroll-target="#matching-text-using-like">Matching Text using <code>LIKE</code></a></li>
   <li><a href="#casting-data-types" id="toc-casting-data-types" class="nav-link" data-scroll-target="#casting-data-types"><code>CAST</code>ing Data Types</a></li>
   <li><a href="#using-conditional-statements-with-case" id="toc-using-conditional-statements-with-case" class="nav-link" data-scroll-target="#using-conditional-statements-with-case">Using Conditional Statements with <code>CASE</code></a></li>
   </ul></li>
-  <li><a href="#joining-tables" id="toc-joining-tables" class="nav-link" data-scroll-target="#joining-tables"><code>JOIN</code>ing Tables</a></li>
+  <li><a href="#joining-tables" id="toc-joining-tables" class="nav-link" data-scroll-target="#joining-tables"><code>JOIN</code>ing Tables</a>
+  <ul class="collapse">
+  <li><a href="#aliasing-in-joins" id="toc-aliasing-in-joins" class="nav-link" data-scroll-target="#aliasing-in-joins">Aliasing in <code>JOIN</code>s</a></li>
+  <li><a href="#common-table-expression" id="toc-common-table-expression" class="nav-link" data-scroll-target="#common-table-expression">Common Table Expression</a></li>
+  </ul></li>
   </ul>
 </nav>
 </div>
@@ -138,125 +139,34 @@ Learning Outcomes
 </div>
 </div>
 <p>In this lecture, we’ll continue our work from last time to introduce some advanced SQL syntax.</p>
-<p>First, let’s load in the database from last lecture.</p>
-<div id="cell-2" class="cell" data-tags="[]" data-execution_count="33">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the SQL Alchemy Python library</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sqlalchemy</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>First, let’s load in the <code>basic_examples.db</code> database.</p>
+<div id="cell-2" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>load_ext sql</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="cell-3" class="cell" data-tags="[]" data-execution_count="34">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>load_ext sql</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>The sql extension is already loaded. To reload it, use:
-  %reload_ext sql</code></pre>
+<div id="cell-3" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> duckdb</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>conn <span class="op">=</span> duckdb.<span class="ex">connect</span>()</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>conn.query(<span class="st">"INSTALL sqlite"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</div>
-<div id="cell-4" class="cell" data-tags="[]" data-execution_count="35">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>sqlite:<span class="op">///</span>data<span class="op">/</span>basic_examples.db </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-4" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>sql duckdb:<span class="op">///</span>data<span class="op">/</span>basic_examples.db <span class="op">--</span>alias basic</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <section id="aggregating-with-group-by" class="level2">
 <h2 class="anchored" data-anchor-id="aggregating-with-group-by">Aggregating with <code>GROUP BY</code></h2>
 <p>At this point, we’ve seen that SQL offers much of the same functionality that was given to us by <code>pandas</code>. We can extract data from a table, filter it, and reorder it to suit our needs.</p>
 <p>In <code>pandas</code>, much of our analysis work relied heavily on being able to use <code>.groupby()</code> to aggregate across the rows of our dataset. SQL’s answer to this task is the (very conveniently named) <code>GROUP BY</code> clause. While the outputs of <code>GROUP BY</code> are similar to those of <code>.groupby()</code> —— in both cases, we obtain an output table where some column has been used for grouping —— the syntax and logic used to group data in SQL are fairly different to the <code>pandas</code> implementation.</p>
-<p>To illustrate <code>GROUP BY</code>, we will consider the <code>Dish</code> table from the <code>basic_examples.db</code> database.</p>
-<div id="cell-6" class="cell" data-tags="[]" data-execution_count="36">
+<p>To illustrate <code>GROUP BY</code>, we will consider the <code>Dish</code> table from our database.</p>
+<div id="cell-6" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>SELECT <span class="op">*</span> </span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>FROM Dish<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Notice that there are multiple dishes of the same <code>type</code>. What if we wanted to find the total costs of dishes of a certain <code>type</code>? To accomplish this, we would write the following code.</p>
+<div id="cell-8" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>SELECT <span class="op">*</span> </span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>FROM Dish<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code> * sqlite:///data/basic_examples.db
-   sqlite:///data/imdbmini.db
-Done.</code></pre>
-</div>
-<div class="cell-output cell-output-display" data-execution_count="36">
-<div>
-<table data-quarto-postprocess="true" class="table table-sm table-striped small">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th">name</th>
-<th data-quarto-table-cell-role="th">type</th>
-<th data-quarto-table-cell-role="th">cost</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>ravioli</td>
-<td>entree</td>
-<td>10</td>
-</tr>
-<tr class="even">
-<td>ramen</td>
-<td>entree</td>
-<td>13</td>
-</tr>
-<tr class="odd">
-<td>taco</td>
-<td>entree</td>
-<td>7</td>
-</tr>
-<tr class="even">
-<td>edamame</td>
-<td>appetizer</td>
-<td>4</td>
-</tr>
-<tr class="odd">
-<td>fries</td>
-<td>appetizer</td>
-<td>4</td>
-</tr>
-<tr class="even">
-<td>potsticker</td>
-<td>appetizer</td>
-<td>4</td>
-</tr>
-<tr class="odd">
-<td>ice cream</td>
-<td>dessert</td>
-<td>5</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-<p>Say we wanted to find the total costs of dishes of a certain <code>type</code>. To accomplish this, we would write the following code.</p>
-<div id="cell-8" class="cell" data-tags="[]" data-execution_count="37">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>SELECT <span class="bu">type</span>, SUM(cost)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>FROM Dish</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>GROUP BY <span class="bu">type</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code> * sqlite:///data/basic_examples.db
-   sqlite:///data/imdbmini.db
-Done.</code></pre>
-</div>
-<div class="cell-output cell-output-display" data-execution_count="37">
-<div>
-<table data-quarto-postprocess="true" class="table table-sm table-striped small">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th">type</th>
-<th data-quarto-table-cell-role="th">SUM(cost)</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>appetizer</td>
-<td>12</td>
-</tr>
-<tr class="even">
-<td>dessert</td>
-<td>5</td>
-</tr>
-<tr class="odd">
-<td>entree</td>
-<td>30</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>SELECT <span class="bu">type</span>, SUM(cost)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>FROM Dish</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>GROUP BY <span class="bu">type</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>What is going on here? The statement <code>GROUP BY type</code> tells SQL to group the data based on the value contained in the <code>type</code> column (whether a record is an appetizer, entree, or dessert). <code>SUM(cost)</code> sums up the costs of dishes in each <code>type</code> and displays the result in the output table.</p>
 <p>You may be wondering: why does <code>SUM(cost)</code> come before the command to <code>GROUP BY type</code>? Don’t we need to form groups before we can count the number of entries in each? Remember that SQL is a <em>declarative</em> programming language —— a SQL programmer simply states what end result they would like to see, and leaves the task of figuring out <em>how</em> to obtain this result to SQL itself. This means that SQL queries sometimes don’t follow what a reader sees as a “logical” sequence of thought. Instead, SQL requires that we follow its set order of operations when constructing queries. So long as we follow this order, SQL will handle the underlying logic.</p>
@@ -270,166 +180,30 @@ Done.</code></pre>
 <li><code>AVG</code>: find the average value of each group</li>
 </ul>
 <p>We can easily compute multiple aggregations all at once (a task that was very tricky in <code>pandas</code>).</p>
-<div id="cell-10" class="cell" data-tags="[]" data-execution_count="38">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>SELECT <span class="bu">type</span>, SUM(cost), MIN(cost), MAX(name)</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>FROM Dish</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>GROUP BY <span class="bu">type</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code> * sqlite:///data/basic_examples.db
-   sqlite:///data/imdbmini.db
-Done.</code></pre>
-</div>
-<div class="cell-output cell-output-display" data-execution_count="38">
-<div>
-<table data-quarto-postprocess="true" class="table table-sm table-striped small">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th">type</th>
-<th data-quarto-table-cell-role="th">SUM(cost)</th>
-<th data-quarto-table-cell-role="th">MIN(cost)</th>
-<th data-quarto-table-cell-role="th">MAX(name)</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>appetizer</td>
-<td>12</td>
-<td>4</td>
-<td>potsticker</td>
-</tr>
-<tr class="even">
-<td>dessert</td>
-<td>5</td>
-<td>5</td>
-<td>ice cream</td>
-</tr>
-<tr class="odd">
-<td>entree</td>
-<td>30</td>
-<td>7</td>
-<td>taco</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<div id="cell-10" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>SELECT <span class="bu">type</span>, SUM(cost), MIN(cost), MAX(name)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>FROM Dish</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>GROUP BY <span class="bu">type</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>To count the number of rows associated with each group, we use the <code>COUNT</code> keyword. Calling <code>COUNT(*)</code> will compute the total number of rows in each group, including rows with null values. Its <code>pandas</code> equivalent is <code>.groupby().size()</code>.</p>
 <p>Recall the <code>Dragon</code> table from the previous lecture:</p>
-<div id="cell-12" class="cell" data-tags="[]" data-execution_count="39">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>SELECT <span class="op">*</span> FROM Dragon<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code> * sqlite:///data/basic_examples.db
-   sqlite:///data/imdbmini.db
-Done.</code></pre>
+<div id="cell-12" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>SELECT <span class="op">*</span> FROM Dragon<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell-output cell-output-display" data-execution_count="39">
-<div>
-<table data-quarto-postprocess="true" class="table table-sm table-striped small">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th">name</th>
-<th data-quarto-table-cell-role="th">year</th>
-<th data-quarto-table-cell-role="th">cute</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>hiccup</td>
-<td>2010</td>
-<td>10</td>
-</tr>
-<tr class="even">
-<td>drogon</td>
-<td>2011</td>
-<td>-100</td>
-</tr>
-<tr class="odd">
-<td>dragon 2</td>
-<td>2019</td>
-<td>0</td>
-</tr>
-</tbody>
-</table>
+<p>Notice that <code>COUNT(*)</code> and <code>COUNT(cute)</code> result in different outputs.</p>
+<div id="cell-14" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>SELECT year, COUNT(<span class="op">*</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>GROUP BY year<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</div>
-</div>
-<p>Notice that <code>COUNT(*)</code> and <code>COUNT(cute)</code> result in different outputs/</p>
-<div id="cell-14" class="cell" data-tags="[]" data-execution_count="42">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>SELECT year, COUNT(<span class="op">*</span>)</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>GROUP BY year<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code> * sqlite:///data/basic_examples.db
-   sqlite:///data/imdbmini.db
-Done.</code></pre>
-</div>
-<div class="cell-output cell-output-display" data-execution_count="42">
-<div>
-<table data-quarto-postprocess="true" class="table table-sm table-striped small">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th">year</th>
-<th data-quarto-table-cell-role="th">COUNT(*)</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>2010</td>
-<td>1</td>
-</tr>
-<tr class="even">
-<td>2011</td>
-<td>1</td>
-</tr>
-<tr class="odd">
-<td>2019</td>
-<td>1</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-<div id="cell-15" class="cell" data-tags="[]" data-execution_count="43">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>SELECT year, COUNT(cute)</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>GROUP BY year<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code> * sqlite:///data/basic_examples.db
-   sqlite:///data/imdbmini.db
-Done.</code></pre>
-</div>
-<div class="cell-output cell-output-display" data-execution_count="43">
-<div>
-<table data-quarto-postprocess="true" class="table table-sm table-striped small">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th">year</th>
-<th data-quarto-table-cell-role="th">COUNT(cute)</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>2010</td>
-<td>1</td>
-</tr>
-<tr class="even">
-<td>2011</td>
-<td>1</td>
-</tr>
-<tr class="odd">
-<td>2019</td>
-<td>1</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<div id="cell-15" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>SELECT year, COUNT(cute)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>GROUP BY year<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>With this definition of <code>GROUP BY</code> in hand, let’s update our SQL order of operations. Remember: <em>every</em> SQL query must list clauses in this order.</p>
 <pre><code>SELECT &lt;column expression list&gt;
@@ -441,97 +215,31 @@ FROM &lt;table&gt;
 [OFFSET &lt;number of rows&gt;];</code></pre>
 <p>Note that we can use the <code>AS</code> keyword to rename columns during the selection process and that column expressions may include aggregation functions (<code>MAX</code>, <code>MIN</code>, etc.).</p>
 </section>
-<section id="summary" class="level2">
-<h2 class="anchored" data-anchor-id="summary">Summary</h2>
-<p>Let’s summarize what we’ve learned so far. We know that <code>SELECT</code> and <code>FROM</code> are the fundamental building blocks of any SQL query. We can augment these two keywords with additional clauses to refine the data in our output table.</p>
-<p>Any clauses that we include must follow a strict ordering within the query:</p>
-<pre><code>SELECT &lt;column list&gt;
+<section id="filtering-groups" class="level2">
+<h2 class="anchored" data-anchor-id="filtering-groups">Filtering Groups</h2>
+<p>Now, what if we only want groups that meet a certain condition? <code>HAVING</code> filters groups by applying some condition across all rows in each group. We interpret it as a way to keep only the groups <code>HAVING</code> some condition. Note the difference between <code>WHERE</code> and <code>HAVING</code>: we use <code>WHERE</code> to filter rows, whereas we use <code>HAVING</code> to filter <em>groups</em>. <code>WHERE</code> precedes <code>HAVING</code> in terms of how SQL executes a query.</p>
+<p>Let’s take a look at the <code>Dish</code> table to see how we can use <code>HAVING</code>. Say we want to group dishes with a cost greater than 4 by <code>type</code> and only keep groups where the max cost is less than 10.</p>
+<div id="cell-17" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>SELECT <span class="bu">type</span>, COUNT(<span class="op">*</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>FROM Dish</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>WHERE cost <span class="op">&gt;</span> <span class="dv">4</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>GROUP BY <span class="bu">type</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>HAVING MAX(cost) <span class="op">&lt;</span>  <span class="dv">10</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Here, we first use <code>WHERE</code> to filter for rows with a cost greater than 4. We then group our values by <code>type</code> before applying the <code>HAVING</code> operator. With <code>HAVING</code>, we can filter our groups based on if the max cost is less than 10.</p>
+</section>
+<section id="summary-sql" class="level2">
+<h2 class="anchored" data-anchor-id="summary-sql">Summary: SQL</h2>
+<p>With this definition of <code>GROUP BY</code> and <code>HAVING</code> in hand, let’s update our SQL order of operations. Remember: <em>every</em> SQL query must list clauses in this order.</p>
+<pre><code>SELECT &lt;column expression list&gt;
 FROM &lt;table&gt;
 [WHERE &lt;predicate&gt;]
 [GROUP BY &lt;column list&gt;]
 [ORDER BY &lt;column list&gt;]
 [LIMIT &lt;number of rows&gt;]
-[OFFSET &lt;number of rows&gt;]</code></pre>
-<p>Here, any clause contained in square brackets <code>[ ]</code> is optional —— we only need to use the keyword if it is relevant to the table operation we want to perform. Also note that by convention, we use all caps for keywords in SQL statements and use newlines to make code more readable.</p>
-</section>
-<section id="filtering-groups" class="level2">
-<h2 class="anchored" data-anchor-id="filtering-groups">Filtering Groups</h2>
-<p><code>HAVING</code> filters groups by applying some condition across all rows in each group. We interpret it as a a way to keep only the groups <code>HAVING</code> some condition. Note the difference between <code>WHERE</code> and <code>HAVING</code>: we use <code>WHERE</code> to filter rows, whereas we use <code>HAVING</code> to filter groups. <code>WHERE</code> precedes <code>HAVING</code> in terms of how SQL executes a query.</p>
-<p>Let’s take a look at the <code>Dish</code> table to see how we can use <code>HAVING</code>.</p>
-<p>The code below groups the different dishes by type, and only keeps those groups wherein the max cost is still less than 8.</p>
-<div id="cell-18" class="cell" data-tags="[]" data-execution_count="44">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>SELECT <span class="bu">type</span>, COUNT(<span class="op">*</span>)</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>FROM Dish</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>GROUP BY <span class="bu">type</span></span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>HAVING MAX(cost) <span class="op">&lt;</span> <span class="dv">8</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code> * sqlite:///data/basic_examples.db
-   sqlite:///data/imdbmini.db
-Done.</code></pre>
-</div>
-<div class="cell-output cell-output-display" data-execution_count="44">
-<div>
-<table data-quarto-postprocess="true" class="table table-sm table-striped small">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th">type</th>
-<th data-quarto-table-cell-role="th">COUNT(*)</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>appetizer</td>
-<td>3</td>
-</tr>
-<tr class="even">
-<td>dessert</td>
-<td>1</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-<p>In contrast, the code below first filters for rows where the cost is less than 8, and then does the grouping. Note the difference in outputs - in this case, “taco” is also included, whereas other entries in the same group having cost greater than or equal to 8 are not included.</p>
-<div id="cell-20" class="cell" data-tags="[]" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>SELECT <span class="bu">type</span>, COUNT(<span class="op">*</span>)</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>FROM Dish</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>WHERE cost <span class="op">&lt;</span> <span class="dv">8</span></span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>GROUP BY <span class="bu">type</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code> * sqlite:///data/basic_examples.db
-Done.</code></pre>
-</div>
-<div class="cell-output cell-output-display" data-execution_count="6">
-<div>
-<table data-quarto-postprocess="true" class="table table-sm table-striped small">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th">type</th>
-<th data-quarto-table-cell-role="th">COUNT(*)</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>appetizer</td>
-<td>3</td>
-</tr>
-<tr class="even">
-<td>dessert</td>
-<td>1</td>
-</tr>
-<tr class="odd">
-<td>entree</td>
-<td>1</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-<p>In general, to filter rows, we use <code>WHERE</code>, while to filter groups, we use <code>HAVING</code>. Note that <code>WHERE</code> precedes <code>HAVING</code> when they are both used.</p>
+[OFFSET &lt;number of rows&gt;];</code></pre>
+<p>Note that we can use the <code>AS</code> keyword to rename columns during the selection process and that column expressions may include aggregation functions (<code>MAX</code>, <code>MIN</code>, etc.).</p>
 </section>
 <section id="eda-in-sql" class="level2">
 <h2 class="anchored" data-anchor-id="eda-in-sql">EDA in SQL</h2>
@@ -539,253 +247,80 @@ Done.</code></pre>
 <p>Our typical workflow when working with “big data” is:</p>
 <ol type="1">
 <li>Use SQL to query data from a database</li>
-<li>Use <code>python</code> (with <code>pandas</code>) to analyze this data in detail</li>
+<li>Use Python (with <code>pandas</code>) to analyze this data in detail</li>
 </ol>
-<p>We can, however, still perform simple data cleaning and re-structuring using SQL directly. To do so, we’ll use the <code>Title</code> table from the <code>imdbmini</code> database.</p>
+<p>We can, however, still perform simple data cleaning and re-structuring using SQL directly. To do so, we’ll use the <code>Title</code> table from the <code>imdb_duck</code> database, which contains information about movies and actors.</p>
+<p>Let’s load in the <code>imdb_duck</code> database.</p>
+<div id="cell-19" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> os.path.exists(<span class="st">"/home/jovyan/shared/sql/imdb_duck.db"</span>):</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    imdbpath <span class="op">=</span> <span class="st">"duckdb:////home/jovyan/shared/sql/imdb_duck.db"</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="cf">elif</span> os.path.exists(<span class="st">"data/imdb_duck.db"</span>):</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    imdbpath <span class="op">=</span>  <span class="st">"duckdb:///data/imdb_duck.db"</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="im">import</span> gdown</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    url <span class="op">=</span> <span class="st">'https://drive.google.com/uc?id=10tKOHGLt9QoOgq5Ii-FhxpB9lDSQgl1O'</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    output_path <span class="op">=</span> <span class="st">'data/imdb_duck.db'</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    gdown.download(url, output_path, quiet<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    imdbpath <span class="op">=</span> <span class="st">"duckdb:///data/imdb_duck.db"</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(imdbpath)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-20" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sqlalchemy <span class="im">import</span> create_engine</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>imdb_engine <span class="op">=</span> create_engine(imdbpath, connect_args<span class="op">=</span>{<span class="st">'read_only'</span>: <span class="va">True</span>})</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>sql imdb_engine <span class="op">--</span>alias imdb</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Since we’ll be working with the <code>Title</code> table, let’s take a quick look at what it contains.</p>
+<div id="cell-22" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql imdb </span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>SELECT <span class="op">*</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>FROM Title</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>WHERE primaryTitle IN (<span class="st">'Ginny &amp; Georgia'</span>, <span class="st">'What If...?'</span>, <span class="st">'Succession'</span>, <span class="st">'Veep'</span>, <span class="st">'Tenet'</span>)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>LIMIT <span class="dv">10</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <section id="matching-text-using-like" class="level3">
 <h3 class="anchored" data-anchor-id="matching-text-using-like">Matching Text using <code>LIKE</code></h3>
 <p>One common task we encountered in our first look at EDA was needing to match string data. For example, we might want to remove entries beginning with the same prefix as part of the data cleaning process.</p>
 <p>In SQL, we use the <code>LIKE</code> operator to (you guessed it) look for strings that are <em>like</em> a given string pattern.</p>
-<div id="cell-23" class="cell" data-tags="[]" data-execution_count="45">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>sqlite:<span class="op">///</span>data<span class="op">/</span>imdbmini.db </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-24" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>SELECT titleType, primaryTitle</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>FROM Title</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>WHERE primaryTitle LIKE <span class="st">'Star Wars: Episode I - The Phantom Menace'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="cell-24" class="cell" data-tags="[]" data-execution_count="46">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>SELECT titleType, primaryTitle</span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>FROM Title</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>WHERE primaryTitle LIKE <span class="st">"Star Wars: Episode I - The Phantom Menace"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>   sqlite:///data/basic_examples.db
- * sqlite:///data/imdbmini.db
-Done.</code></pre>
+<p>What if we wanted to find <em>all</em> Star Wars movies? <code>%</code> is the wildcard operator, it means “look for any character, any number of times”. This makes it helpful for identifying strings that are similar to our desired pattern, even when we don’t know the full text of what we aim to extract.</p>
+<div id="cell-26" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>SELECT titleType, primaryTitle</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>FROM Title</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>WHERE primaryTitle LIKE <span class="st">'%Star Wars%'</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>LIMIT <span class="dv">10</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell-output cell-output-display" data-execution_count="46">
-<div>
-<table data-quarto-postprocess="true" class="table table-sm table-striped small">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th">titleType</th>
-<th data-quarto-table-cell-role="th">primaryTitle</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>movie</td>
-<td>Star Wars: Episode I - The Phantom Menace</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-<p>What if we wanted to find <em>all</em> Star Wars movies? <code>%</code> is the wildcard operator, it means “look for any character, any number of times”. This makes it helpful for identifying strings that are similar to our desired pattern, even when we don’t know the full text of what we aim to extract. In contrast, <code>_</code> means “look for exactly 1 character”, as you can see in the Harry Potter example that follows.</p>
-<div id="cell-26" class="cell" data-tags="[]" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>SELECT titleType, primaryTitle</span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>FROM Title</span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>WHERE primaryTitle LIKE <span class="st">"%Star Wars%"</span></span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>LIMIT <span class="dv">10</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>   sqlite:///data/basic_examples.db
- * sqlite:///data/imdbmini.db
-Done.</code></pre>
-</div>
-<div class="cell-output cell-output-display" data-execution_count="9">
-<div>
-<table data-quarto-postprocess="true" class="table table-sm table-striped small">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th">titleType</th>
-<th data-quarto-table-cell-role="th">primaryTitle</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>movie</td>
-<td>Star Wars: Episode IV - A New Hope</td>
-</tr>
-<tr class="even">
-<td>movie</td>
-<td>Star Wars: Episode V - The Empire Strikes Back</td>
-</tr>
-<tr class="odd">
-<td>movie</td>
-<td>Star Wars: Episode VI - Return of the Jedi</td>
-</tr>
-<tr class="even">
-<td>movie</td>
-<td>Star Wars: Episode I - The Phantom Menace</td>
-</tr>
-<tr class="odd">
-<td>movie</td>
-<td>Star Wars: Episode II - Attack of the Clones</td>
-</tr>
-<tr class="even">
-<td>movie</td>
-<td>Star Wars: Episode III - Revenge of the Sith</td>
-</tr>
-<tr class="odd">
-<td>tvSeries</td>
-<td>Star Wars: Clone Wars</td>
-</tr>
-<tr class="even">
-<td>tvSeries</td>
-<td>Star Wars: The Clone Wars</td>
-</tr>
-<tr class="odd">
-<td>movie</td>
-<td>Star Wars: The Clone Wars</td>
-</tr>
-<tr class="even">
-<td>movie</td>
-<td>Star Wars: Episode VII - The Force Awakens</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-<div id="cell-27" class="cell" data-tags="[]" data-execution_count="10">
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>SELECT titleType, primaryTitle</span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>FROM Title</span>
-<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>WHERE primaryTitle LIKE <span class="st">"Harry Potter and the Deathly Hallows: Part _"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>   sqlite:///data/basic_examples.db
- * sqlite:///data/imdbmini.db
-Done.</code></pre>
-</div>
-<div class="cell-output cell-output-display" data-execution_count="10">
-<div>
-<table data-quarto-postprocess="true" class="table table-sm table-striped small">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th">titleType</th>
-<th data-quarto-table-cell-role="th">primaryTitle</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>movie</td>
-<td>Harry Potter and the Deathly Hallows: Part 1</td>
-</tr>
-<tr class="even">
-<td>movie</td>
-<td>Harry Potter and the Deathly Hallows: Part 2</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p>Alternatively, we can use RegEx! DuckDB and most real DBMSs allow for this. Note that here, we have to use the <code>SIMILAR TO</code> operater rather than <code>LIKE</code>.</p>
+<div id="cell-28" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>SELECT titleType, primaryTitle</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>FROM Title</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>WHERE primaryTitle SIMILAR TO <span class="st">'.*Star Wars*.'</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>LIMIT <span class="dv">10</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="casting-data-types" class="level3">
 <h3 class="anchored" data-anchor-id="casting-data-types"><code>CAST</code>ing Data Types</h3>
 <p>A common data cleaning task is converting data to the correct variable type. The <code>CAST</code> keyword is used to generate a new output column. Each entry in this output column is the result of converting the data in an existing column to a new data type. For example, we may wish to convert numeric data stored as a string to an integer.</p>
-<div id="cell-29" class="cell" data-tags="[]" data-execution_count="11">
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>SELECT primaryTitle, CAST(runtimeMinutes AS INT), CAST(startYear AS INT)</span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>FROM Title</span>
-<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>LIMIT <span class="dv">5</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>   sqlite:///data/basic_examples.db
- * sqlite:///data/imdbmini.db
-Done.</code></pre>
-</div>
-<div class="cell-output cell-output-display" data-execution_count="11">
-<div>
-<table data-quarto-postprocess="true" class="table table-sm table-striped small">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th">primaryTitle</th>
-<th data-quarto-table-cell-role="th">CAST(runtimeMinutes AS INT)</th>
-<th data-quarto-table-cell-role="th">CAST(startYear AS INT)</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>A Trip to the Moon</td>
-<td>13</td>
-<td>1902</td>
-</tr>
-<tr class="even">
-<td>The Birth of a Nation</td>
-<td>195</td>
-<td>1915</td>
-</tr>
-<tr class="odd">
-<td>The Cabinet of Dr. Caligari</td>
-<td>76</td>
-<td>1920</td>
-</tr>
-<tr class="even">
-<td>The Kid</td>
-<td>68</td>
-<td>1921</td>
-</tr>
-<tr class="odd">
-<td>Nosferatu</td>
-<td>94</td>
-<td>1922</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<div id="cell-30" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>SELECT primaryTitle, CAST(runtimeMinutes AS INT)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>FROM Title<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We use <code>CAST</code> when <code>SELECT</code>ing colunns for our output table. In the example above, we want to <code>SELECT</code> the columns of integer year and runtime data that is created by the <code>CAST</code>.</p>
 <p>SQL will automatically name a new column according to the command used to <code>SELECT</code> it, which can lead to unwieldy column names. We can rename the <code>CAST</code>ed column using the <code>AS</code> keyword.</p>
-<div id="cell-31" class="cell" data-tags="[]" data-execution_count="12">
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>SELECT primaryTitle AS title, CAST(runtimeMinutes AS INT) AS minutes, CAST(startYear AS INT) AS year</span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>FROM Title</span>
-<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>LIMIT <span class="dv">5</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>   sqlite:///data/basic_examples.db
- * sqlite:///data/imdbmini.db
-Done.</code></pre>
-</div>
-<div class="cell-output cell-output-display" data-execution_count="12">
-<div>
-<table data-quarto-postprocess="true" class="table table-sm table-striped small">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th">title</th>
-<th data-quarto-table-cell-role="th">minutes</th>
-<th data-quarto-table-cell-role="th">year</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>A Trip to the Moon</td>
-<td>13</td>
-<td>1902</td>
-</tr>
-<tr class="even">
-<td>The Birth of a Nation</td>
-<td>195</td>
-<td>1915</td>
-</tr>
-<tr class="odd">
-<td>The Cabinet of Dr. Caligari</td>
-<td>76</td>
-<td>1920</td>
-</tr>
-<tr class="even">
-<td>The Kid</td>
-<td>68</td>
-<td>1921</td>
-</tr>
-<tr class="odd">
-<td>Nosferatu</td>
-<td>94</td>
-<td>1922</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<div id="cell-32" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>SELECT primaryTitle AS title, CAST(runtimeMinutes AS INT) AS minutes, CAST(startYear AS INT) AS year</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>FROM Title</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>LIMIT <span class="dv">5</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="using-conditional-statements-with-case" class="level3">
@@ -797,98 +332,27 @@ Done.</code></pre>
      ...
      ELSE &lt;yet another value&gt;
      END</code></pre>
-<p>Scanning through the skeleton code above, you can see that the logic is similar to that of an <code>if</code> statement in <code>python</code>. The conditional statement is first opened by calling <code>CASE</code>. Each new condition is specified by <code>WHEN</code>, with <code>THEN</code> indicating what value should be filled if the condition is met. <code>ELSE</code> specifies the value that should be filled if no other conditions are met. Lastly, <code>END</code> indicates the end of the conditional statement; once <code>END</code> has been called, SQL will continue evaluating the query as usual.</p>
+<p>Scanning through the skeleton code above, you can see that the logic is similar to that of an <code>if</code> statement in Python. The conditional statement is first opened by calling <code>CASE</code>. Each new condition is specified by <code>WHEN</code>, with <code>THEN</code> indicating what value should be filled if the condition is met. <code>ELSE</code> specifies the value that should be filled if no other conditions are met. Lastly, <code>END</code> indicates the end of the conditional statement; once <code>END</code> has been called, SQL will continue evaluating the query as usual.</p>
 <p>Let’s see this in action. In the example below, we give the new column created by the <code>CASE</code> statement the name <code>movie_age</code>.</p>
-<div id="cell-33" class="cell" data-tags="[]" data-execution_count="14">
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="op">/*</span> If a movie was filmed before <span class="dv">1950</span>, it <span class="kw">is</span> <span class="st">"old"</span></span>
-<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>Otherwise, <span class="cf">if</span> a movie was filmed before <span class="dv">2000</span>, it <span class="kw">is</span> <span class="st">"mid-aged"</span></span>
-<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>Else, a movie <span class="kw">is</span> <span class="st">"new"</span> <span class="op">*/</span></span>
-<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>SELECT titleType, startYear,</span>
-<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>CASE WHEN startYear <span class="op">&lt;</span> <span class="dv">1950</span> THEN <span class="st">"old"</span></span>
-<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>     WHEN startYear <span class="op">&lt;</span> <span class="dv">2000</span> THEN <span class="st">"mid-aged"</span></span>
-<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>     ELSE <span class="st">"new"</span></span>
-<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>     END AS movie_age</span>
-<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>FROM Title</span>
-<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>LIMIT <span class="dv">10</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>   sqlite:///data/basic_examples.db
- * sqlite:///data/imdbmini.db
-Done.</code></pre>
-</div>
-<div class="cell-output cell-output-display" data-execution_count="14">
-<div>
-<table data-quarto-postprocess="true" class="table table-sm table-striped small">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th">titleType</th>
-<th data-quarto-table-cell-role="th">startYear</th>
-<th data-quarto-table-cell-role="th">movie_age</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>short</td>
-<td>1902</td>
-<td>old</td>
-</tr>
-<tr class="even">
-<td>movie</td>
-<td>1915</td>
-<td>old</td>
-</tr>
-<tr class="odd">
-<td>movie</td>
-<td>1920</td>
-<td>old</td>
-</tr>
-<tr class="even">
-<td>movie</td>
-<td>1921</td>
-<td>old</td>
-</tr>
-<tr class="odd">
-<td>movie</td>
-<td>1922</td>
-<td>old</td>
-</tr>
-<tr class="even">
-<td>movie</td>
-<td>1924</td>
-<td>old</td>
-</tr>
-<tr class="odd">
-<td>movie</td>
-<td>1925</td>
-<td>old</td>
-</tr>
-<tr class="even">
-<td>movie</td>
-<td>1925</td>
-<td>old</td>
-</tr>
-<tr class="odd">
-<td>movie</td>
-<td>1927</td>
-<td>old</td>
-</tr>
-<tr class="even">
-<td>movie</td>
-<td>1926</td>
-<td>old</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<div id="cell-34" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="op">/*</span> If a movie was filmed before <span class="dv">1950</span>, it <span class="kw">is</span> <span class="st">"old"</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>Otherwise, <span class="cf">if</span> a movie was filmed before <span class="dv">2000</span>, it <span class="kw">is</span> <span class="st">"mid-aged"</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>Else, a movie <span class="kw">is</span> <span class="st">"new"</span> <span class="op">*/</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>SELECT titleType, startYear,</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>CASE WHEN startYear <span class="op">&lt;</span> <span class="dv">1950</span> THEN <span class="st">'old'</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>     WHEN startYear <span class="op">&lt;</span> <span class="dv">2000</span> THEN <span class="st">'mid-aged'</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>     ELSE <span class="st">'new'</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>     END AS movie_age</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>FROM Title<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 </section>
 <section id="joining-tables" class="level2">
 <h2 class="anchored" data-anchor-id="joining-tables"><code>JOIN</code>ing Tables</h2>
-<p>At this point, we’re well-versed in using SQL as a tool to clean, manipulate, and transform data in a table. Notice that this sentence referred to one <em>table</em>, specifically. What happens if the data we need is distributed across multiple tables? This is an important consideration when using SQL – recall that we first introduced SQL as a language to query from databases. Databases often store data in a multidimensional structure. In other words, information is stored across several tables, with each table containing a small subset of all the data housed by the database.</p>
-<p>A common way of organizing a database is by using a <strong>star schema</strong>. A star schema is composed of two types of tables. A <strong>fact table</strong> is the central table of the database – it contains the information needed to link entries across several <strong>dimension tables</strong>, which contain more detailed information about the data.</p>
+<p>At this point, we’re well-versed in using SQL as a tool to clean, manipulate, and transform data in a table. Notice that this sentence referred to one <em>table</em>, specifically. What happens if the data we need is distributed across multiple tables? This is an important consideration when using SQL —— recall that we first introduced SQL as a language to query from databases. Databases often store data in a multidimensional structure. In other words, information is stored across several tables, with each table containing a small subset of all the data housed by the database.</p>
+<p>A common way of organizing a database is by using a <strong>star schema</strong>. A star schema is composed of two types of tables. A <strong>fact table</strong> is the central table of the database —— it contains the information needed to link entries across several <strong>dimension tables</strong>, which contain more detailed information about the data.</p>
 <p>Say we were working with a database about boba offerings in Berkeley. The dimension tables of the database might contain information about tea varieties and boba toppings. The fact table would be used to link this information across the various dimension tables.</p>
 <div style="text-align: center;">
 <p><img src="images/multidimensional.png" alt="multidimensional" width="850"></p>
@@ -908,36 +372,84 @@ FROM table_1
     JOIN table_2 
     ON key_1 = key_2;</code></pre>
 <p>We also need to specify what column from each table should be used to determine matching entries. By defining these keys, we provide SQL with the information it needs to pair rows of data together.</p>
-<p>In a <strong>cross join</strong>, <em>all</em> possible combinations of rows appear in the output table, regardless of whether or not rows share a matching key. Because all rows are joined, even if there is no matching key, it is not necessary to specify what keys to consider in an <code>ON</code> statement. A cross join is also known as a cartesian product.</p>
-<div style="text-align: center;">
-<p><img src="images/cross.png" alt="cross" width="800"></p>
-</div>
 <p>The most commonly used type of SQL <code>JOIN</code> is the <strong>inner join</strong>. It turns out you’re already familiar with what an inner join does, and how it works – this is the type of join we’ve been using in <code>pandas</code> all along! In an inner join, we combine every row in our first table with its matching entry in the second table. If a row from either table does not have a match in the other table, it is omitted from the output.</p>
 <div style="text-align: center;">
 <p><img src="images/inner.png" alt="inner" width="800"></p>
 </div>
-<p>Another way of interpreting the inner join: perform a cross join, then remove all rows that do not share a matching key. Notice that the output of the inner join above contains all rows of the cross join example that contain a single color across the entire row.</p>
-<p>In a <strong>full outer join</strong>, all rows that have a match between the two tables are joined together. If a row has no match in the second table, then the values of the columns for that second table are filled with null. In other words, a full outer join performs an inner join <em>while still keeping</em> rows that have no match in the other table. This is best understood visually:</p>
+<p>In a <strong>cross join</strong>, <em>all</em> possible combinations of rows appear in the output table, regardless of whether or not rows share a matching key. Because all rows are joined, even if there is no matching key, it is not necessary to specify what keys to consider in an <code>ON</code> statement. A cross join is also known as a cartesian product.</p>
 <div style="text-align: center;">
-<p><img src="images/full.png" alt="full" width="800"></p>
+<p><img src="images/cross.png" alt="cross" width="800"></p>
 </div>
-<p>We have kept the same output achieved using an inner join, with the addition of partially null rows for entries in <code>s</code> and <code>t</code> that had no match in the second table. Note that <code>FULL OUTER JOIN</code> is not supported by SQLite, the “flavor” of SQL that will be used in lab and homework.</p>
-<p>A <strong>left outer join</strong> is similar to a full outer join. In a left outer join, <em>all</em> rows in the left table are kept in the output table. If a row in the right table shares a match with the left table, this row will be kept; otherwise, the rows in the right table are omitted from the output.</p>
+<p>Conceptually, we can interpret an inner join as a cross join, followed by removing all rows that do not share a matching key. Notice that the output of the inner join above contains all rows of the cross join example that contain a single color across the entire row.</p>
+<p>In a <strong>left outer join</strong>, <em>all</em> rows in the left table are kept in the output table. If a row in the right table shares a match with the left table, this row will be kept; otherwise, the rows in the right table are omitted from the output. We can fill in any missing values with <code>NULL</code>.</p>
 <div style="text-align: center;">
 <p><img src="images/left.png" alt="left" width="800"></p>
 </div>
-<p>A <strong>right outer join</strong> keeps all rows in the right table. Rows in the left table are only kept if they share a match in the right table. Right outer joins are not supported by SQLite.</p>
+<p>A <strong>right outer join</strong> keeps all rows in the right table. Rows in the left table are only kept if they share a match in the right table. Again, we can fill in any missing values with <code>NULL</code>.</p>
 <div style="text-align: center;">
 <p><img src="images/right.png" alt="right" width="800"></p>
 </div>
-<p>In the examples above, we performed our joins by checking for equality between the two tables (i.e., by setting <code>s.id = t.id</code>). SQL also supports joining rows on <em>inequalities</em>, which is something we weren’t able to do when working in <code>pandas</code>. Consider a new dataset that contains information about students and teachers.</p>
+<p>In a <strong>full outer join</strong>, all rows that have a match between the two tables are joined together. If a row has no match in the second table, then the values of the columns for that second table are filled with <code>NULL</code>. In other words, a full outer join performs an inner join <em>while still keeping</em> rows that have no match in the other table. This is best understood visually:</p>
 <div style="text-align: center;">
-<p><img src="images/student.png" alt="student" width="400"></p>
+<p><img src="images/full.png" alt="full" width="800"></p>
 </div>
-<p>Often, we wish to compare the relative values of rows in different tables, rather than check that they are exactly equal. For example, we may want to join rows where students are older than the corresponding teacher. We can do so by specifying an inequality in our <code>ON</code> statement.</p>
-<div style="text-align: center;">
-<p><img src="images/inequality.png" alt="inequality" width="800"></p>
+<p>We have kept the same output achieved using an inner join, with the addition of partially null rows for entries in <code>s</code> and <code>t</code> that had no match in the second table.</p>
+<section id="aliasing-in-joins" class="level3">
+<h3 class="anchored" data-anchor-id="aliasing-in-joins">Aliasing in <code>JOIN</code>s</h3>
+<p>When joining tables, we often create aliases for table names (similarly to what we did with column names in the last lecture). We do this as it is typically easier to refer to aliases, especially when we are working with long table names. We can even reference columns using aliased table names.</p>
+<p>Let’s say we want to determine the average rating of various movies:</p>
+<div id="cell-36" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>SELECT primaryTitle, averageRating</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>FROM Title AS T INNER JOIN Rating AS R</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>ON T.tconst <span class="op">=</span> R.tconst<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>Note that the <code>AS</code> is actually optional! We can create aliases for our tables even without it, but we usually include it for clarity.</p>
+<div id="cell-38" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>SELECT primaryTitle, averageRating</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>FROM Title T INNER JOIN Rating R</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>ON T.tconst <span class="op">=</span> R.tconst<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="common-table-expression" class="level3">
+<h3 class="anchored" data-anchor-id="common-table-expression">Common Table Expression</h3>
+<p>For more sophisticated data problems, the queries can become very complex. Common Table Expressions allow us to break down these complex queries into more manageable parts. This involves creating temporary tables which correspond to different aspects of the problem and then referencing them in the final query. The following format is an example of how we can create two temporary tables and then use them for further querying:</p>
+<pre><code>WITH 
+table_name1 AS ( 
+    SELECT ...
+),
+table_name2 AS ( 
+    SELECT ...
+)
+SELECT ... 
+FROM 
+table_name1, 
+table_name2, ...</code></pre>
+<p>Let’s say we want to identify the top 10 action movies that are highly rated (with an average rating greater than 7) and popular (having more than 5000 votes), along with the primary actors who are the most popular, we can use Common Table Expression to break this query down into separate problems. Initially, we can filter to find good action movies and prolific actors separately. This way, in our final join, we only need to change the order.</p>
+<div id="cell-40" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>WITH </span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>good_action_movies AS (</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    SELECT <span class="op">*</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>    FROM Title T JOIN Rating R ON T.tconst <span class="op">=</span> R.tconst  </span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>    WHERE genres LIKE <span class="st">'%Action%'</span> AND averageRating <span class="op">&gt;</span> <span class="dv">7</span> AND numVotes <span class="op">&gt;</span> <span class="dv">5000</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>),</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>prolific_actors AS (</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>    SELECT N.nconst, primaryName, COUNT(<span class="op">*</span>) <span class="im">as</span> numRoles</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>    FROM Name N JOIN Principal P ON N.nconst <span class="op">=</span> P.nconst</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>    WHERE category <span class="op">=</span> <span class="st">'actor'</span></span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>    GROUP BY N.nconst, primaryName</span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>SELECT primaryTitle, primaryName, numRoles, ROUND(averageRating) AS rating</span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>FROM good_action_movies m, prolific_actors a, principal p</span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>WHERE p.tconst <span class="op">=</span> m.tconst AND p.nconst <span class="op">=</span> a.nconst</span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>ORDER BY rating DESC, numRoles DESC</span>
+<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a>LIMIT <span class="dv">10</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
 </section>
 
 </main>
