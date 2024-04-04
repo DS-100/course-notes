@@ -18,6 +18,7 @@ jupyter: python3
 
 ::: {.callout-note collapse="false"}
 ## Learning Outcomes
+* Perform aggregations using `GROUP BY`
 * Introduce the ability to filter groups
 * Perform data cleaning and text manipulation in SQL
 * Join data across tables
@@ -28,19 +29,126 @@ In this lecture, we'll continue our work from last time to introduce some advanc
 First, let's load in the database from last lecture.
 
 ```{python}
+#| tags: []
 # Load the SQL Alchemy Python library
 import sqlalchemy
 import pandas as pd
 ```
 
 ```{python}
+#| tags: []
 %load_ext sql
 ```
 
 ```{python}
+#| tags: []
 %%sql
 sqlite:///data/basic_examples.db 
 ```
+
+## Aggregating with `GROUP BY`
+
+At this point, we've seen that SQL offers much of the same functionality that was given to us by `pandas`. We can extract data from a table, filter it, and reorder it to suit our needs.
+
+In `pandas`, much of our analysis work relied heavily on being able to use `.groupby()` to aggregate across the rows of our dataset. SQL's answer to this task is the (very conveniently named) `GROUP BY` clause. While the outputs of `GROUP BY` are similar to those of `.groupby()` —— in both cases, we obtain an output table where some column has been used for grouping —— the syntax and logic used to group data in SQL are fairly different to the `pandas` implementation.
+
+To illustrate `GROUP BY`, we will consider the `Dish` table from the `basic_examples.db` database.
+
+```{python}
+#| tags: []
+%%sql
+SELECT * 
+FROM Dish;
+```
+
+Say we wanted to find the total costs of dishes of a certain `type`. To accomplish this, we would write the following code.
+
+```{python}
+#| tags: []
+%%sql
+SELECT type, SUM(cost)
+FROM Dish
+GROUP BY type;
+```
+
+What is going on here? The statement `GROUP BY type` tells SQL to group the data based on the value contained in the `type` column (whether a record is an appetizer, entree, or dessert). `SUM(cost)` sums up the costs of dishes in each `type` and displays the result in the output table.
+
+You may be wondering: why does `SUM(cost)` come before the command to `GROUP BY type`? Don't we need to form groups before we can count the number of entries in each? Remember that SQL is a *declarative* programming language —— a SQL programmer simply states what end result they would like to see, and leaves the task of figuring out *how* to obtain this result to SQL itself. This means that SQL queries sometimes don't follow what a reader sees as a "logical" sequence of thought. Instead, SQL requires that we follow its set order of operations when constructing queries. So long as we follow this order, SQL will handle the underlying logic.
+
+In practical terms: our goal with this query was to output the total `cost`s of each `type`. To communicate this to SQL, we say that we want to `SELECT` the `SUM`med `cost` values for each `type` group. 
+
+There are many aggregation functions that can be used to aggregate the data contained in each group. Some common examples are:
+
+* `COUNT`: count the number of rows associated with each group
+* `MIN`: find the minimum value of each group
+* `MAX`: find the maximum value of each group
+* `SUM`: sum across all records in each group
+* `AVG`: find the average value of each group
+
+We can easily compute multiple aggregations all at once (a task that was very tricky in `pandas`).
+
+```{python}
+#| tags: []
+%%sql
+SELECT type, SUM(cost), MIN(cost), MAX(name)
+FROM Dish
+GROUP BY type;
+```
+
+To count the number of rows associated with each group, we use the `COUNT` keyword. Calling `COUNT(*)` will compute the total number of rows in each group, including rows with null values. Its `pandas` equivalent is `.groupby().size()`.
+
+Recall the `Dragon` table from the previous lecture:
+
+```{python}
+#| tags: []
+%%sql
+SELECT * FROM Dragon;
+```
+
+Notice that `COUNT(*)` and `COUNT(cute)` result in different outputs/
+
+```{python}
+#| tags: []
+%%sql
+SELECT year, COUNT(*)
+FROM Dragon
+GROUP BY year;
+```
+
+```{python}
+#| tags: []
+%%sql
+SELECT year, COUNT(cute)
+FROM Dragon
+GROUP BY year;
+```
+
+With this definition of `GROUP BY` in hand, let's update our SQL order of operations. Remember: *every* SQL query must list clauses in this order. 
+
+    SELECT <column expression list>
+    FROM <table>
+    [WHERE <predicate>]
+    [GROUP BY <column list>]
+    [ORDER BY <column list>]
+    [LIMIT <number of rows>]
+    [OFFSET <number of rows>];
+
+Note that we can use the `AS` keyword to rename columns during the selection process and that column expressions may include aggregation functions (`MAX`, `MIN`, etc.).
+
+## Summary
+Let's summarize what we've learned so far. We know that `SELECT` and `FROM` are the fundamental building blocks of any SQL query. We can augment these two keywords with additional clauses to refine the data in our output table. 
+
+Any clauses that we include must follow a strict ordering within the query:
+
+    SELECT <column list>
+    FROM <table>
+    [WHERE <predicate>]
+    [GROUP BY <column list>]
+    [ORDER BY <column list>]
+    [LIMIT <number of rows>]
+    [OFFSET <number of rows>]
+    
+Here, any clause contained in square brackets `[ ]` is optional —— we only need to use the keyword if it is relevant to the table operation we want to perform. Also note that by convention, we use all caps for keywords in SQL statements and use newlines to make code more readable.
 
 ## Filtering Groups
 
@@ -48,15 +156,10 @@ sqlite:///data/basic_examples.db
 
 Let's take a look at the `Dish` table to see how we can use `HAVING`.
 
-```{python}
-%%sql
-SELECT *
-FROM Dish;
-```
-
 The code below groups the different dishes by type, and only keeps those groups wherein the max cost is still less than 8.
 
 ```{python}
+#| tags: []
 %%sql
 SELECT type, COUNT(*)
 FROM Dish
@@ -67,12 +170,15 @@ HAVING MAX(cost) < 8;
 In contrast, the code below first filters for rows where the cost is less than 8, and then does the grouping. Note the difference in outputs - in this case, "taco" is also included, whereas other entries in the same group having cost greater than or equal to 8 are not included.
 
 ```{python}
+#| tags: []
 %%sql
 SELECT type, COUNT(*)
 FROM Dish
 WHERE cost < 8
 GROUP BY type;
 ```
+
+In general, to filter rows, we use `WHERE`, while to filter groups, we use `HAVING`. Note that `WHERE` precedes `HAVING` when they are both used.
 
 ## EDA in SQL
 In the last lecture, we mostly worked under the assumption that our data had already been cleaned. However, as we saw in our first pass through the data science lifecycle, we're very unlikely to be given data that is free of formatting issues. With this in mind, we'll want to learn how to clean and transform data in SQL. 
@@ -91,11 +197,13 @@ One common task we encountered in our first look at EDA was needing to match str
 In SQL, we use the `LIKE` operator to (you guessed it) look for strings that are *like* a given string pattern. 
 
 ```{python}
+#| tags: []
 %%sql
 sqlite:///data/imdbmini.db 
 ```
 
 ```{python}
+#| tags: []
 %%sql
 SELECT titleType, primaryTitle
 FROM Title
@@ -105,6 +213,7 @@ WHERE primaryTitle LIKE "Star Wars: Episode I - The Phantom Menace"
 What if we wanted to find *all* Star Wars movies? `%` is the wildcard operator, it means "look for any character, any number of times". This makes it helpful for identifying strings that are similar to our desired pattern, even when we don't know the full text of what we aim to extract. In contrast, `_` means "look for exactly 1 character", as you can see in the Harry Potter example that follows.
 
 ```{python}
+#| tags: []
 %%sql
 SELECT titleType, primaryTitle
 FROM Title
@@ -113,6 +222,7 @@ LIMIT 10;
 ```
 
 ```{python}
+#| tags: []
 %%sql
 SELECT titleType, primaryTitle
 FROM Title
@@ -124,6 +234,7 @@ WHERE primaryTitle LIKE "Harry Potter and the Deathly Hallows: Part _"
 A common data cleaning task is converting data to the correct variable type. The `CAST` keyword is used to generate a new output column. Each entry in this output column is the result of converting the data in an existing column to a new data type. For example, we may wish to convert numeric data stored as a string to an integer.
 
 ```{python}
+#| tags: []
 %%sql
 SELECT primaryTitle, CAST(runtimeMinutes AS INT), CAST(startYear AS INT)
 FROM Title
@@ -135,6 +246,7 @@ We use `CAST` when `SELECT`ing colunns for our output table. In the example abov
 SQL will automatically name a new column according to the command used to `SELECT` it, which can lead to unwieldy column names. We can rename the `CAST`ed column using the `AS` keyword.
 
 ```{python}
+#| tags: []
 %%sql
 SELECT primaryTitle AS title, CAST(runtimeMinutes AS INT) AS minutes, CAST(startYear AS INT) AS year
 FROM Title
@@ -151,13 +263,14 @@ In SQL, conditional operations are performed using a `CASE` clause. Conceptually
          WHEN <other condition> THEN <other value>
          ...
          ELSE <yet another value>
-    END
+         END
 
 Scanning through the skeleton code above, you can see that the logic is similar to that of an `if` statement in `python`. The conditional statement is first opened by calling `CASE`. Each new condition is specified by `WHEN`, with `THEN` indicating what value should be filled if the condition is met. `ELSE` specifies the value that should be filled if no other conditions are met. Lastly, `END` indicates the end of the conditional statement; once `END` has been called, SQL will continue evaluating the query as usual. 
 
 Let's see this in action. In the example below, we give the new column created by the `CASE` statement the name `movie_age`.
 
 ```{python}
+#| tags: []
 %%sql
 /* If a movie was filmed before 1950, it is "old"
 Otherwise, if a movie was filmed before 2000, it is "mid-aged"
