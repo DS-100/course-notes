@@ -39,19 +39,21 @@ In this lecture, we'll continue our work from last time to introduce some advanc
 First, let's load in the `basic_examples.db` database.
 
 ```{python}
+#| code-fold: true
+# Load the SQL Alchemy Python library and DuckDB
+import sqlalchemy
+import duckdb
+```
+
+```{python}
 #| vscode: {languageId: python}
+# Load %%sql cell magic
 %load_ext sql
 ```
 
 ```{python}
 #| vscode: {languageId: python}
-import duckdb
-conn = duckdb.connect()
-conn.query("INSTALL sqlite")
-```
-
-```{python}
-#| vscode: {languageId: python}
+# Connect to the database
 %sql duckdb:///data/basic_examples.db --alias basic
 ```
 
@@ -384,9 +386,9 @@ We have kept the same output achieved using an inner join, with the addition of 
 
 ### Aliasing in `JOIN`s
 
-When joining tables, we often create aliases for table names (similarly to what we did with column names in the last lecture). We do this as it is typically easier to refer to aliases, especially when we are working with long table names. We can even reference columns using aliased table names.
+When joining tables, we often create aliases for table names (similarly to what we did with column names in the last lecture). We do this as it is typically easier to refer to aliases, especially when we are working with long table names. We can even reference columns using aliased table names!
 
-Let's say we want to determine the average rating of various movies:
+Let's say we want to determine the average rating of various movies. We'll need to `JOIN` the `Title` and `Rating` tables and can create aliases for both tables.
 
 ```{python}
 #| vscode: {languageId: python}
@@ -408,9 +410,9 @@ FROM Title T INNER JOIN Rating R
 ON T.tconst = R.tconst;
 ```
 
-### Common Table Expression
+### Common Table Expressions
 
-For more sophisticated data problems, the queries can become very complex. Common Table Expressions allow us to break down these complex queries into more manageable parts. This involves creating temporary tables which correspond to different aspects of the problem and then referencing them in the final query. The following format is an example of how we can create two temporary tables and then use them for further querying:
+For more sophisticated data problems, the queries can become very complex. Common table expressions (CTEs) allow us to break down these complex queries into more manageable parts. To do so, we create temporary tables corresponding to different aspects of the problem and then reference them in the final query: 
 
     WITH 
     table_name1 AS ( 
@@ -424,7 +426,7 @@ For more sophisticated data problems, the queries can become very complex. Commo
     table_name1, 
     table_name2, ...
 
-Let's say we want to identify the top 10 action movies that are highly rated (with an average rating greater than 7) and popular (having more than 5000 votes), along with the primary actors who are the most popular, we can use Common Table Expression to break this query down into separate problems. Initially, we can filter to find good action movies and prolific actors separately. This way, in our final join, we only need to change the order.
+Let's say we want to identify the top 10 action movies that are highly rated (with an average rating greater than 7) and popular (having more than 5000 votes), along with the primary actors who are the most popular. We can use CTEs to break this query down into separate problems. Initially, we can filter to find good action movies and prolific actors separately. This way, in our final join, we only need to change the order.
 
 ```{python}
 #| vscode: {languageId: python}
@@ -447,5 +449,3 @@ WHERE p.tconst = m.tconst AND p.nconst = a.nconst
 ORDER BY rating DESC, numRoles DESC
 LIMIT 10;
 ```
-
-

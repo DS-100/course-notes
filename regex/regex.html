@@ -1,0 +1,1765 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Principles and Techniques of Data Science - 6&nbsp; Regular Expressions</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../visualization_1/visualization_1.html" rel="next">
+<link href="../eda/eda.html" rel="prev">
+<link href="../data100_logo.png" rel="icon" type="image/png">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../regex/regex.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Regular Expressions</span></a></li></ol></nav>
+      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+      </a>
+      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="../index.html" class="sidebar-logo-link">
+      <img src="../data100_logo.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Principles and Techniques of Data Science</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/DS-100/course-notes" rel="" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Welcome</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../intro_lec/introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pandas_1/pandas_1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Pandas I</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pandas_2/pandas_2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Pandas II</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pandas_3/pandas_3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Pandas III</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../eda/eda.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Data Cleaning and EDA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../regex/regex.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Regular Expressions</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../visualization_1/visualization_1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Visualization I</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../visualization_2/visualization_2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Visualization II</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sampling/sampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Sampling</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../intro_to_modeling/intro_to_modeling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Introduction to Modeling</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../constant_model_loss_transformations/loss_transformations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Constant Model, Loss, and Transformations</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ols/ols.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Ordinary Least Squares</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../gradient_descent/gradient_descent.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">sklearn and Gradient Descent</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../feature_engineering/feature_engineering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Feature Engineering</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../case_study_HCE/case_study_HCE.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Case Study in Human Contexts and Ethics</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../cv_regularization/cv_reg.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Cross Validation and Regularization</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../probability_1/probability_1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Random Variables</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../probability_2/probability_2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Estimators, Bias, and Variance</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../inference_causality/inference_causality.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Causal Inference and Confounding</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sql_I/sql_I.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">SQL I</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sql_II/sql_II.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">SQL II</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#why-work-with-text" id="toc-why-work-with-text" class="nav-link active" data-scroll-target="#why-work-with-text"><span class="header-section-number">6.1</span> Why Work with Text?</a></li>
+  <li><a href="#python-string-methods" id="toc-python-string-methods" class="nav-link" data-scroll-target="#python-string-methods"><span class="header-section-number">6.2</span> Python String Methods</a>
+  <ul>
+  <li><a href="#canonicalization" id="toc-canonicalization" class="nav-link" data-scroll-target="#canonicalization"><span class="header-section-number">6.2.1</span> Canonicalization</a>
+  <ul>
+  <li><a href="#canonicalization-with-python-string-manipulation" id="toc-canonicalization-with-python-string-manipulation" class="nav-link" data-scroll-target="#canonicalization-with-python-string-manipulation"><span class="header-section-number">6.2.1.1</span> Canonicalization with Python String Manipulation</a></li>
+  <li><a href="#canonicalization-with-pandas-series-methods" id="toc-canonicalization-with-pandas-series-methods" class="nav-link" data-scroll-target="#canonicalization-with-pandas-series-methods"><span class="header-section-number">6.2.1.2</span> Canonicalization with Pandas Series Methods</a></li>
+  </ul></li>
+  <li><a href="#extraction" id="toc-extraction" class="nav-link" data-scroll-target="#extraction"><span class="header-section-number">6.2.2</span> Extraction</a></li>
+  </ul></li>
+  <li><a href="#regex-basics" id="toc-regex-basics" class="nav-link" data-scroll-target="#regex-basics"><span class="header-section-number">6.3</span> RegEx Basics</a>
+  <ul>
+  <li><a href="#basics-regex-syntax" id="toc-basics-regex-syntax" class="nav-link" data-scroll-target="#basics-regex-syntax"><span class="header-section-number">6.3.1</span> Basics RegEx Syntax</a>
+  <ul>
+  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples"><span class="header-section-number">6.3.1.1</span> Examples</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#regex-expanded" id="toc-regex-expanded" class="nav-link" data-scroll-target="#regex-expanded"><span class="header-section-number">6.4</span> RegEx Expanded</a>
+  <ul>
+  <li><a href="#examples-1" id="toc-examples-1" class="nav-link" data-scroll-target="#examples-1"><span class="header-section-number">6.4.0.1</span> Examples</a></li>
+  </ul></li>
+  <li><a href="#convenient-regex" id="toc-convenient-regex" class="nav-link" data-scroll-target="#convenient-regex"><span class="header-section-number">6.5</span> Convenient RegEx</a>
+  <ul>
+  <li><a href="#greediness" id="toc-greediness" class="nav-link" data-scroll-target="#greediness"><span class="header-section-number">6.5.1</span> Greediness</a></li>
+  <li><a href="#examples-2" id="toc-examples-2" class="nav-link" data-scroll-target="#examples-2"><span class="header-section-number">6.5.2</span> Examples</a></li>
+  </ul></li>
+  <li><a href="#regex-in-python-and-pandas-regex-groups" id="toc-regex-in-python-and-pandas-regex-groups" class="nav-link" data-scroll-target="#regex-in-python-and-pandas-regex-groups"><span class="header-section-number">6.6</span> Regex in Python and Pandas (RegEx Groups)</a>
+  <ul>
+  <li><a href="#canonicalization-1" id="toc-canonicalization-1" class="nav-link" data-scroll-target="#canonicalization-1"><span class="header-section-number">6.6.1</span> Canonicalization</a>
+  <ul>
+  <li><a href="#canonicalization-with-regex" id="toc-canonicalization-with-regex" class="nav-link" data-scroll-target="#canonicalization-with-regex"><span class="header-section-number">6.6.1.1</span> Canonicalization with RegEx</a></li>
+  <li><a href="#canonicalization-with-pandas" id="toc-canonicalization-with-pandas" class="nav-link" data-scroll-target="#canonicalization-with-pandas"><span class="header-section-number">6.6.1.2</span> Canonicalization with <code>pandas</code></a></li>
+  </ul></li>
+  <li><a href="#extraction-1" id="toc-extraction-1" class="nav-link" data-scroll-target="#extraction-1"><span class="header-section-number">6.6.2</span> Extraction</a>
+  <ul>
+  <li><a href="#extraction-with-regex" id="toc-extraction-with-regex" class="nav-link" data-scroll-target="#extraction-with-regex"><span class="header-section-number">6.6.2.1</span> Extraction with RegEx</a></li>
+  <li><a href="#extraction-with-pandas" id="toc-extraction-with-pandas" class="nav-link" data-scroll-target="#extraction-with-pandas"><span class="header-section-number">6.6.2.2</span> Extraction with <code>pandas</code></a></li>
+  </ul></li>
+  <li><a href="#regular-expression-capture-groups" id="toc-regular-expression-capture-groups" class="nav-link" data-scroll-target="#regular-expression-capture-groups"><span class="header-section-number">6.6.3</span> Regular Expression Capture Groups</a>
+  <ul>
+  <li><a href="#example-1" id="toc-example-1" class="nav-link" data-scroll-target="#example-1"><span class="header-section-number">6.6.3.1</span> Example 1</a></li>
+  <li><a href="#example-2" id="toc-example-2" class="nav-link" data-scroll-target="#example-2"><span class="header-section-number">6.6.3.2</span> Example 2</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#limitations-of-regular-expressions" id="toc-limitations-of-regular-expressions" class="nav-link" data-scroll-target="#limitations-of-regular-expressions"><span class="header-section-number">6.7</span> Limitations of Regular Expressions</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Regular Expressions</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<div class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="true" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Learning Outcomes
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse show">
+<div class="callout-body-container callout-body">
+<ul>
+<li>Understand Python string manipulation, <code>pandas</code> <code>Series</code> methods</li>
+<li>Parse and create regex, with a reference table</li>
+<li>Use vocabulary (closure, metacharacters, groups, etc.) to describe regex metacharacters</li>
+</ul>
+</div>
+</div>
+</div>
+<section id="why-work-with-text" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="why-work-with-text"><span class="header-section-number">6.1</span> Why Work with Text?</h2>
+<p>Last lecture, we learned of the difference between quantitative and qualitative variable types. The latter includes string data — the primary focus of lecture 6. In this note, we’ll discuss the necessary tools to manipulate text: Python string manipulation and regular expressions.</p>
+<p>There are two main reasons for working with text.</p>
+<ol type="1">
+<li>Canonicalization: Convert data that has multiple formats into a standard form.
+<ul>
+<li>By manipulating text, we can join tables with mismatched string labels.</li>
+</ul></li>
+<li>Extract information into a new feature.
+<ul>
+<li>For example, we can extract date and time features from text.</li>
+</ul></li>
+</ol>
+</section>
+<section id="python-string-methods" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="python-string-methods"><span class="header-section-number">6.2</span> Python String Methods</h2>
+<p>First, we’ll introduce a few methods useful for string manipulation. The following table includes a number of string operations supported by Python and <code>pandas</code>. The Python functions operate on a single string, while their equivalent in <code>pandas</code> are <strong>vectorized</strong> — they operate on a <code>Series</code> of string data.</p>
+<table class="table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 25%">
+<col style="width: 38%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Operation</th>
+<th>Python</th>
+<th><code>Pandas</code> (<code>Series</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Transformation</td>
+<td><ul>
+<li><code>s.lower()</code></li>
+<li><code>s.upper()</code></li>
+</ul></td>
+<td><ul>
+<li><code>ser.str.lower()</code></li>
+<li><code>ser.str.upper()</code></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td>Replacement + Deletion</td>
+<td><ul>
+<li><code>s.replace(_)</code></li>
+</ul></td>
+<td><ul>
+<li><code>ser.str.replace(_)</code></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td>Split</td>
+<td><ul>
+<li><code>s.split(_)</code></li>
+</ul></td>
+<td><ul>
+<li><code>ser.str.split(_)</code></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td>Substring</td>
+<td><ul>
+<li><code>s[1:4]</code></li>
+</ul></td>
+<td><ul>
+<li><code>ser.str[1:4]</code></li>
+</ul></td>
+</tr>
+<tr class="odd">
+<td>Membership</td>
+<td><ul>
+<li><code>'_' in s</code></li>
+</ul></td>
+<td><ul>
+<li><code>ser.str.contains(_)</code></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td>Length</td>
+<td><ul>
+<li><code>len(s)</code></li>
+</ul></td>
+<td><ul>
+<li><code>ser.str.len()</code></li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+<p>We’ll discuss the differences between Python string functions and <code>pandas</code> <code>Series</code> methods in the following section on canonicalization.</p>
+<section id="canonicalization" class="level3" data-number="6.2.1">
+<h3 data-number="6.2.1" class="anchored" data-anchor-id="canonicalization"><span class="header-section-number">6.2.1</span> Canonicalization</h3>
+<p>Assume we want to merge the given tables.</p>
+<div class="cell" data-execution_count="1">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">'data/county_and_state.csv'</span>) <span class="im">as</span> f:</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    county_and_state <span class="op">=</span> pd.read_csv(f)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">'data/county_and_population.csv'</span>) <span class="im">as</span> f:</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    county_and_pop <span class="op">=</span> pd.read_csv(f)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>display(county_and_state), display(county_and_pop)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">County</th>
+<th data-quarto-table-cell-role="th">State</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>De Witt County</td>
+<td>IL</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>Lac qui Parle County</td>
+<td>MN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>Lewis and Clark County</td>
+<td>MT</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>St John the Baptist Parish</td>
+<td>LS</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">County</th>
+<th data-quarto-table-cell-role="th">Population</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>DeWitt</td>
+<td>16798</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>Lac Qui Parle</td>
+<td>8067</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>Lewis &amp; Clark</td>
+<td>55716</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>St. John the Baptist</td>
+<td>43044</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Last time, we used a <strong>primary key</strong> and <strong>foreign key</strong> to join two tables. While neither of these keys exist in our <code>DataFrame</code>s, the <code>"County"</code> columns look similar enough. Can we convert these columns into one standard, canonical form to merge the two tables?</p>
+<section id="canonicalization-with-python-string-manipulation" class="level4" data-number="6.2.1.1">
+<h4 data-number="6.2.1.1" class="anchored" data-anchor-id="canonicalization-with-python-string-manipulation"><span class="header-section-number">6.2.1.1</span> Canonicalization with Python String Manipulation</h4>
+<p>The following function uses Python string manipulation to convert a single county name into canonical form. It does so by eliminating whitespace, punctuation, and unnecessary text.</p>
+<div class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> canonicalize_county(county_name):</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        county_name</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>            .lower()</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>            .replace(<span class="st">' '</span>, <span class="st">''</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>            .replace(<span class="st">'&amp;'</span>, <span class="st">'and'</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>            .replace(<span class="st">'.'</span>, <span class="st">''</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>            .replace(<span class="st">'county'</span>, <span class="st">''</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>            .replace(<span class="st">'parish'</span>, <span class="st">''</span>)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>canonicalize_county(<span class="st">"St. John the Baptist"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<pre><code>'stjohnthebaptist'</code></pre>
+</div>
+</div>
+<p>We will use the <code>pandas</code> <code>map</code> function to apply the <code>canonicalize_county</code> function to every row in both <code>DataFrame</code>s. In doing so, we’ll create a new column in each called <code>clean_county_python</code> with the canonical form.</p>
+<div class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>county_and_pop[<span class="st">'clean_county_python'</span>] <span class="op">=</span> county_and_pop[<span class="st">'County'</span>].<span class="bu">map</span>(canonicalize_county)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>county_and_state[<span class="st">'clean_county_python'</span>] <span class="op">=</span> county_and_state[<span class="st">'County'</span>].<span class="bu">map</span>(canonicalize_county)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>display(county_and_state), display(county_and_pop)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">County</th>
+<th data-quarto-table-cell-role="th">State</th>
+<th data-quarto-table-cell-role="th">clean_county_python</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>De Witt County</td>
+<td>IL</td>
+<td>dewitt</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>Lac qui Parle County</td>
+<td>MN</td>
+<td>lacquiparle</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>Lewis and Clark County</td>
+<td>MT</td>
+<td>lewisandclark</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>St John the Baptist Parish</td>
+<td>LS</td>
+<td>stjohnthebaptist</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">County</th>
+<th data-quarto-table-cell-role="th">Population</th>
+<th data-quarto-table-cell-role="th">clean_county_python</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>DeWitt</td>
+<td>16798</td>
+<td>dewitt</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>Lac Qui Parle</td>
+<td>8067</td>
+<td>lacquiparle</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>Lewis &amp; Clark</td>
+<td>55716</td>
+<td>lewisandclark</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>St. John the Baptist</td>
+<td>43044</td>
+<td>stjohnthebaptist</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="canonicalization-with-pandas-series-methods" class="level4" data-number="6.2.1.2">
+<h4 data-number="6.2.1.2" class="anchored" data-anchor-id="canonicalization-with-pandas-series-methods"><span class="header-section-number">6.2.1.2</span> Canonicalization with Pandas Series Methods</h4>
+<p>Alternatively, we can use <code>pandas</code> <code>Series</code> methods to create this standardized column. To do so, we must call the <code>.str</code> attribute of our <code>Series</code> object prior to calling any methods, like <code>.lower</code> and <code>.replace</code>. Notice how these method names match their equivalent built-in Python string functions.</p>
+<p>Chaining multiple <code>Series</code> methods in this manner eliminates the need to use the <code>map</code> function (as this code is vectorized).</p>
+<div class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> canonicalize_county_series(county_series):</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>        county_series</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>            .<span class="bu">str</span>.lower()</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>            .<span class="bu">str</span>.replace(<span class="st">' '</span>, <span class="st">''</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>            .<span class="bu">str</span>.replace(<span class="st">'&amp;'</span>, <span class="st">'and'</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>            .<span class="bu">str</span>.replace(<span class="st">'.'</span>, <span class="st">''</span>)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>            .<span class="bu">str</span>.replace(<span class="st">'county'</span>, <span class="st">''</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>            .<span class="bu">str</span>.replace(<span class="st">'parish'</span>, <span class="st">''</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>county_and_pop[<span class="st">'clean_county_pandas'</span>] <span class="op">=</span> canonicalize_county_series(county_and_pop[<span class="st">'County'</span>])</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>county_and_state[<span class="st">'clean_county_pandas'</span>] <span class="op">=</span> canonicalize_county_series(county_and_state[<span class="st">'County'</span>])</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>display(county_and_pop), display(county_and_state)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/var/folders/7t/zbwy02ts2m7cn64fvwjqb8xw0000gp/T/ipykernel_91946/2523629438.py:3: FutureWarning:
+
+The default value of regex will change from True to False in a future version. In addition, single character regular expressions will *not* be treated as literal strings when regex=True.
+
+/var/folders/7t/zbwy02ts2m7cn64fvwjqb8xw0000gp/T/ipykernel_91946/2523629438.py:3: FutureWarning:
+
+The default value of regex will change from True to False in a future version. In addition, single character regular expressions will *not* be treated as literal strings when regex=True.
+</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">County</th>
+<th data-quarto-table-cell-role="th">Population</th>
+<th data-quarto-table-cell-role="th">clean_county_python</th>
+<th data-quarto-table-cell-role="th">clean_county_pandas</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>DeWitt</td>
+<td>16798</td>
+<td>dewitt</td>
+<td>dewitt</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>Lac Qui Parle</td>
+<td>8067</td>
+<td>lacquiparle</td>
+<td>lacquiparle</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>Lewis &amp; Clark</td>
+<td>55716</td>
+<td>lewisandclark</td>
+<td>lewisandclark</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>St. John the Baptist</td>
+<td>43044</td>
+<td>stjohnthebaptist</td>
+<td>stjohnthebaptist</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">County</th>
+<th data-quarto-table-cell-role="th">State</th>
+<th data-quarto-table-cell-role="th">clean_county_python</th>
+<th data-quarto-table-cell-role="th">clean_county_pandas</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>De Witt County</td>
+<td>IL</td>
+<td>dewitt</td>
+<td>dewitt</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>Lac qui Parle County</td>
+<td>MN</td>
+<td>lacquiparle</td>
+<td>lacquiparle</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>Lewis and Clark County</td>
+<td>MT</td>
+<td>lewisandclark</td>
+<td>lewisandclark</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>St John the Baptist Parish</td>
+<td>LS</td>
+<td>stjohnthebaptist</td>
+<td>stjohnthebaptist</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="extraction" class="level3" data-number="6.2.2">
+<h3 data-number="6.2.2" class="anchored" data-anchor-id="extraction"><span class="header-section-number">6.2.2</span> Extraction</h3>
+<p>Extraction explores the idea of obtaining useful information from text data. This will be particularily important in model building, which we’ll study in a few weeks.</p>
+<p>Say we want to read some data from a <code>.txt</code> file.</p>
+<div class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">'data/log.txt'</span>, <span class="st">'r'</span>) <span class="im">as</span> f:</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    log_lines <span class="op">=</span> f.readlines()</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>log_lines</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<pre><code>['169.237.46.168 - - [26/Jan/2014:10:47:58 -0800] "GET /stat141/Winter04/ HTTP/1.1" 200 2585 "http://anson.ucdavis.edu/courses/"\n',
+ '193.205.203.3 - - [2/Feb/2005:17:23:6 -0800] "GET /stat141/Notes/dim.html HTTP/1.0" 404 302 "http://eeyore.ucdavis.edu/stat141/Notes/session.html"\n',
+ '169.237.46.240 - "" [3/Feb/2006:10:18:37 -0800] "GET /stat141/homework/Solutions/hw1Sol.pdf HTTP/1.1"\n']</code></pre>
+</div>
+</div>
+<p>Suppose we want to extract the day, month, year, hour, minutes, seconds, and time zone. Unfortunately, these items are not in a fixed position from the beginning of the string, so slicing by some fixed offset won’t work.</p>
+<p>Instead, we can use some clever thinking. Notice how the relevant information is contained within a set of brackets, further separated by <code>/</code> and <code>:</code>. We can hone in on this region of text, and split the data on these characters. Python’s built-in <code>.split</code> function makes this easy.</p>
+<div class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>first <span class="op">=</span> log_lines[<span class="dv">0</span>] <span class="co"># Only considering the first row of data</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>pertinent <span class="op">=</span> first.split(<span class="st">"["</span>)[<span class="dv">1</span>].split(<span class="st">']'</span>)[<span class="dv">0</span>]</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>day, month, rest <span class="op">=</span> pertinent.split(<span class="st">'/'</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>year, hour, minute, rest <span class="op">=</span> rest.split(<span class="st">':'</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>seconds, time_zone <span class="op">=</span> rest.split(<span class="st">' '</span>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>day, month, year, hour, minute, seconds, time_zone</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="7">
+<pre><code>('26', 'Jan', '2014', '10', '47', '58', '-0800')</code></pre>
+</div>
+</div>
+<p>There are two problems with this code:</p>
+<ol type="1">
+<li>Python’s built-in functions limit us to extract data one record at a time,
+<ul>
+<li>This can be resolved using the <code>map</code> function or <code>pandas</code> <code>Series</code> methods.</li>
+</ul></li>
+<li>The code is quite verbose.
+<ul>
+<li>This is a larger issue that is trickier to solve</li>
+</ul></li>
+</ol>
+<p>In the next section, we’ll introduce regular expressions - a tool that solves problem 2.</p>
+</section>
+</section>
+<section id="regex-basics" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="regex-basics"><span class="header-section-number">6.3</span> RegEx Basics</h2>
+<p>A <strong>regular expression (“RegEx”)</strong> is a sequence of characters that specifies a search pattern. They are written to extract specific information from text. Regular expressions are essentially part of a smaller programming language embedded in Python, made available through the <code>re</code> module. As such, they have a stand-alone syntax and methods for various capabilities.</p>
+<p>Regular expressions are useful in many applications beyond data science. For example, Social Security Numbers (SSNs) are often validated with regular expressions.</p>
+<div class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">r"[0-9]{3}-[0-9]{2}-[0-9]{4}"</span> <span class="co"># Regular Expression Syntax</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 3 of any digit, then a dash,</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># then 2 of any digit, then a dash,</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="co"># then 4 of any digit</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<pre><code>'[0-9]{3}-[0-9]{2}-[0-9]{4}'</code></pre>
+</div>
+</div>
+
+<!-- The goal of today is NOT to memorize regex. At a high level, we want you to:
+
+1. Understand what regex is capable of
+2. Parse and create regex, given a reference table -->
+<p>There are a ton of resources to learn and experiment with regular expressions. A few are provided below:</p>
+<ul>
+<li><a href="https://docs.python.org/3/howto/regex.html">Official Regex Guide</a></li>
+<li><a href="https://ds100.org/sp22/resources/assets/hw/regex_reference.pdf">Data 100 Reference Sheet</a></li>
+<li><a href="https://regex101.com/">Regex101.com</a>
+<ul>
+<li>Be sure to check Python under the category on the left.</li>
+</ul></li>
+</ul>
+<section id="basics-regex-syntax" class="level3" data-number="6.3.1">
+<h3 data-number="6.3.1" class="anchored" data-anchor-id="basics-regex-syntax"><span class="header-section-number">6.3.1</span> Basics RegEx Syntax</h3>
+<p>There are four basic operations with regular expressions.</p>
+<table class="table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 18%">
+<col style="width: 17%">
+<col style="width: 14%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Operation</th>
+<th>Order</th>
+<th>Syntax Example</th>
+<th>Matches</th>
+<th>Doesn’t Match</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>Or</code>: <code>|</code></td>
+<td>4</td>
+<td>AA|BAAB</td>
+<td>AA<br> BAAB</td>
+<td>every other string</td>
+</tr>
+<tr class="even">
+<td><code>Concatenation</code></td>
+<td>3</td>
+<td>AABAAB</td>
+<td>AABAAB</td>
+<td>every other string</td>
+</tr>
+<tr class="odd">
+<td><code>Closure</code>: <code>*</code> <br> (zero or more)</td>
+<td>2</td>
+<td>AB*A</td>
+<td>AA ABBBBBBA</td>
+<td>AB <br> ABABA</td>
+</tr>
+<tr class="even">
+<td><code>Group</code>: <code>()</code> <br> (parenthesis)</td>
+<td>1</td>
+<td>A(A|B)AAB <br> <br> <br> (AB)*A</td>
+<td>AAAAB ABAAB <br> <br> <br> A <br> ABABABABA</td>
+<td>every other string <br> <br> <br> AA <br> ABBA</td>
+</tr>
+</tbody>
+</table>
+<p>Notice how these metacharacter operations are ordered. Rather than being literal characters, these <strong>metacharacters</strong> manipulate adjacent characters. <code>()</code> takes precedence, followed by <code>*</code>, and finally <code>|</code>. This allows us to differentiate between very different regex commands like <code>AB*</code> and <code>(AB)*</code>. The former reads “<code>A</code> then zero or more copies of <code>B</code>”, while the latter specifies “zero or more copies of <code>AB</code>”.</p>
+<section id="examples" class="level4" data-number="6.3.1.1">
+<h4 data-number="6.3.1.1" class="anchored" data-anchor-id="examples"><span class="header-section-number">6.3.1.1</span> Examples</h4>
+<p><strong>Question 1</strong>: Give a regular expression that matches <code>moon</code>, <code>moooon</code>, etc. Your expression should match any even number of <code>o</code>s except zero (i.e.&nbsp;don’t match <code>mn</code>).</p>
+<p><strong>Answer 1</strong>: <code>moo(oo)*n</code></p>
+<ul>
+<li>Hardcoding <code>oo</code> before the capture group ensures that <code>mn</code> is not matched.</li>
+<li>A capture group of <code>(oo)*</code> ensures the number of <code>o</code>’s is even.</li>
+</ul>
+<p><strong>Question 2</strong>: Using only basic operations, formulate a regex that matches <code>muun</code>, <code>muuuun</code>, <code>moon</code>, <code>moooon</code>, etc. Your expression should match any even number of <code>u</code>s or <code>o</code>s except zero (i.e.&nbsp;don’t match <code>mn</code>).</p>
+<p><strong>Answer 2</strong>: <code>m(uu(uu)*|oo(oo)*)n</code></p>
+<ul>
+<li>The leading <code>m</code> and trailing <code>n</code> ensures that only strings beginning with <code>m</code> and ending with <code>n</code> are matched.</li>
+<li>Notice how the outer capture group surrounds the <code>|</code>.
+<ul>
+<li>Consider the regex <code>m(uu(uu)*)|(oo(oo)*)n</code>. This incorrectly matches <code>muu</code> and <code>oooon</code>.
+<ul>
+<li>Each OR clause is everything to the left and right of <code>|</code>. The incorrect solution matches only half of the string, and ignores either the beginning <code>m</code> or trailing <code>n</code>.</li>
+<li>A set of parenthesis must surround <code>|</code>. That way, each OR clause is everything to the left and right of <code>|</code> <strong>within</strong> the group. This ensures both the beginning <code>m</code> <em>and</em> trailing <code>n</code> are matched.</li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+</section>
+</section>
+<section id="regex-expanded" class="level2" data-number="6.4">
+<h2 data-number="6.4" class="anchored" data-anchor-id="regex-expanded"><span class="header-section-number">6.4</span> RegEx Expanded</h2>
+<p>Provided below are more complex regular expression functions.</p>
+<table class="table">
+<colgroup>
+<col style="width: 46%">
+<col style="width: 17%">
+<col style="width: 16%">
+<col style="width: 18%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Operation</th>
+<th>Syntax Example</th>
+<th>Matches</th>
+<th>Doesn’t Match</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>Any Character</code>: <code>.</code> <br> (except newline)</td>
+<td>.U.U.U.</td>
+<td>CUMULUS <br> JUGULUM</td>
+<td>SUCCUBUS TUMULTUOUS</td>
+</tr>
+<tr class="even">
+<td><code>Character Class</code>: <code>[]</code> <br> (match one character in <code>[]</code>)</td>
+<td>[A-Za-z][a-z]*</td>
+<td>word <br> Capitalized</td>
+<td>camelCase 4illegal</td>
+</tr>
+<tr class="odd">
+<td><code>Repeated "a" Times</code>: <code>{a}</code><br></td>
+<td>j[aeiou]{3}hn</td>
+<td>jaoehn <br> jooohn</td>
+<td>jhn <br> jaeiouhn</td>
+</tr>
+<tr class="even">
+<td><code>Repeated "from a to b" Times</code>: <code>{a, b}</code><br></td>
+<td>j[ou]{1,2}hn</td>
+<td>john <br> juohn</td>
+<td>jhn <br> jooohn</td>
+</tr>
+<tr class="odd">
+<td><code>At Least One</code>: <code>+</code></td>
+<td>jo+hn</td>
+<td>john <br> joooooohn</td>
+<td>jhn <br> jjohn</td>
+</tr>
+<tr class="even">
+<td><code>Zero or One</code>: <code>?</code></td>
+<td>joh?n</td>
+<td>jon <br> john</td>
+<td>any other string</td>
+</tr>
+</tbody>
+</table>
+<p>A character class matches a single character in its class. These characters can be hardcoded —— in the case of <code>[aeiou]</code> —— or shorthand can be specified to mean a range of characters. Examples include:</p>
+<ol type="1">
+<li><code>[A-Z]</code>: Any capitalized letter</li>
+<li><code>[a-z]</code>: Any lowercase letter</li>
+<li><code>[0-9]</code>: Any single digit</li>
+<li><code>[A-Za-z]</code>: Any capitalized of lowercase letter</li>
+<li><code>[A-Za-z0-9]</code>: Any capitalized or lowercase letter or single digit</li>
+</ol>
+<section id="examples-1" class="level4" data-number="6.4.0.1">
+<h4 data-number="6.4.0.1" class="anchored" data-anchor-id="examples-1"><span class="header-section-number">6.4.0.1</span> Examples</h4>
+<p>Let’s analyze a few examples of complex regular expressions.</p>
+<table class="table">
+<colgroup>
+<col style="width: 47%">
+<col style="width: 47%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Matches</th>
+<th>Does Not Match</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><ol type="1">
+<li><code>.*SPB.*</code></li>
+</ol></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>RASPBERRY <br> SPBOO</td>
+<td>SUBSPACE <br> SUBSPECIES</td>
+</tr>
+<tr class="odd">
+<td><ol start="2" type="1">
+<li><code>[0-9]{3}-[0-9]{2}-[0-9]{4}</code></li>
+</ol></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>231-41-5121 <br> 573-57-1821</td>
+<td>231415121 <br> 57-3571821</td>
+</tr>
+<tr class="odd">
+<td><ol start="3" type="1">
+<li><code>[a-z]+@([a-z]+\.)+(edu|com)</code></li>
+</ol></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>horse@pizza.com <br> horse@pizza.food.com</td>
+<td>frank_99@yahoo.com <br> hug@cs</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Explanations</strong></p>
+<ol type="1">
+<li><code>.*SPB.*</code> only matches strings that contain the substring <code>SPB</code>.
+<ul>
+<li>The <code>.*</code> metacharacter matches any amount of non-negative characters. Newlines do not count.<br>
+</li>
+</ul></li>
+<li>This regular expression matches 3 of any digit, then a dash, then 2 of any digit, then a dash, then 4 of any digit.
+<ul>
+<li>You’ll recognize this as the familiar Social Security Number regular expression.</li>
+</ul></li>
+<li>Matches any email with a <code>com</code> or <code>edu</code> domain, where all characters of the email are letters.
+<ul>
+<li>At least one <code>.</code> must precede the domain name. Including a backslash <code>\</code> before any metacharacter (in this case, the <code>.</code>) tells RegEx to match that character exactly.</li>
+</ul></li>
+</ol>
+</section>
+</section>
+<section id="convenient-regex" class="level2" data-number="6.5">
+<h2 data-number="6.5" class="anchored" data-anchor-id="convenient-regex"><span class="header-section-number">6.5</span> Convenient RegEx</h2>
+<p>Here are a few more convenient regular expressions.</p>
+<table class="table">
+<colgroup>
+<col style="width: 46%">
+<col style="width: 17%">
+<col style="width: 16%">
+<col style="width: 18%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Operation</th>
+<th>Syntax Example</th>
+<th>Matches</th>
+<th>Doesn’t Match</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>built in character class</code></td>
+<td><code>\w+</code> <br> <code>\d+</code><br> <code>\s+</code> <br></td>
+<td>Fawef_03 <br> 231123 <br> <code>whitespace</code></td>
+<td>this person<br> 423 people<br> <code>non-whitespace</code></td>
+</tr>
+<tr class="even">
+<td><code>character class negation</code>: <code>[^]</code> (everything except the given characters)</td>
+<td>[^a-z]+.</td>
+<td>PEPPERS3982 17211!↑å</td>
+<td>porch <br> CLAmS</td>
+</tr>
+<tr class="odd">
+<td><code>escape character</code>: <code>\</code> <br> (match the literal next character)</td>
+<td>cow\.com</td>
+<td>cow.com</td>
+<td>cowscom</td>
+</tr>
+<tr class="even">
+<td><code>beginning of line</code>: <code>^</code></td>
+<td>^ark</td>
+<td>ark two ark o ark</td>
+<td>dark</td>
+</tr>
+<tr class="odd">
+<td><code>end of line</code>: <code>$</code></td>
+<td>ark$</td>
+<td>dark <br> ark o ark</td>
+<td>ark two</td>
+</tr>
+<tr class="even">
+<td><code>lazy version of zero or more</code> : <code>*?</code></td>
+<td>5.*?5</td>
+<td>5005 <br> 55</td>
+<td>5005005</td>
+</tr>
+</tbody>
+</table>
+<section id="greediness" class="level3" data-number="6.5.1">
+<h3 data-number="6.5.1" class="anchored" data-anchor-id="greediness"><span class="header-section-number">6.5.1</span> Greediness</h3>
+<p>In order to fully understand the last operation in the table, we have to discuss greediness. RegEx is greedy – it will look for the longest possible match in a string. To motivate this with an example, consider the pattern <code>&lt;div&gt;.*&lt;/div&gt;</code>. Given the sentence below, we would hope that the bolded portions would be matched:</p>
+<p>“This is a <strong>&lt;div&gt;example&lt;/div&gt;</strong> of greediness &lt;div&gt;in&lt;/div&gt; regular expressions.” ”</p>
+<p>In actuality, the way RegEx processes the text given that pattern is as follows:</p>
+<ol type="1">
+<li><p>“Look for the exact string &lt;&gt;”</p></li>
+<li><p>then, “look for any character 0 or more times”</p></li>
+<li><p>then, “look for the exact string &lt;/div&gt;”</p></li>
+</ol>
+<p>The result would be all the characters starting from the leftmost &lt;div&gt; and the rightmost &lt;/div&gt; (inclusive). We can fix this by making our pattern non-greedy, <code>&lt;div&gt;.*?&lt;/div&gt;</code>. You can read up more on the documentation <a href="https://docs.python.org/3/howto/regex.html#greedy-versus-non-greedy">here</a>.</p>
+</section>
+<section id="examples-2" class="level3" data-number="6.5.2">
+<h3 data-number="6.5.2" class="anchored" data-anchor-id="examples-2"><span class="header-section-number">6.5.2</span> Examples</h3>
+<p>Let’s revisit our earlier problem of extracting date/time data from the given <code>.txt</code> files. Here is how the data looked.</p>
+<div class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>log_lines[<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
+<pre><code>'169.237.46.168 - - [26/Jan/2014:10:47:58 -0800] "GET /stat141/Winter04/ HTTP/1.1" 200 2585 "http://anson.ucdavis.edu/courses/"\n'</code></pre>
+</div>
+</div>
+<p><strong>Question</strong>: Give a regular expression that matches everything contained within and including the brackets - the day, month, year, hour, minutes, seconds, and time zone.</p>
+<p><strong>Answer</strong>: <code>\[.*\]</code></p>
+<ul>
+<li>Notice how matching the literal <code>[</code> and <code>]</code> is necessary. Therefore, an escape character <code>\</code> is required before both <code>[</code> and <code>]</code> — otherwise these metacharacters will match character classes.</li>
+<li>We need to match a particular format between <code>[</code> and <code>]</code>. For this example, <code>.*</code> will suffice.</li>
+</ul>
+<p><strong>Alternative Solution</strong>: <code>\[\w+/\w+/\w+:\w+:\w+:\w+\s-\w+\]</code></p>
+<ul>
+<li>This solution is much safer.
+<ul>
+<li>Imagine the data between <code>[</code> and <code>]</code> was garbage - <code>.*</code> will still match that.</li>
+<li>The alternate solution will only match data that follows the correct format.</li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="regex-in-python-and-pandas-regex-groups" class="level2" data-number="6.6">
+<h2 data-number="6.6" class="anchored" data-anchor-id="regex-in-python-and-pandas-regex-groups"><span class="header-section-number">6.6</span> Regex in Python and Pandas (RegEx Groups)</h2>
+<section id="canonicalization-1" class="level3" data-number="6.6.1">
+<h3 data-number="6.6.1" class="anchored" data-anchor-id="canonicalization-1"><span class="header-section-number">6.6.1</span> Canonicalization</h3>
+<section id="canonicalization-with-regex" class="level4" data-number="6.6.1.1">
+<h4 data-number="6.6.1.1" class="anchored" data-anchor-id="canonicalization-with-regex"><span class="header-section-number">6.6.1.1</span> Canonicalization with RegEx</h4>
+<p>Earlier in this note, we examined the process of canonicalization using <code>python</code> string manipulation and <code>pandas</code> <code>Series</code> methods. However, we mentioned this approach had a major flaw: our code was unnecessarily verbose. Equipped with our knowledge of regular expressions, let’s fix this.</p>
+<p>To do so, we need to understand a few functions in the <code>re</code> module. The first of these is the substitute function: <code>re.sub(pattern, rep1, text)</code>. It behaves similarly to <code>python</code>’s built-in <code>.replace</code> function, and returns text with all instances of <code>pattern</code> replaced by <code>rep1</code>.</p>
+<p>The regular expression here removes text surrounded by <code>&lt;&gt;</code> (also known as HTML tags).</p>
+<p>In order, the pattern matches … 1. a single <code>&lt;</code> 2. any character that is not a <code>&gt;</code> : div, td valign…, /td, /div 3. a single <code>&gt;</code></p>
+<p>Any substring in <code>text</code> that fulfills all three conditions will be replaced by <code>''</code>.</p>
+<div class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>text <span class="op">=</span> <span class="st">"&lt;div&gt;&lt;td valign='top'&gt;Moo&lt;/td&gt;&lt;/div&gt;"</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>pattern <span class="op">=</span> <span class="vs">r"&lt;[^&gt;]+&gt;"</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>re.sub(pattern, <span class="st">''</span>, text) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="10">
+<pre><code>'Moo'</code></pre>
+</div>
+</div>
+<p>Notice the <code>r</code> preceding the regular expression pattern; this specifies the regular expression is a raw string. Raw strings do not recognize escape sequences (i.e., the Python newline metacharacter <code>\n</code>). This makes them useful for regular expressions, which often contain literal <code>\</code> characters.</p>
+<p>In other words, don’t forget to tag your RegEx with an <code>r</code>.</p>
+</section>
+<section id="canonicalization-with-pandas" class="level4" data-number="6.6.1.2">
+<h4 data-number="6.6.1.2" class="anchored" data-anchor-id="canonicalization-with-pandas"><span class="header-section-number">6.6.1.2</span> Canonicalization with <code>pandas</code></h4>
+<p>We can also use regular expressions with <code>pandas</code> <code>Series</code> methods. This gives us the benefit of operating on an entire column of data as opposed to a single value. The code is simple: <br> <code>ser.str.replace(pattern, repl, regex=True</code>).</p>
+<p>Consider the following <code>DataFrame</code> <code>html_data</code> with a single column.</p>
+<div class="cell" data-execution_count="11">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> {<span class="st">"HTML"</span>: [<span class="st">"&lt;div&gt;&lt;td valign='top'&gt;Moo&lt;/td&gt;&lt;/div&gt;"</span>, <span class="op">\</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>                 <span class="st">"&lt;a href='http://ds100.org'&gt;Link&lt;/a&gt;"</span>, <span class="op">\</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>                 <span class="st">"&lt;b&gt;Bold text&lt;/b&gt;"</span>]}</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>html_data <span class="op">=</span> pd.DataFrame(data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>html_data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">HTML</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>&lt;div&gt;&lt;td valign='top'&gt;Moo&lt;/td&gt;&lt;/div&gt;</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>&lt;a href='http://ds100.org'&gt;Link&lt;/a&gt;</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>&lt;b&gt;Bold text&lt;/b&gt;</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>pattern <span class="op">=</span> <span class="vs">r"&lt;[^&gt;]+&gt;"</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>html_data[<span class="st">'HTML'</span>].<span class="bu">str</span>.replace(pattern, <span class="st">''</span>, regex<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="13">
+<pre><code>0          Moo
+1         Link
+2    Bold text
+Name: HTML, dtype: object</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="extraction-1" class="level3" data-number="6.6.2">
+<h3 data-number="6.6.2" class="anchored" data-anchor-id="extraction-1"><span class="header-section-number">6.6.2</span> Extraction</h3>
+<section id="extraction-with-regex" class="level4" data-number="6.6.2.1">
+<h4 data-number="6.6.2.1" class="anchored" data-anchor-id="extraction-with-regex"><span class="header-section-number">6.6.2.1</span> Extraction with RegEx</h4>
+<p>Just like with canonicalization, the <code>re</code> module provides capability to extract relevant text from a string: <br> <code>re.findall(pattern, text)</code>. This function returns a list of all matches to <code>pattern</code>.</p>
+<p>Using the familiar regular expression for Social Security Numbers:</p>
+<div class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>text <span class="op">=</span> <span class="st">"My social security number is 123-45-6789 bro, or maybe it’s 321-45-6789."</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>pattern <span class="op">=</span> <span class="vs">r"[0-9]</span><span class="sc">{3}</span><span class="vs">-[0-9]</span><span class="sc">{2}</span><span class="vs">-[0-9]</span><span class="sc">{4}</span><span class="vs">"</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>re.findall(pattern, text)  </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="14">
+<pre><code>['123-45-6789', '321-45-6789']</code></pre>
+</div>
+</div>
+</section>
+<section id="extraction-with-pandas" class="level4" data-number="6.6.2.2">
+<h4 data-number="6.6.2.2" class="anchored" data-anchor-id="extraction-with-pandas"><span class="header-section-number">6.6.2.2</span> Extraction with <code>pandas</code></h4>
+<p><code>pandas</code> similarily provides extraction functionality on a <code>Series</code> of data: <code>ser.str.findall(pattern)</code></p>
+<p>Consider the following <code>DataFrame</code> <code>ssn_data</code>.</p>
+<div class="cell" data-execution_count="15">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> {<span class="st">"SSN"</span>: [<span class="st">"987-65-4321"</span>, <span class="st">"forty"</span>, <span class="op">\</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>                <span class="st">"123-45-6789 bro or 321-45-6789"</span>,</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>               <span class="st">"999-99-9999"</span>]}</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>ssn_data <span class="op">=</span> pd.DataFrame(data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>ssn_data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="16">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">SSN</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>987-65-4321</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>forty</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>123-45-6789 bro or 321-45-6789</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>999-99-9999</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>ssn_data[<span class="st">"SSN"</span>].<span class="bu">str</span>.findall(pattern)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="17">
+<pre><code>0                 [987-65-4321]
+1                            []
+2    [123-45-6789, 321-45-6789]
+3                 [999-99-9999]
+Name: SSN, dtype: object</code></pre>
+</div>
+</div>
+<p>This function returns a list for every row containing the pattern matches in a given string.</p>
+<p>As you may expect, there are similar <code>pandas</code> equivalents for other <code>re</code> functions as well. <code>Series.str.extract</code> takes in a pattern and returns a <code>DataFrame</code> of each capture group’s first match in the string. In contrast, <code>Series.str.extractall</code> returns a multi-indexed <code>DataFrame</code> of all matches for each capture group. You can see the difference in the outputs below:</p>
+<div class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>pattern_cg <span class="op">=</span> <span class="vs">r"([0-9]</span><span class="sc">{3}</span><span class="vs">)-([0-9]</span><span class="sc">{2}</span><span class="vs">)-([0-9]</span><span class="sc">{4}</span><span class="vs">)"</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>ssn_data[<span class="st">"SSN"</span>].<span class="bu">str</span>.extract(pattern_cg)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="18">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">0</th>
+<th data-quarto-table-cell-role="th">1</th>
+<th data-quarto-table-cell-role="th">2</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>987</td>
+<td>65</td>
+<td>4321</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>123</td>
+<td>45</td>
+<td>6789</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>999</td>
+<td>99</td>
+<td>9999</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div class="cell" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>ssn_data[<span class="st">"SSN"</span>].<span class="bu">str</span>.extractall(pattern_cg)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="19">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">0</th>
+<th data-quarto-table-cell-role="th">1</th>
+<th data-quarto-table-cell-role="th">2</th>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">match</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td data-quarto-table-cell-role="th">0</td>
+<td>987</td>
+<td>65</td>
+<td>4321</td>
+</tr>
+<tr class="even">
+<td rowspan="2" data-quarto-table-cell-role="th" data-valign="top">2</td>
+<td data-quarto-table-cell-role="th">0</td>
+<td>123</td>
+<td>45</td>
+<td>6789</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1</td>
+<td>321</td>
+<td>45</td>
+<td>6789</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td data-quarto-table-cell-role="th">0</td>
+<td>999</td>
+<td>99</td>
+<td>9999</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="regular-expression-capture-groups" class="level3" data-number="6.6.3">
+<h3 data-number="6.6.3" class="anchored" data-anchor-id="regular-expression-capture-groups"><span class="header-section-number">6.6.3</span> Regular Expression Capture Groups</h3>
+<p>Earlier we used parentheses <code>(</code> <code>)</code> to specify the highest order of operation in regular expressions. However, they have another meaning; parentheses are often used to represent <strong>capture groups</strong>. Capture groups are essentially, a set of smaller regular expressions that match multiple substrings in text data.</p>
+<p>Let’s take a look at an example.</p>
+<section id="example-1" class="level4" data-number="6.6.3.1">
+<h4 data-number="6.6.3.1" class="anchored" data-anchor-id="example-1"><span class="header-section-number">6.6.3.1</span> Example 1</h4>
+<div class="cell" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>text <span class="op">=</span> <span class="st">"Observations: 03:04:53 - Horse awakens. </span><span class="ch">\</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="st">        03:05:14 - Horse goes back to sleep."</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Say we want to capture all occurences of time data (hour, minute, and second) as <em>separate entities</em>.</p>
+<div class="cell" data-execution_count="21">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>pattern_1 <span class="op">=</span> <span class="vs">r"(\d\d):(\d\d):(\d\d)"</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>re.findall(pattern_1, text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="21">
+<pre><code>[('03', '04', '53'), ('03', '05', '14')]</code></pre>
+</div>
+</div>
+<p>Notice how the given pattern has 3 capture groups, each specified by the regular expression <code>(\d\d)</code>. We then use <code>re.findall</code> to return these capture groups, each as tuples containing 3 matches.</p>
+<p>These regular expression capture groups can be different. We can use the <code>(\d{2})</code> shorthand to extract the same data.</p>
+<div class="cell" data-execution_count="22">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>pattern_2 <span class="op">=</span> <span class="vs">r"(\d\d):(\d\d):(\d</span><span class="sc">{2}</span><span class="vs">)"</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>re.findall(pattern_2, text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="22">
+<pre><code>[('03', '04', '53'), ('03', '05', '14')]</code></pre>
+</div>
+</div>
+</section>
+<section id="example-2" class="level4" data-number="6.6.3.2">
+<h4 data-number="6.6.3.2" class="anchored" data-anchor-id="example-2"><span class="header-section-number">6.6.3.2</span> Example 2</h4>
+<p>With the notion of capture groups, convince yourself how the following regular expression works.</p>
+<div class="cell" data-execution_count="23">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>first <span class="op">=</span> log_lines[<span class="dv">0</span>]</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>first</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="23">
+<pre><code>'169.237.46.168 - - [26/Jan/2014:10:47:58 -0800] "GET /stat141/Winter04/ HTTP/1.1" 200 2585 "http://anson.ucdavis.edu/courses/"\n'</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="24">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>pattern <span class="op">=</span> <span class="vs">r'\[(\d+)\/(\w+)\/(\d+):(\d+):(\d+):(\d+) (.+)\]'</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>day, month, year, hour, minute, second, time_zone <span class="op">=</span> re.findall(pattern, first)[<span class="dv">0</span>]</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(day, month, year, hour, minute, second, time_zone)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>26 Jan 2014 10 47 58 -0800</code></pre>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="limitations-of-regular-expressions" class="level2" data-number="6.7">
+<h2 data-number="6.7" class="anchored" data-anchor-id="limitations-of-regular-expressions"><span class="header-section-number">6.7</span> Limitations of Regular Expressions</h2>
+<p>Today, we explored the capabilities of regular expressions in data wrangling with text data. However, there are a few things to be wary of.</p>
+<p>Writing regular expressions is like writing a program.</p>
+<ul>
+<li>Need to know the syntax well.</li>
+<li>Can be easier to write than to read.</li>
+<li>Can be difficult to debug.</li>
+</ul>
+<p>Regular expressions are terrible at certain types of problems:</p>
+<ul>
+<li>For parsing a hierarchical structure, such as JSON, use the <code>json.load()</code> parser, not RegEx!</li>
+<li>Complex features (e.g.&nbsp;valid email address).</li>
+<li>Counting (same number of instances of a and b). (impossible)</li>
+<li>Complex properties (palindromes, balanced parentheses). (impossible)</li>
+</ul>
+<p>Ultimately, the goal is not to memorize all regular expressions. Rather, the aim is to:</p>
+<ul>
+<li>Understand what RegEx is capable of.</li>
+<li>Parse and create RegEx, with a reference table</li>
+<li>Use vocabulary (metacharacter, escape character, groups, etc.) to describe regex metacharacters.</li>
+<li>Differentiate between (), [], {}</li>
+<li>Design your own character classes with , , […-…], ^, etc.</li>
+<li>Use <code>python</code> and <code>pandas</code> RegEx methods.</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../eda/eda.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Data Cleaning and EDA</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../visualization_1/visualization_1.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Visualization I</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>
