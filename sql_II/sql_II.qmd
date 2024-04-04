@@ -13,7 +13,17 @@ format:
       - cosmo
       - cerulean
     callout-icon: false
-jupyter: python3
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .qmd
+      format_name: quarto
+      format_version: '1.0'
+      jupytext_version: 1.16.1
+  kernelspec:
+    display_name: Python 3 (ipykernel)
+    language: python
+    name: python3
 ---
 
 ::: {.callout-note collapse="false"}
@@ -26,24 +36,20 @@ jupyter: python3
 
 In this lecture, we'll continue our work from last time to introduce some advanced SQL syntax. 
 
-First, let's load in the database from last lecture.
+First, let's load in the `basic_examples.db` database.
 
 ```{python}
-#| tags: []
-# Load the SQL Alchemy Python library
-import sqlalchemy
-import pandas as pd
-```
-
-```{python}
-#| tags: []
 %load_ext sql
 ```
 
 ```{python}
-#| tags: []
-%%sql
-sqlite:///data/basic_examples.db 
+import duckdb
+conn = duckdb.connect()
+conn.query("INSTALL sqlite")
+```
+
+```{python}
+%sql duckdb:///data/basic_examples.db --alias basic
 ```
 
 ## Aggregating with `GROUP BY`
@@ -52,19 +58,17 @@ At this point, we've seen that SQL offers much of the same functionality that wa
 
 In `pandas`, much of our analysis work relied heavily on being able to use `.groupby()` to aggregate across the rows of our dataset. SQL's answer to this task is the (very conveniently named) `GROUP BY` clause. While the outputs of `GROUP BY` are similar to those of `.groupby()` —— in both cases, we obtain an output table where some column has been used for grouping —— the syntax and logic used to group data in SQL are fairly different to the `pandas` implementation.
 
-To illustrate `GROUP BY`, we will consider the `Dish` table from the `basic_examples.db` database.
+To illustrate `GROUP BY`, we will consider the `Dish` table from our database.
 
 ```{python}
-#| tags: []
 %%sql
 SELECT * 
 FROM Dish;
 ```
 
-Say we wanted to find the total costs of dishes of a certain `type`. To accomplish this, we would write the following code.
+Notice that there are multiple dishes of the same `type`. What if we wanted to find the total costs of dishes of a certain `type`? To accomplish this, we would write the following code.
 
 ```{python}
-#| tags: []
 %%sql
 SELECT type, SUM(cost)
 FROM Dish
@@ -88,7 +92,6 @@ There are many aggregation functions that can be used to aggregate the data cont
 We can easily compute multiple aggregations all at once (a task that was very tricky in `pandas`).
 
 ```{python}
-#| tags: []
 %%sql
 SELECT type, SUM(cost), MIN(cost), MAX(name)
 FROM Dish
@@ -100,15 +103,13 @@ To count the number of rows associated with each group, we use the `COUNT` keywo
 Recall the `Dragon` table from the previous lecture:
 
 ```{python}
-#| tags: []
 %%sql
 SELECT * FROM Dragon;
 ```
 
-Notice that `COUNT(*)` and `COUNT(cute)` result in different outputs/
+Notice that `COUNT(*)` and `COUNT(cute)` result in different outputs.
 
 ```{python}
-#| tags: []
 %%sql
 SELECT year, COUNT(*)
 FROM Dragon
@@ -116,7 +117,6 @@ GROUP BY year;
 ```
 
 ```{python}
-#| tags: []
 %%sql
 SELECT year, COUNT(cute)
 FROM Dragon
@@ -135,48 +135,35 @@ With this definition of `GROUP BY` in hand, let's update our SQL order of operat
 
 Note that we can use the `AS` keyword to rename columns during the selection process and that column expressions may include aggregation functions (`MAX`, `MIN`, etc.).
 
-## Summary
-Let's summarize what we've learned so far. We know that `SELECT` and `FROM` are the fundamental building blocks of any SQL query. We can augment these two keywords with additional clauses to refine the data in our output table. 
+## Filtering Groups
 
-Any clauses that we include must follow a strict ordering within the query:
+Now, what if we only want groups that meet a certain condition? `HAVING` filters groups by applying some condition across all rows in each group. We interpret it as a way to keep only the groups `HAVING` some condition. Note the difference between `WHERE` and `HAVING`: we use `WHERE` to filter rows, whereas we use `HAVING` to filter *groups*. `WHERE` precedes `HAVING` in terms of how SQL executes a query.
 
-    SELECT <column list>
+Let's take a look at the `Dish` table to see how we can use `HAVING`. Say we want to group dishes with a cost greater than 4 by `type` and only keep groups where the max cost is less than 10.
+
+```{python}
+%%sql
+SELECT type, COUNT(*)
+FROM Dish
+WHERE cost > 4
+GROUP BY type
+HAVING MAX(cost) <  10;
+```
+
+Here, we first use `WHERE` to filter for rows with a cost greater than 4. We then group our values by `type` before applying the `HAVING` operator. With `HAVING`, we can filter our groups based on if the max cost is less than 10.
+
+## Summary: SQL
+With this definition of `GROUP BY` and `HAVING` in hand, let's update our SQL order of operations. Remember: *every* SQL query must list clauses in this order. 
+
+    SELECT <column expression list>
     FROM <table>
     [WHERE <predicate>]
     [GROUP BY <column list>]
     [ORDER BY <column list>]
     [LIMIT <number of rows>]
-    [OFFSET <number of rows>]
-    
-Here, any clause contained in square brackets `[ ]` is optional —— we only need to use the keyword if it is relevant to the table operation we want to perform. Also note that by convention, we use all caps for keywords in SQL statements and use newlines to make code more readable.
+    [OFFSET <number of rows>];
 
-## Filtering Groups
-
-`HAVING` filters groups by applying some condition across all rows in each group. We interpret it as a a way to keep only the groups `HAVING` some condition. Note the difference between `WHERE` and `HAVING`: we use `WHERE` to filter rows, whereas we use `HAVING` to filter groups. `WHERE` precedes `HAVING` in terms of how SQL executes a query.
-
-Let's take a look at the `Dish` table to see how we can use `HAVING`.
-
-The code below groups the different dishes by type, and only keeps those groups wherein the max cost is still less than 8.
-
-```{python}
-#| tags: []
-%%sql
-SELECT type, COUNT(*)
-FROM Dish
-GROUP BY type
-HAVING MAX(cost) < 8;
-```
-
-In contrast, the code below first filters for rows where the cost is less than 8, and then does the grouping. Note the difference in outputs - in this case, "taco" is also included, whereas other entries in the same group having cost greater than or equal to 8 are not included.
-
-```{python}
-#| tags: []
-%%sql
-SELECT type, COUNT(*)
-FROM Dish
-WHERE cost < 8
-GROUP BY type;
-```
+Note that we can use the `AS` keyword to rename columns during the selection process and that column expressions may include aggregation functions (`MAX`, `MIN`, etc.).
 
 ## EDA in SQL
 In the last lecture, we mostly worked under the assumption that our data had already been cleaned. However, as we saw in our first pass through the data science lifecycle, we're very unlikely to be given data that is free of formatting issues. With this in mind, we'll want to learn how to clean and transform data in SQL. 
@@ -184,9 +171,43 @@ In the last lecture, we mostly worked under the assumption that our data had alr
 Our typical workflow when working with "big data" is:
 
 1. Use SQL to query data from a database
-2. Use `python` (with `pandas`) to analyze this data in detail
+2. Use Python (with `pandas`) to analyze this data in detail
 
-We can, however, still perform simple data cleaning and re-structuring using SQL directly. To do so, we'll use the `Title` table from the `imdbmini` database.
+We can, however, still perform simple data cleaning and re-structuring using SQL directly. To do so, we'll use the `Title` table from the `imdb_duck` database, which contains information about movies and actors.
+
+Let's load in the `imdb_duck` database.
+
+```{python}
+import os
+if os.path.exists("/home/jovyan/shared/sql/imdb_duck.db"):
+    imdbpath = "duckdb:////home/jovyan/shared/sql/imdb_duck.db"
+elif os.path.exists("data/imdb_duck.db"):
+    imdbpath =  "duckdb:///data/imdb_duck.db"
+else:
+    import gdown
+    url = 'https://drive.google.com/uc?id=10tKOHGLt9QoOgq5Ii-FhxpB9lDSQgl1O'
+    output_path = 'data/imdb_duck.db'
+    gdown.download(url, output_path, quiet=False)
+    imdbpath = "duckdb:///data/imdb_duck.db"
+print(imdbpath)
+```
+
+```{python}
+from sqlalchemy import create_engine
+imdb_engine = create_engine(imdbpath, connect_args={'read_only': True})
+%sql imdb_engine --alias imdb
+```
+
+Since we'll be working with the `Title` table, let's take a quick look at what it contains. 
+
+```{python}
+%%sql imdb 
+    
+SELECT *
+FROM Title
+WHERE primaryTitle IN ('Ginny & Georgia', 'What If...?', 'Succession', 'Veep', 'Tenet')
+LIMIT 10;
+```
 
 ### Matching Text using `LIKE`
 
@@ -195,36 +216,30 @@ One common task we encountered in our first look at EDA was needing to match str
 In SQL, we use the `LIKE` operator to (you guessed it) look for strings that are *like* a given string pattern. 
 
 ```{python}
-#| tags: []
-%%sql
-sqlite:///data/imdbmini.db 
-```
-
-```{python}
-#| tags: []
 %%sql
 SELECT titleType, primaryTitle
 FROM Title
-WHERE primaryTitle LIKE "Star Wars: Episode I - The Phantom Menace"
+WHERE primaryTitle LIKE 'Star Wars: Episode I - The Phantom Menace'
 ```
 
-What if we wanted to find *all* Star Wars movies? `%` is the wildcard operator, it means "look for any character, any number of times". This makes it helpful for identifying strings that are similar to our desired pattern, even when we don't know the full text of what we aim to extract. In contrast, `_` means "look for exactly 1 character", as you can see in the Harry Potter example that follows.
+What if we wanted to find *all* Star Wars movies? `%` is the wildcard operator, it means "look for any character, any number of times". This makes it helpful for identifying strings that are similar to our desired pattern, even when we don't know the full text of what we aim to extract.
 
 ```{python}
-#| tags: []
 %%sql
 SELECT titleType, primaryTitle
 FROM Title
-WHERE primaryTitle LIKE "%Star Wars%"
+WHERE primaryTitle LIKE '%Star Wars%'
 LIMIT 10;
 ```
 
+Alternatively, we can use RegEx! DuckDB and most real DBMSs allow for this. Note that here, we have to use the `SIMILAR TO` operater rather than `LIKE`.
+
 ```{python}
-#| tags: []
 %%sql
 SELECT titleType, primaryTitle
 FROM Title
-WHERE primaryTitle LIKE "Harry Potter and the Deathly Hallows: Part _"
+WHERE primaryTitle SIMILAR TO '.*Star Wars*.'
+LIMIT 10;
 ```
 
 ### `CAST`ing Data Types
@@ -232,11 +247,9 @@ WHERE primaryTitle LIKE "Harry Potter and the Deathly Hallows: Part _"
 A common data cleaning task is converting data to the correct variable type. The `CAST` keyword is used to generate a new output column. Each entry in this output column is the result of converting the data in an existing column to a new data type. For example, we may wish to convert numeric data stored as a string to an integer.
 
 ```{python}
-#| tags: []
 %%sql
-SELECT primaryTitle, CAST(runtimeMinutes AS INT), CAST(startYear AS INT)
-FROM Title
-LIMIT 5
+SELECT primaryTitle, CAST(runtimeMinutes AS INT)
+FROM Title;
 ```
 
 We use `CAST` when `SELECT`ing colunns for our output table. In the example above, we want to `SELECT` the columns of integer year and runtime data that is created by the `CAST`. 
@@ -244,7 +257,6 @@ We use `CAST` when `SELECT`ing colunns for our output table. In the example abov
 SQL will automatically name a new column according to the command used to `SELECT` it, which can lead to unwieldy column names. We can rename the `CAST`ed column using the `AS` keyword.
 
 ```{python}
-#| tags: []
 %%sql
 SELECT primaryTitle AS title, CAST(runtimeMinutes AS INT) AS minutes, CAST(startYear AS INT) AS year
 FROM Title
@@ -263,31 +275,29 @@ In SQL, conditional operations are performed using a `CASE` clause. Conceptually
          ELSE <yet another value>
          END
 
-Scanning through the skeleton code above, you can see that the logic is similar to that of an `if` statement in `python`. The conditional statement is first opened by calling `CASE`. Each new condition is specified by `WHEN`, with `THEN` indicating what value should be filled if the condition is met. `ELSE` specifies the value that should be filled if no other conditions are met. Lastly, `END` indicates the end of the conditional statement; once `END` has been called, SQL will continue evaluating the query as usual. 
+Scanning through the skeleton code above, you can see that the logic is similar to that of an `if` statement in Python. The conditional statement is first opened by calling `CASE`. Each new condition is specified by `WHEN`, with `THEN` indicating what value should be filled if the condition is met. `ELSE` specifies the value that should be filled if no other conditions are met. Lastly, `END` indicates the end of the conditional statement; once `END` has been called, SQL will continue evaluating the query as usual. 
 
 Let's see this in action. In the example below, we give the new column created by the `CASE` statement the name `movie_age`.
 
 ```{python}
-#| tags: []
 %%sql
 /* If a movie was filmed before 1950, it is "old"
 Otherwise, if a movie was filmed before 2000, it is "mid-aged"
 Else, a movie is "new" */
 
 SELECT titleType, startYear,
-CASE WHEN startYear < 1950 THEN "old"
-     WHEN startYear < 2000 THEN "mid-aged"
-     ELSE "new"
+CASE WHEN startYear < 1950 THEN 'old'
+     WHEN startYear < 2000 THEN 'mid-aged'
+     ELSE 'new'
      END AS movie_age
-FROM Title
-LIMIT 10;
+FROM Title;
 ```
 
 ## `JOIN`ing Tables
 
-At this point, we're well-versed in using SQL as a tool to clean, manipulate, and transform data in a table. Notice that this sentence referred to one *table*, specifically. What happens if the data we need is distributed across multiple tables? This is an important consideration when using SQL – recall that we first introduced SQL as a language to query from databases. Databases often store data in a multidimensional structure. In other words, information is stored across several tables, with each table containing a small subset of all the data housed by the database. 
+At this point, we're well-versed in using SQL as a tool to clean, manipulate, and transform data in a table. Notice that this sentence referred to one *table*, specifically. What happens if the data we need is distributed across multiple tables? This is an important consideration when using SQL —— recall that we first introduced SQL as a language to query from databases. Databases often store data in a multidimensional structure. In other words, information is stored across several tables, with each table containing a small subset of all the data housed by the database. 
 
-A common way of organizing a database is by using a **star schema**. A star schema is composed of two types of tables. A **fact table** is the central table of the database – it contains the information needed to link entries across several **dimension tables**, which contain more detailed information about the data. 
+A common way of organizing a database is by using a **star schema**. A star schema is composed of two types of tables. A **fact table** is the central table of the database —— it contains the information needed to link entries across several **dimension tables**, which contain more detailed information about the data. 
 
 Say we were working with a database about boba offerings in Berkeley. The dimension tables of the database might contain information about tea varieties and boba toppings. The fact table would be used to link this information across the various dimension tables.
 
@@ -318,11 +328,6 @@ Remember: SQL does not consider newlines or whitespace when interpreting queries
 
 We also need to specify what column from each table should be used to determine matching entries. By defining these keys, we provide SQL with the information it needs to pair rows of data together.
 
-In a **cross join**, *all* possible combinations of rows appear in the output table, regardless of whether or not rows share a matching key. Because all rows are joined, even if there is no matching key, it is not necessary to specify what keys to consider in an `ON` statement. A cross join is also known as a cartesian product.
-
-<div style="text-align: center;">
-<img src="images/cross.png" alt='cross' width='800'>
-</div> 
 
 The most commonly used type of SQL `JOIN` is the **inner join**. It turns out you're already familiar with what an inner join does, and how it works – this is the type of join we've been using in `pandas` all along! In an inner join, we combine every row in our first table with its matching entry in the second table. If a row from either table does not have a match in the other table, it is omitted from the output. 
 
@@ -330,37 +335,54 @@ The most commonly used type of SQL `JOIN` is the **inner join**. It turns out yo
 <img src="images/inner.png" alt='inner' width='800'>
 </div> 
 
-Another way of interpreting the inner join: perform a cross join, then remove all rows that do not share a matching key. Notice that the output of the inner join above contains all rows of the cross join example that contain a single color across the entire row.
-
-In a **full outer join**, all rows that have a match between the two tables are joined together. If a row has no match in the second table, then the values of the columns for that second table are filled with null. In other words, a full outer join performs an inner join *while still keeping* rows that have no match in the other table. This is best understood visually:
+In a **cross join**, *all* possible combinations of rows appear in the output table, regardless of whether or not rows share a matching key. Because all rows are joined, even if there is no matching key, it is not necessary to specify what keys to consider in an `ON` statement. A cross join is also known as a cartesian product.
 
 <div style="text-align: center;">
-<img src="images/full.png" alt='full' width='800'>
+<img src="images/cross.png" alt='cross' width='800'>
 </div> 
 
-We have kept the same output achieved using an inner join, with the addition of partially null rows for entries in `s` and `t` that had no match in the second table. Note that `FULL OUTER JOIN` is not supported by SQLite, the "flavor" of SQL that will be used in lab and homework.
+Conceptually, we can interpret an inner join as a cross join, followed by removing all rows that do not share a matching key. Notice that the output of the inner join above contains all rows of the cross join example that contain a single color across the entire row.
 
-A **left outer join** is similar to a full outer join. In a left outer join, *all* rows in the left table are kept in the output table. If a row in the right table shares a match with the left table, this row will be kept; otherwise, the rows in the right table are omitted from the output. 
+In a **left outer join**, *all* rows in the left table are kept in the output table. If a row in the right table shares a match with the left table, this row will be kept; otherwise, the rows in the right table are omitted from the output. We can fill in any missing values with `NULL`.
 
 <div style="text-align: center;">
 <img src="images/left.png" alt='left' width='800'>
 </div> 
 
-A **right outer join** keeps all rows in the right table. Rows in the left table are only kept if they share a match in the right table. Right outer joins are not supported by SQLite. 
+A **right outer join** keeps all rows in the right table. Rows in the left table are only kept if they share a match in the right table. Again, we can fill in any missing values with `NULL`. 
 
 <div style="text-align: center;">
 <img src="images/right.png" alt='right' width='800'>
 </div> 
 
-In the examples above, we performed our joins by checking for equality between the two tables (i.e., by setting `s.id = t.id`). SQL also supports joining rows on *inequalities*, which is something we weren't able to do when working in `pandas`. Consider a new dataset that contains information about students and teachers.
+In a **full outer join**, all rows that have a match between the two tables are joined together. If a row has no match in the second table, then the values of the columns for that second table are filled with `NULL`. In other words, a full outer join performs an inner join *while still keeping* rows that have no match in the other table. This is best understood visually:
 
 <div style="text-align: center;">
-<img src="images/student.png" alt='student' width='400'>
+<img src="images/full.png" alt='full' width='800'>
 </div> 
 
-Often, we wish to compare the relative values of rows in different tables, rather than check that they are exactly equal. For example, we may want to join rows where students are older than the corresponding teacher. We can do so by specifying an inequality in our `ON` statement.
+We have kept the same output achieved using an inner join, with the addition of partially null rows for entries in `s` and `t` that had no match in the second table. 
 
-<div style="text-align: center;">
-<img src="images/inequality.png" alt='inequality' width='800'>
-</div> 
+### Aliasing in `JOIN`s
 
+Generally, when joining tables, we often create aliases for table names (similarly to what we did with column names in the last lecture). It is typically easier to refer to aliases, especially when we are working with long table names, and can even reference columns using aliased table names.
+
+Let's say we want to determine the average rating of various movies:
+
+```{python}
+%%sql
+
+SELECT primaryTitle, averageRating
+FROM Title AS T INNER JOIN Rating AS R
+ON T.tconst = R.tconst;
+```
+
+Note that the `AS` is actually optional! We can create aliases for our tables even without it, but we usually include it for clarity.
+
+```{python}
+%%sql
+
+SELECT primaryTitle, averageRating
+FROM Title T INNER JOIN Rating R
+ON T.tconst = R.tconst;
+```

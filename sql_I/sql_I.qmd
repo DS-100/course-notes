@@ -330,86 +330,14 @@ LIMIT 2
 OFFSET 1;
 ```
 
-## Aggregating with `GROUP BY`
-
-At this point, we've seen that SQL offers much of the same functionality that was given to us by `pandas`. We can extract data from a table, filter it, and reorder it to suit our needs.
-
-In `pandas`, much of our analysis work relied heavily on being able to use `.groupby()` to aggregate across the rows of our dataset. SQL's answer to this task is the (very conveniently named) `GROUP BY` clause. While the outputs of `GROUP BY` are similar to those of `.groupby()` —— in both cases, we obtain an output table where some column has been used for grouping —— the syntax and logic used to group data in SQL are fairly different to the `pandas` implementation.
-
-To illustrate `GROUP BY`, we will consider the `Dish` table from the `basic_examples.db` database.
-
-```{python}
-#| vscode: {languageId: python}
-%%sql
-SELECT * 
-FROM Dish;
-```
-
-Say we wanted to find the total costs of dishes of a certain `type`. To accomplish this, we would write the following code.
-
-```{python}
-#| vscode: {languageId: python}
-%%sql
-SELECT type, SUM(cost)
-FROM Dish
-GROUP BY type;
-```
-
-What is going on here? The statement `GROUP BY type` tells SQL to group the data based on the value contained in the `type` column (whether a record is an appetizer, entree, or dessert). `SUM(cost)` sums up the costs of dishes in each `type` and displays the result in the output table.
-
-You may be wondering: why does `SUM(cost)` come before the command to `GROUP BY type`? Don't we need to form groups before we can count the number of entries in each? Remember that SQL is a *declarative* programming language —— a SQL programmer simply states what end result they would like to see, and leaves the task of figuring out *how* to obtain this result to SQL itself. This means that SQL queries sometimes don't follow what a reader sees as a "logical" sequence of thought. Instead, SQL requires that we follow its set order of operations when constructing queries. So long as we follow this order, SQL will handle the underlying logic.
-
-In practical terms: our goal with this query was to output the total `cost`s of each `type`. To communicate this to SQL, we say that we want to `SELECT` the `SUM`med `cost` values for each `type` group. 
-
-There are many aggregation functions that can be used to aggregate the data contained in each group. Some common examples are:
-
-* `COUNT`: count the number of rows associated with each group
-* `MIN`: find the minimum value of each group
-* `MAX`: find the maximum value of each group
-* `SUM`: sum across all records in each group
-* `AVG`: find the average value of each group
-
-We can easily compute multiple aggregations all at once (a task that was very tricky in `pandas`).
-
-```{python}
-#| vscode: {languageId: python}
-%%sql
-SELECT type, SUM(cost), MIN(cost), MAX(name)
-FROM Dish
-GROUP BY type;
-```
-
-To count the number of rows associated with each group, we use the `COUNT` keyword. Calling `COUNT(*)` will compute the total number of rows in each group, including rows with null values. Its `pandas` equivalent is `.groupby().size()`.
-
-```{python}
-#| vscode: {languageId: python}
-%%sql
-SELECT year, COUNT(*)
-FROM Dragon
-GROUP BY year;
-```
-
-To exclude `NULL` values when counting the rows in each group, we explicitly call `COUNT` on a column in the table. This is similar to calling `.groupby().count()` in `pandas`.
-
-```{python}
-#| vscode: {languageId: python}
-%%sql
-SELECT year, COUNT(cute)
-FROM Dragon
-GROUP BY year;
-```
-
-With this definition of `GROUP BY` in hand, let's update our SQL order of operations. Remember: *every* SQL query must list clauses in this order. 
+With these keywords in hand, let's update our SQL order of operations. Remember: *every* SQL query must list clauses in this order. 
 
     SELECT <column expression list>
     FROM <table>
     [WHERE <predicate>]
-    [GROUP BY <column list>]
     [ORDER BY <column list>]
     [LIMIT <number of rows>]
     [OFFSET <number of rows>];
-
-Note that we can use the `AS` keyword to rename columns during the selection process and that column expressions may include aggregation functions (`MAX`, `MIN`, etc.).
 
 ## Summary
 Let's summarize what we've learned so far. We know that `SELECT` and `FROM` are the fundamental building blocks of any SQL query. We can augment these two keywords with additional clauses to refine the data in our output table. 
@@ -419,7 +347,6 @@ Any clauses that we include must follow a strict ordering within the query:
     SELECT <column list>
     FROM <table>
     [WHERE <predicate>]
-    [GROUP BY <column list>]
     [ORDER BY <column list>]
     [LIMIT <number of rows>]
     [OFFSET <number of rows>]
