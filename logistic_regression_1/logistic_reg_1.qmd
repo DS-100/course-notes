@@ -38,7 +38,8 @@ There are a couple of different types of classification:
 
 * Binary classification: classify data into two classes, and responses $y$ are either 0 or 1
 * Multiclass classification: classify data into multiple classes (e.g., image labeling, next word in a sentence, etc.)
-* Structured prediction tasks: conduct mutliple related classification predictions (e.g., translation, voice recognition, etc.)
+
+We can further combine multiple related classfication predictions(e.g., translation, voice recognition, etc.) to tackle complex problems through structured prediction tasks.
 
 In Data 100, we will mostly deal with **binary classification**, where we are attempting to classify data into one of two classes. 
 
@@ -55,7 +56,7 @@ In classification, however, we no longer want to output numeric predictions; ins
 3. Apply a **decision rule** to interpret the outputted quantity and decide a classification.
 4. Output a predicted class.
 
-There are two key differences: as we'll soon see, we need to incorporate a non-linear transformation to capture non-linear relationships hidden in our data. We do so by applying the sigmoid function to a linear combination of the features. Secondly, we must apply a decision rule to convert the numeric quantities computed by our model into an actual class prediction. This can be as simple as saying that any datapoint with a feature greater than some number $x$ belongs to Class 1.
+There are two key differences: as we'll soon see, we need to incorporate a non-linear transformation to capture the non-linear relationships hidden in our data. We do so by applying the sigmoid function to a linear combination of the features. Secondly, we must apply a decision rule to convert the numeric quantities computed by our model into an actual class prediction. This can be as simple as saying that any datapoint with a feature greater than some number $x$ belongs to Class 1.
 
 <center><img src="images/reg.png" alt='reg' width='750'></center>
 
@@ -111,10 +112,7 @@ sns.stripplot(data=games, x="GOAL_DIFF", y="WON", orient="h")
 plt.gca().invert_yaxis();
 ```
 
-The linear regression fit follows the data as closely as it can. However, there are a few key flaws with this approach:
-
-* The predicted output, $\hat{y}$, can be outside the range of possible classes (there are predictions above 1 and below 0)
-* This means that the output can't always be interpreted (what does it mean to predict a class of -2.3?)
+The linear regression fit follows the data as closely as it can. However, this approach has a key flaw - The predicted output, $\hat{y}$, can be outside the range of possible classes (there are predictions above 1 and below 0). This means that the output can't always be interpreted (what does it mean to predict a class of -2.3?).
 
 Our usual linear regression framework won't work here. Instead, we'll need to get more creative.
 
@@ -175,7 +173,7 @@ plt.xlabel("x")
 plt.ylabel(r"Odds $= \frac{p}{1-p}$");
 ```
 
-It turns out that the relationship between our input `"GOAL_DIFF"` and the odds is roughly exponential! Let's linearize the exponential by taking the logarithm. As a reminder, you should assume that any logarithm in Data 100 is the base $e$ natural logarithm unless told otherwise.
+It turns out that the relationship between our input `"GOAL_DIFF"` and the odds is roughly exponential! Let's linearize the exponential by taking the logarithm (as suggested by the [Tukey-Mosteller Bulge Diagram](https://ds100.org/course-notes/visualization_2/visualization_2.html#tukey-mosteller-bulge-diagram)). As a reminder, you should assume that any logarithm in Data 100 is the base $e$ natural logarithm unless told otherwise.
 
 ```{python}
 import numpy as np
@@ -258,9 +256,9 @@ Let's summarize our logistic regression modeling workflow.
 
 Our main takeaways from this section are:
 
+* Assume log-odds is a linear combination of $x$ and $\theta$
 * Fit the "S" curve as best as possible
 * The curve models the probability: $P = (Y=1 | x)$
-* Assume log-odds is a linear combination of $x$ and $\theta$
 
 Putting this together, we know that the estimated probability that response is 1 given the features $x$ is equal to the logistic function $\sigma()$ at the value $x^{\top}\theta$:
 
@@ -401,7 +399,7 @@ The piecewise function we outlined above is difficult to optimize: we don't want
 
 $$\text{Cross-Entropy Loss} = -\left(y\log{(p)}-(1-y)\log{(1-p)}\right)$$
 
-By setting $y$ to 0 or 1, we see that this new form of cross-entropy loss gives us the same behavior as the original formulation.
+By setting $y$ to 0 or 1, we see that this new form of cross-entropy loss gives us the same behavior as the original formulation. Another way to think about this is that in either scenario (y being equal to 0 or 1), only one of the cross-entropy loss terms is activated, which gives us a convenient way to combine the two independent loss functions.
 
 :::: {.columns}
 
@@ -431,12 +429,12 @@ When $y=0$:
 The empirical risk of the logistic regression model is then the mean cross-entropy loss across all datapoints in the dataset. When fitting the model, we want to determine the model parameter $\theta$ that leads to the lowest mean cross-entropy loss possible.
 
 $$R(\theta) = - \frac{1}{n} \sum_{i=1}^n \left(y_i\log{(p_i)}-(1-y_i)\log{(1-p_i)}\right)$$
-$$R(\theta) = - \frac{1}{n} \sum_{i=1}^n \left(y_i\log{(\sigma(X_i^{\top}\theta)}-(1-y_i)\log{(1-\sigma(X_i^{\top}\theta)}\right)$$
+$$R(\theta) = - \frac{1}{n} \sum_{i=1}^n \left(y_i\log{\sigma(X_i^{\top}\theta)}-(1-y_i)\log{1-\sigma(X_i^{\top}\theta)}\right)$$
 
 The optimization problem is therefore to find the estimate $\hat{\theta}$ that minimizes $R(\theta)$:
 
 \begin{align}
-\hat{\theta} = \underset{\theta}{\arg\min} = - \frac{1}{n} \sum_{i=1}^n \left(y_i\log{(\sigma(X_i^{\top}\theta)}-(1-y_i)\log{(1-\sigma(X_i^{\top}\theta)}\right)
+\hat{\theta} = \underset{\theta}{\arg\min} (- \frac{1}{n} \sum_{i=1}^n \left(y_i\log{\sigma(X_i^{\top}\theta)}-(1-y_i)\log{1-\sigma(X_i^{\top}\theta)}\right))
 \end{align}
 
 Plotting the cross-entropy loss surface for our `toy` dataset gives us a more encouraging result – our loss function is now convex. This means we can optimize it using gradient descent. Computing the gradient of the logistic model is fairly challenging, so we'll let `sklearn` take care of this for us. You won't need to compute the gradient of the logistic model in Data 100.
