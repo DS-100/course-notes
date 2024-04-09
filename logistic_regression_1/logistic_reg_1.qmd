@@ -10,7 +10,11 @@ format:
       - cosmo
       - cerulean
     callout-icon: false
-jupyter: python3
+jupyter:
+  kernelspec:
+    display_name: Python 3 (ipykernel)
+    language: python
+    name: python3
 ---
 
 ::: {.callout-note collapse="false"}
@@ -21,7 +25,7 @@ jupyter: python3
 :::
 
 
-Up until this point in the class , we've focused on **regression** tasks - that is, predicting a *numerical* quantity from a given dataset. We discussed optimization, feature engineering, and regularization all in the context of performing regression to predict some quantity. 
+Up until this point in the class , we've focused on **regression** tasks - that is, predicting an *unbounded numerical quantity* from a given dataset. We discussed optimization, feature engineering, and regularization all in the context of performing regression to predict some quantity. 
 
 Now that we have this deep understanding of the modeling process, let's expand our knowledge of possible modeling tasks. 
 
@@ -36,13 +40,14 @@ In the next two lectures, we'll tackle the task of **classification**. A classif
 
 There are a couple of different types of classification:
 
-* Binary classification: classify data into two classes, and responses $y$ are either 0 or 1
-* Multiclass classification: classify data into multiple classes (e.g., image labeling, next word in a sentence, etc.)
+* **Binary classification**: classify data into two classes, and responses $y$ are either 0 or 1
+* **Multiclass classification**: classify data into multiple classes (e.g., image labeling, next word in a sentence, etc.)
 
-We can further combine multiple related classfication predictions(e.g., translation, voice recognition, etc.) to tackle complex problems through structured prediction tasks.
+We can further combine multiple related classfication predictions (e.g., translation, voice recognition, etc.) to tackle complex problems through structured prediction tasks.
 
 In Data 100, we will mostly deal with **binary classification**, where we are attempting to classify data into one of two classes. 
 
+### Modeling Process
 To build a classification model, we need to modify our modeling workflow slightly. Recall that in regression we:
 
 1. Created a design matrix of numeric features
@@ -58,7 +63,11 @@ In classification, however, we no longer want to output numeric predictions; ins
 
 There are two key differences: as we'll soon see, we need to incorporate a non-linear transformation to capture the non-linear relationships hidden in our data. We do so by applying the sigmoid function to a linear combination of the features. Secondly, we must apply a decision rule to convert the numeric quantities computed by our model into an actual class prediction. This can be as simple as saying that any datapoint with a feature greater than some number $x$ belongs to Class 1.
 
+**Regression:**
+
 <center><img src="images/reg.png" alt='reg' width='750'></center>
+
+**Classification:**
 
 <center><img src="images/class.png" alt='class' width='750'></center>
 
@@ -83,19 +92,19 @@ games = pd.read_csv("data/games").dropna()
 games.head()
 ```
 
-Let's visualize the relationship between `"GOAL_DIFF"` and `"WON"` using the Seaborn function `sns.stripplot`. A strip plot automatically introduces a small amount of random noise to jitter the data. Recall that all values in the `"WON"` column are either 1 (won) or 0 (lost) – if we were to directly plot them without jittering, we would see severe overplotting.
+Let's visualize the relationship between `"GOAL_DIFF"` and `"WON"` using the Seaborn function `sns.stripplot`. A strip plot automatically introduces a small amount of random noise to **jitter** the data. Recall that all values in the `"WON"` column are either 1 (won) or 0 (lost) – if we were to directly plot them without jittering, we would see severe overplotting.
 
 ```{python}
 #| code-fold: true
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-sns.stripplot(data=games, x="GOAL_DIFF", y="WON", orient="h")
+sns.stripplot(data=games, x="GOAL_DIFF", y="WON", orient="h", hue='WON', alpha=0.7)
 # By default, sns.stripplot plots 0, then 1. We invert the y axis to reverse this behavior
 plt.gca().invert_yaxis();
 ```
 
-This dataset is unlike anything we've seen before – our target variable contains only two unique values! Remember that each y value is either 0 or 1; the plot above jitters the y data slightly for ease of reading.
+This dataset is unlike anything we've seen before – our target variable contains only two unique values! (Remember that each y value is either 0 or 1; the plot above jitters the y data slightly for ease of reading.)
 
 The regression models we have worked with always assumed that we were attempting to predict a continuous target. If we apply a linear regression model to this dataset, something strange happens.
 
@@ -108,25 +117,28 @@ regression_model = lm.LinearRegression()
 regression_model.fit(X, Y)
 
 plt.plot(X.squeeze(), regression_model.predict(X), "k")
-sns.stripplot(data=games, x="GOAL_DIFF", y="WON", orient="h")
+sns.stripplot(data=games, x="GOAL_DIFF", y="WON", orient="h", hue='WON', alpha=0.7)
 plt.gca().invert_yaxis();
 ```
 
-The linear regression fit follows the data as closely as it can. However, this approach has a key flaw - The predicted output, $\hat{y}$, can be outside the range of possible classes (there are predictions above 1 and below 0). This means that the output can't always be interpreted (what does it mean to predict a class of -2.3?).
+The linear regression fit follows the data as closely as it can. However, this approach has a key flaw - the predicted output, $\hat{y}$, can be outside the range of possible classes (there are predictions above 1 and below 0). This means that the output can't always be interpreted (what does it mean to predict a class of -2.3?).
 
 Our usual linear regression framework won't work here. Instead, we'll need to get more creative.
+
+### Graph of Averages
 
 Back in [Data 8](https://inferentialthinking.com/chapters/08/1/Applying_a_Function_to_a_Column.html#example-prediction), you gradually built up to the concept of linear regression by using the **graph of averages**. Before you knew the mathematical underpinnings of the regression line, you took a more intuitive approach: you bucketed the $x$ data into bins of common values, then computed the average $y$ for all datapoints in the same bin. The result gave you the insight needed to derive the regression fit.
 
 Let's take the same approach as we grapple with our new classification task. In the cell below, we 1) bucket the `"GOAL_DIFF"` data into bins of similar values and 2) compute the average `"WON"` value of all datapoints in a bin.
 
 ```{python}
+# bucket the GOAL_DIFF data into 20 bins
 bins = pd.cut(games["GOAL_DIFF"], 20)
 games["bin"] = [(b.left + b.right) / 2 for b in bins]
 win_rates_by_bin = games.groupby("bin")["WON"].mean()
 
-# alpha makes the points transparent so we can see the line more clearly
-sns.stripplot(data=games, x="GOAL_DIFF", y="WON", orient="h", alpha=0.3)
+# plot the graph of averages
+sns.stripplot(data=games, x="GOAL_DIFF", y="WON", orient="h", alpha=0.5, hue='WON') # alpha makes the points transparent
 plt.plot(win_rates_by_bin.index, win_rates_by_bin, c="tab:red")
 plt.gca().invert_yaxis();
 ```
@@ -148,9 +160,11 @@ Our graph of averages was really modeling the probability, $p$, that a datapoint
 
 $$ p = P(Y = 1 | \text{ x} )$$
 
-In logistic regression, we have a new modeling goal. We want to model the **probability that a particular datapoint belongs to Class 1**. To do so, we'll need to create a model that can approximate the S-shaped curve we plotted above.
+In logistic regression, we have a new modeling goal. We want to model the **probability that a particular datapoint belongs to Class 1** by approximating the S-shaped curve we plotted above. However, we've only learned about linear modeling techniques like Linear Regression and OLS.
 
-Fortunately for us, we're already well-versed with a technique to model non-linear relationships – applying non-linear transformations to linearize the relationship. Recall the steps we've applied previously:
+### Handling Non-Linear Output
+
+Fortunately for us, we're already well-versed with a technique to model non-linear relationships – we can apply non-linear transformations like log or exponents to make a non-linear relationship more linear. Recall the steps we've applied previously:
 
 * Transform the variables until we linearize their relationship
 * Fit a linear model to the transformed variables
@@ -158,6 +172,7 @@ Fortunately for us, we're already well-versed with a technique to model non-line
 
 In past examples, we used the bulge diagram to help us decide what transformations may be useful. The S-shaped curve we saw above, however, looks nothing like any relationship we've seen in the past. We'll need to think carefully about what transformations will linearize this curve.
 
+#### 1. Odds
 Let's consider our eventual goal: determining if we should predict a Class of 0 or 1 for each datapoint. Rephrased, we want to decide if it seems more "likely" that the datapoint belongs to Class 0 or to Class 1. One way of deciding this is to see which class has the higher predicted probability for a given datapoint. The **odds** is defined as the probability of a datapoint belonging to Class 1 divided by the probability of it belonging to Class 0. 
 
 $$\text{odds} = \frac{P(Y=1|x)}{P(Y=0|x)} = \frac{p}{1-p}$$
@@ -165,6 +180,7 @@ $$\text{odds} = \frac{P(Y=1|x)}{P(Y=0|x)} = \frac{p}{1-p}$$
 If we plot the odds for each input `"GOAL_DIFF"` ($x$), we see something that looks more promising.
 
 ```{python}
+#| code-fold: true
 p = win_rates_by_bin
 odds = p/(1-p) 
 
@@ -173,9 +189,12 @@ plt.xlabel("x")
 plt.ylabel(r"Odds $= \frac{p}{1-p}$");
 ```
 
+#### 2. Log
+
 It turns out that the relationship between our input `"GOAL_DIFF"` and the odds is roughly exponential! Let's linearize the exponential by taking the logarithm (as suggested by the [Tukey-Mosteller Bulge Diagram](https://ds100.org/course-notes/visualization_2/visualization_2.html#tukey-mosteller-bulge-diagram)). As a reminder, you should assume that any logarithm in Data 100 is the base $e$ natural logarithm unless told otherwise.
 
 ```{python}
+#| code-fold: true
 import numpy as np
 log_odds = np.log(odds)
 plt.plot(odds.index, log_odds, c="tab:green")
@@ -183,10 +202,11 @@ plt.xlabel("x")
 plt.ylabel(r"Log-Odds $= \log{\frac{p}{1-p}}$");
 ```
 
+#### 3. Putting it Together
 We see something promising – the relationship between the log-odds and our input feature is approximately linear. This means that we can use a linear model to describe the relationship between the log-odds and $x$. In other words:
 
 \begin{align}
-\log{(\frac{p}{1-p})} &= \theta_0 + \theta_1 x_i\\
+\log{(\frac{p}{1-p})} &= \theta_0 + \theta_1 x_1 + ... + \theta_p x_p\\
 &= x^{\top} \theta
 \end{align}
 
@@ -226,31 +246,33 @@ plt.legend(loc="upper left")
 plt.gca().invert_yaxis();
 ```
 
-To predict a probability using the logistic regression model, we:
-
-1. Compute a linear combination of the features, $x^{\top}\theta$
-2. Apply the sigmoid activation function, $\sigma(x^{\top} \theta)$.
-
-Our predicted probabilities are of the form $P(Y=1|x) = p = \frac{1}{1+e^{-(\theta_0 + \theta_1 x_1 + \theta_2 x_2 + \ldots + \theta_p x_p)}}$
-
-An important note: despite its name, logistic regression is used for *classification* tasks, not regression tasks. In Data 100, we always apply logistic regression with the goal of classifying data.
-
 The S-shaped curve is formally known as the **sigmoid function** and is typically denoted by $\sigma$. 
 
 $$\sigma(t) = \frac{1}{1+e^{-t}}$$
 
 ::: {.callout-tip}
 ## Properties of the Sigmoid
-* Reflection/Symmetry: $1-\sigma(t) = \frac{e^{-t}}{1+e^{-t}}=\sigma(-t)$
-* Inverse: $t=\sigma^{-1}(p)=\log{(\frac{p}{1-p})}$
-* Derivative: $\frac{d}{dz} \sigma(t) = \sigma(t) (1-\sigma(t))=\sigma(t)\sigma(-t)$
+* Reflection/Symmetry: $$1-\sigma(t) = \frac{e^{-t}}{1+e^{-t}}=\sigma(-t)$$
+* Inverse: $$t=\sigma^{-1}(p)=\log{(\frac{p}{1-p})}$$
+* Derivative: $$\frac{d}{dz} \sigma(t) = \sigma(t) (1-\sigma(t))=\sigma(t)\sigma(-t)$$
 * Domain: $-\infty < t < \infty$
 * Range: $0 < \sigma(t) < 1$
 :::
 
 In the context of our modeling process, the sigmoid is considered an **activation function**. It takes in a linear combination of the features and applies a non-linear transformation.
 
-Let's summarize our logistic regression modeling workflow.
+## The Logistic Regression Model
+To predict a probability using the logistic regression model, we:
+
+1. Compute a linear combination of the features, $x^{\top}\theta$
+2. Apply the sigmoid activation function, $\sigma(x^{\top} \theta)$.
+
+Our predicted probabilities are of the form $P(Y=1|x) = p = \frac{1}{1+e^{-x^T \theta}}  = \frac{1}{1+e^{-(\theta_0 + \theta_1 x_1 + \theta_2 x_2 + \ldots + \theta_p x_p)}}$
+
+An important note: despite its name, logistic regression is used for *classification* tasks, not regression tasks. In Data 100, we always apply logistic regression with the goal of classifying data.
+
+
+Let's summarize our logistic regression modeling workflow:
 
 <center><img src="images/log_reg.png" alt='log_reg' width='750'></center>
 
@@ -289,7 +311,7 @@ Properties:
 
 :::
 
-::: {.callout collapse="true"}
+::: {.callout}
 ## Example Calculation
 Suppose we want to predict the probability that a team wins a game, given `"GOAL_DIFF"` (first feature) and the number of free throws (second feature). Let's say we fit a logistic regression model (with no intercept) using the training data and estimate the optimal parameters. Now we want to predict the probability that a new team will win their game.
 
@@ -309,10 +331,10 @@ We see that the response is more likely to be 1 than 0, indicating that a reason
 
 ## Cross-Entropy Loss
 
-To quantify the error of our logistic regression model, we'll need to define a loss function. 
+To quantify the error of our logistic regression model, we'll need to define a new loss function. 
 
 ### Why Not MSE?
-You may wonder: why not use our familiar mean squared error? It turns out that the MSE is not well suited for logistic regression. To see why, let's consider a simple, artificially generated `toy` dataset (this will be easier to work with than the more complicated `games` data).
+You may wonder: why not use our familiar mean squared error? It turns out that the MSE is not well suited for logistic regression. To see why, let's consider a simple, artificially generated `toy` dataset with just one feature (this will be easier to work with than the more complicated `games` data).
 
 ```{python}
 #| code-fold: true
@@ -347,12 +369,16 @@ plt.ylabel('MSE');
 This looks nothing like the parabola we found when plotting the MSE of a linear regression model! In particular, we can identify two flaws with using the MSE for logistic regression:
 
 1. The MSE loss surface is *non-convex*. There is both a global minimum and a (barely perceptible) local minimum in the loss surface above. This means that there is the risk of gradient descent converging on the local minimum of the loss surface, missing the true optimum parameter $\theta_1$.
+<center><img src="images/global_local_min.png" alt='reg' width='400'></center>
+
 2. Squared loss is *bounded* for a classification task. Recall that each true $y$ has a value of either 0 or 1. This means that even if our model makes the worst possible prediction (e.g. predicting $p=0$ for $y=1$), the squared loss for an observation will be no greater than 1: $$(y-p)^2=(1-0)^2=1$$ The MSE does not strongly penalize poor predictions.
+<center><img src="images/squared_loss.png" alt='reg' width='400'></center>
+
 
 ### Motivating Cross-Entropy Loss
 Suffice to say, we don't want to use the MSE when working with logistic regression. Instead, we'll consider what kind of behavior we would *like* to see in a loss function.
 
-Let $y$ be the binary label ${0, 1}$, and $p$ be the model's predicted probability of the label being 1. 
+Let $y$ be the binary label (it can either be 0 or 1), and $p$ be the model's predicted probability of the label $y$ being 1. 
 
 * When the true $y$ is 1, we should incur *low* loss when the model predicts large $p$
 * When the true $y$ is 0, we should incur *high* loss when the model predicts large $p$
@@ -368,7 +394,13 @@ $$\text{Cross-Entropy Loss} = \begin{cases}
 
 Why does this (seemingly convoluted) loss function "work"? Let's break it down.
 
-:::: {.columns}
+| When $y=1$ | When $y=0$ | 
+| -- | -- | 
+| <img src="images/y=1.png" alt='cross-entropy loss when Y=1' width='300'> | <img src="images/y=0.png" alt='cross-entropy loss when Y=0' width='300'> |
+| As $p \rightarrow 0$, loss approches $\infty$ | As $p \rightarrow 0$, loss approches 0 | 
+|  As $p \rightarrow 1$, loss approaches 0 | As $p \rightarrow 1$, loss approaches $\infty$ | 
+
+<!-- :::: {.columns}
 
 ::: {.column width="35%"}
 When $y=1$
@@ -391,7 +423,7 @@ When $y=0$
   
 :::
 
-::::
+:::: -->
 
 All good – we are seeing the behavior we want for our logistic regression model.
 
@@ -429,12 +461,12 @@ When $y=0$:
 The empirical risk of the logistic regression model is then the mean cross-entropy loss across all datapoints in the dataset. When fitting the model, we want to determine the model parameter $\theta$ that leads to the lowest mean cross-entropy loss possible.
 
 $$R(\theta) = - \frac{1}{n} \sum_{i=1}^n \left(y_i\log{(p_i)}-(1-y_i)\log{(1-p_i)}\right)$$
-$$R(\theta) = - \frac{1}{n} \sum_{i=1}^n \left(y_i\log{\sigma(X_i^{\top}\theta)}-(1-y_i)\log{1-\sigma(X_i^{\top}\theta)}\right)$$
+$$R(\theta) = - \frac{1}{n} \sum_{i=1}^n \left(y_i\log{\sigma(X_i^{\top}\theta)}-(1-y_i)\log{(1-\sigma(X_i^{\top}\theta))}\right)$$
 
 The optimization problem is therefore to find the estimate $\hat{\theta}$ that minimizes $R(\theta)$:
 
 \begin{align}
-\hat{\theta} = \underset{\theta}{\arg\min} (- \frac{1}{n} \sum_{i=1}^n \left(y_i\log{\sigma(X_i^{\top}\theta)}-(1-y_i)\log{1-\sigma(X_i^{\top}\theta)}\right))
+\hat{\theta} = \underset{\theta}{\arg\min} (- \frac{1}{n} \sum_{i=1}^n \left(y_i\log{(\sigma(X_i^{\top}\theta))}-(1-y_i)\log{(1-\sigma(X_i^{\top}\theta))}\right))
 \end{align}
 
 Plotting the cross-entropy loss surface for our `toy` dataset gives us a more encouraging result – our loss function is now convex. This means we can optimize it using gradient descent. Computing the gradient of the logistic model is fairly challenging, so we'll let `sklearn` take care of this for us. You won't need to compute the gradient of the logistic model in Data 100.
