@@ -33,8 +33,8 @@ In Linear Algebra, we think of data being a collection of vectors. Vectors have 
 
 Linear Algebra views our data as a matrix:
 
-- N row vectors in a d-Dimensions, OR
-- d column vectors in an N-Dimensions
+- N row vectors in a d-Dimensional space, OR
+- d column vectors in an N-Dimensions space
 
 **Dimensionality** of data is a complex topic. Sometimes, it is clear from looking at the number of rows/columns, but other times it is not. 
 
@@ -42,8 +42,7 @@ Linear Algebra views our data as a matrix:
 <br>
 So far, we've used visualizations like rugplots or scatterplots to help us identify clusters in our dataset. Since we humans are 3D beings, we can’t visualize beyond three dimensions, but many datasets come with more than three features. In order to visualize multidimensional data, we can reduce the dataset to lower dimensions through **dimensionality reduction**. 
 
-For example, the dataset below has 4 columns, but the `Weight (lbs)` column is actually just a linear transformation of the `Weight (kg)` column. Thus, no new information is captured, and the matrix of our dataset has a (column) rank of 3! Despite having 4 columns, we still say that this data is 3-dimensional.
-
+For example, the dataset below has 4 columns, but the `Weight (lbs)` column is actually just a linear transformation of the `Weight (kg)` column. Thus, no new information is captured, and the matrix of our dataset has a (column) rank of 3! Therefore, despite having 4 columns, we still say that this data is 3-dimensional.
 
 <center><img src = "images/dataset4.png" width="400vw"></center>
 
@@ -51,7 +50,9 @@ Plotting the weight columns together reveals the key visual intuition. While the
 
 <center><img src = "images/dataset3.png" width="400vw"></center>
 
-What happens when there are outliers? Below, we've added one outlier point to the dataset above, and just that is enough to change the rank of the matrix from 1 to 2 dimensions. However, the data is still very much 1-dimensional. 
+What happens when there are outliers? Below, we've added one outlier point to the dataset above, and just that is enough to change the rank of the matrix from 1 to 2 dimensions. However, the data is still very much 1-dimensional. Here, we can say that the data is intinsically 1-dimensional.
+
+The **Intrinsic Dimension** of a dataset is the minimal set of dimensions needed to approximately represent the data.
 
 <center><img src = "images/dataset3_outlier.png" width="400vw"></center>
 
@@ -61,9 +62,13 @@ As such, dimensionality reduction is generally an *approximation* of the origina
 <br>
 In general, we want the projection that is the best approximation for the original data (the graph on the right). In other words, we want the projection that captures the most variance of the original data. In the next section, we'll see how this is calculated.
 
-## Matrix as Transformation
+## Matrix Decomposition (Factorization)
 
-Consider the matrix multiplication example below:
+One linear technique to dimensionality reduction is via matrix decomposition, which is closely tied with matrix multiplication. In this section, we will decompose our data matrix X into a lower-dimensional matrix Z that when multiplied by W approximately recovers the original data.
+
+<center><img src = "images/factorization.png" width="800vw"></center>
+
+First, consider the matrix multiplication example below:
 
 <center><img src = "images/matmul.png" width="700vw"></center>
 
@@ -76,6 +81,18 @@ In general, there are two ways to interpret matrix multiplication:
 1. Row dot column to get each datapoint. In this view, we perform multiple linear operations on the data <center><img src = "images/matmul2.png" width="550vw"></center>
 2. Linear transformation of columns <center><img src = "images/matmul3.png" width="550vw"></center>
 
+We will be using the second interpretation to link matrix multiplication with matrix decomposition, where we receive a lower dimensional representation of data along with a transformation matrix.
+
+Matrix factorization is the opposite of matrix multiplication. Just like real numbers, there exists infinite ways to decompose a matrix into a product of two matrices. That said, the rank of the matrix puts certain constraints on the factorization. 
+
+<center><img src = "images/factorization_constraints.png" width="550vw"></center>
+
+In the above image, you can see how at the higher end, when we approximate our data to have higher dimensions than the rank of the data, we will get a column of 0s. This decomposition works mathematically but goes against the idea of dimensionality reduction. At the lower end, in a 1D representation, we fail to generate an accurate decomposition as now we have lower number of dimensions than the rank of the data.
+
+In practice we will be working with a lot of features in our dataset, so we want to usually construct decompositions where the dimensionality is below the rank of the original matrix. While we will not be able to recover our data exactly, we will still be able to provide approximate reconstructions of the matrix.
+
+In the next section, we will discuss a method to automatically and approximately factorize given data. Since some approximations are better than the others, we will also discuss how the method helps us capture a lot of information in low number of dimensions.
+
 ## Principal Component Analysis (PCA) 
 
 In PCA, our goal is to transform observations from high-dimensional data down to low dimensions (often 2, as most visualizations are 2D) through linear transformations. In other words, we want to find a linear transformation that creates a low-dimension representation that captures as much of the original data’s *total variance* as possible.
@@ -86,11 +103,16 @@ We often perform PCA during the Exploratory Data Analysis (EDA) stage of our dat
 
 * Visually identifying clusters of similar observations in high dimensions.
 * Removing irrelevant dimensions if we suspect that the dataset is inherently low rank. For example, if the columns are collinear, there are many attributes but only a few mostly determine the rest through linear associations.
-* Finding a small basis for representing variations in complex things, e.g., images, genes.
-* Reducing the number of dimensions to make some computations cheaper.
+* Creating a transformed dataset of decorrelated features.
 
 <center><img src = "images/pca_example.png" width="550vw"></center>
 
+There are two equivalent ways of framing PCA:
+
+* Finding directions of **maximum variability** in the data
+* Finding the low dimensional (rank) matrix factorization that **best approximates the data**
+
+In the first approach, we can find the variances of each attribute and then keep the two attributes with the highest variance. However, in this appraoch, we are limited to just working with attributes individually not as a combination. Following the PCA procedure (as described in the next section), can help us capture the most variance in the data (even higher than first approach) by using **linear combinations of features**
 
 ### PCA Procedure (Overview)
 
@@ -192,6 +214,7 @@ For this demo, we'll continue working with our rectangular dataset from before w
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -209,18 +232,21 @@ rectangle.head(5)
 In `NumPy`, the SVD algorithm is already written and can be called with `np.linalg.svd` ([documentation](https://numpy.org/doc/stable/reference/generated/numpy.linalg.svd.html)). There are multiple versions of SVD; to get the version that we will follow, we need to set the `full_matrices` parameter to `False`.
 
 ```{python}
+#| vscode: {languageId: python}
 U, S, Vt = np.linalg.svd(rectangle, full_matrices = False)
 ```
 
 First, let's examine `U`. As we can see, it's dimensions are $n \times d$.
 
 ```{python}
+#| vscode: {languageId: python}
 U.shape
 ```
 
 The first 5 rows of `U` are shown below.
 
 ```{python}
+#| vscode: {languageId: python}
 pd.DataFrame(U).head(5)
 ```
 
@@ -229,18 +255,21 @@ $\Sigma$ is a little different in `NumPy`. Since the only useful values in the d
 Our `rectangle_data` has a rank of $3$, so we should have 3 non-zero singular values, **sorted from largest to smallest**.
 
 ```{python}
+#| vscode: {languageId: python}
 S
 ```
 
 It seems like we have 4 non-zero values instead of 3, but notice that the last value is so small ($10^{-15}$) that it's practically $0$. Hence, we can round the values to get 3 singular values. 
 
 ```{python}
+#| vscode: {languageId: python}
 np.round(S)
 ```
 
 To get `S` in matrix format, we use `np.diag`.
 
 ```{python}
+#| vscode: {languageId: python}
 Sm = np.diag(S)
 Sm
 ```
@@ -248,16 +277,19 @@ Sm
 Finally, we can see that `Vt` is indeed a $d \times d$ matrix.
 
 ```{python}
+#| vscode: {languageId: python}
 Vt.shape
 ```
 
 ```{python}
+#| vscode: {languageId: python}
 pd.DataFrame(Vt)
 ```
 
 To check that this SVD is a valid decomposition, we can reverse it and see if it matches our original table (it does, yay!).
 
 ```{python}
+#| vscode: {languageId: python}
 pd.DataFrame(U @ Sm @ Vt).head(5)
 ```
 
@@ -273,6 +305,7 @@ In order to get the first $k$ principal components from an $n \times d$ matrix $
 1. Center $X$ by subtracting the mean from each column. Notice how we specify `axis=0` so that the mean is computed per column.
 
 ```{python}
+#| vscode: {languageId: python}
 centered_df = rectangle - np.mean(rectangle, axis = 0)
 centered_df.head(5)
 ```
@@ -280,6 +313,7 @@ centered_df.head(5)
 2. Get the Singular Value Decomposition of centered $X$: $U$, $Σ$ and $V^T$
 
 ```{python}
+#| vscode: {languageId: python}
 U, S, Vt = np.linalg.svd(centered_df, full_matrices = False)
 Sm = pd.DataFrame(np.diag(np.round(S, 1)))
 ```
@@ -287,11 +321,13 @@ Sm = pd.DataFrame(np.diag(np.round(S, 1)))
 3. Multiply either $UΣ$ or $XV$. Mathematically, these give the same result, but computationally, floating point approximation results in slightly different numbers for very small values (check out the right-most column in the cells below).
 
 ```{python}
+#| vscode: {languageId: python}
 # UΣ 
 pd.DataFrame(U @ np.diag(S)).head(5) 
 ```
 
 ```{python}
+#| vscode: {languageId: python}
 # XV
 pd.DataFrame(centered_df @ Vt.T).head(5)
 ```
@@ -299,6 +335,7 @@ pd.DataFrame(centered_df @ Vt.T).head(5)
 4. Take the first $k$ columns of $UΣ$ (or $XV$). These are the first $k$ principal components of $X$.
 
 ```{python}
+#| vscode: {languageId: python}
 two_PCs = (U @ np.diag(S))[:, :2] # using UΣ 
 two_PCs = (centered_df @ Vt.T).iloc[:, :2] # using XV
 pd.DataFrame(two_PCs).head()
