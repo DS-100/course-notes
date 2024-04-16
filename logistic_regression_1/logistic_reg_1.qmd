@@ -429,7 +429,7 @@ All good – we are seeing the behavior we want for our logistic regression mode
 
 The piecewise function we outlined above is difficult to optimize: we don't want to constantly "check" which form of the loss function we should be using at each step of choosing the optimal model parameters. We can re-express cross-entropy loss in a more convenient way:
 
-$$\text{Cross-Entropy Loss} = -\left(y\log{(p)}-(1-y)\log{(1-p)}\right)$$
+$$\text{Cross-Entropy Loss} = -\left(y\log{(p)}+(1-y)\log{(1-p)}\right)$$
 
 By setting $y$ to 0 or 1, we see that this new form of cross-entropy loss gives us the same behavior as the original formulation. Another way to think about this is that in either scenario (y being equal to 0 or 1), only one of the cross-entropy loss terms is activated, which gives us a convenient way to combine the two independent loss functions.
 
@@ -439,7 +439,7 @@ By setting $y$ to 0 or 1, we see that this new form of cross-entropy loss gives 
 When $y=1$:
 
 \begin{align}
-\text{CE} &= -\left((1)\log{(p)}-(1-1)\log{(1-p)}\right)\\
+\text{CE} &= -\left((1)\log{(p)}+(1-1)\log{(1-p)}\right)\\
 &= -\log{(p)}
 \end{align}
 :::
@@ -451,7 +451,7 @@ When $y=1$:
 When $y=0$:
 
 \begin{align}
-\text{CE} &= -\left((0)\log{(p)}-(1-0)\log{(1-p)}\right)\\
+\text{CE} &= -\left((0)\log{(p)}+(1-0)\log{(1-p)}\right)\\
 &= -\log{(1-p)}
 \end{align}
 :::
@@ -460,14 +460,18 @@ When $y=0$:
 
 The empirical risk of the logistic regression model is then the mean cross-entropy loss across all datapoints in the dataset. When fitting the model, we want to determine the model parameter $\theta$ that leads to the lowest mean cross-entropy loss possible.
 
-$$R(\theta) = - \frac{1}{n} \sum_{i=1}^n \left(y_i\log{(p_i)}-(1-y_i)\log{(1-p_i)}\right)$$
-$$R(\theta) = - \frac{1}{n} \sum_{i=1}^n \left(y_i\log{\sigma(X_i^{\top}\theta)}-(1-y_i)\log{(1-\sigma(X_i^{\top}\theta))}\right)$$
+$$
+\begin{align}
+R(\theta) &= - \frac{1}{n} \sum_{i=1}^n \left(y_i\log{(p_i)}+(1-y_i)\log{(1-p_i)}\right) \\
+&= - \frac{1}{n} \sum_{i=1}^n \left(y_i\log{\sigma(X_i^{\top}\theta)}+(1-y_i)\log{(1-\sigma(X_i^{\top}\theta))}\right)
+\end{align}
+$$
 
 The optimization problem is therefore to find the estimate $\hat{\theta}$ that minimizes $R(\theta)$:
 
-\begin{align}
-\hat{\theta} = \underset{\theta}{\arg\min} (- \frac{1}{n} \sum_{i=1}^n \left(y_i\log{(\sigma(X_i^{\top}\theta))}-(1-y_i)\log{(1-\sigma(X_i^{\top}\theta))}\right))
-\end{align}
+$$
+\hat{\theta} = \underset{\theta}{\arg\min} - \frac{1}{n} \sum_{i=1}^n \left(y_i\log{(\sigma(X_i^{\top}\theta))}+(1-y_i)\log{(1-\sigma(X_i^{\top}\theta))}\right) 
+$$
 
 Plotting the cross-entropy loss surface for our `toy` dataset gives us a more encouraging result – our loss function is now convex. This means we can optimize it using gradient descent. Computing the gradient of the logistic model is fairly challenging, so we'll let `sklearn` take care of this for us. You won't need to compute the gradient of the logistic model in Data 100.
 

@@ -428,7 +428,7 @@ Learning Outcomes
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>games <span class="op">=</span> pd.read_csv(<span class="st">"data/games"</span>).dropna()</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>games.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="1">
+<div class="cell-output cell-output-display" data-execution_count="37">
 <div>
 
 
@@ -760,7 +760,7 @@ Example Calculation
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"y"</span>: [<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>]})</span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>toy_df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="8">
+<div class="cell-output cell-output-display" data-execution_count="44">
 <div>
 
 
@@ -906,13 +906,13 @@ When $y=0$
 :::: -->
 <p>All good – we are seeing the behavior we want for our logistic regression model.</p>
 <p>The piecewise function we outlined above is difficult to optimize: we don’t want to constantly “check” which form of the loss function we should be using at each step of choosing the optimal model parameters. We can re-express cross-entropy loss in a more convenient way:</p>
-<p><span class="math display">\[\text{Cross-Entropy Loss} = -\left(y\log{(p)}-(1-y)\log{(1-p)}\right)\]</span></p>
+<p><span class="math display">\[\text{Cross-Entropy Loss} = -\left(y\log{(p)}+(1-y)\log{(1-p)}\right)\]</span></p>
 <p>By setting <span class="math inline">\(y\)</span> to 0 or 1, we see that this new form of cross-entropy loss gives us the same behavior as the original formulation. Another way to think about this is that in either scenario (y being equal to 0 or 1), only one of the cross-entropy loss terms is activated, which gives us a convenient way to combine the two independent loss functions.</p>
 <div class="columns">
 <div class="column" style="width:35%;">
 <p>When <span class="math inline">\(y=1\)</span>:</p>
 <p><span class="math display">\[\begin{align}
-\text{CE} &amp;= -\left((1)\log{(p)}-(1-1)\log{(1-p)}\right)\\
+\text{CE} &amp;= -\left((1)\log{(p)}+(1-1)\log{(1-p)}\right)\\
 &amp;= -\log{(p)}
 \end{align}\]</span></p>
 </div><div class="column" style="width:20%;">
@@ -920,17 +920,22 @@ When $y=0$
 </div><div class="column" style="width:35%;">
 <p>When <span class="math inline">\(y=0\)</span>:</p>
 <p><span class="math display">\[\begin{align}
-\text{CE} &amp;= -\left((0)\log{(p)}-(1-0)\log{(1-p)}\right)\\
+\text{CE} &amp;= -\left((0)\log{(p)}+(1-0)\log{(1-p)}\right)\\
 &amp;= -\log{(1-p)}
 \end{align}\]</span></p>
 </div>
 </div>
 <p>The empirical risk of the logistic regression model is then the mean cross-entropy loss across all datapoints in the dataset. When fitting the model, we want to determine the model parameter <span class="math inline">\(\theta\)</span> that leads to the lowest mean cross-entropy loss possible.</p>
-<p><span class="math display">\[R(\theta) = - \frac{1}{n} \sum_{i=1}^n \left(y_i\log{(p_i)}-(1-y_i)\log{(1-p_i)}\right)\]</span> <span class="math display">\[R(\theta) = - \frac{1}{n} \sum_{i=1}^n \left(y_i\log{\sigma(X_i^{\top}\theta)}-(1-y_i)\log{(1-\sigma(X_i^{\top}\theta))}\right)\]</span></p>
+<p><span class="math display">\[
+\begin{align}
+R(\theta) &amp;= - \frac{1}{n} \sum_{i=1}^n \left(y_i\log{(p_i)}+(1-y_i)\log{(1-p_i)}\right) \\
+&amp;= - \frac{1}{n} \sum_{i=1}^n \left(y_i\log{\sigma(X_i^{\top}\theta)}+(1-y_i)\log{(1-\sigma(X_i^{\top}\theta))}\right)
+\end{align}
+\]</span></p>
 <p>The optimization problem is therefore to find the estimate <span class="math inline">\(\hat{\theta}\)</span> that minimizes <span class="math inline">\(R(\theta)\)</span>:</p>
-<p><span class="math display">\[\begin{align}
-\hat{\theta} = \underset{\theta}{\arg\min} (- \frac{1}{n} \sum_{i=1}^n \left(y_i\log{(\sigma(X_i^{\top}\theta))}-(1-y_i)\log{(1-\sigma(X_i^{\top}\theta))}\right))
-\end{align}\]</span></p>
+<p><span class="math display">\[
+\hat{\theta} = \underset{\theta}{\arg\min} - \frac{1}{n} \sum_{i=1}^n \left(y_i\log{(\sigma(X_i^{\top}\theta))}+(1-y_i)\log{(1-\sigma(X_i^{\top}\theta))}\right)
+\]</span></p>
 <p>Plotting the cross-entropy loss surface for our <code>toy</code> dataset gives us a more encouraging result – our loss function is now convex. This means we can optimize it using gradient descent. Computing the gradient of the logistic model is fairly challenging, so we’ll let <code>sklearn</code> take care of this for us. You won’t need to compute the gradient of the logistic model in Data 100.</p>
 <div class="cell" data-execution_count="10">
 <details>
@@ -962,7 +967,7 @@ When $y=0$
 <div class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>flips <span class="op">=</span> [<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>]</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>flips</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="11">
+<div class="cell-output cell-output-display" data-execution_count="47">
 <pre><code>[0, 0, 1, 1, 1, 1, 0, 0, 0, 0]</code></pre>
 </div>
 </div>
