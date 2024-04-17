@@ -16,57 +16,128 @@ jupyter: python3
 ::: {.callout-note}
 ## Learning Outcomes
 - Discuss the dimensionality of a dataset and strategies for dimensionality reduction
-- Define and carry out the procedure of PCA
-- Understand the connection between PCA and SVD
+- Derive and carry out the procedure of PCA
 :::
 
-## Dimensionality 
+So far in this course, we've focused on **supervised learning** techniques that create a function to map inputs (features) to labelled outputs. Regression and classification are two main examples, where the output value of regression is *quantitative* while the output value of classification is *categorical*. 
 
-Previously, we have been working with data tables with rows and columns. These rows and columns correspond to observations and attributes about said observations. Now, we have to be a bit more clear with our wording to follow the language of linear algebra. 
+Today, we'll introduce an **unsupervised learning** technique called PCA. Unlike supervised learning, unsupervised learning is applied on *unlabeled* data. Because we have features but no labels, the goal is to identified pattern in those features. 
 
+## Visualization (Revisited)
+
+Visualization can help us identify clusters or patterns in our dataset, and it can give us an intuition about our data and how to clean it for the model. For this demo, we'll return to the MPG dataset from Lecture 19 and see how far we can push visualization for multiple features.
+```{python}
+#| code-fold: true
+#| vscode: {languageId: python}
+import pandas as pd
+import numpy as np
+import scipy as sp
+import plotly.express as px
+import seaborn as sns
+```
+
+```{python}
+#| code-fold: true
+#| vscode: {languageId: python}
+mpg = sns.load_dataset("mpg").dropna()
+mpg.head()
+```
+
+We can plot one feature as a histogram to see it's distribution. Since we only plot one feature, we consider this a 1-dimensional plot. 
+
+```{python}
+#| code-fold: true
+#| vscode: {languageId: python}
+px.histogram(mpg, x="displacement")
+```
+
+We can also visualize two features (2-dimensional scatter plot): 
+```{python}
+#| code-fold: true
+#| vscode: {languageId: python}
+px.scatter(mpg, x="displacement", y="horsepower")
+```
+
+Three features (3-dimensional scatter plot):
+```{python}
+#| code-fold: true
+#| vscode: {languageId: python}
+fig = px.scatter_3d(mpg, x="displacement", y="horsepower", z="weight",
+                    width=800, height=800)
+fig.update_traces(marker=dict(size=3))
+```
+
+We can even push to 4 features using a 3D scatter plot and a colorbar: 
+```{python}
+#| code-fold: true
+#| vscode: {languageId: python}
+fig = px.scatter_3d(mpg, x="displacement", 
+                    y="horsepower", 
+                    z="weight", 
+                    color="model_year",
+                    width=800, height=800, 
+                    opacity=.7)
+fig.update_traces(marker=dict(size=5))
+```
+
+Visualizing 5 features is also possible if we make the scatter dots unique to the datapoint's origin.
+```{python}
+#| code-fold: true
+#| vscode: {languageId: python}
+fig = px.scatter_3d(mpg, x="displacement", 
+                    y="horsepower", 
+                    z="weight", 
+                    color="model_year",
+                    size="mpg",
+                    symbol="origin",
+                    width=900, height=800, 
+                    opacity=.7)
+# hide color scale legend on the plotly fig
+fig.update_layout(coloraxis_showscale=False)
+```
+
+However, adding more features to our visualization can make our plot look messy and uninformative, and it can also be near impossible if we have a large number of features. The problem is that many datasets come with more than 5 features -- hundreds, even. Is it still possible to visualize all those features? 
+
+## Dimensionality
 Suppose we have a dataset of:
 
-- N observations (data points/rows)
-- d attributes (features/columns)
+- $N$ observations (data points/rows)
+- $d$ attributes (features/columns)
 
-In Linear Algebra, we think of data being a collection of vectors. Vectors have a *dimension*, meaning they have some number of unique elements. Row and column now denote the direction a vector is written (horizontally, like a row, or vertically, like a column):
+Let's "rename" this in terms of linear algebra so that we can be more clear with our wording. Using linear algebra, we can view our matrix as: 
 
-Linear Algebra views our data as a matrix:
+- $N$ row vectors in a $d$-Dimensional space, OR
+- $d$ column vectors in an $N$-Dimensions space
 
-- N row vectors in a d-Dimensional space, OR
-- d column vectors in an N-Dimensions space
+The **intrinsic dimension** of a dataset is the *minimal set of dimensions* needed to approximately represent the data. In linear algebra terms, it is the **dimension of the column space** of a matrix, or the number of linearly independent columns in a matrix; this is equivalently called the **rank** of a matrix. 
 
-**Dimensionality** of data is a complex topic. Sometimes, it is clear from looking at the number of rows/columns, but other times it is not. 
+In the examples below, Dataset 1 has 2 dimensions because it has 2 linearly independent columns. Simiarly, Dataset 2 has 3 dimensions because it has 3 linearly independent columns.
 
 <center><img src = "images/dataset_dims.png" width="600vw"></center>
 <br>
-So far, we've used visualizations like rugplots or scatterplots to help us identify clusters in our dataset. Since we humans are 3D beings, we can’t visualize beyond three dimensions, but many datasets come with more than three features. In order to visualize multidimensional data, we can reduce the dataset to lower dimensions through **dimensionality reduction**. 
 
-For example, the dataset below has 4 columns, but the `Weight (lbs)` column is actually just a linear transformation of the `Weight (kg)` column. Thus, no new information is captured, and the matrix of our dataset has a (column) rank of 3! Therefore, despite having 4 columns, we still say that this data is 3-dimensional.
+What about Dataset 4 below? 
 
 <center><img src = "images/dataset4.png" width="400vw"></center>
 
+It may be tempting to say that it has 4 dimensions, but the `Weight (lbs)` column is actually just a linear transformation of the `Weight (kg)` column. Thus, no new information is captured, and the matrix of our dataset has a (column) rank of 3! Therefore, despite having 4 columns, we still say that this data is 3-dimensional. 
 Plotting the weight columns together reveals the key visual intuition. While the two columns visually span a 2D space as a line, the data does not deviate at all from that singular line. This means that one of the weight columns is redundant! Even given the option to cover the whole 2D space, the data below does not. It might as well not have this dimension, which is why we still do not consider the data below to span more than 1 dimension.
 
 <center><img src = "images/dataset3.png" width="400vw"></center>
 
-What happens when there are outliers? Below, we've added one outlier point to the dataset above, and just that is enough to change the rank of the matrix from 1 to 2 dimensions. However, the data is still very much 1-dimensional. Here, we can say that the data is intinsically 1-dimensional.
+What happens when there are outliers? Below, we've added one outlier point to the dataset above, and just that one point is enough to change the rank of the matrix from 1 to 2 dimensions. However, the data is still *approximately* 1-dimensional. 
 
-The **Intrinsic Dimension** of a dataset is the minimal set of dimensions needed to approximately represent the data.
-
-<center><img src = "images/dataset3_outlier.png" width="400vw"></center>
-
-As such, dimensionality reduction is generally an *approximation* of the original data that's achieved by projecting the data onto a desired dimension. However, there are many ways to project a dataset onto a lower dimension. How do we choose the best one? 
+**Dimensionality reduction** is generally an **approximation of the original data** that's achieved by **projecting** the data onto a desired dimension. In the example below, our original datapoints (blue dots) are 2-dimensional. We have a few choices if we want to project them down to 1-dimension: project them onto the $x$-axis (left), project them onto the $y$-axis (middle), or project them to a line $mx + b$ (right). The resulting datapoints after the projection is shown in red. Which projection do you think is better? How can we calculate that? 
 
 <center><img src = "images/diff_reductions.png" width="800vw"></center>
 <br>
-In general, we want the projection that is the best approximation for the original data (the graph on the right). In other words, we want the projection that captures the most variance of the original data. In the next section, we'll see how this is calculated.
+In general, we want the projection that is the best approximation for the original data (the graph on the right). In other words, we want the projection that *captures the most variance* of the original data. In the next section, we'll see how this is calculated. 
 
 ## Matrix Decomposition (Factorization)
 
-One linear technique to dimensionality reduction is via matrix decomposition, which is closely tied with matrix multiplication. In this section, we will decompose our data matrix X into a lower-dimensional matrix Z that when multiplied by W approximately recovers the original data.
+One linear technique to dimensionality reduction is via matrix decomposition, which is closely tied with matrix multiplication. In this section, we will decompose our data matrix $X$ into a lower-dimensional matrix $Z$ that approximately recovers the original data when multiplied by $W$.
 
-<center><img src = "images/factorization.png" width="800vw"></center>
+<center><img src = "images/factorization.png" width="500vw"></center>
 
 First, consider the matrix multiplication example below:
 
@@ -76,22 +147,27 @@ First, consider the matrix multiplication example below:
 * For table 2, each column of the dollars matrix represents the cost of fruit at a store; for example, the first store/column charges 2 dollars for an apple, 1 dollar for a lemon, and 4 dollars for a melon.
 * The output is the cost of each bowl at each store.
 
+::: {.callout-tip}
+### Linear Algebra Review: Matrix Multiplication
 In general, there are two ways to interpret matrix multiplication:
 
-1. Row dot column to get each datapoint. In this view, we perform multiple linear operations on the data <center><img src = "images/matmul2.png" width="550vw"></center>
-2. Linear transformation of columns <center><img src = "images/matmul3.png" width="550vw"></center>
+1. Each *datapoint* in our output is a *dot product* between a row in the data matrix and a columnn in the operations matrix. In this view, we perform multiple linear operations on the data <center><img src = "images/matmul2.png" width="550vw"></center>
+2. Each *column* in our output is a *linear transformation* of the original columns based on the a column in the transformation matrix <center><img src = "images/matmul3.png" width="550vw"></center>
 
 We will be using the second interpretation to link matrix multiplication with matrix decomposition, where we receive a lower dimensional representation of data along with a transformation matrix.
+:::
 
-Matrix factorization is the opposite of matrix multiplication. Just like real numbers, there exists infinite ways to decompose a matrix into a product of two matrices. That said, the rank of the matrix puts certain constraints on the factorization. 
+**Matrix decomposition** (a.k.a **matrix factorization**) is the opposite of matrix multiplication. Instead of multiplying two matrices, we want *decompose* a single matrix into 2 separate matrices. Just like real numbers, there are infinite ways to decompose a matrix into a product of two matrices. For example, $9.9$ can be decomposed as $1.1 * 9$, $3.3 * 3.3$, $1 * 9.9$, etc. Additionally, the sizes of the 2 decomposed matrices can vary drastically. In the example below, the first factorization (top) multiplies a $3x2$ matrix by a $2x3$ matrix while the second factorization (bottom) multiplies a $3x3$ matrix by a $3x3$ matrix; both result in the original matrix on the right.
+
+<center><img src = "images/matrix_decomp.png" width="550vw"></center>
+<br> 
+We can even expand the $3x3$ matrices to $3x4$ and $4x3$ (shown below as the factorization on top), but this defeates the point of dimensionality reduction since we're adding more "useless" dimensions. On the flip side, we also can't reduce the dimension to $3x1$ and $1x3$ (shown below as the factorization on the bottom); since the rank of the original matrix is greater than 1, this decomposition will not result in the original matrix. 
 
 <center><img src = "images/factorization_constraints.png" width="550vw"></center>
+<br>
+In practice, we often work with datasets that have many features, so we usually want to construct decompositions where the dimensionality is below the rank of the original matrix. While this does not recover the data exactly, we can still provide *approximate reconstructions* of the matrix.
 
-In the above image, you can see how at the higher end, when we approximate our data to have higher dimensions than the rank of the data, we will get a column of 0s. This decomposition works mathematically but goes against the idea of dimensionality reduction. At the lower end, in a 1D representation, we fail to generate an accurate decomposition as now we have lower number of dimensions than the rank of the data.
-
-In practice we will be working with a lot of features in our dataset, so we want to usually construct decompositions where the dimensionality is below the rank of the original matrix. While we will not be able to recover our data exactly, we will still be able to provide approximate reconstructions of the matrix.
-
-In the next section, we will discuss a method to automatically and approximately factorize given data. Since some approximations are better than the others, we will also discuss how the method helps us capture a lot of information in low number of dimensions.
+In the next section, we will discuss a method to automatically and approximately factorize data. This avoids redundant features and makes computation easier because we can train on less data. Since some approximations are better than the others, we will also discuss how the method helps us capture a lot of information in low number of dimensions.
 
 ## Principal Component Analysis (PCA) 
 
@@ -109,20 +185,22 @@ We often perform PCA during the Exploratory Data Analysis (EDA) stage of our dat
 
 There are two equivalent ways of framing PCA:
 
-* Finding directions of **maximum variability** in the data
-* Finding the low dimensional (rank) matrix factorization that **best approximates the data**
+1. Finding directions of **maximum variability** in the data
+2. Finding the low dimensional (rank) matrix factorization that **best approximates the data**
 
-In the first approach, we can find the variances of each attribute and then keep the two attributes with the highest variance. However, in this appraoch, we are limited to just working with attributes individually not as a combination. Following the PCA procedure (as described in the next section), can help us capture the most variance in the data (even higher than first approach) by using **linear combinations of features**
+To execute the first approach of **variance maximization** framing (more common), we can find the variances of each attribute with `np.var` then keep the $k$ attributes with the highest variance. However, this approach limits us to work with attributes individually; it cannot resolve collinearity, and we cannot combine features. 
+
+The second approach uses PCA to construct **principal components** that have the most variance in the data (even higher than first approach) using **linear combinations of features**. We'll describe the procedure in the next section. 
 
 ### PCA Procedure (Overview)
 
 To perform PCA on a matrix:
 
-1. Center the data matrix by subtracting the mean of each attribute column.
-2. To find the $i$-th principal component $v_i$:
-    1. $v$ is a unit vector that linearly combines the attributes.
+1. **Center** the data matrix by subtracting the mean of each attribute column.
+2. To find the $i$-th **principal component**, $v_i$:
+    1. $v$ is a **unit vector** that linearly combines the attributes.
     2. $v$ gives a one-dimensional projection of the data.
-    3. $v$ is chosen to minimize the sum of squared distances between each point and its projection onto $v$.
+    3. $v$ is chosen to ((maximize the variance)) along the projection onto $v$. This is equivalent to **minimizing the sum of squared distances** between each point and its projection onto $v$.
     4. Choose $v$ such that it is orthogonal to all previous principal components.
 
 The $k$ principal components capture the most variance of any $k$-dimensional reduction of the data matrix.
@@ -131,23 +209,34 @@ In practice, however, we don’t carry out the procedures in step 2 because they
 
 ### Deriving PCA as Error Minimization
 
-In this section, we will derive PCA keeping the following goal in mind: Minimize the reconstruction loss for our matrix factorization model. The reconstruction loss is defined below:
+In this section, we will derive PCA keeping the following goal in mind: minimize the reconstruction loss for our matrix factorization model. You are not expected to be able to be able to redo this derivation, but understanding the derivation may help with future assignments. 
 
-<center><img src = "images/loss.png" width="550vw"></center>
+Given a matrix $X$ with $n$ rows and $d$ columns, our goal is to find its best decomposition such that $$X \approx Z W$$
+Z has $n$ rows and $k$ columns; W has $k$ rows and $d$ columns. 
 
-$$\begin{aligned}
+<center><img src = "images/factorization.png" width="500vw"></center>
+
+To measure the accuracy of our reconstruction, we define the **reconstruction loss** below, where $X_i$ is the row vector of $X$, and $Z_i$ is the row vector of $Z$:
+
+<center><img src = "images/reconstruction_loss.png" width="450vw"></center>
+
+<!-- $$\begin{aligned}
 L(Z,W) &= \frac{1}{n}\sum_{i=1}^{n}||X_i - Z_{i}W||^2 \\
 &= \frac{1}{n}\sum_{i=1}^{n}(X_i - Z_{i}W)(X_i - Z_{i}W)^T \\
-\end{aligned}$$
+\end{aligned}$$ -->
 
-There exists many solutions to the above but we will constrain our model such that W is a row-orthonormal matrix (i.e. $WW^T=I$) where the rows of W are our Principal Components.
+There exists many solutions to the above, so let's constrain our model such that $W$ is a **row-orthonormal matrix** (i.e. $WW^T=I$) where the rows of $W$ are our Principal Components.
 
-In our derivation, lets first work with the case where $k=1$. Here Z will be an $nx1$ vector and W will be a $1xd$ vector.
+In our derivation, lets first work with the case where $k=1$. Here Z will be an $n \times 1$ vector and W will be a $1 \times d$ vector.
 
 $$\begin{aligned}
 L(z,w) &= \frac{1}{n}\sum_{i=1}^{n}(X_i - z_{i}w)(X_i - z_{i}w)^T \\
-&= \frac{1}{n}\sum_{i=1}^{n}(X_{i}X_{i}^T - 2z_{i}X_{i}w^T + z_{i}^{2}ww^T)\\
-&= \frac{1}{n}\sum_{i=1}^{n}(-2z_{i}X_{i}w^T + z_{i}^{2}) & \text{(First term is constant and }ww^T=1\text{)} \\ 
+&= \frac{1}{n}\sum_{i=1}^{n}(X_{i}X_{i}^T - 2z_{i}X_{i}w^T + z_{i}^{2}ww^T)\\ & \text{(expand the loss\text{)}
+&= \frac{1}{n}\sum_{i=1}^{n}(-2z_{i}X_{i}w^T + z_{i}^{2}) & \text{(First term is constant and }ww^T=1\text{)}
+\end{aligned}$$
+
+Now, we can take the derivative with respect to $Z_i$. 
+$$\begin{aligned}
 \frac{\partial{L(Z,W)}}{\partial{z_i}} &= \frac{1}{n}(-2z_{i}X_{i}w^T + 2z_{i}) \\
 z_i &= X_iw^T & \text{(Setting derivative equal to 0 and solving for }z_i\text{)}
 \end{aligned}$$
@@ -163,291 +252,25 @@ L(z=X_iw^T,w) &= \frac{1}{n}\sum_{i=1}^{n}(-2X_iw^TX_{i}w^T + (X_iw^T)^{2}) \\
 &= -w\Sigma w^T
 \end{aligned}$$
 
-Now, we need to minimize our loss with respect to w. Since we have a negative sign, one way we can do this is by making w really big but we also have the orthonormality constraint $ww^T=1$. We can add this constraint by using $\lambda$, our Lagrange multiplier.
+Now, we need to minimize our loss with respect to $w$. Since we have a negative sign, one way we can do this is by making $w$ really big. However, we also have the orthonormality constraint $ww^T=1$. To incorporate this constraint inot the equation, we can add a Lagrange multiplier, $\lambda$. Note that lagrangian multipliers are out of scope for Data 100.
 
+$$
+L(w,\lambda) = -w\Sigma w^T + \lambda(ww^T-1) 
+$$
+
+Taking the derivative with respect to $w$, 
 $$\begin{aligned}
-L(w,\lambda) &= -w\Sigma w^T + \lambda(ww^T-1) \\
 \frac{\partial{L(w,\lambda)}}{w} &= -2\Sigma w^T + 2\lambda w^T \\
 2\Sigma w^T - 2\lambda w^T &= 0 & \text{(Setting derivative equal to 0)} \\
 \Sigma w^T &= \lambda w^T \\
 \end{aligned}$$
 
-The result implies that:
+This result implies that:
 
-* w is a **unitary eigenvector** of the covariance matrix and
-* the error is minimized when w is the eigenvector with the largest eigenvalue $\lambda$
+* $w$ is a **unitary eigenvector** of the covariance matrix 
+* the error is minimized when $w$ is the eigenvector with the largest eigenvalue $\lambda$
 
-This derivation can inductively be used for the next principal component (not shown).
+This derivation can inductively be used for the next (second) principal component (not shown).
 
 The final takeaway from this derivation is that the **principal components** are the **eigenvectors** with the **largest eigenvalues** of the **covariance matrix**. These are the **directions** of the **maximum variance** of the data.
-
-## Singular Value Decomposition (SVD)
-
-Singular value decomposition (SVD) is an important concept in linear algebra. Since this class requires a linear algebra course (MATH 54, 56 or EECS 16A) as a pre/co-requisite, we assume you have taken or are taking a linear algebra course, so we won't explain SVD in its entirety. In particular, we will go over:
-
-- Why SVD is a valid decomposition of rectangular matrices
-- Why PCA is an application of SVD.
-
-We will not go much into the theory and details of SVD. Instead, we will only cover what is needed for a data science interpretation. If you'd like more information, check out [EECS 16B Note 14](https://eecs16b.org/notes/sp23/note14.pdf) or [EECS 16B Note 15](https://eecs16b.org/notes/sp23/note15.pdf).
-
-::: {.callout-tip}
-### [Linear Algebra] Orthonormality
-
-Orthonormal is a combination of two words: orthogonal and normal.
-
-When we say the columns of a matrix are orthonormal, we say that 
-1. The columns are all orthogonal to each other (all pairs of columns have a dot product of zero) 
-2. All columns are unit vectors (the length of each column vector is 1)
-<center><img src = "images/orthonormal.png" width="400vw"></center>
-
-
-Orthonormal matrices have a few important properties
-
-* **Orthonormal inverse**: If an $m \times n$ matrix $Q$ has orthonormal columns,  $QQ^T= Iₘ$ and $Q^TQ=Iₙ$.
-* **Rotation of coordinates**: the linear transformation represented by an orthonormal matrix is often a rotation (and less often a reflection). We can imagine columns of the matrix as where the unit vectors of the original space will land.
-:::
-
-::: {.callout-tip}
-### [Linear Algebra] Diagnomal Matrices 
-
-**Diagonal matrices** are square matrices with non-zero values on the diagonal axis and zero everywhere else.
-
-Right-multiplied diagonal matrices scale each column up or down by a constant factor. Geometrically, this transformation can be viewed as scaling the coordinate system.
-
-<center><img src = "images/diag_matrix.png" width="600vw"></center>
-:::
-
-Singular value decomposition (SVD) describes a matrix $X$'s decomposition into three matrices:
-$$ X = U \Sigma V^T $$
-
-Let's break down each of these terms one by one.
-
-### $U$
-
-* $U$ is an $n \times d$ matrix: $U \in \mathbb{R}^{n \times d}$.
-* Its columns are **orthonormal**
-    * $\bar{u_i}^T\bar{u_j} = 0$ for all pairs $i, j$
-    * all vectors $\bar{u_i}$ are unit vectors with length = 1.
-* Columns of U are called the **left singular vectors**.
-* $UU^T = I_n$ and $U^TU = I_d$.
-* We can think of $U$ as a rotation. 
-
-<center><img src = "images/u.png" width="600vw"></center>
-
-### $\Sigma$
-
-* $\Sigma$ is a $d \times d$ matrix: $\Sigma \in \mathbb{R}^{d \times d}$.
-* The majority of the matrix is zero
-* It has $r$ **non-zero** **singular values**, and $r$ is the rank of $X$
-* Diagonal values (**singular values** $\sigma_1, \sigma_2, ... \sigma_r$), are ordered from greatest to least $\sigma_1 > \sigma_2 > ... > \sigma_r$
-* We can think of $\Sigma$ as scaling. 
-
-<center><img src = "images/sigma.png" width="400vw"></center>
-
-### $V^T$
-
-* $V^T$ is an $d \times d$ matrix: $V \in \mathbb{R}^{d \times d}$.
-* Columns of $V$ are orthonormal, so the rows of $V^T$ are orthonormal
-* Columns of $V$ are called the **right singular vectors**. 
-* $VV^T = V^TV = I_d$
-* We can think of $V$ as a rotation. 
-
-<center><img src = "images/v.png" width="300vw"></center>
-
-### SVD: Geometric Perspective 
-
-<center><img src = "images/svd.png" width="500vw"></center>
-<br>
-We’ve seen that $U$ and $V$ represent rotations, and $\Sigma$ represents scaling. Therefore, SVD says that any matrix can be decomposed into a rotation, then a scaling, and another rotation.
-<center><img src = "images/svd_geo.png" width="600vw"></center>
-
-### SVD in `NumPy`
-For this demo, we'll continue working with our rectangular dataset from before with $n=100$ rows and $d=4$ columns.
-
-```{python}
-#| code-fold: true
-#| vscode: {languageId: python}
-import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-import numpy as np
-np.random.seed(23) #kallisti
-
-plt.rcParams['figure.figsize'] = (4, 4)
-plt.rcParams['figure.dpi'] = 150
-sns.set()
-
-rectangle = pd.read_csv("data/rectangle_data.csv")
-rectangle.head(5)
-```
-
-In `NumPy`, the SVD algorithm is already written and can be called with `np.linalg.svd` ([documentation](https://numpy.org/doc/stable/reference/generated/numpy.linalg.svd.html)). There are multiple versions of SVD; to get the version that we will follow, we need to set the `full_matrices` parameter to `False`.
-
-```{python}
-#| vscode: {languageId: python}
-U, S, Vt = np.linalg.svd(rectangle, full_matrices = False)
-```
-
-First, let's examine `U`. As we can see, it's dimensions are $n \times d$.
-
-```{python}
-#| vscode: {languageId: python}
-U.shape
-```
-
-The first 5 rows of `U` are shown below.
-
-```{python}
-#| vscode: {languageId: python}
-pd.DataFrame(U).head(5)
-```
-
-$\Sigma$ is a little different in `NumPy`. Since the only useful values in the diagonal matrix $\Sigma$ are the singular values on the diagonal axis, only those values are returned and they are stored in an array.
-
-Our `rectangle_data` has a rank of $3$, so we should have 3 non-zero singular values, **sorted from largest to smallest**.
-
-```{python}
-#| vscode: {languageId: python}
-S
-```
-
-It seems like we have 4 non-zero values instead of 3, but notice that the last value is so small ($10^{-15}$) that it's practically $0$. Hence, we can round the values to get 3 singular values. 
-
-```{python}
-#| vscode: {languageId: python}
-np.round(S)
-```
-
-To get `S` in matrix format, we use `np.diag`.
-
-```{python}
-#| vscode: {languageId: python}
-Sm = np.diag(S)
-Sm
-```
-
-Finally, we can see that `Vt` is indeed a $d \times d$ matrix.
-
-```{python}
-#| vscode: {languageId: python}
-Vt.shape
-```
-
-```{python}
-#| vscode: {languageId: python}
-pd.DataFrame(Vt)
-```
-
-To check that this SVD is a valid decomposition, we can reverse it and see if it matches our original table (it does, yay!).
-
-```{python}
-#| vscode: {languageId: python}
-pd.DataFrame(U @ Sm @ Vt).head(5)
-```
-
-## PCA with SVD
-
-Principal Component Analysis (PCA) and Singular Value Decomposition (SVD) can be easily mixed up, especially when you have to keep track of so many acronyms. Here is a quick summary:
-
-* SVD: a linear algebra algorithm that splits a matrix into 3 component parts.
-* PCA: a data science procedure used for dimensionality reduction that *uses* SVD as one of the steps.
-
-In order to get the first $k$ principal components from an $n \times d$ matrix $X$, we: 
-
-1. Center $X$ by subtracting the mean from each column. Notice how we specify `axis=0` so that the mean is computed per column.
-
-```{python}
-#| vscode: {languageId: python}
-centered_df = rectangle - np.mean(rectangle, axis = 0)
-centered_df.head(5)
-```
-
-2. Get the Singular Value Decomposition of centered $X$: $U$, $Σ$ and $V^T$
-
-```{python}
-#| vscode: {languageId: python}
-U, S, Vt = np.linalg.svd(centered_df, full_matrices = False)
-Sm = pd.DataFrame(np.diag(np.round(S, 1)))
-```
-
-3. Multiply either $UΣ$ or $XV$. Mathematically, these give the same result, but computationally, floating point approximation results in slightly different numbers for very small values (check out the right-most column in the cells below).
-
-```{python}
-#| vscode: {languageId: python}
-# UΣ 
-pd.DataFrame(U @ np.diag(S)).head(5) 
-```
-
-```{python}
-#| vscode: {languageId: python}
-# XV
-pd.DataFrame(centered_df @ Vt.T).head(5)
-```
-
-4. Take the first $k$ columns of $UΣ$ (or $XV$). These are the first $k$ principal components of $X$.
-
-```{python}
-#| vscode: {languageId: python}
-two_PCs = (U @ np.diag(S))[:, :2] # using UΣ 
-two_PCs = (centered_df @ Vt.T).iloc[:, :2] # using XV
-pd.DataFrame(two_PCs).head()
-```
-
-## (Bonus) PCA vs. Regression 
-### Regression: Minimizing Horizontal/Verticle Error
-
-Suppose we know the child mortality rate of a given country. Linear regression tries to predict the fertility rate from the mortality rate; for example, if the mortality is 6, we might guess the fertility is near 4. The regression line tells us the “best” prediction of fertility given all possible mortality values by minimizing the root mean squared error [see vertical red lines, only some shown].
-
-<center><img src = "images/lin_reg.png" width="400vw"></center>
-<br>
-We can also perform a regression in the reverse direction, that is, given the fertility, we try to predict the mortality. In this case, we get a different regression line which minimizes the root mean squared length of the horizontal lines.
-
-<center><img src = "images/lin_reg_reverse.png" width="400vw"></center>
-
-### SVD: Minimizing Perpendicular Error
-The rank 1 approximation is close but not the same as the mortality regression line. Instead of minimizing *horizontal* or *vertical* error, our rank 1 approximation minimizes the error *perpendicular* to the subspace onto which we’re projecting. That is, SVD finds the line such that if we project our data onto that line, the error between the projection and our original data is minimized. The similarity of the rank 1 approximation and the fertility was just a coincidence. Looking at adiposity and bicep size from our body measurements dataset, we see the 1D subspace onto which we are projecting is between the two regression lines.
-
-<center><img src = "images/rank1.png" width="400vw"></center>
-
-### Beyond 1D and 2D
-In higher dimensions, the idea behind principal components is just the same! Suppose we have 30-dimensional data and decide to use the first 5 principal components. Our procedure minimizes the error between the original 30-dimensional data and the projection of that 30-dimensional data on to the “best” 5-dimensional subspace. See [CS189](https://www.eecs189.org/static/notes/n10.pdf) for more details.
-
-
-## (Bonus) Automatic Factorization
-
-One key fact to remember is that the decomposition are not arbitrary. The *rank* of a matrix limits how small our inner dimensions can be if we want to perfectly recreate our matrix. The proof for this is out of scope.
-
-Even if we know we have to factorize our matrix using an inner dimension of R, that still leaves a large space of solutions to traverse. What if we have a procedure to automatically factorize a rank R matrix into an R dimensional representation with some transformation matrix?
-
-- Lower dimensional representation avoids redundant features.
-- Imagine a 1000-dimensional dataset: If the rank is only 5, it’s much easier to do EDA after this mystery procedure.
-
-What if we wanted a 2D representation? It's valuable to compress all of the data that is relevant onto as few dimensions as possible in order to plot it efficiently. Some 2D matrices yield better approximations than others. How well can we do?
-
-
-## (Bonus) Proof of Component Score 
-
-The proof defining component score is out of scope for this class, but it is included below for your convenience.
-
-*Setup*: Consider the design matrix $X \in \mathbb{R}^{n \times d}$, where the $j$-th column (corresponding to the $j$-th feature) is $x_j \in \mathbb{R}^n$ and the element in row $i$, column $j$ is $x_{ij}$. Further, define $\tilde{X}$ as the **centered** design matrix. The $j$-th column is $\tilde{x}_j \in \mathbb{R}^n$ and the element in row $i$, column $j$ is $\tilde{x}_{ij} = x_{ij} - \bar{x_j}$, where $\bar{x_j}$ is the mean of the $x_j$ column vector from the original $X$. 
-
-*Variance*: Construct the **covariance matrix**: $\frac{1}{n} \tilde{X}^T \tilde{X} \in \mathbb{R}^{d \times d}$. The $j$-th element along the diagonal is the **variance** of the $j$-th column of the original design matrix $X$:
-
-$$\left( \frac{1}{n} \tilde{X}^T \tilde{X} \right)_{jj} = \frac{1}{n} \tilde{x}_j ^T \tilde{x}_j = \frac{1}{n} \sum_{i=i}^n (\tilde{x}_{ij} )^2 = \frac{1}{n} \sum_{i=i}^n (x_{ij} - \bar{x_j})^2$$
-
-
-*SVD*: Suppose singular value decomposition of the *centered* design matrix $\tilde{X}$ yields $\tilde{X} = U \Sigma V^T$, where $U \in \mathbb{R}^{n \times d}$ and $V \in \mathbb{R}^{d \times d}$ are matrices with orthonormal columns, and $\Sigma \in \mathbb{R}^{d \times d}$ is a diagonal matrix with singular values of $\tilde{X}$.
-
-$$\begin{aligned}
-\tilde{X}^T \tilde{X} &= (U \Sigma V^T )^T (U \Sigma V^T) \\
-&= V \Sigma U^T U \Sigma V^T  & (\Sigma^T = \Sigma) \\
-&= V \Sigma^2 V^T & (U^T U = I) \\
-\frac{1}{n} \tilde{X}^T \tilde{X} &= \frac{1}{n} V \Sigma V^T =V \left( \frac{1}{n} \Sigma \right) V^T \\
-\frac{1}{n} \tilde{X}^T \tilde{X} V &= V \left( \frac{1}{n} \Sigma \right) V^T V = V \left( \frac{1}{n} \Sigma \right) & \text{(right multiply by }V \rightarrow V^T V = I \text{)} \\
-V^T \frac{1}{n} \tilde{X}^T \tilde{X} V &= V^T V \left( \frac{1}{n} \Sigma \right) = \frac{1}{n} \Sigma & \text{(left multiply by }V^T \rightarrow V^T V = I \text{)} \\
-\left( \frac{1}{n} \tilde{X}^T \tilde{X} \right)_{jj} &= \frac{1}{n}\sigma_j^2  & \text{(Define }\sigma_j\text{ as the} j\text{-th singular value)} \\
-\frac{1}{n} \sigma_j^2 &= \frac{1}{n} \sum_{i=i}^n (x_{ij} - \bar{x_j})^2
-\end{aligned}$$
-
-The last line defines the $j$-th component score.
 

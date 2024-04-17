@@ -20,6 +20,279 @@ jupyter: python3
 - See applications of PCA to some real-world contexts.
 :::
 
+
+
+## Singular Value Decomposition (SVD)
+
+Singular value decomposition (SVD) is an important concept in linear algebra. Since this class requires a linear algebra course (MATH 54, 56 or EECS 16A) as a pre/co-requisite, we assume you have taken or are taking a linear algebra course, so we won't explain SVD in its entirety. In particular, we will go over:
+
+- Why SVD is a valid decomposition of rectangular matrices
+- Why PCA is an application of SVD.
+
+We will not go much into the theory and details of SVD. Instead, we will only cover what is needed for a data science interpretation. If you'd like more information, check out [EECS 16B Note 14](https://eecs16b.org/notes/sp23/note14.pdf) or [EECS 16B Note 15](https://eecs16b.org/notes/sp23/note15.pdf).
+
+::: {.callout-tip}
+### [Linear Algebra] Orthonormality
+
+Orthonormal is a combination of two words: orthogonal and normal.
+
+When we say the columns of a matrix are orthonormal, we say that 
+1. The columns are all orthogonal to each other (all pairs of columns have a dot product of zero) 
+2. All columns are unit vectors (the length of each column vector is 1)
+<center><img src = "images/orthonormal.png" width="400vw"></center>
+
+
+Orthonormal matrices have a few important properties
+
+* **Orthonormal inverse**: If an $m \times n$ matrix $Q$ has orthonormal columns,  $QQ^T= Iₘ$ and $Q^TQ=Iₙ$.
+* **Rotation of coordinates**: the linear transformation represented by an orthonormal matrix is often a rotation (and less often a reflection). We can imagine columns of the matrix as where the unit vectors of the original space will land.
+:::
+
+::: {.callout-tip}
+### [Linear Algebra] Diagnomal Matrices 
+
+**Diagonal matrices** are square matrices with non-zero values on the diagonal axis and zero everywhere else.
+
+Right-multiplied diagonal matrices scale each column up or down by a constant factor. Geometrically, this transformation can be viewed as scaling the coordinate system.
+
+<center><img src = "images/diag_matrix.png" width="600vw"></center>
+:::
+
+Singular value decomposition (SVD) describes a matrix $X$'s decomposition into three matrices:
+$$ X = U \Sigma V^T $$
+
+Let's break down each of these terms one by one.
+
+### $U$
+
+* $U$ is an $n \times d$ matrix: $U \in \mathbb{R}^{n \times d}$.
+* Its columns are **orthonormal**
+    * $\bar{u_i}^T\bar{u_j} = 0$ for all pairs $i, j$
+    * all vectors $\bar{u_i}$ are unit vectors with length = 1.
+* Columns of U are called the **left singular vectors**.
+* $UU^T = I_n$ and $U^TU = I_d$.
+* We can think of $U$ as a rotation. 
+
+<center><img src = "images/u.png" width="600vw"></center>
+
+### $\Sigma$
+
+* $\Sigma$ is a $d \times d$ matrix: $\Sigma \in \mathbb{R}^{d \times d}$.
+* The majority of the matrix is zero
+* It has $r$ **non-zero** **singular values**, and $r$ is the rank of $X$
+* Diagonal values (**singular values** $\sigma_1, \sigma_2, ... \sigma_r$), are ordered from greatest to least $\sigma_1 > \sigma_2 > ... > \sigma_r$
+* We can think of $\Sigma$ as scaling. 
+
+<center><img src = "images/sigma.png" width="400vw"></center>
+
+### $V^T$
+
+* $V^T$ is an $d \times d$ matrix: $V \in \mathbb{R}^{d \times d}$.
+* Columns of $V$ are orthonormal, so the rows of $V^T$ are orthonormal
+* Columns of $V$ are called the **right singular vectors**. 
+* $VV^T = V^TV = I_d$
+* We can think of $V$ as a rotation. 
+
+<center><img src = "images/v.png" width="300vw"></center>
+
+### SVD: Geometric Perspective 
+
+<center><img src = "images/svd.png" width="500vw"></center>
+<br>
+We’ve seen that $U$ and $V$ represent rotations, and $\Sigma$ represents scaling. Therefore, SVD says that any matrix can be decomposed into a rotation, then a scaling, and another rotation.
+<center><img src = "images/svd_geo.png" width="600vw"></center>
+
+### SVD in `NumPy`
+For this demo, we'll continue working with our rectangular dataset from before with $n=100$ rows and $d=4$ columns.
+
+```{python}
+#| code-fold: true
+#| vscode: {languageId: python}
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import numpy as np
+np.random.seed(23) #kallisti
+
+plt.rcParams['figure.figsize'] = (4, 4)
+plt.rcParams['figure.dpi'] = 150
+sns.set()
+
+rectangle = pd.read_csv("data/rectangle_data.csv")
+rectangle.head(5)
+```
+
+In `NumPy`, the SVD algorithm is already written and can be called with `np.linalg.svd` ([documentation](https://numpy.org/doc/stable/reference/generated/numpy.linalg.svd.html)). There are multiple versions of SVD; to get the version that we will follow, we need to set the `full_matrices` parameter to `False`.
+
+```{python}
+#| vscode: {languageId: python}
+U, S, Vt = np.linalg.svd(rectangle, full_matrices = False)
+```
+
+First, let's examine `U`. As we can see, it's dimensions are $n \times d$.
+
+```{python}
+#| vscode: {languageId: python}
+U.shape
+```
+
+The first 5 rows of `U` are shown below.
+
+```{python}
+#| vscode: {languageId: python}
+pd.DataFrame(U).head(5)
+```
+
+$\Sigma$ is a little different in `NumPy`. Since the only useful values in the diagonal matrix $\Sigma$ are the singular values on the diagonal axis, only those values are returned and they are stored in an array.
+
+Our `rectangle_data` has a rank of $3$, so we should have 3 non-zero singular values, **sorted from largest to smallest**.
+
+```{python}
+#| vscode: {languageId: python}
+S
+```
+
+It seems like we have 4 non-zero values instead of 3, but notice that the last value is so small ($10^{-15}$) that it's practically $0$. Hence, we can round the values to get 3 singular values. 
+
+```{python}
+#| vscode: {languageId: python}
+np.round(S)
+```
+
+To get `S` in matrix format, we use `np.diag`.
+
+```{python}
+#| vscode: {languageId: python}
+Sm = np.diag(S)
+Sm
+```
+
+Finally, we can see that `Vt` is indeed a $d \times d$ matrix.
+
+```{python}
+#| vscode: {languageId: python}
+Vt.shape
+```
+
+```{python}
+#| vscode: {languageId: python}
+pd.DataFrame(Vt)
+```
+
+To check that this SVD is a valid decomposition, we can reverse it and see if it matches our original table (it does, yay!).
+
+```{python}
+#| vscode: {languageId: python}
+pd.DataFrame(U @ Sm @ Vt).head(5)
+```
+
+## PCA with SVD
+
+Principal Component Analysis (PCA) and Singular Value Decomposition (SVD) can be easily mixed up, especially when you have to keep track of so many acronyms. Here is a quick summary:
+
+* SVD: a linear algebra algorithm that splits a matrix into 3 component parts.
+* PCA: a data science procedure used for dimensionality reduction that *uses* SVD as one of the steps.
+
+In order to get the first $k$ principal components from an $n \times d$ matrix $X$, we: 
+
+1. Center $X$ by subtracting the mean from each column. Notice how we specify `axis=0` so that the mean is computed per column.
+
+```{python}
+#| vscode: {languageId: python}
+centered_df = rectangle - np.mean(rectangle, axis = 0)
+centered_df.head(5)
+```
+
+2. Get the Singular Value Decomposition of centered $X$: $U$, $Σ$ and $V^T$
+
+```{python}
+#| vscode: {languageId: python}
+U, S, Vt = np.linalg.svd(centered_df, full_matrices = False)
+Sm = pd.DataFrame(np.diag(np.round(S, 1)))
+```
+
+3. Multiply either $UΣ$ or $XV$. Mathematically, these give the same result, but computationally, floating point approximation results in slightly different numbers for very small values (check out the right-most column in the cells below).
+
+```{python}
+#| vscode: {languageId: python}
+# UΣ 
+pd.DataFrame(U @ np.diag(S)).head(5) 
+```
+
+```{python}
+#| vscode: {languageId: python}
+# XV
+pd.DataFrame(centered_df @ Vt.T).head(5)
+```
+
+4. Take the first $k$ columns of $UΣ$ (or $XV$). These are the first $k$ principal components of $X$.
+
+```{python}
+#| vscode: {languageId: python}
+two_PCs = (U @ np.diag(S))[:, :2] # using UΣ 
+two_PCs = (centered_df @ Vt.T).iloc[:, :2] # using XV
+pd.DataFrame(two_PCs).head()
+```
+
+## (Bonus) PCA vs. Regression 
+### Regression: Minimizing Horizontal/Verticle Error
+
+Suppose we know the child mortality rate of a given country. Linear regression tries to predict the fertility rate from the mortality rate; for example, if the mortality is 6, we might guess the fertility is near 4. The regression line tells us the “best” prediction of fertility given all possible mortality values by minimizing the root mean squared error [see vertical red lines, only some shown].
+
+<center><img src = "images/lin_reg.png" width="400vw"></center>
+<br>
+We can also perform a regression in the reverse direction, that is, given the fertility, we try to predict the mortality. In this case, we get a different regression line which minimizes the root mean squared length of the horizontal lines.
+
+<center><img src = "images/lin_reg_reverse.png" width="400vw"></center>
+
+### SVD: Minimizing Perpendicular Error
+The rank 1 approximation is close but not the same as the mortality regression line. Instead of minimizing *horizontal* or *vertical* error, our rank 1 approximation minimizes the error *perpendicular* to the subspace onto which we’re projecting. That is, SVD finds the line such that if we project our data onto that line, the error between the projection and our original data is minimized. The similarity of the rank 1 approximation and the fertility was just a coincidence. Looking at adiposity and bicep size from our body measurements dataset, we see the 1D subspace onto which we are projecting is between the two regression lines.
+
+<center><img src = "images/rank1.png" width="400vw"></center>
+
+### Beyond 1D and 2D
+In higher dimensions, the idea behind principal components is just the same! Suppose we have 30-dimensional data and decide to use the first 5 principal components. Our procedure minimizes the error between the original 30-dimensional data and the projection of that 30-dimensional data on to the “best” 5-dimensional subspace. See [CS189](https://www.eecs189.org/static/notes/n10.pdf) for more details.
+
+
+## (Bonus) Automatic Factorization
+
+One key fact to remember is that the decomposition are not arbitrary. The *rank* of a matrix limits how small our inner dimensions can be if we want to perfectly recreate our matrix. The proof for this is out of scope.
+
+Even if we know we have to factorize our matrix using an inner dimension of R, that still leaves a large space of solutions to traverse. What if we have a procedure to automatically factorize a rank R matrix into an R dimensional representation with some transformation matrix?
+
+- Lower dimensional representation avoids redundant features.
+- Imagine a 1000-dimensional dataset: If the rank is only 5, it’s much easier to do EDA after this mystery procedure.
+
+What if we wanted a 2D representation? It's valuable to compress all of the data that is relevant onto as few dimensions as possible in order to plot it efficiently. Some 2D matrices yield better approximations than others. How well can we do?
+
+
+## (Bonus) Proof of Component Score 
+
+The proof defining component score is out of scope for this class, but it is included below for your convenience.
+
+*Setup*: Consider the design matrix $X \in \mathbb{R}^{n \times d}$, where the $j$-th column (corresponding to the $j$-th feature) is $x_j \in \mathbb{R}^n$ and the element in row $i$, column $j$ is $x_{ij}$. Further, define $\tilde{X}$ as the **centered** design matrix. The $j$-th column is $\tilde{x}_j \in \mathbb{R}^n$ and the element in row $i$, column $j$ is $\tilde{x}_{ij} = x_{ij} - \bar{x_j}$, where $\bar{x_j}$ is the mean of the $x_j$ column vector from the original $X$. 
+
+*Variance*: Construct the **covariance matrix**: $\frac{1}{n} \tilde{X}^T \tilde{X} \in \mathbb{R}^{d \times d}$. The $j$-th element along the diagonal is the **variance** of the $j$-th column of the original design matrix $X$:
+
+$$\left( \frac{1}{n} \tilde{X}^T \tilde{X} \right)_{jj} = \frac{1}{n} \tilde{x}_j ^T \tilde{x}_j = \frac{1}{n} \sum_{i=i}^n (\tilde{x}_{ij} )^2 = \frac{1}{n} \sum_{i=i}^n (x_{ij} - \bar{x_j})^2$$
+
+
+*SVD*: Suppose singular value decomposition of the *centered* design matrix $\tilde{X}$ yields $\tilde{X} = U \Sigma V^T$, where $U \in \mathbb{R}^{n \times d}$ and $V \in \mathbb{R}^{d \times d}$ are matrices with orthonormal columns, and $\Sigma \in \mathbb{R}^{d \times d}$ is a diagonal matrix with singular values of $\tilde{X}$.
+
+$$\begin{aligned}
+\tilde{X}^T \tilde{X} &= (U \Sigma V^T )^T (U \Sigma V^T) \\
+&= V \Sigma U^T U \Sigma V^T  & (\Sigma^T = \Sigma) \\
+&= V \Sigma^2 V^T & (U^T U = I) \\
+\frac{1}{n} \tilde{X}^T \tilde{X} &= \frac{1}{n} V \Sigma V^T =V \left( \frac{1}{n} \Sigma \right) V^T \\
+\frac{1}{n} \tilde{X}^T \tilde{X} V &= V \left( \frac{1}{n} \Sigma \right) V^T V = V \left( \frac{1}{n} \Sigma \right) & \text{(right multiply by }V \rightarrow V^T V = I \text{)} \\
+V^T \frac{1}{n} \tilde{X}^T \tilde{X} V &= V^T V \left( \frac{1}{n} \Sigma \right) = \frac{1}{n} \Sigma & \text{(left multiply by }V^T \rightarrow V^T V = I \text{)} \\
+\left( \frac{1}{n} \tilde{X}^T \tilde{X} \right)_{jj} &= \frac{1}{n}\sigma_j^2  & \text{(Define }\sigma_j\text{ as the} j\text{-th singular value)} \\
+\frac{1}{n} \sigma_j^2 &= \frac{1}{n} \sum_{i=i}^n (x_{ij} - \bar{x_j})^2
+\end{aligned}$$
+
+The last line defines the $j$-th component score.
+
+
 ## PCA Review
 
 ### PCA with SVD
