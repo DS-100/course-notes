@@ -129,6 +129,58 @@ The $k$ principal components capture the most variance of any $k$-dimensional re
 
 In practice, however, we don’t carry out the procedures in step 2 because they take too long to compute. Instead, we use singular value decomposition (SVD) to efficiently find all principal components.
 
+### Deriving PCA as Error Minimization
+
+In this section, we will derive PCA keeping the following goal in mind: Minimize the reconstruction loss for our matrix factorization model. The reconstruction loss is defined below:
+
+<center><img src = "images/loss.png" width="550vw"></center>
+
+$$\begin{aligned}
+L(Z,W) &= \frac{1}{n}\sum_{i=1}^{n}||X_i - Z_{i}W||^2 \\
+&= \frac{1}{n}\sum_{i=1}^{n}(X_i - Z_{i}W)(X_i - Z_{i}W)^T \\
+\end{aligned}$$
+
+There exists many solutions to the above but we will constrain our model such that W is a row-orthonormal matrix (i.e. $WW^T=I$) where the rows of W are our Principal Components.
+
+In our derivation, lets first work with the case where $k=1$. Here Z will be an $nx1$ vector and W will be a $1xd$ vector.
+
+$$\begin{aligned}
+L(z,w) &= \frac{1}{n}\sum_{i=1}^{n}(X_i - z_{i}w)(X_i - z_{i}w)^T \\
+&= \frac{1}{n}\sum_{i=1}^{n}(X_{i}X_{i}^T - 2z_{i}X_{i}w^T + z_{i}^{2}ww^T)\\
+&= \frac{1}{n}\sum_{i=1}^{n}(-2z_{i}X_{i}w^T + z_{i}^{2}) & \text{(First term is constant and }ww^T=1\text{)} \\ 
+\frac{\partial{L(Z,W)}}{\partial{z_i}} &= \frac{1}{n}(-2z_{i}X_{i}w^T + 2z_{i}) \\
+z_i &= X_iw^T & \text{(Setting derivative equal to 0 and solving for }z_i\text{)}
+\end{aligned}$$
+
+We can now substitute our solution for $z_i$ in our loss function:
+
+$$\begin{aligned}
+L(z,w) &= \frac{1}{n}\sum_{i=1}^{n}(-2z_{i}X_{i}w^T + z_{i}^{2}) \\
+L(z=X_iw^T,w) &= \frac{1}{n}\sum_{i=1}^{n}(-2X_iw^TX_{i}w^T + (X_iw^T)^{2}) \\
+&= \frac{1}{n}\sum_{i=1}^{n}(-X_iw^TX_{i}w^T) \\
+&= \frac{1}{n}\sum_{i=1}^{n}(-wX_{i}^TX_{i}w^T) \\
+&= -w\frac{1}{n}\sum_{i=1}^{n}(X_i^TX_{i})w^T \\
+&= -w\Sigma w^T
+\end{aligned}$$
+
+Now, we need to minimize our loss with respect to w. Since we have a negative sign, one way we can do this is by making w really big but we also have the orthonormality constraint $ww^T=1$. We can add this constraint by using $\lambda$, our Lagrange multiplier.
+
+$$\begin{aligned}
+L(w,\lambda) &= -w\Sigma w^T + \lambda(ww^T-1) \\
+\frac{\partial{L(w,\lambda)}}{w} &= -2\Sigma w^T + 2\lambda w^T \\
+2\Sigma w^T - 2\lambda w^T &= 0 & \text{(Setting derivative equal to 0)} \\
+\Sigma w^T &= \lambda w^T \\
+\end{aligned}$$
+
+The result implies that:
+
+* w is a **unitary eigenvector** of the covariance matrix and
+* the error is minimized when w is the eigenvector with the largest eigenvalue $\lambda$
+
+This derivation can inductively be used for the next principal component (not shown).
+
+The final takeaway from this derivation is that the **principal components** are the **eigenvectors** with the **largest eigenvalues** of the **covariance matrix**. These are the **directions** of the **maximum variance** of the data.
+
 ## Singular Value Decomposition (SVD)
 
 Singular value decomposition (SVD) is an important concept in linear algebra. Since this class requires a linear algebra course (MATH 54, 56 or EECS 16A) as a pre/co-requisite, we assume you have taken or are taking a linear algebra course, so we won't explain SVD in its entirety. In particular, we will go over:
