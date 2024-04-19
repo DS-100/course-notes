@@ -10,26 +10,36 @@ format:
       - cosmo
       - cerulean
     callout-icon: false
-jupyter: python3
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .qmd
+      format_name: quarto
+      format_version: '1.0'
+      jupytext_version: 1.16.1
+  kernelspec:
+    display_name: Python 3 (ipykernel)
+    language: python
+    name: python3
 ---
 
 ::: {.callout-note}
 
 ## Learning Outcomes
 
-- Dissect Singular Value Decomposition (SVD) and use it to calculate principal components.
-- Develop a deeper understanding of how to interpret Principal Components Analysis (PCA).
-- See applications of PCA to some real-world contexts.
+- Dissect Singular Value Decomposition (SVD) and use it to calculate principal components
+- Develop a deeper understanding of how to interpret Principal Components Analysis (PCA)
+- See applications of PCA in some real-world contexts
   :::
 
 ## Singular Value Decomposition (SVD)
 
-Singular value decomposition (SVD) is an important concept in linear algebra. Since this class requires a linear algebra course (MATH 54, 56 or EECS 16A) as a pre/co-requisite, we assume you have taken or are taking a linear algebra course, so we won't explain SVD in its entirety. In particular, we will go over:
+Singular value decomposition (SVD) is an important concept in linear algebra. Since this class requires a linear algebra course (MATH 54, MATH 56, or EECS 16A) as a pre/co-requisite, we assume you have taken or are taking a linear algebra course, so we won't explain SVD in its entirety. In particular, we will go over:
 
 - Why SVD is a valid decomposition of rectangular matrices
-- Why PCA is an application of SVD.
+- Why PCA is an application of SVD
 
-We will not go much into the theory and details of SVD. Instead, we will only cover what is needed for a data science interpretation. If you'd like more information, check out [EECS 16B Note 14](https://eecs16b.org/notes/sp23/note14.pdf) or [EECS 16B Note 15](https://eecs16b.org/notes/sp23/note15.pdf).
+We will not dive deep into the theory and details of SVD. Instead, we will only cover what is needed for a data science interpretation. If you'd like more information, check out [EECS 16B Note 14](https://inst.eecs.berkeley.edu/~ee16b/sp23/notes/sp23/note14.pdf) or [EECS 16B Note 15](https://inst.eecs.berkeley.edu/~ee16b/sp23/notes/sp23/note15.pdf).
 
 ::: {.callout-tip}
 
@@ -37,16 +47,16 @@ We will not go much into the theory and details of SVD. Instead, we will only co
 
 Orthonormal is a combination of two words: orthogonal and normal.
 
-When we say the columns of a matrix are orthonormal, we say that
+When we say the columns of a matrix are orthonormal, we know that:
 
 1. The columns are all orthogonal to each other (all pairs of columns have a dot product of zero)
 2. All columns are unit vectors (the length of each column vector is 1)
 <center><img src = "images/orthonormal.png" width="400vw"></center>
 
-Orthonormal matrices have a few important properties
+Orthonormal matrices have a few important properties:
 
 - **Orthonormal inverse**: If an $m \times n$ matrix $Q$ has orthonormal columns, $QQ^T= Iₘ$ and $Q^TQ=Iₙ$.
-- **Rotation of coordinates**: the linear transformation represented by an orthonormal matrix is often a rotation (and less often a reflection). We can imagine columns of the matrix as where the unit vectors of the original space will land.
+- **Rotation of coordinates**: The linear transformation represented by an orthonormal matrix is often a rotation (and less often a reflection). We can imagine columns of the matrix as where the unit vectors of the original space will land.
   :::
 
 ::: {.callout-tip}
@@ -68,9 +78,9 @@ Let's break down each of these terms one by one.
 ### $U$
 
 - $U$ is an $n \times d$ matrix: $U \in \mathbb{R}^{n \times d}$.
-- Its columns are **orthonormal**
-  - $\vec{u_i}^T\vec{u_j} = 0$ for all pairs $i, j$
-  - all vectors $\vec{u_i}$ are unit vectors where $|| \vec{u_i} || = 1$ .
+- Its columns are **orthonormal**.
+  - $\vec{u_i}^T\vec{u_j} = 0$ for all pairs $i, j$.
+  - All vectors $\vec{u_i}$ are unit vectors where $|| \vec{u_i} || = 1$ .
 - Columns of U are called the **left singular vectors**.
 - $UU^T = I_n$ and $U^TU = I_d$.
 - We can think of $U$ as a rotation.
@@ -80,17 +90,17 @@ Let's break down each of these terms one by one.
 ### $S$
 
 - $S$ is a $d \times d$ matrix: $S \in \mathbb{R}^{d \times d}$.
-- The majority of the matrix is zero
-- It has $r$ **non-zero** **singular values**, and $r$ is the rank of $X$
-- Diagonal values (**singular values** $s_1, s_2, ... s_r$), are **non-negative** ordered from greatest to least: $s_1 \ge s_2 \ge ... \ge s_r > 0$
-- We can think of $S$ as scaling.
+- The majority of the matrix is zero.
+- It has $r$ **non-zero** **singular values**, and $r$ is the rank of $X$.
+- Diagonal values (**singular values** $s_1, s_2, ... s_r$), are **non-negative** ordered from greatest to least: $s_1 \ge s_2 \ge ... \ge s_r > 0$.
+- We can think of $S$ as a scaling operation.
 
 <center><img src = "images/s.png" width="400vw"></center>
 
 ### $V^T$
 
 - $V^T$ is an $d \times d$ matrix: $V \in \mathbb{R}^{d \times d}$.
-- Columns of $V$ are orthonormal, so the rows of $V^T$ are orthonormal
+- Columns of $V$ are orthonormal, so the rows of $V^T$ are orthonormal.
 - Columns of $V$ are called the **right singular vectors**.
 - $VV^T = V^TV = I_d$
 - We can think of $V$ as a rotation.
@@ -106,7 +116,7 @@ We’ve seen that $U$ and $V$ represent rotations, and $S$ represents scaling. T
 
 ### SVD in `NumPy`
 
-For this demo, we'll continue working with our rectangular dataset from before with $n=100$ rows and $d=4$ columns.
+For this demo, we'll work with a rectangular dataset containing $n=100$ rows and $d=4$ columns.
 
 ```{python}
 #| code-fold: true
@@ -196,10 +206,10 @@ Principal Component Analysis (PCA) and Singular Value Decomposition (SVD) can be
 
 ### Deriving Principal Components From SVD
 
-After centering $X$ so that each column has a mean of 0, we find it's SVD:
+After centering $X$ so that each column has a mean of 0, we find its SVD:
 $$ X = U S V^T $$
 
-Because X is centered, the covariance matrix of X, $\Sigma$, is equal to $X^T X$. Rearranging this equation, we get
+Because $X$ is centered, the covariance matrix of $X$, $\Sigma$, is equal to $X^T X$. Rearranging this equation, we get
 
 $$
 \begin{align}
@@ -210,7 +220,7 @@ $$
 \end{align}
 $$
 
-Multiplying both sides by V, we get
+Multiplying both sides by $V$, we get
 
 $$
 \begin{align}
@@ -219,7 +229,7 @@ $$
 \end{align}
 $$
 
-This shows that The columns of V are the **eigenvectors** of the covariance matrix Σ and therefore the **principal components**. Additionally, the squared singular values $S^2$ are the **eigenvalues** of Σ.
+This shows that the columns of $V$ are the **eigenvectors** of the covariance matrix $\Sigma$ and, therefore, the **principal components**. Additionally, the squared singular values $S^2$ are the **eigenvalues** of $\Sigma$.
 
 <!-- <center><img src="images/slide15.png" alt='slide15' width='500'></center> -->
 
@@ -260,9 +270,9 @@ The first column of $V$ indicates how each feature contributes (e.g. positive, n
 
 Coupled together, this interpretation also allows us to understand that:
 
-- The principal components are all **orthogonal** to each other because the columns of U are orthonormal.
+- The principal components are all **orthogonal** to each other because the columns of $V$ are orthonormal.
 - Principal components are **axis-aligned**. That is, if you plot two PCs on a 2D plane, one will lie on the x-axis, the other on the y-axis.
-- Principal components are **linear combinations** of columns in our data X
+- Principal components are **linear combinations** of columns in our data $X$.
 
 ### Using Principal Components
 
@@ -272,12 +282,12 @@ Let's summarize the steps to obtain Principal Components via SVD:
 
 2. To find the $k$ **principal components**:
 
-   a. Compute the SVD of the data matrix ($X = U{S}V^{T}$)
+   a. Compute the SVD of the data matrix ($X = U{S}V^{T}$).
    b. The first $k$ columns of $U{S}$ (or equivalently, $XV$) contain the $k$ **principal components** of $X$.
 
 ### Code Demo
 
-In order to get the first $k$ principal components from an $n \times d$ matrix $X$, we:
+Let's now walk through an example where we compute PCA using SVD. In order to get the first $k$ principal components from an $n \times d$ matrix $X$, we:
 
 1. Center $X$ by subtracting the mean from each column. Notice how we specify `axis=0` so that the mean is computed per column.
 
@@ -286,14 +296,14 @@ centered_df = rectangle - np.mean(rectangle, axis=0)
 centered_df.head(5)
 ```
 
-2. Get the Singular Value Decomposition of centered $X$: $U$, $S$ and $V^T$
+2. Get the Singular Value Decomposition of the centered $X$: $U$, $S$ and $V^T$
 
 ```{python}
 U, S, Vt = np.linalg.svd(centered_df, full_matrices=False)
 Sm = pd.DataFrame(np.diag(np.round(S, 1)))
 ```
 
-3. Multiply either $UΣ$ or $XV$. Mathematically, these give the same result, but computationally, floating point approximation results in slightly different numbers for very small values (check out the right-most column in the cells below).
+3. Approximate the data by multiplying by either $US$ or $XV$. Mathematically, these give the same result, but computationally, floating point approximation results in slightly different numbers for very small values (check out the right-most column in the cells below).
 
 ```{python}
 # US
@@ -315,13 +325,13 @@ pd.DataFrame(two_PCs).head()
 
 ## Data Variance and Centering
 
-We define the total variance of a data matrix as the sum of variances of attributes. The principal components are a low-dimension representation that capture as much of the original data's total variance as possible. Formally, the $i$-th singular value tells us the **component score**, i.e., how much of the data variance is captured by the $i$-th principal component. Supposing the number of datapoints is $n$:
+We define the total variance of a data matrix as the sum of variances of attributes. The principal components are a low-dimension representation that capture as much of the original data's total variance as possible. Formally, the $i$-th singular value tells us the **component score**, i.e., how much of the data variance is captured by the $i$-th principal component. Assuming the number of datapoints is $n$:
 
 $$\text{i-th component score} = \frac{(\text{i-th singular value}^2)}{n}$$
 
 Summing up the component scores is equivalent to computing the total variance _if we center our data_.
 
-**Data Centering**: PCA has a data centering step that precedes any singular value decomposition, where if implemented defines the component score as above.
+**Data Centering**: PCA has a data centering step that precedes any singular value decomposition, where, if implemented, defines the component score as above.
 
 If you want to dive deeper into PCA, [Steve Brunton's SVD Video Series](https://www.youtube.com/playlist?list=PLMrJAkhIeNNSVjnsviglFoY2nXildDCcv) is a great resource.
 
@@ -331,7 +341,7 @@ If you want to dive deeper into PCA, [Steve Brunton's SVD Video Series](https://
 
 We often plot the first two principal components using a scatter plot, with PC1 on the $x$-axis and PC2 on the $y$-axis. This is often called a PCA plot.
 
-If the first two singular values are large and all others are small, then two dimensions are enough to describe most of what distinguishes one observation from another. If not, then a PCA plot is omitting lots of information.
+If the first two singular values are large and all others are small, then two dimensions are enough to describe most of what distinguishes one observation from another. If not, a PCA plot is omitting a lot of information.
 
 PCA plots help us assess similarities between our data points and if there are any clusters in our dataset. In the case study before, for example, we could create the following PCA plot:
 
@@ -345,27 +355,27 @@ A scree plot shows the **variance ratio** captured by each principal component, 
 
 ### Biplots
 
-Biplots superimpose the directions onto the plot of PC2 vs PC1, where vector $j$ corresponds to the direction for feature $j$ (e.g. $v_{1j}, v_{2j}$). There are several ways to scale biplot vectors -- in this course, we plot the direction itself. For other scalings, which can lead to more interpretable directions/loadings, see [SAS biplots](https://blogs.sas.com/content/iml/2019/11/06/what-are-biplots.html)
+Biplots superimpose the directions onto the plot of PC1 vs. PC2, where vector $j$ corresponds to the direction for feature $j$ (e.g., $v_{1j}, v_{2j}$). There are several ways to scale biplot vectors -- in this course, we plot the direction itself. For other scalings, which can lead to more interpretable directions/loadings, see [SAS biplots](https://blogs.sas.com/content/iml/2019/11/06/what-are-biplots.html).
 
 Through biplots, we can interpret how features correlate with the principal components shown: positively, negatively, or not much at all.
 
 <center><img src="images/slide17_2.png" alt='slide17_2' width='500'></center>
 
-The directions of the arrow are ($v_1$, $v_2$) where $v_1$ and $v_2$ are how that specific feature column contributes to PC1 and PC2, respectively. $v_1$ and $v_2$ are elements of the first and second columns of $V$, respectively (i.e., the first two rows of $V^T$).
+The directions of the arrow are ($v_1$, $v_2$), where $v_1$ and $v_2$ are how that specific feature column contributes to PC1 and PC2, respectively. $v_1$ and $v_2$ are elements of the first and second columns of $V$, respectively (i.e., the first two rows of $V^T$).
 
 Say we were considering feature 3, and say that was the purple arrow labeled "520" here (pointing bottom right).
 
 - $v_1$ and $v_2$ are the third elements of the respective columns in $V$. They are scale feature 3's column vector in the linear transformation to PC1 and PC2, respectively.
-- Here we would infer that $v_1$ (in the $x$/PC1-direction) is positive, meaning that a linear increase in feature 3 would correspond to a linear increase of PC1, meaning feature 3 and PC1 are positively correlated.
-- $v_2$ (in the $y$/pc2-direction) is negative, meaning a linear increase in feature 3 would result correspond to a linear decrease in PC2, meaning feature 3 and PC2 are negatively correlated.
+- Here, we would infer that $v_1$ (in the $x$/PC1-direction) is positive, meaning that a linear increase in feature 3 would correspond to a linear increase of PC1, meaning feature 3 and PC1 are positively correlated.
+- $v_2$ (in the $y$/pc2-direction) is negative, meaning a linear increase in feature 3 would correspond to a linear decrease in PC2, meaning feature 3 and PC2 are negatively correlated.
 
 ## Example: House of Representatives Voting
 
 Let's examine how the House of Representatives (of the 116th Congress, 1st session) voted in the month of September 2019.
 
-Specifically, we’ll look at the records of Roll call votes. From the U.S. Senate ([link](https://www.senate.gov/reference/Index/Votes.htm)): Roll call votes occur when a representative or senator votes "yea" or "nay" so that the names of members voting on each side are recorded. A voice vote is a vote in which those in favor or against a measure say "yea" or "nay," respectively, without the names or tallies of members voting on each side being recorded.
+Specifically, we’ll look at the records of Roll call votes. From the U.S. Senate ([link](https://www.senate.gov/reference/Index/Votes.htm)): roll call votes occur when a representative or senator votes "yea" or "nay" so that the names of members voting on each side are recorded. A voice vote is a vote in which those in favor or against a measure say "yea" or "nay," respectively, without the names or tallies of members voting on each side being recorded.
 
-**Do legislators' roll call votes show a relationship with their political party?**
+**Do legislators' roll call votes show a relationship with their political party?** Let's use PCA to find out!
 
 ```{python}
 #| code-fold: true
@@ -536,7 +546,7 @@ vote_2d.head()
 
 ### Exploring the Principal Components
 
-We can also look at Vt directly to try to gain insight into why each component is as it is.
+We can also look at $V^T$ directly to try to gain insight into why each component is as it is.
 
 ```{python}
 #| code-fold: true
@@ -632,7 +642,7 @@ We can use the following formulas to quantify the amount each principal componen
 
 $$ \text{component score} = \frac{s_i^{2}}{N}$$
 
-$$ \text{total variance} = \text{sum of all the component scores} = \sum\_{i=1}^k \frac{s_i^{2}}{N} $$
+$$ \text{total variance} = \text{sum of all the component scores} = \sum_{i=1} \frac{s_i^{2}}{N} $$
 
 $$ \text{variance ratio of principal component j} = \frac{\text{component score j}}{\text{total variance}} = \frac{s_j^{2} / N}{\sum_{i=1}^k s_i^{2} / N}$$
 
@@ -642,12 +652,15 @@ In Python, assuming you had a 1D `NumPy` array of singular values `s` returned b
 
 In machine learning, PCA is often used as a preprocessing step prior to training a supervised model.
 
-See the following [demo](https://data100.datahub.berkeley.edu/hub/user-redirect/git-pull?repo=https%3A%2F%2Fgithub.com%2FDS-100%2Ffa23-student&urlpath=lab%2Ftree%2Ffa23-student%2Flecture%2Flec26%2Flec26-fashion-mnist.ipynb&branch=main) to see how PCA is useful for building an image classification model based on the MNIST-Fashion dataset.
+Let's explore how PCA is useful for building an image classification model based on the Fashion-MNIST dataset, a dataset containing gray scale 28x28 images of articles of clothing. The copyright for Fashion-MNIST is held by [Zalando SE](https://github.com/zalandoresearch/fashion-mnist). Fashion-MNIST is licensed under the [MIT license](https://github.com/zalandoresearch/fashion-mnist/blob/master/LICENSE).
 
 <center><img src="images/mnist.png" alt='slide21' width='500'></center>
 
+First, we'll load in the data. 
+
 ```{python}
 #| code-fold: true
+#| md-indent: '    '
 
 import requests
 from pathlib import Path
@@ -666,7 +679,6 @@ def fetch_and_cache(data_url, file, data_dir="data", force=False):
     return: The pathlib.Path object representing the file.
     """
 
-    ### BEGIN SOLUTION
     data_dir = Path(data_dir)
     data_dir.mkdir(exist_ok=True)
     file_path = data_dir / Path(file)
@@ -685,7 +697,6 @@ def fetch_and_cache(data_url, file, data_dir="data", force=False):
         last_modified_time = time.ctime(file_path.stat().st_mtime)
         print("Using cached version that was downloaded (UTC):", last_modified_time)
     return file_path
-    ### END SOLUTION
 
 
 def head(filename, lines=5):
@@ -797,19 +808,15 @@ def load_data():
 
 ```{python}
 #| code-fold: true
-
-
 (train_images, train_labels), (test_images, test_labels) = load_data()
 print("Training images", train_images.shape)
 print("Test images", test_images.shape)
 ```
 
-We have loaded a lot of data which you can play with later (try building a classifier).
-For the purposes of this demo, let's take a small sample of the training data.
+Exploring the data, we can see that the class names are:
 
 ```{python}
 #| code-fold: true
-
 class_names = [
     "T-shirt/top",
     "Trouser",
@@ -823,7 +830,13 @@ class_names = [
     "Ankle boot",
 ]
 class_dict = {i: class_name for i, class_name in enumerate(class_names)}
+class_dict
+```
 
+We have loaded in a lot of data (feel free to play around with it later —— try building a classifier!). But for the purposes of this demo, let's take a small sample of the training data.
+
+```{python}
+#| code-fold: true
 rng = np.random.default_rng(42)
 n = 5000
 sample_idx = rng.choice(np.arange(len(train_images)), size=n, replace=False)
@@ -843,6 +856,8 @@ images.head()
 ```
 
 ### Visualizing images
+
+Let's see what some of the images contained in this dataset look like.
 
 ```{python}
 def show_images(images, ncols=5, max_images=30):
@@ -867,19 +882,39 @@ fig = show_images(images.groupby("class", as_index=False).sample(2), ncols=6)
 fig.show()
 ```
 
+Let's break this down further and look at it by class:
+
+```{python}
+show_images(images.groupby('class',as_index=False).sample(2), ncols=6)
+```
+
 ### PCA
 
-How would we visualize the entire dataset? Let's use PCA to find a low dimensional representation of the images.
+While visualizing 20 images is doable, this dataset contains 60,000 images across the 10 fashion categories. So how would we visualize the entire dataset? Let's use PCA to find a low-dimensional representation of the images.
 
-First, let's understand the high-dimensional representation. We will extract the matrix of images from the dataframe:
+First, let's understand the high-dimensional representation. We will extract the matrix of images from the `DataFrame`:
 
 ```{python}
 X = np.array(images["images"].to_list())
+X.shape 
+```
 
+We can then "unroll" the pixels into a single row vector containing 28*28 = 784 dimensions.
+
+```{python}
 X = X.reshape(X.shape[0], -1)
+X.shape
+```
 
+Now, let's center our data.
+
+```{python}
 X = X - X.mean(axis=0)
+```
 
+Finally, we can run PCA, this time using `sklearn`.
+
+```{python}
 from sklearn.decomposition import PCA
 
 n_comps = 50
@@ -889,37 +924,48 @@ pca.fit(X)
 
 ### Examining PCA Results
 
+Let's see what we found from conducting PCA!
+
 ```{python}
-# make a line plot and show markers
+# Make a line plot and show markers
 fig = px.line(y=pca.explained_variance_ratio_ * 100, markers=True)
 fig.show()
 ```
 
-Most of data is explained in first two or three dimensions.
+Looking at the scree plot above, we can see that the line starts flattening out around 2 or 3. This indicates that most of the data is explained in the first two or three dimensions.
 
-<br>
-The demo shows how we can use PCA during the Exploratory Data Analysis stage of our data science lifecycle to:
-- visually identify clusters of similar observations in high dimensions.
-- find a small basis for representing variations in complex things.
-- reduce the number of dimensions to make some computations cheaper.
+### Applying PCA to a Subset of the Data
 
-## (Bonus) Applications of PCA
+Now, we'll work with a subset of the data corresponding to tougher images, particularly those in the "Coat" and "Pullover" classes. Let's see if we can build a better embedding for this data.
 
-### PCA in Biology
+First, let's visualize our data.
 
-PCA is commonly used in biomedical contexts, which have many named variables!
+```{python}
+classes = ['Coat', 'Pullover']
+tough_images = images[images['class'].isin(classes)].copy()
+show_images(tough_images.sample(20))
+```
 
-1. To cluster data ([Paper 1](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-019-2680-1), [Paper 2](https://www.science.org/doi/10.1126/scirobotics.abk2378))
-2. To identify correlated variables ([interpret](https://docs.google.com/presentation/d/1-aDu0ILCkPx3iCcJGB3YXci-L4g90Q6AarXU6wffLB8/edit#slide=id.g62cb86badb_0_1128) rows of $V^{T}$ as linear coefficients) ([Paper 3](https://www.nature.com/articles/s41598-017-05714-1)). Uses [biplots](<https://www.google.com/url?q=https://www.geo.fu-berlin.de/en/v/soga/Geodata-analysis/Principal-Component-Analysis/principal-components-basics/Interpretation-and-visualization/index.html%23:~:text%3DThe%2520biplot%2520is%2520a%2520very,in%2520a%2520single%2520biplot%2520display.%26text%3DThe%2520plot%2520shows%2520the%2520observations,principal%2520components%2520(synthetic%2520variables).&sa=D&source=editors&ust=1682131633152964&usg=AOvVaw2H9SOeMP5kUS890Fkhfthx>).
+Going through the same steps we did above to conduct PCA, we end up with the following plot. Here, the red points reflect data in the "Pullover" class, and the blue points correspond to data in the "Coat" class.
 
-### Why Perform PCA
+```{python}
+X = np.array(tough_images['images'].to_list())
+X = X.reshape(X.shape[0], -1)
+X = X - X.mean(axis=0)
+zs = PCA(n_components=3).fit_transform(X)
+tough_images[['z1', 'z2', 'z3']] = zs
+px.scatter_3d(tough_images, x='z1', y='z2', z='z3', color='class', hover_data=['labels'],
+              width=1000, height=800).update_traces(marker=dict(size=5))
+```
 
-We often perform PCA during the Exploratory Data Analysis (EDA) stage of our data science lifecycle (if we already know what to model, we probably don't need PCA); it helps us with:
+## Why Perform PCA
+
+As we saw in the demos, we often perform PCA during the Exploratory Data Analysis (EDA) stage of our data science lifecycle (if we already know what to model, we probably don't need PCA!). It helps us with:
 
 - Visually identifying clusters of similar observations in high dimensions.
 - Removing irrelevant dimensions if we suspect that the dataset is inherently low rank. For example, if the columns are collinear: there are many attributes but only a few mostly determine the rest through linear associations.
 - Finding a small basis for representing variations in complex things, e.g., images, genes.
-- Reducing the number of dimensions to make some computation cheaper.
+- Reducing the number of dimensions to make some computations cheaper.
 
 ### Why PCA, then Model?
 
@@ -928,15 +974,25 @@ We often perform PCA during the Exploratory Data Analysis (EDA) stage of our dat
 
 <center><img src="images/slide21.png" alt='slide21' width='500'></center>
 
+## (Bonus) Applications of PCA
+
+### PCA in Biology
+
+PCA is commonly used in biomedical contexts, which have many named variables! It can be used to:
+
+1. Cluster data ([Paper 1](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-019-2680-1), [Paper 2](https://www.science.org/doi/10.1126/scirobotics.abk2378)).
+2. Identify correlated variables ([interpret](https://docs.google.com/presentation/d/1-aDu0ILCkPx3iCcJGB3YXci-L4g90Q6AarXU6wffLB8/edit#slide=id.g62cb86badb_0_1128) rows of $V^{T}$ as linear coefficients) ([Paper 3](https://www.nature.com/articles/s41598-017-05714-1)). Uses [biplots](<https://www.google.com/url?q=https://www.geo.fu-berlin.de/en/v/soga/Geodata-analysis/Principal-Component-Analysis/principal-components-basics/Interpretation-and-visualization/index.html%23:~:text%3DThe%2520biplot%2520is%2520a%2520very,in%2520a%2520single%2520biplot%2520display.%26text%3DThe%2520plot%2520shows%2520the%2520observations,principal%2520components%2520(synthetic%2520variables).&sa=D&source=editors&ust=1682131633152964&usg=AOvVaw2H9SOeMP5kUS890Fkhfthx>).
+
+
 ## (Bonus) PCA vs. Regression
 
 ### Regression: Minimizing Horizontal/Verticle Error
 
-Suppose we know the child mortality rate of a given country. Linear regression tries to predict the fertility rate from the mortality rate; for example, if the mortality is 6, we might guess the fertility is near 4. The regression line tells us the “best” prediction of fertility given all possible mortality values by minimizing the root mean squared error [see vertical red lines, only some shown].
+Suppose we know the child mortality rate of a given country. Linear regression tries to predict the fertility rate from the mortality rate; for example, if the mortality is 6, we might guess the fertility is near 4. The regression line tells us the “best” prediction of fertility given all possible mortality values by minimizing the root mean squared error. See the vertical red lines (note that only some are shown).
 
 <center><img src = "images/lin_reg.png" width="400vw"></center>
 <br>
-We can also perform a regression in the reverse direction, that is, given the fertility, we try to predict the mortality. In this case, we get a different regression line which minimizes the root mean squared length of the horizontal lines.
+We can also perform a regression in the reverse direction. That is, given fertility, we try to predict mortality. In this case, we get a different regression line that minimizes the root mean squared length of the horizontal lines.
 
 <center><img src = "images/lin_reg_reverse.png" width="400vw"></center>
 
@@ -948,30 +1004,30 @@ The rank 1 approximation is close but not the same as the mortality regression l
 
 ### Beyond 1D and 2D
 
-In higher dimensions, the idea behind principal components is just the same! Suppose we have 30-dimensional data and decide to use the first 5 principal components. Our procedure minimizes the error between the original 30-dimensional data and the projection of that 30-dimensional data on to the “best” 5-dimensional subspace. See [CS189](https://www.eecs189.org/static/notes/n10.pdf) for more details.
+In higher dimensions, the idea behind principal components is the same! Suppose we have 30-dimensional data and decide to use the first 5 principal components. Our procedure minimizes the error between the original 30-dimensional data and the projection of that 30-dimensional data onto the “best” 5-dimensional subspace. See [CS 189 Note 10](https://eecs189.org/docs/notes/n10.pdf) for more details.
 
 ## (Bonus) Automatic Factorization
 
-One key fact to remember is that the decomposition are not arbitrary. The _rank_ of a matrix limits how small our inner dimensions can be if we want to perfectly recreate our matrix. The proof for this is out of scope.
+One key fact to remember is that the decomposition is not arbitrary. The _rank_ of a matrix limits how small our inner dimensions can be if we want to perfectly recreate our matrix. The proof for this is out of scope.
 
-Even if we know we have to factorize our matrix using an inner dimension of R, that still leaves a large space of solutions to traverse. What if we have a procedure to automatically factorize a rank R matrix into an R dimensional representation with some transformation matrix?
+Even if we know we have to factorize our matrix using an inner dimension of $R$, that still leaves a large space of solutions to traverse. What if we have a procedure to automatically factorize a rank $R$ matrix into an $R$-dimensional representation with some transformation matrix?
 
 - Lower dimensional representation avoids redundant features.
 - Imagine a 1000-dimensional dataset: If the rank is only 5, it’s much easier to do EDA after this mystery procedure.
 
-What if we wanted a 2D representation? It's valuable to compress all of the data that is relevant onto as few dimensions as possible in order to plot it efficiently. Some 2D matrices yield better approximations than others. How well can we do?
+What if we wanted a 2D representation? It's valuable to compress all of the data that is relevant into as few dimensions as possible in order to plot it efficiently. Some 2D matrices yield better approximations than others. How well can we do?
 
 ## (Bonus) Proof of Component Score
 
 The proof defining component score is out of scope for this class, but it is included below for your convenience.
 
-_Setup_: Consider the design matrix $X \in \mathbb{R}^{n \times d}$, where the $j$-th column (corresponding to the $j$-th feature) is $x_j \in \mathbb{R}^n$ and the element in row $i$, column $j$ is $x_{ij}$. Further, define $\tilde{X}$ as the **centered** design matrix. The $j$-th column is $\tilde{x}_j \in \mathbb{R}^n$ and the element in row $i$, column $j$ is $\tilde{x}_{ij} = x_{ij} - \bar{x_j}$, where $\bar{x_j}$ is the mean of the $x_j$ column vector from the original $X$.
+**Setup**: Consider the design matrix $X \in \mathbb{R}^{n \times d}$, where the $j$-th column (corresponding to the $j$-th feature) is $x_j \in \mathbb{R}^n$ and the element in row $i$, column $j$ is $x_{ij}$. Further, define $\tilde{X}$ as the **centered** design matrix. The $j$-th column is $\tilde{x}_j \in \mathbb{R}^n$ and the element in row $i$, column $j$ is $\tilde{x}_{ij} = x_{ij} - \bar{x_j}$, where $\bar{x_j}$ is the mean of the $x_j$ column vector from the original $X$.
 
-_Variance_: Construct the **covariance matrix**: $\frac{1}{n} \tilde{X}^T \tilde{X} \in \mathbb{R}^{d \times d}$. The $j$-th element along the diagonal is the **variance** of the $j$-th column of the original design matrix $X$:
+**Variance**: Construct the **covariance matrix**: $\frac{1}{n} \tilde{X}^T \tilde{X} \in \mathbb{R}^{d \times d}$. The $j$-th element along the diagonal is the **variance** of the $j$-th column of the original design matrix $X$:
 
 $$\left( \frac{1}{n} \tilde{X}^T \tilde{X} \right)_{jj} = \frac{1}{n} \tilde{x}_j ^T \tilde{x}_j = \frac{1}{n} \sum_{i=i}^n (\tilde{x}_{ij} )^2 = \frac{1}{n} \sum_{i=i}^n (x_{ij} - \bar{x_j})^2$$
 
-_SVD_: Suppose singular value decomposition of the _centered_ design matrix $\tilde{X}$ yields $\tilde{X} = U S V^T$, where $U \in \mathbb{R}^{n \times d}$ and $V \in \mathbb{R}^{d \times d}$ are matrices with orthonormal columns, and $S \in \mathbb{R}^{d \times d}$ is a diagonal matrix with singular values of $\tilde{X}$.
+**SVD**: Suppose singular value decomposition of the _centered_ design matrix $\tilde{X}$ yields $\tilde{X} = U S V^T$, where $U \in \mathbb{R}^{n \times d}$ and $V \in \mathbb{R}^{d \times d}$ are matrices with orthonormal columns, and $S \in \mathbb{R}^{d \times d}$ is a diagonal matrix with singular values of $\tilde{X}$.
 
 $$
 \begin{aligned}
@@ -987,5 +1043,3 @@ V^T \frac{1}{n} \tilde{X}^T \tilde{X} V &= V^T V \left( \frac{1}{n} S \right) = 
 $$
 
 The last line defines the $j$-th component score.
-
-
