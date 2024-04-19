@@ -57,7 +57,7 @@ Orthonormal matrices have a few important properties:
 
 - **Orthonormal inverse**: If an $m \times n$ matrix $Q$ has orthonormal columns, $QQ^T= Iₘ$ and $Q^TQ=Iₙ$.
 - **Rotation of coordinates**: The linear transformation represented by an orthonormal matrix is often a rotation (and less often a reflection). We can imagine columns of the matrix as where the unit vectors of the original space will land.
-  :::
+:::
 
 ::: {.callout-tip}
 
@@ -369,13 +369,11 @@ Say we were considering feature 3, and say that was the purple arrow labeled "52
 - Here, we would infer that $v_1$ (in the $x$/PC1-direction) is positive, meaning that a linear increase in feature 3 would correspond to a linear increase of PC1, meaning feature 3 and PC1 are positively correlated.
 - $v_2$ (in the $y$/pc2-direction) is negative, meaning a linear increase in feature 3 would correspond to a linear decrease in PC2, meaning feature 3 and PC2 are negatively correlated.
 
-## Example: House of Representatives Voting
+## Example 1: House of Representatives Voting
 
 Let's examine how the House of Representatives (of the 116th Congress, 1st session) voted in the month of September 2019.
 
 Specifically, we’ll look at the records of Roll call votes. From the U.S. Senate ([link](https://www.senate.gov/reference/Index/Votes.htm)): roll call votes occur when a representative or senator votes "yea" or "nay" so that the names of members voting on each side are recorded. A voice vote is a vote in which those in favor or against a measure say "yea" or "nay," respectively, without the names or tallies of members voting on each side being recorded.
-
-**Do legislators' roll call votes show a relationship with their political party?** Let's use PCA to find out!
 
 ```{python}
 #| code-fold: true
@@ -394,7 +392,7 @@ votes = votes.astype({"roll call": str})
 votes.head()
 ```
 
-Suppose we pivot this table to group each legislator and their voting pattern across every (roll call) vote in this month. We mark 1 if the legislator voted Yes (yea), and 0 otherwise (No/nay, no vote, speaker, etc.).
+Suppose we pivot this table to group each legislator and their voting pattern across every (roll call) vote in this month. We mark 1 if the legislator voted Yes ("yea"), and 0 otherwise ("No", "nay", no vote, speaker, etc.).
 
 ```{python}
 #| code-fold: true
@@ -409,58 +407,39 @@ print(vote_pivot.shape)
 vote_pivot.head()
 ```
 
-How do we analyze this data?
+**Do legislators' roll call votes show a relationship with their political party?**
 
-While we could consider loading information about the legislator, such as their party, and see how this relates to their voting pattern, it turns out that we can do a lot with PCA to cluster legislators by how they vote.
-
-### PCA
+### PCA with SVD
+While we could consider loading information about the legislator, such as their party, and see how this relates to their voting pattern, it turns out that we can do a lot with PCA to cluster legislators by how they vote. Let's calculate the principal components using the SVD method. 
 
 ```{python}
 vote_pivot_centered = vote_pivot - np.mean(vote_pivot, axis=0)
-u, s, vt = np.linalg.svd(vote_pivot_centered, full_matrices=False)
+u, s, vt = np.linalg.svd(vote_pivot_centered, full_matrices=False) # SVD
 ```
 
-### PCA Plot
+We can use the singular values in `s` to construct a scree plot:
 
 ```{python}
-import plotly.io as pio
+fig = px.line(y=s**2 / sum(s**2), title='Variance Explained', width=700, height=600, markers=True)
+fig.update_xaxes(title_text='Principal Component i')
+fig.update_yaxes(title_text='Proportion of Variance Explained')
+```
 
-# Automatically select the appropriate renderer for your environment
-pio.renderers.default = "notebook_connected"
+It looks like this graph plateus after the third principal component, so our "elbow" is at PC 3, and most of the variance is captured by just the first three principal components. Let's visualize them!
 
+```{python}
+# calculate the first 3 principal components
 vote_2d = pd.DataFrame(index=vote_pivot_centered.index)
 vote_2d[["z1", "z2", "z3"]] = (u * s)[:, :3]
-fig = px.scatter(vote_2d, x="z1", y="z2", title="Vote Data", width=800, height=600)
-fig.show()
+
+# plot the 3 PCs
+fig = px.scatter_3d(vote_2d, x='z1', y='z2', z='z3', title='Vote Data', width=800, height=600)
+fig.update_traces(marker=dict(size=5))
 ```
 
-It would be interesting to see the political affiliation for each vote.
+Baesd on the plot above, it looks like there are two clusters of datapoints. What do you think this corresponds to?
 
-### Component Scores
-
-If the first two singular values are large and all others are small, then two dimensions are enough to describe most of what distinguishes one observation from another. If not, then a PCA scatter plot is omitting lots of information.
-
-An equivalent way to evaluate this is to determine the **variance ratios**, i.e., the fraction of the variance each PC contributes to total variance.
-
-```{python}
-np.round(s**2 / sum(s**2), 2)
-```
-
-### Scree plot
-
-```{python}
-fig = px.line(
-    y=s**2 / sum(s**2), title="Variance Explained", width=700, height=600, markers=True
-)
-fig.update_xaxes(title_text="Principal Component")
-fig.update_yaxes(title_text="Proportion of Variance Explained")
-
-fig.show()
-```
-
-## Incorporating Member Information
-
-Suppose we load in more member information, from https://github.com/unitedstates/congress-legislators. This includes each legislator's political party.
+By incorporating member information ([source](https://github.com/unitedstates/congress-legislators), we can augment our graph with biographic data like each member's party and gender. 
 
 ```{python}
 #| code-fold: true
@@ -508,30 +487,16 @@ vote_2d["z1_jittered"] = vote_2d["z1"] + np.random.normal(0, 0.1, len(vote_2d))
 vote_2d["z2_jittered"] = vote_2d["z2"] + np.random.normal(0, 0.1, len(vote_2d))
 vote_2d["z3_jittered"] = vote_2d["z3"] + np.random.normal(0, 0.1, len(vote_2d))
 
-fig = px.scatter(
-    vote_2d,
-    x="z1_jittered",
-    y="z2_jittered",
-    color="party",
-    symbol="gender",
-    size="age",
-    title="Vote Data",
-    width=800,
-    height=600,
-    size_max=10,
-    opacity=0.7,
-    color_discrete_map={
-        "Democrat": "blue",
-        "Republican": "red",
-        "Independent": "green",
-    },
-    hover_data=["first", "last", "state", "party", "gender", "age"],
-)
-
-fig.show()
+px.scatter_3d(vote_2d, x='z1_jittered', y='z2_jittered', z='z3_jittered', color='party', symbol="gender", size='age',
+           title='Vote Data', width=800, height=600, size_max=10,
+           opacity = 0.7,
+           color_discrete_map={'Democrat':'blue', 'Republican':'red', "Independent": "green"},
+           hover_data=['first', 'last', 'state', 'party', 'gender', 'age'])
 ```
 
-### Analysis: Regular Voters
+Using SVD and PCA, we can clearly see a separation between the red dots (Republican) and blue dots (Deomcrat).
+
+<!-- ### Analysis: Regular Voters
 
 Not everyone voted all the time. Let's examine the frequency of voting.
 First, let's recompute the pivot table where we only consider Yes/No votes, and ignore records with "No Vote" or other entries.
@@ -542,7 +507,7 @@ First, let's recompute the pivot table where we only consider Yes/No votes, and 
 vote_2d["num votes"] = votes[votes["vote"].isin(["Yes", "No"])].groupby("member").size()
 vote_2d.dropna(inplace=True)
 vote_2d.head()
-```
+``` -->
 
 ### Exploring the Principal Components
 
@@ -571,18 +536,9 @@ party_line_votes = (
 )
 fig = px.bar(
     party_line_votes,
-    x="call",
-    y="value",
-    facet_row="party",
-    color="party",
-    color_discrete_map={
-        "Democrat": "blue",
-        "Republican": "red",
-        "Independent": "green",
-    },
-)
-fig_each = fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
-fig_each.show()
+    x="call", y="value", facet_row = "party", color="party",
+    color_discrete_map={'Democrat':'blue', 'Republican':'red', "Independent": "green"})
+fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
 ```
 
 ### Biplot
@@ -594,36 +550,30 @@ loadings = pd.DataFrame(
     {"pc1": np.sqrt(s[0]) * vt[0, :], "pc2": np.sqrt(s[1]) * vt[1, :]},
     index=vote_pivot_centered.columns,
 )
-fig = px.scatter(
-    vote_2d,
-    x="z1_jittered",
-    y="z2_jittered",
-    color="party",
-    symbol="gender",
-    size="num votes",
-    title="Biplot",
-    width=800,
-    height=600,
-    size_max=10,
-    opacity=0.7,
-    color_discrete_map={
-        "Democrat": "blue",
-        "Republican": "red",
-        "Independent": "green",
-    },
-    hover_data=["first", "last", "state", "party", "gender", "age"],
-)
 
-for call, pc1, pc2 in loadings.head(20).itertuples():
-    fig.add_scatter(
-        x=[0, pc1],
-        y=[0, pc2],
-        name=call,
-        mode="lines+markers",
-        textposition="top right",
-        marker=dict(size=10, symbol="arrow-bar-up", angleref="previous"),
-    )
-fig.show()
+vote_2d["num votes"] = votes[votes["vote"].isin(["Yes", "No"])].groupby("member").size()
+vote_2d.dropna(inplace=True)
+
+fig = px.scatter(
+    vote_2d, 
+    x='z1_jittered', 
+    y='z2_jittered', 
+    color='party', 
+    symbol="gender", 
+    size='num votes',
+    title='Biplot', 
+    width=800, 
+    height=600, 
+    size_max=10,
+    opacity = 0.7,
+    color_discrete_map={'Democrat':'blue', 'Republican':'red', "Independent": "green"},
+    hover_data=['first', 'last', 'state', 'party', 'gender', 'age'])
+
+for (call, pc1, pc2) in loadings.head(20).itertuples():
+    fig.add_scatter(x=[0,pc1], y=[0,pc2], name=call, 
+                    mode='lines+markers', textposition='top right',
+                    marker= dict(size=10,symbol= "arrow-bar-up", angleref="previous"))
+fig
 ```
 
 Each roll call from the 116th Congress - 1st Session: https://clerk.house.gov/evs/2019/ROLL_500.asp
@@ -632,10 +582,8 @@ Each roll call from the 116th Congress - 1st Session: https://clerk.house.gov/ev
 - 553: [https://www.congress.gov/bill/116th-congress/senate-joint-resolution/54/actions]
 - 527: On Agreeing to the Amendment [H.R.1146 - Arctic Cultural and Coastal Plain Protection Act](https://www.congress.gov/bill/116th-congress/house-bill/1146)
 
-Please visit this [link](https://data100.datahub.berkeley.edu/hub/user-redirect/git-pull?repo=https%3A%2F%2Fgithub.com%2FDS-100%2Ffa23-student&urlpath=lab%2Ftree%2Ffa23-student%2Flecture%2Flec26%2Flec26-votes.ipynb&branch=main) to see the full Jupyter notebook demo.
-
 As shown in the demo, the primary goal of PCA is to transform observations from high-dimensional data down to low dimensions through linear transformations.
-
+<!-- 
 A related goal of PCA connects back to the idea that a low-dimension representation of the data should capture the variability of the original data. For example, if the first two singular values are large and the others are relatively small, then two dimensions are probably enough to describe most of what distinguishes one observation from another. However, if this is not the case, then a PCA scatter plot is probably omitting lots of information.
 
 We can use the following formulas to quantify the amount each principal component contributes to the total variance:
@@ -646,13 +594,13 @@ $$ \text{total variance} = \text{sum of all the component scores} = \sum_{i=1} \
 
 $$ \text{variance ratio of principal component j} = \frac{\text{component score j}}{\text{total variance}} = \frac{s_j^{2} / N}{\sum_{i=1}^k s_i^{2} / N}$$
 
-In Python, assuming you had a 1D `NumPy` array of singular values `s` returned by `np.linalg.svd`, you could compute the list of variances ratios with `s**2 / sum(s**2)`.
+In Python, assuming you had a 1D `NumPy` array of singular values `s` returned by `np.linalg.svd`, you could compute the list of variances ratios with `s**2 / sum(s**2)`. -->
 
-## Example: Image Classification
+## Example 2: Image Classification
 
 In machine learning, PCA is often used as a preprocessing step prior to training a supervised model.
 
-Let's explore how PCA is useful for building an image classification model based on the Fashion-MNIST dataset, a dataset containing gray scale 28x28 images of articles of clothing. The copyright for Fashion-MNIST is held by [Zalando SE](https://github.com/zalandoresearch/fashion-mnist). Fashion-MNIST is licensed under the [MIT license](https://github.com/zalandoresearch/fashion-mnist/blob/master/LICENSE).
+Let's explore how PCA is useful for building an image classification model based on the Fashion-MNIST dataset, a dataset containing images of articles of clothing; these images are gray scale with a size of 28 by 28 pixels. The copyright for Fashion-MNIST is held by [Zalando SE](https://github.com/zalandoresearch/fashion-mnist). Fashion-MNIST is licensed under the [MIT license](https://github.com/zalandoresearch/fashion-mnist/blob/master/LICENSE).
 
 <center><img src="images/mnist.png" alt='slide21' width='500'></center>
 
@@ -660,12 +608,13 @@ First, we'll load in the data.
 
 ```{python}
 #| code-fold: true
-#| md-indent: '    '
-
 import requests
 from pathlib import Path
 import time
-
+import gzip
+import os
+import numpy as np
+import plotly.express as px
 
 def fetch_and_cache(data_url, file, data_dir="data", force=False):
     """
@@ -714,14 +663,9 @@ def head(filename, lines=5):
         return list(islice(f, lines))
 
 
-import gzip
-import os
-
-import numpy as np
-
-
 def load_data():
-    """Loads the Fashion-MNIST dataset.
+    """
+    Loads the Fashion-MNIST dataset.
 
     This is a dataset of 60,000 28x28 grayscale images of 10 fashion categories,
     along with a test set of 10,000 images. This dataset can be used as
@@ -759,13 +703,11 @@ def load_data():
 
     Example:
 
-    ```python
     (x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
     assert x_train.shape == (60000, 28, 28)
     assert x_test.shape == (10000, 28, 28)
     assert y_train.shape == (60000,)
     assert y_test.shape == (10000,)
-    ```
 
     License:
       The copyright for Fashion-MNIST is held by Zalando SE.
@@ -808,15 +750,6 @@ def load_data():
 
 ```{python}
 #| code-fold: true
-(train_images, train_labels), (test_images, test_labels) = load_data()
-print("Training images", train_images.shape)
-print("Test images", test_images.shape)
-```
-
-Exploring the data, we can see that the class names are:
-
-```{python}
-#| code-fold: true
 class_names = [
     "T-shirt/top",
     "Trouser",
@@ -830,13 +763,11 @@ class_names = [
     "Ankle boot",
 ]
 class_dict = {i: class_name for i, class_name in enumerate(class_names)}
-class_dict
-```
 
-We have loaded in a lot of data (feel free to play around with it later —— try building a classifier!). But for the purposes of this demo, let's take a small sample of the training data.
+(train_images, train_labels), (test_images, test_labels) = load_data()
+print("Training images", train_images.shape)
+print("Test images", test_images.shape)
 
-```{python}
-#| code-fold: true
 rng = np.random.default_rng(42)
 n = 5000
 sample_idx = rng.choice(np.arange(len(train_images)), size=n, replace=False)
@@ -852,14 +783,13 @@ images = pd.DataFrame(
         "class": [class_dict[x] for x in train_labels[sample_idx]],
     }
 )
-images.head()
 ```
 
-### Visualizing images
 
 Let's see what some of the images contained in this dataset look like.
 
 ```{python}
+#| code-fold: true
 def show_images(images, ncols=5, max_images=30):
     # conver the subset of images into a n,28,28 matrix for facet visualization
     img_mat = np.array(images.head(max_images)["images"].to_list())
@@ -882,37 +812,47 @@ fig = show_images(images.groupby("class", as_index=False).sample(2), ncols=6)
 fig.show()
 ```
 
-Let's break this down further and look at it by class:
+Let's break this down further and look at it by class, or the category of clothing:
 
 ```{python}
+#| code-fold: true
+print(class_dict)
+
 show_images(images.groupby('class',as_index=False).sample(2), ncols=6)
 ```
 
-### PCA
+### Raw Data
+As we can see, each 28x28 pixel image is labelled by the category of clothing it belongs to. Us humans can very easily look at these images and identify the type of clothing being displayed, even if the image is a little blurry. However, this task is less intuitive for machine learning models. To illustrate this, let's take a small sample of the training data to see how the images above are represented in their raw format:
 
-While visualizing 20 images is doable, this dataset contains 60,000 images across the 10 fashion categories. So how would we visualize the entire dataset? Let's use PCA to find a low-dimensional representation of the images.
+```{python}
+#| code-fold: true
+images.head()
+```
 
-First, let's understand the high-dimensional representation. We will extract the matrix of images from the `DataFrame`:
+Each row represents one image. Every image belongs to a `"class"` of clothing with it's enumerated `"label"`. In place of a typically displayed image, the raw data contains a 28x28 *2D array of pixel values*; each pixel value is a float between 0 and 1. If we just focus on the images, we get a 3D matrix. You can think of this as a matrix containing 2D images.
 
 ```{python}
 X = np.array(images["images"].to_list())
 X.shape 
 ```
 
-We can then "unroll" the pixels into a single row vector containing 28*28 = 784 dimensions.
+However, we're not used to working with 3D matrices for our training data `X`. Typical training data expects a *vector* of features for each datapoint, not a matrix per datapoint. We can reshape our 3D matrix so that it fits our typical training data by "unrolling" the the 28x28 pixels into a single row vector containing 28*28 = 784 dimensions.
 
 ```{python}
 X = X.reshape(X.shape[0], -1)
 X.shape
 ```
 
-Now, let's center our data.
+What we have now is 5000 datapoints tha each have 784 features. That's a lot of features! Not only would training a model on this data take a very long time, it's also very likely that our matrix is linearly independent. PCA is a very good strategy to use in situations like these when there are lots of features, but we want to remove redundant information.
+
+### PCA with `sklearn`
+To perform PCA, let's begin by centering our data.
 
 ```{python}
 X = X - X.mean(axis=0)
 ```
 
-Finally, we can run PCA, this time using `sklearn`.
+We can run PCA using `sklearn`'s `PCA` package.
 
 ```{python}
 from sklearn.decomposition import PCA
@@ -924,7 +864,7 @@ pca.fit(X)
 
 ### Examining PCA Results
 
-Let's see what we found from conducting PCA!
+Now that `sklearn` helped us find the principal components, let's visualize a scree plot.
 
 ```{python}
 # Make a line plot and show markers
@@ -932,31 +872,16 @@ fig = px.line(y=pca.explained_variance_ratio_ * 100, markers=True)
 fig.show()
 ```
 
-Looking at the scree plot above, we can see that the line starts flattening out around 2 or 3. This indicates that most of the data is explained in the first two or three dimensions.
-
-### Applying PCA to a Subset of the Data
-
-Now, we'll work with a subset of the data corresponding to tougher images, particularly those in the "Coat" and "Pullover" classes. Let's see if we can build a better embedding for this data.
-
-First, let's visualize our data.
+We can see that the line starts flattening out around 2 or 3, which suggests that most of the data is explained by just the first two or three dimensions. To illustrate this, let's plot the first three principal components and the datapoints' corresponding classes. Can you identify any patterns? 
 
 ```{python}
-classes = ['Coat', 'Pullover']
-tough_images = images[images['class'].isin(classes)].copy()
-show_images(tough_images.sample(20))
+images[['z1', 'z2', 'z3']] = pca.transform(X)[:, :3]
+fig = px.scatter_3d(images, x='z1', y='z2', z='z3', color='class', hover_data=['labels'], 
+              width=1000, height=800)
+# set marker size to 5
+fig.update_traces(marker=dict(size=5))
 ```
 
-Going through the same steps we did above to conduct PCA, we end up with the following plot. Here, the red points reflect data in the "Pullover" class, and the blue points correspond to data in the "Coat" class.
-
-```{python}
-X = np.array(tough_images['images'].to_list())
-X = X.reshape(X.shape[0], -1)
-X = X - X.mean(axis=0)
-zs = PCA(n_components=3).fit_transform(X)
-tough_images[['z1', 'z2', 'z3']] = zs
-px.scatter_3d(tough_images, x='z1', y='z2', z='z3', color='class', hover_data=['labels'],
-              width=1000, height=800).update_traces(marker=dict(size=5))
-```
 
 ## Why Perform PCA
 
