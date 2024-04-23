@@ -10,7 +10,17 @@ format:
       - cosmo
       - cerulean
     callout-icon: false
-jupyter: python3
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .qmd
+      format_name: quarto
+      format_version: '1.0'
+      jupytext_version: 1.16.1
+  kernelspec:
+    display_name: Python 3 (ipykernel)
+    language: python
+    name: python3
 ---
 
 ::: {.callout-note collapse="false"}
@@ -31,7 +41,7 @@ In this lecture, we will explore another very popular unsupervised learning conc
 
 ### Supervised Learning
 
-In "Supervised Learning", our goal is to create a function that maps inputs to outputs. Each model is learned from example input/output pairs (training set), validated using input/output pairs, and eventually tested on more input/output pairs. Each pair consists of:
+In supervised learning, our goal is to create a function that maps inputs to outputs. Each model is learned from example input/output pairs (training set), validated using input/output pairs, and eventually tested on more input/output pairs. Each pair consists of:
 
 * Input vector
 * Output value (**label**)
@@ -43,14 +53,14 @@ In regression, our output value is quantitative, and in classification, our outp
 
 ### Unsupervised Learning
 
-In unsupervised learning, our goal is to identify patterns in **unlabeled data**. In this type of learning, we do not have input/output pairs. Sometimes we may have labels but choose to ignore them (e.g. PCA on labeled data). Instead, we are more interested in the inherent structure of the data we have rather than trying to simply predict a label using that structure of data. For example, if we are interested in dimensionality reduction, we can use PCA to reduce our data to a lower dimension.
+In unsupervised learning, our goal is to identify patterns in **unlabeled** data. In this type of learning, we do not have input/output pairs. Sometimes, we may have labels but choose to ignore them (e.g. PCA on labeled data). Instead, we are more interested in the inherent structure of the data we have rather than trying to simply predict a label using that structure of data. For example, if we are interested in dimensionality reduction, we can use PCA to reduce our data to a lower dimension.
 
-Now let us consider a new problem: clustering.
+Now, let's consider a new problem: clustering.
 
 ### Clustering Examples
 
 #### Example 1
-Consider this figure from Fall 2019 Midterm 2. The original dataset was 8 dimensions, but we have used PCA to reduce our data down to 2 dimensions.
+Consider this figure from Fall 2019 Midterm 2. The original dataset had 8 dimensions, but we have used PCA to reduce our data down to 2 dimensions.
 
 <center><img src="images/blobs.png" alt='blobs' width='600'></center>
 
@@ -65,16 +75,16 @@ This is an unsupervised task, as:
 
 #### Example 2: Netflix
 
-Now suppose you're Netflix and are looking at information on customer viewing habits. Clustering can come in handy here. We can assign each person or show to a "cluster". (Note: while we don't know for sure that Netflix actually uses ML clustering to identify these categories, they could in principle.)
+Now suppose you're Netflix and are looking at information on customer viewing habits. Clustering can come in handy here. We can assign each person or show to a "cluster." (Note: while we don't know for sure that Netflix actually uses ML clustering to identify these categories, they could, in principle.)
 
-Keep in mind that with clustering, we don't need to define clusters in advance. This marks one of the key differences between clustering and classification, whereas with classification, we have to decide on labels in advance whereas clustering discovers groups automatically. 
+Keep in mind that with clustering, we don't need to define clusters in advance; it discovers groups automatically. On the other hand, with classification, we have to decide labels in advance. This marks one of the key differences between clustering and classification.
 
 #### Example 3: Education 
 
 Let's say we're working with student-generated materials and pass them into the S-BERT module to extract sentence embeddings. Features from clusters are extracted to:
 
-* Detect anomalies in group activities
-* Predict the group's median quiz grade 
+1. Detect anomalies in group activities
+2. Predict the group's median quiz grade 
 
 <center><img src="images/outline-ex3.png" alt='outline-ex3' width='600'></center>
 
@@ -86,7 +96,7 @@ Here we can see the outline of the anomaly detection module. It consists of:
 * 16D $\rightarrow$ 2D PCA dimensionality reduction and 2D $\rightarrow$ 16D reconstruction
 * Anomaly detection based on reconstruction error
 
-Looking more closely at our clustering, we can better understand the different components as represented by centers. Below we have two examples.  
+Looking more closely at our clustering, we can better understand the different components, which are represented by the centers. Below we have two examples.  
 
 <center><img src="images/components.png" alt='components' width='800'></center>
 
@@ -97,7 +107,7 @@ Now, consider the plot below:
 
 <center><img src="images/genes.png" alt='genes' width='600'></center>
 
-The rows of this plot are conditions (e.g. a row might be: “poured acid on the cells”) and the columns are genes. The green coloration indicates that the gene was "off" (red indicates the gene was "on"). For example, the ~9 genes in the top left corner of the plot were all turned off by the 6 experiments (rows) at the top.
+The rows of this plot are conditions (e.g., a row might be: “poured acid on the cells”), and the columns are genes. The green coloration indicates that the gene was "off" whereas red indicates the gene was "on". For example, the ~9 genes in the top left corner of the plot were all turned off by the 6 experiments (rows) at the top.
 
 In a clustering lens, we might be interested in clustering similar observations together based on the reactions (on/off) to certain experiments.
 
@@ -111,20 +121,19 @@ Note: apologies if you can’t differentiate red from green by eye! Historical v
 
 <center><img src="images/taxonomy.png" alt='taxonomy' width='600'></center>
 
-
 There are many types of clustering algorithms, and they all have strengths, inherent weaknesses, and different use cases. We will first focus on a partitional approach: K-Means clustering.
 
 ## K-Means Clustering
 
 The most popular clustering approach is K-Means. The algorithm itself entails the following:
 
-1. Pick an arbitrary $K$, and randomly place $K$ "centers", each a different color.
+1. Pick an arbitrary $k$, and randomly place $k$ "centers", each a different color.
 2. Repeat until convergence:
 
     a. Color points according to the closest center.
     b. Move the center for each color to the center of points with that color.
     
-Consider the following data with an arbitrary $K = 2$ and randomly placed "centers" denoted by the different colors (blue, orange):
+Consider the following data with an arbitrary $k = 2$ and randomly placed "centers" denoted by the different colors (blue, orange):
 
 <center><img src="images/init_cluster.png" alt='init_cluster' width='600'></center>
 
@@ -136,15 +145,15 @@ Next, we will move the center for each color to the center of points with that c
 
 <center><img src="images/cluster_iter1.png" alt='cluster_iter1' width='600'></center>
 
-Assume this process (re-color, re-set centers) repeats for a few more iterations, and we've ended up at this state.
+Assume this process (re-color and re-set centers) repeats for a few more iterations. We eventually reach this state.
 
 <center><img src="images/cluster_iter5.png" alt='cluster_iter5' width='600'></center>
 
 After this iteration, the center stays still and does not move at all. Thus, we have converged, and the clustering is complete!
 
-#### Note
+#### A Quick Note
 
-A quick note: K-Means is a totally different algorithm than K-Nearest Neighbors. K-means is used for *clustering*, where each point is assigned to one of $K$ clusters. On the other hand, K-Nearest Neighbors is used for *classification* (or less often, regression), and the predicted value is typically the most common class among the $K$-nearest data points in the training set.  The names may be similar, but there isn’t really anything in common.
+K-Means is a completely different algorithm than K-Nearest Neighbors. K-means is used for *clustering*, where each point is assigned to one of $K$ clusters. On the other hand, K-Nearest Neighbors is used for *classification* (or, less often, regression), and the predicted value is typically the most common class among the $K$-nearest data points in the training set.  The names may be similar, but there isn’t really anything in common.
 
 ## Minimizing Inertia
 
@@ -172,7 +181,7 @@ In the example above:
 
 Switching back to the four-cluster example at the beginning of this section, `random.seed(25)` had an inertia of `44.96`, `random.seed(29)` had an inertia of `45.95`, and `random.seed(40)` had an inertia of `54.35`. It seems that the best clustering output was `random.seed(25)` with an inertia of `44.96`!
 
-It turns out that the function K-Means is trying to minimize is inertia, but often fails to find global optimum. Why does this happen? We can think of K-means as a pair of optimizers that take turns. The first optimizer holds *center positions* constant and optimizes *data colors*. The second optimizers holds *data colors* constant and optimizes *center positions*. Neither optimizer gets full control!
+It turns out that the function K-Means is trying to minimize is inertia, but often fails to find global optimum. Why does this happen? We can think of K-means as a pair of optimizers that take turns. The first optimizer holds *center positions* constant and optimizes *data colors*. The second optimizer holds *data colors* constant and optimizes *center positions*. Neither optimizer gets full control!
 
 This is a hard problem: give an algorithm that optimizes inertia FOR A GIVEN $K$; $K$ is picked in advance. Your algorithm should return the EXACT best centers and colors, but you don't need to worry about runtime.
 
@@ -210,11 +219,11 @@ There are various ways to decide the order of combining clusters called **Linkag
 * **Complete linkage** (similarity of the least similar): the distance between two clusters as the **maximum** distance between a point in the first cluster and a point in the second.
 * **Average linkage**: **average** similarity of pairs of points in clusters.
 
-The linkage criterion decides how we measure the "distance" between two clusters. Regardless of the criterion we choose, the aim is to combine the two clusters that have the minimum "distance" between them, with the distance computed as per that criterion. In the case of complete linkage for example, that means picking the two clusters that minimize the maximum distance between a point in the first cluster and a point in the second.
+The linkage criterion decides how we measure the "distance" between two clusters. Regardless of the criterion we choose, the aim is to combine the two clusters that have the minimum "distance" between them, with the distance computed as per that criterion. In the case of complete linkage, for example, that means picking the two clusters that minimize the maximum distance between a point in the first cluster and a point in the second.
 
 <center><img src="images/linkage.png" alt='linkage' width='600'></center>
 
-When the algorithm starts, every data point is in its own cluster. In the plot below, there are 12 data points, so the algorithm starts with 12 clusters. As the clustering begins, it begins to assess which clusters are the closest together. 
+When the algorithm starts, every data point is in its own cluster. In the plot below, there are 12 data points, so the algorithm starts with 12 clusters. As the clustering begins, it assesses which clusters are the closest together. 
 
 <center><img src="images/agg1.png" alt='agg1' width='400'></center>
 
@@ -246,7 +255,7 @@ Notice that on the full dataset, our agglomerative clustering algorithm achieves
 
 ### Clustering, Dendrograms, and Intuition
 
-Agglomerative clustering is one form of "hierarchical clustering." It is interpretable because we can keep track of when two clusters got merged (each cluster is a tree), and we can visualize merging hierarchy, resulting in a "dendrogram." Won't discuss this any further for this course, but you might see these in the wild. Here are some examples:
+Agglomerative clustering is one form of "hierarchical clustering." It is interpretable because we can keep track of when two clusters got merged (each cluster is a tree), and we can visualize the merging hierarchy, resulting in a "dendrogram." Won't discuss this any further for this course, but you might see these in the wild. Here are some examples:
 <p float="left">
 <img src="images/dendro_1.png" alt='dendro_1' width='300'>
 <img src="images/dendro_2.png" alt='dendro_2' width='300'>
@@ -284,7 +293,7 @@ Can $S$ be negative? The answer is yes. If the average distance to X’s cluster
 
 ### Silhouette Plot
 
-We can plot the **silhouette scores** for all of our datapoints. The x-axis represents the silhouette coefficient value or silhouette score. The y-axis tell us which cluster label the points belong to as well as the number of points within a particular cluster. Points with large silhouette widths are deeply embedded in their cluster; the red dotted line shows the average. Below, we plot the silhouette score for our plot with $K=2$. 
+We can plot the **silhouette scores** for all of our datapoints. The x-axis represents the silhouette coefficient value or silhouette score. The y-axis tells us which cluster label the points belong to, as well as the number of points within a particular cluster. Points with large silhouette widths are deeply embedded in their cluster; the red dotted line shows the average. Below, we plot the silhouette score for our plot with $K=2$. 
 
 <p float="left">
 <img src="images/high_low.png" alt='dendro_1' width='350'>
@@ -302,23 +311,22 @@ The average silhouette score is lower with 3 clusters, so $K=2$ is a better choi
 
 ### Picking K: Real World Metrics
 
-Sometimes you can rely on real-world metrics to guide your choice of $K$. For t-shirts, we can either 
+Sometimes you can rely on real-world metrics to guide your choice of $K$. For t-shirts, we can either:
 
-* Cluster heights and weights of customers with $K = 3$ to design Small, Medium, and Large shirts.
-* Cluster heights and weights of customers with $K = 5$ to design XS, S, M, L, and XL shirts.
+* Cluster heights and weights of customers with $K = 3$ to design Small, Medium, and Large shirts
+* Cluster heights and weights of customers with $K = 5$ to design XS, S, M, L, and XL shirts
 
-To pick $K$, consider projected costs and sales for the 2 different $K$s, and pick the one that maximizes profit.
+To choose $K$, consider projected costs and sales for the 2 different $K$s and select the one that maximizes profit.
 
 ## Conclusion
 
-We've now discussed a new machine learning goal -- clustering -- and explored two solutions:
+We've now discussed a new machine learning goal —— clustering —— and explored two solutions:
 
 * K-Means Clustering tries to optimize a loss function called inertia (no known algorithm to find the optimal answer in an efficient manner)
 * Hierarchical Agglomerative Clustering builds clusters bottom-up by merging clusters "close" to each other, depending on the choice of linkage.
 
-Our version of these algorithms required a hyperparameter $K$. There are 4 ways to pick $K$: intuitively, elbow method, silhouette scores, and harnessing real-world metrics.
+Our version of these algorithms required a hyperparameter $K$. There are 4 ways to pick $K$: the elbow method, silhouette scores, and by harnessing real-world metrics.
 
 There are many machine learning problems. Each can be addressed by many different solution techniques. Each has many metrics for evaluating success / loss. Many techniques can be used to solve different problem types. For example, linear models can be used for regression and classification.
 
-We’ve only scratched the surface and haven’t discussed many important ideas, such as neural networks / deep learning. We'll provide some specific course recommendations on how to further explore these topics in the last lecture.
-
+We’ve only scratched the surface and haven’t discussed many important ideas, such as neural networks and deep learning. In the last lecture, we'll provide some specific course recommendations on how to explore these topics further.
