@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.545">
+<meta name="generator" content="quarto-1.4.553">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -398,9 +398,9 @@ Agglomerative clustering is one form of “hierarchical clustering.” It is int
 <center>
 <img src="images/high_low.png" alt="high_low" width="600">
 </center>
-<p>For a data point <span class="math inline">\(X\)</span>, score <span class="math inline">\(S\)</span> is: <span class="math display">\[S =\frac{B - A}{\max(A, B)}\]</span> where <span class="math inline">\(A\)</span> is the distance to <em>other</em> points in the cluster, and <span class="math inline">\(B\)</span> is the average distance to points in the <em>closest</em> cluster.</p>
+<p>For a data point <span class="math inline">\(X\)</span>, score <span class="math inline">\(S\)</span> is: <span class="math display">\[S =\frac{B - A}{\max(A, B)}\]</span> where <span class="math inline">\(A\)</span> is the average distance to <em>other</em> points in the cluster, and <span class="math inline">\(B\)</span> is the average distance to points in the <em>closest</em> cluster.</p>
 <p>Consider what the highest possible value of <span class="math inline">\(S\)</span> is and how that value can occur. The highest possible value of <span class="math inline">\(S\)</span> is 1, which happens if every point in <span class="math inline">\(X\)</span>’s cluster is right on top of <span class="math inline">\(X\)</span>; the average distance to other points in <span class="math inline">\(X\)</span>’s cluster is <span class="math inline">\(0\)</span>, so <span class="math inline">\(A = 0\)</span>. Thus, <span class="math inline">\(S = \frac{B}{\max(0, B)} = \frac{B}{B} = 1\)</span>. Another case where <span class="math inline">\(S = 1\)</span> could happen is if <span class="math inline">\(B\)</span> is <em>much</em> greater than <span class="math inline">\(A\)</span> (we denote this as <span class="math inline">\(B &gt;&gt; A\)</span>).</p>
-<p>Can <span class="math inline">\(S\)</span> be negative? The answer is yes. If the average distance to X’s clustermates is larger than the distance to the closest cluster, then this is possible. For example, the “low score” point on the right of the image above has <span class="math inline">\(S = -0.13\)</span></p>
+<p>Can <span class="math inline">\(S\)</span> be negative? The answer is yes. If the average distance to X’s clustermates is larger than the distance to the closest cluster, then this is possible. For example, the “low score” point on the right of the image above has <span class="math inline">\(S = -0.13\)</span>.</p>
 </section>
 <section id="silhouette-plot" class="level3">
 <h3 class="anchored" data-anchor-id="silhouette-plot">Silhouette Plot</h3>
@@ -429,7 +429,7 @@ Agglomerative clustering is one form of “hierarchical clustering.” It is int
 <p>We’ve now discussed a new machine learning goal – clustering – and explored two solutions:</p>
 <ul>
 <li>K-Means Clustering tries to optimize a loss function called inertia (no known algorithm to find the optimal answer in an efficient manner)</li>
-<li>Hierarchical Agglomerative Clustering builds clusters in either a bottom-up or top-down manner by merging clusters close to each other.</li>
+<li>Hierarchical Agglomerative Clustering builds clusters bottom-up by merging clusters “close” to each other, depending on the choice of linkage.</li>
 </ul>
 <p>Our version of these algorithms required a hyperparameter <span class="math inline">\(K\)</span>. There are 4 ways to pick <span class="math inline">\(K\)</span>: intuitively, elbow method, silhouette scores, and harnessing real-world metrics.</p>
 <p>There are many machine learning problems. Each can be addressed by many different solution techniques. Each has many metrics for evaluating success / loss. Many techniques can be used to solve different problem types. For example, linear models can be used for regression and classification.</p>
@@ -517,6 +517,24 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     // clear code selection
     e.clearSelection();
   });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
   function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
@@ -551,7 +569,11 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      return note.innerHTML;
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
     });
   }
   const xrefs = window.document.querySelectorAll('a.quarto-xref');
