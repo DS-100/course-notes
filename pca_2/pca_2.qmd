@@ -28,9 +28,39 @@ jupyter:
 ## Learning Outcomes
 
 - Dissect Singular Value Decomposition (SVD) and use it to calculate principal components
-- Develop a deeper understanding of how to interpret Principal Components Analysis (PCA)
+- Develop a deeper understanding of how to interpret Principal Component Analysis (PCA)
 - See applications of PCA in some real-world contexts
 :::
+
+## Dimensionality Reduction
+
+We often work with high-dimensional data or data containing *many* columns/features. Given the many dimensions, this data can be difficult to visualize and model. To use this data for visualization, EDA, and some modeling tasks, we look for a smaller **intrinsic dimension** to represent our data. More specifically, we want to take high-dimensional data and find a **smaller set** of **new features** (columns) that approximately capture the information contained in the original dataset; this is known as **dimensionality reduction**.
+
+We can frame dimensionality reduction as a matrix factorization problem. We want to factor our $n$ by $d$ data matrix $X$ into a lower-dimensional($n$ by $k$) matrix $C$ that when multiplied by $k$ by $d$ matrix $W$, approximately recovers the original data.
+
+### Loss Minimization
+As with any model, our goal for this matrix factorization model is to minimize the reconstruction loss denoted as:
+
+$$L(Z, W) = \frac{1}{n}\sum_{i=1}^{n}||X_i - Z_iW||^2$$
+
+Breaking down the variables in this formula:
+* $X_i$: A row vector from the original data matrix $X$, which we can assume is centered to a mean of 0.
+* $Z_i$: A row vector from the lower-dimension matrix $Z$. The rows of $Z$ are also known as **latent vectors** and are used for EDA.
+* $W$: We constrain our model so that $W$ is a row-orthonormal matrix (e.g., $WW^T = I$). The rows of $W$ are the **principal components**.
+
+Using calculus, we know that this loss is minimized with respect to $W$ when $Z = XW^T$. We won't go through this proof in-depth, since it is out of scope for Data 100, but generally, we:
+* Used Lagrangian multipliers to introduce the orthonormality constraint on $W$.
+* Took the derivative with respect to $W$ (which requires vector calculus) and solved for 0.
+
+Conducting this loss minimization, we find that $\Sigma w^T = \lambda w^T$, which implies:
+1. $w$ is a **unitary eigenvector** of the covariance matrix $\Sigma$.
+2. The error is minimized when $w$ is the eigenvector with the **largest eigenvalue** $\lambda$.
+
+From this minimization, it becomes clear that the principal components are the eigenvectors with the largest eigenvalues of the covariance matrix. They represent the directions of **maximum variance** in the data. We can construct the latent factors, or the $Z$ matrix, by projecting the centered data $X$ onto the principal component vectors, $W^T$.
+
+<center><img src = "images/slide10.png" width="400vw"></center>
+
+But how do we compute the eigenvectors of $\Sigma$? Let's dive into SVD to answer this question. 
 
 ## Singular Value Decomposition (SVD)
 
@@ -81,7 +111,7 @@ Let's break down each of these terms one by one.
 - Its columns are **orthonormal**.
   - $\vec{u_i}^T\vec{u_j} = 0$ for all pairs $i, j$.
   - All vectors $\vec{u_i}$ are unit vectors where $|| \vec{u_i} || = 1$ .
-- Columns of U are called the **left singular vectors**.
+- Columns of U are called the **left singular vectors** and are **eigenvectors** of $XX^T$.
 - $UU^T = I_n$ and $U^TU = I_d$.
 - We can think of $U$ as a rotation.
 
@@ -91,8 +121,8 @@ Let's break down each of these terms one by one.
 
 - $S$ is a $d \times d$ matrix: $S \in \mathbb{R}^{d \times d}$.
 - The majority of the matrix is zero.
-- It has $r$ **non-zero** **singular values**, and $r$ is the rank of $X$.
-- Diagonal values (**singular values** $s_1, s_2, ... s_r$), are **non-negative** ordered from greatest to least: $s_1 \ge s_2 \ge ... \ge s_r > 0$.
+- It has $r$ **non-zero** **singular values**, and $r$ is the rank of $X$. Note that rank $r \leq d$.
+- Diagonal values (**singular values** $s_1, s_2, ... s_r$), are **non-negative** ordered from largest to smallest: $s_1 \ge s_2 \ge ... \ge s_r > 0$.
 - We can think of $S$ as a scaling operation.
 
 <center><img src = "images/s.png" width="400vw"></center>
@@ -101,7 +131,7 @@ Let's break down each of these terms one by one.
 
 - $V^T$ is an $d \times d$ matrix: $V \in \mathbb{R}^{d \times d}$.
 - Columns of $V$ are orthonormal, so the rows of $V^T$ are orthonormal.
-- Columns of $V$ are called the **right singular vectors**.
+- Columns of $V$ are called the **right singular vectors**, and similarly to $U$, are **eigenvectors** of $X^TX$.
 - $VV^T = V^TV = I_d$
 - We can think of $V$ as a rotation.
 
@@ -200,13 +230,13 @@ Principal Component Analysis (PCA) and Singular Value Decomposition (SVD) can be
 <!-- ### Derivation
 ::: {.callout-tip}
 ### [Linear Algebra Review] Covariance Matrix
-
+[TO DO if time]
 
 ::: -->
 
 ### Deriving Principal Components From SVD
 
-After centering $X$ so that each column has a mean of 0, we find its SVD:
+After centering the data matrix $X$ so that each column has a mean of 0, we find its SVD:
 $$ X = U S V^T $$
 
 Because $X$ is centered, the covariance matrix of $X$, $\Sigma$, is equal to $X^T X$. Rearranging this equation, we get
@@ -238,7 +268,7 @@ We've now shown that the first $k$ columns of $V$ (equivalently, the first $k$ r
 <!-- TODO if we have time: add lin alg review for projection  -->
 <center><img src="images/Z.png" alt='slide16' width='500'></center>
 
-From this equation $Z = X V$, we can compoute a second way to calculate $Z$:
+We can then instead compute $Z$ as follows:
 
 $$
 \begin{align}
@@ -252,38 +282,55 @@ $$Z = XV = US$$
 
 In other words, we can construct $X$'s' latent vector representation $Z$ through:
 
-1. projecting $X$ onto the first $k$ columns of $V$, $V[:, :k]$
-2. multiplying the first $k$ columns of U and the first $k$ rows of S
+1. Projecting $X$ onto the first $k$ columns of $V$, $V[:, :k]$
+2. Multiplying the first $k$ columns of U and the first $k$ rows of S
 
-Using $Z$, we can approximately recover the original $X$ matrix by multiplying $Z$ by $V^T$:
+Using $Z$, we can approximately recover the centered $X$ matrix by multiplying $Z$ by $V^T$:
 $$ Z V^T = XV V^T = USV^T = X$$
+
+Note that to recover the original (uncentered) $X$ matrix, we would also need to add back the mean.
+
+::: {.callout-tip}
+
+### [Summary] Terminology
+
+**Note**: The notation used for PCA this semester differs from previous semesters a bit. Please bay careful attention to the terminology presented in this note.
+
+To summarize the terminology and concepts we've covered so far:
+1. Principal Component: The columns of $V$ . These vectors specify the principal coordinate system and represent the directions along which the most variance in the data is captured.
+2. Latent Vector Representation of $X$: The projection of our data matrix $X$ onto the principal components, $Z = XV = US$. In previous semesters, the terminology was different and this was termed the principal components of $X$. In other classes, the term principal coordinate is also used. The $i$-th latent vector refers to the $i$-th column of $V$, corresponding to the $i$-th largest singular value of $X$. The latent vector representation of $X$ using the first $k$ principal components is described as the ”best” rank-$k$ approximation of $X$.
+3. $S$ (as in SVD): The diagonal matrix containing all the singular values of $X$.
+4. $\Sigma$: The covariance matrix of $X$. Assuming $X$ is centered, $\Sigma = X^T X$. In previous semesters, the singular value decomposition of $X$ was written out as $X = U{\Sigma}V^T$. Note the difference between $\Sigma$ in that context compared to this semester.
+
+:::
 
 ### PCA Visualization
 
+<center><img src="images/rotate_center_plot.png" alt='slide17' width='750'></center>
+
+As we discussed above, when conducting PCA, we first center the data matrix $X$ and then rotate it such that the direction with the most variation (e.g., the direction that is most spread out) aligns with the x-axis. 
+
 <center><img src="images/slide16.png" alt='slide16' width='500'></center>
 
-The elements of each column of $V$ (row of $V^{T}$) rotate the original feature vectors into a principal component.
+In particular, the elements of each column of $V$ (row of $V^{T}$) rotate the original feature vectors, projecting $X$ onto the principal components.
 
-The first column of $V$ indicates how each feature contributes (e.g. positive, negative, etc.) to principal component 1.
-
-<center><img src="images/rotate_center_plot.png" alt='slide17' width='750'></center>
+The first column of $V$ indicates how each feature contributes (e.g. positive, negative, etc.) to principal component 1; it essentially assigns "weights" to each feature. 
 
 Coupled together, this interpretation also allows us to understand that:
 
 - The principal components are all **orthogonal** to each other because the columns of $V$ are orthonormal.
-- Principal components are **axis-aligned**. That is, if you plot two PCs on a 2D plane, one will lie on the x-axis, the other on the y-axis.
+- Principal components are **axis-aligned**. That is, if you plot two PCs on a 2D plane, one will lie on the x-axis and the other on the y-axis.
 - Principal components are **linear combinations** of columns in our data $X$.
 
 ### Using Principal Components
 
 Let's summarize the steps to obtain Principal Components via SVD:
 
-1. Center the data matrix by subtracting the mean of each attribute column.
+1. Center the data matrix $X$ by subtracting the mean of each attribute column.
 
 2. To find the $k$ **principal components**:
-
-   a. Compute the SVD of the data matrix ($X = U{S}V^{T}$).
-   b. The first $k$ columns of $U{S}$ (or equivalently, $XV$) contain the $k$ **principal components** of $X$.
+    1. Compute the SVD of the data matrix ($X = U{S}V^{T}$).
+    2. The first $k$ columns of $V$ contain the $k$ **principal components** of $X$. The $k$-th column of $V$ is also known as the $k$-th latent vector and corresponds to the $k$-th largest singular value of $X$. 
 
 ### Code Demo
 
@@ -303,35 +350,22 @@ U, S, Vt = np.linalg.svd(centered_df, full_matrices=False)
 Sm = pd.DataFrame(np.diag(np.round(S, 1)))
 ```
 
-3. Approximate the data by multiplying by either $US$ or $XV$. Mathematically, these give the same result, but computationally, floating point approximation results in slightly different numbers for very small values (check out the right-most column in the cells below).
+3. Take the first $k$ columns of $V$. These are the first $k$ principal components of $X$.
 
 ```{python}
-# US
-pd.DataFrame(U @ np.diag(S)).head(5)
-```
-
-```{python}
-# XV
-pd.DataFrame(centered_df @ Vt.T).head(5)
-```
-
-4. Take the first $k$ columns of $US$ (or $XV$). These are the first $k$ principal components of $X$.
-
-```{python}
-two_PCs = (U @ np.diag(S))[:, :2]  # using US
-two_PCs = (centered_df @ Vt.T).iloc[:, :2]  # using XV
+two_PCs = Vt.T[:, :2]
 pd.DataFrame(two_PCs).head()
 ```
 
 ## Data Variance and Centering
 
-We define the total variance of a data matrix as the sum of variances of attributes. The principal components are a low-dimension representation that capture as much of the original data's total variance as possible. Formally, the $i$-th singular value tells us the **component score**, i.e., how much of the data variance is captured by the $i$-th principal component. Assuming the number of datapoints is $n$:
+We define the total variance of a data matrix as the sum of variances of attributes. The principal components are a low-dimension representation that capture as much of the original data's total variance as possible. Formally, the $i$-th singular value tells us the **component score**, or how much of the data variance is captured by the $i$-th principal component. Assuming the number of datapoints is $n$:
 
 $$\text{i-th component score} = \frac{(\text{i-th singular value}^2)}{n}$$
 
 Summing up the component scores is equivalent to computing the total variance _if we center our data_.
 
-**Data Centering**: PCA has a data centering step that precedes any singular value decomposition, where, if implemented, defines the component score as above.
+**Data Centering**: PCA has a data-centering step that precedes any singular value decomposition, where, if implemented, the component score is defined as above.
 
 If you want to dive deeper into PCA, [Steve Brunton's SVD Video Series](https://www.youtube.com/playlist?list=PLMrJAkhIeNNSVjnsviglFoY2nXildDCcv) is a great resource.
 
@@ -341,7 +375,7 @@ If you want to dive deeper into PCA, [Steve Brunton's SVD Video Series](https://
 
 We often plot the first two principal components using a scatter plot, with PC1 on the $x$-axis and PC2 on the $y$-axis. This is often called a PCA plot.
 
-If the first two singular values are large and all others are small, then two dimensions are enough to describe most of what distinguishes one observation from another. If not, a PCA plot is omitting a lot of information.
+If the first two singular values are large and all others are small, then two dimensions are enough to describe most of what distinguishes one observation from another. If not, a PCA plot omits a lot of information.
 
 PCA plots help us assess similarities between our data points and if there are any clusters in our dataset. In the case study before, for example, we could create the following PCA plot:
 
@@ -355,7 +389,7 @@ A scree plot shows the **variance ratio** captured by each principal component, 
 
 ### Biplots
 
-Biplots superimpose the directions onto the plot of PC1 vs. PC2, where vector $j$ corresponds to the direction for feature $j$ (e.g., $v_{1j}, v_{2j}$). There are several ways to scale biplot vectors -- in this course, we plot the direction itself. For other scalings, which can lead to more interpretable directions/loadings, see [SAS biplots](https://blogs.sas.com/content/iml/2019/11/06/what-are-biplots.html).
+Biplots superimpose the directions onto the plot of PC1 vs. PC2, where vector $j$ corresponds to the direction for feature $j$ (e.g., $v_{1j}, v_{2j}$). There are several ways to scale biplot vectors —— in this course, we plot the direction itself. For other scalings, which can lead to more interpretable directions/loadings, see [SAS biplots](https://blogs.sas.com/content/iml/2019/11/06/what-are-biplots.html).
 
 Through biplots, we can interpret how features correlate with the principal components shown: positively, negatively, or not much at all.
 
@@ -425,21 +459,22 @@ fig.update_xaxes(title_text='Principal Component i')
 fig.update_yaxes(title_text='Proportion of Variance Explained')
 ```
 
-It looks like this graph plateus after the third principal component, so our "elbow" is at PC 3, and most of the variance is captured by just the first three principal components. Let's visualize them!
+It looks like this graph plateaus after the third principal component, so our "elbow" is at PC3, and most of the variance is captured by just the first three principal components. Let's use these PCs to visualize the latent vector representation of $X$!
 
 ```{python}
-# calculate the first 3 principal components
+# Calculate the latent vector representation (US or XV)
+# using the first 3 principal components
 vote_2d = pd.DataFrame(index=vote_pivot_centered.index)
 vote_2d[["z1", "z2", "z3"]] = (u * s)[:, :3]
 
-# plot the 3 PCs
+# Plot the latent vector representation
 fig = px.scatter_3d(vote_2d, x='z1', y='z2', z='z3', title='Vote Data', width=800, height=600)
 fig.update_traces(marker=dict(size=5))
 ```
 
 Baesd on the plot above, it looks like there are two clusters of datapoints. What do you think this corresponds to?
 
-By incorporating member information ([source](https://github.com/unitedstates/congress-legislators), we can augment our graph with biographic data like each member's party and gender. 
+By incorporating member information ([source](https://github.com/unitedstates/congress-legislators)), we can augment our graph with biographic data like each member's party and gender. 
 
 ```{python}
 #| code-fold: true
@@ -841,7 +876,7 @@ X = X.reshape(X.shape[0], -1)
 X.shape
 ```
 
-What we have now is 5000 datapoints tha each have 784 features. That's a lot of features! Not only would training a model on this data take a very long time, it's also very likely that our matrix is linearly independent. PCA is a very good strategy to use in situations like these when there are lots of features, but we want to remove redundant information.
+What we have now is 5000 datapoints that each have 784 features. That's a lot of features! Not only would training a model on this data take a very long time, it's also very likely that our matrix is linearly independent. PCA is a very good strategy to use in situations like these when there are lots of features, but we want to remove redundant information.
 
 ### PCA with `sklearn`
 To perform PCA, let's begin by centering our data.
@@ -920,13 +955,13 @@ We can also perform a regression in the reverse direction. That is, given fertil
 
 ### SVD: Minimizing Perpendicular Error
 
-The rank 1 approximation is close but not the same as the mortality regression line. Instead of minimizing _horizontal_ or _vertical_ error, our rank 1 approximation minimizes the error _perpendicular_ to the subspace onto which we’re projecting. That is, SVD finds the line such that if we project our data onto that line, the error between the projection and our original data is minimized. The similarity of the rank 1 approximation and the fertility was just a coincidence. Looking at adiposity and bicep size from our body measurements dataset, we see the 1D subspace onto which we are projecting is between the two regression lines.
+The rank-1 approximation is close but not the same as the mortality regression line. Instead of minimizing _horizontal_ or _vertical_ error, our rank-1 approximation minimizes the error _perpendicular_ to the subspace onto which we’re projecting. That is, SVD finds the line such that if we project our data onto that line, the error between the projection and our original data is minimized. The similarity of the rank-1 approximation and the fertility was just a coincidence. Looking at adiposity and bicep size from our body measurements dataset, we see the 1D subspace onto which we are projecting is between the two regression lines.
 
 <center><img src = "images/rank1.png" width="400vw"></center>
 
 ### Beyond 1D and 2D
 
-In higher dimensions, the idea behind principal components is the same! Suppose we have 30-dimensional data and decide to use the first 5 principal components. Our procedure minimizes the error between the original 30-dimensional data and the projection of that 30-dimensional data onto the “best” 5-dimensional subspace. See [CS 189 Note 10](https://eecs189.org/docs/notes/n10.pdf) for more details.
+Even in higher dimensions, the idea behind principal components is the same! Suppose we have 30-dimensional data and decide to use the first 5 principal components. Our procedure minimizes the error between the original 30-dimensional data and the projection of that 30-dimensional data onto the “best” 5-dimensional subspace. See [CS 189 Note 10](https://eecs189.org/docs/notes/n10.pdf) for more details.
 
 ## (Bonus) Automatic Factorization
 
