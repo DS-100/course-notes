@@ -34,7 +34,7 @@ jupyter:
 
 ## Dimensionality Reduction
 
-We often work with high-dimensional data that contain *many* columns/features. Given all these dimensions, this data can be difficult to visualize and model. However, not all the data in this high-demensional space is useful -- there could be repeated features or outliers that make the data seem more complex than it really is. The most concise representation of high-demensional data is it's **intrinsic dimension**. Our goal with this lecture is to use **dimensionality reduction** to find the intrinsic dimension of a high-demensional dataset. In other words, we want to find a smaller set of new features/columns that approximates the original data well without loosing that much information. This is especially useful because this smaller set of features allows us to better visualize the data and do EDA to understand which modeling techniques would fit the data well. 
+We often work with high-dimensional data that contain *many* columns/features. Given all these dimensions, this data can be difficult to visualize and model. However, not all the data in this high-dimensional space is useful —— there could be repeated features or outliers that make the data seem more complex than it really is. The most concise representation of high-dimensional data is its **intrinsic dimension**. Our goal with this lecture is to use **dimensionality reduction** to find the intrinsic dimension of a high-dimensional dataset. In other words, we want to find a smaller set of new features/columns that approximates the original data well without losing that much information. This is especially useful because this smaller set of features allows us to better visualize the data and do EDA to understand which modeling techniques would fit the data well. 
 
 ### Loss Minimization
 In order to find the intrinsic dimension of a high-dimensional dataset, we'll use techniques from linear algebra. Suppose we have a high-dimensional dataset, $X$, that has $n$ rows and $d$ columns. We want to factor (split) $X$ into two matrices, $Z$ and $W$. $Z$ has $n$ rows and $k$ columns; $W$ has $k$ rows and $d$ columns.
@@ -46,13 +46,15 @@ We can reframe this problem as a loss function: in other words, if we want $X$ t
 $$L(Z, W) = \frac{1}{n}\sum_{i=1}^{n}||X_i - Z_iW||^2$$
 
 Breaking down the variables in this formula:
+
 * $X_i$: A row vector from the original data matrix $X$, which we can assume is centered to a mean of 0.
 * $Z_i$: A row vector from the lower-dimension matrix $Z$. The rows of $Z$ are also known as **latent vectors** and are used for EDA.
 * $W$: The rows of $W$ are the **principal components**. We constrain our model so that $W$ is a row-orthonormal matrix (e.g., $WW^T = I$). 
 
-Using calculus and optimization techniques (take EECS 127 if you're interested!), we we find that this loss is minimized when 
+Using calculus and optimization techniques (take EECS 127 if you're interested!), we find that this loss is minimized when 
 $$Z = XW^T$$ 
 The proof for this is out of scope for Data 100, but for those who are interested, we:
+
 * Use Lagrangian multipliers to introduce the orthonormality constraint on $W$.
 * Took the derivative with respect to $W$ (which requires vector calculus) and solve for 0.
 
@@ -61,7 +63,8 @@ This gives us a very cool result of
 $$\Sigma w^T = \lambda w^T$$
 
 $\Sigma$ is the covariance matrix of $X$. The equation above implies that:
-1. $w$ is a **unitary eigenvector** of the covariance matrix $\Sigma$. In other words, it's norm is equal to 1: $||w||^2 = ww^T = 1$
+
+1. $w$ is a **unitary eigenvector** of the covariance matrix $\Sigma$. In other words, its norm is equal to 1: $||w||^2 = ww^T = 1$.
 2. The loss is minimized when $w$ is the eigenvector with the **largest eigenvalue** $\lambda$.
 
 This tells us that the principal components (rows of $W$) are the eigenvectors with the largest eigenvalues of the covariance matrix $\Sigma$. They represent the directions of **maximum variance** in the data. We can construct the latent factors, or the $Z$ matrix, by projecting the centered data $X$ onto the principal component vectors, $W^T$.
