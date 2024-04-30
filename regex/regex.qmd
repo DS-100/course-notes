@@ -75,6 +75,7 @@ Assume we want to merge the given tables.
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 import pandas as pd
 
 with open('data/county_and_state.csv') as f:
@@ -86,6 +87,7 @@ with open('data/county_and_population.csv') as f:
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 display(county_and_state), display(county_and_pop);
 ```
 
@@ -97,6 +99,7 @@ The following function uses Python string manipulation to convert a single count
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 def canonicalize_county(county_name):
     return (
         county_name
@@ -115,6 +118,7 @@ We will use the `pandas` `map` function to apply the `canonicalize_county` funct
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 county_and_pop['clean_county_python'] = county_and_pop['County'].map(canonicalize_county)
 county_and_state['clean_county_python'] = county_and_state['County'].map(canonicalize_county)
 display(county_and_state), display(county_and_pop);
@@ -128,6 +132,7 @@ Chaining multiple `Series` methods in this manner eliminates the need to use the
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 def canonicalize_county_series(county_series):
     return (
         county_series
@@ -152,6 +157,7 @@ Say we want to read some data from a `.txt` file.
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 with open('data/log.txt', 'r') as f:
     log_lines = f.readlines()
 
@@ -164,6 +170,7 @@ Instead, we can use some clever thinking. Notice how the relevant information is
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 first = log_lines[0] # Only considering the first row of data
 
 pertinent = first.split("[")[1].split(']')[0]
@@ -190,6 +197,7 @@ Regular expressions are useful in many applications beyond data science. For exa
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 r"[0-9]{3}-[0-9]{2}-[0-9]{4}" # Regular Expression Syntax
 
 # 3 of any digit, then a dash,
@@ -360,10 +368,9 @@ Here are a few more convenient regular expressions.
 
 ### Greediness
 
-In order to fully understand the last operation in the table, we have to discuss greediness. RegEx is greedy – it will look for the longest possible match in a string. To motivate this with an example, consider the pattern `<div>.*</div>`. Given the sentence below, we would hope that the bolded portions would be matched:
+In order to fully understand the last operation in the table, we have to discuss greediness. RegEx is greedy – it will look for the longest possible match in a string. To motivate this with an example, consider the pattern `<div>.*<\/div>`. Given the sentence below, we would hope that the bolded portions would be matched:
 
-"This is a **\<div>example\<\/div>** of greediness \<div>in\<\/div> regular expressions.”
-"
+"This is a **\<div>example\<\/div>** of greediness **\<div>in\<\/div>** regular expressions."
 
 In actuality, the way RegEx processes the text given that pattern is as follows:
 
@@ -373,7 +380,11 @@ In actuality, the way RegEx processes the text given that pattern is as follows:
 
 3. then, “look for the exact string \<\/div>"
 
-The result would be all the characters starting from the leftmost \<div> and the rightmost \<\/div> (inclusive). We can fix this by making our pattern non-greedy, `<div>.*?</div>`. You can read up more on the documentation [here](https://docs.python.org/3/howto/regex.html#greedy-versus-non-greedy).
+The result would be all the characters starting from the leftmost \<div> and the rightmost \<\/div> (inclusive):
+
+"This is a **\<div>example\<\/div> of greediness \<div>in\<\/div>** regular expressions."
+
+We can fix this by making our pattern non-greedy, `<div>.*?<\/div>`. You can read up more on the documentation [here](https://docs.python.org/3/howto/regex.html#greedy-versus-non-greedy).
 
 ### Examples
 
@@ -381,6 +392,7 @@ Let's revisit our earlier problem of extracting date/time data from the given `.
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 log_lines[0]
 ```
 
@@ -418,6 +430,7 @@ Any substring in `text` that fulfills all three conditions will be replaced by `
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 import re
 
 text = "<div><td valign='top'>Moo</td></div>"
@@ -437,6 +450,7 @@ Consider the following `DataFrame` `html_data` with a single column.
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 data = {"HTML": ["<div><td valign='top'>Moo</td></div>", \
                  "<a href='http://ds100.org'>Link</a>", \
                  "<b>Bold text</b>"]}
@@ -445,11 +459,13 @@ html_data = pd.DataFrame(data)
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 html_data
 ```
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 pattern = r"<[^>]+>"
 html_data['HTML'].str.replace(pattern, '', regex=True)
 ```
@@ -464,6 +480,7 @@ Using the familiar regular expression for Social Security Numbers:
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 text = "My social security number is 123-45-6789 bro, or maybe it’s 321-45-6789."
 pattern = r"[0-9]{3}-[0-9]{2}-[0-9]{4}"
 re.findall(pattern, text)  
@@ -477,6 +494,7 @@ Consider the following `DataFrame` `ssn_data`.
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 data = {"SSN": ["987-65-4321", "forty", \
                 "123-45-6789 bro or 321-45-6789",
                "999-99-9999"]}
@@ -485,11 +503,13 @@ ssn_data = pd.DataFrame(data)
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 ssn_data
 ```
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 ssn_data["SSN"].str.findall(pattern)
 ```
 
@@ -499,12 +519,14 @@ As you may expect, there are similar `pandas` equivalents for other `re` functio
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 pattern_cg = r"([0-9]{3})-([0-9]{2})-([0-9]{4})"
 ssn_data["SSN"].str.extract(pattern_cg)
 ```
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 ssn_data["SSN"].str.extractall(pattern_cg)
 ```
 
@@ -518,6 +540,7 @@ Let's take a look at an example.
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 text = "Observations: 03:04:53 - Horse awakens. \
         03:05:14 - Horse goes back to sleep."
 ```
@@ -526,6 +549,7 @@ Say we want to capture all occurences of time data (hour, minute, and second) as
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 pattern_1 = r"(\d\d):(\d\d):(\d\d)"
 re.findall(pattern_1, text)
 ```
@@ -536,6 +560,7 @@ These regular expression capture groups can be different. We can use the `(\d{2}
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 pattern_2 = r"(\d\d):(\d\d):(\d{2})"
 re.findall(pattern_2, text)
 ```
@@ -546,12 +571,14 @@ With the notion of capture groups, convince yourself how the following regular e
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 first = log_lines[0]
 first
 ```
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 pattern = r'\[(\d+)\/(\w+)\/(\d+):(\d+):(\d+):(\d+) (.+)\]'
 day, month, year, hour, minute, second, time_zone = re.findall(pattern, first)[0]
 print(day, month, year, hour, minute, second, time_zone)
@@ -582,3 +609,4 @@ Ultimately, the goal is not to memorize all regular expressions. Rather, the aim
 - Differentiate between (), [], {}
 - Design your own character classes with \d, \w, \s, […-…], ^, etc.
 - Use `python` and `pandas` RegEx methods.
+
