@@ -49,7 +49,10 @@ Run the following in your terminal within the main directory:
 conda create --name data100quarto 
 conda activate data100quarto
 pip3 install -r requirements.txt # will take a while
+ipython kernel install --user
 ```
+
+If you get an `error: externally-managed-environment` on the third line, run `pip3 install -r requirements.txt --break-system-packages`
 
 Remember to always activate the right environment before running anything with `conda activate data100quarto`.
 
