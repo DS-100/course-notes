@@ -1,0 +1,1903 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.56">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>21&nbsp; SQL II – Principles and Techniques of Data Science</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../logistic_regression_1/logistic_reg_1.html" rel="next">
+<link href="../sql_I/sql_I.html" rel="prev">
+<link href="../data100_logo.png" rel="icon" type="image/png">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../sql_II/sql_II.html"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">SQL II</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="../index.html" class="sidebar-logo-link">
+      <img src="../data100_logo.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Principles and Techniques of Data Science</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/DS-100/course-notes" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Welcome</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../intro_lec/introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pandas_1/pandas_1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Pandas I</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pandas_2/pandas_2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Pandas II</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pandas_3/pandas_3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Pandas III</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../eda/eda.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Data Cleaning and EDA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../regex/regex.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Regular Expressions</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../visualization_1/visualization_1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Visualization I</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../visualization_2/visualization_2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Visualization II</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sampling/sampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Sampling</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../intro_to_modeling/intro_to_modeling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Introduction to Modeling</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../constant_model_loss_transformations/loss_transformations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Constant Model, Loss, and Transformations</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ols/ols.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Ordinary Least Squares</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../gradient_descent/gradient_descent.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">sklearn and Gradient Descent</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../feature_engineering/feature_engineering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Feature Engineering</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../case_study_HCE/case_study_HCE.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Case Study in Human Contexts and Ethics</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../cv_regularization/cv_reg.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Cross Validation and Regularization</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../probability_1/probability_1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Random Variables</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../probability_2/probability_2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Estimators, Bias, and Variance</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../inference_causality/inference_causality.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Causal Inference and Confounding</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sql_I/sql_I.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">SQL I</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sql_II/sql_II.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">SQL II</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../logistic_regression_1/logistic_reg_1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Logistic Regression I</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../logistic_regression_2/logistic_reg_2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Logistic Regression II</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pca_1/pca_1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">PCA I</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pca_2/pca_2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">PCA II</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../clustering/clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Clustering</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">SQL II</h2>
+   
+  <ul>
+  <li><a href="#aggregating-with-group-by" id="toc-aggregating-with-group-by" class="nav-link active" data-scroll-target="#aggregating-with-group-by"><span class="header-section-number">21.1</span> Aggregating with <code>GROUP BY</code></a></li>
+  <li><a href="#filtering-groups" id="toc-filtering-groups" class="nav-link" data-scroll-target="#filtering-groups"><span class="header-section-number">21.2</span> Filtering Groups</a></li>
+  <li><a href="#summary-sql" id="toc-summary-sql" class="nav-link" data-scroll-target="#summary-sql"><span class="header-section-number">21.3</span> Summary: SQL</a></li>
+  <li><a href="#eda-in-sql" id="toc-eda-in-sql" class="nav-link" data-scroll-target="#eda-in-sql"><span class="header-section-number">21.4</span> EDA in SQL</a>
+  <ul>
+  <li><a href="#matching-text-using-like" id="toc-matching-text-using-like" class="nav-link" data-scroll-target="#matching-text-using-like"><span class="header-section-number">21.4.1</span> Matching Text using <code>LIKE</code></a></li>
+  <li><a href="#casting-data-types" id="toc-casting-data-types" class="nav-link" data-scroll-target="#casting-data-types"><span class="header-section-number">21.4.2</span> <code>CAST</code>ing Data Types</a></li>
+  <li><a href="#using-conditional-statements-with-case" id="toc-using-conditional-statements-with-case" class="nav-link" data-scroll-target="#using-conditional-statements-with-case"><span class="header-section-number">21.4.3</span> Using Conditional Statements with <code>CASE</code></a></li>
+  </ul></li>
+  <li><a href="#joining-tables" id="toc-joining-tables" class="nav-link" data-scroll-target="#joining-tables"><span class="header-section-number">21.5</span> <code>JOIN</code>ing Tables</a>
+  <ul>
+  <li><a href="#aliasing-in-joins" id="toc-aliasing-in-joins" class="nav-link" data-scroll-target="#aliasing-in-joins"><span class="header-section-number">21.5.1</span> Aliasing in <code>JOIN</code>s</a></li>
+  <li><a href="#common-table-expressions" id="toc-common-table-expressions" class="nav-link" data-scroll-target="#common-table-expressions"><span class="header-section-number">21.5.2</span> Common Table Expressions</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content column-body" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">SQL II</span></h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta column-body">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="true" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Learning Outcomes
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse show">
+<div class="callout-body-container callout-body">
+<ul>
+<li>Perform aggregations using <code>GROUP BY</code></li>
+<li>Introduce the ability to filter groups</li>
+<li>Perform data cleaning and text manipulation in SQL</li>
+<li>Join data across tables</li>
+</ul>
+</div>
+</div>
+</div>
+<p>In this lecture, we’ll continue our work from last time to introduce some advanced SQL syntax.</p>
+<p>First, let’s load in the <code>basic_examples.db</code> database.</p>
+<div id="7fb120ae" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the SQL Alchemy Python library and DuckDB</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sqlalchemy</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> duckdb</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div id="b6386da5" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load %%sql cell magic</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>load_ext sql</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="b56f3cde" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Connect to the database</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>sql duckdb:<span class="op">///</span>data<span class="op">/</span>basic_examples.db <span class="op">--</span>alias basic</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="aggregating-with-group-by" class="level2" data-number="21.1">
+<h2 data-number="21.1" class="anchored" data-anchor-id="aggregating-with-group-by"><span class="header-section-number">21.1</span> Aggregating with <code>GROUP BY</code></h2>
+<p>At this point, we’ve seen that SQL offers much of the same functionality that was given to us by <code>pandas</code>. We can extract data from a table, filter it, and reorder it to suit our needs.</p>
+<p>In <code>pandas</code>, much of our analysis work relied heavily on being able to use <code>.groupby()</code> to aggregate across the rows of our dataset. SQL’s answer to this task is the (very conveniently named) <code>GROUP BY</code> clause. While the outputs of <code>GROUP BY</code> are similar to those of <code>.groupby()</code> —— in both cases, we obtain an output table where some column has been used for grouping —— the syntax and logic used to group data in SQL are fairly different to the <code>pandas</code> implementation.</p>
+<p>To illustrate <code>GROUP BY</code>, we will consider the <code>Dish</code> table from our database.</p>
+<div id="4d1072f6" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>SELECT <span class="op">*</span> </span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>FROM Dish<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * duckdb:///data/basic_examples.db
+Done.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<table class="caption-top" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">name</th>
+<th data-quarto-table-cell-role="th">type</th>
+<th data-quarto-table-cell-role="th">cost</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+</div>
+</div>
+<p>Notice that there are multiple dishes of the same <code>type</code>. What if we wanted to find the total costs of dishes of a certain <code>type</code>? To accomplish this, we would write the following code.</p>
+<div id="5834a676" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>SELECT <span class="bu">type</span>, SUM(cost)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>FROM Dish</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>GROUP BY <span class="bu">type</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * duckdb:///data/basic_examples.db
+Done.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<table class="caption-top" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">type</th>
+<th data-quarto-table-cell-role="th">sum("cost")</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+</div>
+</div>
+<p>What is going on here? The statement <code>GROUP BY type</code> tells SQL to group the data based on the value contained in the <code>type</code> column (whether a record is an appetizer, entree, or dessert). <code>SUM(cost)</code> sums up the costs of dishes in each <code>type</code> and displays the result in the output table.</p>
+<p>You may be wondering: why does <code>SUM(cost)</code> come before the command to <code>GROUP BY type</code>? Don’t we need to form groups before we can count the number of entries in each? Remember that SQL is a <em>declarative</em> programming language —— a SQL programmer simply states what end result they would like to see, and leaves the task of figuring out <em>how</em> to obtain this result to SQL itself. This means that SQL queries sometimes don’t follow what a reader sees as a “logical” sequence of thought. Instead, SQL requires that we follow its set order of operations when constructing queries. So long as we follow this order, SQL will handle the underlying logic.</p>
+<p>In practical terms: our goal with this query was to output the total <code>cost</code>s of each <code>type</code>. To communicate this to SQL, we say that we want to <code>SELECT</code> the <code>SUM</code>med <code>cost</code> values for each <code>type</code> group.</p>
+<p>There are many aggregation functions that can be used to aggregate the data contained in each group. Some common examples are:</p>
+<ul>
+<li><code>COUNT</code>: count the number of rows associated with each group</li>
+<li><code>MIN</code>: find the minimum value of each group</li>
+<li><code>MAX</code>: find the maximum value of each group</li>
+<li><code>SUM</code>: sum across all records in each group</li>
+<li><code>AVG</code>: find the average value of each group</li>
+</ul>
+<p>We can easily compute multiple aggregations all at once (a task that was very tricky in <code>pandas</code>).</p>
+<div id="924d1ca3" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>SELECT <span class="bu">type</span>, SUM(cost), MIN(cost), MAX(name)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>FROM Dish</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>GROUP BY <span class="bu">type</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * duckdb:///data/basic_examples.db
+Done.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<table class="caption-top" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">type</th>
+<th data-quarto-table-cell-role="th">sum("cost")</th>
+<th data-quarto-table-cell-role="th">min("cost")</th>
+<th data-quarto-table-cell-role="th">max("name")</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+</div>
+</div>
+<p>To count the number of rows associated with each group, we use the <code>COUNT</code> keyword. Calling <code>COUNT(*)</code> will compute the total number of rows in each group, including rows with null values. Its <code>pandas</code> equivalent is <code>.groupby().size()</code>.</p>
+<p>Recall the <code>Dragon</code> table from the previous lecture:</p>
+<div id="2f89a42c" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>SELECT <span class="op">*</span> FROM Dragon<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * duckdb:///data/basic_examples.db
+Done.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="7">
+<table class="caption-top" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">name</th>
+<th data-quarto-table-cell-role="th">year</th>
+<th data-quarto-table-cell-role="th">cute</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+</div>
+</div>
+<p>Notice that <code>COUNT(*)</code> and <code>COUNT(cute)</code> result in different outputs.</p>
+<div id="0a9aa412" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>SELECT year, COUNT(<span class="op">*</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>GROUP BY year<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * duckdb:///data/basic_examples.db
+Done.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<table class="caption-top" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">year</th>
+<th data-quarto-table-cell-role="th">count_star()</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+</div>
+</div>
+<div id="1c2c947f" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>SELECT year, COUNT(cute)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>GROUP BY year<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * duckdb:///data/basic_examples.db
+Done.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="9">
+<table class="caption-top" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">year</th>
+<th data-quarto-table-cell-role="th">count(cute)</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+</div>
+</div>
+<p>With this definition of <code>GROUP BY</code> in hand, let’s update our SQL order of operations. Remember: <em>every</em> SQL query must list clauses in this order.</p>
+<pre><code>SELECT &lt;column expression list&gt;
+FROM &lt;table&gt;
+[WHERE &lt;predicate&gt;]
+[GROUP BY &lt;column list&gt;]
+[ORDER BY &lt;column list&gt;]
+[LIMIT &lt;number of rows&gt;]
+[OFFSET &lt;number of rows&gt;];</code></pre>
+<p>Note that we can use the <code>AS</code> keyword to rename columns during the selection process and that column expressions may include aggregation functions (<code>MAX</code>, <code>MIN</code>, etc.).</p>
+</section>
+<section id="filtering-groups" class="level2" data-number="21.2">
+<h2 data-number="21.2" class="anchored" data-anchor-id="filtering-groups"><span class="header-section-number">21.2</span> Filtering Groups</h2>
+<p>Now, what if we only want groups that meet a certain condition? <code>HAVING</code> filters groups by applying some condition across all rows in each group. We interpret it as a way to keep only the groups <code>HAVING</code> some condition. Note the difference between <code>WHERE</code> and <code>HAVING</code>: we use <code>WHERE</code> to filter rows, whereas we use <code>HAVING</code> to filter <em>groups</em>. <code>WHERE</code> precedes <code>HAVING</code> in terms of how SQL executes a query.</p>
+<p>Let’s take a look at the <code>Dish</code> table to see how we can use <code>HAVING</code>. Say we want to group dishes with a cost greater than 4 by <code>type</code> and only keep groups where the max cost is less than 10.</p>
+<div id="50e85973" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>SELECT <span class="bu">type</span>, COUNT(<span class="op">*</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>FROM Dish</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>WHERE cost <span class="op">&gt;</span> <span class="dv">4</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>GROUP BY <span class="bu">type</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>HAVING MAX(cost) <span class="op">&lt;</span>  <span class="dv">10</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * duckdb:///data/basic_examples.db
+Done.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="10">
+<table class="caption-top" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">type</th>
+<th data-quarto-table-cell-role="th">count_star()</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+</div>
+</div>
+<p>Here, we first use <code>WHERE</code> to filter for rows with a cost greater than 4. We then group our values by <code>type</code> before applying the <code>HAVING</code> operator. With <code>HAVING</code>, we can filter our groups based on if the max cost is less than 10.</p>
+</section>
+<section id="summary-sql" class="level2" data-number="21.3">
+<h2 data-number="21.3" class="anchored" data-anchor-id="summary-sql"><span class="header-section-number">21.3</span> Summary: SQL</h2>
+<p>With this definition of <code>GROUP BY</code> and <code>HAVING</code> in hand, let’s update our SQL order of operations. Remember: <em>every</em> SQL query must list clauses in this order.</p>
+<pre><code>SELECT &lt;column expression list&gt;
+FROM &lt;table&gt;
+[WHERE &lt;predicate&gt;]
+[GROUP BY &lt;column list&gt;]
+[ORDER BY &lt;column list&gt;]
+[LIMIT &lt;number of rows&gt;]
+[OFFSET &lt;number of rows&gt;];</code></pre>
+<p>Note that we can use the <code>AS</code> keyword to rename columns during the selection process and that column expressions may include aggregation functions (<code>MAX</code>, <code>MIN</code>, etc.).</p>
+</section>
+<section id="eda-in-sql" class="level2" data-number="21.4">
+<h2 data-number="21.4" class="anchored" data-anchor-id="eda-in-sql"><span class="header-section-number">21.4</span> EDA in SQL</h2>
+<p>In the last lecture, we mostly worked under the assumption that our data had already been cleaned. However, as we saw in our first pass through the data science lifecycle, we’re very unlikely to be given data that is free of formatting issues. With this in mind, we’ll want to learn how to clean and transform data in SQL.</p>
+<p>Our typical workflow when working with “big data” is:</p>
+<ol type="1">
+<li>Use SQL to query data from a database</li>
+<li>Use Python (with <code>pandas</code>) to analyze this data in detail</li>
+</ol>
+<p>We can, however, still perform simple data cleaning and re-structuring using SQL directly. To do so, we’ll use the <code>Title</code> table from the <code>imdb_duck</code> database, which contains information about movies and actors.</p>
+<p>Let’s load in the <code>imdb_duck</code> database.</p>
+<div id="9f81f9e9" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>os.environ[<span class="st">"TQDM_DISABLE"</span>] <span class="op">=</span> <span class="st">"1"</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> os.path.exists(<span class="st">"/home/jovyan/shared/sql/imdb_duck.db"</span>):</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    imdbpath <span class="op">=</span> <span class="st">"duckdb:////home/jovyan/shared/sql/imdb_duck.db"</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="cf">elif</span> os.path.exists(<span class="st">"data/imdb_duck.db"</span>):</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    imdbpath <span class="op">=</span>  <span class="st">"duckdb:///data/imdb_duck.db"</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    <span class="im">import</span> gdown</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    url <span class="op">=</span> <span class="st">'https://drive.google.com/uc?id=10tKOHGLt9QoOgq5Ii-FhxpB9lDSQgl1O'</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>    output_path <span class="op">=</span> <span class="st">'data/imdb_duck.db'</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>    gdown.download(url, output_path, quiet<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>    imdbpath <span class="op">=</span> <span class="st">"duckdb:///data/imdb_duck.db"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="ed1857a0" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sqlalchemy <span class="im">import</span> create_engine</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>imdb_engine <span class="op">=</span> create_engine(imdbpath, connect_args<span class="op">=</span>{<span class="st">'read_only'</span>: <span class="va">True</span>})</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>sql imdb_engine <span class="op">--</span>alias imdb</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * duckdb:///data/basic_examples.db
+(duckdb.duckdb.ParserException) Parser Error: syntax error at or near "imdb_engine"
+[SQL: imdb_engine]
+(Background on this error at: https://sqlalche.me/e/20/f405)</code></pre>
+</div>
+</div>
+<p>Since we’ll be working with the <code>Title</code> table, let’s take a quick look at what it contains.</p>
+<div id="c5c1cd6e" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql imdb </span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>SELECT <span class="op">*</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>FROM Title</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>WHERE primaryTitle IN (<span class="st">'Ginny &amp; Georgia'</span>, <span class="st">'What If...?'</span>, <span class="st">'Succession'</span>, <span class="st">'Veep'</span>, <span class="st">'Tenet'</span>)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>LIMIT <span class="dv">10</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * duckdb:///data/basic_examples.db
+(duckdb.duckdb.ParserException) Parser Error: syntax error at or near "imdb"
+[SQL: imdb
+    
+SELECT *
+FROM Title
+WHERE primaryTitle IN ('Ginny &amp; Georgia', 'What If...?', 'Succession', 'Veep', 'Tenet')
+LIMIT 10;]
+(Background on this error at: https://sqlalche.me/e/20/f405)</code></pre>
+</div>
+</div>
+<section id="matching-text-using-like" class="level3" data-number="21.4.1">
+<h3 data-number="21.4.1" class="anchored" data-anchor-id="matching-text-using-like"><span class="header-section-number">21.4.1</span> Matching Text using <code>LIKE</code></h3>
+<p>One common task we encountered in our first look at EDA was needing to match string data. For example, we might want to remove entries beginning with the same prefix as part of the data cleaning process.</p>
+<p>In SQL, we use the <code>LIKE</code> operator to (you guessed it) look for strings that are <em>like</em> a given string pattern.</p>
+<div id="94baefb5" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>SELECT titleType, primaryTitle</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>FROM Title</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>WHERE primaryTitle LIKE <span class="st">'Star Wars: Episode I - The Phantom Menace'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * duckdb:///data/basic_examples.db
+(duckdb.duckdb.CatalogException) Catalog Error: Table with name Title does not exist!
+Did you mean "system.information_schema.tables"?
+LINE 2: FROM Title
+             ^
+[SQL: SELECT titleType, primaryTitle
+FROM Title
+WHERE primaryTitle LIKE 'Star Wars: Episode I - The Phantom Menace']
+(Background on this error at: https://sqlalche.me/e/20/f405)</code></pre>
+</div>
+</div>
+<p>What if we wanted to find <em>all</em> Star Wars movies? <code>%</code> is the wildcard operator, it means “look for any character, any number of times”. This makes it helpful for identifying strings that are similar to our desired pattern, even when we don’t know the full text of what we aim to extract.</p>
+<div id="8c483e2c" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>SELECT titleType, primaryTitle</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>FROM Title</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>WHERE primaryTitle LIKE <span class="st">'%Star Wars%'</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>LIMIT <span class="dv">10</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * duckdb:///data/basic_examples.db
+(duckdb.duckdb.CatalogException) Catalog Error: Table with name Title does not exist!
+Did you mean "system.information_schema.tables"?
+LINE 2: FROM Title
+             ^
+[SQL: SELECT titleType, primaryTitle
+FROM Title
+WHERE primaryTitle LIKE '%Star Wars%'
+LIMIT 10;]
+(Background on this error at: https://sqlalche.me/e/20/f405)</code></pre>
+</div>
+</div>
+<p>Alternatively, we can use RegEx! DuckDB and most real DBMSs allow for this. Note that here, we have to use the <code>SIMILAR TO</code> operater rather than <code>LIKE</code>.</p>
+<div id="677e6c4d" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>SELECT titleType, primaryTitle</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>FROM Title</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>WHERE primaryTitle SIMILAR TO <span class="st">'.*Star Wars*.'</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>LIMIT <span class="dv">10</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * duckdb:///data/basic_examples.db
+(duckdb.duckdb.CatalogException) Catalog Error: Table with name Title does not exist!
+Did you mean "system.information_schema.tables"?
+LINE 2: FROM Title
+             ^
+[SQL: SELECT titleType, primaryTitle
+FROM Title
+WHERE primaryTitle SIMILAR TO '.*Star Wars*.'
+LIMIT 10;]
+(Background on this error at: https://sqlalche.me/e/20/f405)</code></pre>
+</div>
+</div>
+</section>
+<section id="casting-data-types" class="level3" data-number="21.4.2">
+<h3 data-number="21.4.2" class="anchored" data-anchor-id="casting-data-types"><span class="header-section-number">21.4.2</span> <code>CAST</code>ing Data Types</h3>
+<p>A common data cleaning task is converting data to the correct variable type. The <code>CAST</code> keyword is used to generate a new output column. Each entry in this output column is the result of converting the data in an existing column to a new data type. For example, we may wish to convert numeric data stored as a string to an integer.</p>
+<div id="89ab5ad3" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>SELECT primaryTitle, CAST(runtimeMinutes AS INT)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>FROM Title<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * duckdb:///data/basic_examples.db
+(duckdb.duckdb.CatalogException) Catalog Error: Table with name Title does not exist!
+Did you mean "system.information_schema.tables"?
+LINE 2: FROM Title;
+             ^
+[SQL: SELECT primaryTitle, CAST(runtimeMinutes AS INT)
+FROM Title;]
+(Background on this error at: https://sqlalche.me/e/20/f405)</code></pre>
+</div>
+</div>
+<p>We use <code>CAST</code> when <code>SELECT</code>ing colunns for our output table. In the example above, we want to <code>SELECT</code> the columns of integer year and runtime data that is created by the <code>CAST</code>.</p>
+<p>SQL will automatically name a new column according to the command used to <code>SELECT</code> it, which can lead to unwieldy column names. We can rename the <code>CAST</code>ed column using the <code>AS</code> keyword.</p>
+<div id="3f5f31dc" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>SELECT primaryTitle AS title, CAST(runtimeMinutes AS INT) AS minutes, CAST(startYear AS INT) AS year</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>FROM Title</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>LIMIT <span class="dv">5</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * duckdb:///data/basic_examples.db
+(duckdb.duckdb.CatalogException) Catalog Error: Table with name Title does not exist!
+Did you mean "system.information_schema.tables"?
+LINE 2: FROM Title
+             ^
+[SQL: SELECT primaryTitle AS title, CAST(runtimeMinutes AS INT) AS minutes, CAST(startYear AS INT) AS year
+FROM Title
+LIMIT 5;]
+(Background on this error at: https://sqlalche.me/e/20/f405)</code></pre>
+</div>
+</div>
+</section>
+<section id="using-conditional-statements-with-case" class="level3" data-number="21.4.3">
+<h3 data-number="21.4.3" class="anchored" data-anchor-id="using-conditional-statements-with-case"><span class="header-section-number">21.4.3</span> Using Conditional Statements with <code>CASE</code></h3>
+<p>When working with <code>pandas</code>, we often ran into situations where we wanted to generate new columns using some form of conditional statement. For example, say we wanted to describe a film title as “old,” “mid-aged,” or “new,” depending on the year of its release.</p>
+<p>In SQL, conditional operations are performed using a <code>CASE</code> clause. Conceptually, <code>CASE</code> behaves much like the <code>CAST</code> operation: it creates a new column that we can then <code>SELECT</code> to appear in the output. The syntax for a <code>CASE</code> clause is as follows:</p>
+<pre><code>CASE WHEN &lt;condition&gt; THEN &lt;value&gt;
+     WHEN &lt;other condition&gt; THEN &lt;other value&gt;
+     ...
+     ELSE &lt;yet another value&gt;
+     END</code></pre>
+<p>Scanning through the skeleton code above, you can see that the logic is similar to that of an <code>if</code> statement in Python. The conditional statement is first opened by calling <code>CASE</code>. Each new condition is specified by <code>WHEN</code>, with <code>THEN</code> indicating what value should be filled if the condition is met. <code>ELSE</code> specifies the value that should be filled if no other conditions are met. Lastly, <code>END</code> indicates the end of the conditional statement; once <code>END</code> has been called, SQL will continue evaluating the query as usual.</p>
+<p>Let’s see this in action. In the example below, we give the new column created by the <code>CASE</code> statement the name <code>movie_age</code>.</p>
+<div id="db3c4e6e" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="op">/*</span> If a movie was filmed before <span class="dv">1950</span>, it <span class="kw">is</span> <span class="st">"old"</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>Otherwise, <span class="cf">if</span> a movie was filmed before <span class="dv">2000</span>, it <span class="kw">is</span> <span class="st">"mid-aged"</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>Else, a movie <span class="kw">is</span> <span class="st">"new"</span> <span class="op">*/</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>SELECT titleType, startYear,</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>CASE WHEN startYear <span class="op">&lt;</span> <span class="dv">1950</span> THEN <span class="st">'old'</span></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>     WHEN startYear <span class="op">&lt;</span> <span class="dv">2000</span> THEN <span class="st">'mid-aged'</span></span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>     ELSE <span class="st">'new'</span></span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>     END AS movie_age</span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>FROM Title<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * duckdb:///data/basic_examples.db
+(duckdb.duckdb.CatalogException) Catalog Error: Table with name Title does not exist!
+Did you mean "system.information_schema.tables"?
+LINE 10: FROM Title;
+              ^
+[SQL: /* If a movie was filmed before 1950, it is "old"
+Otherwise, if a movie was filmed before 2000, it is "mid-aged"
+Else, a movie is "new" */
+
+SELECT titleType, startYear,
+CASE WHEN startYear &lt; 1950 THEN 'old'
+     WHEN startYear &lt; 2000 THEN 'mid-aged'
+     ELSE 'new'
+     END AS movie_age
+FROM Title;]
+(Background on this error at: https://sqlalche.me/e/20/f405)</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="joining-tables" class="level2" data-number="21.5">
+<h2 data-number="21.5" class="anchored" data-anchor-id="joining-tables"><span class="header-section-number">21.5</span> <code>JOIN</code>ing Tables</h2>
+<p>At this point, we’re well-versed in using SQL as a tool to clean, manipulate, and transform data in a table. Notice that this sentence referred to one <em>table</em>, specifically. What happens if the data we need is distributed across multiple tables? This is an important consideration when using SQL —— recall that we first introduced SQL as a language to query from databases. Databases often store data in a multidimensional structure. In other words, information is stored across several tables, with each table containing a small subset of all the data housed by the database.</p>
+<p>A common way of organizing a database is by using a <strong>star schema</strong>. A star schema is composed of two types of tables. A <strong>fact table</strong> is the central table of the database —— it contains the information needed to link entries across several <strong>dimension tables</strong>, which contain more detailed information about the data.</p>
+<p>Say we were working with a database about boba offerings in Berkeley. The dimension tables of the database might contain information about tea varieties and boba toppings. The fact table would be used to link this information across the various dimension tables.</p>
+<div style="text-align: center;">
+<p><img src="images/multidimensional.png" alt="multidimensional" width="850"></p>
+</div>
+<p>If we explicitly mark the relationships between tables, we start to see the star-like structure of the star schema.</p>
+<div style="text-align: center;">
+<p><img src="images/star.png" alt="star" width="650"></p>
+</div>
+<p>To join data across multiple tables, we’ll use the (creatively named) <code>JOIN</code> keyword. We’ll make things easier for now by first considering the simpler <code>cats</code> dataset, which consists of the tables <code>s</code> and <code>t</code>.</p>
+<div style="text-align: center;">
+<p><img src="images/cats.png" alt="cats" width="500"></p>
+</div>
+<p>To perform a join, we amend the <code>FROM</code> clause. You can think of this as saying, “<code>SELECT</code> my data <code>FROM</code> tables that have been <code>JOIN</code>ed together.”</p>
+<p>Remember: SQL does not consider newlines or whitespace when interpreting queries. The indentation given in the example below is to help improve readability. If you wish, you can write code that does not follow this formatting.</p>
+<pre><code>SELECT &lt;column list&gt;
+FROM table_1 
+    JOIN table_2 
+    ON key_1 = key_2;</code></pre>
+<p>We also need to specify what column from each table should be used to determine matching entries. By defining these keys, we provide SQL with the information it needs to pair rows of data together.</p>
+<p>The most commonly used type of SQL <code>JOIN</code> is the <strong>inner join</strong>. It turns out you’re already familiar with what an inner join does, and how it works – this is the type of join we’ve been using in <code>pandas</code> all along! In an inner join, we combine every row in our first table with its matching entry in the second table. If a row from either table does not have a match in the other table, it is omitted from the output.</p>
+<div style="text-align: center;">
+<p><img src="images/inner.png" alt="inner" width="800"></p>
+</div>
+<p>In a <strong>cross join</strong>, <em>all</em> possible combinations of rows appear in the output table, regardless of whether or not rows share a matching key. Because all rows are joined, even if there is no matching key, it is not necessary to specify what keys to consider in an <code>ON</code> statement. A cross join is also known as a cartesian product.</p>
+<div style="text-align: center;">
+<p><img src="images/cross.png" alt="cross" width="800"></p>
+</div>
+<p>Conceptually, we can interpret an inner join as a cross join, followed by removing all rows that do not share a matching key. Notice that the output of the inner join above contains all rows of the cross join example that contain a single color across the entire row.</p>
+<p>In a <strong>left outer join</strong>, <em>all</em> rows in the left table are kept in the output table. If a row in the right table shares a match with the left table, this row will be kept; otherwise, the rows in the right table are omitted from the output. We can fill in any missing values with <code>NULL</code>.</p>
+<div style="text-align: center;">
+<p><img src="images/left.png" alt="left" width="800"></p>
+</div>
+<p>A <strong>right outer join</strong> keeps all rows in the right table. Rows in the left table are only kept if they share a match in the right table. Again, we can fill in any missing values with <code>NULL</code>.</p>
+<div style="text-align: center;">
+<p><img src="images/right.png" alt="right" width="800"></p>
+</div>
+<p>In a <strong>full outer join</strong>, all rows that have a match between the two tables are joined together. If a row has no match in the second table, then the values of the columns for that second table are filled with <code>NULL</code>. In other words, a full outer join performs an inner join <em>while still keeping</em> rows that have no match in the other table. This is best understood visually:</p>
+<div style="text-align: center;">
+<p><img src="images/full.png" alt="full" width="800"></p>
+</div>
+<p>We have kept the same output achieved using an inner join, with the addition of partially null rows for entries in <code>s</code> and <code>t</code> that had no match in the second table.</p>
+<section id="aliasing-in-joins" class="level3" data-number="21.5.1">
+<h3 data-number="21.5.1" class="anchored" data-anchor-id="aliasing-in-joins"><span class="header-section-number">21.5.1</span> Aliasing in <code>JOIN</code>s</h3>
+<p>When joining tables, we often create aliases for table names (similarly to what we did with column names in the last lecture). We do this as it is typically easier to refer to aliases, especially when we are working with long table names. We can even reference columns using aliased table names!</p>
+<p>Let’s say we want to determine the average rating of various movies. We’ll need to <code>JOIN</code> the <code>Title</code> and <code>Rating</code> tables and can create aliases for both tables.</p>
+<div id="ae6478e3" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>SELECT primaryTitle, averageRating</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>FROM Title AS T INNER JOIN Rating AS R</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>ON T.tconst <span class="op">=</span> R.tconst<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * duckdb:///data/basic_examples.db
+(duckdb.duckdb.CatalogException) Catalog Error: Table with name Title does not exist!
+Did you mean "system.information_schema.tables"?
+LINE 2: FROM Title AS T INNER JOIN Rating AS R
+             ^
+[SQL: SELECT primaryTitle, averageRating
+FROM Title AS T INNER JOIN Rating AS R
+ON T.tconst = R.tconst;]
+(Background on this error at: https://sqlalche.me/e/20/f405)</code></pre>
+</div>
+</div>
+<p>Note that the <code>AS</code> is actually optional! We can create aliases for our tables even without it, but we usually include it for clarity.</p>
+<div id="861f1d7c" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="21">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>SELECT primaryTitle, averageRating</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>FROM Title T INNER JOIN Rating R</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>ON T.tconst <span class="op">=</span> R.tconst<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * duckdb:///data/basic_examples.db
+(duckdb.duckdb.CatalogException) Catalog Error: Table with name Title does not exist!
+Did you mean "system.information_schema.tables"?
+LINE 2: FROM Title T INNER JOIN Rating R
+             ^
+[SQL: SELECT primaryTitle, averageRating
+FROM Title T INNER JOIN Rating R
+ON T.tconst = R.tconst;]
+(Background on this error at: https://sqlalche.me/e/20/f405)</code></pre>
+</div>
+</div>
+</section>
+<section id="common-table-expressions" class="level3" data-number="21.5.2">
+<h3 data-number="21.5.2" class="anchored" data-anchor-id="common-table-expressions"><span class="header-section-number">21.5.2</span> Common Table Expressions</h3>
+<p>For more sophisticated data problems, the queries can become very complex. Common table expressions (CTEs) allow us to break down these complex queries into more manageable parts. To do so, we create temporary tables corresponding to different aspects of the problem and then reference them in the final query:</p>
+<pre><code>WITH 
+table_name1 AS ( 
+    SELECT ...
+),
+table_name2 AS ( 
+    SELECT ...
+)
+SELECT ... 
+FROM 
+table_name1, 
+table_name2, ...</code></pre>
+<p>Let’s say we want to identify the top 10 action movies that are highly rated (with an average rating greater than 7) and popular (having more than 5000 votes), along with the primary actors who are the most popular. We can use CTEs to break this query down into separate problems. Initially, we can filter to find good action movies and prolific actors separately. This way, in our final join, we only need to change the order.</p>
+<div id="9b80fad8" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="22">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>WITH </span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>good_action_movies AS (</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>    SELECT <span class="op">*</span></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>    FROM Title T JOIN Rating R ON T.tconst <span class="op">=</span> R.tconst  </span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>    WHERE genres LIKE <span class="st">'%Action%'</span> AND averageRating <span class="op">&gt;</span> <span class="dv">7</span> AND numVotes <span class="op">&gt;</span> <span class="dv">5000</span></span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>),</span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>prolific_actors AS (</span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>    SELECT N.nconst, primaryName, COUNT(<span class="op">*</span>) <span class="im">as</span> numRoles</span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>    FROM Name N JOIN Principal P ON N.nconst <span class="op">=</span> P.nconst</span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>    WHERE category <span class="op">=</span> <span class="st">'actor'</span></span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a>    GROUP BY N.nconst, primaryName</span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a>SELECT primaryTitle, primaryName, numRoles, ROUND(averageRating) AS rating</span>
+<span id="cb44-15"><a href="#cb44-15" aria-hidden="true" tabindex="-1"></a>FROM good_action_movies m, prolific_actors a, principal p</span>
+<span id="cb44-16"><a href="#cb44-16" aria-hidden="true" tabindex="-1"></a>WHERE p.tconst <span class="op">=</span> m.tconst AND p.nconst <span class="op">=</span> a.nconst</span>
+<span id="cb44-17"><a href="#cb44-17" aria-hidden="true" tabindex="-1"></a>ORDER BY rating DESC, numRoles DESC</span>
+<span id="cb44-18"><a href="#cb44-18" aria-hidden="true" tabindex="-1"></a>LIMIT <span class="dv">10</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> * duckdb:///data/basic_examples.db
+(duckdb.duckdb.CatalogException) Catalog Error: Table with name Title does not exist!
+Did you mean "system.information_schema.tables"?
+LINE 4:     F...
+                 ^
+[SQL: WITH 
+good_action_movies AS (
+    SELECT *
+    FROM Title T JOIN Rating R ON T.tconst = R.tconst  
+    WHERE genres LIKE '%Action%' AND averageRating &gt; 7 AND numVotes &gt; 5000
+),
+prolific_actors AS (
+    SELECT N.nconst, primaryName, COUNT(*) as numRoles
+    FROM Name N JOIN Principal P ON N.nconst = P.nconst
+    WHERE category = 'actor'
+    GROUP BY N.nconst, primaryName
+)
+SELECT primaryTitle, primaryName, numRoles, ROUND(averageRating) AS rating
+FROM good_action_movies m, prolific_actors a, principal p
+WHERE p.tconst = m.tconst AND p.nconst = a.nconst
+ORDER BY rating DESC, numRoles DESC
+LIMIT 10;]
+(Background on this error at: https://sqlalche.me/e/20/f405)</code></pre>
+</div>
+</div>
+
+
+<!-- -->
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation column-body">
+  <div class="nav-page nav-page-previous">
+      <a href="../sql_I/sql_I.html" class="pagination-link" aria-label="SQL I">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">SQL I</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../logistic_regression_1/logistic_reg_1.html" class="pagination-link" aria-label="Logistic Regression I">
+        <span class="nav-page-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Logistic Regression I</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb46" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> SQL II</span></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a><span class="an">execute:</span></span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="co">  echo: true</span></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a><span class="co">    code-fold: false</span></span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools: true</span></span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a><span class="co">    toc: true</span></span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a><span class="co">    toc-title: SQL II</span></span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a><span class="co">    page-layout: full</span></span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a><span class="co">    theme:</span></span>
+<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a><span class="co">      - cosmo</span></span>
+<span id="cb46-14"><a href="#cb46-14" aria-hidden="true" tabindex="-1"></a><span class="co">      - cerulean</span></span>
+<span id="cb46-15"><a href="#cb46-15" aria-hidden="true" tabindex="-1"></a><span class="co">    callout-icon: false</span></span>
+<span id="cb46-16"><a href="#cb46-16" aria-hidden="true" tabindex="-1"></a><span class="an">jupyter:</span></span>
+<span id="cb46-17"><a href="#cb46-17" aria-hidden="true" tabindex="-1"></a><span class="co">  jupytext:</span></span>
+<span id="cb46-18"><a href="#cb46-18" aria-hidden="true" tabindex="-1"></a><span class="co">    text_representation:</span></span>
+<span id="cb46-19"><a href="#cb46-19" aria-hidden="true" tabindex="-1"></a><span class="co">      extension: .qmd</span></span>
+<span id="cb46-20"><a href="#cb46-20" aria-hidden="true" tabindex="-1"></a><span class="co">      format_name: quarto</span></span>
+<span id="cb46-21"><a href="#cb46-21" aria-hidden="true" tabindex="-1"></a><span class="co">      format_version: '1.0'</span></span>
+<span id="cb46-22"><a href="#cb46-22" aria-hidden="true" tabindex="-1"></a><span class="co">      jupytext_version: 1.16.1</span></span>
+<span id="cb46-23"><a href="#cb46-23" aria-hidden="true" tabindex="-1"></a><span class="co">  kernelspec:</span></span>
+<span id="cb46-24"><a href="#cb46-24" aria-hidden="true" tabindex="-1"></a><span class="co">    display_name: Python 3 (ipykernel)</span></span>
+<span id="cb46-25"><a href="#cb46-25" aria-hidden="true" tabindex="-1"></a><span class="co">    language: python</span></span>
+<span id="cb46-26"><a href="#cb46-26" aria-hidden="true" tabindex="-1"></a><span class="co">    name: python3</span></span>
+<span id="cb46-27"><a href="#cb46-27" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb46-28"><a href="#cb46-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-29"><a href="#cb46-29" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="false"}</span>
+<span id="cb46-30"><a href="#cb46-30" aria-hidden="true" tabindex="-1"></a><span class="fu">## Learning Outcomes</span></span>
+<span id="cb46-31"><a href="#cb46-31" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Perform aggregations using <span class="in">`GROUP BY`</span></span>
+<span id="cb46-32"><a href="#cb46-32" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Introduce the ability to filter groups</span>
+<span id="cb46-33"><a href="#cb46-33" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Perform data cleaning and text manipulation in SQL</span>
+<span id="cb46-34"><a href="#cb46-34" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Join data across tables</span>
+<span id="cb46-35"><a href="#cb46-35" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb46-36"><a href="#cb46-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-37"><a href="#cb46-37" aria-hidden="true" tabindex="-1"></a>In this lecture, we'll continue our work from last time to introduce some advanced SQL syntax. </span>
+<span id="cb46-38"><a href="#cb46-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-39"><a href="#cb46-39" aria-hidden="true" tabindex="-1"></a>First, let's load in the <span class="in">`basic_examples.db`</span> database.</span>
+<span id="cb46-40"><a href="#cb46-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-43"><a href="#cb46-43" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb46-44"><a href="#cb46-44" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb46-45"><a href="#cb46-45" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the SQL Alchemy Python library and DuckDB</span></span>
+<span id="cb46-46"><a href="#cb46-46" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sqlalchemy</span>
+<span id="cb46-47"><a href="#cb46-47" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> duckdb</span>
+<span id="cb46-48"><a href="#cb46-48" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb46-49"><a href="#cb46-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-52"><a href="#cb46-52" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb46-53"><a href="#cb46-53" aria-hidden="true" tabindex="-1"></a><span class="co">#| vscode: {languageId: python}</span></span>
+<span id="cb46-54"><a href="#cb46-54" aria-hidden="true" tabindex="-1"></a><span class="co"># Load %%sql cell magic</span></span>
+<span id="cb46-55"><a href="#cb46-55" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>load_ext sql</span>
+<span id="cb46-56"><a href="#cb46-56" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb46-57"><a href="#cb46-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-60"><a href="#cb46-60" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb46-61"><a href="#cb46-61" aria-hidden="true" tabindex="-1"></a><span class="co">#| vscode: {languageId: python}</span></span>
+<span id="cb46-62"><a href="#cb46-62" aria-hidden="true" tabindex="-1"></a><span class="co"># Connect to the database</span></span>
+<span id="cb46-63"><a href="#cb46-63" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>sql duckdb:<span class="op">///</span>data<span class="op">/</span>basic_examples.db <span class="op">--</span>alias basic</span>
+<span id="cb46-64"><a href="#cb46-64" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb46-65"><a href="#cb46-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-66"><a href="#cb46-66" aria-hidden="true" tabindex="-1"></a><span class="fu">## Aggregating with `GROUP BY`</span></span>
+<span id="cb46-67"><a href="#cb46-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-68"><a href="#cb46-68" aria-hidden="true" tabindex="-1"></a>At this point, we've seen that SQL offers much of the same functionality that was given to us by <span class="in">`pandas`</span>. We can extract data from a table, filter it, and reorder it to suit our needs.</span>
+<span id="cb46-69"><a href="#cb46-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-70"><a href="#cb46-70" aria-hidden="true" tabindex="-1"></a>In <span class="in">`pandas`</span>, much of our analysis work relied heavily on being able to use <span class="in">`.groupby()`</span> to aggregate across the rows of our dataset. SQL's answer to this task is the (very conveniently named) <span class="in">`GROUP BY`</span> clause. While the outputs of <span class="in">`GROUP BY`</span> are similar to those of <span class="in">`.groupby()`</span> —— in both cases, we obtain an output table where some column has been used for grouping —— the syntax and logic used to group data in SQL are fairly different to the <span class="in">`pandas`</span> implementation.</span>
+<span id="cb46-71"><a href="#cb46-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-72"><a href="#cb46-72" aria-hidden="true" tabindex="-1"></a>To illustrate <span class="in">`GROUP BY`</span>, we will consider the <span class="in">`Dish`</span> table from our database.</span>
+<span id="cb46-73"><a href="#cb46-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-76"><a href="#cb46-76" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb46-77"><a href="#cb46-77" aria-hidden="true" tabindex="-1"></a><span class="co">#| vscode: {languageId: python}</span></span>
+<span id="cb46-78"><a href="#cb46-78" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb46-79"><a href="#cb46-79" aria-hidden="true" tabindex="-1"></a>SELECT <span class="op">*</span> </span>
+<span id="cb46-80"><a href="#cb46-80" aria-hidden="true" tabindex="-1"></a>FROM Dish<span class="op">;</span></span>
+<span id="cb46-81"><a href="#cb46-81" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb46-82"><a href="#cb46-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-83"><a href="#cb46-83" aria-hidden="true" tabindex="-1"></a>Notice that there are multiple dishes of the same <span class="in">`type`</span>. What if we wanted to find the total costs of dishes of a certain <span class="in">`type`</span>? To accomplish this, we would write the following code.</span>
+<span id="cb46-84"><a href="#cb46-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-87"><a href="#cb46-87" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb46-88"><a href="#cb46-88" aria-hidden="true" tabindex="-1"></a><span class="co">#| vscode: {languageId: python}</span></span>
+<span id="cb46-89"><a href="#cb46-89" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb46-90"><a href="#cb46-90" aria-hidden="true" tabindex="-1"></a>SELECT <span class="bu">type</span>, SUM(cost)</span>
+<span id="cb46-91"><a href="#cb46-91" aria-hidden="true" tabindex="-1"></a>FROM Dish</span>
+<span id="cb46-92"><a href="#cb46-92" aria-hidden="true" tabindex="-1"></a>GROUP BY <span class="bu">type</span><span class="op">;</span></span>
+<span id="cb46-93"><a href="#cb46-93" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb46-94"><a href="#cb46-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-95"><a href="#cb46-95" aria-hidden="true" tabindex="-1"></a>What is going on here? The statement <span class="in">`GROUP BY type`</span> tells SQL to group the data based on the value contained in the <span class="in">`type`</span> column (whether a record is an appetizer, entree, or dessert). <span class="in">`SUM(cost)`</span> sums up the costs of dishes in each <span class="in">`type`</span> and displays the result in the output table.</span>
+<span id="cb46-96"><a href="#cb46-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-97"><a href="#cb46-97" aria-hidden="true" tabindex="-1"></a>You may be wondering: why does <span class="in">`SUM(cost)`</span> come before the command to <span class="in">`GROUP BY type`</span>? Don't we need to form groups before we can count the number of entries in each? Remember that SQL is a *declarative* programming language —— a SQL programmer simply states what end result they would like to see, and leaves the task of figuring out *how* to obtain this result to SQL itself. This means that SQL queries sometimes don't follow what a reader sees as a "logical" sequence of thought. Instead, SQL requires that we follow its set order of operations when constructing queries. So long as we follow this order, SQL will handle the underlying logic.</span>
+<span id="cb46-98"><a href="#cb46-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-99"><a href="#cb46-99" aria-hidden="true" tabindex="-1"></a>In practical terms: our goal with this query was to output the total <span class="in">`cost`</span>s of each <span class="in">`type`</span>. To communicate this to SQL, we say that we want to <span class="in">`SELECT`</span> the <span class="in">`SUM`</span>med <span class="in">`cost`</span> values for each <span class="in">`type`</span> group. </span>
+<span id="cb46-100"><a href="#cb46-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-101"><a href="#cb46-101" aria-hidden="true" tabindex="-1"></a>There are many aggregation functions that can be used to aggregate the data contained in each group. Some common examples are:</span>
+<span id="cb46-102"><a href="#cb46-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-103"><a href="#cb46-103" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span><span class="in">`COUNT`</span>: count the number of rows associated with each group</span>
+<span id="cb46-104"><a href="#cb46-104" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span><span class="in">`MIN`</span>: find the minimum value of each group</span>
+<span id="cb46-105"><a href="#cb46-105" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span><span class="in">`MAX`</span>: find the maximum value of each group</span>
+<span id="cb46-106"><a href="#cb46-106" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span><span class="in">`SUM`</span>: sum across all records in each group</span>
+<span id="cb46-107"><a href="#cb46-107" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span><span class="in">`AVG`</span>: find the average value of each group</span>
+<span id="cb46-108"><a href="#cb46-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-109"><a href="#cb46-109" aria-hidden="true" tabindex="-1"></a>We can easily compute multiple aggregations all at once (a task that was very tricky in <span class="in">`pandas`</span>).</span>
+<span id="cb46-110"><a href="#cb46-110" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-113"><a href="#cb46-113" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb46-114"><a href="#cb46-114" aria-hidden="true" tabindex="-1"></a><span class="co">#| vscode: {languageId: python}</span></span>
+<span id="cb46-115"><a href="#cb46-115" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb46-116"><a href="#cb46-116" aria-hidden="true" tabindex="-1"></a>SELECT <span class="bu">type</span>, SUM(cost), MIN(cost), MAX(name)</span>
+<span id="cb46-117"><a href="#cb46-117" aria-hidden="true" tabindex="-1"></a>FROM Dish</span>
+<span id="cb46-118"><a href="#cb46-118" aria-hidden="true" tabindex="-1"></a>GROUP BY <span class="bu">type</span><span class="op">;</span></span>
+<span id="cb46-119"><a href="#cb46-119" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb46-120"><a href="#cb46-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-121"><a href="#cb46-121" aria-hidden="true" tabindex="-1"></a>To count the number of rows associated with each group, we use the <span class="in">`COUNT`</span> keyword. Calling <span class="in">`COUNT(*)`</span> will compute the total number of rows in each group, including rows with null values. Its <span class="in">`pandas`</span> equivalent is <span class="in">`.groupby().size()`</span>.</span>
+<span id="cb46-122"><a href="#cb46-122" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-123"><a href="#cb46-123" aria-hidden="true" tabindex="-1"></a>Recall the <span class="in">`Dragon`</span> table from the previous lecture:</span>
+<span id="cb46-124"><a href="#cb46-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-127"><a href="#cb46-127" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb46-128"><a href="#cb46-128" aria-hidden="true" tabindex="-1"></a><span class="co">#| vscode: {languageId: python}</span></span>
+<span id="cb46-129"><a href="#cb46-129" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb46-130"><a href="#cb46-130" aria-hidden="true" tabindex="-1"></a>SELECT <span class="op">*</span> FROM Dragon<span class="op">;</span></span>
+<span id="cb46-131"><a href="#cb46-131" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb46-132"><a href="#cb46-132" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-133"><a href="#cb46-133" aria-hidden="true" tabindex="-1"></a>Notice that <span class="in">`COUNT(*)`</span> and <span class="in">`COUNT(cute)`</span> result in different outputs.</span>
+<span id="cb46-134"><a href="#cb46-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-137"><a href="#cb46-137" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb46-138"><a href="#cb46-138" aria-hidden="true" tabindex="-1"></a><span class="co">#| vscode: {languageId: python}</span></span>
+<span id="cb46-139"><a href="#cb46-139" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb46-140"><a href="#cb46-140" aria-hidden="true" tabindex="-1"></a>SELECT year, COUNT(<span class="op">*</span>)</span>
+<span id="cb46-141"><a href="#cb46-141" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span>
+<span id="cb46-142"><a href="#cb46-142" aria-hidden="true" tabindex="-1"></a>GROUP BY year<span class="op">;</span></span>
+<span id="cb46-143"><a href="#cb46-143" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb46-144"><a href="#cb46-144" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-147"><a href="#cb46-147" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb46-148"><a href="#cb46-148" aria-hidden="true" tabindex="-1"></a><span class="co">#| vscode: {languageId: python}</span></span>
+<span id="cb46-149"><a href="#cb46-149" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb46-150"><a href="#cb46-150" aria-hidden="true" tabindex="-1"></a>SELECT year, COUNT(cute)</span>
+<span id="cb46-151"><a href="#cb46-151" aria-hidden="true" tabindex="-1"></a>FROM Dragon</span>
+<span id="cb46-152"><a href="#cb46-152" aria-hidden="true" tabindex="-1"></a>GROUP BY year<span class="op">;</span></span>
+<span id="cb46-153"><a href="#cb46-153" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb46-154"><a href="#cb46-154" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-155"><a href="#cb46-155" aria-hidden="true" tabindex="-1"></a>With this definition of <span class="in">`GROUP BY`</span> in hand, let's update our SQL order of operations. Remember: *every* SQL query must list clauses in this order. </span>
+<span id="cb46-156"><a href="#cb46-156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-157"><a href="#cb46-157" aria-hidden="true" tabindex="-1"></a><span class="in">    SELECT &lt;column expression list&gt;</span></span>
+<span id="cb46-158"><a href="#cb46-158" aria-hidden="true" tabindex="-1"></a><span class="in">    FROM &lt;table&gt;</span></span>
+<span id="cb46-159"><a href="#cb46-159" aria-hidden="true" tabindex="-1"></a><span class="in">    [WHERE &lt;predicate&gt;]</span></span>
+<span id="cb46-160"><a href="#cb46-160" aria-hidden="true" tabindex="-1"></a><span class="in">    [GROUP BY &lt;column list&gt;]</span></span>
+<span id="cb46-161"><a href="#cb46-161" aria-hidden="true" tabindex="-1"></a><span class="in">    [ORDER BY &lt;column list&gt;]</span></span>
+<span id="cb46-162"><a href="#cb46-162" aria-hidden="true" tabindex="-1"></a><span class="in">    [LIMIT &lt;number of rows&gt;]</span></span>
+<span id="cb46-163"><a href="#cb46-163" aria-hidden="true" tabindex="-1"></a><span class="in">    [OFFSET &lt;number of rows&gt;];</span></span>
+<span id="cb46-164"><a href="#cb46-164" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-165"><a href="#cb46-165" aria-hidden="true" tabindex="-1"></a>Note that we can use the <span class="in">`AS`</span> keyword to rename columns during the selection process and that column expressions may include aggregation functions (<span class="in">`MAX`</span>, <span class="in">`MIN`</span>, etc.).</span>
+<span id="cb46-166"><a href="#cb46-166" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-167"><a href="#cb46-167" aria-hidden="true" tabindex="-1"></a><span class="fu">## Filtering Groups</span></span>
+<span id="cb46-168"><a href="#cb46-168" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-169"><a href="#cb46-169" aria-hidden="true" tabindex="-1"></a>Now, what if we only want groups that meet a certain condition? <span class="in">`HAVING`</span> filters groups by applying some condition across all rows in each group. We interpret it as a way to keep only the groups <span class="in">`HAVING`</span> some condition. Note the difference between <span class="in">`WHERE`</span> and <span class="in">`HAVING`</span>: we use <span class="in">`WHERE`</span> to filter rows, whereas we use <span class="in">`HAVING`</span> to filter *groups*. <span class="in">`WHERE`</span> precedes <span class="in">`HAVING`</span> in terms of how SQL executes a query.</span>
+<span id="cb46-170"><a href="#cb46-170" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-171"><a href="#cb46-171" aria-hidden="true" tabindex="-1"></a>Let's take a look at the <span class="in">`Dish`</span> table to see how we can use <span class="in">`HAVING`</span>. Say we want to group dishes with a cost greater than 4 by <span class="in">`type`</span> and only keep groups where the max cost is less than 10.</span>
+<span id="cb46-172"><a href="#cb46-172" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-175"><a href="#cb46-175" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb46-176"><a href="#cb46-176" aria-hidden="true" tabindex="-1"></a><span class="co">#| vscode: {languageId: python}</span></span>
+<span id="cb46-177"><a href="#cb46-177" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb46-178"><a href="#cb46-178" aria-hidden="true" tabindex="-1"></a>SELECT <span class="bu">type</span>, COUNT(<span class="op">*</span>)</span>
+<span id="cb46-179"><a href="#cb46-179" aria-hidden="true" tabindex="-1"></a>FROM Dish</span>
+<span id="cb46-180"><a href="#cb46-180" aria-hidden="true" tabindex="-1"></a>WHERE cost <span class="op">&gt;</span> <span class="dv">4</span></span>
+<span id="cb46-181"><a href="#cb46-181" aria-hidden="true" tabindex="-1"></a>GROUP BY <span class="bu">type</span></span>
+<span id="cb46-182"><a href="#cb46-182" aria-hidden="true" tabindex="-1"></a>HAVING MAX(cost) <span class="op">&lt;</span>  <span class="dv">10</span><span class="op">;</span></span>
+<span id="cb46-183"><a href="#cb46-183" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb46-184"><a href="#cb46-184" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-185"><a href="#cb46-185" aria-hidden="true" tabindex="-1"></a>Here, we first use <span class="in">`WHERE`</span> to filter for rows with a cost greater than 4. We then group our values by <span class="in">`type`</span> before applying the <span class="in">`HAVING`</span> operator. With <span class="in">`HAVING`</span>, we can filter our groups based on if the max cost is less than 10.</span>
+<span id="cb46-186"><a href="#cb46-186" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-187"><a href="#cb46-187" aria-hidden="true" tabindex="-1"></a><span class="fu">## Summary: SQL</span></span>
+<span id="cb46-188"><a href="#cb46-188" aria-hidden="true" tabindex="-1"></a>With this definition of <span class="in">`GROUP BY`</span> and <span class="in">`HAVING`</span> in hand, let's update our SQL order of operations. Remember: *every* SQL query must list clauses in this order. </span>
+<span id="cb46-189"><a href="#cb46-189" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-190"><a href="#cb46-190" aria-hidden="true" tabindex="-1"></a><span class="in">    SELECT &lt;column expression list&gt;</span></span>
+<span id="cb46-191"><a href="#cb46-191" aria-hidden="true" tabindex="-1"></a><span class="in">    FROM &lt;table&gt;</span></span>
+<span id="cb46-192"><a href="#cb46-192" aria-hidden="true" tabindex="-1"></a><span class="in">    [WHERE &lt;predicate&gt;]</span></span>
+<span id="cb46-193"><a href="#cb46-193" aria-hidden="true" tabindex="-1"></a><span class="in">    [GROUP BY &lt;column list&gt;]</span></span>
+<span id="cb46-194"><a href="#cb46-194" aria-hidden="true" tabindex="-1"></a><span class="in">    [ORDER BY &lt;column list&gt;]</span></span>
+<span id="cb46-195"><a href="#cb46-195" aria-hidden="true" tabindex="-1"></a><span class="in">    [LIMIT &lt;number of rows&gt;]</span></span>
+<span id="cb46-196"><a href="#cb46-196" aria-hidden="true" tabindex="-1"></a><span class="in">    [OFFSET &lt;number of rows&gt;];</span></span>
+<span id="cb46-197"><a href="#cb46-197" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-198"><a href="#cb46-198" aria-hidden="true" tabindex="-1"></a>Note that we can use the <span class="in">`AS`</span> keyword to rename columns during the selection process and that column expressions may include aggregation functions (<span class="in">`MAX`</span>, <span class="in">`MIN`</span>, etc.).</span>
+<span id="cb46-199"><a href="#cb46-199" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-200"><a href="#cb46-200" aria-hidden="true" tabindex="-1"></a><span class="fu">## EDA in SQL</span></span>
+<span id="cb46-201"><a href="#cb46-201" aria-hidden="true" tabindex="-1"></a>In the last lecture, we mostly worked under the assumption that our data had already been cleaned. However, as we saw in our first pass through the data science lifecycle, we're very unlikely to be given data that is free of formatting issues. With this in mind, we'll want to learn how to clean and transform data in SQL. </span>
+<span id="cb46-202"><a href="#cb46-202" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-203"><a href="#cb46-203" aria-hidden="true" tabindex="-1"></a>Our typical workflow when working with "big data" is:</span>
+<span id="cb46-204"><a href="#cb46-204" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-205"><a href="#cb46-205" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Use SQL to query data from a database</span>
+<span id="cb46-206"><a href="#cb46-206" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Use Python (with <span class="in">`pandas`</span>) to analyze this data in detail</span>
+<span id="cb46-207"><a href="#cb46-207" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-208"><a href="#cb46-208" aria-hidden="true" tabindex="-1"></a>We can, however, still perform simple data cleaning and re-structuring using SQL directly. To do so, we'll use the <span class="in">`Title`</span> table from the <span class="in">`imdb_duck`</span> database, which contains information about movies and actors.</span>
+<span id="cb46-209"><a href="#cb46-209" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-210"><a href="#cb46-210" aria-hidden="true" tabindex="-1"></a>Let's load in the <span class="in">`imdb_duck`</span> database.</span>
+<span id="cb46-211"><a href="#cb46-211" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-214"><a href="#cb46-214" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb46-215"><a href="#cb46-215" aria-hidden="true" tabindex="-1"></a><span class="co">#| vscode: {languageId: python}</span></span>
+<span id="cb46-216"><a href="#cb46-216" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb46-217"><a href="#cb46-217" aria-hidden="true" tabindex="-1"></a>os.environ[<span class="st">"TQDM_DISABLE"</span>] <span class="op">=</span> <span class="st">"1"</span></span>
+<span id="cb46-218"><a href="#cb46-218" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> os.path.exists(<span class="st">"/home/jovyan/shared/sql/imdb_duck.db"</span>):</span>
+<span id="cb46-219"><a href="#cb46-219" aria-hidden="true" tabindex="-1"></a>    imdbpath <span class="op">=</span> <span class="st">"duckdb:////home/jovyan/shared/sql/imdb_duck.db"</span></span>
+<span id="cb46-220"><a href="#cb46-220" aria-hidden="true" tabindex="-1"></a><span class="cf">elif</span> os.path.exists(<span class="st">"data/imdb_duck.db"</span>):</span>
+<span id="cb46-221"><a href="#cb46-221" aria-hidden="true" tabindex="-1"></a>    imdbpath <span class="op">=</span>  <span class="st">"duckdb:///data/imdb_duck.db"</span></span>
+<span id="cb46-222"><a href="#cb46-222" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb46-223"><a href="#cb46-223" aria-hidden="true" tabindex="-1"></a>    <span class="im">import</span> gdown</span>
+<span id="cb46-224"><a href="#cb46-224" aria-hidden="true" tabindex="-1"></a>    url <span class="op">=</span> <span class="st">'https://drive.google.com/uc?id=10tKOHGLt9QoOgq5Ii-FhxpB9lDSQgl1O'</span></span>
+<span id="cb46-225"><a href="#cb46-225" aria-hidden="true" tabindex="-1"></a>    output_path <span class="op">=</span> <span class="st">'data/imdb_duck.db'</span></span>
+<span id="cb46-226"><a href="#cb46-226" aria-hidden="true" tabindex="-1"></a>    gdown.download(url, output_path, quiet<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb46-227"><a href="#cb46-227" aria-hidden="true" tabindex="-1"></a>    imdbpath <span class="op">=</span> <span class="st">"duckdb:///data/imdb_duck.db"</span></span>
+<span id="cb46-228"><a href="#cb46-228" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb46-229"><a href="#cb46-229" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-232"><a href="#cb46-232" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb46-233"><a href="#cb46-233" aria-hidden="true" tabindex="-1"></a><span class="co">#| vscode: {languageId: python}</span></span>
+<span id="cb46-234"><a href="#cb46-234" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sqlalchemy <span class="im">import</span> create_engine</span>
+<span id="cb46-235"><a href="#cb46-235" aria-hidden="true" tabindex="-1"></a>imdb_engine <span class="op">=</span> create_engine(imdbpath, connect_args<span class="op">=</span>{<span class="st">'read_only'</span>: <span class="va">True</span>})</span>
+<span id="cb46-236"><a href="#cb46-236" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>sql imdb_engine <span class="op">--</span>alias imdb</span>
+<span id="cb46-237"><a href="#cb46-237" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb46-238"><a href="#cb46-238" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-239"><a href="#cb46-239" aria-hidden="true" tabindex="-1"></a>Since we'll be working with the <span class="in">`Title`</span> table, let's take a quick look at what it contains. </span>
+<span id="cb46-240"><a href="#cb46-240" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-243"><a href="#cb46-243" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb46-244"><a href="#cb46-244" aria-hidden="true" tabindex="-1"></a><span class="co">#| vscode: {languageId: python}</span></span>
+<span id="cb46-245"><a href="#cb46-245" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql imdb </span>
+<span id="cb46-246"><a href="#cb46-246" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb46-247"><a href="#cb46-247" aria-hidden="true" tabindex="-1"></a>SELECT <span class="op">*</span></span>
+<span id="cb46-248"><a href="#cb46-248" aria-hidden="true" tabindex="-1"></a>FROM Title</span>
+<span id="cb46-249"><a href="#cb46-249" aria-hidden="true" tabindex="-1"></a>WHERE primaryTitle IN (<span class="st">'Ginny &amp; Georgia'</span>, <span class="st">'What If...?'</span>, <span class="st">'Succession'</span>, <span class="st">'Veep'</span>, <span class="st">'Tenet'</span>)</span>
+<span id="cb46-250"><a href="#cb46-250" aria-hidden="true" tabindex="-1"></a>LIMIT <span class="dv">10</span><span class="op">;</span></span>
+<span id="cb46-251"><a href="#cb46-251" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb46-252"><a href="#cb46-252" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-253"><a href="#cb46-253" aria-hidden="true" tabindex="-1"></a><span class="fu">### Matching Text using `LIKE`</span></span>
+<span id="cb46-254"><a href="#cb46-254" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-255"><a href="#cb46-255" aria-hidden="true" tabindex="-1"></a>One common task we encountered in our first look at EDA was needing to match string data. For example, we might want to remove entries beginning with the same prefix as part of the data cleaning process.</span>
+<span id="cb46-256"><a href="#cb46-256" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-257"><a href="#cb46-257" aria-hidden="true" tabindex="-1"></a>In SQL, we use the <span class="in">`LIKE`</span> operator to (you guessed it) look for strings that are *like* a given string pattern. </span>
+<span id="cb46-258"><a href="#cb46-258" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-261"><a href="#cb46-261" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb46-262"><a href="#cb46-262" aria-hidden="true" tabindex="-1"></a><span class="co">#| vscode: {languageId: python}</span></span>
+<span id="cb46-263"><a href="#cb46-263" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb46-264"><a href="#cb46-264" aria-hidden="true" tabindex="-1"></a>SELECT titleType, primaryTitle</span>
+<span id="cb46-265"><a href="#cb46-265" aria-hidden="true" tabindex="-1"></a>FROM Title</span>
+<span id="cb46-266"><a href="#cb46-266" aria-hidden="true" tabindex="-1"></a>WHERE primaryTitle LIKE <span class="st">'Star Wars: Episode I - The Phantom Menace'</span></span>
+<span id="cb46-267"><a href="#cb46-267" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb46-268"><a href="#cb46-268" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-269"><a href="#cb46-269" aria-hidden="true" tabindex="-1"></a>What if we wanted to find *all* Star Wars movies? <span class="in">`%`</span> is the wildcard operator, it means "look for any character, any number of times". This makes it helpful for identifying strings that are similar to our desired pattern, even when we don't know the full text of what we aim to extract.</span>
+<span id="cb46-270"><a href="#cb46-270" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-273"><a href="#cb46-273" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb46-274"><a href="#cb46-274" aria-hidden="true" tabindex="-1"></a><span class="co">#| vscode: {languageId: python}</span></span>
+<span id="cb46-275"><a href="#cb46-275" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb46-276"><a href="#cb46-276" aria-hidden="true" tabindex="-1"></a>SELECT titleType, primaryTitle</span>
+<span id="cb46-277"><a href="#cb46-277" aria-hidden="true" tabindex="-1"></a>FROM Title</span>
+<span id="cb46-278"><a href="#cb46-278" aria-hidden="true" tabindex="-1"></a>WHERE primaryTitle LIKE <span class="st">'%Star Wars%'</span></span>
+<span id="cb46-279"><a href="#cb46-279" aria-hidden="true" tabindex="-1"></a>LIMIT <span class="dv">10</span><span class="op">;</span></span>
+<span id="cb46-280"><a href="#cb46-280" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb46-281"><a href="#cb46-281" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-282"><a href="#cb46-282" aria-hidden="true" tabindex="-1"></a>Alternatively, we can use RegEx! DuckDB and most real DBMSs allow for this. Note that here, we have to use the <span class="in">`SIMILAR TO`</span> operater rather than <span class="in">`LIKE`</span>.</span>
+<span id="cb46-283"><a href="#cb46-283" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-286"><a href="#cb46-286" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb46-287"><a href="#cb46-287" aria-hidden="true" tabindex="-1"></a><span class="co">#| vscode: {languageId: python}</span></span>
+<span id="cb46-288"><a href="#cb46-288" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb46-289"><a href="#cb46-289" aria-hidden="true" tabindex="-1"></a>SELECT titleType, primaryTitle</span>
+<span id="cb46-290"><a href="#cb46-290" aria-hidden="true" tabindex="-1"></a>FROM Title</span>
+<span id="cb46-291"><a href="#cb46-291" aria-hidden="true" tabindex="-1"></a>WHERE primaryTitle SIMILAR TO <span class="st">'.*Star Wars*.'</span></span>
+<span id="cb46-292"><a href="#cb46-292" aria-hidden="true" tabindex="-1"></a>LIMIT <span class="dv">10</span><span class="op">;</span></span>
+<span id="cb46-293"><a href="#cb46-293" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb46-294"><a href="#cb46-294" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-295"><a href="#cb46-295" aria-hidden="true" tabindex="-1"></a><span class="fu">### `CAST`ing Data Types</span></span>
+<span id="cb46-296"><a href="#cb46-296" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-297"><a href="#cb46-297" aria-hidden="true" tabindex="-1"></a>A common data cleaning task is converting data to the correct variable type. The <span class="in">`CAST`</span> keyword is used to generate a new output column. Each entry in this output column is the result of converting the data in an existing column to a new data type. For example, we may wish to convert numeric data stored as a string to an integer.</span>
+<span id="cb46-298"><a href="#cb46-298" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-301"><a href="#cb46-301" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb46-302"><a href="#cb46-302" aria-hidden="true" tabindex="-1"></a><span class="co">#| vscode: {languageId: python}</span></span>
+<span id="cb46-303"><a href="#cb46-303" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb46-304"><a href="#cb46-304" aria-hidden="true" tabindex="-1"></a>SELECT primaryTitle, CAST(runtimeMinutes AS INT)</span>
+<span id="cb46-305"><a href="#cb46-305" aria-hidden="true" tabindex="-1"></a>FROM Title<span class="op">;</span></span>
+<span id="cb46-306"><a href="#cb46-306" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb46-307"><a href="#cb46-307" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-308"><a href="#cb46-308" aria-hidden="true" tabindex="-1"></a>We use <span class="in">`CAST`</span> when <span class="in">`SELECT`</span>ing colunns for our output table. In the example above, we want to <span class="in">`SELECT`</span> the columns of integer year and runtime data that is created by the <span class="in">`CAST`</span>. </span>
+<span id="cb46-309"><a href="#cb46-309" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-310"><a href="#cb46-310" aria-hidden="true" tabindex="-1"></a>SQL will automatically name a new column according to the command used to <span class="in">`SELECT`</span> it, which can lead to unwieldy column names. We can rename the <span class="in">`CAST`</span>ed column using the <span class="in">`AS`</span> keyword.</span>
+<span id="cb46-311"><a href="#cb46-311" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-314"><a href="#cb46-314" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb46-315"><a href="#cb46-315" aria-hidden="true" tabindex="-1"></a><span class="co">#| vscode: {languageId: python}</span></span>
+<span id="cb46-316"><a href="#cb46-316" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb46-317"><a href="#cb46-317" aria-hidden="true" tabindex="-1"></a>SELECT primaryTitle AS title, CAST(runtimeMinutes AS INT) AS minutes, CAST(startYear AS INT) AS year</span>
+<span id="cb46-318"><a href="#cb46-318" aria-hidden="true" tabindex="-1"></a>FROM Title</span>
+<span id="cb46-319"><a href="#cb46-319" aria-hidden="true" tabindex="-1"></a>LIMIT <span class="dv">5</span><span class="op">;</span></span>
+<span id="cb46-320"><a href="#cb46-320" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb46-321"><a href="#cb46-321" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-322"><a href="#cb46-322" aria-hidden="true" tabindex="-1"></a><span class="fu">### Using Conditional Statements with `CASE`</span></span>
+<span id="cb46-323"><a href="#cb46-323" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-324"><a href="#cb46-324" aria-hidden="true" tabindex="-1"></a>When working with <span class="in">`pandas`</span>, we often ran into situations where we wanted to generate new columns using some form of conditional statement. For example, say we wanted to describe a film title as "old," "mid-aged," or "new," depending on the year of its release.</span>
+<span id="cb46-325"><a href="#cb46-325" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-326"><a href="#cb46-326" aria-hidden="true" tabindex="-1"></a>In SQL, conditional operations are performed using a <span class="in">`CASE`</span> clause. Conceptually, <span class="in">`CASE`</span> behaves much like the <span class="in">`CAST`</span> operation: it creates a new column that we can then <span class="in">`SELECT`</span> to appear in the output. The syntax for a <span class="in">`CASE`</span> clause is as follows:</span>
+<span id="cb46-327"><a href="#cb46-327" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-328"><a href="#cb46-328" aria-hidden="true" tabindex="-1"></a><span class="in">    CASE WHEN &lt;condition&gt; THEN &lt;value&gt;</span></span>
+<span id="cb46-329"><a href="#cb46-329" aria-hidden="true" tabindex="-1"></a><span class="in">         WHEN &lt;other condition&gt; THEN &lt;other value&gt;</span></span>
+<span id="cb46-330"><a href="#cb46-330" aria-hidden="true" tabindex="-1"></a><span class="in">         ...</span></span>
+<span id="cb46-331"><a href="#cb46-331" aria-hidden="true" tabindex="-1"></a><span class="in">         ELSE &lt;yet another value&gt;</span></span>
+<span id="cb46-332"><a href="#cb46-332" aria-hidden="true" tabindex="-1"></a><span class="in">         END</span></span>
+<span id="cb46-333"><a href="#cb46-333" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-334"><a href="#cb46-334" aria-hidden="true" tabindex="-1"></a>Scanning through the skeleton code above, you can see that the logic is similar to that of an <span class="in">`if`</span> statement in Python. The conditional statement is first opened by calling <span class="in">`CASE`</span>. Each new condition is specified by <span class="in">`WHEN`</span>, with <span class="in">`THEN`</span> indicating what value should be filled if the condition is met. <span class="in">`ELSE`</span> specifies the value that should be filled if no other conditions are met. Lastly, <span class="in">`END`</span> indicates the end of the conditional statement; once <span class="in">`END`</span> has been called, SQL will continue evaluating the query as usual. </span>
+<span id="cb46-335"><a href="#cb46-335" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-336"><a href="#cb46-336" aria-hidden="true" tabindex="-1"></a>Let's see this in action. In the example below, we give the new column created by the <span class="in">`CASE`</span> statement the name <span class="in">`movie_age`</span>.</span>
+<span id="cb46-337"><a href="#cb46-337" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-340"><a href="#cb46-340" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb46-341"><a href="#cb46-341" aria-hidden="true" tabindex="-1"></a><span class="co">#| vscode: {languageId: python}</span></span>
+<span id="cb46-342"><a href="#cb46-342" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb46-343"><a href="#cb46-343" aria-hidden="true" tabindex="-1"></a><span class="op">/*</span> If a movie was filmed before <span class="dv">1950</span>, it <span class="kw">is</span> <span class="st">"old"</span></span>
+<span id="cb46-344"><a href="#cb46-344" aria-hidden="true" tabindex="-1"></a>Otherwise, <span class="cf">if</span> a movie was filmed before <span class="dv">2000</span>, it <span class="kw">is</span> <span class="st">"mid-aged"</span></span>
+<span id="cb46-345"><a href="#cb46-345" aria-hidden="true" tabindex="-1"></a>Else, a movie <span class="kw">is</span> <span class="st">"new"</span> <span class="op">*/</span></span>
+<span id="cb46-346"><a href="#cb46-346" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-347"><a href="#cb46-347" aria-hidden="true" tabindex="-1"></a>SELECT titleType, startYear,</span>
+<span id="cb46-348"><a href="#cb46-348" aria-hidden="true" tabindex="-1"></a>CASE WHEN startYear <span class="op">&lt;</span> <span class="dv">1950</span> THEN <span class="st">'old'</span></span>
+<span id="cb46-349"><a href="#cb46-349" aria-hidden="true" tabindex="-1"></a>     WHEN startYear <span class="op">&lt;</span> <span class="dv">2000</span> THEN <span class="st">'mid-aged'</span></span>
+<span id="cb46-350"><a href="#cb46-350" aria-hidden="true" tabindex="-1"></a>     ELSE <span class="st">'new'</span></span>
+<span id="cb46-351"><a href="#cb46-351" aria-hidden="true" tabindex="-1"></a>     END AS movie_age</span>
+<span id="cb46-352"><a href="#cb46-352" aria-hidden="true" tabindex="-1"></a>FROM Title<span class="op">;</span></span>
+<span id="cb46-353"><a href="#cb46-353" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb46-354"><a href="#cb46-354" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-355"><a href="#cb46-355" aria-hidden="true" tabindex="-1"></a><span class="fu">## `JOIN`ing Tables</span></span>
+<span id="cb46-356"><a href="#cb46-356" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-357"><a href="#cb46-357" aria-hidden="true" tabindex="-1"></a>At this point, we're well-versed in using SQL as a tool to clean, manipulate, and transform data in a table. Notice that this sentence referred to one *table*, specifically. What happens if the data we need is distributed across multiple tables? This is an important consideration when using SQL —— recall that we first introduced SQL as a language to query from databases. Databases often store data in a multidimensional structure. In other words, information is stored across several tables, with each table containing a small subset of all the data housed by the database. </span>
+<span id="cb46-358"><a href="#cb46-358" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-359"><a href="#cb46-359" aria-hidden="true" tabindex="-1"></a>A common way of organizing a database is by using a **star schema**. A star schema is composed of two types of tables. A **fact table** is the central table of the database —— it contains the information needed to link entries across several **dimension tables**, which contain more detailed information about the data. </span>
+<span id="cb46-360"><a href="#cb46-360" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-361"><a href="#cb46-361" aria-hidden="true" tabindex="-1"></a>Say we were working with a database about boba offerings in Berkeley. The dimension tables of the database might contain information about tea varieties and boba toppings. The fact table would be used to link this information across the various dimension tables.</span>
+<span id="cb46-362"><a href="#cb46-362" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-363"><a href="#cb46-363" aria-hidden="true" tabindex="-1"></a>&lt;div style="text-align: center;"&gt;</span>
+<span id="cb46-364"><a href="#cb46-364" aria-hidden="true" tabindex="-1"></a>&lt;img src="images/multidimensional.png" alt='multidimensional' width='850'&gt;</span>
+<span id="cb46-365"><a href="#cb46-365" aria-hidden="true" tabindex="-1"></a>&lt;/div&gt; </span>
+<span id="cb46-366"><a href="#cb46-366" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-367"><a href="#cb46-367" aria-hidden="true" tabindex="-1"></a>If we explicitly mark the relationships between tables, we start to see the star-like structure of the star schema.</span>
+<span id="cb46-368"><a href="#cb46-368" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-369"><a href="#cb46-369" aria-hidden="true" tabindex="-1"></a>&lt;div style="text-align: center;"&gt;</span>
+<span id="cb46-370"><a href="#cb46-370" aria-hidden="true" tabindex="-1"></a>&lt;img src="images/star.png" alt='star' width='650'&gt;</span>
+<span id="cb46-371"><a href="#cb46-371" aria-hidden="true" tabindex="-1"></a>&lt;/div&gt; </span>
+<span id="cb46-372"><a href="#cb46-372" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-373"><a href="#cb46-373" aria-hidden="true" tabindex="-1"></a>To join data across multiple tables, we'll use the (creatively named) <span class="in">`JOIN`</span> keyword. We'll make things easier for now by first considering the simpler <span class="in">`cats`</span> dataset, which consists of the tables <span class="in">`s`</span> and <span class="in">`t`</span>.</span>
+<span id="cb46-374"><a href="#cb46-374" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-375"><a href="#cb46-375" aria-hidden="true" tabindex="-1"></a>&lt;div style="text-align: center;"&gt;</span>
+<span id="cb46-376"><a href="#cb46-376" aria-hidden="true" tabindex="-1"></a>&lt;img src="images/cats.png" alt='cats' width='500'&gt;</span>
+<span id="cb46-377"><a href="#cb46-377" aria-hidden="true" tabindex="-1"></a>&lt;/div&gt; </span>
+<span id="cb46-378"><a href="#cb46-378" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-379"><a href="#cb46-379" aria-hidden="true" tabindex="-1"></a>To perform a join, we amend the <span class="in">`FROM`</span> clause. You can think of this as saying, "<span class="in">`SELECT`</span> my data <span class="in">`FROM`</span> tables that have  been <span class="in">`JOIN`</span>ed together." </span>
+<span id="cb46-380"><a href="#cb46-380" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-381"><a href="#cb46-381" aria-hidden="true" tabindex="-1"></a>Remember: SQL does not consider newlines or whitespace when interpreting queries. The indentation given in the example below is to help improve readability. If you wish, you can write code that does not follow this formatting.</span>
+<span id="cb46-382"><a href="#cb46-382" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-383"><a href="#cb46-383" aria-hidden="true" tabindex="-1"></a><span class="in">    SELECT &lt;column list&gt;</span></span>
+<span id="cb46-384"><a href="#cb46-384" aria-hidden="true" tabindex="-1"></a><span class="in">    FROM table_1 </span></span>
+<span id="cb46-385"><a href="#cb46-385" aria-hidden="true" tabindex="-1"></a><span class="in">        JOIN table_2 </span></span>
+<span id="cb46-386"><a href="#cb46-386" aria-hidden="true" tabindex="-1"></a><span class="in">        ON key_1 = key_2;</span></span>
+<span id="cb46-387"><a href="#cb46-387" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-388"><a href="#cb46-388" aria-hidden="true" tabindex="-1"></a>We also need to specify what column from each table should be used to determine matching entries. By defining these keys, we provide SQL with the information it needs to pair rows of data together.</span>
+<span id="cb46-389"><a href="#cb46-389" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-390"><a href="#cb46-390" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-391"><a href="#cb46-391" aria-hidden="true" tabindex="-1"></a>The most commonly used type of SQL <span class="in">`JOIN`</span> is the **inner join**. It turns out you're already familiar with what an inner join does, and how it works – this is the type of join we've been using in <span class="in">`pandas`</span> all along! In an inner join, we combine every row in our first table with its matching entry in the second table. If a row from either table does not have a match in the other table, it is omitted from the output. </span>
+<span id="cb46-392"><a href="#cb46-392" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-393"><a href="#cb46-393" aria-hidden="true" tabindex="-1"></a>&lt;div style="text-align: center;"&gt;</span>
+<span id="cb46-394"><a href="#cb46-394" aria-hidden="true" tabindex="-1"></a>&lt;img src="images/inner.png" alt='inner' width='800'&gt;</span>
+<span id="cb46-395"><a href="#cb46-395" aria-hidden="true" tabindex="-1"></a>&lt;/div&gt; </span>
+<span id="cb46-396"><a href="#cb46-396" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-397"><a href="#cb46-397" aria-hidden="true" tabindex="-1"></a>In a **cross join**, *all* possible combinations of rows appear in the output table, regardless of whether or not rows share a matching key. Because all rows are joined, even if there is no matching key, it is not necessary to specify what keys to consider in an <span class="in">`ON`</span> statement. A cross join is also known as a cartesian product.</span>
+<span id="cb46-398"><a href="#cb46-398" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-399"><a href="#cb46-399" aria-hidden="true" tabindex="-1"></a>&lt;div style="text-align: center;"&gt;</span>
+<span id="cb46-400"><a href="#cb46-400" aria-hidden="true" tabindex="-1"></a>&lt;img src="images/cross.png" alt='cross' width='800'&gt;</span>
+<span id="cb46-401"><a href="#cb46-401" aria-hidden="true" tabindex="-1"></a>&lt;/div&gt; </span>
+<span id="cb46-402"><a href="#cb46-402" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-403"><a href="#cb46-403" aria-hidden="true" tabindex="-1"></a>Conceptually, we can interpret an inner join as a cross join, followed by removing all rows that do not share a matching key. Notice that the output of the inner join above contains all rows of the cross join example that contain a single color across the entire row.</span>
+<span id="cb46-404"><a href="#cb46-404" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-405"><a href="#cb46-405" aria-hidden="true" tabindex="-1"></a>In a **left outer join**, *all* rows in the left table are kept in the output table. If a row in the right table shares a match with the left table, this row will be kept; otherwise, the rows in the right table are omitted from the output. We can fill in any missing values with <span class="in">`NULL`</span>.</span>
+<span id="cb46-406"><a href="#cb46-406" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-407"><a href="#cb46-407" aria-hidden="true" tabindex="-1"></a>&lt;div style="text-align: center;"&gt;</span>
+<span id="cb46-408"><a href="#cb46-408" aria-hidden="true" tabindex="-1"></a>&lt;img src="images/left.png" alt='left' width='800'&gt;</span>
+<span id="cb46-409"><a href="#cb46-409" aria-hidden="true" tabindex="-1"></a>&lt;/div&gt; </span>
+<span id="cb46-410"><a href="#cb46-410" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-411"><a href="#cb46-411" aria-hidden="true" tabindex="-1"></a>A **right outer join** keeps all rows in the right table. Rows in the left table are only kept if they share a match in the right table. Again, we can fill in any missing values with <span class="in">`NULL`</span>. </span>
+<span id="cb46-412"><a href="#cb46-412" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-413"><a href="#cb46-413" aria-hidden="true" tabindex="-1"></a>&lt;div style="text-align: center;"&gt;</span>
+<span id="cb46-414"><a href="#cb46-414" aria-hidden="true" tabindex="-1"></a>&lt;img src="images/right.png" alt='right' width='800'&gt;</span>
+<span id="cb46-415"><a href="#cb46-415" aria-hidden="true" tabindex="-1"></a>&lt;/div&gt; </span>
+<span id="cb46-416"><a href="#cb46-416" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-417"><a href="#cb46-417" aria-hidden="true" tabindex="-1"></a>In a **full outer join**, all rows that have a match between the two tables are joined together. If a row has no match in the second table, then the values of the columns for that second table are filled with <span class="in">`NULL`</span>. In other words, a full outer join performs an inner join *while still keeping* rows that have no match in the other table. This is best understood visually:</span>
+<span id="cb46-418"><a href="#cb46-418" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-419"><a href="#cb46-419" aria-hidden="true" tabindex="-1"></a>&lt;div style="text-align: center;"&gt;</span>
+<span id="cb46-420"><a href="#cb46-420" aria-hidden="true" tabindex="-1"></a>&lt;img src="images/full.png" alt='full' width='800'&gt;</span>
+<span id="cb46-421"><a href="#cb46-421" aria-hidden="true" tabindex="-1"></a>&lt;/div&gt; </span>
+<span id="cb46-422"><a href="#cb46-422" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-423"><a href="#cb46-423" aria-hidden="true" tabindex="-1"></a>We have kept the same output achieved using an inner join, with the addition of partially null rows for entries in <span class="in">`s`</span> and <span class="in">`t`</span> that had no match in the second table. </span>
+<span id="cb46-424"><a href="#cb46-424" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-425"><a href="#cb46-425" aria-hidden="true" tabindex="-1"></a><span class="fu">### Aliasing in `JOIN`s</span></span>
+<span id="cb46-426"><a href="#cb46-426" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-427"><a href="#cb46-427" aria-hidden="true" tabindex="-1"></a>When joining tables, we often create aliases for table names (similarly to what we did with column names in the last lecture). We do this as it is typically easier to refer to aliases, especially when we are working with long table names. We can even reference columns using aliased table names!</span>
+<span id="cb46-428"><a href="#cb46-428" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-429"><a href="#cb46-429" aria-hidden="true" tabindex="-1"></a>Let's say we want to determine the average rating of various movies. We'll need to <span class="in">`JOIN`</span> the <span class="in">`Title`</span> and <span class="in">`Rating`</span> tables and can create aliases for both tables.</span>
+<span id="cb46-430"><a href="#cb46-430" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-433"><a href="#cb46-433" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb46-434"><a href="#cb46-434" aria-hidden="true" tabindex="-1"></a><span class="co">#| vscode: {languageId: python}</span></span>
+<span id="cb46-435"><a href="#cb46-435" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb46-436"><a href="#cb46-436" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-437"><a href="#cb46-437" aria-hidden="true" tabindex="-1"></a>SELECT primaryTitle, averageRating</span>
+<span id="cb46-438"><a href="#cb46-438" aria-hidden="true" tabindex="-1"></a>FROM Title AS T INNER JOIN Rating AS R</span>
+<span id="cb46-439"><a href="#cb46-439" aria-hidden="true" tabindex="-1"></a>ON T.tconst <span class="op">=</span> R.tconst<span class="op">;</span></span>
+<span id="cb46-440"><a href="#cb46-440" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb46-441"><a href="#cb46-441" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-442"><a href="#cb46-442" aria-hidden="true" tabindex="-1"></a>Note that the <span class="in">`AS`</span> is actually optional! We can create aliases for our tables even without it, but we usually include it for clarity.</span>
+<span id="cb46-443"><a href="#cb46-443" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-446"><a href="#cb46-446" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb46-447"><a href="#cb46-447" aria-hidden="true" tabindex="-1"></a><span class="co">#| vscode: {languageId: python}</span></span>
+<span id="cb46-448"><a href="#cb46-448" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb46-449"><a href="#cb46-449" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-450"><a href="#cb46-450" aria-hidden="true" tabindex="-1"></a>SELECT primaryTitle, averageRating</span>
+<span id="cb46-451"><a href="#cb46-451" aria-hidden="true" tabindex="-1"></a>FROM Title T INNER JOIN Rating R</span>
+<span id="cb46-452"><a href="#cb46-452" aria-hidden="true" tabindex="-1"></a>ON T.tconst <span class="op">=</span> R.tconst<span class="op">;</span></span>
+<span id="cb46-453"><a href="#cb46-453" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb46-454"><a href="#cb46-454" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-455"><a href="#cb46-455" aria-hidden="true" tabindex="-1"></a><span class="fu">### Common Table Expressions</span></span>
+<span id="cb46-456"><a href="#cb46-456" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-457"><a href="#cb46-457" aria-hidden="true" tabindex="-1"></a>For more sophisticated data problems, the queries can become very complex. Common table expressions (CTEs) allow us to break down these complex queries into more manageable parts. To do so, we create temporary tables corresponding to different aspects of the problem and then reference them in the final query: </span>
+<span id="cb46-458"><a href="#cb46-458" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-459"><a href="#cb46-459" aria-hidden="true" tabindex="-1"></a><span class="in">    WITH </span></span>
+<span id="cb46-460"><a href="#cb46-460" aria-hidden="true" tabindex="-1"></a><span class="in">    table_name1 AS ( </span></span>
+<span id="cb46-461"><a href="#cb46-461" aria-hidden="true" tabindex="-1"></a><span class="in">        SELECT ...</span></span>
+<span id="cb46-462"><a href="#cb46-462" aria-hidden="true" tabindex="-1"></a><span class="in">    ),</span></span>
+<span id="cb46-463"><a href="#cb46-463" aria-hidden="true" tabindex="-1"></a><span class="in">    table_name2 AS ( </span></span>
+<span id="cb46-464"><a href="#cb46-464" aria-hidden="true" tabindex="-1"></a><span class="in">        SELECT ...</span></span>
+<span id="cb46-465"><a href="#cb46-465" aria-hidden="true" tabindex="-1"></a><span class="in">    )</span></span>
+<span id="cb46-466"><a href="#cb46-466" aria-hidden="true" tabindex="-1"></a><span class="in">    SELECT ... </span></span>
+<span id="cb46-467"><a href="#cb46-467" aria-hidden="true" tabindex="-1"></a><span class="in">    FROM </span></span>
+<span id="cb46-468"><a href="#cb46-468" aria-hidden="true" tabindex="-1"></a><span class="in">    table_name1, </span></span>
+<span id="cb46-469"><a href="#cb46-469" aria-hidden="true" tabindex="-1"></a><span class="in">    table_name2, ...</span></span>
+<span id="cb46-470"><a href="#cb46-470" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-471"><a href="#cb46-471" aria-hidden="true" tabindex="-1"></a>Let's say we want to identify the top 10 action movies that are highly rated (with an average rating greater than 7) and popular (having more than 5000 votes), along with the primary actors who are the most popular. We can use CTEs to break this query down into separate problems. Initially, we can filter to find good action movies and prolific actors separately. This way, in our final join, we only need to change the order.</span>
+<span id="cb46-472"><a href="#cb46-472" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-475"><a href="#cb46-475" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb46-476"><a href="#cb46-476" aria-hidden="true" tabindex="-1"></a><span class="co">#| vscode: {languageId: python}</span></span>
+<span id="cb46-477"><a href="#cb46-477" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>sql</span>
+<span id="cb46-478"><a href="#cb46-478" aria-hidden="true" tabindex="-1"></a>WITH </span>
+<span id="cb46-479"><a href="#cb46-479" aria-hidden="true" tabindex="-1"></a>good_action_movies AS (</span>
+<span id="cb46-480"><a href="#cb46-480" aria-hidden="true" tabindex="-1"></a>    SELECT <span class="op">*</span></span>
+<span id="cb46-481"><a href="#cb46-481" aria-hidden="true" tabindex="-1"></a>    FROM Title T JOIN Rating R ON T.tconst <span class="op">=</span> R.tconst  </span>
+<span id="cb46-482"><a href="#cb46-482" aria-hidden="true" tabindex="-1"></a>    WHERE genres LIKE <span class="st">'%Action%'</span> AND averageRating <span class="op">&gt;</span> <span class="dv">7</span> AND numVotes <span class="op">&gt;</span> <span class="dv">5000</span></span>
+<span id="cb46-483"><a href="#cb46-483" aria-hidden="true" tabindex="-1"></a>),</span>
+<span id="cb46-484"><a href="#cb46-484" aria-hidden="true" tabindex="-1"></a>prolific_actors AS (</span>
+<span id="cb46-485"><a href="#cb46-485" aria-hidden="true" tabindex="-1"></a>    SELECT N.nconst, primaryName, COUNT(<span class="op">*</span>) <span class="im">as</span> numRoles</span>
+<span id="cb46-486"><a href="#cb46-486" aria-hidden="true" tabindex="-1"></a>    FROM Name N JOIN Principal P ON N.nconst <span class="op">=</span> P.nconst</span>
+<span id="cb46-487"><a href="#cb46-487" aria-hidden="true" tabindex="-1"></a>    WHERE category <span class="op">=</span> <span class="st">'actor'</span></span>
+<span id="cb46-488"><a href="#cb46-488" aria-hidden="true" tabindex="-1"></a>    GROUP BY N.nconst, primaryName</span>
+<span id="cb46-489"><a href="#cb46-489" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb46-490"><a href="#cb46-490" aria-hidden="true" tabindex="-1"></a>SELECT primaryTitle, primaryName, numRoles, ROUND(averageRating) AS rating</span>
+<span id="cb46-491"><a href="#cb46-491" aria-hidden="true" tabindex="-1"></a>FROM good_action_movies m, prolific_actors a, principal p</span>
+<span id="cb46-492"><a href="#cb46-492" aria-hidden="true" tabindex="-1"></a>WHERE p.tconst <span class="op">=</span> m.tconst AND p.nconst <span class="op">=</span> a.nconst</span>
+<span id="cb46-493"><a href="#cb46-493" aria-hidden="true" tabindex="-1"></a>ORDER BY rating DESC, numRoles DESC</span>
+<span id="cb46-494"><a href="#cb46-494" aria-hidden="true" tabindex="-1"></a>LIMIT <span class="dv">10</span><span class="op">;</span></span>
+<span id="cb46-495"><a href="#cb46-495" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+</code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
