@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.450">
+<meta name="generator" content="quarto-1.5.56">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Principles and Techniques of Data Science - 14&nbsp; Feature Engineering</title>
+<title>14&nbsp; Feature Engineering – Principles and Techniques of Data Science</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -22,7 +22,7 @@ ul.task-list li input[type="checkbox"] {
 }
 /* CSS for syntax highlighting */
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -33,7 +33,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -57,7 +57,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 
 
-<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -82,7 +82,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   "collapse-after": 3,
   "panel-placement": "start",
   "type": "textbox",
-  "limit": 20,
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -91,17 +96,45 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
     "search-submit-button-title": "Submit",
     "search-label": "Search"
   }
 }</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -111,13 +144,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <header id="quarto-header" class="headroom fixed-top">
   <nav class="quarto-secondary-nav">
     <div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../feature_engineering/feature_engineering.html"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Feature Engineering</span></a></li></ol></nav>
-      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-      </a>
-      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../feature_engineering/feature_engineering.html"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Feature Engineering</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
       </button>
     </div>
@@ -126,7 +159,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
       <a href="../index.html" class="sidebar-logo-link">
       <img src="../data100_logo.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
@@ -134,7 +167,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div class="sidebar-title mb-0 py-0">
       <a href="../">Principles and Techniques of Data Science</a> 
         <div class="sidebar-tools-main">
-    <a href="https://github.com/DS-100/course-notes" rel="" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+    <a href="https://github.com/DS-100/course-notes" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
 </div>
     </div>
       </div>
@@ -307,16 +340,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Clustering</span></span></a>
   </div>
 </li>
-<li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../decision_tree/decision_tree.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Decision Trees</span></span></a>
-  </div>
-</li>
     </ul>
     </div>
 </nav>
-<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
@@ -347,7 +374,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<div class="quarto-title-meta">
+<div class="quarto-title-meta column-body">
 
     
   
@@ -355,7 +382,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </div>
   
 
+
 </header>
+
 
 <div class="callout callout-style-default callout-note no-icon callout-titled">
 <div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="true" aria-label="Toggle callout">
@@ -390,7 +419,10 @@ Learning Outcomes
 <section id="gradient-descent-review" class="level3" data-number="14.1.1">
 <h3 data-number="14.1.1" class="anchored" data-anchor-id="gradient-descent-review"><span class="header-section-number">14.1.1</span> Gradient Descent Review</h3>
 <p>As we learned earlier, we set the derivative of the loss function to zero and solve to determine the optimal parameters <span class="math inline">\(\theta\)</span> that minimize loss. For a loss surface in 2D (or higher), the best way to minimize loss is to “walk” down the loss surface until we reach our optimal parameters <span class="math inline">\(\vec{\theta}\)</span>. The <strong>gradient vector</strong> tells us which direction to “walk” in.</p>
-<p>For example, the <em>vector</em> of parameter values <span class="math inline">\(\vec{\theta} = \begin{bmatrix}  \theta_{0} \\  \theta_{1} \\  \end{bmatrix}\)</span> gives us a two parameter model (d = 2). To calculate our gradient vector, we can take the <em>partial derivative</em> of loss with respect to each parameter: <span class="math inline">\(\frac{\partial L}{\partial \theta_0}\)</span> and <span class="math inline">\(\frac{\partial L}{\partial \theta_1}\)</span>.</p>
+<p>For example, the <em>vector</em> of parameter values <span class="math inline">\(\vec{\theta} = \begin{bmatrix}
+           \theta_{0} \\
+           \theta_{1} \\
+         \end{bmatrix}\)</span> gives us a two parameter model (d = 2). To calculate our gradient vector, we can take the <em>partial derivative</em> of loss with respect to each parameter: <span class="math inline">\(\frac{\partial L}{\partial \theta_0}\)</span> and <span class="math inline">\(\frac{\partial L}{\partial \theta_1}\)</span>.</p>
 <p>Its <strong>gradient vector</strong> would then be the 2D vector: <span class="math display">\[\nabla_{\vec{\theta}} L =  \begin{bmatrix} \frac{\partial L}{\partial \theta_0} \\ \frac{\partial L}{\partial \theta_1} \end{bmatrix}\]</span></p>
 <p>Note that <span class="math inline">\(-\nabla_{\vec{\theta}} L\)</span> always points in the <strong>downhill direction</strong> of the surface.</p>
 <p>Recall that we also discussed the gradient descent update rule, where we nudge <span class="math inline">\(\theta\)</span> in a negative gradient direction until <span class="math inline">\(\theta\)</span> converges.</p>
@@ -491,8 +523,8 @@ f_{\vec{\theta}}(\vec{x}) &amp;= \vec{x}^T\vec{\theta} = \theta_0x_0 + \theta_1x
 <p>Feature engineering opens up a whole new set of possibilities for designing better-performing models. As you will see in lab and homework, feature engineering is one of the most important parts of the entire modeling process.</p>
 <p>A particularly powerful use of feature engineering is to allow us to perform regression on <em>non-numeric</em> features. <strong>One hot encoding</strong> is a feature engineering technique that generates numeric features from categorical data, allowing us to use our usual methods to fit a regression model on the data.</p>
 <p>To illustrate how this works, we’ll refer back to the <code>tips</code> dataset from previous lectures. Consider the <code>"day"</code> column of the dataset:</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="1">
-<details>
+<div id="489dd063" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="1">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
@@ -505,7 +537,7 @@ f_{\vec{\theta}}(\vec{x}) &amp;= \vec{x}^T\vec{\theta} = \theta_0x_0 + \theta_1x
 <div>
 
 
-<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -591,7 +623,7 @@ Value = 0 otherwise
 </li>
 </ul>
 <p>The <code>OneHotEncoder</code> class of <code>sklearn</code> (<a href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OneHotEncoder.html#sklearn.preprocessing.OneHotEncoder.get_feature_names_out">documentation</a>) offers a quick way to perform this one-hot encoding. You will explore its use in detail in the lab. For now, recognize that we follow a very similar workflow to when we were working with the <code>LinearRegression</code> class: we initialize a <code>OneHotEncoder</code> object, fit it to our data, and finally use <code>.transform</code> to apply the fitted encoder.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="2">
+<div id="a09866ad" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> OneHotEncoder</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialize a OneHotEncoder object</span></span>
@@ -609,7 +641,7 @@ Value = 0 otherwise
 <div>
 
 
-<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -670,7 +702,7 @@ Value = 0 otherwise
 <p><span class="math display">\[\hat{y} = \theta_{1}\phi_{1} + \theta_{2}\phi_{2} + \theta_{3}\phi_{3} + \theta_{4}\phi_{4} + \theta_{5}\phi_{5} + \theta_{6}\phi_{6}\]</span></p>
 <p>Now, the <code>day</code> feature (or rather, the four new boolean features that represent day) can be used to fit a model.</p>
 <p>Using <code>sklearn</code> to fit the new model, we can determine the model coefficients, allowing us to understand how each feature impacts the predicted tip.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="3">
+<div id="1fd360a3" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LinearRegression</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>data_w_ohe <span class="op">=</span> tips[[<span class="st">"total_bill"</span>, <span class="st">"size"</span>, <span class="st">"day"</span>]].join(encoded_day_df).drop(columns <span class="op">=</span> <span class="st">"day"</span>)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>ohe_model <span class="op">=</span> lm.LinearRegression(fit_intercept<span class="op">=</span><span class="va">False</span>) <span class="co">#Tell sklearn to not add an additional bias column. Why?</span></span>
@@ -681,7 +713,7 @@ Value = 0 otherwise
 <div>
 
 
-<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -743,8 +775,8 @@ Value = 0 otherwise
 <p>We have encountered a few cases now where models with linear features have performed poorly on datasets that show clear non-linear curvature.</p>
 <p>As an example, consider the <code>vehicles</code> dataset, which contains information about cars. Suppose we want to use the <code>hp</code> (horsepower) of a car to predict its <code>"mpg"</code> (gas mileage in miles per gallon). If we visualize the relationship between these two variables, we see a non-linear curvature. Fitting a linear model to these variables results in a high (poor) value of RMSE.</p>
 <p><span class="math display">\[\hat{y} = \theta_0 + \theta_1 (\text{hp})\]</span></p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="4">
-<details>
+<div id="669f3e32" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="4">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>pd.options.mode.chained_assignment <span class="op">=</span> <span class="va">None</span> </span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>vehicles <span class="op">=</span> sns.load_dataset(<span class="st">"mpg"</span>).dropna().rename(columns <span class="op">=</span> {<span class="st">"horsepower"</span>: <span class="st">"hp"</span>}).sort_values(<span class="st">"hp"</span>)</span>
@@ -767,13 +799,17 @@ Value = 0 otherwise
 <pre><code>MSE of model with (hp) feature: 23.943662938603108</code></pre>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="feature_engineering_files/figure-html/cell-5-output-2.png" width="585" height="429"></p>
+<div>
+<figure class="figure">
+<p><img src="feature_engineering_files/figure-html/cell-5-output-2.png" width="585" height="429" class="figure-img"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>As we can see from the plot, the data follows a curved line rather than a straight one. To capture this non-linearity, we can incorporate <strong>non-linear</strong> features. Let’s introduce a <strong>polynomial</strong> term, <span class="math inline">\(\text{hp}^2\)</span>, into our regression model. The model now takes the form:</p>
 <p><span class="math display">\[\hat{y} = \theta_0 + \theta_1 (\text{hp}) + \theta_2 (\text{hp}^2)\]</span> <span class="math display">\[\hat{y} = \theta_0 + \theta_1 \phi_1 + \theta_2 \phi_2\]</span></p>
 <p>How can we fit a model with non-linear features? We can use the exact same techniques as before: ordinary least squares, gradient descent, or <code>sklearn</code>. This is because our new model is still a <strong>linear model</strong>. Although it contains non-linear <em>features</em>, it is linear with respect to the model <em>parameters</em>. All of our previous work on fitting models was done under the assumption that we were working with linear models. Because our new model is still linear, we can apply our existing methods to determine the optimal parameters.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="5">
+<div id="1ebff9ce" class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Add a hp^2 feature to the design matrix</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> vehicles[[<span class="st">"hp"</span>]]</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>X[<span class="st">"hp^2"</span>] <span class="op">=</span> vehicles[<span class="st">"hp"</span>]<span class="op">**</span><span class="dv">2</span></span>
@@ -788,10 +824,14 @@ Value = 0 otherwise
 <span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"MSE of model with (hp^2) feature: </span><span class="sc">{</span>np<span class="sc">.</span>mean((Y<span class="op">-</span>hp2_model_predictions)<span class="op">**</span><span class="dv">2</span>)<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>MSE of model with (hp^2) feature: 18.984768907617223</code></pre>
+<pre><code>MSE of model with (hp^2) feature: 18.98476890761722</code></pre>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="feature_engineering_files/figure-html/cell-6-output-2.png" width="585" height="429"></p>
+<div>
+<figure class="figure">
+<p><img src="feature_engineering_files/figure-html/cell-6-output-2.png" width="585" height="429" class="figure-img"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>Looking a lot better! By incorporating a squared feature, we are able to capture the curvature of the dataset. Our model is now a parabola centered on our data. Notice that our new model’s error has decreased relative to the original model with linear features.</p>
@@ -906,18 +946,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
     return false;
   }
-  const clipboard = new window.ClipboardJS('.code-copy-button', {
-    text: function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-    }
-  });
-  clipboard.on('success', function(e) {
+  const onCopySuccess = function(e) {
     // button target
     const button = e.trigger;
     // don't keep focus
@@ -949,7 +978,29 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }, 1000);
     // clear code selection
     e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
   });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
   const viewSource = window.document.getElementById('quarto-view-source') ||
                      window.document.getElementById('quarto-code-tools-source');
   if (viewSource) {
@@ -1001,10 +1052,27 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   if (showAllCode) {
     showAllCode.addEventListener("click", toggleCodeHandler(true));
   }
-  function tippyHover(el, contentFn) {
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
-      content: contentFn,
       maxWidth: 500,
       delay: 100,
       arrow: false,
@@ -1014,8 +1082,17 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       interactive: true,
       interactiveBorder: 10,
       theme: 'quarto',
-      placement: 'bottom-start'
+      placement: 'bottom-start',
     };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
     window.tippy(el, config); 
   }
   const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
@@ -1027,7 +1104,130 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      return note.innerHTML;
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
     });
   }
       let selectedAnnoteEl;
@@ -1071,6 +1271,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             }
             div.style.top = top - 2 + "px";
             div.style.height = height + 4 + "px";
+            div.style.left = 0;
             let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
             if (gutterDiv === null) {
               gutterDiv = window.document.createElement("div");
@@ -1096,6 +1297,32 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         });
         selectedAnnoteEl = undefined;
       };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
       // Attach click handler to the DT
       const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
       for (const annoteDlNode of annoteDls) {
@@ -1157,12 +1384,12 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation column-body">
   <div class="nav-page nav-page-previous">
-      <a href="../gradient_descent/gradient_descent.html" class="pagination-link">
+      <a href="../gradient_descent/gradient_descent.html" class="pagination-link" aria-label="sklearn and Gradient Descent">
         <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">sklearn and Gradient Descent</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../case_study_HCE/case_study_HCE.html" class="pagination-link">
+      <a href="../case_study_HCE/case_study_HCE.html" class="pagination-link" aria-label="Case Study in Human Contexts and Ethics">
         <span class="nav-page-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Case Study in Human Contexts and Ethics</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
@@ -1264,7 +1491,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb8-95"><a href="#cb8-95" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-96"><a href="#cb8-96" aria-hidden="true" tabindex="-1"></a>We know that the solution to the normal equation is $\hat{\theta} = (\mathbb{X}^T\mathbb{X})^{-1}\mathbb{X}^T\mathbb{Y}$. Let's break this down and determine the computational complexity for this solution.</span>
 <span id="cb8-97"><a href="#cb8-97" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-98"><a href="#cb8-98" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;center&gt;&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/complexity_normal_solution.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'complexity_normal_solution'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'600'</span><span class="kw">&gt;&lt;/center&gt;</span></span>
+<span id="cb8-98"><a href="#cb8-98" aria-hidden="true" tabindex="-1"></a>&lt;center&gt;&lt;img src="images/complexity_normal_solution.png" alt='complexity_normal_solution' width='600'&gt;&lt;/center&gt;</span>
 <span id="cb8-99"><a href="#cb8-99" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-100"><a href="#cb8-100" aria-hidden="true" tabindex="-1"></a> Let $n$ be the number of samples (rows) and $d$ be the number of features (columns). </span>
 <span id="cb8-101"><a href="#cb8-101" aria-hidden="true" tabindex="-1"></a></span>
@@ -1276,7 +1503,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb8-107"><a href="#cb8-107" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-108"><a href="#cb8-108" aria-hidden="true" tabindex="-1"></a>On the other hand, the time complexity of a single gradient descent step takes only $O(nd)$ time. </span>
 <span id="cb8-109"><a href="#cb8-109" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-110"><a href="#cb8-110" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;center&gt;&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/complexity_grad_descent.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'complexity_grad_descent'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'600'</span><span class="kw">&gt;&lt;/center&gt;</span></span>
+<span id="cb8-110"><a href="#cb8-110" aria-hidden="true" tabindex="-1"></a>&lt;center&gt;&lt;img src="images/complexity_grad_descent.png" alt='complexity_grad_descent' width='600'&gt;&lt;/center&gt;</span>
 <span id="cb8-111"><a href="#cb8-111" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-112"><a href="#cb8-112" aria-hidden="true" tabindex="-1"></a>Suppose we run $T$ iterations. The final complexity would then be $O(Tnd)$. Typically, $n$ is much larger than $T$ and $d$. How can we reduce the cost of this algorithm using a technique from Data 100? Do we really need to use $n$ data points? We don't! Instead, we can use stochastic gradient descent.</span>
 <span id="cb8-113"><a href="#cb8-113" aria-hidden="true" tabindex="-1"></a></span>
@@ -1293,11 +1520,11 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb8-124"><a href="#cb8-124" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-125"><a href="#cb8-125" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**(Batch) Gradient Descent**: Gradient descent computes the **true** descent and always descends towards the true minimum of the loss. While accurate, it can often be computationally expensive.</span>
 <span id="cb8-126"><a href="#cb8-126" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-127"><a href="#cb8-127" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;center&gt;&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/gd.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'batch_grad_descent'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'300'</span><span class="kw">&gt;&lt;/center&gt;</span></span>
+<span id="cb8-127"><a href="#cb8-127" aria-hidden="true" tabindex="-1"></a>&lt;center&gt;&lt;img src="images/gd.png" alt='batch_grad_descent' width='300'&gt;&lt;/center&gt;</span>
 <span id="cb8-128"><a href="#cb8-128" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-129"><a href="#cb8-129" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**(Minibatch) Stochastic gradient descent**: Stochastic gradient descent **approximates** the true gradient descent. It may not descend towards the true minimum with each update, but it's often less computationally expensive than batch gradient descent.</span>
 <span id="cb8-130"><a href="#cb8-130" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-131"><a href="#cb8-131" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;center&gt;&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/sgd.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'stochastic_grad_descent'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'300'</span><span class="kw">&gt;&lt;/center&gt;</span></span>
+<span id="cb8-131"><a href="#cb8-131" aria-hidden="true" tabindex="-1"></a>&lt;center&gt;&lt;img src="images/sgd.png" alt='stochastic_grad_descent' width='300'&gt;&lt;/center&gt;</span>
 <span id="cb8-132"><a href="#cb8-132" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-133"><a href="#cb8-133" aria-hidden="true" tabindex="-1"></a><span class="fu">## Feature Engineering</span></span>
 <span id="cb8-134"><a href="#cb8-134" aria-hidden="true" tabindex="-1"></a></span>
@@ -1319,7 +1546,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb8-150"><a href="#cb8-150" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-151"><a href="#cb8-151" aria-hidden="true" tabindex="-1"></a>For example, we might design a feature function that computes the square of an existing feature and adds it to the design matrix. In this case, our existing matrix $<span class="co">[</span><span class="ot">x</span><span class="co">]</span>$ is transformed to $<span class="co">[</span><span class="ot">x, x^2</span><span class="co">]</span>$. Its *dimension* increases from 1 to 2. Often, the dimension of the *featurized* dataset increases as seen here.</span>
 <span id="cb8-152"><a href="#cb8-152" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-153"><a href="#cb8-153" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;center&gt;&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/phi.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'phi'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'700'</span><span class="kw">&gt;&lt;/center&gt;</span></span>
+<span id="cb8-153"><a href="#cb8-153" aria-hidden="true" tabindex="-1"></a>&lt;center&gt;&lt;img src="images/phi.png" alt='phi' width='700'&gt;&lt;/center&gt;</span>
 <span id="cb8-154"><a href="#cb8-154" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-155"><a href="#cb8-155" aria-hidden="true" tabindex="-1"></a>The new features introduced by the feature function can then be used in modeling. Often, we use the symbol $\phi_i$ to represent transformed features after feature engineering. </span>
 <span id="cb8-156"><a href="#cb8-156" aria-hidden="true" tabindex="-1"></a></span>
@@ -1360,19 +1587,19 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb8-193"><a href="#cb8-193" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb8-194"><a href="#cb8-194" aria-hidden="true" tabindex="-1"></a>To resolve this, we instead create a new table with a feature for each unique value in the original <span class="in">`"day"`</span> column. We then iterate through the <span class="in">`"day"`</span> column. For each entry in <span class="in">`"day"`</span> we fill the corresponding feature in the new table with 1. All other features are set to 0.</span>
 <span id="cb8-195"><a href="#cb8-195" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-196"><a href="#cb8-196" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;center&gt;&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/ohe.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'ohe'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'600'</span><span class="kw">&gt;&lt;/center&gt;</span></span>
+<span id="cb8-196"><a href="#cb8-196" aria-hidden="true" tabindex="-1"></a>&lt;center&gt;&lt;img src="images/ohe.png" alt='ohe' width='600'&gt;&lt;/center&gt;</span>
 <span id="cb8-197"><a href="#cb8-197" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-198"><a href="#cb8-198" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;br&gt;</span> </span>
+<span id="cb8-198"><a href="#cb8-198" aria-hidden="true" tabindex="-1"></a>&lt;br&gt; </span>
 <span id="cb8-199"><a href="#cb8-199" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-200"><a href="#cb8-200" aria-hidden="true" tabindex="-1"></a>In short, each category of a categorical variable gets its own feature</span>
-<span id="cb8-201"><a href="#cb8-201" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;ul&gt;</span></span>
-<span id="cb8-202"><a href="#cb8-202" aria-hidden="true" tabindex="-1"></a>   <span class="kw">&lt;li&gt;</span></span>
+<span id="cb8-201"><a href="#cb8-201" aria-hidden="true" tabindex="-1"></a>&lt;ul&gt;</span>
+<span id="cb8-202"><a href="#cb8-202" aria-hidden="true" tabindex="-1"></a>   &lt;li&gt;</span>
 <span id="cb8-203"><a href="#cb8-203" aria-hidden="true" tabindex="-1"></a>      Value = 1 if a row belongs to the category</span>
-<span id="cb8-204"><a href="#cb8-204" aria-hidden="true" tabindex="-1"></a>   <span class="kw">&lt;/li&gt;</span></span>
-<span id="cb8-205"><a href="#cb8-205" aria-hidden="true" tabindex="-1"></a>   <span class="kw">&lt;li&gt;</span></span>
+<span id="cb8-204"><a href="#cb8-204" aria-hidden="true" tabindex="-1"></a>   &lt;/li&gt;</span>
+<span id="cb8-205"><a href="#cb8-205" aria-hidden="true" tabindex="-1"></a>   &lt;li&gt;</span>
 <span id="cb8-206"><a href="#cb8-206" aria-hidden="true" tabindex="-1"></a>      Value = 0 otherwise</span>
-<span id="cb8-207"><a href="#cb8-207" aria-hidden="true" tabindex="-1"></a>   <span class="kw">&lt;/li&gt;</span></span>
-<span id="cb8-208"><a href="#cb8-208" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/ul&gt;</span></span>
+<span id="cb8-207"><a href="#cb8-207" aria-hidden="true" tabindex="-1"></a>   &lt;/li&gt;</span>
+<span id="cb8-208"><a href="#cb8-208" aria-hidden="true" tabindex="-1"></a>&lt;/ul&gt;</span>
 <span id="cb8-209"><a href="#cb8-209" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-210"><a href="#cb8-210" aria-hidden="true" tabindex="-1"></a>The <span class="in">`OneHotEncoder`</span> class of <span class="in">`sklearn`</span> (<span class="co">[</span><span class="ot">documentation</span><span class="co">](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OneHotEncoder.html#sklearn.preprocessing.OneHotEncoder.get_feature_names_out)</span>) offers a quick way to perform this one-hot encoding. You will explore its use in detail in the lab. For now, recognize that we follow a very similar workflow to when we were working with the <span class="in">`LinearRegression`</span> class: we initialize a <span class="in">`OneHotEncoder`</span> object, fit it to our data, and finally use <span class="in">`.transform`</span> to apply the fitted encoder.</span>
 <span id="cb8-211"><a href="#cb8-211" aria-hidden="true" tabindex="-1"></a></span>
@@ -1396,7 +1623,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb8-231"><a href="#cb8-231" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-232"><a href="#cb8-232" aria-hidden="true" tabindex="-1"></a>The one-hot encoded features can then be used in the design matrix to train a model:</span>
 <span id="cb8-233"><a href="#cb8-233" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-234"><a href="#cb8-234" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;center&gt;&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/ohemodel.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'ohemodel'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'600'</span><span class="kw">&gt;&lt;/center&gt;</span></span>
+<span id="cb8-234"><a href="#cb8-234" aria-hidden="true" tabindex="-1"></a>&lt;center&gt;&lt;img src="images/ohemodel.png" alt='ohemodel' width='600'&gt;&lt;/center&gt;</span>
 <span id="cb8-235"><a href="#cb8-235" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-236"><a href="#cb8-236" aria-hidden="true" tabindex="-1"></a>$$\hat{y} = \theta_1 (\text{total}<span class="sc">\_</span>\text{bill}) + \theta_2 (\text{size}) + \theta_3 (\text{day}<span class="sc">\_</span>\text{Fri}) + \theta_4 (\text{day}<span class="sc">\_</span>\text{Sat}) + \theta_5 (\text{day}<span class="sc">\_</span>\text{Sun}) + \theta_6 (\text{day}<span class="sc">\_</span>\text{Thur})$$</span>
 <span id="cb8-237"><a href="#cb8-237" aria-hidden="true" tabindex="-1"></a></span>
@@ -1422,13 +1649,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb8-259"><a href="#cb8-259" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-260"><a href="#cb8-260" aria-hidden="true" tabindex="-1"></a>When one-hot encoding, keep in mind that any set of one-hot encoded columns will always sum to a column of all ones, representing the bias column. More formally, the bias column is a linear combination of the OHE columns.</span>
 <span id="cb8-261"><a href="#cb8-261" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-262"><a href="#cb8-262" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;center&gt;&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/bias.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'bias'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'600'</span><span class="kw">&gt;&lt;/center&gt;</span></span>
+<span id="cb8-262"><a href="#cb8-262" aria-hidden="true" tabindex="-1"></a>&lt;center&gt;&lt;img src="images/bias.png" alt='bias' width='600'&gt;&lt;/center&gt;</span>
 <span id="cb8-263"><a href="#cb8-263" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-264"><a href="#cb8-264" aria-hidden="true" tabindex="-1"></a>We must be careful not to include this bias column in our design matrix. Otherwise, there will be linear dependence in the model, meaning $\mathbb{X}^{\top}\mathbb{X}$ would no longer be invertible, and our OLS estimate $\hat{\theta} = (\mathbb{X}^{\top}\mathbb{X})^{-1}\mathbb{X}^{\top}\mathbb{Y}$ fails.</span>
 <span id="cb8-265"><a href="#cb8-265" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-266"><a href="#cb8-266" aria-hidden="true" tabindex="-1"></a>To resolve this issue, we simply omit one of the one-hot encoded columns *or* do not include an intercept term. The adjusted design matrices are shown below.</span>
 <span id="cb8-267"><a href="#cb8-267" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-268"><a href="#cb8-268" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;center&gt;&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/remove.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'remove'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'600'</span><span class="kw">&gt;&lt;/center&gt;</span></span>
+<span id="cb8-268"><a href="#cb8-268" aria-hidden="true" tabindex="-1"></a>&lt;center&gt;&lt;img src="images/remove.png" alt='remove' width='600'&gt;&lt;/center&gt;</span>
 <span id="cb8-269"><a href="#cb8-269" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-270"><a href="#cb8-270" aria-hidden="true" tabindex="-1"></a>Either approach works — we still retain the same information as the omitted column being a linear combination of the remaining columns.</span>
 <span id="cb8-271"><a href="#cb8-271" aria-hidden="true" tabindex="-1"></a></span>
@@ -1495,15 +1722,15 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb8-336"><a href="#cb8-336" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Model with order 3: $\hat{y} = \theta_0 + \theta_1 (\text{hp}) + \theta_2 (\text{hp}^2) + \theta_3 (\text{hp}^3)$</span>
 <span id="cb8-337"><a href="#cb8-337" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Model with order 4: $\hat{y} = \theta_0 + \theta_1 (\text{hp}) + \theta_2 (\text{hp}^2) + \theta_3 (\text{hp}^3) + \theta_4 (\text{hp}^4)$</span>
 <span id="cb8-338"><a href="#cb8-338" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-339"><a href="#cb8-339" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;center&gt;&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/degree_comparison.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'degree_comparison'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'900'</span><span class="kw">&gt;&lt;/center&gt;</span></span>
+<span id="cb8-339"><a href="#cb8-339" aria-hidden="true" tabindex="-1"></a>&lt;center&gt;&lt;img src="images/degree_comparison.png" alt='degree_comparison' width='900'&gt;&lt;/center&gt;</span>
 <span id="cb8-340"><a href="#cb8-340" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-341"><a href="#cb8-341" aria-hidden="true" tabindex="-1"></a>As we can see in the plots above, MSE continues to decrease with each additional polynomial term. To visualize it further, let's plot models as the complexity increases from 0 to 7: </span>
 <span id="cb8-342"><a href="#cb8-342" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-343"><a href="#cb8-343" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;center&gt;&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/degree_comparison2.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'degree_comparison'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'850'</span><span class="kw">&gt;&lt;/center&gt;</span></span>
+<span id="cb8-343"><a href="#cb8-343" aria-hidden="true" tabindex="-1"></a>&lt;center&gt;&lt;img src="images/degree_comparison2.png" alt='degree_comparison' width='850'&gt;&lt;/center&gt;</span>
 <span id="cb8-344"><a href="#cb8-344" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-345"><a href="#cb8-345" aria-hidden="true" tabindex="-1"></a>When we use our model to make predictions on the same data that was used to fit the model, we find that the MSE decreases with each additional polynomial term (as our model gets more complex). The **training error** is the model's error when generating predictions from the same data that was used for training purposes. We can conclude that the training error goes down as the complexity of the model increases. </span>
 <span id="cb8-346"><a href="#cb8-346" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-347"><a href="#cb8-347" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;center&gt;&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/train_error.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'train_error'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'400'</span><span class="kw">&gt;&lt;/center&gt;</span></span>
+<span id="cb8-347"><a href="#cb8-347" aria-hidden="true" tabindex="-1"></a>&lt;center&gt;&lt;img src="images/train_error.png" alt='train_error' width='400'&gt;&lt;/center&gt;</span>
 <span id="cb8-348"><a href="#cb8-348" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-349"><a href="#cb8-349" aria-hidden="true" tabindex="-1"></a>This seems like good news – when working on the **training data**, we can improve model performance by designing increasingly complex models. </span>
 <span id="cb8-350"><a href="#cb8-350" aria-hidden="true" tabindex="-1"></a></span>
@@ -1512,25 +1739,25 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb8-353"><a href="#cb8-353" aria-hidden="true" tabindex="-1"></a>Given $N$ overlapping data points, we can always find a polynomial of degree $N-1$ that goes through all those points.</span>
 <span id="cb8-354"><a href="#cb8-354" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-355"><a href="#cb8-355" aria-hidden="true" tabindex="-1"></a>For example, there always exists a degree-4 polynomial curve that can perfectly model a dataset of 5 datapoints:</span>
-<span id="cb8-356"><a href="#cb8-356" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;center&gt;&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/perfect_poly_fits.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'train_error'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'600'</span><span class="kw">&gt;&lt;/center&gt;</span></span>
+<span id="cb8-356"><a href="#cb8-356" aria-hidden="true" tabindex="-1"></a>&lt;center&gt;&lt;img src="images/perfect_poly_fits.png" alt='train_error' width='600'&gt;&lt;/center&gt;</span>
 <span id="cb8-357"><a href="#cb8-357" aria-hidden="true" tabindex="-1"></a>:::</span>
 <span id="cb8-358"><a href="#cb8-358" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-359"><a href="#cb8-359" aria-hidden="true" tabindex="-1"></a>However, high model complexity comes with its own set of issues. When building the <span class="in">`vehicles`</span> models above, we trained the models on the *entire* dataset and then evaluated their performance on this same dataset. In reality, we are likely to instead train the model on a *sample* from the population, then use it to make predictions on data it didn't encounter during training. </span>
 <span id="cb8-360"><a href="#cb8-360" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-361"><a href="#cb8-361" aria-hidden="true" tabindex="-1"></a>Let's walk through a more realistic example. Say we are given a training dataset of just 6 datapoints and want to train a model to then make predictions on a *different* set of points. We may be tempted to make a highly complex model (e.g., degree 5), especially given it makes perfect predictions on the training data as clear on the left. However, as shown in the graph on the right, this model would perform *horribly* on the rest of the population! </span>
 <span id="cb8-362"><a href="#cb8-362" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-363"><a href="#cb8-363" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;center&gt;&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/complex.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'complex'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'600'</span><span class="kw">&gt;&lt;/center&gt;</span></span>
+<span id="cb8-363"><a href="#cb8-363" aria-hidden="true" tabindex="-1"></a>&lt;center&gt;&lt;img src="images/complex.png" alt='complex' width='600'&gt;&lt;/center&gt;</span>
 <span id="cb8-364"><a href="#cb8-364" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-365"><a href="#cb8-365" aria-hidden="true" tabindex="-1"></a>This phenomenon called **overfitting**. The model effectively just memorized the training data it encountered when it was fitted, leaving it unable to **generalize** well to data it didn't encounter during training. This is a problem: we want models that are generalizable to “unseen” data.</span>
 <span id="cb8-366"><a href="#cb8-366" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-367"><a href="#cb8-367" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-368"><a href="#cb8-368" aria-hidden="true" tabindex="-1"></a>Additionally, since complex models are sensitive to the specific dataset used to train them, they have high **variance**. A model with high variance tends to *vary* more dramatically when trained on different datasets. Going back to our example above, we can see our degree-5 model varies erratically when we fit it to different samples of 6 points from <span class="in">`vehicles`</span>. </span>
 <span id="cb8-369"><a href="#cb8-369" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-370"><a href="#cb8-370" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;center&gt;&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/resamples.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'resamples'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'800'</span><span class="kw">&gt;&lt;/center&gt;</span></span>
+<span id="cb8-370"><a href="#cb8-370" aria-hidden="true" tabindex="-1"></a>&lt;center&gt;&lt;img src="images/resamples.png" alt='resamples' width='800'&gt;&lt;/center&gt;</span>
 <span id="cb8-371"><a href="#cb8-371" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-372"><a href="#cb8-372" aria-hidden="true" tabindex="-1"></a>We now face a dilemma: we know that we can **decrease training error** by increasing model complexity, but models that are *too* complex start to overfit and can't be reapplied to new datasets due to **high variance**.</span>
 <span id="cb8-373"><a href="#cb8-373" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-374"><a href="#cb8-374" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;center&gt;&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/bvt.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'bvt'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'400'</span><span class="kw">&gt;&lt;/center&gt;</span></span>
+<span id="cb8-374"><a href="#cb8-374" aria-hidden="true" tabindex="-1"></a>&lt;center&gt;&lt;img src="images/bvt.png" alt='bvt' width='400'&gt;&lt;/center&gt;</span>
 <span id="cb8-375"><a href="#cb8-375" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-376"><a href="#cb8-376" aria-hidden="true" tabindex="-1"></a>We can see that there is a clear trade-off that comes from the complexity of our model. As model complexity increases, the model's error on the training data decreases. At the same time, the model's variance tends to increase.</span>
 <span id="cb8-377"><a href="#cb8-377" aria-hidden="true" tabindex="-1"></a></span>
@@ -1549,12 +1776,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb8-390"><a href="#cb8-390" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Compute the loss and the gradient.</span>
 <span id="cb8-391"><a href="#cb8-391" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Update your gradient until you reach an appropriate estimate of the true gradient.</span>
 <span id="cb8-392"><a href="#cb8-392" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-393"><a href="#cb8-393" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;center&gt;&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/pytorchsgd.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'pytorch_sgd'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'500'</span><span class="kw">&gt;&lt;/center&gt;</span></span>
+<span id="cb8-393"><a href="#cb8-393" aria-hidden="true" tabindex="-1"></a>&lt;center&gt;&lt;img src="images/pytorchsgd.png" alt='pytorch_sgd' width='500'&gt;&lt;/center&gt;</span>
 <span id="cb8-394"><a href="#cb8-394" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-395"><a href="#cb8-395" aria-hidden="true" tabindex="-1"></a>If you want to learn more, this <span class="co">[</span><span class="ot">Intro to PyTorch tutorial</span><span class="co">](https://pytorch.org/tutorials/beginner/deep_learning_60min_blitz.html)</span> is a great resource to get started! </span>
-</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
+
 
 
 

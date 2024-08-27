@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.450">
+<meta name="generator" content="quarto-1.5.56">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Principles and Techniques of Data Science - 22&nbsp; Logistic Regression I</title>
+<title>22&nbsp; Logistic Regression I – Principles and Techniques of Data Science</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -22,7 +22,7 @@ ul.task-list li input[type="checkbox"] {
 }
 /* CSS for syntax highlighting */
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -33,7 +33,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -57,7 +57,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 
 
-<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -82,7 +82,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   "collapse-after": 3,
   "panel-placement": "start",
   "type": "textbox",
-  "limit": 20,
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -91,17 +96,45 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
     "search-submit-button-title": "Submit",
     "search-label": "Search"
   }
 }</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -111,13 +144,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <header id="quarto-header" class="headroom fixed-top">
   <nav class="quarto-secondary-nav">
     <div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../logistic_regression_1/logistic_reg_1.html"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Logistic Regression I</span></a></li></ol></nav>
-      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-      </a>
-      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../logistic_regression_1/logistic_reg_1.html"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Logistic Regression I</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
       </button>
     </div>
@@ -126,7 +159,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
       <a href="../index.html" class="sidebar-logo-link">
       <img src="../data100_logo.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
@@ -134,7 +167,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div class="sidebar-title mb-0 py-0">
       <a href="../">Principles and Techniques of Data Science</a> 
         <div class="sidebar-tools-main">
-    <a href="https://github.com/DS-100/course-notes" rel="" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+    <a href="https://github.com/DS-100/course-notes" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
 </div>
     </div>
       </div>
@@ -307,16 +340,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Clustering</span></span></a>
   </div>
 </li>
-<li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../decision_tree/decision_tree.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Decision Trees</span></span></a>
-  </div>
-</li>
     </ul>
     </div>
 </nav>
-<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
@@ -343,7 +370,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#why-not-mse" id="toc-why-not-mse" class="nav-link" data-scroll-target="#why-not-mse"><span class="header-section-number">22.4.1</span> Why Not MSE?</a></li>
   <li><a href="#motivating-cross-entropy-loss" id="toc-motivating-cross-entropy-loss" class="nav-link" data-scroll-target="#motivating-cross-entropy-loss"><span class="header-section-number">22.4.2</span> Motivating Cross-Entropy Loss</a></li>
   </ul></li>
-  <li><a href="#bonus-maximum-likelihood-estimation" id="toc-bonus-maximum-likelihood-estimation" class="nav-link" data-scroll-target="#bonus-maximum-likelihood-estimation"><span class="header-section-number">22.5</span> Maximum Likelihood Estimation</a>
+  <li><a href="#maximum-likelihood-estimation" id="toc-maximum-likelihood-estimation" class="nav-link" data-scroll-target="#maximum-likelihood-estimation"><span class="header-section-number">22.5</span> Maximum Likelihood Estimation</a>
   <ul>
   <li><a href="#building-intuition-the-coin-flip" id="toc-building-intuition-the-coin-flip" class="nav-link" data-scroll-target="#building-intuition-the-coin-flip"><span class="header-section-number">22.5.1</span> Building Intuition: The Coin Flip</a></li>
   <li><a href="#likelihood-of-data" id="toc-likelihood-of-data" class="nav-link" data-scroll-target="#likelihood-of-data"><span class="header-section-number">22.5.2</span> Likelihood of Data</a></li>
@@ -369,7 +396,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </div>
   
 
+
 </header>
+
 
 <div class="callout callout-style-default callout-note no-icon callout-titled">
 <div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="true" aria-label="Toggle callout">
@@ -439,8 +468,8 @@ Learning Outcomes
 <h2 data-number="22.2" class="anchored" data-anchor-id="deriving-the-logistic-regression-model"><span class="header-section-number">22.2</span> Deriving the Logistic Regression Model</h2>
 <p>Throughout this lecture, we will work with the <code>games</code> dataset, which contains information about games played in the NBA basketball league. Our goal will be to use a basketball team’s <code>"GOAL_DIFF"</code> to predict whether or not a given team won their game (<code>"WON"</code>). If a team wins their game, we’ll say they belong to Class 1. If they lose, they belong to Class 0.</p>
 <p>For those who are curious, <code>"GOAL_DIFF"</code> represents the difference in successful field goal percentages between the two competing teams.</p>
-<div class="cell" data-execution_count="1">
-<details>
+<div id="ddb6005f" class="cell" data-execution_count="1">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>warnings.filterwarnings(<span class="st">"ignore"</span>)</span>
@@ -456,7 +485,7 @@ Learning Outcomes
 <div>
 
 
-<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -521,8 +550,8 @@ Learning Outcomes
 </div>
 </div>
 <p>Let’s visualize the relationship between <code>"GOAL_DIFF"</code> and <code>"WON"</code> using the Seaborn function <code>sns.stripplot</code>. A strip plot automatically introduces a small amount of random noise to <strong>jitter</strong> the data. Recall that all values in the <code>"WON"</code> column are either 1 (won) or 0 (lost) – if we were to directly plot them without jittering, we would see severe overplotting.</p>
-<div class="cell" data-execution_count="2">
-<details>
+<div id="fd76782e" class="cell" data-execution_count="2">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -532,13 +561,17 @@ Learning Outcomes
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>plt.gca().invert_yaxis()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
-<p><img src="logistic_reg_1_files/figure-html/cell-3-output-1.png" width="580" height="429"></p>
+<div>
+<figure class="figure">
+<p><img src="logistic_reg_1_files/figure-html/cell-3-output-1.png" width="580" height="429" class="figure-img"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>This dataset is unlike anything we’ve seen before – our target variable contains only two unique values! (Remember that each y value is either 0 or 1; the plot above jitters the y data slightly for ease of reading.)</p>
 <p>The regression models we have worked with always assumed that we were attempting to predict a continuous target. If we apply a linear regression model to this dataset, something strange happens.</p>
-<div class="cell" data-execution_count="3">
-<details>
+<div id="77e06c8c" class="cell" data-execution_count="3">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sklearn.linear_model <span class="im">as</span> lm</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -551,7 +584,11 @@ Learning Outcomes
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>plt.gca().invert_yaxis()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
-<p><img src="logistic_reg_1_files/figure-html/cell-4-output-1.png" width="580" height="429"></p>
+<div>
+<figure class="figure">
+<p><img src="logistic_reg_1_files/figure-html/cell-4-output-1.png" width="580" height="429" class="figure-img"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>The linear regression fit follows the data as closely as it can. However, this approach has a key flaw - the predicted output, <span class="math inline">\(\hat{y}\)</span>, can be outside the range of possible classes (there are predictions above 1 and below 0). This means that the output can’t always be interpreted (what does it mean to predict a class of -2.3?).</p>
@@ -560,7 +597,7 @@ Learning Outcomes
 <h3 data-number="22.2.1" class="anchored" data-anchor-id="graph-of-averages"><span class="header-section-number">22.2.1</span> Graph of Averages</h3>
 <p>Back in <a href="https://inferentialthinking.com/chapters/08/1/Applying_a_Function_to_a_Column.html#example-prediction">Data 8</a>, you gradually built up to the concept of linear regression by using the <strong>graph of averages</strong>. Before you knew the mathematical underpinnings of the regression line, you took a more intuitive approach: you bucketed the <span class="math inline">\(x\)</span> data into bins of common values, then computed the average <span class="math inline">\(y\)</span> for all datapoints in the same bin. The result gave you the insight needed to derive the regression fit.</p>
 <p>Let’s take the same approach as we grapple with our new classification task. In the cell below, we 1) bucket the <code>"GOAL_DIFF"</code> data into bins of similar values and 2) compute the average <code>"WON"</code> value of all datapoints in a bin.</p>
-<div class="cell" data-execution_count="4">
+<div id="0fa5d6eb" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># bucket the GOAL_DIFF data into 20 bins</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>bins <span class="op">=</span> pd.cut(games[<span class="st">"GOAL_DIFF"</span>], <span class="dv">20</span>)</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>games[<span class="st">"bin"</span>] <span class="op">=</span> [(b.left <span class="op">+</span> b.right) <span class="op">/</span> <span class="dv">2</span> <span class="cf">for</span> b <span class="kw">in</span> bins]</span>
@@ -571,7 +608,11 @@ Learning Outcomes
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>plt.plot(win_rates_by_bin.index, win_rates_by_bin, c<span class="op">=</span><span class="st">"tab:red"</span>)</span>
 <span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>plt.gca().invert_yaxis()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
-<p><img src="logistic_reg_1_files/figure-html/cell-5-output-1.png" width="580" height="429"></p>
+<div>
+<figure class="figure">
+<p><img src="logistic_reg_1_files/figure-html/cell-5-output-1.png" width="580" height="429" class="figure-img"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>Interesting: our result is certainly not like the straight line produced by finding the graph of averages for a linear relationship. We can make two observations:</p>
@@ -601,8 +642,8 @@ Learning Outcomes
 <p>Let’s consider our eventual goal: determining if we should predict a Class of 0 or 1 for each datapoint. Rephrased, we want to decide if it seems more “likely” that the datapoint belongs to Class 0 or to Class 1. One way of deciding this is to see which class has the higher predicted probability for a given datapoint. The <strong>odds</strong> is defined as the probability of a datapoint belonging to Class 1 divided by the probability of it belonging to Class 0.</p>
 <p><span class="math display">\[\text{odds} = \frac{P(Y=1|x)}{P(Y=0|x)} = \frac{p}{1-p}\]</span></p>
 <p>If we plot the odds for each input <code>"GOAL_DIFF"</code> (<span class="math inline">\(x\)</span>), we see something that looks more promising.</p>
-<div class="cell" data-execution_count="5">
-<details>
+<div id="8a727343" class="cell" data-execution_count="5">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> win_rates_by_bin</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>odds <span class="op">=</span> p<span class="op">/</span>(<span class="dv">1</span><span class="op">-</span>p) </span>
@@ -612,15 +653,19 @@ Learning Outcomes
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="vs">r"Odds $= \frac</span><span class="sc">{p}</span><span class="vs">{1-p}$"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
-<p><img src="logistic_reg_1_files/figure-html/cell-6-output-1.png" width="595" height="429"></p>
+<div>
+<figure class="figure">
+<p><img src="logistic_reg_1_files/figure-html/cell-6-output-1.png" width="595" height="429" class="figure-img"></p>
+</figure>
+</div>
 </div>
 </div>
 </section>
 <section id="log" class="level4" data-number="22.2.2.2">
 <h4 data-number="22.2.2.2" class="anchored" data-anchor-id="log"><span class="header-section-number">22.2.2.2</span> 2. Log</h4>
 <p>It turns out that the relationship between our input <code>"GOAL_DIFF"</code> and the odds is roughly exponential! Let’s linearize the exponential by taking the logarithm (as suggested by the <a href="https://ds100.org/course-notes/visualization_2/visualization_2.html#tukey-mosteller-bulge-diagram">Tukey-Mosteller Bulge Diagram</a>). As a reminder, you should assume that any logarithm in Data 100 is the base <span class="math inline">\(e\)</span> natural logarithm unless told otherwise.</p>
-<div class="cell" data-execution_count="6">
-<details>
+<div id="b6b9e739" class="cell" data-execution_count="6">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>log_odds <span class="op">=</span> np.log(odds)</span>
@@ -629,7 +674,11 @@ Learning Outcomes
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="vs">r"Log-Odds $= \log{\frac</span><span class="sc">{p}</span><span class="vs">{1-p</span><span class="sc">}}</span><span class="vs">$"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
-<p><img src="logistic_reg_1_files/figure-html/cell-7-output-1.png" width="597" height="429"></p>
+<div>
+<figure class="figure">
+<p><img src="logistic_reg_1_files/figure-html/cell-7-output-1.png" width="597" height="429" class="figure-img"></p>
+</figure>
+</div>
 </div>
 </div>
 </section>
@@ -654,8 +703,8 @@ p &amp;= \frac{e^{x^T \theta}}{1+e^{x^T \theta}}\\
 p &amp;= \frac{1}{1+e^{-x^T \theta}}\\
 \end{align}\]</span></p>
 <p>Phew, that was a lot of algebra. What we’ve uncovered is the <strong>logistic regression model</strong> to predict the probability of a datapoint <span class="math inline">\(x^{\top}\)</span> belonging to Class 1. If we plot this relationship for our data, we see the S-shaped curve from earlier!</p>
-<div class="cell" data-execution_count="7">
-<details>
+<div id="ae095b21" class="cell" data-execution_count="7">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># We'll discuss the `LogisticRegression` class next time</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>xs <span class="op">=</span> np.linspace(<span class="op">-</span><span class="fl">0.3</span>, <span class="fl">0.3</span>)</span>
@@ -671,7 +720,11 @@ p &amp;= \frac{1}{1+e^{-x^T \theta}}\\
 <span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>plt.gca().invert_yaxis()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
-<p><img src="logistic_reg_1_files/figure-html/cell-8-output-1.png" width="576" height="429"></p>
+<div>
+<figure class="figure">
+<p><img src="logistic_reg_1_files/figure-html/cell-8-output-1.png" width="576" height="429" class="figure-img"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>The S-shaped curve is formally known as the <strong>sigmoid function</strong> and is typically denoted by <span class="math inline">\(\sigma\)</span>.</p>
@@ -706,7 +759,7 @@ Properties of the Sigmoid
 <li>Compute a linear combination of the features, <span class="math inline">\(x^{\top}\theta\)</span></li>
 <li>Apply the sigmoid activation function, <span class="math inline">\(\sigma(x^{\top} \theta)\)</span>.</li>
 </ol>
-<p>Our predicted probabilities are of the form <span class="math inline">\(P(Y=1|x) = p = \frac{1}{1+e^{-x^T \theta}} = \frac{1}{1+e^{-(\theta_0 + \theta_1 x_1 + \theta_2 x_2 + \ldots + \theta_p x_p)}}\)</span></p>
+<p>Our predicted probabilities are of the form <span class="math inline">\(P(Y=1|x) = p = \frac{1}{1+e^{-x^T \theta}}  = \frac{1}{1+e^{-(\theta_0 + \theta_1 x_1 + \theta_2 x_2 + \ldots + \theta_p x_p)}}\)</span></p>
 <p>An important note: despite its name, logistic regression is used for <em>classification</em> tasks, not regression tasks. In Data 100, we always apply logistic regression with the goal of classifying data.</p>
 <p>Let’s summarize our logistic regression modeling workflow:</p>
 <center>
@@ -776,8 +829,8 @@ Example Calculation
 <section id="why-not-mse" class="level3" data-number="22.4.1">
 <h3 data-number="22.4.1" class="anchored" data-anchor-id="why-not-mse"><span class="header-section-number">22.4.1</span> Why Not MSE?</h3>
 <p>You may wonder: why not use our familiar mean squared error? It turns out that the MSE is not well suited for logistic regression. To see why, let’s consider a simple, artificially generated <code>toy</code> dataset with just one feature (this will be easier to work with than the more complicated <code>games</code> data).</p>
-<div class="cell" data-execution_count="8">
-<details>
+<div id="2cd1427a" class="cell" data-execution_count="8">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>toy_df <span class="op">=</span> pd.DataFrame({</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>        <span class="st">"x"</span>: [<span class="op">-</span><span class="dv">4</span>, <span class="op">-</span><span class="dv">2</span>, <span class="op">-</span><span class="fl">0.5</span>, <span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">5</span>],</span>
@@ -788,7 +841,7 @@ Example Calculation
 <div>
 
 
-<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -831,8 +884,8 @@ Example Calculation
 <p>We’ll construct a basic logistic regression model with only one feature and no intercept term. Our predicted probabilities take the form:</p>
 <p><span class="math display">\[p=P(Y=1|x)=\frac{1}{1+e^{-\theta_1 x}}\]</span></p>
 <p>In the cell below, we plot the MSE for our model on the data.</p>
-<div class="cell" data-execution_count="9">
-<details>
+<div id="f5de9ac5" class="cell" data-execution_count="9">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sigmoid(z):</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">1</span><span class="op">/</span>(<span class="dv">1</span><span class="op">+</span>np.e<span class="op">**</span>(<span class="op">-</span>z))</span>
@@ -848,7 +901,11 @@ Example Calculation
 <span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'MSE'</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
-<p><img src="logistic_reg_1_files/figure-html/cell-10-output-1.png" width="589" height="451"></p>
+<div>
+<figure class="figure">
+<p><img src="logistic_reg_1_files/figure-html/cell-10-output-1.png" width="589" height="451" class="figure-img"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>This looks nothing like the parabola we found when plotting the MSE of a linear regression model! In particular, we can identify two flaws with using the MSE for logistic regression:</p>
@@ -878,7 +935,7 @@ Example Calculation
   -\log{(1-p)} &amp; \text{if } y=0
 \end{cases}\]</span></p>
 <p>Why does this (seemingly convoluted) loss function “work”? Let’s break it down.</p>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 50%">
 <col style="width: 50%">
@@ -961,8 +1018,8 @@ R(\theta) &amp;= - \frac{1}{n} \sum_{i=1}^n \left(y_i\log{(p_i)}+(1-y_i)\log{(1-
 \hat{\theta} = \underset{\theta}{\arg\min} - \frac{1}{n} \sum_{i=1}^n \left(y_i\log{(\sigma(X_i^{\top}\theta))}+(1-y_i)\log{(1-\sigma(X_i^{\top}\theta))}\right)
 \]</span></p>
 <p>Plotting the cross-entropy loss surface for our <code>toy</code> dataset gives us a more encouraging result – our loss function is now convex. This means we can optimize it using gradient descent. Computing the gradient of the logistic model is fairly challenging, so we’ll let <code>sklearn</code> take care of this for us. You won’t need to compute the gradient of the logistic model in Data 100.</p>
-<div class="cell" data-execution_count="10">
-<details>
+<div id="4239ae7b" class="cell" data-execution_count="10">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> cross_entropy(y, p_hat):</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">-</span> y <span class="op">*</span> np.log(p_hat) <span class="op">-</span> (<span class="dv">1</span> <span class="op">-</span> y) <span class="op">*</span> np.log(<span class="dv">1</span> <span class="op">-</span> p_hat)</span>
@@ -976,19 +1033,23 @@ R(\theta) &amp;= - \frac{1}{n} \sum_{i=1}^n \left(y_i\log{(p_i)}+(1-y_i)\log{(1-
 <span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="vs">r'$\theta$'</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
-<p><img src="logistic_reg_1_files/figure-html/cell-11-output-1.png" width="587" height="429"></p>
+<div>
+<figure class="figure">
+<p><img src="logistic_reg_1_files/figure-html/cell-11-output-1.png" width="587" height="429" class="figure-img"></p>
+</figure>
+</div>
 </div>
 </div>
 </section>
 </section>
-<section id="bonus-maximum-likelihood-estimation" class="level2" data-number="22.5">
-<h2 data-number="22.5" class="anchored" data-anchor-id="bonus-maximum-likelihood-estimation"><span class="header-section-number">22.5</span>Maximum Likelihood Estimation</h2>
+<section id="maximum-likelihood-estimation" class="level2" data-number="22.5">
+<h2 data-number="22.5" class="anchored" data-anchor-id="maximum-likelihood-estimation"><span class="header-section-number">22.5</span> Maximum Likelihood Estimation</h2>
 <p>It may have seemed like we pulled cross-entropy loss out of thin air. How did we know that taking the negative logarithms of our probabilities would work so well? It turns out that cross-entropy loss is justified by probability theory.</p>
 <p>The following section is out of scope, but is certainly an interesting read!</p>
 <section id="building-intuition-the-coin-flip" class="level3" data-number="22.5.1">
 <h3 data-number="22.5.1" class="anchored" data-anchor-id="building-intuition-the-coin-flip"><span class="header-section-number">22.5.1</span> Building Intuition: The Coin Flip</h3>
 <p>To build some intuition for logistic regression, let’s look at an introductory example to classification: the coin flip. Suppose we observe some outcomes of a coin flip (1 = Heads, 0 = Tails).</p>
-<div class="cell" data-execution_count="11">
+<div id="474b75d7" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>flips <span class="op">=</span> [<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>]</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>flips</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="11">
@@ -1011,13 +1072,17 @@ R(\theta) &amp;= - \frac{1}{n} \sum_{i=1}^n \left(y_i\log{(p_i)}+(1-y_i)\log{(1-
 <p>We define the <strong>likelihood</strong> of obtaining our observed data as a quantity <em>proportional</em> to the probability above. To find it, simply multiply the probabilities of obtaining each coin flip.</p>
 <p><span class="math display">\[(p)^{4} (1-p)^6\]</span></p>
 <p>The technique known as <strong>maximum likelihood estimation</strong> finds the <span class="math inline">\(p\)</span> that maximizes the above likelihood. You can find this maximum by taking the derivative of the likelihood, but we’ll provide a more intuitive graphical solution.</p>
-<div class="cell" data-execution_count="12">
+<div id="fe488eb3" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>thetas <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">1</span>)</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>plt.plot(thetas, (thetas<span class="op">**</span><span class="dv">4</span>)<span class="op">*</span>(<span class="dv">1</span><span class="op">-</span>thetas)<span class="op">**</span><span class="dv">6</span>)</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="vs">r"$\theta$"</span>)</span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Likelihood"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
-<p><img src="logistic_reg_1_files/figure-html/cell-13-output-1.png" width="614" height="429"></p>
+<div>
+<figure class="figure">
+<p><img src="logistic_reg_1_files/figure-html/cell-13-output-1.png" width="614" height="429" class="figure-img"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>More generally, the likelihood for some Bernoulli(<span class="math inline">\(p\)</span>) random variable <span class="math inline">\(Y\)</span> is:</p>
@@ -1096,18 +1161,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
     return false;
   }
-  const clipboard = new window.ClipboardJS('.code-copy-button', {
-    text: function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-    }
-  });
-  clipboard.on('success', function(e) {
+  const onCopySuccess = function(e) {
     // button target
     const button = e.trigger;
     // don't keep focus
@@ -1139,11 +1193,50 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }, 1000);
     // clear code selection
     e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
   });
-  function tippyHover(el, contentFn) {
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
-      content: contentFn,
       maxWidth: 500,
       delay: 100,
       arrow: false,
@@ -1153,8 +1246,17 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       interactive: true,
       interactiveBorder: 10,
       theme: 'quarto',
-      placement: 'bottom-start'
+      placement: 'bottom-start',
     };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
     window.tippy(el, config); 
   }
   const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
@@ -1166,7 +1268,130 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      return note.innerHTML;
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
     });
   }
       let selectedAnnoteEl;
@@ -1210,6 +1435,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             }
             div.style.top = top - 2 + "px";
             div.style.height = height + 4 + "px";
+            div.style.left = 0;
             let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
             if (gutterDiv === null) {
               gutterDiv = window.document.createElement("div");
@@ -1235,6 +1461,32 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         });
         selectedAnnoteEl = undefined;
       };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
       // Attach click handler to the DT
       const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
       for (const annoteDlNode of annoteDls) {
@@ -1296,17 +1548,18 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../sql_II/sql_II.html" class="pagination-link">
+      <a href="../sql_II/sql_II.html" class="pagination-link" aria-label="SQL II">
         <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">SQL II</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../logistic_regression_2/logistic_reg_2.html" class="pagination-link">
+      <a href="../logistic_regression_2/logistic_reg_2.html" class="pagination-link" aria-label="Logistic Regression II">
         <span class="nav-page-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Logistic Regression II</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
 </div> <!-- /content -->
+
 
 
 

@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.450">
+<meta name="generator" content="quarto-1.5.56">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Principles and Techniques of Data Science - 12&nbsp; Ordinary Least Squares</title>
+<title>12&nbsp; Ordinary Least Squares – Principles and Techniques of Data Science</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -22,7 +22,7 @@ ul.task-list li input[type="checkbox"] {
 }
 /* CSS for syntax highlighting */
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -33,7 +33,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -57,7 +57,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 
 
-<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -82,7 +82,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   "collapse-after": 3,
   "panel-placement": "start",
   "type": "textbox",
-  "limit": 20,
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -91,17 +96,45 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
     "search-submit-button-title": "Submit",
     "search-label": "Search"
   }
 }</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -111,13 +144,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <header id="quarto-header" class="headroom fixed-top">
   <nav class="quarto-secondary-nav">
     <div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../ols/ols.html"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Ordinary Least Squares</span></a></li></ol></nav>
-      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-      </a>
-      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../ols/ols.html"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Ordinary Least Squares</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
       </button>
     </div>
@@ -126,7 +159,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
       <a href="../index.html" class="sidebar-logo-link">
       <img src="../data100_logo.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
@@ -134,7 +167,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div class="sidebar-title mb-0 py-0">
       <a href="../">Principles and Techniques of Data Science</a> 
         <div class="sidebar-tools-main">
-    <a href="https://github.com/DS-100/course-notes" rel="" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+    <a href="https://github.com/DS-100/course-notes" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
 </div>
     </div>
       </div>
@@ -307,16 +340,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Clustering</span></span></a>
   </div>
 </li>
-<li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../decision_tree/decision_tree.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Decision Trees</span></span></a>
-  </div>
-</li>
     </ul>
     </div>
 </nav>
-<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
@@ -352,7 +379,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<div class="quarto-title-meta">
+<div class="quarto-title-meta column-body">
 
     
   
@@ -360,7 +387,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </div>
   
 
+
 </header>
+
 
 <div class="callout callout-style-default callout-note no-icon callout-titled">
 <div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="true" aria-label="Toggle callout">
@@ -393,16 +422,16 @@ Learning Outcomes
 <p><span class="math display">\[\hat{y} = \theta_0\:+\:\theta_1x_{1}\:+\:\theta_2 x_{2}\:+\:...\:+\:\theta_p x_{p}\]</span></p>
 <p>Our predicted value of <span class="math inline">\(y\)</span>, <span class="math inline">\(\hat{y}\)</span>, is a linear combination of the single <strong>observations</strong> (features), <span class="math inline">\(x_i\)</span>, and the parameters, <span class="math inline">\(\theta_i\)</span>.</p>
 <p>We can explore this idea further by looking at a dataset containing aggregate per-player data from the 2018-19 NBA season, downloaded from <a href="https://www.kaggle.com/schmadam97/nba-regular-season-stats-20182019">Kaggle</a>.</p>
-<div class="cell" data-execution_count="1">
-<details>
+<div id="50d41e8d" class="cell" data-execution_count="1">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>nba <span class="op">=</span> pd.read_csv(<span class="st">'data/nba18-19.csv'</span>, index_col<span class="op">=</span><span class="dv">0</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>nba.index.name <span class="op">=</span> <span class="va">None</span> <span class="co"># Drops name of index (players are ordered by rank)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div class="cell" data-execution_count="2">
-<details>
+<div id="1c405b85" class="cell" data-execution_count="2">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>nba.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -410,7 +439,7 @@ Learning Outcomes
 <div>
 
 
-<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -572,8 +601,8 @@ Learning Outcomes
 <li><code>AST</code>, the average number of assists per game</li>
 <li><code>3PA</code>, the average number of 3-point field goals attempted per game</li>
 </ul>
-<div class="cell" data-execution_count="3">
-<details>
+<div id="6ae38bff" class="cell" data-execution_count="3">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>nba[[<span class="st">'FG'</span>, <span class="st">'AST'</span>, <span class="st">'3PA'</span>, <span class="st">'PTS'</span>]].head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -581,7 +610,7 @@ Learning Outcomes
 <div>
 
 
-<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -694,41 +723,35 @@ Linear Algebra Review: Vector Dot Product
 <p>We now know how to generate a single prediction from multiple observed features. Data scientists usually work at scale – that is, they want to build models that can produce many predictions, all at once. The vector notation we introduced above gives us a hint on how we can expedite multiple linear regression. We want to use the tools of linear algebra.</p>
 <p>Let’s think about how we can apply what we did above. To accommodate for the fact that we’re considering several feature variables, we’ll adjust our notation slightly. Each observation can now be thought of as a row vector with an entry for each of <span class="math inline">\(p\)</span> features.</p>
 <div data-align="middle">
-
 <table style="width:100%">
 <tbody><tr align="center">
 <td>
 <img src="images/observation.png" alt="observation" width="550">
 </td>
 </tr>
-
 </tbody></table>
 </div>
 <p>To make a prediction from the <em>first</em> observation in the data, we take the dot product of the parameter vector and <em>first</em> observation vector. To make a prediction from the <em>second</em> observation, we would repeat this process to find the dot product of the parameter vector and the <em>second</em> observation vector. If we wanted to find the model predictions for each observation in the dataset, we’d repeat this process for all <span class="math inline">\(n\)</span> observations in the data.</p>
 <p><span class="math display">\[\hat{y}_1 = \theta_0 + \theta_1 x_{11} + \theta_2 x_{12} + ... + \theta_p x_{1p} = [1,\:x_{11},\:x_{12},\:x_{13},\:...,\:x_{1p}] \theta\]</span> <span class="math display">\[\hat{y}_2 = \theta_0 + \theta_1 x_{21} + \theta_2 x_{22} + ... + \theta_p x_{2p} = [1,\:x_{21},\:x_{22},\:x_{23},\:...,\:x_{2p}] \theta\]</span> <span class="math display">\[\vdots\]</span> <span class="math display">\[\hat{y}_n = \theta_0 + \theta_1 x_{n1} + \theta_2 x_{n2} + ... + \theta_p x_{np} = [1,\:x_{n1},\:x_{n2},\:x_{n3},\:...,\:x_{np}] \theta\]</span></p>
 <p>Our observed data is represented by <span class="math inline">\(n\)</span> row vectors, each with dimension <span class="math inline">\((p+1)\)</span>. We can collect them all into a single matrix, which we call <span class="math inline">\(\mathbb{X}\)</span>.</p>
 <div data-align="middle">
-
 <table style="width:100%">
 <tbody><tr align="center">
 <td>
 <img src="images/design_matrix.png" alt="design_matrix" width="400">
 </td>
 </tr>
-
 </tbody></table>
 </div>
 <p>The matrix <span class="math inline">\(\mathbb{X}\)</span> is known as the <strong>design matrix</strong>. It contains all observed data for each of our <span class="math inline">\(p\)</span> features, where each <strong>row</strong> corresponds to one <strong>observation</strong>, and each <strong>column</strong> corresponds to a <strong>feature</strong>. It often (but not always) contains an additional column of all ones to represent the <strong>intercept</strong> or <strong>bias column</strong>.</p>
 <p>To review what is happening in the design matrix: each row represents a single observation. For example, a student in Data 100. Each column represents a feature. For example, the ages of students in Data 100. This convention allows us to easily transfer our previous work in DataFrames over to this new linear algebra perspective.</p>
 <div data-align="middle">
-
 <table style="width:100%">
 <tbody><tr align="center">
 <td>
 <img src="images/row_col.png" alt="row_col" width="600">
 </td>
 </tr>
-
 </tbody></table>
 </div>
 <p>The multiple linear regression model can then be restated in terms of matrices: <span class="math display">\[
@@ -868,26 +891,22 @@ Linear Algebra: Matrix-Vector Multiplication
 <ol type="1">
 <li>So far, we’ve thought of our model as horizontally stacked predictions per datapoint
 <div data-align="middle">
-
 <table style="width:100%">
 <tbody><tr align="center">
 <td>
 <img src="images/matmul1.png" alt="row_col" width="300">
 </td>
 </tr>
-
 </tbody></table>
 </div></li>
 <li>However, it is helpful sometimes to think of matrix-vector multiplication as performed by columns. We can also think of <span class="math inline">\(\mathbb{Y}\)</span> as a <em>linear combination of feature vectors</em>, scaled by <em>parameters</em>.
 <div data-align="middle">
-
 <table style="width:100%">
 <tbody><tr align="center">
 <td>
 <img src="images/matmul2.png" alt="row_col" width="500">
 </td>
 </tr>
-
 </tbody></table>
 </div></li>
 </ol>
@@ -895,14 +914,12 @@ Linear Algebra: Matrix-Vector Multiplication
 </div>
 <p>Up until now, we’ve mostly thought of our model as a scalar product between horizontally stacked observations and the parameter vector. We can also think of <span class="math inline">\(\hat{\mathbb{Y}}\)</span> as a <strong>linear combination of feature vectors</strong>, scaled by the <strong>parameters</strong>. We use the notation <span class="math inline">\(\mathbb{X}_{:, i}\)</span> to denote the <span class="math inline">\(i\)</span>th column of the design matrix. You can think of this as following the same convention as used when calling <code>.iloc</code> and <code>.loc</code>. “:” means that we are taking all entries in the <span class="math inline">\(i\)</span>th column.</p>
 <div data-align="middle">
-
 <table style="width:100%">
 <tbody><tr align="center">
 <td>
 <img src="images/columns.png" alt="columns" width="500">
 </td>
 </tr>
-
 </tbody></table>
 </div>
 <p><span class="math display">\[
@@ -928,27 +945,23 @@ Linear Algebra: Matrix-Vector Multiplication
 <p>Because the prediction vector, <span class="math inline">\(\hat{\mathbb{Y}} = \mathbb{X} \theta\)</span>, is a <strong>linear combination</strong> of the columns of <span class="math inline">\(\mathbb{X}\)</span>, we know that the <strong>predictions are contained in the span of <span class="math inline">\(\mathbb{X}\)</span></strong>. That is, we know that <span class="math inline">\(\mathbb{\hat{Y}} \in \text{Span}(\mathbb{X})\)</span>.</p>
 <p>The diagram below is a simplified view of <span class="math inline">\(\text{Span}(\mathbb{X})\)</span>, assuming that each column of <span class="math inline">\(\mathbb{X}\)</span> has length <span class="math inline">\(n\)</span>. Notice that the columns of <span class="math inline">\(\mathbb{X}\)</span> define a subspace of <span class="math inline">\(\mathbb{R}^n\)</span>, where each point in the subspace can be reached by a linear combination of <span class="math inline">\(\mathbb{X}\)</span>’s columns. The prediction vector <span class="math inline">\(\mathbb{\hat{Y}}\)</span> lies somewhere in this subspace.</p>
 <div data-align="middle">
-
 <table style="width:100%">
 <tbody><tr align="center">
 <td>
 <img src="images/span.png" alt="span" width="600">
 </td>
 </tr>
-
 </tbody></table>
 </div>
 <p>Examining this diagram, we find a problem. The vector of true values, <span class="math inline">\(\mathbb{Y}\)</span>, could theoretically lie <em>anywhere</em> in <span class="math inline">\(\mathbb{R}^n\)</span> space – its exact location depends on the data we collect out in the real world. However, our multiple linear regression model can only make predictions in the subspace of <span class="math inline">\(\mathbb{R}^n\)</span> spanned by <span class="math inline">\(\mathbb{X}\)</span>. Remember the model fitting goal we established in the previous section: we want to generate predictions such that the distance between the vector of true values, <span class="math inline">\(\mathbb{Y}\)</span>, and the vector of predicted values, <span class="math inline">\(\mathbb{\hat{Y}}\)</span>, is minimized. This means that <strong>we want <span class="math inline">\(\mathbb{\hat{Y}}\)</span> to be the vector in <span class="math inline">\(\text{Span}(\mathbb{X})\)</span> that is closest to <span class="math inline">\(\mathbb{Y}\)</span></strong>.</p>
 <p>Another way of rephrasing this goal is to say that we wish to minimize the length of the residual vector <span class="math inline">\(e\)</span>, as measured by its <span class="math inline">\(L_2\)</span> norm.</p>
 <div data-align="middle">
-
 <table style="width:100%">
 <tbody><tr align="center">
 <td>
 <img src="images/residual.png" alt="residual" width="600">
 </td>
 </tr>
-
 </tbody></table>
 </div>
 <p>The vector in <span class="math inline">\(\text{Span}(\mathbb{X})\)</span> that is closest to <span class="math inline">\(\mathbb{Y}\)</span> is always the <strong>orthogonal projection</strong> of <span class="math inline">\(\mathbb{Y}\)</span> onto <span class="math inline">\(\text{Span}(\mathbb{X}).\)</span> Thus, we should choose the parameter vector <span class="math inline">\(\theta\)</span> that makes the <strong>residual vector orthogonal to any vector in <span class="math inline">\(\text{Span}(\mathbb{X})\)</span></strong>. You can visualize this as the vector created by dropping a perpendicular line from <span class="math inline">\(\mathbb{Y}\)</span> onto the span of <span class="math inline">\(\mathbb{X}\)</span>.</p>
@@ -989,14 +1002,12 @@ Linear Algebra: Orthogonality
 <h3 data-number="12.3.2" class="anchored" data-anchor-id="residual-plots"><span class="header-section-number">12.3.2</span> Residual Plots</h3>
 <p>When working with SLR, we generated plots of the residuals against a single feature to understand the behavior of residuals. When working with several features in multiple linear regression, it no longer makes sense to consider a single feature in our residual plots. Instead, multiple linear regression is evaluated by making plots of the residuals against the predicted values. As was the case with SLR, a multiple linear model performs well if its residual plot shows no patterns.</p>
 <div data-align="middle">
-
 <table style="width:100%">
 <tbody><tr align="center">
 <td>
 <img src="images/residual_plot.png" alt="residual_plot" width="500">
 </td>
 </tr>
-
 </tbody></table>
 </div>
 </section>
@@ -1054,7 +1065,7 @@ Linear Algebra: Orthogonality
 </div>
 </div>
 <p>To summarize:</p>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 25%">
 <col style="width: 25%">
@@ -1181,18 +1192,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
     return false;
   }
-  const clipboard = new window.ClipboardJS('.code-copy-button', {
-    text: function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-    }
-  });
-  clipboard.on('success', function(e) {
+  const onCopySuccess = function(e) {
     // button target
     const button = e.trigger;
     // don't keep focus
@@ -1224,7 +1224,29 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }, 1000);
     // clear code selection
     e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
   });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
   const viewSource = window.document.getElementById('quarto-view-source') ||
                      window.document.getElementById('quarto-code-tools-source');
   if (viewSource) {
@@ -1276,10 +1298,27 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   if (showAllCode) {
     showAllCode.addEventListener("click", toggleCodeHandler(true));
   }
-  function tippyHover(el, contentFn) {
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
-      content: contentFn,
       maxWidth: 500,
       delay: 100,
       arrow: false,
@@ -1289,8 +1328,17 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       interactive: true,
       interactiveBorder: 10,
       theme: 'quarto',
-      placement: 'bottom-start'
+      placement: 'bottom-start',
     };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
     window.tippy(el, config); 
   }
   const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
@@ -1302,7 +1350,130 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      return note.innerHTML;
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
     });
   }
       let selectedAnnoteEl;
@@ -1346,6 +1517,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             }
             div.style.top = top - 2 + "px";
             div.style.height = height + 4 + "px";
+            div.style.left = 0;
             let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
             if (gutterDiv === null) {
               gutterDiv = window.document.createElement("div");
@@ -1371,6 +1543,32 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         });
         selectedAnnoteEl = undefined;
       };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
       // Attach click handler to the DT
       const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
       for (const annoteDlNode of annoteDls) {
@@ -1432,12 +1630,12 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation column-body">
   <div class="nav-page nav-page-previous">
-      <a href="../constant_model_loss_transformations/loss_transformations.html" class="pagination-link">
+      <a href="../constant_model_loss_transformations/loss_transformations.html" class="pagination-link" aria-label="Constant Model, Loss, and Transformations">
         <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Constant Model, Loss, and Transformations</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../gradient_descent/gradient_descent.html" class="pagination-link">
+      <a href="../gradient_descent/gradient_descent.html" class="pagination-link" aria-label="sklearn and Gradient Descent">
         <span class="nav-page-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">sklearn and Gradient Descent</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
@@ -1572,14 +1770,14 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb4-134"><a href="#cb4-134" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-135"><a href="#cb4-135" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-136"><a href="#cb4-136" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-137"><a href="#cb4-137" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;div</span> <span class="er">align</span><span class="ot">=</span><span class="st">"middle"</span><span class="kw">&gt;</span></span>
-<span id="cb4-138"><a href="#cb4-138" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;table</span> <span class="er">style</span><span class="ot">=</span><span class="st">"width:100%"</span><span class="kw">&gt;</span></span>
-<span id="cb4-139"><a href="#cb4-139" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;tr</span> <span class="er">align</span><span class="ot">=</span><span class="st">"center"</span><span class="kw">&gt;</span></span>
-<span id="cb4-140"><a href="#cb4-140" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;td&gt;&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/observation.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'observation'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'550'</span><span class="kw">&gt;</span></span>
-<span id="cb4-141"><a href="#cb4-141" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/td&gt;</span></span>
-<span id="cb4-142"><a href="#cb4-142" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;/tr&gt;</span></span>
-<span id="cb4-143"><a href="#cb4-143" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;/table&gt;</span></span>
-<span id="cb4-144"><a href="#cb4-144" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/div&gt;</span></span>
+<span id="cb4-137"><a href="#cb4-137" aria-hidden="true" tabindex="-1"></a>&lt;div align="middle"&gt;</span>
+<span id="cb4-138"><a href="#cb4-138" aria-hidden="true" tabindex="-1"></a>  &lt;table style="width:100%"&gt;</span>
+<span id="cb4-139"><a href="#cb4-139" aria-hidden="true" tabindex="-1"></a>    &lt;tr align="center"&gt;</span>
+<span id="cb4-140"><a href="#cb4-140" aria-hidden="true" tabindex="-1"></a>      &lt;td&gt;&lt;img src="images/observation.png" alt='observation' width='550'&gt;</span>
+<span id="cb4-141"><a href="#cb4-141" aria-hidden="true" tabindex="-1"></a>      &lt;/td&gt;</span>
+<span id="cb4-142"><a href="#cb4-142" aria-hidden="true" tabindex="-1"></a>    &lt;/tr&gt;</span>
+<span id="cb4-143"><a href="#cb4-143" aria-hidden="true" tabindex="-1"></a>  &lt;/table&gt;</span>
+<span id="cb4-144"><a href="#cb4-144" aria-hidden="true" tabindex="-1"></a>&lt;/div&gt;</span>
 <span id="cb4-145"><a href="#cb4-145" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-146"><a href="#cb4-146" aria-hidden="true" tabindex="-1"></a>To make a prediction from the *first* observation in the data, we take the dot product of the parameter vector and *first* observation vector. To make a prediction from the *second* observation, we would repeat this process to find the dot product of the parameter vector and the *second* observation vector. If we wanted to find the model predictions for each observation in the dataset, we'd repeat this process for all $n$ observations in the data. </span>
 <span id="cb4-147"><a href="#cb4-147" aria-hidden="true" tabindex="-1"></a></span>
@@ -1590,29 +1788,29 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb4-152"><a href="#cb4-152" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-153"><a href="#cb4-153" aria-hidden="true" tabindex="-1"></a>Our observed data is represented by $n$ row vectors, each with dimension $(p+1)$. We can collect them all into a single matrix, which we call $\mathbb{X}$.</span>
 <span id="cb4-154"><a href="#cb4-154" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-155"><a href="#cb4-155" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;div</span> <span class="er">align</span><span class="ot">=</span><span class="st">"middle"</span><span class="kw">&gt;</span></span>
-<span id="cb4-156"><a href="#cb4-156" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;table</span> <span class="er">style</span><span class="ot">=</span><span class="st">"width:100%"</span><span class="kw">&gt;</span></span>
-<span id="cb4-157"><a href="#cb4-157" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;tr</span> <span class="er">align</span><span class="ot">=</span><span class="st">"center"</span><span class="kw">&gt;</span></span>
-<span id="cb4-158"><a href="#cb4-158" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;td&gt;&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/design_matrix.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'design_matrix'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'400'</span><span class="kw">&gt;</span></span>
-<span id="cb4-159"><a href="#cb4-159" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/td&gt;</span></span>
-<span id="cb4-160"><a href="#cb4-160" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;/tr&gt;</span></span>
-<span id="cb4-161"><a href="#cb4-161" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;/table&gt;</span></span>
-<span id="cb4-162"><a href="#cb4-162" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/div&gt;</span></span>
+<span id="cb4-155"><a href="#cb4-155" aria-hidden="true" tabindex="-1"></a>&lt;div align="middle"&gt;</span>
+<span id="cb4-156"><a href="#cb4-156" aria-hidden="true" tabindex="-1"></a>  &lt;table style="width:100%"&gt;</span>
+<span id="cb4-157"><a href="#cb4-157" aria-hidden="true" tabindex="-1"></a>    &lt;tr align="center"&gt;</span>
+<span id="cb4-158"><a href="#cb4-158" aria-hidden="true" tabindex="-1"></a>      &lt;td&gt;&lt;img src="images/design_matrix.png" alt='design_matrix' width='400'&gt;</span>
+<span id="cb4-159"><a href="#cb4-159" aria-hidden="true" tabindex="-1"></a>      &lt;/td&gt;</span>
+<span id="cb4-160"><a href="#cb4-160" aria-hidden="true" tabindex="-1"></a>    &lt;/tr&gt;</span>
+<span id="cb4-161"><a href="#cb4-161" aria-hidden="true" tabindex="-1"></a>  &lt;/table&gt;</span>
+<span id="cb4-162"><a href="#cb4-162" aria-hidden="true" tabindex="-1"></a>&lt;/div&gt;</span>
 <span id="cb4-163"><a href="#cb4-163" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-164"><a href="#cb4-164" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-165"><a href="#cb4-165" aria-hidden="true" tabindex="-1"></a>The matrix $\mathbb{X}$ is known as the **design matrix**. It contains all observed data for each of our $p$ features, where each **row** corresponds to one **observation**, and each **column** corresponds to a **feature**. It often (but not always) contains an additional column of all ones to represent the **intercept** or **bias column**. </span>
 <span id="cb4-166"><a href="#cb4-166" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-167"><a href="#cb4-167" aria-hidden="true" tabindex="-1"></a>To review what is happening in the design matrix: each row represents a single observation. For example, a student in Data 100. Each column represents a feature. For example, the ages of students in Data 100. This convention allows us to easily transfer our previous work in DataFrames over to this new linear algebra perspective.</span>
 <span id="cb4-168"><a href="#cb4-168" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-169"><a href="#cb4-169" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;div</span> <span class="er">align</span><span class="ot">=</span><span class="st">"middle"</span><span class="kw">&gt;</span></span>
-<span id="cb4-170"><a href="#cb4-170" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;table</span> <span class="er">style</span><span class="ot">=</span><span class="st">"width:100%"</span><span class="kw">&gt;</span></span>
-<span id="cb4-171"><a href="#cb4-171" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;tr</span> <span class="er">align</span><span class="ot">=</span><span class="st">"center"</span><span class="kw">&gt;</span></span>
-<span id="cb4-172"><a href="#cb4-172" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;td&gt;</span></span>
-<span id="cb4-173"><a href="#cb4-173" aria-hidden="true" tabindex="-1"></a>        <span class="kw">&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/row_col.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'row_col'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'600'</span><span class="kw">&gt;</span></span>
-<span id="cb4-174"><a href="#cb4-174" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/td&gt;</span></span>
-<span id="cb4-175"><a href="#cb4-175" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;/tr&gt;</span></span>
-<span id="cb4-176"><a href="#cb4-176" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;/table&gt;</span></span>
-<span id="cb4-177"><a href="#cb4-177" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/div&gt;</span></span>
+<span id="cb4-169"><a href="#cb4-169" aria-hidden="true" tabindex="-1"></a>&lt;div align="middle"&gt;</span>
+<span id="cb4-170"><a href="#cb4-170" aria-hidden="true" tabindex="-1"></a>  &lt;table style="width:100%"&gt;</span>
+<span id="cb4-171"><a href="#cb4-171" aria-hidden="true" tabindex="-1"></a>    &lt;tr align="center"&gt;</span>
+<span id="cb4-172"><a href="#cb4-172" aria-hidden="true" tabindex="-1"></a>      &lt;td&gt;</span>
+<span id="cb4-173"><a href="#cb4-173" aria-hidden="true" tabindex="-1"></a>        &lt;img src="images/row_col.png" alt='row_col' width='600'&gt;</span>
+<span id="cb4-174"><a href="#cb4-174" aria-hidden="true" tabindex="-1"></a>      &lt;/td&gt;</span>
+<span id="cb4-175"><a href="#cb4-175" aria-hidden="true" tabindex="-1"></a>    &lt;/tr&gt;</span>
+<span id="cb4-176"><a href="#cb4-176" aria-hidden="true" tabindex="-1"></a>  &lt;/table&gt;</span>
+<span id="cb4-177"><a href="#cb4-177" aria-hidden="true" tabindex="-1"></a>&lt;/div&gt;</span>
 <span id="cb4-178"><a href="#cb4-178" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-179"><a href="#cb4-179" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-180"><a href="#cb4-180" aria-hidden="true" tabindex="-1"></a>The multiple linear regression model can then be restated in terms of matrices:</span>
@@ -1726,38 +1924,38 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb4-288"><a href="#cb4-288" aria-hidden="true" tabindex="-1"></a>There are 2 ways we can think about matrix-vector multiplication </span>
 <span id="cb4-289"><a href="#cb4-289" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-290"><a href="#cb4-290" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>So far, we’ve thought of our model as horizontally stacked predictions per datapoint</span>
-<span id="cb4-291"><a href="#cb4-291" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;div</span> <span class="er">align</span><span class="ot">=</span><span class="st">"middle"</span><span class="kw">&gt;</span></span>
-<span id="cb4-292"><a href="#cb4-292" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;table</span> <span class="er">style</span><span class="ot">=</span><span class="st">"width:100%"</span><span class="kw">&gt;</span></span>
-<span id="cb4-293"><a href="#cb4-293" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;tr</span> <span class="er">align</span><span class="ot">=</span><span class="st">"center"</span><span class="kw">&gt;</span></span>
-<span id="cb4-294"><a href="#cb4-294" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;td&gt;</span></span>
-<span id="cb4-295"><a href="#cb4-295" aria-hidden="true" tabindex="-1"></a>        <span class="kw">&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/matmul1.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'row_col'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'300'</span><span class="kw">&gt;</span></span>
-<span id="cb4-296"><a href="#cb4-296" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/td&gt;</span></span>
-<span id="cb4-297"><a href="#cb4-297" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;/tr&gt;</span></span>
-<span id="cb4-298"><a href="#cb4-298" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;/table&gt;</span></span>
-<span id="cb4-299"><a href="#cb4-299" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/div&gt;</span></span>
+<span id="cb4-291"><a href="#cb4-291" aria-hidden="true" tabindex="-1"></a>&lt;div align="middle"&gt;</span>
+<span id="cb4-292"><a href="#cb4-292" aria-hidden="true" tabindex="-1"></a>  &lt;table style="width:100%"&gt;</span>
+<span id="cb4-293"><a href="#cb4-293" aria-hidden="true" tabindex="-1"></a>    &lt;tr align="center"&gt;</span>
+<span id="cb4-294"><a href="#cb4-294" aria-hidden="true" tabindex="-1"></a>      &lt;td&gt;</span>
+<span id="cb4-295"><a href="#cb4-295" aria-hidden="true" tabindex="-1"></a>        &lt;img src="images/matmul1.png" alt='row_col' width='300'&gt;</span>
+<span id="cb4-296"><a href="#cb4-296" aria-hidden="true" tabindex="-1"></a>      &lt;/td&gt;</span>
+<span id="cb4-297"><a href="#cb4-297" aria-hidden="true" tabindex="-1"></a>    &lt;/tr&gt;</span>
+<span id="cb4-298"><a href="#cb4-298" aria-hidden="true" tabindex="-1"></a>  &lt;/table&gt;</span>
+<span id="cb4-299"><a href="#cb4-299" aria-hidden="true" tabindex="-1"></a>&lt;/div&gt;</span>
 <span id="cb4-300"><a href="#cb4-300" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>However, it is helpful sometimes to think of matrix-vector multiplication as performed by columns. We can also think of $\mathbb{Y}$ as a *linear combination of feature vectors*, scaled by *parameters*.</span>
-<span id="cb4-301"><a href="#cb4-301" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;div</span> <span class="er">align</span><span class="ot">=</span><span class="st">"middle"</span><span class="kw">&gt;</span></span>
-<span id="cb4-302"><a href="#cb4-302" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;table</span> <span class="er">style</span><span class="ot">=</span><span class="st">"width:100%"</span><span class="kw">&gt;</span></span>
-<span id="cb4-303"><a href="#cb4-303" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;tr</span> <span class="er">align</span><span class="ot">=</span><span class="st">"center"</span><span class="kw">&gt;</span></span>
-<span id="cb4-304"><a href="#cb4-304" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;td&gt;</span></span>
-<span id="cb4-305"><a href="#cb4-305" aria-hidden="true" tabindex="-1"></a>        <span class="kw">&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/matmul2.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'row_col'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'500'</span><span class="kw">&gt;</span></span>
-<span id="cb4-306"><a href="#cb4-306" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/td&gt;</span></span>
-<span id="cb4-307"><a href="#cb4-307" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;/tr&gt;</span></span>
-<span id="cb4-308"><a href="#cb4-308" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;/table&gt;</span></span>
-<span id="cb4-309"><a href="#cb4-309" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/div&gt;</span></span>
+<span id="cb4-301"><a href="#cb4-301" aria-hidden="true" tabindex="-1"></a>&lt;div align="middle"&gt;</span>
+<span id="cb4-302"><a href="#cb4-302" aria-hidden="true" tabindex="-1"></a>  &lt;table style="width:100%"&gt;</span>
+<span id="cb4-303"><a href="#cb4-303" aria-hidden="true" tabindex="-1"></a>    &lt;tr align="center"&gt;</span>
+<span id="cb4-304"><a href="#cb4-304" aria-hidden="true" tabindex="-1"></a>      &lt;td&gt;</span>
+<span id="cb4-305"><a href="#cb4-305" aria-hidden="true" tabindex="-1"></a>        &lt;img src="images/matmul2.png" alt='row_col' width='500'&gt;</span>
+<span id="cb4-306"><a href="#cb4-306" aria-hidden="true" tabindex="-1"></a>      &lt;/td&gt;</span>
+<span id="cb4-307"><a href="#cb4-307" aria-hidden="true" tabindex="-1"></a>    &lt;/tr&gt;</span>
+<span id="cb4-308"><a href="#cb4-308" aria-hidden="true" tabindex="-1"></a>  &lt;/table&gt;</span>
+<span id="cb4-309"><a href="#cb4-309" aria-hidden="true" tabindex="-1"></a>&lt;/div&gt;</span>
 <span id="cb4-310"><a href="#cb4-310" aria-hidden="true" tabindex="-1"></a>:::</span>
 <span id="cb4-311"><a href="#cb4-311" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-312"><a href="#cb4-312" aria-hidden="true" tabindex="-1"></a>Up until now, we've mostly thought of our model as a scalar product between horizontally stacked observations and the parameter vector. We can also think of $\hat{\mathbb{Y}}$ as a **linear combination of feature vectors**, scaled by the **parameters**. We use the notation $\mathbb{X}_{:, i}$ to denote the $i$th column of the design matrix. You can think of this as following the same convention as used when calling <span class="in">`.iloc`</span> and <span class="in">`.loc`</span>. ":" means that we are taking all entries in the $i$th column.</span>
 <span id="cb4-313"><a href="#cb4-313" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-314"><a href="#cb4-314" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;div</span> <span class="er">align</span><span class="ot">=</span><span class="st">"middle"</span><span class="kw">&gt;</span></span>
-<span id="cb4-315"><a href="#cb4-315" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;table</span> <span class="er">style</span><span class="ot">=</span><span class="st">"width:100%"</span><span class="kw">&gt;</span></span>
-<span id="cb4-316"><a href="#cb4-316" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;tr</span> <span class="er">align</span><span class="ot">=</span><span class="st">"center"</span><span class="kw">&gt;</span></span>
-<span id="cb4-317"><a href="#cb4-317" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;td&gt;</span></span>
-<span id="cb4-318"><a href="#cb4-318" aria-hidden="true" tabindex="-1"></a>        <span class="kw">&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/columns.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'columns'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'500'</span><span class="kw">&gt;</span></span>
-<span id="cb4-319"><a href="#cb4-319" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/td&gt;</span></span>
-<span id="cb4-320"><a href="#cb4-320" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;/tr&gt;</span></span>
-<span id="cb4-321"><a href="#cb4-321" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;/table&gt;</span></span>
-<span id="cb4-322"><a href="#cb4-322" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/div&gt;</span></span>
+<span id="cb4-314"><a href="#cb4-314" aria-hidden="true" tabindex="-1"></a>&lt;div align="middle"&gt;</span>
+<span id="cb4-315"><a href="#cb4-315" aria-hidden="true" tabindex="-1"></a>  &lt;table style="width:100%"&gt;</span>
+<span id="cb4-316"><a href="#cb4-316" aria-hidden="true" tabindex="-1"></a>    &lt;tr align="center"&gt;</span>
+<span id="cb4-317"><a href="#cb4-317" aria-hidden="true" tabindex="-1"></a>      &lt;td&gt;</span>
+<span id="cb4-318"><a href="#cb4-318" aria-hidden="true" tabindex="-1"></a>        &lt;img src="images/columns.png" alt='columns' width='500'&gt;</span>
+<span id="cb4-319"><a href="#cb4-319" aria-hidden="true" tabindex="-1"></a>      &lt;/td&gt;</span>
+<span id="cb4-320"><a href="#cb4-320" aria-hidden="true" tabindex="-1"></a>    &lt;/tr&gt;</span>
+<span id="cb4-321"><a href="#cb4-321" aria-hidden="true" tabindex="-1"></a>  &lt;/table&gt;</span>
+<span id="cb4-322"><a href="#cb4-322" aria-hidden="true" tabindex="-1"></a>&lt;/div&gt;</span>
 <span id="cb4-323"><a href="#cb4-323" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-324"><a href="#cb4-324" aria-hidden="true" tabindex="-1"></a>$$</span>
 <span id="cb4-325"><a href="#cb4-325" aria-hidden="true" tabindex="-1"></a>\hat{\mathbb{Y}} = </span>
@@ -1785,30 +1983,30 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb4-347"><a href="#cb4-347" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-348"><a href="#cb4-348" aria-hidden="true" tabindex="-1"></a>The diagram below is a simplified view of $\text{Span}(\mathbb{X})$, assuming that each column of $\mathbb{X}$ has length $n$. Notice that the columns of $\mathbb{X}$ define a subspace of $\mathbb{R}^n$, where each point in the subspace can be reached by a linear combination of $\mathbb{X}$'s columns. The prediction vector $\mathbb{\hat{Y}}$ lies somewhere in this subspace.</span>
 <span id="cb4-349"><a href="#cb4-349" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-350"><a href="#cb4-350" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;div</span> <span class="er">align</span><span class="ot">=</span><span class="st">"middle"</span><span class="kw">&gt;</span></span>
-<span id="cb4-351"><a href="#cb4-351" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;table</span> <span class="er">style</span><span class="ot">=</span><span class="st">"width:100%"</span><span class="kw">&gt;</span></span>
-<span id="cb4-352"><a href="#cb4-352" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;tr</span> <span class="er">align</span><span class="ot">=</span><span class="st">"center"</span><span class="kw">&gt;</span></span>
-<span id="cb4-353"><a href="#cb4-353" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;td&gt;</span></span>
-<span id="cb4-354"><a href="#cb4-354" aria-hidden="true" tabindex="-1"></a>        <span class="kw">&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/span.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'span'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'600'</span><span class="kw">&gt;</span></span>
-<span id="cb4-355"><a href="#cb4-355" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/td&gt;</span></span>
-<span id="cb4-356"><a href="#cb4-356" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;/tr&gt;</span></span>
-<span id="cb4-357"><a href="#cb4-357" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;/table&gt;</span></span>
-<span id="cb4-358"><a href="#cb4-358" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/div&gt;</span></span>
+<span id="cb4-350"><a href="#cb4-350" aria-hidden="true" tabindex="-1"></a>&lt;div align="middle"&gt;</span>
+<span id="cb4-351"><a href="#cb4-351" aria-hidden="true" tabindex="-1"></a>  &lt;table style="width:100%"&gt;</span>
+<span id="cb4-352"><a href="#cb4-352" aria-hidden="true" tabindex="-1"></a>    &lt;tr align="center"&gt;</span>
+<span id="cb4-353"><a href="#cb4-353" aria-hidden="true" tabindex="-1"></a>      &lt;td&gt;</span>
+<span id="cb4-354"><a href="#cb4-354" aria-hidden="true" tabindex="-1"></a>        &lt;img src="images/span.png" alt='span' width='600'&gt;</span>
+<span id="cb4-355"><a href="#cb4-355" aria-hidden="true" tabindex="-1"></a>      &lt;/td&gt;</span>
+<span id="cb4-356"><a href="#cb4-356" aria-hidden="true" tabindex="-1"></a>    &lt;/tr&gt;</span>
+<span id="cb4-357"><a href="#cb4-357" aria-hidden="true" tabindex="-1"></a>  &lt;/table&gt;</span>
+<span id="cb4-358"><a href="#cb4-358" aria-hidden="true" tabindex="-1"></a>&lt;/div&gt;</span>
 <span id="cb4-359"><a href="#cb4-359" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-360"><a href="#cb4-360" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-361"><a href="#cb4-361" aria-hidden="true" tabindex="-1"></a>Examining this diagram, we find a problem. The vector of true values, $\mathbb{Y}$, could theoretically lie *anywhere* in $\mathbb{R}^n$ space – its exact location depends on the data we collect out in the real world. However, our multiple linear regression model can only make predictions in the subspace of $\mathbb{R}^n$ spanned by $\mathbb{X}$. Remember the model fitting goal we established in the previous section: we want to generate predictions such that the distance between the vector of true values, $\mathbb{Y}$, and the vector of predicted values, $\mathbb{\hat{Y}}$, is minimized. This means that **we want $\mathbb{\hat{Y}}$ to be the vector in $\text{Span}(\mathbb{X})$ that is closest to $\mathbb{Y}$**. </span>
 <span id="cb4-362"><a href="#cb4-362" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-363"><a href="#cb4-363" aria-hidden="true" tabindex="-1"></a>Another way of rephrasing this goal is to say that we wish to minimize the length of the residual vector $e$, as measured by its $L_2$ norm. </span>
 <span id="cb4-364"><a href="#cb4-364" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-365"><a href="#cb4-365" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;div</span> <span class="er">align</span><span class="ot">=</span><span class="st">"middle"</span><span class="kw">&gt;</span></span>
-<span id="cb4-366"><a href="#cb4-366" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;table</span> <span class="er">style</span><span class="ot">=</span><span class="st">"width:100%"</span><span class="kw">&gt;</span></span>
-<span id="cb4-367"><a href="#cb4-367" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;tr</span> <span class="er">align</span><span class="ot">=</span><span class="st">"center"</span><span class="kw">&gt;</span></span>
-<span id="cb4-368"><a href="#cb4-368" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;td&gt;</span></span>
-<span id="cb4-369"><a href="#cb4-369" aria-hidden="true" tabindex="-1"></a>        <span class="kw">&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/residual.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'residual'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'600'</span><span class="kw">&gt;</span></span>
-<span id="cb4-370"><a href="#cb4-370" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/td&gt;</span></span>
-<span id="cb4-371"><a href="#cb4-371" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;/tr&gt;</span></span>
-<span id="cb4-372"><a href="#cb4-372" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;/table&gt;</span></span>
-<span id="cb4-373"><a href="#cb4-373" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/div&gt;</span></span>
+<span id="cb4-365"><a href="#cb4-365" aria-hidden="true" tabindex="-1"></a>&lt;div align="middle"&gt;</span>
+<span id="cb4-366"><a href="#cb4-366" aria-hidden="true" tabindex="-1"></a>  &lt;table style="width:100%"&gt;</span>
+<span id="cb4-367"><a href="#cb4-367" aria-hidden="true" tabindex="-1"></a>    &lt;tr align="center"&gt;</span>
+<span id="cb4-368"><a href="#cb4-368" aria-hidden="true" tabindex="-1"></a>      &lt;td&gt;</span>
+<span id="cb4-369"><a href="#cb4-369" aria-hidden="true" tabindex="-1"></a>        &lt;img src="images/residual.png" alt='residual' width='600'&gt;</span>
+<span id="cb4-370"><a href="#cb4-370" aria-hidden="true" tabindex="-1"></a>      &lt;/td&gt;</span>
+<span id="cb4-371"><a href="#cb4-371" aria-hidden="true" tabindex="-1"></a>    &lt;/tr&gt;</span>
+<span id="cb4-372"><a href="#cb4-372" aria-hidden="true" tabindex="-1"></a>  &lt;/table&gt;</span>
+<span id="cb4-373"><a href="#cb4-373" aria-hidden="true" tabindex="-1"></a>&lt;/div&gt;</span>
 <span id="cb4-374"><a href="#cb4-374" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-375"><a href="#cb4-375" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-376"><a href="#cb4-376" aria-hidden="true" tabindex="-1"></a>The vector in $\text{Span}(\mathbb{X})$ that is closest to $\mathbb{Y}$ is always the **orthogonal projection** of $\mathbb{Y}$ onto $\text{Span}(\mathbb{X}).$ Thus, we should choose the parameter vector $\theta$ that makes the **residual vector orthogonal to any vector in $\text{Span}(\mathbb{X})$**. You can visualize this as the vector created by dropping a perpendicular line from $\mathbb{Y}$ onto the span of $\mathbb{X}$. </span>
@@ -1856,15 +2054,15 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb4-418"><a href="#cb4-418" aria-hidden="true" tabindex="-1"></a><span class="fu">### Residual Plots</span></span>
 <span id="cb4-419"><a href="#cb4-419" aria-hidden="true" tabindex="-1"></a>When working with SLR, we generated plots of the residuals against a single feature to understand the behavior of residuals. When working with several features in multiple linear regression, it no longer makes sense to consider a single feature in our residual plots. Instead, multiple linear regression is evaluated by making plots of the residuals against the predicted values. As was the case with SLR, a multiple linear model performs well if its residual plot shows no patterns.</span>
 <span id="cb4-420"><a href="#cb4-420" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-421"><a href="#cb4-421" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;div</span> <span class="er">align</span><span class="ot">=</span><span class="st">"middle"</span><span class="kw">&gt;</span></span>
-<span id="cb4-422"><a href="#cb4-422" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;table</span> <span class="er">style</span><span class="ot">=</span><span class="st">"width:100%"</span><span class="kw">&gt;</span></span>
-<span id="cb4-423"><a href="#cb4-423" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;tr</span> <span class="er">align</span><span class="ot">=</span><span class="st">"center"</span><span class="kw">&gt;</span></span>
-<span id="cb4-424"><a href="#cb4-424" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;td&gt;</span></span>
-<span id="cb4-425"><a href="#cb4-425" aria-hidden="true" tabindex="-1"></a>        <span class="kw">&lt;img</span> <span class="er">src</span><span class="ot">=</span><span class="st">"images/residual_plot.png"</span> <span class="er">alt</span><span class="ot">=</span><span class="st">'residual_plot'</span> <span class="er">width</span><span class="ot">=</span><span class="st">'500'</span><span class="kw">&gt;</span></span>
-<span id="cb4-426"><a href="#cb4-426" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/td&gt;</span></span>
-<span id="cb4-427"><a href="#cb4-427" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;/tr&gt;</span></span>
-<span id="cb4-428"><a href="#cb4-428" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;/table&gt;</span></span>
-<span id="cb4-429"><a href="#cb4-429" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/div&gt;</span></span>
+<span id="cb4-421"><a href="#cb4-421" aria-hidden="true" tabindex="-1"></a>&lt;div align="middle"&gt;</span>
+<span id="cb4-422"><a href="#cb4-422" aria-hidden="true" tabindex="-1"></a>  &lt;table style="width:100%"&gt;</span>
+<span id="cb4-423"><a href="#cb4-423" aria-hidden="true" tabindex="-1"></a>    &lt;tr align="center"&gt;</span>
+<span id="cb4-424"><a href="#cb4-424" aria-hidden="true" tabindex="-1"></a>      &lt;td&gt;</span>
+<span id="cb4-425"><a href="#cb4-425" aria-hidden="true" tabindex="-1"></a>        &lt;img src="images/residual_plot.png" alt='residual_plot' width='500'&gt;</span>
+<span id="cb4-426"><a href="#cb4-426" aria-hidden="true" tabindex="-1"></a>      &lt;/td&gt;</span>
+<span id="cb4-427"><a href="#cb4-427" aria-hidden="true" tabindex="-1"></a>    &lt;/tr&gt;</span>
+<span id="cb4-428"><a href="#cb4-428" aria-hidden="true" tabindex="-1"></a>  &lt;/table&gt;</span>
+<span id="cb4-429"><a href="#cb4-429" aria-hidden="true" tabindex="-1"></a>&lt;/div&gt;</span>
 <span id="cb4-430"><a href="#cb4-430" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-431"><a href="#cb4-431" aria-hidden="true" tabindex="-1"></a><span class="fu">### Multiple $R^2$</span></span>
 <span id="cb4-432"><a href="#cb4-432" aria-hidden="true" tabindex="-1"></a>For SLR, we used the correlation coefficient to capture the association between the target variable and a single feature variable. In a multiple linear model setting, we will need a performance metric that can account for multiple features at once. **Multiple $R^2$**, also called the **coefficient of determination**, is the **proportion of variance** of our **fitted values** (predictions) $\hat{y}_i$ to our true values $y_i$. It ranges from 0 to 1 and is effectively the *proportion* of variance in the observations that the **model explains**. </span>
@@ -1949,9 +2147,10 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb4-511"><a href="#cb4-511" aria-hidden="true" tabindex="-1"></a><span class="ss">    * </span>Example: If “Width”, “Height”, and “Perimeter” are all columns,</span>
 <span id="cb4-512"><a href="#cb4-512" aria-hidden="true" tabindex="-1"></a><span class="ss">      * </span>Perimeter = 2 * Width + 2 * Height  $\rightarrow$  $\mathbb{X}$ is not full rank.</span>
 <span id="cb4-513"><a href="#cb4-513" aria-hidden="true" tabindex="-1"></a><span class="ss">    * </span>Important with one-hot encoding (to discuss later).</span>
-</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
+
 
 
 
