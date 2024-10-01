@@ -391,3 +391,204 @@ Just as was given in Data 8!
 
 Remember, this derivation found the optimal model parameters for SLR when using the MSE cost function. If we had used a different model or different loss function, we likely would have found different values for the best model parameters. However, regardless of the model and loss used, we can *always* follow these three steps to fit the model.
 
+## Evaluating the SLR Model
+
+Now that we've explored the mathematics behind (1) choosing a model, (2) choosing a loss function, and (3) fitting the model, we're left with one final question – how "good" are the predictions made by this "best" fitted model? To determine this, we can:
+
+1. Visualize data and compute statistics:
+   - Plot the original data.
+   - Compute each column's mean and standard deviation. If the mean and standard deviation of our predictions are close to those of the original observed $y_i$'s, we might be inclined to say that our model has done well.
+   - (If we're fitting a linear model) Compute the correlation $r$. A large magnitude for the correlation coefficient between the feature and response variables could also indicate that our model has done well.    
+
+2. Performance metrics:
+
+   - We can take the **Root Mean Squared Error (RMSE)**.
+     - It's the square root of the mean squared error (MSE), which is the average loss that we've been minimizing to determine optimal model parameters.
+     - RMSE is in the same units as $y$.
+     - A lower RMSE indicates more "accurate" predictions, as we have a lower "average loss" across the data.
+
+   $$\text{RMSE} = \sqrt{\frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2}$$
+
+3. Visualization:
+   - Look at the residual plot of $e_i = y_i - \hat{y_i}$ to visualize the difference between actual and predicted values. The good residual plot should not show any pattern between input/features $x_i$ and residual values $e_i$.
+
+To illustrate this process, let's take a look at **Anscombe's quartet**.
+
+### Four Mysterious Datasets (Anscombe’s quartet)
+
+Let's take a look at four different datasets.
+
+```{python}
+#| code-fold: true
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+%matplotlib inline
+import seaborn as sns
+import itertools
+from mpl_toolkits.mplot3d import Axes3D
+```
+
+```{python}
+#| code-fold: true
+# Big font helper
+def adjust_fontsize(size=None):
+    SMALL_SIZE = 8
+    MEDIUM_SIZE = 10
+    BIGGER_SIZE = 12
+    if size != None:
+        SMALL_SIZE = MEDIUM_SIZE = BIGGER_SIZE = size
+
+    plt.rc("font", size=SMALL_SIZE)  # controls default text sizes
+    plt.rc("axes", titlesize=SMALL_SIZE)  # fontsize of the axes title
+    plt.rc("axes", labelsize=MEDIUM_SIZE)  # fontsize of the x and y labels
+    plt.rc("xtick", labelsize=SMALL_SIZE)  # fontsize of the tick labels
+    plt.rc("ytick", labelsize=SMALL_SIZE)  # fontsize of the tick labels
+    plt.rc("legend", fontsize=SMALL_SIZE)  # legend fontsize
+    plt.rc("figure", titlesize=BIGGER_SIZE)  # fontsize of the figure title
+
+
+# Helper functions
+def standard_units(x):
+    return (x - np.mean(x)) / np.std(x)
+
+
+def correlation(x, y):
+    return np.mean(standard_units(x) * standard_units(y))
+
+
+def slope(x, y):
+    return correlation(x, y) * np.std(y) / np.std(x)
+
+
+def intercept(x, y):
+    return np.mean(y) - slope(x, y) * np.mean(x)
+
+
+def fit_least_squares(x, y):
+    theta_0 = intercept(x, y)
+    theta_1 = slope(x, y)
+    return theta_0, theta_1
+
+
+def predict(x, theta_0, theta_1):
+    return theta_0 + theta_1 * x
+
+
+def compute_mse(y, yhat):
+    return np.mean((y - yhat) ** 2)
+
+
+plt.style.use("default")  # Revert style to default mpl
+```
+
+```{python}
+plt.style.use("default")  # Revert style to default mpl
+NO_VIZ, RESID, RESID_SCATTER = range(3)
+
+
+def least_squares_evaluation(x, y, visualize=NO_VIZ):
+    # statistics
+    print(f"x_mean : {np.mean(x):.2f}, y_mean : {np.mean(y):.2f}")
+    print(f"x_stdev: {np.std(x):.2f}, y_stdev: {np.std(y):.2f}")
+    print(f"r = Correlation(x, y): {correlation(x, y):.3f}")
+
+    # Performance metrics
+    ahat, bhat = fit_least_squares(x, y)
+    yhat = predict(x, ahat, bhat)
+    print(f"\theta_0: {ahat:.2f}, \theta_1: {bhat:.2f}")
+    print(f"RMSE: {np.sqrt(compute_mse(y, yhat)):.3f}")
+
+    # visualization
+    fig, ax_resid = None, None
+    if visualize == RESID_SCATTER:
+        fig, axs = plt.subplots(1, 2, figsize=(8, 3))
+        axs[0].scatter(x, y)
+        axs[0].plot(x, yhat)
+        axs[0].set_title("LS fit")
+        ax_resid = axs[1]
+    elif visualize == RESID:
+        fig = plt.figure(figsize=(4, 3))
+        ax_resid = plt.gca()
+
+    if ax_resid is not None:
+        ax_resid.scatter(x, y - yhat, color="red")
+        ax_resid.plot([4, 14], [0, 0], color="black")
+        ax_resid.set_title("Residuals")
+
+    return fig
+```
+
+```{python}
+#| code-fold: true
+# Load in four different datasets: I, II, III, IV
+x = [10, 8, 13, 9, 11, 14, 6, 4, 12, 7, 5]
+y1 = [8.04, 6.95, 7.58, 8.81, 8.33, 9.96, 7.24, 4.26, 10.84, 4.82, 5.68]
+y2 = [9.14, 8.14, 8.74, 8.77, 9.26, 8.10, 6.13, 3.10, 9.13, 7.26, 4.74]
+y3 = [7.46, 6.77, 12.74, 7.11, 7.81, 8.84, 6.08, 5.39, 8.15, 6.42, 5.73]
+x4 = [8, 8, 8, 8, 8, 8, 8, 19, 8, 8, 8]
+y4 = [6.58, 5.76, 7.71, 8.84, 8.47, 7.04, 5.25, 12.50, 5.56, 7.91, 6.89]
+
+anscombe = {
+    "I": pd.DataFrame(list(zip(x, y1)), columns=["x", "y"]),
+    "II": pd.DataFrame(list(zip(x, y2)), columns=["x", "y"]),
+    "III": pd.DataFrame(list(zip(x, y3)), columns=["x", "y"]),
+    "IV": pd.DataFrame(list(zip(x4, y4)), columns=["x", "y"]),
+}
+
+# Plot the scatter plot and line of best fit
+fig, axs = plt.subplots(2, 2, figsize=(10, 10))
+
+for i, dataset in enumerate(["I", "II", "III", "IV"]):
+    ans = anscombe[dataset]
+    x, y = ans["x"], ans["y"]
+    ahat, bhat = fit_least_squares(x, y)
+    yhat = predict(x, ahat, bhat)
+    axs[i // 2, i % 2].scatter(x, y, alpha=0.6, color="red")  # plot the x, y points
+    axs[i // 2, i % 2].plot(x, yhat)  # plot the line of best fit
+    axs[i // 2, i % 2].set_xlabel(f"$x_{i+1}$")
+    axs[i // 2, i % 2].set_ylabel(f"$y_{i+1}$")
+    axs[i // 2, i % 2].set_title(f"Dataset {dataset}")
+
+plt.show()
+```
+
+While these four sets of datapoints look very different, they actually all have identical means $\bar x$, $\bar y$, standard deviations $\sigma_x$, $\sigma_y$, correlation $r$, and RMSE! If we only look at these statistics, we would probably be inclined to say that these datasets are similar.
+
+```{python}
+#| code-fold: true
+for dataset in ["I", "II", "III", "IV"]:
+    print(f">>> Dataset {dataset}:")
+    ans = anscombe[dataset]
+    fig = least_squares_evaluation(ans["x"], ans["y"], visualize=NO_VIZ)
+    print()
+    print()
+```
+
+We may also wish to visualize the model's **residuals**, defined as the difference between the observed and predicted $y_i$ value ($e_i = y_i - \hat{y}_i$). This gives a high-level view of how "off" each prediction is from the true observed value. Recall that you explored this concept in [Data 8](https://inferentialthinking.com/chapters/15/5/Visual_Diagnostics.html?highlight=heteroscedasticity#detecting-heteroscedasticity): a good regression fit should display no clear pattern in its plot of residuals. The residual plots for Anscombe's quartet are displayed below. Note how only the first plot shows no clear pattern to the magnitude of residuals. This is an indication that SLR is not the best choice of model for the remaining three sets of points.
+
+<!-- <img src="images/residual.png" alt='residual' width='600'> -->
+
+```{python}
+#| code-fold: true
+# Residual visualization
+fig, axs = plt.subplots(2, 2, figsize=(10, 10))
+
+for i, dataset in enumerate(["I", "II", "III", "IV"]):
+    ans = anscombe[dataset]
+    x, y = ans["x"], ans["y"]
+    ahat, bhat = fit_least_squares(x, y)
+    yhat = predict(x, ahat, bhat)
+    axs[i // 2, i % 2].scatter(
+        x, y - yhat, alpha=0.6, color="red"
+    )  # plot the x, y points
+    axs[i // 2, i % 2].plot(
+        x, np.zeros_like(x), color="black"
+    )  # plot the residual line
+    axs[i // 2, i % 2].set_xlabel(f"$x_{i+1}$")
+    axs[i // 2, i % 2].set_ylabel(f"$e_{i+1}$")
+    axs[i // 2, i % 2].set_title(f"Dataset {dataset} Residuals")
+
+plt.show()
+```
+
