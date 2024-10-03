@@ -49,218 +49,17 @@ To illustrate this process, we derived the optimal model parameters under simple
 <img src="images/slr_modeling.png" alt='modeling' width='600'>
 </div>
 
-In this lecture, we'll dive deeper into step 4 - evaluating model performance - using SLR as an example. Additionally, we'll also explore the modeling process with new models, continue familiarizing ourselves with the modeling process by finding the best model parameters under a new model, the constant model, and test out two different loss functions to understand how our choice of loss influences model design. Later on, we'll consider what happens when a linear model isn't the best choice to capture trends in our data and what solutions there are to create better models.
+At the end of last lecture, we dived deeper into step 4 - evaluating model performance - using SLR as an example. In this lecture, we'll also explore the modeling process with new models, continue familiarizing ourselves with the modeling process by finding the best model parameters under a new model, the constant model, and test out two different loss functions to understand how our choice of loss influences model design. Later on, we'll consider what happens when a linear model isn't the best choice to capture trends in our data and what solutions there are to create better models.
 
-Before we get into Step 4, let's quickly review some important terminology.
+Before we get into the modeling process, let's quickly review some important terminology.
 
 ### Prediction vs. Estimation
 
 The terms prediction and estimation are often used somewhat interchangeably, but there is a subtle difference between them. **Estimation** is the task of using data to calculate model parameters. **Prediction** is the task of using a model to predict outputs for unseen data. In our simple linear regression model,
 
-$$\hat{y} = \hat{\theta_0} + \hat{\theta_1}$$
+$$\hat{y} = \hat{\theta_0} + \hat{\theta_1}x$$
 
 we **estimate** the parameters by minimizing average loss; then, we **predict** using these estimations. **Least Squares Estimation** is when we choose the parameters that minimize MSE.
-
-## Step 4: Evaluating the SLR Model
-
-Now that we've explored the mathematics behind (1) choosing a model, (2) choosing a loss function, and (3) fitting the model, we're left with one final question – how "good" are the predictions made by this "best" fitted model? To determine this, we can:
-
-1. Visualize data and compute statistics:
-   - Plot the original data.
-   - Compute each column's mean and standard deviation. If the mean and standard deviation of our predictions are close to those of the original observed $y_i$'s, we might be inclined to say that our model has done well.
-   - (If we're fitting a linear model) Compute the correlation $r$. A large magnitude for the correlation coefficient between the feature and response variables could also indicate that our model has done well.    
-
-2. Performance metrics:
-
-   - We can take the **Root Mean Squared Error (RMSE)**.
-     - It's the square root of the mean squared error (MSE), which is the average loss that we've been minimizing to determine optimal model parameters.
-     - RMSE is in the same units as $y$.
-     - A lower RMSE indicates more "accurate" predictions, as we have a lower "average loss" across the data.
-
-   $$\text{RMSE} = \sqrt{\frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2}$$
-
-3. Visualization:
-   - Look at the residual plot of $e_i = y_i - \hat{y_i}$ to visualize the difference between actual and predicted values. The good residual plot should not show any pattern between input/features $x_i$ and residual values $e_i$.
-
-To illustrate this process, let's take a look at **Anscombe's quartet**.
-
-### Four Mysterious Datasets (Anscombe’s quartet)
-
-Let's take a look at four different datasets.
-
-```{python}
-#| code-fold: true
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-%matplotlib inline
-import seaborn as sns
-import itertools
-from mpl_toolkits.mplot3d import Axes3D
-```
-
-```{python}
-#| code-fold: true
-# Big font helper
-def adjust_fontsize(size=None):
-    SMALL_SIZE = 8
-    MEDIUM_SIZE = 10
-    BIGGER_SIZE = 12
-    if size != None:
-        SMALL_SIZE = MEDIUM_SIZE = BIGGER_SIZE = size
-
-    plt.rc("font", size=SMALL_SIZE)  # controls default text sizes
-    plt.rc("axes", titlesize=SMALL_SIZE)  # fontsize of the axes title
-    plt.rc("axes", labelsize=MEDIUM_SIZE)  # fontsize of the x and y labels
-    plt.rc("xtick", labelsize=SMALL_SIZE)  # fontsize of the tick labels
-    plt.rc("ytick", labelsize=SMALL_SIZE)  # fontsize of the tick labels
-    plt.rc("legend", fontsize=SMALL_SIZE)  # legend fontsize
-    plt.rc("figure", titlesize=BIGGER_SIZE)  # fontsize of the figure title
-
-
-# Helper functions
-def standard_units(x):
-    return (x - np.mean(x)) / np.std(x)
-
-
-def correlation(x, y):
-    return np.mean(standard_units(x) * standard_units(y))
-
-
-def slope(x, y):
-    return correlation(x, y) * np.std(y) / np.std(x)
-
-
-def intercept(x, y):
-    return np.mean(y) - slope(x, y) * np.mean(x)
-
-
-def fit_least_squares(x, y):
-    theta_0 = intercept(x, y)
-    theta_1 = slope(x, y)
-    return theta_0, theta_1
-
-
-def predict(x, theta_0, theta_1):
-    return theta_0 + theta_1 * x
-
-
-def compute_mse(y, yhat):
-    return np.mean((y - yhat) ** 2)
-
-
-plt.style.use("default")  # Revert style to default mpl
-```
-
-```{python}
-plt.style.use("default")  # Revert style to default mpl
-NO_VIZ, RESID, RESID_SCATTER = range(3)
-
-
-def least_squares_evaluation(x, y, visualize=NO_VIZ):
-    # statistics
-    print(f"x_mean : {np.mean(x):.2f}, y_mean : {np.mean(y):.2f}")
-    print(f"x_stdev: {np.std(x):.2f}, y_stdev: {np.std(y):.2f}")
-    print(f"r = Correlation(x, y): {correlation(x, y):.3f}")
-
-    # Performance metrics
-    ahat, bhat = fit_least_squares(x, y)
-    yhat = predict(x, ahat, bhat)
-    print(f"\theta_0: {ahat:.2f}, \theta_1: {bhat:.2f}")
-    print(f"RMSE: {np.sqrt(compute_mse(y, yhat)):.3f}")
-
-    # visualization
-    fig, ax_resid = None, None
-    if visualize == RESID_SCATTER:
-        fig, axs = plt.subplots(1, 2, figsize=(8, 3))
-        axs[0].scatter(x, y)
-        axs[0].plot(x, yhat)
-        axs[0].set_title("LS fit")
-        ax_resid = axs[1]
-    elif visualize == RESID:
-        fig = plt.figure(figsize=(4, 3))
-        ax_resid = plt.gca()
-
-    if ax_resid is not None:
-        ax_resid.scatter(x, y - yhat, color="red")
-        ax_resid.plot([4, 14], [0, 0], color="black")
-        ax_resid.set_title("Residuals")
-
-    return fig
-```
-
-```{python}
-#| code-fold: true
-# Load in four different datasets: I, II, III, IV
-x = [10, 8, 13, 9, 11, 14, 6, 4, 12, 7, 5]
-y1 = [8.04, 6.95, 7.58, 8.81, 8.33, 9.96, 7.24, 4.26, 10.84, 4.82, 5.68]
-y2 = [9.14, 8.14, 8.74, 8.77, 9.26, 8.10, 6.13, 3.10, 9.13, 7.26, 4.74]
-y3 = [7.46, 6.77, 12.74, 7.11, 7.81, 8.84, 6.08, 5.39, 8.15, 6.42, 5.73]
-x4 = [8, 8, 8, 8, 8, 8, 8, 19, 8, 8, 8]
-y4 = [6.58, 5.76, 7.71, 8.84, 8.47, 7.04, 5.25, 12.50, 5.56, 7.91, 6.89]
-
-anscombe = {
-    "I": pd.DataFrame(list(zip(x, y1)), columns=["x", "y"]),
-    "II": pd.DataFrame(list(zip(x, y2)), columns=["x", "y"]),
-    "III": pd.DataFrame(list(zip(x, y3)), columns=["x", "y"]),
-    "IV": pd.DataFrame(list(zip(x4, y4)), columns=["x", "y"]),
-}
-
-# Plot the scatter plot and line of best fit
-fig, axs = plt.subplots(2, 2, figsize=(10, 10))
-
-for i, dataset in enumerate(["I", "II", "III", "IV"]):
-    ans = anscombe[dataset]
-    x, y = ans["x"], ans["y"]
-    ahat, bhat = fit_least_squares(x, y)
-    yhat = predict(x, ahat, bhat)
-    axs[i // 2, i % 2].scatter(x, y, alpha=0.6, color="red")  # plot the x, y points
-    axs[i // 2, i % 2].plot(x, yhat)  # plot the line of best fit
-    axs[i // 2, i % 2].set_xlabel(f"$x_{i+1}$")
-    axs[i // 2, i % 2].set_ylabel(f"$y_{i+1}$")
-    axs[i // 2, i % 2].set_title(f"Dataset {dataset}")
-
-plt.show()
-```
-
-While these four sets of datapoints look very different, they actually all have identical means $\bar x$, $\bar y$, standard deviations $\sigma_x$, $\sigma_y$, correlation $r$, and RMSE! If we only look at these statistics, we would probably be inclined to say that these datasets are similar.
-
-```{python}
-#| code-fold: true
-for dataset in ["I", "II", "III", "IV"]:
-    print(f">>> Dataset {dataset}:")
-    ans = anscombe[dataset]
-    fig = least_squares_evaluation(ans["x"], ans["y"], visualize=NO_VIZ)
-    print()
-    print()
-```
-
-We may also wish to visualize the model's **residuals**, defined as the difference between the observed and predicted $y_i$ value ($e_i = y_i - \hat{y}_i$). This gives a high-level view of how "off" each prediction is from the true observed value. Recall that you explored this concept in [Data 8](https://inferentialthinking.com/chapters/15/5/Visual_Diagnostics.html?highlight=heteroscedasticity#detecting-heteroscedasticity): a good regression fit should display no clear pattern in its plot of residuals. The residual plots for Anscombe's quartet are displayed below. Note how only the first plot shows no clear pattern to the magnitude of residuals. This is an indication that SLR is not the best choice of model for the remaining three sets of points.
-
-<!-- <img src="images/residual.png" alt='residual' width='600'> -->
-
-```{python}
-#| code-fold: true
-# Residual visualization
-fig, axs = plt.subplots(2, 2, figsize=(10, 10))
-
-for i, dataset in enumerate(["I", "II", "III", "IV"]):
-    ans = anscombe[dataset]
-    x, y = ans["x"], ans["y"]
-    ahat, bhat = fit_least_squares(x, y)
-    yhat = predict(x, ahat, bhat)
-    axs[i // 2, i % 2].scatter(
-        x, y - yhat, alpha=0.6, color="red"
-    )  # plot the x, y points
-    axs[i // 2, i % 2].plot(
-        x, np.zeros_like(x), color="black"
-    )  # plot the residual line
-    axs[i // 2, i % 2].set_xlabel(f"$x_{i+1}$")
-    axs[i // 2, i % 2].set_ylabel(f"$e_{i+1}$")
-    axs[i // 2, i % 2].set_title(f"Dataset {dataset} Residuals")
-
-plt.show()
-```
 
 ## Constant Model + MSE
 
@@ -292,16 +91,16 @@ Given the **constant model** $\hat{y} = \theta_0$, we can rewrite the MSE equati
 
 $$\hat{R}(\theta) = \frac{1}{n}\sum^{n}_{i=1} (y_i - \theta_0)^2 $$
 
-We can fit **the model** by finding the optimal $\hat{\theta_0}$ that minimizes the MSE using a calculus approach.
+We can **fit the model** by finding the optimal $\hat{\theta_0}$ that minimizes the MSE using a calculus approach.
 
 1. Differentiate with respect to $\theta_0$:
 
 $$
 \begin{align}
 \frac{d}{d\theta_0}\text{R}(\theta) & = \frac{d}{d\theta_0}(\frac{1}{n}\sum^{n}_{i=1} (y_i - \theta_0)^2)
-\\ &= \frac{1}{n}\sum^{n}_{i=1} \frac{d}{d\theta_0}  (y_i - \theta_0)^2 \quad \quad \text{a derivative of sums is a sum of derivatives}
+\\ &= \frac{1}{n}\sum^{n}_{i=1} \frac{d}{d\theta_0}  (y_i - \theta_0)^2 \quad \quad \text{a derivative of sum is a sum of derivatives}
 \\ &= \frac{1}{n}\sum^{n}_{i=1} 2 (y_i - \theta_0) (-1) \quad \quad \text{chain rule}
-\\ &= {\frac{-2}{n}}\sum^{n}_{i=1} (y_i - \theta_0) \quad \quad \text{simply constants}
+\\ &= {\frac{-2}{n}}\sum^{n}_{i=1} (y_i - \theta_0) \quad \quad \text{simplify constants}
 \end{align}
 $$
 
@@ -360,6 +159,14 @@ The code for generating the graphs and models is included below, but we won't go
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+%matplotlib inline
+import seaborn as sns
+import itertools
+from mpl_toolkits.mplot3d import Axes3D
 dugongs = pd.read_csv("data/dugongs.csv")
 data_constant = dugongs["Age"]
 data_linear = dugongs[["Length", "Age"]]
@@ -367,6 +174,29 @@ data_linear = dugongs[["Length", "Age"]]
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
+# Big font helper
+def adjust_fontsize(size=None):
+    SMALL_SIZE = 8
+    MEDIUM_SIZE = 10
+    BIGGER_SIZE = 12
+    if size != None:
+        SMALL_SIZE = MEDIUM_SIZE = BIGGER_SIZE = size
+
+    plt.rc("font", size=SMALL_SIZE)  # controls default text sizes
+    plt.rc("axes", titlesize=SMALL_SIZE)  # fontsize of the axes title
+    plt.rc("axes", labelsize=MEDIUM_SIZE)  # fontsize of the x and y labels
+    plt.rc("xtick", labelsize=SMALL_SIZE)  # fontsize of the tick labels
+    plt.rc("ytick", labelsize=SMALL_SIZE)  # fontsize of the tick labels
+    plt.rc("legend", fontsize=SMALL_SIZE)  # legend fontsize
+    plt.rc("figure", titlesize=BIGGER_SIZE)  # fontsize of the figure title
+
+plt.style.use("default")  # Revert style to default mpl
+```
+
+```{python}
+#| code-fold: true
+#| vscode: {languageId: python}
 # Constant Model + MSE
 plt.style.use('default') # Revert style to default mpl
 adjust_fontsize(size=16)
@@ -392,6 +222,7 @@ plt.legend();
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 # SLR + MSE
 def mse_linear(theta_0, theta_1, data_linear):
     data_x, data_y = data_linear.iloc[:, 0], data_linear.iloc[:, 1]
@@ -447,6 +278,7 @@ ax.set_zlabel("MSE");
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 # Predictions
 yobs = data_linear["Age"]  # The true observations y
 xs = data_linear["Length"]  # Needed for linear predictions
@@ -458,6 +290,7 @@ yhats_linear = [theta_0_hat + theta_1_hat * x for x in xs]
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 # Constant Model Rug Plot
 # In case we're in a weird style state
 sns.set_theme()
@@ -474,6 +307,7 @@ plt.yticks([]);
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 # SLR model scatter plot 
 # In case we're in a weird style state
 sns.set_theme()
@@ -557,7 +391,7 @@ Thus, the constant model parameter $\theta = \hat{\theta_0}$ that minimizes MAE 
 $$ \sum_{\hat{\theta_0} < y_i} (1) = \sum_{\hat{\theta_0} > y_i} (1) $$
 
 In other words, the number of observations greater than $\theta_0$ must be equal to the number of observations less than $\theta_0$; there must be an equal number of points on the left and right sides of the equation. This is the definition of median, so our optimal value is
-$$ \hat{\theta_0} = median(y) $$
+$$ \hat{\theta}_0 = median(y) $$
 
 ## Summary: Loss Optimization, Calculus, and Critical Points
 
@@ -587,6 +421,7 @@ Let's consider a dataset where each entry represents the number of drinks sold a
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 drinks = np.array([20, 21, 22, 29, 33])
 drinks
 ```
@@ -595,6 +430,7 @@ From our derivations above, we know that the optimal model parameter under MSE c
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 np.mean(drinks), np.median(drinks)
 ```
 
@@ -608,6 +444,7 @@ How do outliers affect each cost function? Imagine we replace the largest value 
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 drinks_with_outlier = np.append(drinks, 1033)
 display(drinks_with_outlier)
 np.mean(drinks_with_outlier), np.median(drinks_with_outlier)
@@ -621,6 +458,7 @@ Let's try another experiment. This time, we'll add an additional, non-outlying d
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 drinks_with_additional_observation = np.append(drinks, 35)
 drinks_with_additional_observation
 ```
@@ -640,7 +478,7 @@ To summarize our example,
 | Outliers                   | **Sensitive** to outliers (since they change mean substantially). Sensitivity also depends on the dataset size.                                                            | **More robust** to outliers.                                                                           |
 | $\hat{\theta_0}$ Uniqueness | **Unique** $\hat{\theta_0}$                              | **Infinitely many** $\hat{\theta_0}$s                                    |
 
-## Transformations to fit Linear Models
+## Transformations to Fit Linear Models
 
 At this point, we have an effective method of fitting models to predict linear relationships. Given a feature variable and target, we can apply our four-step process to find the optimal model parameters.
 
@@ -664,6 +502,7 @@ Let's revisit our dugongs example. The lengths and ages are plotted below:
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 # `corrcoef` computes the correlation coefficient between two variables
 # `std` finds the standard deviation
 x = dugongs["Length"]
@@ -680,7 +519,7 @@ ax[0].set_ylabel("Age")
 ax[1].scatter(x, y)
 ax[1].plot(x, theta_0 + theta_1 * x, "tab:red")
 ax[1].set_xlabel("Length")
-ax[1].set_ylabel("Age")
+ax[1].set_ylabel("Age");
 ```
 
 Looking at the plot on the left, we see that there is a slight curvature to the data points. Plotting the SLR curve on the right results in a poor fit.
@@ -691,6 +530,7 @@ An important word on $\log$: in Data 100 (and most upper-division STEM courses),
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 z = np.log(y)
 
 r = np.corrcoef(x, z)[0, 1]
@@ -728,12 +568,13 @@ $y$ is an *exponential* function of $x$. Applying an exponential fit to the untr
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 plt.figure(dpi=120, figsize=(4, 3))
 
 plt.scatter(x, y)
 plt.plot(x, np.exp(theta_0) * np.exp(theta_1 * x), "tab:red")
 plt.xlabel("Length")
-plt.ylabel("Age")
+plt.ylabel("Age");
 ```
 
 You may wonder: why did we choose to apply a log transformation specifically? Why not some other function to linearize the data?
