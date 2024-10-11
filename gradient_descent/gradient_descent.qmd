@@ -22,7 +22,7 @@ jupyter:
       format_version: '1.0'
       jupytext_version: 1.16.1
   kernelspec:
-    display_name: Python 3 (ipykernel)
+    display_name: ds100env
     language: python
     name: python3
 ---
@@ -37,7 +37,6 @@ jupyter:
 
 ```{python}
 #| code-fold: true
-#| vscode: {languageId: python}
 import pandas as pd
 import seaborn as sns
 import plotly.express as px
@@ -54,7 +53,6 @@ Throughout this lecture, we'll refer to the `penguins` dataset.
 
 ```{python}
 #| code-fold: true
-#| vscode: {languageId: python}
 import pandas as pd
 import seaborn as sns
 import numpy as np
@@ -67,7 +65,6 @@ penguins.head()
 Our goal will be to predict the value of the `"bill_depth_mm"` for a particular penguin given its `"flipper_length_mm"` and `"body_mass_g"`. We'll also add a bias column of all ones to represent the intercept term of our models.
 
 ```{python}
-#| vscode: {languageId: python}
 # Add a bias column of all ones to `penguins`
 penguins["bias"] = np.ones(len(penguins), dtype=int) 
 
@@ -100,7 +97,6 @@ Putting this all together, we can compute the OLS estimate for the optimal model
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 theta_hat = np.linalg.inv(X.T @ X) @ X.T @ Y
 theta_hat
 ```
@@ -111,7 +107,6 @@ $$\hat{\mathbb{Y}} = \mathbb{X}\theta$$
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 Y_hat = X @ theta_hat
 pd.DataFrame(Y_hat).head()
 ```
@@ -169,7 +164,6 @@ For now, let's create a linear regression model using `LinearRegression`.
 `my_model` is now an instance of the `LinearRegression` class. You can think of it as the "idea" of a linear regression model. We haven't trained it yet, so it doesn't know any model parameters and cannot be used to make predictions. In fact, we haven't even told it what data to use for modeling! It simply waits for further instructions.
 
 ```{python}
-#| vscode: {languageId: python}
 my_model = LinearRegression()
 ```
 
@@ -182,7 +176,6 @@ All `sklearn` model classes include a `.fit` method, which is used to fit the mo
 Let's start by fitting a model with just one feature: the flipper length. We create a design matrix `X` by pulling out the `"flipper_length_mm"` column from the `DataFrame`. 
 
 ```{python}
-#| vscode: {languageId: python}
 # .fit expects a 2D data design matrix, so we use double brackets to extract a DataFrame
 X = penguins[["flipper_length_mm"]]
 Y = penguins["bill_depth_mm"]
@@ -202,13 +195,11 @@ The fitted model parameters are stored as attributes of the model instance. `my_
 \hat{\theta}_1, ...$ in an array. Because our model only contains one feature, we see just the value of $\hat{\theta}_1$ in the cell below.
 
 ```{python}
-#| vscode: {languageId: python}
 # The intercept term, theta_0
 my_model.intercept_
 ```
 
 ```{python}
-#| vscode: {languageId: python}
 # All parameters theta_1, ..., theta_p
 my_model.coef_
 ```
@@ -220,7 +211,6 @@ Now that the model has been trained, we can use it to make predictions! To do so
 Below, we call `.predict` to generate model predictions on the original training data. As before, we use double brackets to ensure that we extract 2-dimensional data.
 
 ```{python}
-#| vscode: {languageId: python}
 Y_hat_one_feature = my_model.predict(penguins[["flipper_length_mm"]])
 
 print(f"The RMSE of the model is {np.sqrt(np.mean((Y-Y_hat_one_feature)**2))}")
@@ -233,7 +223,6 @@ $$\text{bill depth} = \theta_0 + \theta_1 \text{flipper length} + \theta_2 \text
 We repeat this three-step process by intializing a new model object, then calling `.fit` and `.predict` as before.
 
 ```{python}
-#| vscode: {languageId: python}
 # Step 1: initialize LinearRegression model
 two_feature_model = LinearRegression()
 
@@ -253,7 +242,6 @@ We can also see that we obtain the same predictions using `sklearn` as we did wh
 
 ```{python}
 #| code-fold: true
-#| vscode: {languageId: python}
 pd.DataFrame({"Y_hat from OLS":np.squeeze(Y_hat), "Y_hat from sklearn":Y_hat_two_features}).head()
 ```
 
@@ -273,7 +261,6 @@ One thing to note, however, is that the techniques we used above can only be app
 Let's consider an arbitrary function. Our goal is to find the value of $x$ that minimizes this function.
 
 ```{python}
-#| vscode: {languageId: python}
 def arbitrary(x):
     return (x**4 - 15*x**3 + 80*x**2 - 180*x + 144)/10
 ```
@@ -285,14 +272,12 @@ def arbitrary(x):
 Above, we saw that the minimum is somewhere around 5.3. Let's see if we can figure out how to find the exact minimum algorithmically from scratch. One very slow (and terrible) way would be manual guess-and-check.
 
 ```{python}
-#| vscode: {languageId: python}
 arbitrary(6)
 ```
 
 A somewhat better (but still slow) approach is to use brute force to try out a bunch of x values and return the one that yields the lowest loss.
 
 ```{python}
-#| vscode: {languageId: python}
 def simple_minimize(f, xs):
     # Takes in a function f and a set of values xs. 
     # Calculates the value of the function f at all values x in xs
@@ -308,7 +293,6 @@ This process is essentially the same as before where we made a graphical plot, i
 
 ```{python}
 #| code-fold: true
-#| vscode: {languageId: python}
 xs = np.linspace(1, 7, 200)
 sparse_xs = np.linspace(1, 7, 5)
 
@@ -333,7 +317,6 @@ This basic approach suffers from three major flaws:
 One way to minimize this mathematical function is to use the `scipy.optimize.minimize` function. It takes a function and a starting guess and tries to find the minimum.
 
 ```{python}
-#| vscode: {languageId: python}
 from scipy.optimize import minimize
 
 # takes a function f and a starting point x0 and returns a readout 
@@ -351,7 +334,30 @@ In Data 100, the gradient descent process will usually be invisible to us, hidde
 #### Digging into Gradient Descent
 Looking at the function across this domain, it is clear that the function's minimum value occurs around $\theta = 5.3$. Let's pretend for a moment that we *couldn't* see the full view of the cost function. How would we guess the value of $\theta$ that minimizes the function? 
 
-It turns out that the first derivative of the function can give us a clue. In the plots below, the line indicates the value of the derivative of each value of $\theta$. The derivative is negative where it is red and positive where it is green.
+It turns out that the first derivative of the function can give us a clue. In the graph below, the function and its derivative are plotted, with points where the derivative is equal to 0 plotted in light green.
+
+```{python}
+#| code-fold: true
+import plotly.graph_objects as go
+
+def derivative_arbitrary(x):
+    return (4*x**3 - 45*x**2 + 160*x - 180)/10
+
+fig = go.Figure()
+roots = np.array([2.3927, 3.5309, 5.3263])
+
+fig.add_trace(go.Scatter(x = xs, y = arbitrary(xs), 
+                         mode = "lines", name = "f"))
+fig.add_trace(go.Scatter(x = xs, y = derivative_arbitrary(xs), 
+                         mode = "lines", name = "df", line = {"dash": "dash"}))
+fig.add_trace(go.Scatter(x = np.array(roots), y = 0*roots, 
+                         mode = "markers", name = "df = zero", marker_size = 12))
+fig.update_layout(font_size = 20, yaxis_range=[-1, 3])
+fig.update_layout(autosize=False, width=800, height=600)
+fig.show()
+```
+
+In the plots below, the line indicates the value of the derivative of each value of $\theta$. The derivative is negative where it is red and positive where it is green.
 
 
 Say we make a guess for the minimizing value of $\theta$. Remember that we read plots from left to right, and assume that our starting $\theta$ value is to the left of the optimal $\hat{\theta}$. If the guess "undershoots" the true minimizing value – our guess for $\theta$ is lower than the value of the $\hat{\theta}$ that minimizes the function – the derivative will be **negative**. This means that if we increase $\theta$ (move further to the right), then we **can decrease** our loss function further. If this guess "overshoots" the true minimizing value, the derivative will be positive, implying the converse.
@@ -476,7 +482,7 @@ In summary, non-convex loss functions can cause problems with optimization. This
 
 ### Gradient Descent in 1 Dimension
 
-> **Terminology clarification**: In past lectures, we have used “loss” to refer to the error incurred on a *single* datapoint. In applications, we usually care more about the average error across *all* datapoints. Going forward, we will take the “model’s loss” to mean the model’s average error across the dataset. This is sometimes also known as the empirical risk, cost function, or objective function. $$L(\theta) = R(\theta) = \frac{1}{n} \sum_{i=1}^{n} L(y, \hat{y})$$
+> **Terminology clarification**: In past lectures, we have used “loss” to refer to the error incurred on a *single* datapoint. In applications, we usually care more about the average error across *all* datapoints. Going forward, we will take the “model’s loss” to mean the model’s average error across the dataset. This is sometimes also known as the empirical risk (R), cost function, or objective function. $$L(\theta) = R(\theta) = \frac{1}{n} \sum_{i=1}^{n} L(y, \hat{y})$$
 
 In our discussion above, we worked with some arbitrary function $f$. As data scientists, we will almost always work with gradient descent in the context of optimizing *models* – specifically, we want to apply gradient descent to find the minimum of a *loss function*. In a modeling context, our goal is to minimize a loss function by choosing the minimizing model *parameters*.
 
@@ -506,34 +512,11 @@ To see this in action, let's consider a case where we have a linear model with n
 Let's apply our `gradient_descent` function from before to optimize our model on the `tips` dataset. We will try to select the best parameter $\theta_i$ to predict the `tip` $y$ from the `total_bill` $x$.
 
 ```{python}
-#| vscode: {languageId: python}
 df = sns.load_dataset("tips")
 df.head()
 ```
 
 We can visualize the value of the MSE on our dataset for different possible choices of $\theta_1$. To optimize our model, we want to select the value of $\theta_1$ that leads to the lowest MSE.
-
-```{python}
-#| code-fold: true
-#| vscode: {languageId: python}
-import plotly.graph_objects as go
-
-def derivative_arbitrary(x):
-    return (4*x**3 - 45*x**2 + 160*x - 180)/10
-
-fig = go.Figure()
-roots = np.array([2.3927, 3.5309, 5.3263])
-
-fig.add_trace(go.Scatter(x = xs, y = arbitrary(xs), 
-                         mode = "lines", name = "f"))
-fig.add_trace(go.Scatter(x = xs, y = derivative_arbitrary(xs), 
-                         mode = "lines", name = "df", line = {"dash": "dash"}))
-fig.add_trace(go.Scatter(x = np.array(roots), y = 0*roots, 
-                         mode = "markers", name = "df = zero", marker_size = 12))
-fig.update_layout(font_size = 20, yaxis_range=[-1, 3])
-fig.update_layout(autosize=False, width=800, height=600)
-fig.show()
-```
 
 To apply gradient descent, we need to compute the derivative of the loss function with respect to our parameter $\theta_1$.
 
@@ -548,7 +531,6 @@ Implementing this in code, we can visualize the MSE loss on the `tips` data. **M
 
 ```{python}
 #| code-fold: true
-#| vscode: {languageId: python}
 def gradient_descent(df, initial_guess, alpha, n):
     """Performs n steps of gradient descent on df using learning rate alpha starting
        from initial_guess. Returns a numpy array of all guesses over time."""
@@ -588,173 +570,3 @@ plt.ylabel(r"$L(\theta_1)$");
 print(f"Final guess for theta_1: {trajectory[-1]}")
 ```
 
-### Gradient Descent on Multi-Dimensional Models
-The function we worked with above was one-dimensional – we were only minimizing the function with respect to a single parameter, $\theta$. However, models usually have a cost function with multiple parameters that need to be optimized. For example, simple linear regression has 2 parameters: 
-$$\hat{y} + \theta_0 + \theta_1x$$ 
-and multiple linear regression has $p+1$ parameters: 
-$$\mathbb{Y} = \theta_0 + \theta_1 \Bbb{X}_{:,1} + \theta_2 \Bbb{X}_{:,2} + \cdots + \theta_p \Bbb{X}_{:,p}$$
-
-We'll need to expand gradient descent so we can update our guesses for all model parameters all in one go.
-
-With multiple parameters to optimize, we consider a **loss surface**, or the model's loss for a particular *combination* of possible parameter values.
-
-```{python}
-#| code-fold: true
-#| vscode: {languageId: python}
-import plotly.graph_objects as go
-
-
-def mse_loss(theta, X, y_obs):
-    y_hat = X @ theta
-    return np.mean((y_hat - y_obs) ** 2)    
-
-tips_with_bias = df.copy()
-tips_with_bias["bias"] = 1
-tips_with_bias = tips_with_bias[["bias", "total_bill"]]
-
-uvalues = np.linspace(0, 2, 10)
-vvalues = np.linspace(-0.1, 0.35, 10)
-(u,v) = np.meshgrid(uvalues, vvalues)
-thetas = np.vstack((u.flatten(),v.flatten()))
-
-def mse_loss_single_arg(theta):
-    return mse_loss(theta, tips_with_bias, df["tip"])
-
-MSE = np.array([mse_loss_single_arg(t) for t in thetas.T])
-
-loss_surface = go.Surface(x=u, y=v, z=np.reshape(MSE, u.shape))
-
-ind = np.argmin(MSE)
-optimal_point = go.Scatter3d(name = "Optimal Point",
-    x = [thetas.T[ind,0]], y = [thetas.T[ind,1]], 
-    z = [MSE[ind]],
-    marker=dict(size=10, color="red"))
-
-fig = go.Figure(data=[loss_surface, optimal_point])
-fig.update_layout(scene = dict(
-    xaxis_title = "theta0",
-    yaxis_title = "theta1",
-    zaxis_title = "MSE"), autosize=False, width=800, height=600)
-
-fig.show()
-```
-
-We can also visualize a bird's-eye view of the loss surface from above using a contour plot:
-
-```{python}
-#| code-fold: true
-#| vscode: {languageId: python}
-contour = go.Contour(x=u[0], y=v[:, 0], z=np.reshape(MSE, u.shape))
-fig = go.Figure(contour)
-fig.update_layout(
-    xaxis_title = "theta0",
-    yaxis_title = "theta1", autosize=False, width=800, height=600)
-
-fig.show()
-```
-
-#### The Gradient Vector
-As before, the derivative of the loss function tells us the best way towards the minimum value.
-
-On a 2D (or higher) surface, the best way to go down (gradient) is described by a *vector*.
-
-<div align="middle">
-  <table style="width:100%">
-    <tr align="center">
-      <td><img src="images/loss_surface.png" alt='loss_surface' width='600'>
-      </td>
-    </tr>
-  </table>
-</div>
-
-> Math Aside: Partial Derivatives 
-
-> - For an equation with multiple variables, we take a **partial derivative** by differentiating with respect to just one variable at a time. The partial derivative is denoted with a $\partial$. Intuitively, we want to see how the function changes if we only vary one variable while holding other variables constant. 
-> - Using $f(x, y) = 3x^2 + y$ as an example,
->   - taking the partial derivative with respect to x and treating y as a constant gives us $\frac{\partial f}{\partial x} = 6x$
->   - taking the partial derivative with respect to y and treating x as a constant gives us $\frac{\partial f}{\partial y} = 1$
-
-For the *vector* of parameter values $\vec{\theta} = \begin{bmatrix}
-           \theta_{0} \\
-           \theta_{1} \\
-         \end{bmatrix}$, we take the *partial derivative* of loss with respect to each parameter: $\frac{\partial L}{\partial \theta_0}$ and $\frac{\partial L}{\partial \theta_1}$.
-
-> For example, consider the 2D function: $$f(\theta_0, \theta_1) = 8 \theta_0^2 + 3\theta_0\theta_1$$
-> For a function of 2 variables $f(\theta_0, \theta_1)$, we define the gradient 
-$$
-\begin{align}
-\frac{\partial f}{\partial \theta_{0}} &= 16\theta_0 + 3\theta_1 \\
-\frac{\partial f}{\partial \theta_{1}} &= 3\theta_0 \\
-\nabla_{\vec{\theta}} f(\vec{\theta}) &=  \begin{bmatrix} 16\theta_0 + 3\theta_1 \\ 3\theta_0 \\ \end{bmatrix}
-\end{align}
-$$
-
-
-The **gradient vector** of a generic function of $p+1$ variables is therefore 
-$$\nabla_{\vec{\theta}} L =  \begin{bmatrix} \frac{\partial L}{\partial \theta_0} \\ \frac{\partial L}{\partial \theta_1} \\ \vdots \end{bmatrix}$$
-where $\nabla_\theta L$ always points in the downhill direction of the surface. We can interpret each gradient as: "If I nudge the $i$th model weight, what happens to loss?"
-
-We can use this to update our 1D gradient rule for models with multiple parameters. 
-
-* Recall our 1D update rule: $$\theta^{(t+1)} = \theta^{(t)} - \alpha \frac{d}{d\theta}L(\theta^{(t)})$$ 
-* For models with multiple parameters, we work in terms of vectors:
-$$\begin{bmatrix}
-           \theta_{0}^{(t+1)} \\
-           \theta_{1}^{(t+1)} \\
-           \vdots
-         \end{bmatrix} = \begin{bmatrix}
-           \theta_{0}^{(t)} \\
-           \theta_{1}^{(t)} \\
-           \vdots
-         \end{bmatrix} - \alpha \begin{bmatrix}
-           \frac{\partial L}{\partial \theta_{0}} \\
-           \frac{\partial L}{\partial \theta_{1}} \\
-           \vdots \\
-         \end{bmatrix}$$
-  
-* Written in a more compact form, $$\vec{\theta}^{(t+1)} = \vec{\theta}^{(t)} - \alpha \nabla_{\vec{\theta}} L(\theta^{(t)}) $$
-
-  * $\theta$ is a vector with our model weights
-  * $L$ is the loss function
-  * $\alpha$ is the learning rate (ours is constant, but other techniques use an $\alpha$ that decreases over time)
-  * $\vec{\theta}^{(t)}$ is the current value of $\theta$
-  * $\vec{\theta}^{(t+1)}$ is the next value of $\theta$
-  * $\nabla_{\vec{\theta}} L(\theta^{(t)})$ is the gradient of the loss function evaluated at the current $\vec{\theta}^{(t)}$
-
-
-### Batch Gradient Descent and Stochastic Gradient Descent
-
-Formally, the algorithm we derived above is called **batch gradient descent.** For each iteration of the algorithm, the derivative of loss is computed across the *entire* batch of all $n$ datapoints. While this update rule works well in theory, it is not practical in most circumstances. For large datasets (with perhaps billions of datapoints), finding the gradient across all the data is incredibly computationally taxing; gradient descent will converge slowly because each individual update is slow.
-
-**Stochastic (mini-batch) gradient descent** tries to address this issue. In stochastic descent, only a *sample* of the full dataset is used at each update. We estimate the true gradient of the loss surface using just that sample of data. The **batch size** is the number of data points used in each sample. The sampling strategy is generally without replacement (data is shuffled and batch size examples are selected one at a time.)
-
-Each complete "pass" through the data is known as a **training epoch**. After shuffling the data, in a single **training epoch** of stochastic gradient descent, we
-
-* Compute the gradient on the first x% of the data. Update the parameter guesses.
-* Compute the gradient on the next x% of the data. Update the parameter guesses.
-* $\dots$
-* Compute the gradient on the last x% of the data. Update the parameter guesses.
-
-Every data point appears once in a single training epoch. We then perform several training epochs until we're satisfied.
-
-Batch gradient descent is a deterministic technique – because the entire dataset is used at each update iteration, the algorithm will always advance towards the minimum of the loss surface. In contrast, stochastic gradient descent involve an element of randomness. Since only a subset of the full data is used to update the guess for $\vec{\theta}$ at each iteration, there's a chance the algorithm will not progress towards the true minimum of loss with each update. Over the longer term, these stochastic techniques should still converge towards the optimal solution. 
-
-The diagrams below represent a "bird's eye view" of a loss surface from above. Notice that batch gradient descent takes a direct path towards the optimal $\hat{\theta}$. Stochastic gradient descent, in contrast, "hops around" on its path to the minimum point on the loss surface. This reflects the randomness of the sampling process at each update step.
-
-<div align="middle">
-  <table style="width:100%">
-    <tr align="center">
-      <td><img src="images/stochastic.png" alt='stochastic' width='600'>
-      </td>
-    </tr>
-  </table>
-</div>
-
-To summarize the tradeoffs of batch size: 
-
-| - | Smaller Batch Size | Larger Batch Size | 
-| -- | -- | -- | 
-| Pros | More frequent gradient updates | Leverage hardware acceleration to improve overall system performance and higher quality gradient updates | 
-| Cons | More variability in the gradient estimates | Less frequent gradient updates |
-
-The typical solution is to set batch size to ensure sufficient hardware utilization.

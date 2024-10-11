@@ -22,7 +22,7 @@ jupyter:
       format_version: '1.0'
       jupytext_version: 1.16.1
   kernelspec:
-    display_name: Python 3 (ipykernel)
+    display_name: ds100env
     language: python
     name: python3
 ---
@@ -46,6 +46,182 @@ With our new programming frameworks in hand, we will also add sophistication to 
 ## Gradient Descent Cont.
 
 Before we dive into feature engineering, let's quickly review gradient descent, which we covered in the last lecture. Recall that gradient descent is a powerful technique for choosing the model parameters that minimize the loss function.  
+
+### Gradient Descent on Multi-Dimensional Models
+The function we worked with above was one-dimensional – we were only minimizing the function with respect to a single parameter, $\theta$. However, models usually have a cost function with multiple parameters that need to be optimized. For example, simple linear regression has 2 parameters: 
+$$\hat{y} + \theta_0 + \theta_1x$$ 
+and multiple linear regression has $p+1$ parameters: 
+$$\mathbb{Y} = \theta_0 + \theta_1 \Bbb{X}_{:,1} + \theta_2 \Bbb{X}_{:,2} + \cdots + \theta_p \Bbb{X}_{:,p}$$
+
+We'll need to expand gradient descent so we can update our guesses for all model parameters all in one go.
+
+With multiple parameters to optimize, we consider a **loss surface**, or the model's loss for a particular *combination* of possible parameter values.
+
+```{python}
+#| code-fold: true
+import seaborn as sns
+import numpy as np
+df = sns.load_dataset("tips")
+```
+
+```{python}
+#| code-fold: true
+import plotly.graph_objects as go
+
+
+def mse_loss(theta, X, y_obs):
+    y_hat = X @ theta
+    return np.mean((y_hat - y_obs) ** 2)    
+
+tips_with_bias = df.copy()
+tips_with_bias["bias"] = 1
+tips_with_bias = tips_with_bias[["bias", "total_bill"]]
+
+uvalues = np.linspace(0, 2, 10)
+vvalues = np.linspace(-0.1, 0.35, 10)
+(u,v) = np.meshgrid(uvalues, vvalues)
+thetas = np.vstack((u.flatten(),v.flatten()))
+
+def mse_loss_single_arg(theta):
+    return mse_loss(theta, tips_with_bias, df["tip"])
+
+MSE = np.array([mse_loss_single_arg(t) for t in thetas.T])
+
+loss_surface = go.Surface(x=u, y=v, z=np.reshape(MSE, u.shape))
+
+ind = np.argmin(MSE)
+optimal_point = go.Scatter3d(name = "Optimal Point",
+    x = [thetas.T[ind,0]], y = [thetas.T[ind,1]], 
+    z = [MSE[ind]],
+    marker=dict(size=10, color="red"))
+
+fig = go.Figure(data=[loss_surface, optimal_point])
+fig.update_layout(scene = dict(
+    xaxis_title = "theta0",
+    yaxis_title = "theta1",
+    zaxis_title = "MSE"), autosize=False, width=800, height=600)
+
+fig.show()
+```
+
+We can also visualize a bird's-eye view of the loss surface from above using a contour plot:
+
+```{python}
+#| code-fold: true
+contour = go.Contour(x=u[0], y=v[:, 0], z=np.reshape(MSE, u.shape))
+fig = go.Figure(contour)
+fig.update_layout(
+    xaxis_title = "theta0",
+    yaxis_title = "theta1", autosize=False, width=800, height=600)
+
+fig.show()
+```
+
+#### The Gradient Vector
+As before, the derivative of the loss function tells us the best way towards the minimum value.
+
+On a 2D (or higher) surface, the best way to go down (gradient) is described by a *vector*.
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td><img src="images/loss_surface.png" alt='loss_surface' width='600'>
+      </td>
+    </tr>
+  </table>
+</div>
+
+> Math Aside: Partial Derivatives 
+
+> - For an equation with multiple variables, we take a **partial derivative** by differentiating with respect to just one variable at a time. The partial derivative is denoted with a $\partial$. Intuitively, we want to see how the function changes if we only vary one variable while holding other variables constant. 
+> - Using $f(x, y) = 3x^2 + y$ as an example,
+>   - taking the partial derivative with respect to x and treating y as a constant gives us $\frac{\partial f}{\partial x} = 6x$
+>   - taking the partial derivative with respect to y and treating x as a constant gives us $\frac{\partial f}{\partial y} = 1$
+
+For the *vector* of parameter values $\vec{\theta} = \begin{bmatrix}
+           \theta_{0} \\
+           \theta_{1} \\
+         \end{bmatrix}$, we take the *partial derivative* of loss with respect to each parameter: $\frac{\partial L}{\partial \theta_0}$ and $\frac{\partial L}{\partial \theta_1}$.
+
+> For example, consider the 2D function: $$f(\theta_0, \theta_1) = 8 \theta_0^2 + 3\theta_0\theta_1$$
+> For a function of 2 variables $f(\theta_0, \theta_1)$, we define the gradient 
+$$
+\begin{align}
+\frac{\partial f}{\partial \theta_{0}} &= 16\theta_0 + 3\theta_1 \\
+\frac{\partial f}{\partial \theta_{1}} &= 3\theta_0 \\
+\nabla_{\vec{\theta}} f(\vec{\theta}) &=  \begin{bmatrix} 16\theta_0 + 3\theta_1 \\ 3\theta_0 \\ \end{bmatrix}
+\end{align}
+$$
+
+
+The **gradient vector** of a generic function of $p+1$ variables is therefore 
+$$\nabla_{\vec{\theta}} L =  \begin{bmatrix} \frac{\partial L}{\partial \theta_0} \\ \frac{\partial L}{\partial \theta_1} \\ \vdots \end{bmatrix}$$
+where $\nabla_\theta L$ always points in the downhill direction of the surface. We can interpret each gradient as: "If I nudge the $i$th model weight, what happens to loss?"
+
+We can use this to update our 1D gradient rule for models with multiple parameters. 
+
+* Recall our 1D update rule: $$\theta^{(t+1)} = \theta^{(t)} - \alpha \frac{d}{d\theta}L(\theta^{(t)})$$ 
+* For models with multiple parameters, we work in terms of vectors:
+$$\begin{bmatrix}
+           \theta_{0}^{(t+1)} \\
+           \theta_{1}^{(t+1)} \\
+           \vdots
+         \end{bmatrix} = \begin{bmatrix}
+           \theta_{0}^{(t)} \\
+           \theta_{1}^{(t)} \\
+           \vdots
+         \end{bmatrix} - \alpha \begin{bmatrix}
+           \frac{\partial L}{\partial \theta_{0}} \\
+           \frac{\partial L}{\partial \theta_{1}} \\
+           \vdots \\
+         \end{bmatrix}$$
+  
+* Written in a more compact form, $$\vec{\theta}^{(t+1)} = \vec{\theta}^{(t)} - \alpha \nabla_{\vec{\theta}} L(\theta^{(t)}) $$
+
+  * $\theta$ is a vector with our model weights
+  * $L$ is the loss function
+  * $\alpha$ is the learning rate (ours is constant, but other techniques use an $\alpha$ that decreases over time)
+  * $\vec{\theta}^{(t)}$ is the current value of $\theta$
+  * $\vec{\theta}^{(t+1)}$ is the next value of $\theta$
+  * $\nabla_{\vec{\theta}} L(\theta^{(t)})$ is the gradient of the loss function evaluated at the current $\vec{\theta}^{(t)}$
+
+
+### Batch Gradient Descent and Stochastic Gradient Descent
+
+Formally, the algorithm we derived above is called **batch gradient descent.** For each iteration of the algorithm, the derivative of loss is computed across the *entire* batch of all $n$ datapoints. While this update rule works well in theory, it is not practical in most circumstances. For large datasets (with perhaps billions of datapoints), finding the gradient across all the data is incredibly computationally taxing; gradient descent will converge slowly because each individual update is slow.
+
+**Stochastic (mini-batch) gradient descent** tries to address this issue. In stochastic descent, only a *sample* of the full dataset is used at each update. We estimate the true gradient of the loss surface using just that sample of data. The **batch size** is the number of data points used in each sample. The sampling strategy is generally without replacement (data is shuffled and batch size examples are selected one at a time.)
+
+Each complete "pass" through the data is known as a **training epoch**. After shuffling the data, in a single **training epoch** of stochastic gradient descent, we
+
+* Compute the gradient on the first x% of the data. Update the parameter guesses.
+* Compute the gradient on the next x% of the data. Update the parameter guesses.
+* $\dots$
+* Compute the gradient on the last x% of the data. Update the parameter guesses.
+
+Every data point appears once in a single training epoch. We then perform several training epochs until we're satisfied.
+
+Batch gradient descent is a deterministic technique – because the entire dataset is used at each update iteration, the algorithm will always advance towards the minimum of the loss surface. In contrast, stochastic gradient descent involve an element of randomness. Since only a subset of the full data is used to update the guess for $\vec{\theta}$ at each iteration, there's a chance the algorithm will not progress towards the true minimum of loss with each update. Over the longer term, these stochastic techniques should still converge towards the optimal solution. 
+
+The diagrams below represent a "bird's eye view" of a loss surface from above. Notice that batch gradient descent takes a direct path towards the optimal $\hat{\theta}$. Stochastic gradient descent, in contrast, "hops around" on its path to the minimum point on the loss surface. This reflects the randomness of the sampling process at each update step.
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td><img src="images/stochastic.png" alt='stochastic' width='600'>
+      </td>
+    </tr>
+  </table>
+</div>
+
+To summarize the tradeoffs of batch size: 
+
+| - | Smaller Batch Size | Larger Batch Size | 
+| -- | -- | -- | 
+| Pros | More frequent gradient updates | Leverage hardware acceleration to improve overall system performance and higher quality gradient updates | 
+| Cons | More variability in the gradient estimates | Less frequent gradient updates |
+
+The typical solution is to set batch size to ensure sufficient hardware utilization.
 
 ### Gradient Descent Review
 As we learned earlier, we set the derivative of the loss function to zero and solve to determine the optimal parameters $\theta$ that minimize loss. For a loss surface in 2D (or higher), the best way to minimize loss is to "walk" down the loss surface until we reach our optimal parameters $\vec{\theta}$. The **gradient vector** tells us which direction to "walk" in.
@@ -178,7 +354,6 @@ To illustrate how this works, we'll refer back to the `tips` dataset from previo
 
 ```{python}
 #| code-fold: true
-#| vscode: {languageId: python}
 import numpy as np
 import seaborn as sns
 import pandas as pd
@@ -209,7 +384,6 @@ The `OneHotEncoder` class of `sklearn` ([documentation](https://scikit-learn.org
 
 ```{python}
 #| code-fold: false
-#| vscode: {languageId: python}
 from sklearn.preprocessing import OneHotEncoder
 
 # Initialize a OneHotEncoder object
@@ -240,7 +414,6 @@ Now, the `day` feature (or rather, the four new boolean features that represent 
 Using `sklearn` to fit the new model, we can determine the model coefficients, allowing us to understand how each feature impacts the predicted tip.
 
 ```{python}
-#| vscode: {languageId: python}
 from sklearn.linear_model import LinearRegression
 data_w_ohe = tips[["total_bill", "size", "day"]].join(encoded_day_df).drop(columns = "day")
 ohe_model = lm.LinearRegression(fit_intercept=False) #Tell sklearn to not add an additional bias column. Why?
@@ -273,7 +446,6 @@ $$\hat{y} = \theta_0 + \theta_1 (\text{hp})$$
 
 ```{python}
 #| code-fold: true
-#| vscode: {languageId: python}
 pd.options.mode.chained_assignment = None 
 vehicles = sns.load_dataset("mpg").dropna().rename(columns = {"horsepower": "hp"}).sort_values("hp")
 
@@ -300,7 +472,6 @@ $$\hat{y} = \theta_0 + \theta_1 \phi_1 + \theta_2 \phi_2$$
 How can we fit a model with non-linear features? We can use the exact same techniques as before: ordinary least squares, gradient descent, or `sklearn`. This is because our new model is still a **linear model**. Although it contains non-linear *features*, it is linear with respect to the model *parameters*. All of our previous work on fitting models was done under the assumption that we were working with linear models. Because our new model is still linear, we can apply our existing methods to determine the optimal parameters. 
 
 ```{python}
-#| vscode: {languageId: python}
 # Add a hp^2 feature to the design matrix
 X = vehicles[["hp"]]
 X["hp^2"] = vehicles["hp"]**2
@@ -383,3 +554,4 @@ In practice, you will use software packages such as `PyTorch` when computing gra
 <center><img src="images/pytorchsgd.png" alt='pytorch_sgd' width='500'></center>
 
 If you want to learn more, this [Intro to PyTorch tutorial](https://pytorch.org/tutorials/beginner/deep_learning_60min_blitz.html) is a great resource to get started! 
+
