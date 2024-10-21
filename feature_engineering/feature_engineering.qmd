@@ -207,7 +207,7 @@ $$\nabla_{\theta} l(\vec{\theta}, \vec{x}, y_i) =  \begin{bmatrix} -2(y_i - \the
 
 Remember that we need to keep updating $\theta$ until the algorithm **converges** to a solution and stops updating significantly (or at all). When updating $\theta$, we'll have a fixed number of updates and subsequent updates will be quite small (we won't change $\theta$ by much).
 
-### Stochastic (Mini-batch) Gradient Descent
+<!-- ### Stochastic (Mini-batch) Gradient Descent
 
 Formally, the algorithm we derived above is called **batch gradient descent.** For each iteration of the algorithm, the derivative of loss is computed across the *entire* batch of all $n$ datapoints. While this update rule works well in theory, it is not practical in most circumstances. For large datasets (with perhaps billions of datapoints), finding the gradient across all the data is incredibly computationally taxing; gradient descent will converge slowly because each individual update is slow.
 
@@ -242,39 +242,25 @@ To summarize the tradeoffs of batch size:
 | Pros | More frequent gradient updates | Leverage hardware acceleration to improve overall system performance and higher quality gradient updates | 
 | Cons | More variability in the gradient estimates | Less frequent gradient updates |
 
-The typical solution is to set batch size to ensure sufficient hardware utilization.
+The typical solution is to set batch size to ensure sufficient hardware utilization. -->
 
-
-#### Computational Complexity and Summary
-
-Let's now dive deeper into gradient and stochastic gradient descent. We discussed earlier how finding the gradient across all the data is extremeley computationally taxing and takes a lot of resources to calculate. Here we'll explore why this is true.
-
-We know that the solution to the normal equation is $\hat{\theta} = (\mathbb{X}^T\mathbb{X})^{-1}\mathbb{X}^T\mathbb{Y}$. Let's break this down and determine the computational complexity for this solution.
-
-<center><img src="images/complexity_normal_solution.png" alt='complexity_normal_solution' width='600'></center>
-
- Let $n$ be the number of samples (rows) and $d$ be the number of features (columns). 
-
- * Computing $(\mathbb{X}^{\top}\mathbb{X})$ takes $O(nd^2)$ time, and it's inverse takes another $O(d^3)$ time to calculate; overall, $(\mathbb{X}^{\top}\mathbb{X})^{-1}$ takes $O(nd^2) + O(d^3)$ time. 
- * $\mathbb{X}^{\top}\mathbb{Y}$ takes $O(nd)$ time.
- * Multiplying $(\mathbb{X}^{\top}\mathbb{X})^{-1}$ and $\mathbb{X}^{\top}\mathbb{Y}$ takes $O(d^2)$ time. 
- 
- In total, calculating the solution to the normal equation takes $O(nd^2) + O(d^3) + O(nd) + O(d^2)$ time. We can see that $O(nd^2) + O(d^3)$ dominates the complexity — this can be problematic for high-dimensional models and very large datasets.
-
-On the other hand, the time complexity of a single gradient descent step takes only $O(nd)$ time. 
+### Batch, Mini-batch, Stochastic Gradient Descent
+The time complexity of a single gradient descent step takes only $O(nd)$ time where $n$ is the number of samples (rows) and $d$ is the number of features (columns).
 
 <center><img src="images/complexity_grad_descent.png" alt='complexity_grad_descent' width='600'></center>
 
 Suppose we run $T$ iterations. The final complexity would then be $O(Tnd)$. Typically, $n$ is much larger than $T$ and $d$. How can we reduce the cost of this algorithm using a technique from Data 100? Do we really need to use $n$ data points? We don't! Instead, we can use stochastic gradient descent.
 
-We know that our true gradient of $\nabla_{\vec{\theta}} L (\vec{\theta^{(t)}}) = \frac{1}{n}\sum_{i=1}^{n}\nabla_{\vec{\theta}} l(y_i, f_{\vec{\theta}^{(t)}}(X_i))$ has a time complexity of $O(nd)$. Instead of using all $n$ samples to calculate the true gradient of the loss surface, let's use a sample of our data to approximate. Say we sample $b$ records ($s_1, \cdots, s_b$) from our $n$ datapoints. Our new (stochastic) gradient descent function will be $\nabla_{\vec{\theta}} L (\vec{\theta^{(t)}}) = \frac{1}{b}\sum_{i=1}^{b}\nabla_{\vec{\theta}} l(y_{s_i}, f_{\vec{\theta}^{(t)}}(X_{s_i}))$ and will now have a time complexity of $O(bd)$, which is much faster! 
+We know that our true gradient of $\nabla_{\vec{\theta}} L (\vec{\theta^{(t)}}) = \frac{1}{n}\sum_{i=1}^{n}\nabla_{\vec{\theta}} l(y_i, f_{\vec{\theta}^{(t)}}(X_i))$ has a time complexity of $O(nd)$. Instead of using all $n$ samples to calculate the true gradient of the loss surface, let's use a sample of our data to **approximate the gradient**. Say we sample $b$ records ($s_1, \cdots, s_b$) from our $n$ datapoints. Our new (stochastic) gradient descent function will be $\nabla_{\vec{\theta}} L (\vec{\theta^{(t)}}) = \frac{1}{b}\sum_{i=1}^{b}\nabla_{\vec{\theta}} l(y_{s_i}, f_{\vec{\theta}^{(t)}}(X_{s_i}))$ and will now have a time complexity of $O(bd)$, which is much faster! For more on computational complexity, see the bonus section at the end.
 
-Stochastic gradient descent helps us approximate the gradient while also reducing the time complexity and computational cost. The time complexity scales with the number of datapoints selected in the sample. To sample data, there are two approaches we can use:
+But how do we decide our mini-batch size ($b$), or the number of datapoints in our sample? The original stochastic gradient descent algorithm uses $b=1$ so that only one sample is used to approximate the gradient at a time. Although we don't use such a small mini-batch size often, $b$ typically is small. When choosing $b$, there are several factors to consider: a **larger batch size** results in a **better gradient estimate**, **parallelism**, and other **systems factors**. On the other hand, a **smaller batch size** will be **faster** and have **more frequent updates**. It is up to data scientists to balance the tradeoff between batch size and time complexity.
 
-1. Shuffle the data and select samples one at a time.
+Stochastic gradient descent helps us approximate the true gradient of a loss surface while also reducing the time complexity and computational cost. To sample data, there are two approaches we can use:
+
+1. Shuffle the data and select batch size records at a time.
 2. Take a simple random sample for each gradient computation.
 
-But how do we decide our mini-batch size ($b$), or the number of datapoints in our sample? The original stochastic gradient descent algorithm uses $b=1$ so that only one sample is used to approximate the gradient at a time. Although we don't use such a small mini-batch size often, $b$ typically is small. When choosing $b$, there are several factors to consider: a larger batch size results in a better gradient estimate, parallelism, and other systems factors. On the other hand, a smaller batch size will be faster and have more frequent updates. It is up to data scientists to balance the tradeoff between batch size and time complexity.
+
 
 Summarizing our two gradient descent techniques:
 
@@ -521,6 +507,24 @@ The takeaway here: we need to strike a balance in the complexity of our models; 
 This begs the question: how do we control the complexity of a model? Stay tuned for Lecture 16 on Cross-Validation and Regularization!
 
 
+## [Bonus] Time Complexity of the Normal Equation
+
+Let's now dive deeper into gradient and stochastic gradient descent. We discussed earlier how finding the gradient across all the data is extremeley computationally taxing and takes a lot of resources to calculate. Here we'll explore why this is true.
+
+We know that the solution to the normal equation is $\hat{\theta} = (\mathbb{X}^T\mathbb{X})^{-1}\mathbb{X}^T\mathbb{Y}$. Let's break this down and determine the computational complexity for this solution.
+
+<center><img src="images/complexity_normal_solution.png" alt='complexity_normal_solution' width='600'></center>
+
+ Let $n$ be the number of samples (rows) and $d$ be the number of features (columns). 
+
+ * Computing $(\mathbb{X}^{\top}\mathbb{X})$ takes $O(nd^2)$ time, and it's inverse takes another $O(d^3)$ time to calculate; overall, $(\mathbb{X}^{\top}\mathbb{X})^{-1}$ takes $O(nd^2) + O(d^3)$ time. 
+ * $\mathbb{X}^{\top}\mathbb{Y}$ takes $O(nd)$ time.
+ * Multiplying $(\mathbb{X}^{\top}\mathbb{X})^{-1}$ and $\mathbb{X}^{\top}\mathbb{Y}$ takes $O(d^2)$ time. 
+ 
+ In total, calculating the solution to the normal equation takes $O(nd^2) + O(d^3) + O(nd) + O(d^2)$ time. We can see that $O(nd^2) + O(d^3)$ dominates the complexity — this can be problematic for high-dimensional models and very large datasets.
+
+
+
 ## [Bonus] Stochastic Gradient Descent in `PyTorch`
 
 While this material is out of scope for Data 100, it is useful if you plan to enter a career in data science!
@@ -534,5 +538,4 @@ In practice, you will use software packages such as `PyTorch` when computing gra
 <center><img src="images/pytorchsgd.png" alt='pytorch_sgd' width='500'></center>
 
 If you want to learn more, this [Intro to PyTorch tutorial](https://pytorch.org/tutorials/beginner/deep_learning_60min_blitz.html) is a great resource to get started! 
-
 
