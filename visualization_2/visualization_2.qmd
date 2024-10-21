@@ -18,7 +18,7 @@ jupyter:
       format_version: '1.0'
       jupytext_version: 1.16.1
   kernelspec:
-    display_name: Python 3 (ipykernel)
+    display_name: ds100env
     language: python
     name: python3
 ---
@@ -245,7 +245,7 @@ A **kernel** (for our purposes) is a valid density function. This means it:
 
 #### Gaussian Kernel
 
-The most common kernel is the **Gaussian kernel**. The Gaussian kernel is equivalent to the Gaussian probability density function (the Normal distribution), centered at the observed value with a standard deviation of (this is known as the **bandwidth** parameter).
+The most common kernel is the **Gaussian kernel**. The Gaussian kernel is equivalent to the Gaussian probability density function (the Normal distribution), centered at the observed value with a standard deviation of $\alpha$ (this is known as the **bandwidth** parameter).
 
 $$K_a(x, x_i) = \frac{1}{\sqrt{2\pi\alpha^{2}}}e^{-\frac{(x-x_i)^{2}}{2\alpha^{2}}}$$
 
@@ -307,7 +307,6 @@ Below, we can see a couple of examples of how `sns.displot` can be used to plot 
 First, we can plot a histogram by setting `kind` to `"hist"`. Note that here we've specified `stat = density` to normalize the histogram such that the area under the histogram is equal to 1.
 
 ```{python}
-#| vscode: {languageId: python}
 sns.displot(data=wb, 
             x="gni", 
             kind="hist", 
@@ -318,7 +317,6 @@ plt.title("Distribution of gross national income per capita");
 Now, what if we want to generate a KDE plot? We can set `kind` = to `"kde"`! 
 
 ```{python}
-#| vscode: {languageId: python}
 sns.displot(data=wb, 
             x="gni", 
             kind='kde')
@@ -328,7 +326,6 @@ plt.title("Distribution of gross national income per capita");
 And finally, if we want to generate an Empirical Cumulative Distribution Function (ECDF), we can specify `kind = "ecdf"`.
 
 ```{python}
-#| vscode: {languageId: python}
 sns.displot(data=wb, 
             x="gni", 
             kind='ecdf')
@@ -346,7 +343,6 @@ Up until now, we've discussed how to visualize single-variable distributions. Go
 In `matplotlib`, we use the function `plt.scatter` to generate a scatter plot. Notice that, unlike our examples of plotting single-variable distributions, now we specify sequences of values to be plotted along the x-axis *and* the y-axis. 
 
 ```{python}
-#| vscode: {languageId: python}
 plt.scatter(wb["per capita: % growth: 2016"], \
             wb['Adult literacy rate: Female: % ages 15 and older: 2005-14'])
 
@@ -358,7 +354,6 @@ plt.title("Female adult literacy against % growth");
 In `seaborn`, we call the function `sns.scatterplot`. We use the `x` and `y` parameters to indicate the values to be plotted along the x and y axes, respectively. By using the `hue` parameter, we can specify a third variable to be used for coloring each scatter point.
 
 ```{python}
-#| vscode: {languageId: python}
 sns.scatterplot(data = wb, x = "per capita: % growth: 2016", \
                y = "Adult literacy rate: Female: % ages 15 and older: 2005-14", 
                hue = "Continent")
@@ -378,7 +373,6 @@ We have a few methods to help reduce overplotting:
 In the cell below, we first jitter the data using `np.random.uniform`, then re-plot it with smaller markers. The resulting plot is much easier to interpret.
 
 ```{python}
-#| vscode: {languageId: python}
 # Setting a seed ensures that we produce the same plot each time
 # This means that the course notes will not change each time you access them
 np.random.seed(150)
@@ -407,7 +401,6 @@ plt.title("Female adult literacy against % growth");
 `sns.lmplot` plots both a scatter plot *and* a linear regression line, all in one function call. We'll discuss linear regression in a few lectures. 
 
 ```{python}
-#| vscode: {languageId: python}
 sns.lmplot(data = wb, x = "per capita: % growth: 2016", \
            y = "Adult literacy rate: Female: % ages 15 and older: 2005-14")
 
@@ -417,7 +410,6 @@ plt.title("Female adult literacy against % growth");
 `sns.jointplot` creates a visualization with three components: a scatter plot, a histogram of the distribution of x values, and a histogram of the distribution of y values.
 
 ```{python}
-#| vscode: {languageId: python}
 sns.jointplot(data = wb, x = "per capita: % growth: 2016", \
            y = "Adult literacy rate: Female: % ages 15 and older: 2005-14")
 
@@ -434,7 +426,6 @@ For datasets with a very large number of datapoints, jittering is unlikely to fu
 We can generate a hex plot using `sns.jointplot` modified with the `kind` parameter.
 
 ```{python}
-#| vscode: {languageId: python}
 sns.jointplot(data = wb, x = "per capita: % growth: 2016", \
               y = "Adult literacy rate: Female: % ages 15 and older: 2005-14", \
               kind = "hex")
@@ -451,7 +442,6 @@ plt.subplots_adjust(top=0.9);
 `sns.kdeplot` will generate a contour plot if we specify both x and y data.
 
 ```{python}
-#| vscode: {languageId: python}
 sns.kdeplot(data = wb, x = "per capita: % growth: 2016", \
             y = "Adult literacy rate: Female: % ages 15 and older: 2005-14", \
             fill = True)
@@ -470,7 +460,6 @@ To see why we may want to transform data, consider the following plot of adult l
 
 ```{python}
 #| code-fold: true
-#| vscode: {languageId: python}
 
 # Some data cleaning to help with the next example
 df = pd.DataFrame(index=wb.index)
@@ -516,7 +505,6 @@ One function that produces this result is the **log transformation**. When we ta
 In Data 100 (and most upper-division STEM classes), $\log$ is used to refer to the natural logarithm with base $e$.
 
 ```{python}
-#| vscode: {languageId: python}
 # np.log takes the logarithm of an array or Series
 plt.scatter(np.log(df["inc"]), df["lit"])
 
@@ -537,7 +525,6 @@ If we were to "spread out" these large values of y more, we would no longer see 
 In this case, it is helpful to apply a **power transformation** – that is, raise our y values to a power. Let's try raising our adult literacy rate values to the power of 4. Large values raised to the power of 4 will increase in magnitude proportionally much more than small values raised to the power of 4 (consider the difference between $2^4 = 16$ and $200^4 = 1600000000$). 
 
 ```{python}
-#| vscode: {languageId: python}
 # Apply a log transformation to the x values and a power transformation to the y values
 plt.scatter(np.log(df["inc"]), df["lit"]**4)
 
@@ -559,7 +546,6 @@ The cell below computes $m$ and $b$ for our transformed data. We'll discuss how 
 
 ```{python}
 #| code-fold: true
-#| vscode: {languageId: python}
 # The code below fits a linear regression model. We'll discuss it at length in a future lecture
 from sklearn.linear_model import LinearRegression
 
@@ -592,7 +578,6 @@ When we plug in the values for $m$ and $b$ computed above, something interesting
 
 ```{python}
 #| code-fold: true
-#| vscode: {languageId: python}
 # Now, plug the values for m and b into the relationship between the untransformed x and y
 plt.scatter(df["inc"], df["lit"], label="Untransformed data")
 plt.plot(df["inc"], (m*np.log(df["inc"])+b)**(1/4), c="red", label="Modeled relationship")
@@ -876,3 +861,4 @@ Captions should:
 - Describe what has been graphed,
 - Draw attention to important features,
 - Describe conclusions drawn from graphs.
+
