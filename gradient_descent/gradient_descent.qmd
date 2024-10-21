@@ -46,6 +46,97 @@ from sklearn.linear_model import LinearRegression
 pd.options.mode.chained_assignment = None  # default='warn'
 ```
 
+## OLS Recap
+
+### 1. Choose a model
+Recall that when using multiple linear regression, we can generate a prediction for each of our $n$ data points:
+
+$$\hat{y} =\theta_{0} + \theta_{1}x_{1} + \theta_{2}x_{2} + ... + \theta_{p}x_{p}$$
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td><img src="images/ols_matrices_old.png" alt='ols_matrices_old' width='600'>
+      </td>
+    </tr>
+  </table>
+</div>
+
+In the previous lecture, we used p+1 features to account for the intercept, $\theta_0$.  This makes slides and notation messy.  
+Let’s redefine **p as the number of columns in our covariate matrix** and **add a column of 1s** to encode the intercept (if desired). If we choose to add a column of 1s, then $x_1$ can be a 1 for every data point.
+
+$$\hat{y} =\theta_{1}x_{1} + \theta_{2}x_{2} + ... + \theta_{p}x_{p}$$
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td><img src="images/ols_matrices_new.png" alt='ols_matrices_new' width='600'>
+      </td>
+    </tr>
+  </table>
+</div>
+
+### 2. Choose a loss function
+
+Recall that we then choose the mean squared error loss function shown below where the prediction vector $\hat{\mathbb{Y}}$ depends on $\theta$.
+$$R(\theta) = \frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2 = \frac{1}{n} (||\mathbb{Y} - \hat{\mathbb{Y}}||_2)^2$$
+
+### 3. Fit the model
+
+We can then minimize the average loss with calculus or geometry. See the previous lecture for a derivation on the Normal Equation ($\mathbb{X}^T \mathbb{X} \hat{\theta} = \mathbb{X}^T \mathbb{Y}$) using geometry. We can see what the matrices look like with our new interpretation where $\mathbb{X}$ is now an $n$ by $p$ matrix instead of an $n$ by $p+1$ matrix.
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td><img src="images/ols_solution_matrices.png" alt='ols_solution_matrices' width='400'>
+      </td>
+    </tr>
+  </table>
+</div>
+
+To summarize:
+
+|   | Model | Estimate | Unique? |
+| -- | -- | -- |  -- | 
+| Constant Model + MSE | $\hat{y} = \theta_0$| $\hat{\theta}_0 = mean(y) = \bar{y}$ | **Yes**. Any set of values has a unique mean.
+| Constant Model + MAE | $\hat{y} = \theta_0$  | $\hat{\theta}_0 = median(y)$ | **Yes**, if odd. **No**, if even. Return the average of the middle 2 values.
+| Simple Linear Regression + MSE | $\hat{y} = \theta_0 + \theta_1x$| $\hat{\theta}_0 = \bar{y} - \hat{\theta}_1\bar{x}$ $\hat{\theta}_1 = r\frac{\sigma_y}{\sigma_x}$| **Yes**. Any set of non-constant* values has a unique mean, SD, and correlation coefficient.
+| **OLS** (Linear Model + MSE) | $\mathbb{\hat{Y}} = \mathbb{X}\mathbb{\theta}$| $\hat{\theta} = (\mathbb{X}^T\mathbb{X})^{-1}\mathbb{X}^T\mathbb{Y}$  | **Yes**, if $\mathbb{X}$ is full column rank (all columns are linearly independent, # of datapoints >>> # of features).
+
+#### Uniqueness of a Solution
+
+In most settings, the number of observations ($n$) is much greater than the number of features ($p$). Note that at least one solution always exists because intuitively, we can always draw a line of best fit for a given set of data, but there may be multiple lines that are “equally good”. (Formal proof is beyond this course.) Let's now revisit the interpretation for uniqueness of a solution at the end of the last lecture, but with the new notation of $p$ instead of $p+1$ features.
+
+The Least Squares estimate $\hat{\theta}$ is **unique** if and only if $\mathbb{X}$ is **full column rank**.
+
+::: {.callout}
+Proof: 
+
+* We know the solution to the normal equation $\mathbb{X}^T\mathbb{X}\hat{\theta} = \mathbb{X}^T\mathbb{Y}$ is the least square estimate that minimizes the squared loss.
+* $\hat{\theta}$ has a **unique** solution $\iff$ the square matrix $\mathbb{X}^T\mathbb{X}$ is **invertible** $\iff$ $\mathbb{X}^T\mathbb{X}$ is full rank.
+  * The **column rank** of a square matrix is the max number of linearly independent columns it contains.
+  * An $n$ x $n$ square matrix is deemed full column rank when all of its columns are linearly independent. That is, its rank would be equal to $n$.
+  * $\mathbb{X}^T\mathbb{X}$ has shape $p \times p$, and therefore has max rank $p$. 
+* $rank(\mathbb{X}^T\mathbb{X})$ = $rank(\mathbb{X})$ (proof out of scope).
+* Therefore, $\mathbb{X}^T\mathbb{X}$ has rank $p$ $\iff$  $\mathbb{X}$ has rank $p$ $\iff \mathbb{X}$ is full column rank.
+:::
+
+Therefore, if $\mathbb{X}$ is not full column rank, we will not have unique estimates. This can happen for two major reasons.
+
+1. If our design matrix $\mathbb{X}$ is "**wide**":
+    * If n < p, then we have way more features (columns) than observations (rows).
+    * Then $rank(\mathbb{X})$ = min(n, p) < p, so $\hat{\theta}$ is not unique.
+    * Typically we have n >> p so this is less of an issue.
+
+2. If our design matrix $\mathbb{X}$ has features that are **linear combinations** of other features:
+    * By definition, rank of $\mathbb{X}$ is number of linearly independent columns in $\mathbb{X}$.
+    * Example: If “Width”, “Height”, and “Perimeter” are all columns,
+      * Perimeter = 2 * Width + 2 * Height  $\rightarrow$  $\mathbb{X}$ is not full rank.
+    * Important with one-hot encoding (to discuss later).
+
+
+Let's now explore how to use the normal equations with a real-world dataset in the next section.
+
 ## `sklearn`
 ### Implementing Derived Formulas in Code
 
