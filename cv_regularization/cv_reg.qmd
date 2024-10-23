@@ -18,7 +18,7 @@ jupyter:
       format_version: '1.0'
       jupytext_version: 1.16.1
   kernelspec:
-    display_name: Python 3 (ipykernel)
+    display_name: ds100env
     language: python
     name: python3
 ---
@@ -39,7 +39,7 @@ To answer this question, we will need to address two things: first, we need to u
 
 <center><img src="images/simple_under_overfit.png" alt='train-test-split' width='400'></center><br>
 
-From the last lecture, we learned that *increasing* model complexity *decreased* our model's training error but *increased* its  variance. This makes intuitive sense: adding more features causes our model to fit more closely to data it encountered during training, but it generalizes worse to new data that hasn't been seen before. For this reason, a low training error is not always representative of our model's underlying performance -- we need to also assess how well it performs on unseen data to ensure that it is not overfitting.
+From lecture 14, we learned that *increasing* model complexity *decreased* our model's training error but *increased* its  variance. This makes intuitive sense: adding more features causes our model to fit more closely to data it encountered during training, but it generalizes worse to new data that hasn't been seen before. For this reason, a low training error is not always representative of our model's underlying performance -- we need to also assess how well it performs on unseen data to ensure that it is not overfitting.
 
 Truly, the only way to know when our model overfits is by evaluating it on unseen data. Unfortunately, that means we need to wait for more data. This may be very expensive and time-consuming.
 
@@ -143,7 +143,7 @@ Our goal is to train a model with complexity near the orange dotted line – thi
 
 ### K-Fold Cross-Validation
 
-Introducing a validation set gave us an "extra" chance to assess model performance on another set of unseen data. We are able to finetune the model design based on its performance on this one set of validation data.
+Introducing a validation set gave us one "extra" chance to assess model performance on another set of unseen data. We are able to finetune the model design based on its performance on this *one* set of validation data.
 
 But what if, by random chance, our validation set just happened to contain many outliers? It is possible that the validation datapoints we set aside do not actually represent other unseen data that the model might encounter. Ideally, we would like to validate our model's performance on several different unseen datasets. This would give us greater confidence in our understanding of how the model behaves on new data.
 
@@ -160,7 +160,7 @@ The common term for one of these chunks is a **fold**. In the example above, we 
 In **cross-validation**, we perform validation splits for each fold in the training set. For a dataset with $K$ folds, we:
 
 1. Pick one fold to be the validation fold
-2. Fit the model to training data from every fold *other* than the validation fold
+2. Train model of data from every fold *other* than the validation fold
 3. Compute the model's error on the validation fold and record it
 4. Repeat for all $K$ folds
 
@@ -183,7 +183,7 @@ Some examples of hyperparameters in Data 100 are:
 
 To select a hyperparameter value via cross-validation, we first list out several "guesses" for what the best hyperparameter may be. For each guess, we then run cross-validation to compute the cross-validation error incurred by the model when using that choice of hyperparameter value. We then select the value of the hyperparameter that resulted in the lowest cross-validation error. 
 
-For example, we may wish to use cross-validation to decide what value we should use for $\alpha$, which controls the step size of each gradient descent update. To do so, we list out some possible guesses for the best $\alpha$, like 0.1, 1, and 10. For each possible value, we perform cross-validation to see what error the model has when we use that value of $\alpha$ to train it.
+For example, we may wish to use cross-validation to decide what value we should use for $\alpha$, which controls the step size of each gradient descent update. To do so, we list out some possible guesses for the best $\alpha$, like 0.1, 1, and 10. For each possible value, we decide to apply 3-fold cross-validation to see what error the model has when we use that value of $\alpha$ to train it.
 
 <center><img src="images/hyperparameter_tuning.png" alt='hyperparameter_tuning' width='600'></center>
 
@@ -213,7 +213,7 @@ What if, instead of fully removing particular features, we kept all features and
 
 What do we mean by a "little bit"? Consider the case where some parameter $\theta_i$ is close to or equal to 0. Then, feature $\phi_i$ barely impacts the prediction – the feature is weighted by such a small value that its presence doesn't significantly change the value of $\hat{\mathbb{Y}}$. If we restrict how large each parameter $\theta_i$ can be, we restrict how much feature $\phi_i$ contributes to the model. This has the effect of *reducing* model complexity.
 
-In **regularization**, we restrict model complexity by putting a limit on the *magnitudes* of the model parameters $\theta_i$. 
+In **regularization**, we restrict model complexity by *putting a limit* on the magnitudes of the model parameters $\theta_i$. 
 
 What do these limits look like? Suppose we specify that the sum of all absolute parameter values can be no greater than some number $Q$. In other words:
 
@@ -258,7 +258,7 @@ Consider the extreme case of when $Q$ is extremely large. In this situation, our
 Now what if $Q$ was extremely small? Most parameters are then set to (essentially) 0. 
 
 * If the model has no intercept term: $\hat{\mathbb{Y}} = (0)\phi_1 + (0)\phi_2 + \ldots = 0$.
-* If the model has an intercept term: $\hat{\mathbb{Y}} = (0)\phi_1 + (0)\phi_2 + \ldots = \theta_0$. Remember that the intercept term is excluded from the constraint - this is so we avoid the situation where we always predict 0.
+* If the model has an intercept term: $\hat{\mathbb{Y}} = \theta_0 + (0)\phi_1 + (0)\phi_2 + \ldots = \theta_0$. Remember that the intercept term is excluded from the constraint - this is so we avoid the situation where we always predict 0.
 
 Let's summarize what we have seen. 
 
@@ -290,7 +290,7 @@ Notice that we've replaced the constraint with a second term in our objective fu
 1. Keeping the model's error on the training data low, represented by the term $\frac{1}{n} \sum_{i=1}^n (y_i - (\theta_0 + \theta_1 x_{i, 1} + \theta_2 x_{i, 2} + \ldots + \theta_p x_{i, p}))^2$
 2. Keeping the magnitudes of model parameters low, represented by the term $\lambda \sum_{i=1}^p |\theta_i|$
 
-The $\lambda$ factor controls the degree of regularization. Roughly speaking, $\lambda$ is related to our $Q$ constraint from before by the rule $\lambda \approx \frac{1}{Q}$. To understand why, let's consider two extreme examples. Recall that our goal is to minimize the cost function: $\frac{1}{n}||\mathbb{Y} - \mathbb{X}\theta||_2^2 + \lambda || \theta ||_1$.
+The $\lambda$ controls the degree of regularization. Roughly speaking, $\lambda$ is related to our $Q$ constraint from before by the rule $\lambda \approx \frac{1}{Q}$. To understand why, let's consider two extreme examples. Recall that our goal is to minimize the cost function: $\frac{1}{n}||\mathbb{Y} - \mathbb{X}\theta||_2^2 + \lambda || \theta ||_1$.
 
 - Assume $\lambda \rightarrow \infty$. Then, $\lambda || \theta ||_1$ dominates the cost function. In order to neutralize the $\infty$ and minimize this term, we set $\theta_j = 0$ for all $j \ge 1$. This is a very constrained model that is mathematically equivalent to the constant model <!--, which also arises when $Q$ approaches $0$. -->
 
@@ -337,7 +337,7 @@ Recall that by applying regularization, we give our a model a "budget" for how i
 
 We can avoid this issue by **scaling** the data before regularizing. This is a process where we convert all features to the same numeric scale. A common way to scale data is to perform **standardization** such that all features have mean 0 and standard deviation 1; essentially, we replace everything with its Z-score.
 
-$$z_i = \frac{x_i - \mu}{\sigma}$$
+$$z_k = \frac{x_k - \mu_k}{\sigma_k}$$
 
 ### L2 (Ridge) Regularization
 
@@ -389,6 +389,7 @@ Our regression models are summarized below. Note the objective function is what 
 
 | Type | Model                                  | Loss | Regularization | Objective Function                                                                        | Solution                                                                                             |
 |-----------------|----------------------------------------|---------------|----------------|-------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|
-| OLS             | $\hat{\mathbb{Y}} = \mathbb{X}\theta$  | MSE           | None           | $\frac{1}{n} \|\mathbb{Y}-\mathbb{X} \theta\|^2_2$                                     | $\hat{\theta}_{OLS} = (\mathbb{X}^{\top}\mathbb{X})^{-1}\mathbb{X}^{\top}\mathbb{Y}$ if $\mathbb{X}$ is full column rank               |
+| OLS             | $\hat{\mathbb{Y}} = \mathbb{X}\theta$  | MSE           | None           | $\frac{1}{n} \|\mathbb{Y}-\mathbb{X} \theta\|^2_2$                                     | $\hat{\theta}_{OLS} = (\mathbb{X}^{\top}\mathbb{X})^{-1}\mathbb{X}^{\top}\mathbb{Y}$ if $\mathbb{X}$ is full-column rank               |
 | Ridge           | $\hat{\mathbb{Y}} = \mathbb{X} \theta$ | MSE           | L2             | $\frac{1}{n} \|\mathbb{Y}-\mathbb{X}\theta\|^2_2 + \lambda \sum_{i=1}^p \theta_i^2$   | $\hat{\theta}_{ridge} = (\mathbb{X}^{\top}\mathbb{X} + n \lambda I)^{-1}\mathbb{X}^{\top}\mathbb{Y}$ |
 | LASSO           | $\hat{\mathbb{Y}} = \mathbb{X} \theta$ | MSE           | L1             | $\frac{1}{n} \|\mathbb{Y}-\mathbb{X}\theta\|^2_2 + \lambda \sum_{i=1}^p \vert \theta_i \vert$ | No closed form solution                                                                                     |                                                                                   |
+
