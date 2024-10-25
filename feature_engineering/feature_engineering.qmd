@@ -234,15 +234,7 @@ The diagrams below represent a "bird's eye view" of a loss surface from above. N
     </tr>
   </table>
 </div>
-
-To summarize the tradeoffs of batch size: 
-
-| - | Smaller Batch Size | Larger Batch Size | 
-| -- | -- | -- | 
-| Pros | More frequent gradient updates | Leverage hardware acceleration to improve overall system performance and higher quality gradient updates | 
-| Cons | More variability in the gradient estimates | Less frequent gradient updates |
-
-The typical solution is to set batch size to ensure sufficient hardware utilization. -->
+ -->
 
 ### Batch, Mini-batch, Stochastic Gradient Descent
 The time complexity of a single gradient descent step takes only $O(nd)$ time where $n$ is the number of samples (rows) and $d$ is the number of features (columns).
@@ -251,14 +243,23 @@ The time complexity of a single gradient descent step takes only $O(nd)$ time wh
 
 Suppose we run $T$ iterations. The final complexity would then be $O(Tnd)$. Typically, $n$ is much larger than $T$ and $d$. How can we reduce the cost of this algorithm using a technique from Data 100? Do we really need to use $n$ data points? We don't! Instead, we can use stochastic gradient descent.
 
-We know that our true gradient of $\nabla_{\vec{\theta}} L (\vec{\theta^{(t)}}) = \frac{1}{n}\sum_{i=1}^{n}\nabla_{\vec{\theta}} l(y_i, f_{\vec{\theta}^{(t)}}(X_i))$ has a time complexity of $O(nd)$. Instead of using all $n$ samples to calculate the true gradient of the loss surface, let's use a sample of our data to **approximate the gradient**. Say we sample $b$ records ($s_1, \cdots, s_b$) from our $n$ datapoints. Our new (stochastic) gradient descent function will be $\nabla_{\vec{\theta}} L (\vec{\theta^{(t)}}) = \frac{1}{b}\sum_{i=1}^{b}\nabla_{\vec{\theta}} l(y_{s_i}, f_{\vec{\theta}^{(t)}}(X_{s_i}))$ and will now have a time complexity of $O(bd)$, which is much faster! For more on computational complexity, see the bonus section at the end.
+We know that our true gradient of $\nabla_{\vec{\theta}} L (\vec{\theta^{(t)}}) = \frac{1}{n}\sum_{i=1}^{n}\nabla_{\vec{\theta}} l(y_i, f_{\vec{\theta}^{(t)}}(X_i))$ has a time complexity of $O(nd)$. Instead of using all $n$ samples to calculate the true gradient of the loss surface, let's use a **probability sample** of our data to **approximate the gradient**! 
 
-But how do we decide our mini-batch size ($b$), or the number of datapoints in our sample? The original stochastic gradient descent algorithm uses $b=1$ so that only one sample is used to approximate the gradient at a time. Although we don't use such a small mini-batch size often, $b$ typically is small. When choosing $b$, there are several factors to consider: a **larger batch size** results in a **better gradient estimate**, **parallelism**, and other **systems factors**. On the other hand, a **smaller batch size** will be **faster** and have **more frequent updates**. It is up to data scientists to balance the tradeoff between batch size and time complexity.
+Say we sample $b$ records ($s_1, \cdots, s_b$) from our $n$ datapoints. Our new (stochastic) gradient descent function will be: $$\nabla_{\vec{\theta}} L (\vec{\theta}^{(t)}) \approx \frac{1}{\textcolor{red}{b}}\sum_{i=1}^{\textcolor{red}{b}}\nabla_{\vec{\theta}} l(y_{\textcolor{red}{s_i}}, f_{\vec{\theta}^{(t)}}(X_{\textcolor{red}{s_i}}))$$ and will now have a time complexity of $O(bd)$, which is much faster! For more on computational complexity, see the bonus section at the end.
 
-Stochastic gradient descent helps us approximate the true gradient of a loss surface while also reducing the time complexity and computational cost. To sample data, there are two approaches we can use:
+But how do we decide our mini-batch size ($b$), or the number of datapoints in our sample? Mini-batch size is typically **small**. 
 
-1. Shuffle the data and select batch size records at a time.
-2. Take a simple random sample for each gradient computation.
+- The original **Stochastic Gradient Descent** algorithm uses $\boldsymbol{b=1}$ so that only one sample is used to approximate the gradient at a time. 
+- When choosing $b$, there are several factors to consider: 
+  - **Larger b** $\rightarrow$ better **gradient estimates**, **parallelism**, and other **systems factors**, but also rapidly diminishing returns with more complexity
+  - **Smaller b** $\rightarrow$ **faster** and has **more frequent updates**
+  
+It is up to data scientists to balance the tradeoff between batch size and time complexity.
+
+Stochastic gradient descent helps us **estimate** the **true gradient** of the loss surface using just that sample of data, and this allows us to compute gradients quicker. To sample data, there are two sampling strategies we can use:
+
+1. **Shuffle the data** and select batch size records at a time.
+2. Take a **simple random sample** for each gradient computation.
 
 
 
@@ -271,6 +272,16 @@ Summarizing our two gradient descent techniques:
 - **(Minibatch) Stochastic gradient descent**: Stochastic gradient descent **approximates** the true gradient descent. It may not descend towards the true minimum with each update, but it's often less computationally expensive than batch gradient descent.
 
 <center><img src="images/sgd.png" alt='stochastic_grad_descent' width='300'></center>
+
+
+To summarize the tradeoffs of batch size: 
+
+|  | Smaller Batch Size | Larger Batch Size | 
+| -- | -- | -- | 
+| **Pros** | More frequent gradient updates | Leverage hardware acceleration to improve overall system performance and higher quality gradient updates | 
+| **Cons** | More variability in the gradient estimates | Less frequent gradient updates |
+
+The typical solution is to set batch size to ensure sufficient hardware utilization.
 
 ## Feature Engineering
 
