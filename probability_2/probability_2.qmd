@@ -38,6 +38,33 @@ Last time, we introduced the idea of random variables: numerical functions of a 
 
 In this lecture, we will delve more deeply into the idea of fitting a model to a sample. We'll explore how to re-express our modeling process in terms of random variables and use this new understanding to steer model complexity. 
 
+## Brief Recap
+* Let $X$ be a random variable with distribution $P(X=x)$. 
+    * $\mathbb{E}[X] = \sum_{x} x P(X=x)$
+    * $\text{Var}(X) = \mathbb{E}[(X-\mathbb{E}[X])^2] = \mathbb{E}[X^2] - (\mathbb{E}[X])^2$
+* Let $a$ and $b$ be scalar values. 
+    * $\mathbb{E}[aX+b] = aE[\mathbb{X}] + b$
+    * $\text{Var}(aX+b) = a^2 \text{Var}(X)$
+* Let $Y$ be another random variable. 
+    * $\mathbb{E}[X+Y] = \mathbb{E}[X] + \mathbb{E}[Y]$
+    * $\text{Var}(X + Y) = \text{Var}(X) + \text{Var}(Y) + 2\text{Cov}(X,Y)$
+
+Note that $\text{Cov}(X,Y)$ would equal 0 if $X$ and $Y$ are independent.
+
+There is also one more important property of expectation that we should look at. Let $X$ and $Y$ be **independent** random variables: 
+$$ \mathbb{E}[XY] = \mathbb{E}[X]\mathbb{E}[Y] $$
+
+::: {.callout-tip collapse="false"}
+## Proof
+$$\begin{align}
+   \mathbb{E}[XY] &= \sum_x\sum_y xy\ \textbf{P}(X=x, Y=y) &\text{Definition} \\
+   &= \sum_x\sum_y xy\ \textbf{P}(X=x)\textbf{P}(Y=y) &\text{Independence}\\
+   &= \sum_x x\textbf{P}(X=x) \sum_y y \textbf{P}(Y=y) &\text{Algebra}\\
+   &= \left(\sum_x x\textbf{P}(X=x)\right) \left(\sum_y y \textbf{P}(Y=y)\right) &\text{Algebra}\\
+   &= \mathbb{E}[X]\mathbb{E}[Y] &\text{Definition}
+\end{align}$$
+:::
+
 
 ## Common Random Variables
 There are several cases of random variables that appear often and have useful properties. Below are the ones we will explore further in this course. The numbers in parentheses are the parameters of a random variable, which are constants. Parameters define a random variable’s shape (i.e., distribution) and its values. For this lecture, we'll focus more heavily on the bolded random variables and their special properties, but you should familiarize yourself with all the ones listed below: 
@@ -47,7 +74,7 @@ There are several cases of random variables that appear often and have useful pr
   * AKA the “indicator” random variable.
   * Let $X$ be a Bernoulli($p$) random variable.
     * $\mathbb{E}[X] = 1 * p + 0 * (1-p) = p$
-        * $\mathbb{E}[X^2] = 1^2 * p + 0 * (1-p) = p$
+        * $\mathbb{E}[X^2] = 1^2 * p + 0^2 * (1-p) = p$
     * $\text{Var}(X) = \mathbb{E}[X^2] - (\mathbb{E}[X])^2 = p - p^2 = p(1-p)$
 * **Binomial($n$, $p$)**
   * Number of 1s in $n$ independent Bernoulli($p$) trials.
@@ -66,25 +93,31 @@ There are several cases of random variables that appear often and have useful pr
 * Normal($\mu, \sigma^2$), a.k.a Gaussian
   * $f(x) = \frac{1}{\sigma\sqrt{2\pi}} \exp\left( -\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^{\!2}\,\right)$
 
-### Example: Bernoulli Random Variable
+### Properties of Bernoulli Random Variables
 
 To get some practice with the formulas discussed so far, let's derive the expectation and variance for a Bernoulli($p$) random variable. If $X$ ~ Bernoulli($p$),
+$$\mathbb{E}[X] = 1 \cdot p + 0 \cdot (1 - p) = p$$
 
-$\mathbb{E}[X] = 1 \cdot p + 0 \cdot (1 - p) = p$
-
-To compute the variance, we will use the computational formula. We first find that:
-$\mathbb{E}[X^2] = 1^2 \cdot p + 0^2 \cdot (1 - p) = p$
+We will get an average value of p across many, many samples. To compute the variance, we will use the computational formula. We first find that:
+$$\mathbb{E}[X^2] = 1^2 \cdot p + 0^2 \cdot (1 - p) = p$$
 
 From there, let's calculate our variance: 
-$\text{Var}(X) = \mathbb{E}[X^2] - \mathbb{E}[X]^2 = p - p^2 = p(1-p)$
+$$\text{Var}(X) = \mathbb{E}[X^2] - \mathbb{E}[X]^2 = p - p^2 = p(1-p)$$
 
-### Example: Binomial Random Variable
+Looking at this equation, we can see that we get a lower var at more extreme probabilities like p = 0.1 or 0.9, and we get a higher variance when p close to 0.5.
 
-Let $Y$ ~ Binomial($n$, $p$). We can think of $Y$ as being the sum of $n$ i.i.d. Bernoulli($p$) random variables. Mathematically, this translates to 
+### Properties of Binomial Random Variables
+
+Let $Y$ ~ Binomial($n$, $p$). We can think of $Y$ as the number (i.e., count) of 1s in $n$ independent Bernoulli($p$) trials. Distribution of Y given by the binomial formula:
+
+$$ \textbf{P}(Y=y) = \binom{n}{y} p^y (1-p)^{n-y}$$
+
+We can write: 
 
 $$Y = \sum_{i=1}^n X_i$$
 
-where $X_i$ is the indicator of a success on trial $i$. 
+* $X_i$ is the indicator of a success on trial $i$. $X_i$ = 1 if trial i is a success, else 0. 
+* All $X_i$s are **i.i.d.** (independent and identically distributed) and **Bernoulli(p)**.
 
 Using linearity of expectation,
 
@@ -127,9 +160,9 @@ Note that:
 
 In Data Science, however, we often do not have access to the whole population, so we don’t know its distribution. As such, we need to collect a sample and use its distribution to estimate or infer properties of the population. In cases like these, we can take several samples of size $n$ from the population (an easy way to do this is using `df.sample(n, replace=True)`), and compute the mean of each *sample*. When sampling, we make the (big) assumption that we sample uniformly at random *with replacement* from the population; each observation in our sample is a random variable drawn i.i.d from our population distribution. Remember that our sample mean is a random variable since it depends on our randomly drawn sample! On the other hand, our population mean is simply a number (a fixed value).
 
-### Sample Mean 
+### Sample Mean Properties
 Consider an i.i.d. sample $X_1, X_2, ..., X_n$ drawn from a population with mean 𝜇 and SD 𝜎.
-We define the sample mean as $$\bar{X}_n = \frac{1}{n} \sum_{i=1}^n X_i$$
+We define the **sample mean** as $$\bar{X}_n = \frac{1}{n} \sum_{i=1}^n X_i$$
 
 The expectation of the sample mean is given by: 
 $$\begin{align} 
@@ -144,8 +177,11 @@ $$\begin{align}
     &=  \frac{1}{n^2} \left( \sum_{i=1}^n \text{Var}(X_i) \right) \\
     &=  \frac{1}{n^2} (n \sigma^2) = \frac{\sigma^2}{n}
 \end{align}$$
+
+The standard deviation is:
+$$ \text{SD}(\bar{X}_n) = \frac{\sigma}{\sqrt{n}} $$
  
-$\bar{X}_n$ is approximately normally distributed by the Central Limit Theorem (CLT).
+$\bar{X}_n$ is **normally distributed** (in the limit) by the **Central Limit Theorem** (CLT).
 
 ### Central Limit Theorem
 In [Data 8](https://inferentialthinking.com/chapters/14/4/Central_Limit_Theorem.html?) and in the previous lecture, you encountered the **Central Limit Theorem (CLT)**. 
@@ -184,7 +220,7 @@ Given this potential variance, it is also important that we consider the **avera
 The square root law ([Data 8](https://inferentialthinking.com/chapters/14/5/Variability_of_the_Sample_Mean.html#the-square-root-law)) states that if you increase the sample size by a factor, the SD of the sample mean decreases by the square root of the factor. $$\text{SD}(\bar{X_n}) = \frac{\sigma}{\sqrt{n}}$$ The sample mean is more likely to be close to the population mean if we have a larger sample size.
 :::
 
-## Prediction and Inference
+## Population vs Sample Statistics
 
 At this point in the course, we've spent a great deal of time working with models. When we first introduced the idea of modeling a few weeks ago, we did so in the context of **prediction**: using models to make *accurate predictions* about unseen data. Another reason we might build models is to better understand complex phenomena in the world around us. **Inference** is the task of using a model to infer the true underlying relationships between the feature and response variables. For example, if we are working with a set of housing data, *prediction* might ask: given the attributes of a house, how much is it worth? *Inference* might ask: how much does having a local park impact the value of a house?
 
@@ -199,9 +235,11 @@ To address our inference question, we aim to construct estimators that closely e
 * Do we get the right answer for the parameter, on average? **(Bias)** 
   $$\text{Bias}(\hat{\theta}) = E[\hat{\theta} - \theta] = E[\hat{\theta}] - \theta$$
 * How variable is the answer? **(Variance)**
-  $$Var(\hat{\theta}) = E[(\theta - E[\theta])^2] $$
+  $$Var(\hat{\theta}) = E[(\hat{\theta} - E[\hat{\theta}])^2] $$
 
-This relationship can be illustrated with an archery analogy. Imagine that the center of the target is the $\theta$ and each arrow corresponds to a separate parameter estimate $\hat{\theta}$
+If the Bias of an estimator $\hat{theta}$ is **zero**, then it is said to be an **unbiased estimator**. For example, sample mean is unbiased for the population mean.
+
+This relationship between bias and variance can be illustrated with an archery analogy. Imagine that the center of the target is the $\theta$ and each arrow corresponds to a separate parameter estimate $\hat{\theta}$
 
 
 <p align="center">
@@ -210,7 +248,7 @@ This relationship can be illustrated with an archery analogy. Imagine that the c
 
 Ideally, we want our estimator to have low bias and low variance, but how can we mathematically quantify that? See @sec-bias-variance-tradeoff for more detail.
 
-### Prediction as Estimation
+### Training and Prediction as Estimation
 
 Now that we've established the idea of an estimator, let's see how we can apply this learning to the modeling process. To do so, we'll take a moment to formalize our data collection and models in the language of random variables.
 
@@ -290,10 +328,10 @@ $$\text{model risk }=E\left[(Y-\hat{Y(x)})^2\right]$$
 
 What is the origin of the error encoded by model risk? Note that there are two types of errors:
 
-* Chance errors: happen due to randomness alone
+* **Chance errors**: happen due to randomness alone
     * Source 1 **(Observation Variance)**: randomness in new observations $Y$ due to random noise $\epsilon$
     * Source 2 **(Model Variance)**: randomness in the sample we used to train the models, as samples $X_1, X_2, \ldots, X_n, Y$ are random
-* **(Model Bias)**: non-random error due to our model being different from the true underlying function $g$
+* **Bias**: non-random error due to our model being different from the true underlying function $g$
 
 Recall the data-generating process we established earlier. There is a true underlying relationship $g$, observed data (with random noise) $Y$, and model $\hat{Y}$. 
 
@@ -301,7 +339,7 @@ Recall the data-generating process we established earlier. There is a true under
 <img src="images/errors.png" alt='errors' width='600'>
 </p>
 
-To better understand model risk, we'll zoom in on a single data point in the plot above.
+To better understand model risk, we'll zoom in on a single data point in the plot above and look at its residual.
 
 <p align="center">
 <img src="images/breakdown.png" alt='breakdown' width='600'>
