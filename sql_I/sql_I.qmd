@@ -21,7 +21,7 @@ jupyter:
       format_version: '1.0'
       jupytext_version: 1.16.1
   kernelspec:
-    display_name: Python 3 (ipykernel)
+    display_name: ds100env
     language: python
     name: python3
 ---
@@ -36,9 +36,9 @@ jupyter:
 So far in the course, we have made our way through the entire data science lifecycle: we learned how to load and explore a dataset, formulate questions, and use the tools of prediction and inference to come up with answers. For the remaining weeks of the semester, we are going to make a second pass through the lifecycle, this time with a different set of tools, ideas, and abstractions. 
 
 ## Databases
-With this goal in mind, let's go back to the very beginning of the lifecycle. We first started our work in data analysis by looking at the `pandas` library, which offered us powerful tools to manipulate tabular data stored in (primarily) CSV files. CSVs work well when analyzing relatively small datasets (less than 10GB) that don't need to be shared across many users. In research and industry, however, data scientists often need to access enormous bodies of data that cannot be easily stored in a CSV format. Collaborating with others when working with CSVs can also be tricky —— a real-world data scientist may run into problems when multiple users try to make modifications or more dire security issues arise regarding who should and should not have access to the data. 
+With this goal in mind, let's go back to the very beginning of the lifecycle. We first started our work in data analysis by looking at the `pandas` library, which offered us powerful tools to manipulate tabular data stored in (primarily) CSV files. CSVs work well when analyzing relatively small datasets (less than 10GB) that are unchanging (static) and don't need to be shared across many users. In research and industry, however, data scientists often need to access enormous bodies of data that cannot be easily stored in a CSV format. Collaborating with others when working with CSVs can also be tricky — a real-world data scientist may run into problems when multiple users try to make modifications or more dire security issues arise regarding who should and should not have access to the data. 
 
-A **database** is a large, organized collection of data. Databases are administered by **Database Management Systems (DBMS)**, which are software systems that store, manage, and facilitate access to one or more databases. Databases help mitigate many of the issues that come with using CSVs for data storage: they provide reliable storage that can survive system crashes or disk failures, are optimized to compute on data that does not fit into memory, and contain special data structures to improve performance. Using databases rather than CSVs offers further benefits from the standpoint of data management. A DBMS can apply settings that configure how data is organized, block certain data anomalies (for example, enforcing non-negative weights or ages), and determine who is allowed access to the data. It can also ensure safe concurrent operations where multiple users reading and writing to the database will not lead to fatal errors. Below, you can see the functionality of the different types of data storage and management architectures. In data science, common large-scale DBMS systems used are Google BigQuery, Amazon Redshift, Snowflake, Databricks, Microsoft SQL Server, and more. To learn more about these, consider taking [Data 101](https://www.data101.org/sp24/)!
+A **database** is a large, organized collection of data. Databases are administered by **Database Management Systems (DBMS)**, which are software systems that **store**, **manage**, and **facilitate access** to one or more databases. Databases help mitigate many of the issues that come with using CSVs for data storage: they provide reliable storage that can survive system crashes or disk failures, are optimized to compute on data that does not fit into memory, and contain special data structures to improve performance. Using databases rather than CSVs offers further benefits from the standpoint of data management. A DBMS can apply settings that configure how data is organized, block certain data anomalies (for example, enforcing non-negative weights or ages), and determine who is allowed access to the data. It can also ensure safe concurrent operations where multiple users reading and writing to the database will not lead to fatal errors. Below, you can see the functionality of the different types of data storage and management architectures. In data science, common large-scale DBMS systems used are Google BigQuery, Amazon Redshift, Snowflake, Databricks, Microsoft SQL Server, and more. To learn more about these, consider taking [Data 101](https://www.data101.org/sp24/)!
 
 <p style="text-align:center">
     <img src='images/data_storage.png' width="700px" />
@@ -50,7 +50,7 @@ As you may have guessed, we can't use our usual `pandas` methods to work with da
 
 **Structured Query Language**, or **SQL** (commonly pronounced "sequel," though this is the subject of [fierce debate](https://patorjk.com/blog/2012/01/26/pronouncing-sql-s-q-l-or-sequel/)), is a special programming language designed to communicate with databases, and it is the dominant language/technology for working with data. You may have encountered it in classes like CS 61A or Data C88C before, and you likely will encounter it in the future. It is a language of tables: all inputs and outputs are tables. Unlike Python, it is a **declarative programming language** – this means that rather than writing the exact logic needed to complete a task, a piece of SQL code "declares" what the desired final output should be and leaves the program to determine what logic should be implemented. This logic differs depending on the SQL code itself or on the system it's running on (ie. [MongoDB](https://www.mongodb.com/), [SQLite](https://www.sqlite.org/), [DuckDB](https://duckdb.org/), etc.). Most systems don’t follow the standards, and every system you work with will be a little different. 
 
-For the purposes of Data 100, we use SQLite or DuckDB. SQLite is an easy-to-use library that allows users to directly manipulate a database file or an in-memory database with a simplified version of SQL. It's commonly used to store data for small apps on mobile devices and is optimized for simplicity and speed of simple data tasks. DuckDB is an easy-to-use library that lets you directly manipulate a database file, collection of table formatted files (e.g., CSV), or in-memory `pandas` `DataFrame`s using a more complete version of SQL. It's optimized for simplicity and speed of advanced data analysis tasks and is becoming increasingly popular for data analysis tasks on large datasets.
+For the purposes of Data 100, we use **SQLite** or **DuckDB**. SQLite is an easy-to-use library that allows users to directly manipulate a database file or an in-memory database with a simplified version of SQL. It's commonly used to store data for small apps on mobile devices and is optimized for simplicity and speed of simple data tasks. DuckDB is an easy-to-use library that lets you directly manipulate a database file, collection of table formatted files (e.g., CSV), or in-memory `pandas` `DataFrame`s using a **more complete version of SQL**. It's optimized for simplicity and speed of advanced data analysis tasks and is becoming increasingly popular for data analysis tasks on large datasets.
 
 It is important to reiterate that SQL is an entirely different language from Python. However, Python *does* have special engines that allow us to run SQL code in a Jupyter notebook. While this is typically not how SQL is used outside of an educational setting, we will use this workflow to illustrate how SQL queries are constructed using the tools we've already worked with this semester. You will learn more about how to run SQL queries in Jupyter in an upcoming lab and homework.
 
@@ -60,28 +60,24 @@ To start, we'll look at a database called `example_duck.db` and connect to it us
 
 ```{python}
 #| code-fold: true
-#| vscode: {languageId: python}
 # Load the SQL Alchemy Python library and DuckDB
 import sqlalchemy
 import duckdb
 ```
 
 ```{python}
-#| vscode: {languageId: python}
 # Load %%sql cell magic
 %load_ext sql
 ```
 
 ```{python}
-#| vscode: {languageId: python}
 # Connect to the database
 %sql duckdb:///data/example_duck.db --alias duck
 ```
 
-Now that we’re connected, let’s make some queries!
+Now that we’re connected, let’s make some queries! Note that SQL statements are terminated with semicolons, and a SQL query is a SQL statement that returns data.
 
 ```{python}
-#| vscode: {languageId: python}
 %%sql
 SELECT * FROM Dragon;
 ```
@@ -98,14 +94,13 @@ Looking at the `Dragon` table above, we can see that it contains contains three 
 Now, let's look at the **schema** of our database. A schema describes the logical structure of a table. Whenever a new table is created, the creator must declare its schema.
 
 ```{python}
-#| vscode: {languageId: python}
 %%sql
 SELECT * 
 FROM sqlite_master
 WHERE type='table'
 ```
 
-The summary above displays information about the database; it contains four tables named `sqlite_sequence`, `Dragon`, `Dish`, and `Scene`. The rightmost column above lists the command that was used to construct each table. 
+The summary above displays information about the database; it contains three tables named `Dragon`, `Dish`, and `Scene`. The rightmost column above lists the command that was used to construct each table. 
 
 Let's look more closely at the command used to create the `Dragon` table (the second entry above). 
 
@@ -120,7 +115,7 @@ The statement `CREATE TABLE` is used to specify the **schema** of the table – 
 
   * `INT` (integers)
   * `FLOAT` (floating point numbers)
-  * `TEXT` (strings)
+  * `VARCHAR` (strings of text, also called `TEXT`)
   * `BLOB` (arbitrary data, such as audio/video files)
   * `DATETIME` (a date and time)
 * `Constraint`: some restriction on the data to be stored in the column. Common constraints are:
@@ -134,10 +129,10 @@ Note that different implementations of SQL (e.g., [DuckDB](https://duckdb.org/do
 Database tables (also referred to as **relations**) are structured much like `DataFrame`s in `pandas`. Each row, sometimes called a **tuple**, represents a single record in the dataset. Each column, sometimes called an **attribute** or **field**, describes some feature of the record. 
 
 ### Primary Keys
-The **primary key** is a set of column(s) that uniquely identify each record in the table. In the `Dragon` table, the `"name"` column is its primary key that *uniquely* identifies each entry in the table. Because `"name"` is the primary key of the table, no two entries in the table can have the same name – a given value of `"name"` is unique to each dragon. Primary keys are used to ensure data integrity and to optimize data access.
+The **primary key** is a set of column(s) that uniquely identify each record in the table. In the `Dragon` table, the `"name"` column is its primary key that *uniquely* identifies each entry in the table. Because `"name"` is the primary key of the table, no two entries in the table can have the same name – a given value of `"name"` is unique to each dragon. Primary keys are used to **ensure data integrity** and **to optimize data access**.
 
 ### Foreign Keys
-A foreign key is a column or set of columns that references a *primary key in another table*. A foreign key constraint ensures that a primary key exists in the referenced table. For example, let's say we have 2 tables, `student` and `assignment`, with the following schemas: 
+A **foreign key** is a column or set of columns that references a *primary key in another table*. A foreign key constraint ensures that a primary key exists in the referenced table. For example, let's say we have 2 tables, `student` and `assignment`, with the following schemas: 
 
     CREATE TABLE student (
         student_id INTEGER PRIMARY KEY,
@@ -170,7 +165,6 @@ To extract and manipulate data stored in a SQL table, we will need to familiariz
 The basic unit of a SQL query is the `SELECT` statement. `SELECT` specifies what columns we would like to extract from a given table. We use `FROM` to tell SQL the table from which we want to `SELECT` our data. 
 
 ```{python}
-#| vscode: {languageId: python}
 %%sql
 SELECT *
 FROM Dragon;
@@ -179,15 +173,14 @@ FROM Dragon;
 In SQL, `*` means "everything." The query above grabs *all* the columns in `Dragon` and displays them in the outputted table. We can also specify a specific subset of columns to be `SELECT`ed. Notice that the outputted columns appear in the order they were `SELECT`ed.
 
 ```{python}
-#| vscode: {languageId: python}
 %%sql
 SELECT cute, year
 FROM Dragon;
 ```
 
-**Every** SQL query must include both a `SELECT` and `FROM` statement. Intuitively, this makes sense —— we know that we'll want to extract some piece of information from the table; to do so, we also need to indicate what table we want to consider. 
+**Every** SQL query must include both a `SELECT` and `FROM` statement. Intuitively, this makes sense — we know that we'll want to extract some piece of information from the table; to do so, we also need to indicate what table we want to consider. 
 
-It is important to note that SQL enforces a strict "order of operations" —— SQL clauses must *always* follow the same sequence. For example, the `SELECT` statement must always precede `FROM`. This means that any SQL query will follow the same structure. 
+It is important to note that SQL enforces a strict "order of operations" — SQL clauses must *always* follow the same sequence. For example, the `SELECT` statement must always precede `FROM`. This means that any SQL query will follow the same structure. 
 
     SELECT <column list>
     FROM <table>
@@ -204,7 +197,6 @@ The `AS` keyword allows us to give a column a new name (called an **alias**) aft
     SELECT column_in_input_table AS new_name_in_output_table
 
 ```{python}
-#| vscode: {languageId: python}
 %%sql
 SELECT cute AS cuteness, year AS birth
 FROM Dragon;
@@ -214,7 +206,6 @@ FROM Dragon;
 To `SELECT` only the *unique* values in a column, we use the `DISTINCT` keyword. This will cause any any duplicate entries in a column to be removed. If we want to find only the unique years in `Dragon`, without any repeats, we would write:
 
 ```{python}
-#| vscode: {languageId: python}
 %%sql
 SELECT DISTINCT year
 FROM Dragon;
@@ -225,7 +216,6 @@ FROM Dragon;
 The `WHERE` keyword is used to select only some rows of a table, filtered on a given Boolean condition. 
 
 ```{python}
-#| vscode: {languageId: python}
 %%sql
 SELECT name, year
 FROM Dragon
@@ -235,7 +225,6 @@ WHERE cute > 0;
 We can add complexity to the `WHERE` condition using the keywords `AND`, `OR`, and `NOT`, much like we would in Python.
 
 ```{python}
-#| vscode: {languageId: python}
 %%sql
 SELECT name, year
 FROM Dragon
@@ -245,7 +234,6 @@ WHERE cute > 0 OR year > 2013;
 To spare ourselves needing to write complicated logical expressions by combining several conditions, we can also filter for entries that are `IN` a specified list of values. This is similar to the use of `in` or `.isin` in Python.
 
 ```{python}
-#| vscode: {languageId: python}
 %%sql
 SELECT name, year
 FROM Dragon
@@ -266,7 +254,6 @@ to select the column `"birth weight"` from the `patient` table and only select r
 You may have noticed earlier that our table actually has a missing value. In SQL, missing data is given the special value `NULL`. `NULL` behaves in a fundamentally different way to other data types. We can't use the typical operators (=, >, and <) on `NULL` values (in fact, `NULL == NULL` returns `False`!). Instead, we check to see if a value `IS` or `IS NOT` `NULL`.
 
 ```{python}
-#| vscode: {languageId: python}
 %%sql
 SELECT name, cute
 FROM Dragon
@@ -279,7 +266,6 @@ WHERE cute IS NOT NULL;
 What if we want the output table to appear in a certain order? The `ORDER BY` keyword behaves similarly to `.sort_values()` in `pandas`. 
 
 ```{python}
-#| vscode: {languageId: python}
 %%sql
 SELECT *
 FROM Dragon
@@ -289,7 +275,6 @@ ORDER BY cute;
 By default, `ORDER BY` will display results in ascending order (`ASC`) with the lowest values at the top of the table. To sort in descending order, we use the `DESC` keyword after specifying the column to be used for ordering.
 
 ```{python}
-#| vscode: {languageId: python}
 %%sql
 SELECT *
 FROM Dragon
@@ -299,7 +284,6 @@ ORDER BY cute DESC;
 We can also tell SQL to `ORDER BY` two columns at once. This will sort the table by the first listed column, then use the values in the second listed column to break any ties.
 
 ```{python}
-#| vscode: {languageId: python}
 %%sql
 SELECT *
 FROM Dragon
@@ -312,7 +296,6 @@ Note that in this example, `year` is sorted in ascending order and `cute` in des
 In many instances, we are only concerned with a certain number of rows in the output table (for example, wanting to find the first two dragons in the table). The `LIMIT` keyword restricts the output to a specified number of rows. It serves a function similar to that of `.head()` in `pandas`.
 
 ```{python}
-#| vscode: {languageId: python}
 %%sql
 SELECT *
 FROM Dragon
@@ -322,7 +305,6 @@ LIMIT 2;
 The `OFFSET` keyword indicates the index at which `LIMIT` should start. In other words, we can use `OFFSET` to shift where the `LIMIT`ing begins by a specified number of rows. For example, we might care about the dragons that are at positions 2 and 3 in the table. 
 
 ```{python}
-#| vscode: {languageId: python}
 %%sql
 SELECT *
 FROM Dragon
@@ -351,4 +333,5 @@ Any clauses that we include must follow a strict ordering within the query:
     [LIMIT <number of rows>]
     [OFFSET <number of rows>]
     
-Here, any clause contained in square brackets `[ ]` is optional —— we only need to use the keyword if it is relevant to the table operation we want to perform. Also note that by convention, we use all caps for keywords in SQL statements and use newlines to make code more readable.
+Here, any clause contained in square brackets `[ ]` is optional —— we only need to use the keyword if it is relevant to the table operation we want to perform. Also note that by convention, we use **all caps** for keywords in SQL statements and use **newlines** to make code more readable.
+
