@@ -21,7 +21,7 @@ jupyter:
       format_version: '1.0'
       jupytext_version: 1.16.1
   kernelspec:
-    display_name: Python 3 (ipykernel)
+    display_name: ds100env
     language: python
     name: python3
 ---
@@ -46,27 +46,46 @@ import duckdb
 ```
 
 ```{python}
-#| vscode: {languageId: python}
 # Load %%sql cell magic
 %load_ext sql
 ```
 
 ```{python}
-#| vscode: {languageId: python}
 # Connect to the database
 %sql duckdb:///data/basic_examples.db --alias basic
+```
+
+## Finish Basic Queries
+See the [SQL I course note](https://ds100.org/course-notes/sql_I/sql_I.html) for all of the basic queries that we looked at so far, including `SELECT`ing, applying `WHERE` conditions, and sorting or restricting the output of tables. Let's look at one more basic query before we go to more advanced queries.
+
+### Sampling the Dataset
+We can use `RANDOM` or `SAMPLE` to get a sample of the dataset. The `RANDOM` keyword randomizes the entire table (reordering rows randomly). In the example below, we randomize and returns the first two rows as requested.
+
+```{python}
+%%sql
+SELECT * 
+FROM Dragon
+ORDER BY RANDOM()
+LIMIT 2;
+```
+
+The `SAMPLE` keyword instead uses a seed to randomly draw samples from the table, and it's more efficient than ordering the entire table using `RANDOM`. In the example below, we randomly draw two samples from the table, and the `REPEATABLE` keyword is used here as a seed so that the same rows are drawn each time we run this.
+
+```{python}
+%%sql
+SELECT *
+FROM Dragon USING SAMPLE reservoir(2 ROWS) REPEATABLE (100);
 ```
 
 ## Aggregating with `GROUP BY`
 
 At this point, we've seen that SQL offers much of the same functionality that was given to us by `pandas`. We can extract data from a table, filter it, and reorder it to suit our needs.
 
-In `pandas`, much of our analysis work relied heavily on being able to use `.groupby()` to aggregate across the rows of our dataset. SQL's answer to this task is the (very conveniently named) `GROUP BY` clause. While the outputs of `GROUP BY` are similar to those of `.groupby()` —— in both cases, we obtain an output table where some column has been used for grouping —— the syntax and logic used to group data in SQL are fairly different to the `pandas` implementation.
+In `pandas`, much of our analysis work relied heavily on being able to use `.groupby()` to aggregate across the rows of our dataset. SQL's answer to this task is the (very conveniently named) `GROUP BY` clause. While the outputs of `GROUP BY` are similar to those of `.groupby()` — in both cases, we obtain an output table where some column has been used for grouping — the syntax and logic used to group data in SQL are fairly different to the `pandas` implementation.
 
 To illustrate `GROUP BY`, we will consider the `Dish` table from our database.
 
 ```{python}
-#| vscode: {languageId: python}
 %%sql
 SELECT * 
 FROM Dish;
@@ -75,7 +94,6 @@ FROM Dish;
 Notice that there are multiple dishes of the same `type`. What if we wanted to find the total costs of dishes of a certain `type`? To accomplish this, we would write the following code.
 
 ```{python}
-#| vscode: {languageId: python}
 %%sql
 SELECT type, SUM(cost)
 FROM Dish
@@ -84,7 +102,7 @@ GROUP BY type;
 
 What is going on here? The statement `GROUP BY type` tells SQL to group the data based on the value contained in the `type` column (whether a record is an appetizer, entree, or dessert). `SUM(cost)` sums up the costs of dishes in each `type` and displays the result in the output table.
 
-You may be wondering: why does `SUM(cost)` come before the command to `GROUP BY type`? Don't we need to form groups before we can count the number of entries in each? Remember that SQL is a *declarative* programming language —— a SQL programmer simply states what end result they would like to see, and leaves the task of figuring out *how* to obtain this result to SQL itself. This means that SQL queries sometimes don't follow what a reader sees as a "logical" sequence of thought. Instead, SQL requires that we follow its set order of operations when constructing queries. So long as we follow this order, SQL will handle the underlying logic.
+You may be wondering: why does `SUM(cost)` come before the command to `GROUP BY type`? Don't we need to form groups before we can count the number of entries in each? Remember that SQL is a *declarative* programming language — a SQL programmer simply states what end result they would like to see, and leaves the task of figuring out *how* to obtain this result to SQL itself. This means that SQL queries sometimes don't follow what a reader sees as a "logical" sequence of thought. Instead, SQL requires that we follow its set order of operations when constructing queries. So long as we follow this order, SQL will handle the underlying logic.
 
 In practical terms: our goal with this query was to output the total `cost`s of each `type`. To communicate this to SQL, we say that we want to `SELECT` the `SUM`med `cost` values for each `type` group. 
 
@@ -99,7 +117,6 @@ There are many aggregation functions that can be used to aggregate the data cont
 We can easily compute multiple aggregations all at once (a task that was very tricky in `pandas`).
 
 ```{python}
-#| vscode: {languageId: python}
 %%sql
 SELECT type, SUM(cost), MIN(cost), MAX(name)
 FROM Dish
@@ -111,7 +128,6 @@ To count the number of rows associated with each group, we use the `COUNT` keywo
 Recall the `Dragon` table from the previous lecture:
 
 ```{python}
-#| vscode: {languageId: python}
 %%sql
 SELECT * FROM Dragon;
 ```
@@ -119,7 +135,6 @@ SELECT * FROM Dragon;
 Notice that `COUNT(*)` and `COUNT(cute)` result in different outputs.
 
 ```{python}
-#| vscode: {languageId: python}
 %%sql
 SELECT year, COUNT(*)
 FROM Dragon
@@ -127,7 +142,6 @@ GROUP BY year;
 ```
 
 ```{python}
-#| vscode: {languageId: python}
 %%sql
 SELECT year, COUNT(cute)
 FROM Dragon
@@ -153,7 +167,6 @@ Now, what if we only want groups that meet a certain condition? `HAVING` filters
 Let's take a look at the `Dish` table to see how we can use `HAVING`. Say we want to group dishes with a cost greater than 4 by `type` and only keep groups where the max cost is less than 10.
 
 ```{python}
-#| vscode: {languageId: python}
 %%sql
 SELECT type, COUNT(*)
 FROM Dish
@@ -171,11 +184,12 @@ With this definition of `GROUP BY` and `HAVING` in hand, let's update our SQL or
     FROM <table>
     [WHERE <predicate>]
     [GROUP BY <column list>]
+    [HAVING <predicate>]
     [ORDER BY <column list>]
     [LIMIT <number of rows>]
     [OFFSET <number of rows>];
 
-Note that we can use the `AS` keyword to rename columns during the selection process and that column expressions may include aggregation functions (`MAX`, `MIN`, etc.).
+Note that we can use the `AS` keyword to rename columns during the selection process and that column expressions may include aggregation functions (`MAX`, `MIN`, etc.). `WHERE` is for rows, `HAVING` is for groups, and `WHERE` precedes `HAVING`.
 
 ## EDA in SQL
 In the last lecture, we mostly worked under the assumption that our data had already been cleaned. However, as we saw in our first pass through the data science lifecycle, we're very unlikely to be given data that is free of formatting issues. With this in mind, we'll want to learn how to clean and transform data in SQL. 
@@ -190,7 +204,7 @@ We can, however, still perform simple data cleaning and re-structuring using SQL
 Let's load in the `imdb_duck` database.
 
 ```{python}
-#| vscode: {languageId: python}
+#| code-fold: true
 import os
 os.environ["TQDM_DISABLE"] = "1"
 if os.path.exists("/home/jovyan/shared/sql/imdb_duck.db"):
@@ -206,7 +220,6 @@ else:
 ```
 
 ```{python}
-#| vscode: {languageId: python}
 from sqlalchemy import create_engine
 imdb_engine = create_engine(imdbpath, connect_args={'read_only': True})
 %sql imdb_engine --alias imdb
@@ -215,7 +228,6 @@ imdb_engine = create_engine(imdbpath, connect_args={'read_only': True})
 Since we'll be working with the `Title` table, let's take a quick look at what it contains. 
 
 ```{python}
-#| vscode: {languageId: python}
 %%sql imdb 
     
 SELECT *
@@ -231,7 +243,6 @@ One common task we encountered in our first look at EDA was needing to match str
 In SQL, we use the `LIKE` operator to (you guessed it) look for strings that are *like* a given string pattern. 
 
 ```{python}
-#| vscode: {languageId: python}
 %%sql
 SELECT titleType, primaryTitle
 FROM Title
@@ -241,7 +252,6 @@ WHERE primaryTitle LIKE 'Star Wars: Episode I - The Phantom Menace'
 What if we wanted to find *all* Star Wars movies? `%` is the wildcard operator, it means "look for any character, any number of times". This makes it helpful for identifying strings that are similar to our desired pattern, even when we don't know the full text of what we aim to extract.
 
 ```{python}
-#| vscode: {languageId: python}
 %%sql
 SELECT titleType, primaryTitle
 FROM Title
@@ -252,11 +262,10 @@ LIMIT 10;
 Alternatively, we can use RegEx! DuckDB and most real DBMSs allow for this. Note that here, we have to use the `SIMILAR TO` operater rather than `LIKE`.
 
 ```{python}
-#| vscode: {languageId: python}
 %%sql
 SELECT titleType, primaryTitle
 FROM Title
-WHERE primaryTitle SIMILAR TO '.*Star Wars*.'
+WHERE primaryTitle SIMILAR TO '.*Star Wars.*'
 LIMIT 10;
 ```
 
@@ -265,7 +274,6 @@ LIMIT 10;
 A common data cleaning task is converting data to the correct variable type. The `CAST` keyword is used to generate a new output column. Each entry in this output column is the result of converting the data in an existing column to a new data type. For example, we may wish to convert numeric data stored as a string to an integer.
 
 ```{python}
-#| vscode: {languageId: python}
 %%sql
 SELECT primaryTitle, CAST(runtimeMinutes AS INT)
 FROM Title;
@@ -276,7 +284,6 @@ We use `CAST` when `SELECT`ing colunns for our output table. In the example abov
 SQL will automatically name a new column according to the command used to `SELECT` it, which can lead to unwieldy column names. We can rename the `CAST`ed column using the `AS` keyword.
 
 ```{python}
-#| vscode: {languageId: python}
 %%sql
 SELECT primaryTitle AS title, CAST(runtimeMinutes AS INT) AS minutes, CAST(startYear AS INT) AS year
 FROM Title
@@ -300,7 +307,6 @@ Scanning through the skeleton code above, you can see that the logic is similar 
 Let's see this in action. In the example below, we give the new column created by the `CASE` statement the name `movie_age`.
 
 ```{python}
-#| vscode: {languageId: python}
 %%sql
 /* If a movie was filmed before 1950, it is "old"
 Otherwise, if a movie was filmed before 2000, it is "mid-aged"
@@ -316,9 +322,9 @@ FROM Title;
 
 ## `JOIN`ing Tables
 
-At this point, we're well-versed in using SQL as a tool to clean, manipulate, and transform data in a table. Notice that this sentence referred to one *table*, specifically. What happens if the data we need is distributed across multiple tables? This is an important consideration when using SQL —— recall that we first introduced SQL as a language to query from databases. Databases often store data in a multidimensional structure. In other words, information is stored across several tables, with each table containing a small subset of all the data housed by the database. 
+At this point, we're well-versed in using SQL as a tool to clean, manipulate, and transform data in a table. Notice that this sentence referred to one *table*, specifically. What happens if the data we need is distributed across multiple tables? This is an important consideration when using SQL — recall that we first introduced SQL as a language to query from databases. Databases often store data in a multidimensional structure. In other words, information is stored across several tables, with each table containing a small subset of all the data housed by the database. 
 
-A common way of organizing a database is by using a **star schema**. A star schema is composed of two types of tables. A **fact table** is the central table of the database —— it contains the information needed to link entries across several **dimension tables**, which contain more detailed information about the data. 
+A common way of organizing a database is by using a **star schema**. A star schema is composed of two types of tables. A **fact table** is the central table of the database — it contains the information needed to link entries across several **dimension tables**, which contain more detailed information about the data. 
 
 Say we were working with a database about boba offerings in Berkeley. The dimension tables of the database might contain information about tea varieties and boba toppings. The fact table would be used to link this information across the various dimension tables.
 
@@ -364,13 +370,13 @@ In a **cross join**, *all* possible combinations of rows appear in the output ta
 
 Conceptually, we can interpret an inner join as a cross join, followed by removing all rows that do not share a matching key. Notice that the output of the inner join above contains all rows of the cross join example that contain a single color across the entire row.
 
-In a **left outer join**, *all* rows in the left table are kept in the output table. If a row in the right table shares a match with the left table, this row will be kept; otherwise, the rows in the right table are omitted from the output. We can fill in any missing values with `NULL`.
+In a **left outer join** (or just **left join**), *all* rows in the left table are kept in the output table. If a row in the right table shares a match with the left table, this row will be kept; otherwise, the rows in the right table are omitted from the output. We can fill in any missing values with `NULL`. Using `LEFT OUTER JOIN` or `LEFT JOIN` would achieve the same result.
 
 <div style="text-align: center;">
 <img src="images/left.png" alt='left' width='800'>
 </div> 
 
-A **right outer join** keeps all rows in the right table. Rows in the left table are only kept if they share a match in the right table. Again, we can fill in any missing values with `NULL`. 
+A **right outer join** (or just **right join**) keeps all rows in the right table. Rows in the left table are only kept if they share a match in the right table. Again, we can fill in any missing values with `NULL`. Using `RIGHT OUTER JOIN` or `RIGHT JOIN` would achieve the same result.
 
 <div style="text-align: center;">
 <img src="images/right.png" alt='right' width='800'>
@@ -382,7 +388,7 @@ In a **full outer join**, all rows that have a match between the two tables are 
 <img src="images/full.png" alt='full' width='800'>
 </div> 
 
-We have kept the same output achieved using an inner join, with the addition of partially null rows for entries in `s` and `t` that had no match in the second table. 
+Using `FULL OUTER JOIN` or `FULL JOIN` would achieve the same result. We have kept the same output achieved using an inner join, with the addition of partially null rows for entries in `s` and `t` that had no match in the second table. 
 
 ### Aliasing in `JOIN`s
 
@@ -391,9 +397,7 @@ When joining tables, we often create aliases for table names (similarly to what 
 Let's say we want to determine the average rating of various movies. We'll need to `JOIN` the `Title` and `Rating` tables and can create aliases for both tables.
 
 ```{python}
-#| vscode: {languageId: python}
 %%sql
-
 SELECT primaryTitle, averageRating
 FROM Title AS T INNER JOIN Rating AS R
 ON T.tconst = R.tconst;
@@ -402,9 +406,7 @@ ON T.tconst = R.tconst;
 Note that the `AS` is actually optional! We can create aliases for our tables even without it, but we usually include it for clarity.
 
 ```{python}
-#| vscode: {languageId: python}
 %%sql
-
 SELECT primaryTitle, averageRating
 FROM Title T INNER JOIN Rating R
 ON T.tconst = R.tconst;
@@ -429,7 +431,6 @@ For more sophisticated data problems, the queries can become very complex. Commo
 Let's say we want to identify the top 10 action movies that are highly rated (with an average rating greater than 7) and popular (having more than 5000 votes), along with the primary actors who are the most popular. We can use CTEs to break this query down into separate problems. Initially, we can filter to find good action movies and prolific actors separately. This way, in our final join, we only need to change the order.
 
 ```{python}
-#| vscode: {languageId: python}
 %%sql
 WITH 
 good_action_movies AS (
@@ -449,3 +450,4 @@ WHERE p.tconst = m.tconst AND p.nconst = a.nconst
 ORDER BY rating DESC, numRoles DESC
 LIMIT 10;
 ```
+
