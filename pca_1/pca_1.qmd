@@ -18,7 +18,7 @@ jupyter:
       format_version: '1.0'
       jupytext_version: 1.16.1
   kernelspec:
-    display_name: Python 3 (ipykernel)
+    display_name: ds100env
     language: python
     name: python3
 ---
@@ -31,7 +31,7 @@ jupyter:
 
 So far in this course, we've focused on **supervised learning** techniques that create a function to map inputs (features) to labelled outputs. Regression and classification are two main examples, where the output value of regression is *quantitative* while the output value of classification is *categorical*. 
 
-Today, we'll introduce an **unsupervised learning** technique called PCA. Unlike supervised learning, unsupervised learning is applied to *unlabeled* data. Because we have features but no labels, we aim to identify patterns in those features. 
+Today, we'll introduce an **unsupervised learning** technique called PCA. Unlike supervised learning, unsupervised learning is applied to *unlabeled* data. Because we have features but no labels, we aim to identify patterns in those features. Principal Component Analysis (PCA) is a linear technique for dimensionality reduction, and PCA relies on a linear algebra algorithm called Singular Value Decomposition, which we will discuss more in the next lecture.
 
 ## Visualization (Revisited)
 
@@ -39,7 +39,6 @@ Visualization can help us identify clusters or patterns in our dataset, and it c
 
 ```{python}
 #| code-fold: true
-#| vscode: {languageId: python}
 import pandas as pd
 import numpy as np
 import scipy as sp
@@ -49,7 +48,6 @@ import seaborn as sns
 
 ```{python}
 #| code-fold: true
-#| vscode: {languageId: python}
 mpg = sns.load_dataset("mpg").dropna()
 mpg.head()
 ```
@@ -58,7 +56,6 @@ We can plot one feature as a histogram to see it's distribution. Since we only p
 
 ```{python}
 #| code-fold: true
-#| vscode: {languageId: python}
 px.histogram(mpg, x="displacement")
 ```
 
@@ -66,7 +63,6 @@ We can also visualize two features (2-dimensional scatter plot):
 
 ```{python}
 #| code-fold: true
-#| vscode: {languageId: python}
 px.scatter(mpg, x="displacement", y="horsepower")
 ```
 
@@ -74,7 +70,6 @@ Three features (3-dimensional scatter plot):
 
 ```{python}
 #| code-fold: true
-#| vscode: {languageId: python}
 fig = px.scatter_3d(mpg, x="displacement", y="horsepower", z="weight",
                     width=800, height=800)
 fig.update_traces(marker=dict(size=3))
@@ -84,7 +79,6 @@ We can even push to 4 features using a 3D scatter plot and a colorbar:
 
 ```{python}
 #| code-fold: true
-#| vscode: {languageId: python}
 fig = px.scatter_3d(mpg, x="displacement", 
                     y="horsepower", 
                     z="weight", 
@@ -98,7 +92,6 @@ Visualizing 5 features is also possible if we make the scatter dots unique to th
 
 ```{python}
 #| code-fold: true
-#| vscode: {languageId: python}
 fig = px.scatter_3d(mpg, x="displacement", 
                     y="horsepower", 
                     z="weight", 
@@ -111,7 +104,7 @@ fig = px.scatter_3d(mpg, x="displacement",
 fig.update_layout(coloraxis_showscale=False)
 ```
 
-However, adding more features to our visualization can make our plot look messy and uninformative, and it can also be near impossible if we have a large number of features. The problem is that many datasets come with more than 5 features —— hundreds, even. Is it still possible to visualize all those features? 
+However, adding more features to our visualization can make our plot look messy and uninformative, and it can also be near impossible if we have a large number of features. The problem is that many datasets come with more than 5 features — hundreds, even. Is it still possible to visualize all those features? 
 
 ## Dimensionality
 Suppose we have a dataset of:
@@ -121,8 +114,8 @@ Suppose we have a dataset of:
 
 Let's "rename" this in terms of linear algebra so that we can be more clear with our wording. Using linear algebra, we can view our matrix as: 
 
-- $N$ row vectors in a $d$-Dimensional space, OR
-- $d$ column vectors in an $N$-Dimensions space
+- $N$ **points/row vectors** in a $d$-Dimensional space, OR
+- $d$ column vectors in an $N$-Dimensional space
 
 The **intrinsic dimension** of a dataset is the *minimal set of dimensions* needed to approximately represent the data. In linear algebra terms, it is the **dimension of the column space** of a matrix, or the number of linearly independent columns in a matrix; this is equivalently called the **rank** of a matrix. 
 
@@ -145,7 +138,7 @@ What happens when there are outliers? Below, we've added one outlier point to th
 
 <center><img src = "images/dataset3_outlier.png" width="400vw"></center>
 
-**Dimensionality reduction** is generally an **approximation of the original data** that's achieved by **projecting** the data onto a desired dimension. In the example below, our original datapoints (blue dots) are 2-dimensional. We have a few choices if we want to project them down to 1-dimension: project them onto the $x$-axis (left), project them onto the $y$-axis (middle), or project them to a line $mx + b$ (right). The resulting datapoints after the projection is shown in red. Which projection do you think is better? How can we calculate that? 
+**Dimensionality reduction** is generally an **approximation of the original data** that's achieved through **matrix decomposition** by **projecting** the data onto a desired dimension. In the example below, our original datapoints (blue dots) are 2-dimensional. We have a few choices if we want to project them down to 1-dimension: project them onto the $x$-axis (left), project them onto the $y$-axis (middle), or project them to a line $mx + b$ (right). The resulting datapoints after the projection is shown in red. Which projection do you think is better? How can we calculate that? 
 
 <center><img src = "images/diff_reductions.png" width="800vw"></center>
 <br>
@@ -154,7 +147,7 @@ In general, we want the projection which is the best approximation for the origi
 
 ## Matrix Decomposition (Factorization)
 
-One linear technique for dimensionality reduction is matrix decomposition, which is closely tied to matrix multiplication. In this section, we will decompose our data matrix $X$ into a lower-dimensional matrix $Z$ that approximately recovers the original data when multiplied by $W$.
+One linear technique for dimensionality reduction is **matrix decomposition**, which is closely tied to **matrix multiplication**. In this section, we will decompose our data matrix $X$ into a lower-dimensional matrix $Z$ that *approximately recovers* the original data when multiplied by $W$.
 
 <center><img src = "images/factorization.png" width="500vw"></center>
 
@@ -162,8 +155,8 @@ First, consider the matrix multiplication example below:
 
 <center><img src = "images/matmul.png" width="700vw"></center>
 
-* For table 1, each row of the fruits matrix represents one bowl of fruit; for example, the first bowl/row has 2 apples, 2 lemons, and 2 melons.
-* For table 2, each column of the dollars matrix represents the cost of fruit at a store; for example, the first store/column charges 2 dollars for an apple, 1 dollar for a lemon, and 4 dollars for a melon.
+* For Table 1, each row of the fruits matrix represents one bowl of fruit; for example, the first bowl/row has 2 apples, 2 lemons, and 2 melons.
+* For Table 2, each column of the dollars matrix represents the cost of fruit at a store; for example, the first store/column charges 2 dollars for an apple, 1 dollar for a lemon, and 4 dollars for a melon.
 * The output is the cost of each bowl at each store.
 
 ::: {.callout-tip}
@@ -176,30 +169,33 @@ In general, there are two ways to interpret matrix multiplication:
 We will use the second interpretation to link matrix multiplication with matrix decomposition, where we receive a lower dimensional representation of data along with a transformation matrix.
 :::
 
-**Matrix decomposition** (a.k.a **matrix factorization**) is the opposite of matrix multiplication. Instead of multiplying two matrices, we want to *decompose* a single matrix into 2 separate matrices. Just like with real numbers, there are infinite ways to decompose a matrix into a product of two matrices. For example, $9.9$ can be decomposed as $1.1 * 9$, $3.3 * 3.3$, $1 * 9.9$, etc. Additionally, the sizes of the 2 decomposed matrices can vary drastically. In the example below, the first factorization (top) multiplies a $3x2$ matrix by a $2x3$ matrix while the second factorization (bottom) multiplies a $3x3$ matrix by a $3x3$ matrix; both result in the original matrix on the right.
+**Matrix decomposition** (a.k.a **matrix factorization**) is the opposite of matrix multiplication. Instead of multiplying two matrices, we want to *decompose* a single matrix into 2 separate matrices. Just like with real numbers, there are infinite ways to decompose a matrix into a product of two matrices. For example, $9.9$ can be decomposed as $1.1 * 9$, $3.3 * 3.3$, $1 * 9.9$, etc. Additionally, the sizes of the 2 decomposed matrices can vary drastically. In the example below, the first factorization (top) multiplies a $3\times2$ matrix by a $2\times3$ matrix while the second factorization (bottom) multiplies a $3\times3$ matrix by a $3\times3$ matrix; both result in the original matrix on the right.
 
 <center><img src = "images/matrix_decomp.png" width="550vw"></center>
 <br> 
 
-We can even expand the $3x3$ matrices to $3x4$ and $4x3$ (shown below as the factorization on top), but this defeats the point of dimensionality reduction since we're adding more "useless" dimensions. On the flip side, we also can't reduce the dimension to $3x1$ and $1x3$ (shown below as the factorization on the bottom); since the rank of the original matrix is greater than 1, this decomposition will not result in the original matrix. 
+We can even expand the $3\times3$ matrices to $3\times4$ and $4\times3$ (shown below as the factorization on top), but this defeats the point of dimensionality reduction since we're adding more "useless" dimensions. On the flip side, we also can't reduce the dimension to $3\times1$ and $1\times3$ (shown below as the factorization on the bottom); since the rank of the original matrix is greater than 1, this decomposition will not result in the original matrix. 
 
 <center><img src = "images/factorization_constraints.png" width="550vw"></center>
 <br>
-In practice, we often work with datasets containing many features, so we usually want to construct decompositions where the dimensionality is below the rank of the original matrix. While this does not recover the data exactly, we can still provide *approximate reconstructions* of the matrix.
+
+In practice, we often work with datasets containing many features, so we usually want to **construct decompositions where the dimensionality is below the rank of the original matrix**. While this does not recover the data exactly, we can still provide **approximate reconstructions** of the matrix.
 
 In the next section, we will discuss a method to automatically and approximately factorize data. This avoids redundant features and makes computation easier because we can train on less data. Since some approximations are better than others, we will also discuss how the method helps us capture a lot of information in a low number of dimensions.
 
 ## Principal Component Analysis (PCA) 
 
-In PCA, our goal is to transform observations from high-dimensional data down to low dimensions (often 2, as most visualizations are 2D) through linear transformations. In other words, we want to find a linear transformation that creates a low-dimension representation that captures as much of the original data’s *total variance* as possible.
+In PCA, our goal is to transform observations from high-dimensional data down to **low dimensions** (often 2, as most visualizations are 2D) through linear transformations. In other words, we want to find a linear transformation that creates a low-dimension representation that captures as much of the original data’s **variability** as possible.
 
-<center><img src = "images/PCA_1.png" width="600vw"></center>
+<center><img src = "images/PCA_1.png" width="600vw" alt="PCA_1"></center>
+
+Each column of the transformation matrix is a **prinicipal component** that describes the basic directions of the data when represented in lower-dimensional space. The columns of the new lower-dimension representation are called the **latent factors**, and we often work with these to represent and visualize the data. We'll discuss more about these two terms in a bit.
 
 We often perform PCA during the Exploratory Data Analysis (EDA) stage of our data science lifecycle when we don't know what model to use. It helps us with:
 
-* Visually identifying clusters of similar observations in high dimensions.
-* Removing irrelevant dimensions if we suspect that the dataset is inherently low rank. For example, if the columns are collinear, there are many attributes, but only a few mostly determine the rest through linear associations.
-* Creating a transformed dataset of decorrelated features.
+* **Visually identifying clusters** of similar observations in high dimensions.
+* Removing irrelevant dimensions if we suspect that the **dataset is inherently low rank**. For example, if the columns are collinear, there are many attributes, but only a few mostly determine the rest through linear associations.
+* Creating a transformed dataset of **decorrelated features**.
 
 <center><img src = "images/pca_example.png" width="550vw"></center>
 
@@ -208,89 +204,94 @@ There are two equivalent ways of framing PCA:
 1. Finding directions of **maximum variability** in the data.
 2. Finding the low dimensional (rank) matrix factorization that **best approximates the data**.
 
-To execute the first approach of **variance maximization** framing (more common), we can find the variances of each attribute with `np.var` and then keep the $k$ attributes with the highest variance. However, this approach limits us to work with attributes individually; it cannot resolve collinearity, and we cannot combine features. 
+To execute the first approach of **variance maximization** framing (more common), we can find the variances of each attribute with `np.var` and then keep the $k$ attributes with the highest variance. For example, if we are working with data that has the features width, length, area, and perimeter, we can compute the total variance as the sum of the variance in each column. The total variance would be 402.56, and we want to find a representation which captures as much of the original data’s **total variance** as possible. Here, we choose area and perimeter which captures 389.52 of the original 402.56.
 
-The second approach uses PCA to construct **principal components** with the most variance in the data (even higher than the first approach) using **linear combinations of features**. We'll describe the procedure in the next section. 
+<center><img src = "images/total_variance_1.png" width="550vw"></center>
+
+However, this approach limits us to work with attributes individually; it cannot resolve collinearity, and we cannot combine features. The second approach uses PCA to construct **latent factors** with the most variance in the data (even higher than the first approach) using **linear combinations of features**.
+
+<center><img src = "images/total_variance_2.png" width="500vw"></center>  
+<br>
+
+We'll describe the procedure for this second approach in the next section. 
 
 ### PCA Procedure (Overview)
 
 To perform PCA on a matrix:
 
-1. **Center** the data matrix by subtracting the mean of each attribute column.
+1. **Center the data matrix** by subtracting the mean of each attribute column.
 2. To find the $i$-th **principal component**, $v_i$:
     1. $v$ is a **unit vector** that linearly combines the attributes.
     2. $v$ gives a one-dimensional projection of the data.
     3. $v$ is chosen to **maximize the variance** along the projection onto $v$. This is equivalent to **minimizing the sum of squared distances** between each point and its projection onto $v$.
     4. Choose $v$ such that it is orthogonal to all previous principal components.
 
-The $k$ principal components capture the most variance of any $k$-dimensional reduction of the data matrix.
+The $k$ principal components capture the **most variance** of any $k$-dimensional reduction of the data matrix. In the example below from [Stack Exchange](https://stats.stackexchange.com/questions/2691/making-sense-of-principal-component-analysis-eigenvectors-eigenvalues/140579#140579), maximizing variance means **spreading out the red dots**, and minimizing error (the projections) means **making red lines short**.
 
-In practice, however, we don’t carry out the procedures in step 2 because they take too long to compute. Instead, we use singular value decomposition (SVD) to find all principal components efficiently.
+<center><img src = "images/pc_rotation.gif" width="550vw"></center>  
 
 ### Deriving PCA as Error Minimization
 
-In this section, we will derive PCA keeping the following goal in mind: minimize the reconstruction loss for our matrix factorization model. You are not expected to be able to be able to redo this derivation, but understanding the derivation may help with future assignments. 
+In this section, we will derive PCA keeping the following goal in mind: minimize the **reconstruction loss** for our **matrix factorization model**. You are not expected to be able to be able to redo this derivation, but understanding the derivation may help with future assignments. 
 
 Given a matrix $X$ with $n$ rows and $d$ columns, our goal is to find its best decomposition such that $$X \approx Z W$$
-Z has $n$ rows and $k$ columns; W has $k$ rows and $d$ columns. 
+Z has $n$ rows and $k$ columns; W has $k$ rows and $d$ columns. To measure the accuracy of our reconstruction, we define the **reconstruction loss** below, where $X_i$ is the row vector of $X$, and $Z_i$ is the row vector of $Z$:
 
-<center><img src = "images/factorization.png" width="500vw"></center>
+<center><img src = "images/factorization.png" width="550vw"></center><br>
 
-To measure the accuracy of our reconstruction, we define the **reconstruction loss** below, where $X_i$ is the row vector of $X$, and $Z_i$ is the row vector of $Z$:
+We can then rewrite the norm squared as the matrix product of a row vector and a column vector.
 
-<center><img src = "images/reconstruction_loss.png" width="450vw"></center>
+<center><img src = "images/reconstruction_loss.png" width="400vw"></center>
 
-<!-- $$\begin{aligned}
-L(Z,W) &= \frac{1}{n}\sum_{i=1}^{n}||X_i - Z_{i}W||^2 \\
-&= \frac{1}{n}\sum_{i=1}^{n}(X_i - Z_{i}W)(X_i - Z_{i}W)^T \\
-\end{aligned}$$ -->
 
-There are many solutions to the above, so let's constrain our model such that $W$ is a **row-orthonormal matrix** (i.e. $WW^T=I$) where the rows of $W$ are our principal components.
+There are many solutions to the above, so let's constrain our model such that **$W$ is a row-orthonormal matrix** (i.e. $WW^T=I$) where the rows of $W$ are our principal components.
 
 In our derivation, let's first work with the case where $k=1$. Here Z will be an $n \times 1$ vector and W will be a $1 \times d$ vector.
 
 $$\begin{aligned}
 L(z,w) &= \frac{1}{n}\sum_{i=1}^{n}(X_i - z_{i}w)(X_i - z_{i}w)^T \\
-&= \frac{1}{n}\sum_{i=1}^{n}(X_{i}X_{i}^T - 2z_{i}X_{i}w^T + z_{i}^{2}ww^T) & \text{(expand the loss)} \\
-= \frac{1}{n}\sum_{i=1}^{n}(-2z_{i}X_{i}w^T + z_{i}^{2}) & \text{(First term is constant and }ww^T=1\text{ by orthonormality)} \\
+&= \frac{1}{n}\sum_{i=1}^{n}(X_{i}X_{i}^T - 2z_{i}X_{i}w^T + z_{i}^{2}ww^T) \ \ \ \text{(expand the loss)} \\
+&= \frac{1}{n}\sum_{i=1}^{n}(-2z_{i}X_{i}w^T + z_{i}^{2}) \ \ \ \text{(First term is constant and }ww^T=1\text{ by orthonormality)} \\
 \end{aligned}$$
 
-Now, we can take the derivative with respect to $Z_i$. 
+Now, we can take the derivative with respect to $z_i$, set the derivative equal to 0, and solve for $z_i$. 
 $$\begin{aligned}
-\frac{\partial{L(Z,W)}}{\partial{z_i}} &= \frac{1}{n}(-2X_{i}w^T + 2z_{i}) \\
-z_i &= X_iw^T & \text{(Setting derivative equal to 0 and solving for }z_i\text{)}\end{aligned}$$
+\frac{\partial{L(z,w)}}{\partial{z_i}} &= \frac{1}{n}(-2X_{i}w^T + 2z_{i}) \\
+z_i &= X_iw^T  
+\end{aligned}$$
 
-We can now substitute our solution for $z_i$ in our loss function:
+This tells us that we can compute $z$ by projecting onto $w$. We can now substitute our solution for $z_i$ in our loss function:
 
 $$\begin{aligned}
 L(z,w) &= \frac{1}{n}\sum_{i=1}^{n}(-2z_{i}X_{i}w^T + z_{i}^{2}) \\
-L(z=X_iw^T,w) &= \frac{1}{n}\sum_{i=1}^{n}(-2X_iw^TX_{i}w^T + (X_iw^T)^{2}) \\
+L(z=Xw^T,w) &= \frac{1}{n}\sum_{i=1}^{n}(-2X_iw^TX_{i}w^T + (X_iw^T)^{2}) \\
 &= \frac{1}{n}\sum_{i=1}^{n}(-X_iw^TX_{i}w^T) \\
-&= \frac{1}{n}\sum_{i=1}^{n}(-wX_{i}^TX_{i}w^T) \\
+&= \frac{1}{n}\sum_{i=1}^{n}(-wX_{i}^TX_{i}w^T)  \hspace{1cm} \textcolor{green}{\text{Algebra}}\\
 &= -w\frac{1}{n}\sum_{i=1}^{n}(X_i^TX_{i})w^T \\
-&= -w\Sigma w^T
+&= -w\Sigma w^T \hspace{2cm}   \textcolor{green}{\text{Definition of Covariance ($\Sigma$)}}
 \end{aligned}$$
 
-Now, we need to minimize our loss with respect to $w$. Since we have a negative sign, one way we can do this is by making $w$ really big. However, we also have the orthonormality constraint $ww^T=1$. To incorporate this constraint into the equation, we can add a Lagrange multiplier, $\lambda$. Note that lagrangian multipliers are out of scope for Data 100.
+Now, we need to minimize our loss with respect to $w$. Since we have a negative sign, one way we can do this is by making $w$ really big. However, we also have the **orthonormality constraint $ww^T=1$**. To incorporate this constraint into the equation, we can add a **Lagrange multiplier**, $\lambda$. Note that lagrangian multipliers are out of scope for Data 100.
 
 $$
 L(w,\lambda) = -w\Sigma w^T + \lambda(ww^T-1) 
 $$
 
-Taking the derivative with respect to $w$, 
+Taking the derivative with respect to $w$ and setting equal to zero, 
 $$\begin{aligned}
-\frac{\partial{L(w,\lambda)}}{w} &= -2\Sigma w^T + 2\lambda w^T \\
-2\Sigma w^T - 2\lambda w^T &= 0 & \text{(Setting derivative equal to 0)} \\
+\frac{\partial{L(w,\lambda)}}{\partial{w}} &= -2\Sigma w^T + 2\lambda w^T \\
+-2\Sigma w^T + 2\lambda w^T &= 0 \\
 \Sigma w^T &= \lambda w^T \\
 \end{aligned}$$
 
 This result implies that:
 
-* $w$ is a **unitary eigenvector** of the covariance matrix. This means that $||w||^2 = ww^T = 1$
-* The error is minimized when $w$ is the eigenvector with the largest eigenvalue $\lambda$.
+1. $w$ is a **unitary eigenvector** of the **covariance matrix**. This means that $||w||^2 = ww^T = 1$
+2. The **error is minimized** when $w$ is the eigenvector with the **largest eigenvalue $\lambda$**.
 
 This derivation can inductively be used for the next (second) principal component (not shown).
 
 The final takeaway from this derivation is that the **principal components** are the **eigenvectors** with the **largest eigenvalues** of the **covariance matrix**. These are the **directions** of the **maximum variance** of the data. We can construct the **latent factors (the Z matrix)** by **projecting** the centered data X onto the principal component vectors:
 
 <center><img src = "images/optimization_takeaways.png" width="450vw"></center>
+
