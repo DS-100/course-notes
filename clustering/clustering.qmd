@@ -18,7 +18,7 @@ jupyter:
       format_version: '1.0'
       jupytext_version: 1.16.1
   kernelspec:
-    display_name: Python 3 (ipykernel)
+    display_name: ds100env
     language: python
     name: python3
 ---
@@ -59,63 +59,44 @@ Now, let's consider a new problem: clustering.
 
 ### Clustering Examples
 
-#### Example 1
-Consider this figure from Fall 2019 Midterm 2. The original dataset had 8 dimensions, but we have used PCA to reduce our data down to 2 dimensions.
+#### Example 1 - Image Compression with Clustering
 
-<center><img src="images/blobs.png" alt='blobs' width='600'></center>
+Clustering can be used for image compression. Why? Digital images consume significant storage and bandwidth, so reducing the number of colors simplifies images while retaining their visual appeal.
 
-Each point represents the 1st and 2nd principal component of how much time patrons spent at 8 different zoo exhibits. Visually and intuitively, we could potentially guess that this data belongs to 3 groups: one for each cluster. The goal of clustering is now to assign each point (in the 2 dimensional PCA representation) to a cluster.
+* Clustering can group similar colors (pixels) in an image into clusters.
+* Each cluster represents a color centroid (mean color of the group).
+* Replace each pixel in the image with the color of its cluster centroid, reducing the number of unique colors.
 
-<center><img src="images/clusters_ex1.png" alt='clusters_ex1' width='600'></center>
+In the example below, notice that using more clusters will make the compressed image look more similar to the original image, while using fewer clusters will look more like a silhouette of the image. Finding a good balance can help resemble the original image while storing less information.
 
-This is an unsupervised task, as:
+<center><img src="images/pishi_compression.gif" alt='pishi_compression' width='550'></center>
 
-* We don’t have labels for each visitor.
-* We want to infer patterns even without labels.
+Image compression can also be done using other techniques including transform-based, prediction-based, and deep learning-based methods.
 
-#### Example 2: Netflix
+#### Example 2 - Clustering in Social Networks
 
-Now suppose you're Netflix and are looking at information on customer viewing habits. Clustering can come in handy here. We can assign each person or show to a "cluster." (Note: while we don't know for sure that Netflix actually uses ML clustering to identify these categories, they could, in principle.)
+In social network clustering, we identify groups (clusters or communities) of individuals who interact more frequently with each other. This can help *analyze network behavior*, *predict relationships*, and *recommend connections*. Some applications include:
 
-Keep in mind that with clustering, we don't need to define clusters in advance; it discovers groups automatically. On the other hand, with classification, we have to decide labels in advance. This marks one of the key differences between clustering and classification.
+* Detecting communities on social network platforms.
+* Understanding collaboration in organizations.
+* Optimizing targeted marketing strategies.
 
-#### Example 3: Education 
+<center><img src="images/social_network.png" alt='social_network' width='500'></center>
+Shown above is a synthetic graph representing interactions in a karate club, where each Node represents a member of the club and each Edge is an interaction between members (or Nodes). Members can be clustered based on the people they interact the most with.
 
-Let's say we're working with student-generated materials and pass them into the S-BERT module to extract sentence embeddings. Features from clusters are extracted to:
+#### Example 3 - Clustering in Climate Sciences
 
-1. Detect anomalies in group activities
-2. Predict the group's median quiz grade 
+Clustering in climate science helps to *identify patterns* in large, complex datasets and *provide insights* into global and regional climate trends. Some examples include :
 
-<center><img src="images/outline-ex3.png" alt='outline-ex3' width='600'></center>
+* Climate zone identification
+* Weather pattern analysis
+* Environmental monitoring
 
-Here we can see the outline of the anomaly detection module. It consists of:
+In this example, we grouped regions based on average temperatures to understand climate zones.
 
-* S-BERT feature extraction
-* Topic extraction
-* Feature extraction
-* 16D $\rightarrow$ 2D PCA dimensionality reduction and 2D $\rightarrow$ 16D reconstruction
-* Anomaly detection based on reconstruction error
 
-Looking more closely at our clustering, we can better understand the different components, which are represented by the centers. Below we have two examples.  
 
-<center><img src="images/components.png" alt='components' width='800'></center>
-
-Note that the details for this example are not in scope.
-
-#### Example 4: Reverse Engineering Biology
-Now, consider the plot below:
-
-<center><img src="images/genes.png" alt='genes' width='600'></center>
-
-The rows of this plot are conditions (e.g., a row might be: “poured acid on the cells”), and the columns are genes. The green coloration indicates that the gene was "off" whereas red indicates the gene was "on". For example, the ~9 genes in the top left corner of the plot were all turned off by the 6 experiments (rows) at the top.
-
-In a clustering lens, we might be interested in clustering similar observations together based on the reactions (on/off) to certain experiments.
-
-For example, here is a look at our data before and after clustering. 
-
-<center><img src="images/beforeandafter4.png" alt='beforeandafter4' width='400'></center>
-
-Note: apologies if you can’t differentiate red from green by eye! Historical visualizations are not always the best.
+<center><img src="images/climate_clusters.png" alt='climate_clusters' width='600'></center>
 
 ## Taxonomy of Clustering Approaches
 
@@ -153,7 +134,7 @@ After this iteration, the center stays still and does not move at all. Thus, we 
 
 #### A Quick Note
 
-K-Means is a completely different algorithm than K-Nearest Neighbors. K-means is used for *clustering*, where each point is assigned to one of $K$ clusters. On the other hand, K-Nearest Neighbors is used for *classification* (or, less often, regression), and the predicted value is typically the most common class among the $K$-nearest data points in the training set.  The names may be similar, but there isn’t really anything in common.
+**K-Means** is a completely different algorithm than **K-Nearest Neighbors**. K-means is used for *clustering*, where each point is assigned to one of $K$ clusters. On the other hand, K-Nearest Neighbors is used for *classification* (or, less often, regression), and the predicted value is typically the most common class among the $K$-nearest data points in the training set.  The names may be similar, but there isn’t really anything in common.
 
 ## Minimizing Inertia
 
@@ -179,22 +160,33 @@ In the example above:
 * Calculated inertia: $0.47^2 + 0.19^2 + 0.34^2 + 0.25^2 + 0.58^2 + 0.36^2 + 0.44^2$
 * Calculated distortion: $\frac{0.47^2 + 0.19^2 + 0.34^2}{3} + \frac{0.25^2 + 0.58^2 + 0.36^2 + 0.44^2}{4}$
 
-Switching back to the four-cluster example at the beginning of this section, `random.seed(25)` had an inertia of `44.96`, `random.seed(29)` had an inertia of `45.95`, and `random.seed(40)` had an inertia of `54.35`. It seems that the best clustering output was `random.seed(25)` with an inertia of `44.96`!
+Switching back to the four-cluster example at the beginning of this section, `random.seed(25)` had an inertia of `44.88`, `random.seed(29)` had an inertia of `45.87`, and `random.seed(40)` had an inertia of `54.27`. It seems that the best clustering output was `random.seed(25)` with an inertia of `44.88`!
 
-It turns out that the function K-Means is trying to minimize is inertia, but often fails to find global optimum. Why does this happen? We can think of K-means as a pair of optimizers that take turns. The first optimizer holds *center positions* constant and optimizes *data colors*. The second optimizer holds *data colors* constant and optimizes *center positions*. Neither optimizer gets full control!
+It turns out that the function K-Means is trying to minimize is **inertia**, but often fails to find global optimum. Why does this happen? We can think of K-means as a pair of optimizers that take turns. The first optimizer holds *center positions* constant and optimizes *data colors*. The second optimizer holds *data colors* constant and optimizes *center positions*. Neither optimizer gets full control!
 
 This is a hard problem: give an algorithm that optimizes inertia FOR A GIVEN $K$; $K$ is picked in advance. Your algorithm should return the EXACT best centers and colors, but you don't need to worry about runtime.
 
 *Note: This is a bit of a CS61B/CS70/CS170 problem, so do not worry about completely understanding the tricky predicament we are in too much!*
 
+First note that there are $k^n$ possible colorings because there are $k$ colors that each point could be, so with $n$ points, this gives $k^n$ possibilities. 
+
 A potential algorithm:
 
-* For all possible $k^n$ colorings:
+* For all possible $k^n$ **colorings**:
     * Compute the $k$ centers for that coloring.
     * Compute the inertia for the $k$ centers.
         * If current inertia is better than best known, write down the current centers and coloring and call that the new best known.
 
 No better algorithm has been found for solving the problem of minimizing inertia exactly.
+
+Consider the following results of two K-Means clustering outputs:
+
+<center><img src="images/clustering_comparison.png" alt='clustering_comparison' width='600'></center>
+<br>
+Which clustering result do you like better? K-Means likes the one on the right better because it has lower inertia (the sum of squared distances from each data point to its center), but this raises some questions:
+
+* Why is the inertia on the right lower? K-Means optimizes for distance, not "blobbiness".
+* Is clustering on the right "wrong"? Good question!
 
 ## Hierarchical Agglomerative Clustering
 
@@ -202,22 +194,14 @@ Now, let us consider hierarchical agglomerative clustering.
 
 <center><img src="images/hierarchical_approach.png" alt='hierarchical_approach' width='600'></center>
 <br>
-Consider the following results of two K-Means clustering outputs:
-
-<center><img src="images/clustering_comparison.png" alt='clustering_comparison' width='600'></center>
-<br>
-Which clustering result do you like better? It seems K-Means likes the one on the right better because it has lower inertia (the sum of squared distances from each data point to its center), but this raises some questions:
-
-* Why is the inertia on the right lower? K-Means optimizes for distance, not "blobbiness".
-* Is clustering on the right "wrong"? Good question!
 
 Now, let us introduce Hierarchical Agglomerative Clustering! We start with every data point in a separate cluster, and we'll keep merging the most similar pairs of data points/clusters until we have one big cluster left. This is called a **bottom-up** or **agglomerative method**.
 
 There are various ways to decide the order of combining clusters called **Linkage Criterion**:
 
 * **Single linkage** (similarity of the most similar): the distance between two clusters as the **minimum** distance between a point in the first cluster and a point in the second.
-* **Complete linkage** (similarity of the least similar): the distance between two clusters as the **maximum** distance between a point in the first cluster and a point in the second.
 * **Average linkage**: **average** similarity of pairs of points in clusters.
+* **Complete linkage** (similarity of the least similar): the distance between two clusters as the **maximum** distance between a point in the first cluster and a point in the second.
 
 The linkage criterion decides how we measure the "distance" between two clusters. Regardless of the criterion we choose, the aim is to combine the two clusters that have the minimum "distance" between them, with the distance computed as per that criterion. In the case of complete linkage, for example, that means picking the two clusters that minimize the maximum distance between a point in the first cluster and a point in the second.
 
@@ -237,7 +221,7 @@ Next, points 0 and 4 are merged together because they are closest.
 
 At this point, we have 10 clusters: 8 with a single point (clusters 1, 2, 3, 4, 5, 6, 7, 8, and 9) and 2 with 2 points (clusters 0 and 10).
 
-Although clusters 0 and 3 are not the closest, let us consider if we were trying to merge them. A tricky question arises: what is the "distance" between clusters 0 and 3? We can use the **Complete-Link** approach that uses the **max** distance among all pairs of points between groups to decide which group has smaller "distance".
+Although clusters 0 and 3 are not the closest, let us consider if we were trying to merge them. A tricky question arises: what is the "distance" between clusters 0 and 3? We can use the **Complete-Link** approach that uses the **max** distance among all pairs of points between groups to decide which group has smaller "distance". In this case, the distance between clusters 0 and 3 would be the distance from the bottom 0 point to the 3 point.
 
 <center><img src="images/agg4.png" alt='agg4' width='400'></center>
 
@@ -261,9 +245,16 @@ Agglomerative clustering is one form of "hierarchical clustering." It is interpr
 <img src="images/dendro_2.png" alt='dendro_2' width='300'>
 </p>
 
-Some professors use agglomerative clustering for grading bins; if there is a big gap between two people, draw a grading threshold there. The idea is that grade clustering should be more like the figure below on the left, not the right.
+#### How to use a dendrogram
+* Observe the Vertical Gaps:
+    * Look for the largest vertical distance (gap) between horizontal lines as you move upward in the dendrogram.
+    * This gap indicates a *significant jump in distance* and suggests that merging clusters beyond this point combines dissimilar groups.
+* Cut the Dendrogram:
+    * Draw a horizontal line just below this large gap.
+    * The number of vertical lines the horizontal line crosses represents the optimal K.
 
-<center><img src="images/grading.png" alt='grading' width='600'></center>
+<center><img src="images/dendro_3.png" alt='dendro_3' width='400'></center>
+In this example, the horizontal line crosses 4 vertical lines so the optimal K is 4 clusters ([9,41], [5,20], [17,12], and [17,8,7,14]).
 
 ## Picking K
 
@@ -271,7 +262,7 @@ The algorithms we’ve discussed require us to pick a $K$ before we start. But h
 
 <center><img src="images/states.png" alt='states' width='600'></center>
 
-How many clusters are there here? For K-Means, one approach to determine this is to plot inertia versus many different $K$ values. We'd pick the $K$ in the **elbow**, where we get diminishing returns afterward. Note that big, complicated data often lacks an elbow, so this method is not foolproof. Here, we would likely select $K = 2$.
+How many clusters are there here? For K-Means, one approach to determine this is to plot inertia versus many different $K$ values. We'd pick the $K$ in the **elbow**, where we get diminishing returns afterward. Note that big, complicated data often lacks an elbow, so this method is not foolproof. Here, we would likely select $K = 2$ or $K = 3$.
 
 <center><img src="images/elbow.png" alt='elbow' width='500'></center>
 
@@ -291,27 +282,45 @@ Consider what the highest possible value of $S$ is and how that value can occur.
 
 Can $S$ be negative? The answer is yes. If the average distance to X’s clustermates is larger than the distance to the closest cluster, then this is possible. For example, the “low score” point on the right of the image above has $S = -0.13$.
 
+### Evaluating Clusters
+
+To evaluate different clustering results, we discussed two loss functions:
+
+* **Inertia**: Sum of squared distances from each data point to its center.
+    * *Lower inertia* indicates *tighter clusters*.
+    * Inertia always decreases as k increases, so it doesn’t penalize overfitting.
+    * Inertia doesn’t consider whether clusters are well-separated or non-spherical.
+    * Use the elbow method to find optimal number of clusters.
+
+* **Silhouette Score**: Silhouette score evaluates how well a point fits within its cluster versus how poorly it fits into neighboring clusters.
+    * A *higher silhouette score* indicates *better-defined and separated clusters*.
+    * Useful when comparing clustering results for different values of k.
+    * Negative silhouette scores can highlight misclassified points or overlapping clusters.
+    * Assumes convex clusters and computationally expensive.
+
+We discussed using the elbow method to pick a k with inertia, but let's also discuss another method for visualizing silhouette scores.
+
 ### Silhouette Plot
 
 We can plot the **silhouette scores** for all of our datapoints. The x-axis represents the silhouette coefficient value or silhouette score. The y-axis tells us which cluster label the points belong to, as well as the number of points within a particular cluster. Points with large silhouette widths are deeply embedded in their cluster; the red dotted line shows the average. Below, we plot the silhouette score for our plot with $K=2$. 
 
 <p float="left">
-<img src="images/high_low.png" alt='dendro_1' width='350'>
-<img src="images/silhouette_2.png" alt='dendro_2' width='350'>
+<img src="images/high_low.png" alt='high_low' width='350'>
+<img src="images/silhouette_1.png" alt='silhouette_1' width='350'>
 </p>
 
 Similarly, we can plot the silhouette score for the same dataset but with $K=3$:
 
 <p float="left">
 <img src="images/cluster_3.png" alt='dendro_1' width='350'>
-<img src="images/silhouette_scores.png" alt='dendro_2' width='350'>
+<img src="images/silhouette_2.png" alt='silhouette_2' width='350'>
 </p>
 
 The average silhouette score is lower with 3 clusters, so $K=2$ is a better choice. This aligns with our visual intuition as well.
 
 ### Picking K: Real World Metrics
 
-Sometimes you can rely on real-world metrics to guide your choice of $K$. For t-shirts, we can either:
+Sometimes you can rely on real-world metrics to guide your choice of $K$. Assume that you have a T-shirt production line and you want to decide about the different T-shirt sizes you need to produce. We can either:
 
 * Cluster heights and weights of customers with $K = 3$ to design Small, Medium, and Large shirts
 * Cluster heights and weights of customers with $K = 5$ to design XS, S, M, L, and XL shirts
@@ -320,13 +329,14 @@ To choose $K$, consider projected costs and sales for the 2 different $K$s and s
 
 ## Conclusion
 
-We've now discussed a new machine learning goal —— clustering —— and explored two solutions:
+We've now discussed a new machine learning goal — clustering — and explored two solutions:
 
-* K-Means Clustering tries to optimize a loss function called inertia (no known algorithm to find the optimal answer in an efficient manner)
-* Hierarchical Agglomerative Clustering builds clusters bottom-up by merging clusters "close" to each other, depending on the choice of linkage.
+* **K-Means Clustering** tries to optimize a loss function called inertia (no known algorithm to find the optimal answer in an efficient manner)
+* **Hierarchical Agglomerative Clustering** builds clusters bottom-up by merging clusters "close" to each other, depending on the choice of linkage.
 
-Our version of these algorithms required a hyperparameter $K$. There are 4 ways to pick $K$: the elbow method, silhouette scores, and by harnessing real-world metrics.
+Our version of these algorithms required a hyperparameter $K$. There are 4 ways to pick $K$: intuitively, the elbow method, silhouette scores, or by harnessing real-world metrics.
 
 There are many machine learning problems. Each can be addressed by many different solution techniques. Each has many metrics for evaluating success / loss. Many techniques can be used to solve different problem types. For example, linear models can be used for regression and classification.
 
-We’ve only scratched the surface and haven’t discussed many important ideas, such as neural networks and deep learning. In the last lecture, we'll provide some specific course recommendations on how to explore these topics further.
+We’ve only scratched the surface and haven’t discussed many important ideas, such as neural networks and deep learning. In the next lecture, we'll provide some specific course recommendations on how to explore these topics further.
+
