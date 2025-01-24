@@ -1,0 +1,1077 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "---\n",
+        "title: Pandas I\n",
+        "format:\n",
+        "  html:\n",
+        "    toc: true\n",
+        "    toc-depth: 5\n",
+        "    toc-location: right\n",
+        "    code-fold: false\n",
+        "    theme:\n",
+        "      - cosmo\n",
+        "      - cerulean\n",
+        "    callout-icon: false\n",
+        "jupyter: python3\n",
+        "---\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "\n",
+        "::: {.callout-note collapse=\"false\"}\n",
+        "## Learning Outcomes\n",
+        "\n",
+        "- Build familiarity with `pandas` and `pandas` syntax.\n",
+        "- Learn key data structures: `DataFrame`, `Series`, and `Index`.\n",
+        "- Understand methods for extracting data: `.loc`, `.iloc`, and `[]`.\n",
+        ":::\n",
+        "\n",
+        "In this sequence of lectures, we will dive right into things by having you explore and manipulate real-world data. We'll first introduce `pandas`, a popular Python library for interacting with **tabular data**.\n",
+        "\n",
+        "## Tabular Data\n",
+        "\n",
+        "Data scientists work with data stored in a variety of formats. This class focuses primarily on *tabular data* — data that is stored in a table.\n",
+        "\n",
+        "Tabular data is one of the most common systems that data scientists use to organize data. This is in large part due to the simplicity and flexibility of tables. Tables allow us to represent each **observation**, or instance of collecting data from an individual, as its own *row*. We can record each observation's distinct characteristics, or **features**, in separate *columns*.\n",
+        "\n",
+        "\n",
+        "To see this in action, we'll explore the `elections` dataset, which stores information about political candidates who ran for president of the United States in previous years.\n",
+        "\n",
+        "In the `elections` dataset, each row (blue box) represents one instance of a candidate running for president in a particular year. For example, the first row represents Andrew Jackson running for president in the year 1824. Each column (yellow box) represents one characteristic piece of information about each presidential candidate. For example, the column named \"Result\" stores whether or not the candidate won the election. \n",
+        "\n",
+        "<center><img src = \"images/row_col.png\" width = \"600\"></img></a></center>\n",
+        "\n",
+        "Your work in Data 8 helped you grow very familiar with using and interpreting data stored in a tabular format. Back then, you used the `Table` class of the `datascience` library, a special programming library created specifically for Data 8 students.\n",
+        "\n",
+        "In Data 100, we will be working with the programming library `pandas`, which is generally accepted in the data science community as the industry- and academia-standard tool for manipulating tabular data (as well as the inspiration for Petey, our panda bear mascot).\n",
+        "\n",
+        "Using `pandas`, we can\n",
+        "\n",
+        "- Arrange data in a tabular format.\n",
+        "- Extract useful information filtered by specific conditions.\n",
+        "- Operate on data to gain new insights.\n",
+        "- Apply `NumPy` functions to our data (our friends from Data 8).\n",
+        "- Perform vectorized computations to speed up our analysis (Lab 1).\n",
+        "\n",
+        "## `Series`, `DataFrame`s, and Indices\n",
+        "\n",
+        "To begin our work in `pandas`, we must first import the library into our Python environment. This will allow us to use `pandas` data structures and methods in our code.\n"
+      ],
+      "id": "5610926c"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "# `pd` is the conventional alias for Pandas, as `np` is for NumPy\n",
+        "import pandas as pd"
+      ],
+      "id": "757fb2b7",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "There are three fundamental data structures in `pandas`:\n",
+        "\n",
+        "1. **`Series`**: 1D labeled array data; best thought of as columnar data.\n",
+        "2. **`DataFrame`**: 2D tabular data with rows and columns.\n",
+        "3. **`Index`**: A sequence of row/column labels.\n",
+        "\n",
+        "`DataFrame`s, `Series`, and Indices can be represented visually in the following diagram, which considers the first few rows of the `elections` dataset.\n",
+        "\n",
+        "<center><img src = \"images/df_elections.png\" width = \"600\"></img></a></center>\n",
+        "\n",
+        "Notice how the **DataFrame** is a two-dimensional object — it contains both rows and columns. The **Series** above is a singular column of this `DataFrame`, namely the `Result` column. Both contain an **Index**, or a shared list of row labels (the integers from 0 to 4, inclusive).\n",
+        "\n",
+        "### Series\n",
+        "\n",
+        "A `Series` represents a column of a `DataFrame`; more generally, it can be any 1-dimensional array-like object. It contains both:\n",
+        "\n",
+        "- A sequence of **values** of the same type.\n",
+        "- A sequence of data labels called the **index**.\n",
+        "\n",
+        "In the cell below, we create a `Series` named `s`.\n"
+      ],
+      "id": "593f18d8"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "s = pd.Series([\"welcome\", \"to\", \"data 100\"])\n",
+        "s"
+      ],
+      "id": "5795b291",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        " # Accessing data values within the Series\n",
+        " s.values"
+      ],
+      "id": "42fd8458",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        " # Accessing the Index of the Series\n",
+        " s.index"
+      ],
+      "id": "bca4568b",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "By default, the `index` of a `Series` is a sequential list of integers beginning from 0. Optionally, a manually specified list of desired indices can be passed to the `index` argument.\n"
+      ],
+      "id": "2bfb5b65"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "s = pd.Series([-1, 10, 2], index = [\"a\", \"b\", \"c\"])\n",
+        "s"
+      ],
+      "id": "12f428ad",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "s.index"
+      ],
+      "id": "f017fccb",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Indices can also be changed after initialization.\n"
+      ],
+      "id": "4160f555"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "s.index = [\"first\", \"second\", \"third\"]\n",
+        "s"
+      ],
+      "id": "7837a71c",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "s.index"
+      ],
+      "id": "737e5889",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "#### Selection in `Series`\n",
+        "\n",
+        "Much like when working with `NumPy` arrays, we can select a single value or a set of values from a `Series`. To do so, there are three primary methods:\n",
+        "\n",
+        "1. A single label.\n",
+        "2. A list of labels.\n",
+        "3. A filtering condition.\n",
+        "\n",
+        "To demonstrate this, let's define a new Series `s`.\n"
+      ],
+      "id": "3a5d444b"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "s = pd.Series([4, -2, 0, 6], index = [\"a\", \"b\", \"c\", \"d\"])\n",
+        "s"
+      ],
+      "id": "65c03a0c",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "##### A Single Label\n"
+      ],
+      "id": "8b01e5ba"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "# We return the value stored at the index label \"a\"\n",
+        "s[\"a\"] "
+      ],
+      "id": "5828c9d2",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "##### A List of Labels\n"
+      ],
+      "id": "2a3f778a"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "# We return a Series of the values stored at the index labels \"a\" and \"c\"\n",
+        "s[[\"a\", \"c\"]] "
+      ],
+      "id": "fc968d1e",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "##### A Filtering Condition\n",
+        "\n",
+        "Perhaps the most interesting (and useful) method of selecting data from a `Series` is by using a filtering condition. \n",
+        "\n",
+        "First, we apply a boolean operation to the `Series`. This creates **a new `Series` of boolean values**.\n"
+      ],
+      "id": "1cbd6847"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "# Filter condition: select all elements greater than 0\n",
+        "s > 0 "
+      ],
+      "id": "bf4c1b9c",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "We then use this boolean condition to index into our original `Series`. `pandas` will select only the entries in the original `Series` that satisfy the condition.\n"
+      ],
+      "id": "247282d0"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "s[s > 0] "
+      ],
+      "id": "246a77e6",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "### `DataFrames`\n",
+        "\n",
+        "Typically, we will work with `Series` using the perspective that they are columns in a `DataFrame`. We can think of a **`DataFrame`** as a collection of **`Series`** that all share the same **`Index`**. \n",
+        "\n",
+        "In Data 8, you encountered the `Table` class of the `datascience` library, which represented tabular data. In Data 100, we'll be using the `DataFrame` class of the `pandas` library.\n",
+        "\n",
+        "#### Creating a `DataFrame`\n",
+        "\n",
+        "There are many ways to create a `DataFrame`. Here, we will cover the most popular approaches:\n",
+        "\n",
+        "1. From a CSV file.\n",
+        "2. Using a list and column name(s).\n",
+        "3. From a dictionary.\n",
+        "4. From a `Series`.\n",
+        "\n",
+        "More generally, the syntax for creating a `DataFrame` is: \n",
+        "        \n",
+        "     pandas.DataFrame(data, index, columns)\n",
+        "\n",
+        "##### From a CSV file\n",
+        "In Data 100, our data are typically stored in a CSV (comma-separated values) file format. We can import a CSV file into a `DataFrame` by passing the data path as an argument to the following ````pandas```` function. \n",
+        "<br> &emsp;```` pd.read_csv(\"filename.csv\") ```` \n",
+        "\n",
+        "With our new understanding of `pandas` in hand, let's return to the `elections` dataset from before. Now, we can recognize that it is represented as a `pandas` `DataFrame`.\n"
+      ],
+      "id": "4a62ae05"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "elections = pd.read_csv(\"data/elections.csv\")\n",
+        "elections"
+      ],
+      "id": "4616433c",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "This code stores our `DataFrame` object in the ````elections```` variable. Upon inspection, our ````elections```` `DataFrame` has 182 rows and 6 columns (`Year`, `Candidate`, `Party`, `Popular Vote`, `Result`, `%`). Each row represents a single record — in our example, a presidential candidate from some particular year. Each column represents a single attribute or feature of the record.\n",
+        "\n",
+        "##### Using a List and Column Name(s)\n",
+        "\n",
+        "We'll now explore creating a `DataFrame` with data of our own.\n",
+        "\n",
+        "Consider the following examples. The first code cell creates a `DataFrame` with a single column `Numbers`. \n"
+      ],
+      "id": "b90b4693"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "df_list = pd.DataFrame([1, 2, 3], columns=[\"Numbers\"])\n",
+        "df_list"
+      ],
+      "id": "8c890bea",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "The second creates a `DataFrame` with the columns `Numbers` and `Description`. Notice how a 2D list of values is required to initialize the second `DataFrame` — each nested list represents a single row of data.\n"
+      ],
+      "id": "901ff210"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "df_list = pd.DataFrame([[1, \"one\"], [2, \"two\"]], columns = [\"Number\", \"Description\"])\n",
+        "df_list"
+      ],
+      "id": "27302ea8",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "##### From a Dictionary\n",
+        "\n",
+        "A third (and more common) way to create a `DataFrame` is with a dictionary. The dictionary keys represent the column names, and the dictionary values represent the column values.\n",
+        "\n",
+        "Below are two ways of implementing this approach. The first is based on specifying the columns of the `DataFrame`, whereas the second is based on specifying the rows of the `DataFrame`.\n"
+      ],
+      "id": "b1f994e1"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "df_dict = pd.DataFrame({\n",
+        "    \"Fruit\": [\"Strawberry\", \"Orange\"], \n",
+        "    \"Price\": [5.49, 3.99]\n",
+        "})\n",
+        "df_dict"
+      ],
+      "id": "3a46da72",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "df_dict = pd.DataFrame(\n",
+        "    [\n",
+        "        {\"Fruit\":\"Strawberry\", \"Price\":5.49}, \n",
+        "        {\"Fruit\": \"Orange\", \"Price\":3.99}\n",
+        "    ]\n",
+        ")\n",
+        "df_dict"
+      ],
+      "id": "5dd5345e",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "##### From a `Series`\n",
+        "\n",
+        "Earlier, we explained how a `Series` was synonymous to a column in a `DataFrame`. It follows, then, that a `DataFrame` is equivalent to a collection of `Series`, which all share the same `Index`. \n",
+        "\n",
+        "In fact, we can initialize a `DataFrame` by merging two or more `Series`. Consider the `Series` `s_a` and `s_b`.\n"
+      ],
+      "id": "98206448"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "# Notice how our indices, or row labels, are the same\n",
+        "\n",
+        "s_a = pd.Series([\"a1\", \"a2\", \"a3\"], index = [\"r1\", \"r2\", \"r3\"])\n",
+        "s_b = pd.Series([\"b1\", \"b2\", \"b3\"], index = [\"r1\", \"r2\", \"r3\"])"
+      ],
+      "id": "c4edb86b",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "We can turn individual `Series` into a `DataFrame` using two common methods (shown below): \n"
+      ],
+      "id": "1b4ccf0f"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "pd.DataFrame(s_a)"
+      ],
+      "id": "70e9642f",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "s_b.to_frame()"
+      ],
+      "id": "259c5fa2",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "To merge the two `Series` and specify their column names, we use the following syntax:\n"
+      ],
+      "id": "296d6087"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "pd.DataFrame({\n",
+        "    \"A-column\": s_a, \n",
+        "    \"B-column\": s_b\n",
+        "})"
+      ],
+      "id": "ce6ea529",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "### Indices\n",
+        "\n",
+        "On a more technical note, an index doesn't have to be an integer, nor does it have to be unique. For example, we can set the index of the `elections` `DataFrame` to be the name of presidential candidates. \n"
+      ],
+      "id": "ccd6e468"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "# Creating a DataFrame from a CSV file and specifying the index column\n",
+        "elections = pd.read_csv(\"data/elections.csv\", index_col = \"Candidate\")\n",
+        "elections"
+      ],
+      "id": "79d1a4b7",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "We can also select a new column and set it as the index of the `DataFrame`. For example, we can set the index of the `elections` `DataFrame` to represent the candidate's party.\n"
+      ],
+      "id": "a93b6c5d"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "elections.reset_index(inplace = True) # Resetting the index so we can set it again\n",
+        "# This sets the index to the \"Party\" column\n",
+        "elections.set_index(\"Party\")"
+      ],
+      "id": "925dbe74",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "And, if we'd like, we can revert the index back to the default list of integers.\n"
+      ],
+      "id": "3a44975a"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "# This resets the index to be the default list of integer\n",
+        "elections.reset_index(inplace=True) \n",
+        "elections.index"
+      ],
+      "id": "702ffd3a",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "It is also important to note that the row labels that constitute an index don't have to be unique. While index values can be unique and numeric, acting as a row number, they can also be named and non-unique. \n",
+        "\n",
+        "Here we see unique and numeric index values.\n",
+        "\n",
+        "<center><img src = \"images/uniqueindex.png\" width = \"400\"></img></a></center>\n",
+        "\n",
+        "However, here the index values are not unique. \n",
+        "\n",
+        "<center><img src = \"images/non-uniqueindex.png\" width = \"400\"></img></a></center>\n",
+        "\n",
+        "\n",
+        "## `DataFrame` Attributes: Index, Columns, and Shape\n",
+        "\n",
+        "On the other hand, column names in a `DataFrame` are almost always unique. Looking back to the `elections` dataset, it wouldn't make sense to have two columns named `\"Candidate\"`. Sometimes, you'll want to extract these different values, in particular, the list of row and column labels.\n",
+        "\n",
+        "For index/row labels, use `DataFrame.index`:\n"
+      ],
+      "id": "170ccc9c"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "elections.set_index(\"Party\", inplace = True)\n",
+        "elections.index"
+      ],
+      "id": "97c6876e",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "For column labels, use `DataFrame.columns`:\n"
+      ],
+      "id": "bfab0e84"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "elections.columns"
+      ],
+      "id": "79615d8f",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "And for the shape of the `DataFrame`, we can use `DataFrame.shape` to get the number of rows followed by the number of columns:\n"
+      ],
+      "id": "709c90ca"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "elections.shape"
+      ],
+      "id": "49fe71bb",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## Slicing in `DataFrame`s\n",
+        "\n",
+        "Now that we've learned more about `DataFrame`s, let's dive deeper into their capabilities. \n",
+        "\n",
+        "The API (Application Programming Interface) for the `DataFrame` class is enormous. In this section, we'll discuss several methods of the `DataFrame` API that allow us to extract subsets of data.\n",
+        "\n",
+        "The simplest way to manipulate a `DataFrame` is to extract a subset of rows and columns, known as **slicing**. \n",
+        "\n",
+        "Common ways we may want to extract data are grabbing:\n",
+        "\n",
+        "- The first or last `n` rows in the `DataFrame`.\n",
+        "- Data with a certain label.\n",
+        "- Data at a certain position.\n",
+        "\n",
+        "We will do so with four primary methods of the `DataFrame` class:\n",
+        "\n",
+        "1. `.head` and `.tail`\n",
+        "2. `.loc`\n",
+        "3. `.iloc`\n",
+        "4. `[]`\n",
+        "\n",
+        "### Extracting data with `.head` and `.tail`\n",
+        "\n",
+        "The simplest scenario in which we want to extract data is when we simply want to select the first or last few rows of the `DataFrame`.\n",
+        "\n",
+        "To extract the first `n` rows of a `DataFrame` `df`, we use the syntax `df.head(n)`.\n"
+      ],
+      "id": "1a620f3f"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: true\n",
+        "elections = pd.read_csv(\"data/elections.csv\")"
+      ],
+      "id": "1a8682b9",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "# Extract the first 5 rows of the DataFrame\n",
+        "elections.head(5)"
+      ],
+      "id": "76ee7e44",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Similarly, calling `df.tail(n)` allows us to extract the last `n` rows of the `DataFrame`.  \n"
+      ],
+      "id": "191563b5"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "# Extract the last 5 rows of the DataFrame\n",
+        "elections.tail(5)"
+      ],
+      "id": "b472ae62",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "### Label-based Extraction: Indexing with `.loc`\n",
+        "\n",
+        "For the more complex task of extracting data with specific column or index labels, we can use `.loc`. The `.loc` accessor allows us to specify the ***labels*** of rows and columns we wish to extract. The **labels** (commonly referred to as the **indices**) are the bold text on the far *left* of a `DataFrame`, while the **column labels** are the column names found at the *top* of a `DataFrame`.\n",
+        "\n",
+        "<center><img src = \"images/locgraphic.png\" width = \"800\"></img></a></center>\n",
+        "\n",
+        "\n",
+        "To grab data with `.loc`, we must specify the row and column label(s) where the data exists. The row labels are the first argument to the `.loc` function; the column labels are the second.\n",
+        "\n",
+        "Arguments to `.loc` can be:\n",
+        "\n",
+        "- A single value.\n",
+        "- A slice.\n",
+        "- A list.\n",
+        "\n",
+        "For example, to select a single value, we can select the row labeled `0` and the column labeled `Candidate` from the `elections` `DataFrame`.\n"
+      ],
+      "id": "15fd9557"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "elections.loc[0, 'Candidate']"
+      ],
+      "id": "f4aa2e6f",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Keep in mind that passing in just one argument as a single value will produce a `Series`. Below, we've extracted a subset of the `\"Popular vote\"` column as a `Series`.\n"
+      ],
+      "id": "2322ddbf"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "elections.loc[[87, 25, 179], \"Popular vote\"]"
+      ],
+      "id": "f47e43db",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Note that if we pass `\"Popular vote\"` as a list, the output will be a `DataFrame`.\n"
+      ],
+      "id": "0cccad0a"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "elections.loc[[87, 25, 179], [\"Popular vote\"]]"
+      ],
+      "id": "4a36f769",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "To select *multiple* rows and columns, we can use Python slice notation. Here, we select the rows from labels `0` to `3` and the columns from labels `\"Year\"` to `\"Popular vote\"`. Notice that unlike Python slicing, `.loc` is *inclusive* of the right upper bound.\n"
+      ],
+      "id": "b30e8489"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "elections.loc[0:3, 'Year':'Popular vote']"
+      ],
+      "id": "323d430c",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Suppose that instead, we want to extract *all* column values for the first four rows in the `elections` `DataFrame`. The shorthand `:` is useful for this.\n"
+      ],
+      "id": "56a39662"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "elections.loc[0:3, :]"
+      ],
+      "id": "814dca7e",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "We can use the same shorthand to extract all rows. \n"
+      ],
+      "id": "8e7d0416"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "elections.loc[:, [\"Year\", \"Candidate\", \"Result\"]]"
+      ],
+      "id": "8fa29270",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "There are a couple of things we should note. Firstly, unlike conventional Python, `pandas` allows us to slice string values (in our example, the column labels). Secondly, slicing with `.loc` is *inclusive*. Notice how our resulting `DataFrame` includes every row and column between and including the slice labels we specified.\n",
+        "\n",
+        "Equivalently, we can use a list to obtain multiple rows and columns in our `elections` `DataFrame`. \n"
+      ],
+      "id": "fe395125"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "elections.loc[[0, 1, 2, 3], ['Year', 'Candidate', 'Party', 'Popular vote']]"
+      ],
+      "id": "a9fb5b60",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Lastly, we can interchange list and slicing notation.\n"
+      ],
+      "id": "2170bb4b"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "elections.loc[[0, 1, 2, 3], :]"
+      ],
+      "id": "fb4498fe",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "### Integer-based Extraction: Indexing with `.iloc`\n",
+        "\n",
+        "Slicing with `.iloc` works similarly to `.loc`. However, `.iloc` uses the *index positions* of rows and columns rather than the labels (think to yourself: **l**oc uses **l**ables; **i**loc uses **i**ndices). The arguments to the `.iloc` function also behave similarly — single values, lists, indices, and any combination of these are permitted. \n",
+        "\n",
+        "Let's begin reproducing our results from above. We'll begin by selecting the first presidential candidate in our `elections` `DataFrame`:\n"
+      ],
+      "id": "dd810343"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "# elections.loc[0, \"Candidate\"] - Previous approach\n",
+        "elections.iloc[0, 1]"
+      ],
+      "id": "7c3d735f",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Notice how the first argument to both `.loc` and `.iloc` are the same. This is because the row with a label of `0` is conveniently in the $0^{\\text{th}}$ (equivalently, the first position) of the `elections` `DataFrame`. Generally, this is true of any `DataFrame` where the row labels are incremented in ascending order from 0.\n",
+        "\n",
+        "And, as before, if we were to pass in only one single value argument, our result would be a `Series`.\n"
+      ],
+      "id": "81f9bcc8"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "elections.iloc[[1,2,3],1]"
+      ],
+      "id": "3471d0b6",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "However, when we select the first four rows and columns using `.iloc`, we notice something.\n"
+      ],
+      "id": "eca3cd9f"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "# elections.loc[0:3, 'Year':'Popular vote'] - Previous approach\n",
+        "elections.iloc[0:4, 0:4]"
+      ],
+      "id": "546e1a05",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Slicing is no longer inclusive in `.iloc` — it's *exclusive*. In other words, the right end of a slice is not included when using `.iloc`. This is one of the subtleties of `pandas` syntax; you will get used to it with practice.\n",
+        "\n",
+        "List behavior works just as expected.\n"
+      ],
+      "id": "ec3cb9fc"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#elections.loc[[0, 1, 2, 3], ['Year', 'Candidate', 'Party', 'Popular vote']] - Previous Approach\n",
+        "elections.iloc[[0, 1, 2, 3], [0, 1, 2, 3]]"
+      ],
+      "id": "42d0dca1",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "And just like with `.loc`, we can use a colon with `.iloc` to extract all rows or columns.\n"
+      ],
+      "id": "94442c19"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "elections.iloc[:, 0:3]"
+      ],
+      "id": "47339731",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "This discussion begs the question: when should we use `.loc` vs. `.iloc`? In most cases, `.loc` is generally safer to use. You can imagine `.iloc` may return incorrect values when applied to a dataset where the ordering of data can change. However, `.iloc` can still be useful — for example, if you are looking at a `DataFrame` of sorted movie earnings and want to get the median earnings for a given year, you can use `.iloc` to index into the middle.\n",
+        "\n",
+        "Overall, it is important to remember that:\n",
+        "\n",
+        "- `.loc` performances **l**abel-based extraction.\n",
+        "- `.iloc` performs **i**nteger-based extraction.\n",
+        "\n",
+        "### Context-dependent Extraction: Indexing with `[]`\n",
+        "\n",
+        "The `[]` selection operator is the most baffling of all, yet the most commonly used. It only takes a single argument, which may be one of the following:\n",
+        "\n",
+        "1. A slice of row numbers.\n",
+        "2. A list of column labels.\n",
+        "3. A single-column label.\n",
+        "\n",
+        "That is, `[]` is *context-dependent*. Let's see some examples.\n",
+        "\n",
+        "#### A slice of row numbers\n",
+        "\n",
+        "Say we wanted the first four rows of our `elections` `DataFrame`.\n"
+      ],
+      "id": "aabf2074"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "elections[0:4]"
+      ],
+      "id": "a19f6b94",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "#### A list of column labels\n",
+        "\n",
+        "Suppose we now want the first four columns.\n"
+      ],
+      "id": "6f465cb5"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "elections[[\"Year\", \"Candidate\", \"Party\", \"Popular vote\"]]"
+      ],
+      "id": "52fe7f51",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "#### A single-column label\n",
+        "\n",
+        "Lastly, `[]` allows us to extract only the `\"Candidate\"` column.\n"
+      ],
+      "id": "7924192b"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "elections[\"Candidate\"]"
+      ],
+      "id": "bbb8e8a2",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "The output is a `Series`! In this course, we'll become very comfortable with `[]`, especially for selecting columns. In practice, `[]` is much more common than `.loc`, especially since it is far more concise.\n",
+        "\n",
+        "## Parting Note\n",
+        "\n",
+        "The `pandas` library is enormous and contains many useful functions. Here is a link to its [documentation](https://pandas.pydata.org/docs/). We certainly don't expect you to memorize each and every method of the library, and we will give you a reference sheet for exams.\n",
+        "\n",
+        "The introductory Data 100 `pandas` lectures will provide a high-level view of the key data structures and methods that will form the foundation of your `pandas` knowledge. A goal of this course is to help you build your familiarity with the real-world programming practice of ... Googling! Answers to your questions can be found in documentation, Stack Overflow, etc. Being able to search for, read, and implement documentation is an important life skill for any data scientist. \n",
+        "\n",
+        "With that, we will move on to Pandas II!\n"
+      ],
+      "id": "80eadbfa"
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "name": "python3",
+      "language": "python",
+      "display_name": "Python 3 (ipykernel)",
+      "path": "C:\\Users\\conan\\AppData\\Local\\Programs\\Python\\Python313\\share\\jupyter\\kernels\\python3"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}
