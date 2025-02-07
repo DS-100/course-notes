@@ -1,5 +1,5 @@
 ---
-title: Data Cleaning and EDA (Old Notes from Fall 2024)
+title: Data Cleaning and EDA
 execute:
   echo: true
 format:
@@ -48,6 +48,7 @@ pd.set_option('display.float_format', '{:.2f}'.format)
 # Silence some spurious seaborn warnings
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", category=UserWarning)
 ```
 
 ::: {.callout-note collapse="false"}
@@ -210,7 +211,7 @@ We can use the `head` Unix command (which is where `pandas`' `head` method comes
 !head -5 {covid_file}
 ```
 
-In order to load the JSON file into `pandas`, Let's first do some EDA with Oython's `json` package to understand the particular structure of this JSON file so that we can decide what (if anything) to load into `pandas`. Python has relatively good support for JSON data since it closely matches the internal python object model. In the following cell we import the entire JSON datafile into a python dictionary using the `json` package.
+In order to load the JSON file into `pandas`, Let's first do some EDA with Python's `json` package to understand the particular structure of this JSON file so that we can decide what (if anything) to load into `pandas`. Python has relatively good support for JSON data since it closely matches the internal python object model. In the following cell we import the entire JSON datafile into a python dictionary using the `json` package.
 
 ```{python}
 #| code-fold: false
@@ -326,57 +327,29 @@ covid = pd.DataFrame(
 covid.tail()
 ```
 
-### Primary and Foreign Keys
-
-Last time, we introduced `.merge` as the `pandas` method for joining multiple `DataFrame`s together. In our discussion of joins, we touched on the idea of using a "key" to determine what rows should be merged from each table. Let's take a moment to examine this idea more closely.
-
-The **primary key** is the column or set of columns in a table that *uniquely* determine the values of the remaining columns. It can be thought of as the unique identifier for each individual row in the table. For example, a table of Data 100 students might use each student's Cal ID as the primary key. 
-
-```{python}
-#| echo: false
-pd.DataFrame({"Cal ID":[3034619471, 3035619472, 3025619473, 3046789372], \
-             "Name":["Oski", "Ollie", "Orrie", "Ollie"], \
-             "Major":["Data Science", "Computer Science", "Data Science", "Economics"]})
-```
-
-The **foreign key** is the column or set of columns in a table that reference primary keys in other tables. Knowing a dataset's foreign keys can be useful when assigning the `left_on` and `right_on` parameters of `.merge`. In the table of office hour tickets below, `"Cal ID"` is a foreign key referencing the previous table.
-
-```{python}
-#| echo: false
-pd.DataFrame({"OH Request":[1, 2, 3, 4], \
-             "Cal ID":[3034619471, 3035619472, 3025619473, 3035619472], \
-             "Question":["HW 2 Q1", "HW 2 Q3", "Lab 3 Q4", "HW 2 Q7"]})
-```
-
 ### Variable Types
 
 Variables are columns. A variable is a measurement of a particular concept. Variables have two common properties: data type/storage type and variable type/feature type. The data type of a variable indicates how each variable value is stored in memory (integer, floating point, boolean, etc.) and affects which `pandas` functions are used. The variable type is a conceptualized measurement of information (and therefore indicates what values a variable can take on). Variable type is identified through expert knowledge, exploring the data itself, or consulting the data codebook. The variable type affects how one visualizes and inteprets the data. In this class, "variable types" are conceptual.
 
 After loading data into a file, it's a good idea to take the time to understand what pieces of information are encoded in the dataset. In particular, we want to identify what variable types are present in our data. Broadly speaking, we can categorize variables into one of two overarching types. 
 
-**Quantitative variables** describe some numeric quantity or amount. We can divide quantitative data further into:
-
-* **Continuous quantitative variables**: numeric data that can be measured on a continuous scale to arbitrary precision. Continuous variables do not have a strict set of possible values – they can be recorded to any number of decimal places. For example, weights, GPA, or CO<sub>2</sub> concentrations.
-* **Discrete quantitative variables**: numeric data that can only take on a finite set of possible values. For example, someone's age or the number of siblings they have.
+**Quantitative variables** describe some numeric quantity or amount. Some examples include weights, GPA, CO<sub>2</sub> concentrations, someone's age, or the number of siblings they have.
 
 **Qualitative variables**, also known as **categorical variables**, describe data that isn't measuring some quantity or amount. The sub-categories of categorical data are:
 
 * **Ordinal qualitative variables**: categories with ordered levels. Specifically, ordinal variables are those where the difference between levels has no consistent, quantifiable meaning. Some examples include levels of education (high school, undergrad, grad, etc.), income bracket (low, medium, high), or Yelp rating. 
 * **Nominal qualitative variables**: categories with no specific order. For example, someone's political affiliation or Cal ID number.
 
-![Classification of variable types](images/variable.png)
+![Classification of variable types](images/variable_types.png)
 
 Note that many variables don't sit neatly in just one of these categories. Qualitative variables could have numeric levels, and conversely, quantitative variables could be stored as strings. 
 
-## Granularity, Scope, and Temporality
+## Granularity and Temporality
 
-After understanding the structure of the dataset, the next task is to determine what exactly the data represents. We'll do so by considering the data's granularity, scope, and temporality.
+After understanding the structure of the dataset, the next task is to determine what exactly the data represents. We'll do so by considering the data's granularity and temporality.
 
 ### Granularity
 The **granularity** of a dataset is what a single row represents. You can also think of it as the level of detail included in the data. To determine the data's granularity, ask: what does each row in the dataset represent? Fine-grained data contains a high level of detail, with a single row representing a small individual unit. For example, each record may represent one person. Coarse-grained data is encoded such that a single row represents a large individual unit – for example, each record may represent a group of people.
-
-### Scope
-The **scope** of a dataset is the subset of the population covered by the data. If we were investigating student performance in Data Science courses, a dataset with a narrow scope might encompass all students enrolled in Data 100 whereas a dataset with an expansive scope might encompass all students in California. 
 
 ### Temporality
 The **temporality** of a dataset describes the periodicity over which the data was collected as well as when the data was most recently collected or updated. 
@@ -486,7 +459,7 @@ We can then explore the CSV (which is a text file, and does not contain binary-e
 3. The `Python` file object
 4. `pandas`, using `pd.read_csv()`
 
-To try out options 1 and 2, you can view or download the Tuberculosis from the [lecture demo notebook](https://data100.datahub.berkeley.edu/hub/user-redirect/git-pull?repo=https%3A%2F%2Fgithub.com%2FDS-100%2Ffa23-student&urlpath=lab%2Ftree%2Ffa23-student%2Flecture%2Flec05%2Flec04-eda.ipynb&branch=main) under the `data` folder in the left hand menu. Notice how the CSV file is a type of **rectangular data (i.e., tabular data) stored as comma-separated values**.
+To try out options 1 and 2, you can view or download the Tuberculosis from the [lecture demo notebook](https://data100.datahub.berkeley.edu/hub/user-redirect/git-pull?repo=https%3A%2F%2Fgithub.com%2FDS-100%2Fsp25-student&urlpath=lab%2Ftree%2Fsp25-student%2Flecture%2Flec05%2Flec05-part-1-eda-tuberculosis.ipynb&branch=main) under the `data` folder in the left hand menu. Notice how the CSV file is a type of **rectangular data (i.e., tabular data) stored as comma-separated values**.
 
 Next, let's try out option 3 using the `Python` file object. We'll look at the first four lines:
 
@@ -538,22 +511,6 @@ tb_df = pd.read_csv("data/cdc_tuberculosis.csv", header=1) # row index
 tb_df.head(5)
 ```
 
-Wait...but now we can't differentiate betwen the "Number of TB cases" and "TB incidence" year columns. `pandas` has tried to make our lives easier by automatically adding ".1" to the latter columns, but this doesn't help us, as humans, understand the data.
-
-We can do this manually with `df.rename()` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.rename.html?highlight=rename#pandas.DataFrame.rename)):
-
-```{python}
-#| code-fold: false
-rename_dict = {'2019': 'TB cases 2019',
-               '2020': 'TB cases 2020',
-               '2021': 'TB cases 2021',
-               '2019.1': 'TB incidence 2019',
-               '2020.1': 'TB incidence 2020',
-               '2021.1': 'TB incidence 2021'}
-tb_df = tb_df.rename(columns=rename_dict)
-tb_df.head(5)
-```
-
 ### Record Granularity
 
 You might already be wondering: what's up with that first record?
@@ -586,7 +543,6 @@ Fortunately `read_csv` also has a `thousands` parameter ([documentation](https:/
 # improve readability: chaining method calls with outer parentheses/line breaks
 tb_df = (
     pd.read_csv("data/cdc_tuberculosis.csv", header=1, thousands=',')
-    .rename(columns=rename_dict)
 )
 tb_df.head(5)
 ```
@@ -608,7 +564,7 @@ state_tb_df.head(5)
 
 ### Gather Census Data
 
-U.S. Census population estimates [source](https://www.census.gov/data/tables/time-series/demo/popest/2010s-state-total.html) (2019), [source](https://www.census.gov/data/tables/time-series/demo/popest/2020s-state-total.html) (2020-2021).
+U.S. Census population estimates [source](https://www.census.gov/data/tables/time-series/demo/popest/2010s-state-total.html) (2019), [source](https://www.census.gov/data/tables/time-series/demo/popest/2020s-state-total.html) (2020-2024).
 
 Running the below cells cleans the data.
 There are a few new methods here:
@@ -652,14 +608,14 @@ or use `iPython` magic which will intelligently import code when files change:
 ```{python}
 #| code-fold: true
 # census 2020s data
-census_2020s_df = pd.read_csv("data/NST-EST2022-POP.csv", header=3, thousands=",")
+census_2020s_df = pd.read_csv("data/NST-EST2024-POP.csv", header=3, thousands=",")
 census_2020s_df = (
     census_2020s_df
-    .reset_index()
-    .drop(columns=["index", "Unnamed: 1"])
+    .drop(columns=["Unnamed: 1"])
     .rename(columns={"Unnamed: 0": "Geographic Area"})
+    .loc[:, "Geographic Area":"2024"] # ignore all the blank extra columns
     .convert_dtypes()                 # "smart" converting of columns, use at your own risk
-    .dropna()                         # we'll introduce this next time
+    .dropna()                         # we'll introduce this next ti
 )
 census_2020s_df['Geographic Area'] = census_2020s_df['Geographic Area'].str.strip('.')
 
@@ -683,7 +639,7 @@ tb_census_df = (
 tb_census_df.head(5)
 ```
 
-Having all of these columns is a little unwieldy. We could either drop the unneeded columns now, or just merge on smaller census `DataFrame`s. Let's do the latter.
+Having all of these columns is a little unwieldy. Let's say we're only interested in the population for the years 2019, 2020, and 2021. We could either drop the unneeded columns now, or just merge on smaller census `DataFrame`s. Let's do the latter.
 
 ```{python}
 #| code-fold: false
@@ -722,11 +678,11 @@ tb_census_df.head(5)
 
 Awesome!!!
 
-Let's use a for-loop and Python format strings to compute TB incidence for all years. Python f-strings are just used for the purposes of this demo, but they're handy to know when you explore data beyond this course ([documentation](https://docs.python.org/3/tutorial/inputoutput.html)).
+Let's use a for-loop and Python format strings to compute TB incidence for 2019, 2020, and 2021. Python f-strings are just used for the purposes of this demo, but they're handy to know when you explore data beyond this course ([documentation](https://docs.python.org/3/tutorial/inputoutput.html)).
 
 ```{python}
 #| code-fold: false
-# recompute incidence for all years
+# recompute incidence for 2019, 2020, and 2021.
 for year in [2019, 2020, 2021]:
     tb_census_df[f"recompute incidence {year}"] = tb_census_df[f"TB cases {year}"]/tb_census_df[f"{year}"]*100000
 tb_census_df.head(5)

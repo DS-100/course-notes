@@ -1,0 +1,2027 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "---\n",
+        "title: Data Cleaning and EDA\n",
+        "execute:\n",
+        "  echo: true\n",
+        "format:\n",
+        "  html:\n",
+        "    code-fold: true\n",
+        "    code-tools: true\n",
+        "    toc: true\n",
+        "    toc-title: Data Cleaning and EDA\n",
+        "    page-layout: full\n",
+        "    theme:\n",
+        "      - cosmo\n",
+        "      - cerulean\n",
+        "    callout-icon: false\n",
+        "jupyter:\n",
+        "  jupytext:\n",
+        "    text_representation:\n",
+        "      extension: .qmd\n",
+        "      format_name: quarto\n",
+        "      format_version: '1.0'\n",
+        "      jupytext_version: 1.16.1\n",
+        "  kernelspec:\n",
+        "    display_name: data100quarto\n",
+        "    language: python\n",
+        "    name: python3\n",
+        "---"
+      ],
+      "id": "130e3425"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: true\n",
+        "import numpy as np\n",
+        "import pandas as pd\n",
+        "\n",
+        "import matplotlib.pyplot as plt\n",
+        "import seaborn as sns\n",
+        "#%matplotlib inline\n",
+        "plt.rcParams['figure.figsize'] = (12, 9)\n",
+        "\n",
+        "sns.set()\n",
+        "sns.set_context('talk')\n",
+        "np.set_printoptions(threshold=20, precision=2, suppress=True)\n",
+        "pd.set_option('display.max_rows', 30)\n",
+        "pd.set_option('display.max_columns', None)\n",
+        "pd.set_option('display.precision', 2)\n",
+        "# This option stops scientific notation for pandas\n",
+        "pd.set_option('display.float_format', '{:.2f}'.format)\n",
+        "\n",
+        "# Silence some spurious seaborn warnings\n",
+        "import warnings\n",
+        "warnings.filterwarnings(\"ignore\", category=FutureWarning)\n",
+        "warnings.filterwarnings(\"ignore\", category=UserWarning)"
+      ],
+      "id": "d7a505dc",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "::: {.callout-note collapse=\"false\"}\n",
+        "## Learning Outcomes\n",
+        "* Recognize common file formats\n",
+        "* Categorize data by its variable type\n",
+        "* Build awareness of issues with data faithfulness and develop targeted solutions\n",
+        ":::\n",
+        "\n",
+        "In the past few lectures, we've learned that `pandas` is a toolkit to restructure, modify, and explore a dataset. What we haven't yet touched on is *how* to make these data transformation decisions. When we receive a new set of data from the \"real world,\" how do we know what processing we should do to convert this data into a usable form?\n",
+        "\n",
+        "**Data cleaning**, also called **data wrangling**, is the process of transforming raw data to facilitate subsequent analysis. It is often used to address issues like:\n",
+        "\n",
+        "* Unclear structure or formatting\n",
+        "* Missing or corrupted values\n",
+        "* Unit conversions\n",
+        "* ...and so on\n",
+        "\n",
+        "**Exploratory Data Analysis (EDA)** is the process of understanding a new dataset. It is an open-ended, informal analysis that involves familiarizing ourselves with the variables present in the data, discovering potential hypotheses, and identifying possible issues with the data. This last point can often motivate further data cleaning to address any problems with the dataset's format; because of this, EDA and data cleaning are often thought of as an \"infinite loop,\" with each process driving the other.\n",
+        "\n",
+        "In this lecture, we will consider the key properties of data to consider when performing data cleaning and EDA. In doing so, we'll develop a \"checklist\" of sorts for you to consider when approaching a new dataset. Throughout this process, we'll build a deeper understanding of this early (but very important!) stage of the data science lifecycle.\n",
+        "\n",
+        "## Structure\n",
+        "We often prefer rectangular data for data analysis. Rectangular structures are easy to manipulate and analyze. A key element of data cleaning is about transforming data to be more rectangular. \n",
+        "\n",
+        "There are two kinds of rectangular data: tables and matrices. Tables have named columns with different data types and are manipulated using data transformation languages. Matrices contain numeric data of the same type and are manipulated using linear algebra.\n",
+        "\n",
+        "### File Formats\n",
+        "There are many file types for storing structured data: TSV, JSON, XML, ASCII, SAS, etc. We'll only cover CSV, TSV, and JSON in lecture, but you'll likely encounter other formats as you work with different datasets. Reading documentation is your best bet for understanding how to process the multitude of different file types. \n",
+        "\n",
+        "#### CSV\n",
+        "CSVs, which stand for **Comma-Separated Values**, are a common tabular data format. \n",
+        "In the past two `pandas` lectures, we briefly touched on the idea of file format: the way data is encoded in a file for storage. Specifically, our `elections` and `babynames` datasets were stored and loaded as CSVs:\n"
+      ],
+      "id": "c18332f0"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "pd.read_csv(\"data/elections.csv\").head(5)"
+      ],
+      "id": "40535cf4",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "To better understand the properties of a CSV, let's take a look at the first few rows of the raw data file to see what it looks like before being loaded into a `DataFrame`. We'll use the `repr()` function to return the raw string with its special characters: \n"
+      ],
+      "id": "76715af9"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "with open(\"data/elections.csv\", \"r\") as table:\n",
+        "    i = 0\n",
+        "    for row in table:\n",
+        "        print(repr(row))\n",
+        "        i += 1\n",
+        "        if i > 3:\n",
+        "            break"
+      ],
+      "id": "15b0a448",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Each row, or **record**, in the data is delimited by a newline `\\n`. Each column, or **field**, in the data is delimited by a comma `,` (hence, comma-separated!). \n",
+        "\n",
+        "#### TSV\n",
+        "\n",
+        "Another common file type is **TSV (Tab-Separated Values)**. In a TSV, records are still delimited by a newline `\\n`, while fields are delimited by `\\t` tab character. \n",
+        "\n",
+        "Let's check out the first few rows of the raw TSV file. Again, we'll use the `repr()` function so that `print` shows the special characters.\n"
+      ],
+      "id": "0e7a1af8"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "with open(\"data/elections.txt\", \"r\") as table:\n",
+        "    i = 0\n",
+        "    for row in table:\n",
+        "        print(repr(row))\n",
+        "        i += 1\n",
+        "        if i > 3:\n",
+        "            break"
+      ],
+      "id": "6cf37193",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "TSVs can be loaded into `pandas` using `pd.read_csv`. We'll need to specify the **delimiter** with parameter` sep='\\t'` [(documentation)](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html).\n"
+      ],
+      "id": "ecf0833b"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "pd.read_csv(\"data/elections.txt\", sep='\\t').head(3)"
+      ],
+      "id": "fd9387fb",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "An issue with CSVs and TSVs comes up whenever there are commas or tabs within the records. How does `pandas` differentiate between a comma delimiter vs. a comma within the field itself, for example `8,900`? To remedy this, check out the [`quotechar` parameter](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html). \n",
+        "\n",
+        "#### JSON\n",
+        "**JSON (JavaScript Object Notation)** files behave similarly to Python dictionaries. A raw JSON is shown below.\n"
+      ],
+      "id": "be663212"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "with open(\"data/elections.json\", \"r\") as table:\n",
+        "    i = 0\n",
+        "    for row in table:\n",
+        "        print(row)\n",
+        "        i += 1\n",
+        "        if i > 8:\n",
+        "            break"
+      ],
+      "id": "afee5274",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "JSON files can be loaded into `pandas` using `pd.read_json`. \n"
+      ],
+      "id": "3ef2ff90"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "pd.read_json('data/elections.json').head(3)"
+      ],
+      "id": "a2dc49b6",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "##### EDA with JSON: Berkeley COVID-19 Data\n",
+        "The City of Berkeley Open Data [website](https://data.cityofberkeley.info/Health/COVID-19-Confirmed-Cases/xn6j-b766) has a dataset with COVID-19 Confirmed Cases among Berkeley residents by date. Let's download the file and save it as a JSON (note the source URL file type is also a JSON). In the interest of reproducible data science, we will download the data programatically. We have defined some helper functions in the [`ds100_utils.py`](https://ds100.org/fa23/resources/assets/lectures/lec05/lec05-eda.html) file that we can reuse these helper functions in many different notebooks.\n"
+      ],
+      "id": "6625d86a"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "from ds100_utils import fetch_and_cache\n",
+        "\n",
+        "covid_file = fetch_and_cache(\n",
+        "    \"https://data.cityofberkeley.info/api/views/xn6j-b766/rows.json?accessType=DOWNLOAD\",\n",
+        "    \"confirmed-cases.json\",\n",
+        "    force=False)\n",
+        "covid_file          # a file path wrapper object"
+      ],
+      "id": "687ddc0b",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "###### File Size\n",
+        "Let's start our analysis by getting a rough estimate of the size of the dataset to inform the tools we use to view the data. For relatively small datasets, we can use a text editor or spreadsheet. For larger datasets, more programmatic exploration or distributed computing tools may be more fitting. Here we will use `Python` tools to probe the file.\n",
+        "\n",
+        "Since there seem to be text files, let's investigate the number of lines, which often corresponds to the number of records\n"
+      ],
+      "id": "afa10835"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "import os\n",
+        "\n",
+        "print(covid_file, \"is\", os.path.getsize(covid_file) / 1e6, \"MB\")\n",
+        "\n",
+        "with open(covid_file, \"r\") as f:\n",
+        "    print(covid_file, \"is\", sum(1 for l in f), \"lines.\")"
+      ],
+      "id": "c05d5a19",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "###### Unix Commands\n",
+        "As part of the EDA workflow, Unix commands can come in very handy. In fact, there's an entire book called [\"Data Science at the Command Line\"](https://datascienceatthecommandline.com/) that explores this idea in depth! \n",
+        "In Jupyter/IPython, you can prefix lines with `!` to execute arbitrary Unix commands, and within those lines, you can refer to Python variables and expressions with the syntax `{expr}`.\n",
+        "\n",
+        "Here, we use the `ls` command to list files, using the `-lh` flags, which request \"long format with information in human-readable form.\" We also use the `wc` command for \"word count,\" but with the `-l` flag, which asks for line counts instead of words.\n",
+        "\n",
+        "These two give us the same information as the code above, albeit in a slightly different form:\n"
+      ],
+      "id": "a86d95cd"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "!ls -lh {covid_file}\n",
+        "!wc -l {covid_file}"
+      ],
+      "id": "9b29237d",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "###### File Contents\n",
+        "Let's explore the data format using `Python`. \n"
+      ],
+      "id": "cb19ee27"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "with open(covid_file, \"r\") as f:\n",
+        "    for i, row in enumerate(f):\n",
+        "        print(repr(row)) # print raw strings\n",
+        "        if i >= 4: break"
+      ],
+      "id": "66a92f5f",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "We can use the `head` Unix command (which is where `pandas`' `head` method comes from!) to see the first few lines of the file:\n"
+      ],
+      "id": "0eeb442c"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "!head -5 {covid_file}"
+      ],
+      "id": "e5f3507f",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "In order to load the JSON file into `pandas`, Let's first do some EDA with Python's `json` package to understand the particular structure of this JSON file so that we can decide what (if anything) to load into `pandas`. Python has relatively good support for JSON data since it closely matches the internal python object model. In the following cell we import the entire JSON datafile into a python dictionary using the `json` package.\n"
+      ],
+      "id": "fcdd1bcd"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "import json\n",
+        "\n",
+        "with open(covid_file, \"rb\") as f:\n",
+        "    covid_json = json.load(f)"
+      ],
+      "id": "7207b224",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "The `covid_json` variable is now a dictionary encoding the data in the file:\n"
+      ],
+      "id": "b7802bfc"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "type(covid_json)"
+      ],
+      "id": "40f10577",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "We can examine what keys are in the top level JSON object by listing out the keys. \n"
+      ],
+      "id": "403cb75c"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "covid_json.keys()"
+      ],
+      "id": "d10969c5",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "**Observation**: The JSON dictionary contains a `meta` key which likely refers to metadata (data about the data).  Metadata is often maintained with the data and can be a good source of additional information.\n",
+        "\n",
+        "\n",
+        "We can investigate the metadata further by examining the keys associated with the metadata.\n"
+      ],
+      "id": "82a70a3e"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "covid_json['meta'].keys()"
+      ],
+      "id": "9daec793",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "The `meta` key contains another dictionary called `view`.  This likely refers to metadata about a particular \"view\" of some underlying database. We will learn more about views when we study SQL later in the class.    \n"
+      ],
+      "id": "c7a82964"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "covid_json['meta']['view'].keys()"
+      ],
+      "id": "c214f464",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Notice that this a nested/recursive data structure.  As we dig deeper we reveal more and more keys and the corresponding data:\n",
+        "\n",
+        "```\n",
+        "meta\n",
+        "|-> data\n",
+        "    | ... (haven't explored yet)\n",
+        "|-> view\n",
+        "    | -> id\n",
+        "    | -> name\n",
+        "    | -> attribution \n",
+        "    ...\n",
+        "    | -> description\n",
+        "    ...\n",
+        "    | -> columns\n",
+        "    ...\n",
+        "```\n",
+        "\n",
+        "\n",
+        "There is a key called description in the view sub dictionary.  This likely contains a description of the data:\n"
+      ],
+      "id": "6c95814c"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "print(covid_json['meta']['view']['description'])"
+      ],
+      "id": "693fbf85",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "###### Examining the Data Field for Records\n",
+        "\n",
+        "We can look at a few entries in the `data` field. This is what we'll load into `pandas`.\n"
+      ],
+      "id": "0fe7ccbd"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "for i in range(3):\n",
+        "    print(f\"{i:03} | {covid_json['data'][i]}\")"
+      ],
+      "id": "19a63df1",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Observations:\n",
+        "* These look like equal-length records, so maybe `data` is a table!\n",
+        "* But what do each of values in the record mean? Where can we find column headers?\n",
+        "\n",
+        "For that, we'll need the `columns` key in the metadata dictionary. This returns a list: \n"
+      ],
+      "id": "09692e96"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "type(covid_json['meta']['view']['columns'])"
+      ],
+      "id": "79cb1011",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "###### Summary of exploring the JSON file\n",
+        "\n",
+        "1. The above **metadata** tells us a lot about the columns in the data including column names, potential data anomalies, and a basic statistic. \n",
+        "1. Because of its non-tabular structure, JSON makes it easier (than CSV) to create **self-documenting data**, meaning that information about the data is stored in the same file as the data.\n",
+        "1. Self-documenting data can be helpful since it maintains its own description and these descriptions are more likely to be updated as data changes. \n",
+        "\n",
+        "###### Loading COVID Data into `pandas`\n",
+        "Finally, let's load the data (not the metadata) into a `pandas` `DataFrame`. In the following block of code we:\n",
+        "\n",
+        "1. Translate the JSON records into a `DataFrame`:\n",
+        "\n",
+        "    * fields: `covid_json['meta']['view']['columns']`\n",
+        "    * records: `covid_json['data']`\n",
+        "\n",
+        "    \n",
+        "1. Remove columns that have no metadata description.  This would be a bad idea in general, but here we remove these columns since the above analysis suggests they are unlikely to contain useful information.\n",
+        "   \n",
+        "1. Examine the `tail` of the table.\n"
+      ],
+      "id": "9ebf658a"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "# Load the data from JSON and assign column titles\n",
+        "covid = pd.DataFrame(\n",
+        "    covid_json['data'],\n",
+        "    columns=[c['name'] for c in covid_json['meta']['view']['columns']])\n",
+        "\n",
+        "covid.tail()"
+      ],
+      "id": "35d2e17f",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "### Variable Types\n",
+        "\n",
+        "Variables are columns. A variable is a measurement of a particular concept. Variables have two common properties: data type/storage type and variable type/feature type. The data type of a variable indicates how each variable value is stored in memory (integer, floating point, boolean, etc.) and affects which `pandas` functions are used. The variable type is a conceptualized measurement of information (and therefore indicates what values a variable can take on). Variable type is identified through expert knowledge, exploring the data itself, or consulting the data codebook. The variable type affects how one visualizes and inteprets the data. In this class, \"variable types\" are conceptual.\n",
+        "\n",
+        "After loading data into a file, it's a good idea to take the time to understand what pieces of information are encoded in the dataset. In particular, we want to identify what variable types are present in our data. Broadly speaking, we can categorize variables into one of two overarching types. \n",
+        "\n",
+        "**Quantitative variables** describe some numeric quantity or amount. Some examples include weights, GPA, CO<sub>2</sub> concentrations, someone's age, or the number of siblings they have.\n",
+        "\n",
+        "**Qualitative variables**, also known as **categorical variables**, describe data that isn't measuring some quantity or amount. The sub-categories of categorical data are:\n",
+        "\n",
+        "* **Ordinal qualitative variables**: categories with ordered levels. Specifically, ordinal variables are those where the difference between levels has no consistent, quantifiable meaning. Some examples include levels of education (high school, undergrad, grad, etc.), income bracket (low, medium, high), or Yelp rating. \n",
+        "* **Nominal qualitative variables**: categories with no specific order. For example, someone's political affiliation or Cal ID number.\n",
+        "\n",
+        "![Classification of variable types](images/variable_types.png)\n",
+        "\n",
+        "Note that many variables don't sit neatly in just one of these categories. Qualitative variables could have numeric levels, and conversely, quantitative variables could be stored as strings. \n",
+        "\n",
+        "## Granularity and Temporality\n",
+        "\n",
+        "After understanding the structure of the dataset, the next task is to determine what exactly the data represents. We'll do so by considering the data's granularity and temporality.\n",
+        "\n",
+        "### Granularity\n",
+        "The **granularity** of a dataset is what a single row represents. You can also think of it as the level of detail included in the data. To determine the data's granularity, ask: what does each row in the dataset represent? Fine-grained data contains a high level of detail, with a single row representing a small individual unit. For example, each record may represent one person. Coarse-grained data is encoded such that a single row represents a large individual unit – for example, each record may represent a group of people.\n",
+        "\n",
+        "### Temporality\n",
+        "The **temporality** of a dataset describes the periodicity over which the data was collected as well as when the data was most recently collected or updated. \n",
+        "\n",
+        "Time and date fields of a dataset could represent a few things:\n",
+        "\n",
+        "1. when the \"event\" happened\n",
+        "2. when the data was collected, or when it was entered into the system\n",
+        "3. when the data was copied into the database \n",
+        "\n",
+        "To fully understand the temporality of the data, it also may be necessary to standardize time zones or inspect recurring time-based trends in the data (do patterns recur in 24-hour periods? Over the course of a month? Seasonally?). The convention for standardizing time is the Coordinated Universal Time (UTC), an international time standard measured at 0 degrees latitude that stays consistent throughout the year (no daylight savings). We can represent Berkeley's time zone, Pacific Standard Time (PST), as UTC-7 (with daylight savings). \n",
+        "\n",
+        "#### Temporality with `pandas`' `dt` accessors \n",
+        "Let's briefly look at how we can use `pandas`' `dt` accessors to work with dates/times in a dataset using the dataset you'll see in Lab 3: the Berkeley PD Calls for Service dataset.\n"
+      ],
+      "id": "fc8054f6"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: true\n",
+        "calls = pd.read_csv(\"data/Berkeley_PD_-_Calls_for_Service.csv\")\n",
+        "calls.head()"
+      ],
+      "id": "11d46a6e",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Looks like there are three columns with dates/times: `EVENTDT`, `EVENTTM`, and `InDbDate`. \n",
+        "\n",
+        "Most likely, `EVENTDT` stands for the date when the event took place, `EVENTTM` stands for the time of day the event took place (in 24-hr format), and `InDbDate` is the date this call is recorded onto the database.\n",
+        "\n",
+        "If we check the data type of these columns, we will see they are stored as strings. We can convert them to `datetime` objects using pandas `to_datetime` function.\n"
+      ],
+      "id": "ebc03ece"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "calls[\"EVENTDT\"] = pd.to_datetime(calls[\"EVENTDT\"])\n",
+        "calls.head()"
+      ],
+      "id": "38a06b92",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Now, we can use the `dt` accessor on this column.\n",
+        "\n",
+        "We can get the month: \n"
+      ],
+      "id": "3881357d"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "calls[\"EVENTDT\"].dt.month.head()"
+      ],
+      "id": "25dbc827",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Which day of the week the date is on:\n"
+      ],
+      "id": "c1f1beca"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "calls[\"EVENTDT\"].dt.dayofweek.head()"
+      ],
+      "id": "e3d31729",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Check the mimimum values to see if there are any suspicious-looking, 70s dates:\n"
+      ],
+      "id": "efbcf208"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "calls.sort_values(\"EVENTDT\").head()"
+      ],
+      "id": "38f50441",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Doesn't look like it! We are good!\n",
+        "\n",
+        "\n",
+        "We can also do many things with the `dt` accessor like switching time zones and converting time back to UNIX/POSIX time. Check out the documentation on [`.dt` accessor](https://pandas.pydata.org/docs/user_guide/basics.html#basics-dt-accessors) and [time series/date functionality](https://pandas.pydata.org/docs/user_guide/timeseries.html#).\n",
+        "\n",
+        "## Faithfulness\n",
+        "\n",
+        "At this stage in our data cleaning and EDA workflow, we've achieved quite a lot: we've identified how our data is structured, come to terms with what information it encodes, and gained insight as to how it was generated. Throughout this process, we should always recall the original intent of our work in Data Science – to use data to better understand and model the real world. To achieve this goal, we need to ensure that the data we use is faithful to reality; that is, that our data accurately captures the \"real world.\"\n",
+        "\n",
+        "Data used in research or industry is often \"messy\" – there may be errors or inaccuracies that impact the faithfulness of the dataset. Signs that data may not be faithful include:\n",
+        "\n",
+        "* Unrealistic or \"incorrect\" values, such as negative counts, locations that don't exist, or dates set in the future\n",
+        "* Violations of obvious dependencies, like an age that does not match a birthday\n",
+        "* Clear signs that data was entered by hand, which can lead to spelling errors or fields that are incorrectly shifted\n",
+        "* Signs of data falsification, such as fake email addresses or repeated use of the same names\n",
+        "* Duplicated records or fields containing the same information\n",
+        "* Truncated data, e.g. Microsoft Excel would limit the number of rows to 655536 and the number of columns to 255\n",
+        "\n",
+        "We often solve some of these more common issues in the following ways: \n",
+        "\n",
+        "* Spelling errors: apply corrections or drop records that aren't in a dictionary\n",
+        "* Time zone inconsistencies: convert to a common time zone (e.g. UTC) \n",
+        "* Duplicated records or fields: identify and eliminate duplicates (using primary keys)\n",
+        "* Unspecified or inconsistent units: infer the units and check that values are in reasonable ranges in the data\n",
+        "\n",
+        "### Missing Values\n",
+        "Another common issue encountered with real-world datasets is that of missing data. One strategy to resolve this is to simply drop any records with missing values from the dataset. This does, however, introduce the risk of inducing biases – it is possible that the missing or corrupt records may be systemically related to some feature of interest in the data. Another solution is to keep the data as `NaN` values. \n",
+        "\n",
+        "A third method to address missing data is to perform **imputation**: infer the missing values using other data available in the dataset. There is a wide variety of imputation techniques that can be implemented; some of the most common are listed below.\n",
+        "\n",
+        "* Average imputation: replace missing values with the average value for that field\n",
+        "* Hot deck imputation: replace missing values with some random value\n",
+        "* Regression imputation: develop a model to predict missing values and replace with the predicted value from the model.\n",
+        "* Multiple imputation: replace missing values with multiple random values\n",
+        "\n",
+        "Regardless of the strategy used to deal with missing data, we should think carefully about *why* particular records or fields may be missing – this can help inform whether or not the absence of these values is significant or meaningful.\n",
+        "\n",
+        "## EDA Demo 1: Tuberculosis in the United States\n",
+        "\n",
+        "Now, let's walk through the data-cleaning and EDA workflow to see what can we learn about the presence of Tuberculosis in the United States!\n",
+        "\n",
+        "We will examine the data included in the [original CDC article](https://www.cdc.gov/mmwr/volumes/71/wr/mm7112a1.htm?s_cid=mm7112a1_w#T1_down) published in 2021.\n",
+        "\n",
+        "\n",
+        "### CSVs and Field Names\n",
+        "Suppose Table 1 was saved as a CSV file located in `data/cdc_tuberculosis.csv`.\n",
+        "\n",
+        "We can then explore the CSV (which is a text file, and does not contain binary-encoded data) in many ways:\n",
+        "1. Using a text editor like emacs, vim, VSCode, etc.\n",
+        "2. Opening the CSV directly in DataHub (read-only), Excel, Google Sheets, etc.\n",
+        "3. The `Python` file object\n",
+        "4. `pandas`, using `pd.read_csv()`\n",
+        "\n",
+        "To try out options 1 and 2, you can view or download the Tuberculosis from the [lecture demo notebook](https://data100.datahub.berkeley.edu/hub/user-redirect/git-pull?repo=https%3A%2F%2Fgithub.com%2FDS-100%2Fsp25-student&urlpath=lab%2Ftree%2Fsp25-student%2Flecture%2Flec05%2Flec05-part-1-eda-tuberculosis.ipynb&branch=main) under the `data` folder in the left hand menu. Notice how the CSV file is a type of **rectangular data (i.e., tabular data) stored as comma-separated values**.\n",
+        "\n",
+        "Next, let's try out option 3 using the `Python` file object. We'll look at the first four lines:\n"
+      ],
+      "id": "4cbb0b45"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: true\n",
+        "with open(\"data/cdc_tuberculosis.csv\", \"r\") as f:\n",
+        "    i = 0\n",
+        "    for row in f:\n",
+        "        print(row)\n",
+        "        i += 1\n",
+        "        if i > 3:\n",
+        "            break"
+      ],
+      "id": "df058174",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Whoa, why are there blank lines interspaced between the lines of the CSV?\n",
+        "\n",
+        "You may recall that all line breaks in text files are encoded as the special newline character `\\n`. Python's `print()` prints each string (including the newline), and an additional newline on top of that.\n",
+        "\n",
+        "If you're curious, we can use the `repr()` function to return the raw string with all special characters:\n"
+      ],
+      "id": "d82bc980"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: true\n",
+        "with open(\"data/cdc_tuberculosis.csv\", \"r\") as f:\n",
+        "    i = 0\n",
+        "    for row in f:\n",
+        "        print(repr(row)) # print raw strings\n",
+        "        i += 1\n",
+        "        if i > 3:\n",
+        "            break"
+      ],
+      "id": "c2342fad",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Finally, let's try option 4 and use the tried-and-true Data 100 approach: `pandas`.\n"
+      ],
+      "id": "9031979b"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "tb_df = pd.read_csv(\"data/cdc_tuberculosis.csv\")\n",
+        "tb_df.head()"
+      ],
+      "id": "35fc4eeb",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "You may notice some strange things about this table: what's up with the \"Unnamed\" column names and the first row? \n",
+        "\n",
+        "Congratulations — you're ready to wrangle your data! Because of how things are stored, we'll need to clean the data a bit to name our columns better.\n",
+        "\n",
+        "A reasonable first step is to identify the row with the right header. The `pd.read_csv()` function ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html)) has the convenient `header` parameter that we can set to use the elements in row 1 as the appropriate columns:\n"
+      ],
+      "id": "bf28a2b2"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "tb_df = pd.read_csv(\"data/cdc_tuberculosis.csv\", header=1) # row index\n",
+        "tb_df.head(5)"
+      ],
+      "id": "a9048301",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "### Record Granularity\n",
+        "\n",
+        "You might already be wondering: what's up with that first record?\n",
+        "\n",
+        "Row 0 is what we call a **rollup record**, or summary record. It's often useful when displaying tables to humans. The **granularity** of record 0 (Totals) vs the rest of the records (States) is different.\n",
+        "\n",
+        "Okay, EDA step two. How was the rollup record aggregated?\n",
+        "\n",
+        "Let's check if Total TB cases is the sum of all state TB cases. If we sum over all rows, we should get **2x** the total cases in each of our TB cases by year (why do you think this is?).\n"
+      ],
+      "id": "178b2c4e"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: true\n",
+        "tb_df.sum(axis=0)"
+      ],
+      "id": "0fe4ec61",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Whoa, what's going on with the TB cases in 2019, 2020, and 2021? Check out the column types:\n"
+      ],
+      "id": "13a784eb"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: true\n",
+        "tb_df.dtypes"
+      ],
+      "id": "8c77db3d",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Since there are commas in the values for TB cases, the numbers are read as the `object` datatype, or **storage type** (close to the `Python` string datatype), so `pandas` is concatenating strings instead of adding integers (recall that Python can \"sum\", or concatenate, strings together: `\"data\" + \"100\"` evaluates to `\"data100\"`). \n",
+        "\n",
+        "\n",
+        "Fortunately `read_csv` also has a `thousands` parameter ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html)):\n"
+      ],
+      "id": "bee6e54d"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "# improve readability: chaining method calls with outer parentheses/line breaks\n",
+        "tb_df = (\n",
+        "    pd.read_csv(\"data/cdc_tuberculosis.csv\", header=1, thousands=',')\n",
+        ")\n",
+        "tb_df.head(5)"
+      ],
+      "id": "4e388249",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "tb_df.sum()"
+      ],
+      "id": "bba175af",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "The total TB cases look right. Phew!\n",
+        "\n",
+        "Let's just look at the records with **state-level granularity**:\n"
+      ],
+      "id": "63492cb6"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: true\n",
+        "state_tb_df = tb_df[1:]\n",
+        "state_tb_df.head(5)"
+      ],
+      "id": "81847b02",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "### Gather Census Data\n",
+        "\n",
+        "U.S. Census population estimates [source](https://www.census.gov/data/tables/time-series/demo/popest/2010s-state-total.html) (2019), [source](https://www.census.gov/data/tables/time-series/demo/popest/2020s-state-total.html) (2020-2024).\n",
+        "\n",
+        "Running the below cells cleans the data.\n",
+        "There are a few new methods here:\n",
+        "* `df.convert_dtypes()` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.convert_dtypes.html)) conveniently converts all float dtypes into ints and is out of scope for the class.\n",
+        "* `df.drop_na()` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.dropna.html)) will be explained in more detail next time.\n"
+      ],
+      "id": "42c4870b"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: true\n",
+        "# 2010s census data\n",
+        "census_2010s_df = pd.read_csv(\"data/nst-est2019-01.csv\", header=3, thousands=\",\")\n",
+        "census_2010s_df = (\n",
+        "    census_2010s_df\n",
+        "    .reset_index()\n",
+        "    .drop(columns=[\"index\", \"Census\", \"Estimates Base\"])\n",
+        "    .rename(columns={\"Unnamed: 0\": \"Geographic Area\"})\n",
+        "    .convert_dtypes()                 # \"smart\" converting of columns, use at your own risk\n",
+        "    .dropna()                         # we'll introduce this next time\n",
+        ")\n",
+        "census_2010s_df['Geographic Area'] = census_2010s_df['Geographic Area'].str.strip('.')\n",
+        "\n",
+        "# with pd.option_context('display.min_rows', 30): # shows more rows\n",
+        "#     display(census_2010s_df)\n",
+        "    \n",
+        "census_2010s_df.head(5)"
+      ],
+      "id": "b698227f",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Occasionally, you will want to modify code that you have imported.  To reimport those modifications you can either use `python`'s `importlib` library:\n",
+        "\n",
+        "```python\n",
+        "from importlib import reload\n",
+        "reload(utils)\n",
+        "```\n",
+        "\n",
+        "or use `iPython` magic which will intelligently import code when files change:\n",
+        "\n",
+        "```python\n",
+        "%load_ext autoreload\n",
+        "%autoreload 2\n",
+        "```\n"
+      ],
+      "id": "68ce43ad"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: true\n",
+        "# census 2020s data\n",
+        "census_2020s_df = pd.read_csv(\"data/NST-EST2024-POP.csv\", header=3, thousands=\",\")\n",
+        "census_2020s_df = (\n",
+        "    census_2020s_df\n",
+        "    .drop(columns=[\"Unnamed: 1\"])\n",
+        "    .rename(columns={\"Unnamed: 0\": \"Geographic Area\"})\n",
+        "    .loc[:, \"Geographic Area\":\"2024\"] # ignore all the blank extra columns\n",
+        "    .convert_dtypes()                 # \"smart\" converting of columns, use at your own risk\n",
+        "    .dropna()                         # we'll introduce this next ti\n",
+        ")\n",
+        "census_2020s_df['Geographic Area'] = census_2020s_df['Geographic Area'].str.strip('.')\n",
+        "\n",
+        "census_2020s_df.head(5)"
+      ],
+      "id": "34192a8c",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "### Joining Data (Merging `DataFrame`s)\n",
+        "\n",
+        "Time to `merge`! Here we use the `DataFrame` method `df1.merge(right=df2, ...)` on `DataFrame` `df1` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.merge.html)). Contrast this with the function `pd.merge(left=df1, right=df2, ...)` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.merge.html?highlight=pandas%20merge#pandas.merge)). Feel free to use either.\n"
+      ],
+      "id": "a06d6585"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "# merge TB DataFrame with two US census DataFrames\n",
+        "tb_census_df = (\n",
+        "    tb_df\n",
+        "    .merge(right=census_2010s_df,\n",
+        "           left_on=\"U.S. jurisdiction\", right_on=\"Geographic Area\")\n",
+        "    .merge(right=census_2020s_df,\n",
+        "           left_on=\"U.S. jurisdiction\", right_on=\"Geographic Area\")\n",
+        ")\n",
+        "tb_census_df.head(5)"
+      ],
+      "id": "8afb2895",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Having all of these columns is a little unwieldy. Let's say we're only interested in the population for the years 2019, 2020, and 2021. We could either drop the unneeded columns now, or just merge on smaller census `DataFrame`s. Let's do the latter.\n"
+      ],
+      "id": "b5bbf762"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "# try merging again, but cleaner this time\n",
+        "tb_census_df = (\n",
+        "    tb_df\n",
+        "    .merge(right=census_2010s_df[[\"Geographic Area\", \"2019\"]],\n",
+        "           left_on=\"U.S. jurisdiction\", right_on=\"Geographic Area\")\n",
+        "    .drop(columns=\"Geographic Area\")\n",
+        "    .merge(right=census_2020s_df[[\"Geographic Area\", \"2020\", \"2021\"]],\n",
+        "           left_on=\"U.S. jurisdiction\", right_on=\"Geographic Area\")\n",
+        "    .drop(columns=\"Geographic Area\")\n",
+        ")\n",
+        "tb_census_df.head(5)"
+      ],
+      "id": "f8a263bf",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "### Reproducing Data: Compute Incidence\n",
+        "\n",
+        "Let's recompute incidence to make sure we know where the original CDC numbers came from.\n",
+        "\n",
+        "From the [CDC report](https://www.cdc.gov/mmwr/volumes/71/wr/mm7112a1.htm?s_cid=mm7112a1_w#T1_down): TB incidence is computed as “Cases per 100,000 persons using mid-year population estimates from the U.S. Census Bureau.”\n",
+        "\n",
+        "If we define a group as 100,000 people, then we can compute the TB incidence for a given state population as\n",
+        "\n",
+        "$$\\text{TB incidence} = \\frac{\\text{TB cases in population}}{\\text{groups in population}} = \\frac{\\text{TB cases in population}}{\\text{population}/100000} $$\n",
+        "\n",
+        "$$= \\frac{\\text{TB cases in population}}{\\text{population}} \\times 100000$$\n",
+        "\n",
+        "Let's try this for 2019:\n"
+      ],
+      "id": "051b3001"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "tb_census_df[\"recompute incidence 2019\"] = tb_census_df[\"TB cases 2019\"]/tb_census_df[\"2019\"]*100000\n",
+        "tb_census_df.head(5)"
+      ],
+      "id": "fbce766f",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Awesome!!!\n",
+        "\n",
+        "Let's use a for-loop and Python format strings to compute TB incidence for 2019, 2020, and 2021. Python f-strings are just used for the purposes of this demo, but they're handy to know when you explore data beyond this course ([documentation](https://docs.python.org/3/tutorial/inputoutput.html)).\n"
+      ],
+      "id": "08ba6a84"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "# recompute incidence for 2019, 2020, and 2021.\n",
+        "for year in [2019, 2020, 2021]:\n",
+        "    tb_census_df[f\"recompute incidence {year}\"] = tb_census_df[f\"TB cases {year}\"]/tb_census_df[f\"{year}\"]*100000\n",
+        "tb_census_df.head(5)"
+      ],
+      "id": "62b0d040",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "These numbers look pretty close!!! There are a few errors in the hundredths place, particularly in 2021. It may be useful to further explore reasons behind this discrepancy. \n"
+      ],
+      "id": "da147f22"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "tb_census_df.describe()"
+      ],
+      "id": "7ab9b89a",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "### Bonus EDA: Reproducing the Reported Statistic\n",
+        "\n",
+        "\n",
+        "**How do we reproduce that reported statistic in the original [CDC report](https://www.cdc.gov/mmwr/volumes/71/wr/mm7112a1.htm?s_cid=mm7112a1_w)?**\n",
+        "\n",
+        "> Reported TB incidence (cases per 100,000 persons) increased **9.4%**, from **2.2** during 2020 to **2.4** during 2021 but was lower than incidence during 2019 (2.7). Increases occurred among both U.S.-born and non–U.S.-born persons.\n",
+        "\n",
+        "This is TB incidence computed across the entire U.S. population! How do we reproduce this?\n",
+        "* We need to reproduce the \"Total\" TB incidences in our rolled record.\n",
+        "* But our current `tb_census_df` only has 51 entries (50 states plus Washington, D.C.). There is no rolled record.\n",
+        "* What happened...?\n",
+        "\n",
+        "Let's get exploring!\n",
+        "\n",
+        "Before we keep exploring, we'll set all indexes to more meaningful values, instead of just numbers that pertain to some row at some point. This will make our cleaning slightly easier.\n"
+      ],
+      "id": "db26e5b9"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: true\n",
+        "tb_df = tb_df.set_index(\"U.S. jurisdiction\")\n",
+        "tb_df.head(5)"
+      ],
+      "id": "e0117cd2",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "census_2010s_df = census_2010s_df.set_index(\"Geographic Area\")\n",
+        "census_2010s_df.head(5)"
+      ],
+      "id": "594be428",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "census_2020s_df = census_2020s_df.set_index(\"Geographic Area\")\n",
+        "census_2020s_df.head(5)"
+      ],
+      "id": "85cc6b9e",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "It turns out that our merge above only kept state records, even though our original `tb_df` had the \"Total\" rolled record:\n"
+      ],
+      "id": "23951052"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "tb_df.head()"
+      ],
+      "id": "75af10d2",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Recall that `merge` by default does an **inner** merge by default, meaning that it only preserves keys that are present in **both** `DataFrame`s.\n",
+        "\n",
+        "The rolled records in our census `DataFrame` have different `Geographic Area` fields, which was the key we merged on:\n"
+      ],
+      "id": "17edf05a"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "census_2010s_df.head(5)"
+      ],
+      "id": "2f9f0478",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "The Census `DataFrame` has several rolled records. The aggregate record we are looking for actually has the Geographic Area named \"United States\".\n",
+        "\n",
+        "One straightforward way to get the right merge is to rename the value itself. Because we now have the Geographic Area index, we'll use `df.rename()` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.rename.html)):\n"
+      ],
+      "id": "c062819c"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "# rename rolled record for 2010s\n",
+        "census_2010s_df.rename(index={'United States':'Total'}, inplace=True)\n",
+        "census_2010s_df.head(5)"
+      ],
+      "id": "bb61a63e",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "# same, but for 2020s rename rolled record\n",
+        "census_2020s_df.rename(index={'United States':'Total'}, inplace=True)\n",
+        "census_2020s_df.head(5)"
+      ],
+      "id": "db697a47",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "<br/>\n",
+        "\n",
+        "Next let's rerun our merge. Note the different chaining, because we are now merging on indexes (`df.merge()` [documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.merge.html)).\n"
+      ],
+      "id": "a0c45376"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "tb_census_df = (\n",
+        "    tb_df\n",
+        "    .merge(right=census_2010s_df[[\"2019\"]],\n",
+        "           left_index=True, right_index=True)\n",
+        "    .merge(right=census_2020s_df[[\"2020\", \"2021\"]],\n",
+        "           left_index=True, right_index=True)\n",
+        ")\n",
+        "tb_census_df.head(5)"
+      ],
+      "id": "8994e18f",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "<br/>\n",
+        "\n",
+        "Finally, let's recompute our incidences:\n"
+      ],
+      "id": "4f0fbfa0"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "# recompute incidence for all years\n",
+        "for year in [2019, 2020, 2021]:\n",
+        "    tb_census_df[f\"recompute incidence {year}\"] = tb_census_df[f\"TB cases {year}\"]/tb_census_df[f\"{year}\"]*100000\n",
+        "tb_census_df.head(5)"
+      ],
+      "id": "a7340105",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "We reproduced the total U.S. incidences correctly!\n",
+        "\n",
+        "We're almost there. Let's revisit the quote:\n",
+        "\n",
+        "> Reported TB incidence (cases per 100,000 persons) increased **9.4%**, from **2.2** during 2020 to **2.4** during 2021 but was lower than incidence during 2019 (2.7). Increases occurred among both U.S.-born and non–U.S.-born persons.\n",
+        "\n",
+        "Recall that percent change from $A$ to $B$ is computed as\n",
+        "$\\text{percent change} = \\frac{B - A}{A} \\times 100$.\n"
+      ],
+      "id": "e7512a37"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "incidence_2020 = tb_census_df.loc['Total', 'recompute incidence 2020']\n",
+        "incidence_2020"
+      ],
+      "id": "63dea1da",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "incidence_2021 = tb_census_df.loc['Total', 'recompute incidence 2021']\n",
+        "incidence_2021"
+      ],
+      "id": "b1410afb",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "difference = (incidence_2021 - incidence_2020)/incidence_2020 * 100\n",
+        "difference"
+      ],
+      "id": "de8447b6",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## EDA Demo 2: Mauna Loa CO<sub>2</sub> Data -- A Lesson in Data Faithfulness\n",
+        "\n",
+        "[Mauna Loa Observatory](https://gml.noaa.gov/ccgg/trends/data.html) has been monitoring CO<sub>2</sub> concentrations since 1958.\n"
+      ],
+      "id": "9899f884"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "co2_file = \"data/co2_mm_mlo.txt\""
+      ],
+      "id": "196fb842",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Let's do some **EDA**!!\n",
+        "\n",
+        "### Reading this file into `Pandas`?\n",
+        "Let's instead check out this `.txt` file. Some questions to keep in mind: Do we trust this file extension? What structure is it? \n",
+        "\n",
+        "Lines 71-78 (inclusive) are shown below: \n",
+        "\n",
+        "    line number |                            file contents\n",
+        "    \n",
+        "    71          |   #            decimal     average   interpolated    trend    #days\n",
+        "    72          |   #             date                             (season corr)\n",
+        "    73          |   1958   3    1958.208      315.71      315.71      314.62     -1\n",
+        "    74          |   1958   4    1958.292      317.45      317.45      315.29     -1\n",
+        "    75          |   1958   5    1958.375      317.50      317.50      314.71     -1\n",
+        "    76          |   1958   6    1958.458      -99.99      317.10      314.85     -1\n",
+        "    77          |   1958   7    1958.542      315.86      315.86      314.98     -1\n",
+        "    78          |   1958   8    1958.625      314.93      314.93      315.94     -1\n",
+        "\n",
+        "\n",
+        "Notice how: \n",
+        "\n",
+        "- The values are separated by white space, possibly tabs.\n",
+        "- The data line up down the rows. For example, the month appears in 7th to 8th position of each line.\n",
+        "- The 71st and 72nd lines in the file contain column headings split over two lines.\n",
+        "\n",
+        "We can use `read_csv` to read the data into a `pandas` `DataFrame`, and we provide several arguments to specify that the separators are white space, there is no header (**we will set our own column names**), and to skip the first 72 rows of the file.\n"
+      ],
+      "id": "54cbc41c"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "co2 = pd.read_csv(\n",
+        "    co2_file, header = None, skiprows = 72,\n",
+        "    sep = r'\\s+'       #delimiter for continuous whitespace (stay tuned for regex next lecture))\n",
+        ")\n",
+        "co2.head()"
+      ],
+      "id": "91ba0617",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Congratulations! You've wrangled the data!\n",
+        "\n",
+        "<br/>\n",
+        "\n",
+        "...But our columns aren't named.\n",
+        "**We need to do more EDA.**\n",
+        "\n",
+        "### Exploring Variable Feature Types\n",
+        "\n",
+        "The NOAA [webpage](https://gml.noaa.gov/ccgg/trends/) might have some useful tidbits (in this case it doesn't).\n",
+        "\n",
+        "Using this information, we'll rerun `pd.read_csv`, but this time with some **custom column names.**\n"
+      ],
+      "id": "eb2bc099"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "co2 = pd.read_csv(\n",
+        "    co2_file, header = None, skiprows = 72,\n",
+        "    sep = r'\\s+', #regex for continuous whitespace (next lecture)\n",
+        "    names = ['Yr', 'Mo', 'DecDate', 'Avg', 'Int', 'Trend', 'Days']\n",
+        ")\n",
+        "co2.head()"
+      ],
+      "id": "ca56051b",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "### Visualizing CO<sub>2</sub>\n",
+        "Scientific studies tend to have very clean data, right...? Let's jump right in and make a time series plot of CO<sub>2</sub> monthly averages.\n"
+      ],
+      "id": "915a9ed8"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: true\n",
+        "sns.lineplot(x='DecDate', y='Avg', data=co2);"
+      ],
+      "id": "ad29a94b",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "The code above uses the `seaborn` plotting library (abbreviated `sns`). We will cover this in the Visualization lecture, but now you don't need to worry about how it works!\n",
+        "\n",
+        "Yikes! Plotting the data uncovered a problem. The sharp vertical lines suggest that we have some **missing values**. What happened here?\n"
+      ],
+      "id": "e9c8141a"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "co2.head()"
+      ],
+      "id": "c42f7712",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "co2.tail()"
+      ],
+      "id": "968f3e13",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Some data have unusual values like -1 and -99.99.\n",
+        "\n",
+        "Let's check the description at the top of the file again.\n",
+        "\n",
+        "* -1 signifies a missing value for the number of days `Days` the equipment was in operation that month.\n",
+        "* -99.99 denotes a missing monthly average `Avg`\n",
+        "\n",
+        "How can we fix this? First, let's explore other aspects of our data. Understanding our data will help us decide what to do with the missing values.\n",
+        "\n",
+        "<br/>\n",
+        "\n",
+        "\n",
+        "### Sanity Checks: Reasoning about the data\n",
+        "First, we consider the shape of the data. How many rows should we have?\n",
+        "\n",
+        "* If chronological order, we should have one record per month.\n",
+        "* Data from March 1958 to August 2019.\n",
+        "* We should have $ 12 \\times (2019-1957) - 2 - 4 = 738 $ records.\n"
+      ],
+      "id": "3f47c892"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "co2.shape"
+      ],
+      "id": "dfe954f0",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Nice!! The number of rows (i.e. records) match our expectations.\n",
+        "\n",
+        "\n",
+        "Let's now check the quality of each feature.\n",
+        "\n",
+        "### Understanding Missing Value 1: `Days`\n",
+        "`Days` is a time field, so let's analyze other time fields to see if there is an explanation for missing values of days of operation.\n",
+        "\n",
+        "Let's start with **months**, `Mo`.\n",
+        "\n",
+        "Are we missing any records? The number of months should have 62 or 61 instances (March 1957-August 2019).\n"
+      ],
+      "id": "062a81f9"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "co2[\"Mo\"].value_counts().sort_index()"
+      ],
+      "id": "ce887c4f",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "As expected Jan, Feb, Sep, Oct, Nov, and Dec have 61 occurrences and the rest 62.\n",
+        "\n",
+        "<br/>\n",
+        "\n",
+        "Next let's explore **days** `Days` itself, which is the number of days that the measurement equipment worked.\n"
+      ],
+      "id": "a12cd808"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: true\n",
+        "sns.displot(co2['Days']);\n",
+        "plt.title(\"Distribution of days feature\"); # suppresses unneeded plotting output"
+      ],
+      "id": "a271c097",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "In terms of data quality, a handful of months have averages based on measurements taken on fewer than half the days. In addition, there are nearly 200 missing values--**that's about 27% of the data**!\n",
+        "\n",
+        "<br/>\n",
+        "\n",
+        "Finally, let's check the last time feature, **year** `Yr`.\n",
+        "\n",
+        "Let's check to see if there is any connection between missing-ness and the year of the recording.\n"
+      ],
+      "id": "83cac787"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: true\n",
+        "sns.scatterplot(x=\"Yr\", y=\"Days\", data=co2);\n",
+        "plt.title(\"Day field by Year\"); # the ; suppresses output"
+      ],
+      "id": "af86100e",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "**Observations**:\n",
+        "\n",
+        "* All of the missing data are in the early years of operation.\n",
+        "* It appears there may have been problems with equipment in the mid to late 80s.\n",
+        "\n",
+        "**Potential Next Steps**:\n",
+        "\n",
+        "* Confirm these explanations through documentation about the historical readings.\n",
+        "* Maybe drop the earliest recordings? However, we would want to delay such action until after we have examined the time trends and assess whether there are any potential problems.\n",
+        "\n",
+        "<br/>\n",
+        "\n",
+        "### Understanding Missing Value 2: `Avg`\n",
+        "Next, let's return to the -99.99 values in `Avg` to analyze the overall quality of the CO<sub>2</sub> measurements. We'll plot a histogram of the average CO<sub>2</sub> measurements\n"
+      ],
+      "id": "c72c73ce"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: true\n",
+        "# Histograms of average CO2 measurements\n",
+        "sns.displot(co2['Avg']);"
+      ],
+      "id": "e9979087",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "The non-missing values are in the 300-400 range (a regular range of CO<sub>2</sub> levels).\n",
+        "\n",
+        "We also see that there are only a few missing `Avg` values (**<1% of values**). Let's examine all of them:\n"
+      ],
+      "id": "57a5037e"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "co2[co2[\"Avg\"] < 0]"
+      ],
+      "id": "a45a85ee",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "There doesn't seem to be a pattern to these values, other than that most records also were missing `Days` data.\n",
+        "\n",
+        "### Drop, `NaN`, or Impute Missing `Avg` Data?\n",
+        "\n",
+        "How should we address the invalid `Avg` data?\n",
+        "\n",
+        "1. Drop records\n",
+        "2. Set to NaN\n",
+        "3. Impute using some strategy\n",
+        "\n",
+        "Remember we want to fix the following plot:\n"
+      ],
+      "id": "15518326"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: true\n",
+        "sns.lineplot(x='DecDate', y='Avg', data=co2)\n",
+        "plt.title(\"CO2 Average By Month\");"
+      ],
+      "id": "e399205b",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Since we are plotting `Avg` vs `DecDate`, we should just focus on dealing with missing values for `Avg`.\n",
+        "\n",
+        "\n",
+        "Let's consider a few options:\n",
+        "1. Drop those records\n",
+        "2. Replace -99.99 with NaN\n",
+        "3. Substitute it with a likely value for the average CO<sub>2</sub>?\n",
+        "\n",
+        "What do you think are the pros and cons of each possible action?\n",
+        "\n",
+        "Let's examine each of these three options.\n"
+      ],
+      "id": "466e514e"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "# 1. Drop missing values\n",
+        "co2_drop = co2[co2['Avg'] > 0]\n",
+        "co2_drop.head()"
+      ],
+      "id": "4f66770f",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "# 2. Replace NaN with -99.99\n",
+        "co2_NA = co2.replace(-99.99, np.nan)\n",
+        "co2_NA.head()"
+      ],
+      "id": "2e9a6f39",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "We'll also use a third version of the data.\n",
+        "\n",
+        "First, we note that the dataset already comes with a **substitute value** for the -99.99.\n",
+        "\n",
+        "From the file description:\n",
+        "\n",
+        ">  The `interpolated` column includes average values from the preceding column (`average`)\n",
+        "and **interpolated values** where data are missing.  Interpolated values are\n",
+        "computed in two steps...\n",
+        "\n",
+        "The `Int` feature has values that exactly match those in `Avg`, except when `Avg` is -99.99, and then a **reasonable** estimate is used instead.\n",
+        "\n",
+        "So, the third version of our data will use the `Int` feature instead of `Avg`.\n"
+      ],
+      "id": "e55f313e"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: false\n",
+        "# 3. Use interpolated column which estimates missing Avg values\n",
+        "co2_impute = co2.copy()\n",
+        "co2_impute['Avg'] = co2['Int']\n",
+        "co2_impute.head()"
+      ],
+      "id": "f2defdff",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "What's a **reasonable** estimate?\n",
+        "\n",
+        "To answer this question, let's zoom in on a short time period, say the measurements in 1958 (where we know we have two missing values).\n"
+      ],
+      "id": "04873731"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: true\n",
+        "# results of plotting data in 1958\n",
+        "\n",
+        "def line_and_points(data, ax, title):\n",
+        "    # assumes single year, hence Mo\n",
+        "    ax.plot('Mo', 'Avg', data=data)\n",
+        "    ax.scatter('Mo', 'Avg', data=data)\n",
+        "    ax.set_xlim(2, 13)\n",
+        "    ax.set_title(title)\n",
+        "    ax.set_xticks(np.arange(3, 13))\n",
+        "\n",
+        "def data_year(data, year):\n",
+        "    return data[data[\"Yr\"] == 1958]\n",
+        "    \n",
+        "# uses matplotlib subplots\n",
+        "# you may see more next week; focus on output for now\n",
+        "fig, axes = plt.subplots(ncols = 3, figsize=(12, 4), sharey=True)\n",
+        "\n",
+        "year = 1958\n",
+        "line_and_points(data_year(co2_drop, year), axes[0], title=\"1. Drop Missing\")\n",
+        "line_and_points(data_year(co2_NA, year), axes[1], title=\"2. Missing Set to NaN\")\n",
+        "line_and_points(data_year(co2_impute, year), axes[2], title=\"3. Missing Interpolated\")\n",
+        "\n",
+        "fig.suptitle(f\"Monthly Averages for {year}\")\n",
+        "plt.tight_layout()"
+      ],
+      "id": "98c68ec2",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "In the big picture since there are only 7 `Avg` values missing (**<1%** of 738 months), any of these approaches would work.\n",
+        "\n",
+        "However there is some appeal to **option C, Imputing**:\n",
+        "\n",
+        "* Shows seasonal trends for CO<sub>2</sub>\n",
+        "* We are plotting all months in our data as a line plot\n",
+        "\n",
+        "\n",
+        "Let's replot our original figure with option 3:\n"
+      ],
+      "id": "e302492a"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: true\n",
+        "sns.lineplot(x='DecDate', y='Avg', data=co2_impute)\n",
+        "plt.title(\"CO2 Average By Month, Imputed\");"
+      ],
+      "id": "a1d35068",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Looks pretty close to what we see on the NOAA [website](https://gml.noaa.gov/ccgg/trends/)!\n",
+        "\n",
+        "### Presenting the Data: A Discussion on Data Granularity\n",
+        "\n",
+        "From the description:\n",
+        "\n",
+        "* Monthly measurements are averages of average day measurements.\n",
+        "* The NOAA GML website has datasets for daily/hourly measurements too.\n",
+        "\n",
+        "The data you present depends on your research question.\n",
+        "\n",
+        "**How do CO<sub>2</sub> levels vary by season?**\n",
+        "\n",
+        "* You might want to keep average monthly data.\n",
+        "\n",
+        "**Are CO<sub>2</sub> levels rising over the past 50+ years, consistent with global warming predictions?**\n",
+        "\n",
+        "* You might be happier with a **coarser granularity** of average year data!\n"
+      ],
+      "id": "9a4b663c"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| code-fold: true\n",
+        "co2_year = co2_impute.groupby('Yr').mean()\n",
+        "sns.lineplot(x='Yr', y='Avg', data=co2_year)\n",
+        "plt.title(\"CO2 Average By Year\");"
+      ],
+      "id": "7e5ab88d",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Indeed, we see a rise by nearly 100 ppm of CO<sub>2</sub> since Mauna Loa began recording in 1958.\n",
+        "\n",
+        "## Summary\n",
+        "We went over a lot of content this lecture; let's summarize the most important points: \n",
+        "\n",
+        "### Dealing with Missing Values\n",
+        "There are a few options we can take to deal with missing data:\n",
+        "\n",
+        "* Drop missing records\n",
+        "* Keep `NaN` missing values\n",
+        "* Impute using an interpolated column\n",
+        "\n",
+        "### EDA and Data Wrangling\n",
+        "There are several ways to approach EDA and Data Wrangling: \n",
+        "\n",
+        "* Examine the **data and metadata**: what is the date, size, organization, and structure of the data? \n",
+        "* Examine each **field/attribute/dimension** individually.\n",
+        "* Examine pairs of related dimensions (e.g. breaking down grades by major).\n",
+        "* Along the way, we can:\n",
+        "    * **Visualize** or summarize the data.\n",
+        "    * **Validate assumptions** about data and its collection process. Pay particular attention to when the data was collected. \n",
+        "    * Identify and **address anomalies**.\n",
+        "    * Apply data transformations and corrections (we'll cover this in the upcoming lecture).\n",
+        "    * **Record everything you do!** Developing in Jupyter Notebook promotes *reproducibility* of your own work!\n"
+      ],
+      "id": "a5b5d88e"
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "display_name": "data100quarto",
+      "language": "python",
+      "name": "python3"
+    },
+    "jupytext": {
+      "text_representation": {
+        "extension": ".qmd",
+        "format_name": "quarto",
+        "format_version": "1.0",
+        "jupytext_version": "1.16.1"
+      }
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}
