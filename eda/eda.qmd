@@ -288,6 +288,7 @@ for i in range(3):
 ```
 
 Observations:
+
 * These look like equal-length records, so maybe `data` is a table!
 * But what do each of values in the record mean? Where can we find column headers?
 
@@ -568,6 +569,7 @@ U.S. Census population estimates [source](https://www.census.gov/data/tables/tim
 
 Running the below cells cleans the data.
 There are a few new methods here:
+
 * `df.convert_dtypes()` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.convert_dtypes.html)) conveniently converts all float dtypes into ints and is out of scope for the class.
 * `df.drop_na()` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.dropna.html)) will be explained in more detail next time.
 
@@ -577,11 +579,10 @@ There are a few new methods here:
 census_2010s_df = pd.read_csv("data/nst-est2019-01.csv", header=3, thousands=",")
 census_2010s_df = (
     census_2010s_df
-    .reset_index()
-    .drop(columns=["index", "Census", "Estimates Base"])
     .rename(columns={"Unnamed: 0": "Geographic Area"})
-    .convert_dtypes()                 # "smart" converting of columns, use at your own risk
-    .dropna()                         # we'll introduce this next time
+    .drop(columns=["Census", "Estimates Base"])
+    .convert_dtypes() # "smart" converting of columns to int, use at your own risk
+    .dropna()  # we'll introduce this very soon
 )
 census_2010s_df['Geographic Area'] = census_2010s_df['Geographic Area'].str.strip('.')
 
@@ -639,183 +640,159 @@ tb_census_df = (
 tb_census_df.head(5)
 ```
 
-Having all of these columns is a little unwieldy. Let's say we're only interested in the population for the years 2019, 2020, and 2021. We could either drop the unneeded columns now, or just merge on smaller census `DataFrame`s. Let's do the latter.
+We're only interested in the population for the years 2019, 2020, and 2021, so let's select just those columns:
 
 ```{python}
 #| code-fold: false
-# try merging again, but cleaner this time
+census_2019_df = census_2010s_df[['Geographic Area', '2019']]
+census_2020_2021_df = census_2020s_df[['Geographic Area', '2020', '2021']]
+
+display(tb_df.tail(2))
+display(census_2019_df.tail(2))
+display(census_2020_2021_df.tail(2))
+```
+
+All three dataframes have a column containing U.S. states, along with some other geographic areas. These columns are our **join keys**.
+
+* Below, we use `df1.merge(right=df2, ...)` to carry out the merge ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.merge.html)).
+
+* We could have alternatively used the function `pd.merge(left=df1, right=df2, ...)` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.merge.html#pandas.merge)).
+
+```{python}
+#| code-fold: false
+# merge TB dataframe with two US census dataframes
 tb_census_df = (
     tb_df
-    .merge(right=census_2010s_df[["Geographic Area", "2019"]],
+    .merge(right=census_2019_df,
            left_on="U.S. jurisdiction", right_on="Geographic Area")
-    .drop(columns="Geographic Area")
-    .merge(right=census_2020s_df[["Geographic Area", "2020", "2021"]],
+    .merge(right=census_2020_2021_df,
            left_on="U.S. jurisdiction", right_on="Geographic Area")
-    .drop(columns="Geographic Area")
 )
-tb_census_df.head(5)
+tb_census_df.tail(2)
+```
+
+To see what's going on with the duplicate columns, and the `_x` and `_y`, let's do the just the first merge:
+
+```{python}
+#| code-fold: false
+tb_df.merge(right=census_2019_df, 
+            left_on="U.S. jurisdiction", 
+            right_on="Geographic Area").head()
+```
+
+Notice that the columns containing the **join keys** have all been retained, and all contain the same values.
+
+* Furthermore, notice that the duplicated columns are appended with `_x` and `_y` to keep the column names unique.
+
+* In the TB case count data, column `2019` represents the number of TB cases in 2019, but in the Census data, column `2019` represents the U.S. population.
+
+We can use the `suffixes` argument to modify the `_x` and `_y` defaults to our liking ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.merge.html#pandas.merge)).
+
+```{python}
+#| code-fold: false
+# Specify the suffixes to use for duplicated column names
+tb_df.merge(right=census_2019_df,
+           left_on="U.S. jurisdiction", 
+           right_on="Geographic Area",
+           suffixes=('_cases', '_population')).head()
+```
+
+Notice the `_x` and `_y` have changed to `_cases` and `_population`, just like we specified.
+
+Putting it all together, and dropping the duplicated `Geographic Area` columns:
+
+```{python}
+#| code-fold: false
+# Redux: merge TB dataframe with two US census dataframes
+tb_census_df = (
+    tb_df
+    
+    .merge(right=census_2019_df,
+           left_on="U.S. jurisdiction", right_on="Geographic Area",
+           suffixes=('_cases', '_population'))
+    .drop(columns="Geographic Area")
+
+    .merge(right=census_2020_2021_df,
+           left_on="U.S. jurisdiction", right_on="Geographic Area",
+           suffixes=('_cases', '_population'))
+    .drop(columns="Geographic Area")
+    
+)
+tb_census_df.tail(2)
 ```
 
 ### Reproducing Data: Compute Incidence
 
-Let's recompute incidence to make sure we know where the original CDC numbers came from.
+Let's see if we can reproduce the original CDC numbers from our augmented dataset of TB case counts and state populations.
+
+- Recall that the nationwide TB incidence was **2.7 in 2019**, **2.2 in 2020**, and **2.4 in 2021**.
+
+- Along the way, we'll also compute state-level incidence.
 
 From the [CDC report](https://www.cdc.gov/mmwr/volumes/71/wr/mm7112a1.htm?s_cid=mm7112a1_w#T1_down): TB incidence is computed as “Cases per 100,000 persons using mid-year population estimates from the U.S. Census Bureau.”
 
-If we define a group as 100,000 people, then we can compute the TB incidence for a given state population as
+Let's start with a simpler question: What is the per person incidence? 
 
-$$\text{TB incidence} = \frac{\text{TB cases in population}}{\text{groups in population}} = \frac{\text{TB cases in population}}{\text{population}/100000} $$
+- In other words, what is the probability that a randomly selected person in the population had TB within a given year?
 
-$$= \frac{\text{TB cases in population}}{\text{population}} \times 100000$$
+$$\text{TB incidence per person} = \frac{\text{\# TB cases in population}}{\text{Total population size}}$$
 
-Let's try this for 2019:
-
-```{python}
-#| code-fold: false
-tb_census_df["recompute incidence 2019"] = tb_census_df["TB cases 2019"]/tb_census_df["2019"]*100000
-tb_census_df.head(5)
-```
-
-Awesome!!!
-
-Let's use a for-loop and Python format strings to compute TB incidence for 2019, 2020, and 2021. Python f-strings are just used for the purposes of this demo, but they're handy to know when you explore data beyond this course ([documentation](https://docs.python.org/3/tutorial/inputoutput.html)).
+Let's calculate per person incidence for 2019:
 
 ```{python}
 #| code-fold: false
-# recompute incidence for 2019, 2020, and 2021.
-for year in [2019, 2020, 2021]:
-    tb_census_df[f"recompute incidence {year}"] = tb_census_df[f"TB cases {year}"]/tb_census_df[f"{year}"]*100000
-tb_census_df.head(5)
-```
-
-These numbers look pretty close!!! There are a few errors in the hundredths place, particularly in 2021. It may be useful to further explore reasons behind this discrepancy. 
-
-```{python}
-#| code-fold: false
-tb_census_df.describe()
-```
-
-### Bonus EDA: Reproducing the Reported Statistic
-
-
-**How do we reproduce that reported statistic in the original [CDC report](https://www.cdc.gov/mmwr/volumes/71/wr/mm7112a1.htm?s_cid=mm7112a1_w)?**
-
-> Reported TB incidence (cases per 100,000 persons) increased **9.4%**, from **2.2** during 2020 to **2.4** during 2021 but was lower than incidence during 2019 (2.7). Increases occurred among both U.S.-born and non–U.S.-born persons.
-
-This is TB incidence computed across the entire U.S. population! How do we reproduce this?
-* We need to reproduce the "Total" TB incidences in our rolled record.
-* But our current `tb_census_df` only has 51 entries (50 states plus Washington, D.C.). There is no rolled record.
-* What happened...?
-
-Let's get exploring!
-
-Before we keep exploring, we'll set all indexes to more meaningful values, instead of just numbers that pertain to some row at some point. This will make our cleaning slightly easier.
-
-```{python}
-#| code-fold: true
-tb_df = tb_df.set_index("U.S. jurisdiction")
-tb_df.head(5)
-```
-
-```{python}
-#| code-fold: false
-census_2010s_df = census_2010s_df.set_index("Geographic Area")
-census_2010s_df.head(5)
-```
-
-```{python}
-#| code-fold: false
-census_2020s_df = census_2020s_df.set_index("Geographic Area")
-census_2020s_df.head(5)
-```
-
-It turns out that our merge above only kept state records, even though our original `tb_df` had the "Total" rolled record:
-
-```{python}
-#| code-fold: false
-tb_df.head()
-```
-
-Recall that `merge` by default does an **inner** merge by default, meaning that it only preserves keys that are present in **both** `DataFrame`s.
-
-The rolled records in our census `DataFrame` have different `Geographic Area` fields, which was the key we merged on:
-
-```{python}
-#| code-fold: false
-census_2010s_df.head(5)
-```
-
-The Census `DataFrame` has several rolled records. The aggregate record we are looking for actually has the Geographic Area named "United States".
-
-One straightforward way to get the right merge is to rename the value itself. Because we now have the Geographic Area index, we'll use `df.rename()` ([documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.rename.html)):
-
-```{python}
-#| code-fold: false
-# rename rolled record for 2010s
-census_2010s_df.rename(index={'United States':'Total'}, inplace=True)
-census_2010s_df.head(5)
-```
-
-```{python}
-#| code-fold: false
-# same, but for 2020s rename rolled record
-census_2020s_df.rename(index={'United States':'Total'}, inplace=True)
-census_2020s_df.head(5)
-```
-
-<br/>
-
-Next let's rerun our merge. Note the different chaining, because we are now merging on indexes (`df.merge()` [documentation](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.merge.html)).
-
-```{python}
-#| code-fold: false
-tb_census_df = (
-    tb_df
-    .merge(right=census_2010s_df[["2019"]],
-           left_index=True, right_index=True)
-    .merge(right=census_2020s_df[["2020", "2021"]],
-           left_index=True, right_index=True)
+# Calculate per person incidence for 2019
+tb_census_df["per person incidence 2019"] = (
+    tb_census_df["2019_cases"]/tb_census_df["2019_population"]
 )
-tb_census_df.head(5)
+tb_census_df
 ```
 
-<br/>
+TB is really rare in the United States, so per person TB incidence is really low, as expected.
 
-Finally, let's recompute our incidences:
+- But, if we were to consider 100,000 people, the probability of seeing a TB case is higher.
+
+- In fact, it would be 100,000 times higher!
+
+$$\text{TB incidence per 100,000} = \text{100,000} * \text{TB incidence per person}$$
 
 ```{python}
 #| code-fold: false
-# recompute incidence for all years
+# To help read bigger numbers in Python, you can use _ to separate thousands,
+# akin to using commas. 100_000 is the same as writing 100000, but more readable.
+tb_census_df["per 100k incidence 2019"] = (
+    100_000 * tb_census_df["per person incidence 2019"] 
+)
+tb_census_df
+```
+
+Now we're seeing more human-readable values.
+
+- For example, there 5.3 tuberculosis cases for every 100,000 California residents in 2019.
+
+To wrap up this exercise, let's calculate the nationwide incidence of TB in 2019.
+
+```{python}
+#| code-fold: false
+# Recall that the CDC reported an incidence of 2.7 per 100,000 in 2019.
+tot_tb_cases_50_states = tb_census_df["2019_cases"].sum()
+tot_pop_50_states = tb_census_df["2019_population"].sum()
+tb_per_100k_50_states = 100_000 * tot_tb_cases_50_states / tot_pop_50_states
+tb_per_100k_50_states
+```
+
+We can use a `for` loop to compute the incidence for 2019, 2020, and 2021.
+
+- You'll notice that we get the same numbers reported by the CDC!
+
+```{python}
+#| code-fold: false
+# f strings (f"...") are a handy way to pass in variables to strings.
 for year in [2019, 2020, 2021]:
-    tb_census_df[f"recompute incidence {year}"] = tb_census_df[f"TB cases {year}"]/tb_census_df[f"{year}"]*100000
-tb_census_df.head(5)
-```
-
-We reproduced the total U.S. incidences correctly!
-
-We're almost there. Let's revisit the quote:
-
-> Reported TB incidence (cases per 100,000 persons) increased **9.4%**, from **2.2** during 2020 to **2.4** during 2021 but was lower than incidence during 2019 (2.7). Increases occurred among both U.S.-born and non–U.S.-born persons.
-
-Recall that percent change from $A$ to $B$ is computed as
-$\text{percent change} = \frac{B - A}{A} \times 100$.
-
-```{python}
-#| code-fold: false
-incidence_2020 = tb_census_df.loc['Total', 'recompute incidence 2020']
-incidence_2020
-```
-
-```{python}
-#| code-fold: false
-incidence_2021 = tb_census_df.loc['Total', 'recompute incidence 2021']
-incidence_2021
-```
-
-```{python}
-#| code-fold: false
-difference = (incidence_2021 - incidence_2020)/incidence_2020 * 100
-difference
+  tot_tb_cases_50_states = tb_census_df[f"{year}_cases"].sum()
+  tot_pop_50_states = tb_census_df[f"{year}_population"].sum()
+  tb_per_100k_50_states = 100_000 * tot_tb_cases_50_states / tot_pop_50_states
+  print(tb_per_100k_50_states)
 ```
 
 ## EDA Demo 2: Mauna Loa CO<sub>2</sub> Data -- A Lesson in Data Faithfulness
