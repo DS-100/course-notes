@@ -1,5 +1,5 @@
 ---
-title: Regular Expressions (Old Notes from Fall 2024)
+title: Regular Expressions
 format:
   html:
     toc: true
@@ -89,7 +89,7 @@ with open('data/county_and_population.csv') as f:
 display(county_and_state), display(county_and_pop);
 ```
 
-Last time, we used a **primary key** and **foreign key** to join two tables. While neither of these keys exist in our `DataFrame`s, the `"County"` columns look similar enough. Can we convert these columns into one standard, canonical form to merge the two tables? 
+Can we convert these columns into one standard, canonical form to merge the two tables? 
 
 #### Canonicalization with Python String Manipulation
 
@@ -109,15 +109,6 @@ def canonicalize_county(county_name):
     )
 
 canonicalize_county("St. John the Baptist")
-```
-
-We will use the `pandas` `map` function to apply the `canonicalize_county` function to every row in both `DataFrame`s. In doing so, we'll create a new column in each called `clean_county_python` with the canonical form.
-
-```{python}
-#| code-fold: false
-county_and_pop['clean_county_python'] = county_and_pop['County'].map(canonicalize_county)
-county_and_state['clean_county_python'] = county_and_state['County'].map(canonicalize_county)
-display(county_and_state), display(county_and_pop);
 ```
 
 #### Canonicalization with Pandas Series Methods
@@ -176,7 +167,6 @@ day, month, year, hour, minute, seconds, time_zone
 There are two problems with this code:
 
 1. Python's built-in functions limit us to extract data one record at a time,
-    - This can be resolved using the `map` function or `pandas` `Series` methods.
 2. The code is quite verbose.
     - This is a larger issue that is trickier to solve
 
@@ -241,20 +231,30 @@ Notice how these metacharacter operations are ordered. Rather than being literal
 
 **Question 1**: Give a regular expression that matches `moon`, `moooon`, etc. Your expression should match any even number of `o`s except zero (i.e. don’t match `mn`).
 
-**Answer 1**: `moo(oo)*n`
+<details>
+    <summary><b>Answer1</b></summary>
+
+`moo(oo)*n`
 
 - Hardcoding `oo` before the capture group ensures that `mn` is not matched.
 - A capture group of `(oo)*` ensures the number of `o`'s is even.
 
+</details>
+
 **Question 2**: Using only basic operations, formulate a regex that matches `muun`, `muuuun`, `moon`, `moooon`, etc. Your expression should match any even number of `u`s or `o`s except zero (i.e. don’t match `mn`).
 
-**Answer 2**: `m(uu(uu)*|oo(oo)*)n`
+<details>
+    <summary><b>Answer2</b></summary>
+
+`m(uu(uu)*|oo(oo)*)n`
 
 - The leading `m` and trailing `n` ensures that only strings beginning with `m` and ending with `n` are matched.
 - Notice how the outer capture group surrounds the `|`. 
     - Consider the regex `m(uu(uu)*)|(oo(oo)*)n`. This incorrectly matches `muu` and `oooon`. 
         - Each OR clause is everything to the left and right of `|`. The incorrect solution matches only half of the string, and ignores either the beginning `m` or trailing `n`.
         - A set of parenthesis must surround `|`. That way, each OR clause is everything to the left and right of `|` **within** the group. This ensures both the beginning `m` *and* trailing `n` are matched.
+
+</details>
 
 ## RegEx Expanded
 
@@ -389,7 +389,10 @@ log_lines[0]
 
 **Question**: Give a regular expression that matches everything contained within and including the brackets - the day, month, year, hour, minutes, seconds, and time zone.
 
-**Answer**: `\[.*\]`
+<details>
+    <summary><b>Answer</b></summary>
+
+`\[.*\]`
 
 - Notice how matching the literal `[` and `]` is necessary. Therefore, an escape character `\` is required before both `[` and `]` — otherwise these metacharacters will match character classes. 
 - We need to match a particular format between `[` and `]`. For this example, `.*` will suffice.
@@ -399,6 +402,8 @@ log_lines[0]
 - This solution is much safer. 
     - Imagine the data between `[` and `]` was garbage - `.*` will still match that. 
     - The alternate solution will only match data that follows the correct format.
+
+</details>
 
 ## Regex in Python and Pandas (RegEx Groups)
 
