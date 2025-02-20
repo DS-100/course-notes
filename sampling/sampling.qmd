@@ -1,5 +1,5 @@
 ---
-title: Sampling (Old Notes from Fall 2024)
+title: Sampling
 format:
   html:
     toc: true
@@ -18,7 +18,7 @@ jupyter:
       format_version: '1.0'
       jupytext_version: 1.16.1
   kernelspec:
-    display_name: Python 3 (ipykernel)
+    display_name: data100quarto
     language: python
     name: python3
 ---
@@ -58,7 +58,7 @@ While ideally, these three sets would be exactly the same, they usually aren't i
 
 ![Sampling_Frames](images/samplingframe.png)
 
-## Bias: A Case Study
+## Sampling: A Case Study
 
 The following case study is adapted from *Statistics* by Freedman, Pisani, and Purves, W.W. Norton NY, 1978.
 
@@ -70,35 +70,21 @@ It turns out that the *Literary Digest* sample was not representative of the pop
 
 At the same time, George Gallup, a rising statistician, also made predictions about the 1936 elections. Despite having a smaller sample size of “only” 50,000 (this is still more than necessary; more when we cover the Central Limit Theorem), his estimate that 56\% of voters would choose Roosevelt was much closer to the actual result (61\%). Gallup also predicted the *Digest*'s prediction within 1\% with a sample size of only 3000 people by anticipating the *Digest*'s affluent sampling frame and subsampling those individuals. 
 
+## Sampling Errors
+
 So what's the moral of the story? Samples, while convenient, are subject to chance error and **bias**. Election polling, in particular, can involve many sources of bias. To name a few:
 
 * **Selection bias** systematically excludes (or favors) particular groups. 
     * Example: the Literary Digest poll excludes people not in phone books.
-    * How to avoid: Examine the sampling frame and the method of sampling.
+    * How to avoid: Randomly sample, and improve overlap of sampling  frame and population.
 * **Response bias** occurs because people don't always respond truthfully. Survey designers pay special detail to the nature and wording of questions to avoid this type of bias.
     * Example: Illegal immigrants might not answer truthfully when asked citizenship questions on the census survey.
-    * How to avoid: Examine the nature of questions and the method of surveying. Randomized response - flip a coin and answer yes if heads or answer truthfully if tails.
+    * How to avoid: Improve questions. Lots of response bias [subtypes + prevention methods](https://en.wikipedia.org/wiki/Response_bias#:~:text=%5B7%5D-,Types,-%5Bedit%5D).
 * **Non-response bias** occurs because people don't always respond to survey requests, which can skew responses. 
     * Example: Only 2.4m out of 10m people responded to the *Literary Digest*'s poll.
-    * How to avoid: Keep surveys short, and be persistent.
- 
-**Randomized Response**
+    * How to avoid: Increase response rate. For example, reduce the number and length of questions, incentivize completion, and follow up.
 
-Suppose you want to ask someone a sensitive question: "Have you ever cheated on an exam?" An individual may be embarrassed or afraid to answer truthfully and might lie or not answer the question. One solution is to leverage a randomized response:
-
-First, you can ask the individual to secretly flip a fair coin; you (the surveyor) *don't* know the outcome of the coin flip.
-
-Then, you ask them to **answer "Yes"** if the coin landed heads and to **answer truthfully** if the coin landed tails.
-  
-The surveyor doesn't know if the **"Yes"** means that the **person cheated** or if it means that the **coin landed heads**. The individual's sensitive information remains secret. However, if the response is **"No"**, then the surveyor knows the **individual didn't cheat**. We assume the individual is comfortable revealing this information. 
-
-Generally, we can assume that the coin lands heads 50% of the time, masking the remaining 50% of the "No" answers. We can therefore **double** the proportion of "No" answers to estimate the **true** fraction of "No" answers.
-
-**Election Polls**
-
-Today, the *Gallup Poll* is one of the leading polls for election results. The many sources of biases -- who responds to polls? Do voters tell the truth? How can we predict turnout? -- still remain, but the *Gallup Poll* uses several tactics to mitigate them. Within their sampling frame of "civilian, non-institutionalized population” of adults in telephone households in continental U.S., they use random digit dialing to include both listed/unlisted phone numbers and to avoid selection bias. Additionally, they use a within-household selection process to randomly select households with one or more adults. If no one answers, re-call multiple times to avoid non-response bias.
-
-## Probability Samples
+## Types of Sampling
 
 When sampling, it is essential to focus on the quality of the sample rather than the quantity of the sample. A huge sample size does not fix a bad sampling method. Our main goal is to gather a sample that is representative of the population it came from. In this section, we'll explore the different types of sampling and their pros and cons. 
 
@@ -175,16 +161,34 @@ Consider the following sampling scheme:
   No. The chance of selecting (8, 18) is 1/10; the chance of selecting (8, 9) is 0.
 </details>
 
-### Demo: Barbie v. Oppenheimer
-We are trying to collect a sample from Berkeley residents to predict the which one of Barbie and Oppenheimer would perform better on their opening day, July 21st.
+### Example Scheme 3: Stratified Random Sampling
+Suppose you want to interview a representative sample of **12 students** enrolled in Data 100.
 
-First, let's grab a dataset that has every single resident in Berkeley (this is a fake dataset) and which movie they **actually** watched on July 21st.
+- Suppose there are **1,200 students** in Data 100.
+- **100 students** are graduate students. The remaining **1,100** are undergraduates.
+- I conduct an SRS with **n=1** on the 100 graduate students, and an SRS with **n=11** on the 1,100 undergraduates.
 
-Let's load in the `movie.csv` table. We can assume that:
+<details>
+<summary>Does each student have the same probability of being selected?</summary>
 
-* `is_male` is a boolean that indicates if a resident identifies as male.
-* There are only two movies they can watch on July 21st: Barbie and Oppenheimer.
-* Every resident watches a movie (either Barbie or Oppenheimer) on July 21st.
+**Yes**. Each student is chosen with probability 1/100
+
+</details>
+
+<details>
+<summary>Is there any benefit or downside to sampling this way?</summary>
+
+**Yes, a benefit!** We have **guaranteed proportional representation** of undergrads and grad students. In other words, we have **reduced chance error** (i.e., variance).
+
+</details>
+
+## Demo: The 1936 Presidential Election Results
+Let's start with the real election results from the 1936 election.
+
+* Each row of `votes` represents a single voter.
+* `voted_dem` is 0/1 variable indicating whether the voter voted for Franklin D. Roosevelt, who was the Democratic candidate in 1936. If 0, the voter voted for Alf Landon, the Republican candidate.
+
+Votes for other parties are excluded from this dataset.
 
 ```{python}
 #| code-fold: true
@@ -192,142 +196,298 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+import zipfile
 
 sns.set_theme(style='darkgrid', font_scale = 1.5,
               rc={'figure.figsize':(7,5)})
+```
 
+```{python}
+with zipfile.ZipFile("data/1936_votes.zip", 'r') as z:
+    with z.open("1936_votes.csv") as csv_file:
+        votes = pd.read_csv(csv_file)
+
+votes.head()
+```
+
+How many votes were cast for either Roosevelt or Landon in 1936?
+
+```{python}
+len(votes)
+```
+
+What fraction of voters voted for Roosevelt, the Democratic candidate?
+
+```{python}
+votes['voted_dem'].sum() / len(votes)
+```
+
+> But wait, don't the slides say that Roosevelt won 61% of the vote?
+>
+> Yes! But, he won 61% of **all** votes. If we filter to just the voters who
+> voted for Roosevelt or Landon, Roosevelt won 62.5% of votes.
+
+Useful tip: The mean of a 0/1 column is the same as the proportion of values that are 1.
+
+```{python}
+votes['voted_dem'].mean()
+```
+
+Of the **44,430,549** voters who voted for either Roosevelt or Landon, **62.5\%** voted for Roosevelt.
+
+### 🎩 Simple Random Sample (SRS)
+
+Note: An SRS is sometimes called a "names in a hat" sample, since it's a lot like putting each observation on a slip of paper, putting all the slips in a big hat, and then randomly drawing slips one at a time.
+
+If we were to take a simple random sample of just 1,000 voters and calculate the proportion who planned to vote for Roosevelt, how close would we be to 62.5%?
+
+```{python}
+votes['voted_dem'].sample(1000).mean()
+```
+
+Note that the cell above is a little slow, since we're sampling from a `DataFrame` with almost 45 million rows.
+
+We can speed up the sampling using `NumPy`:
+
+```{python}
+# Construct a random number generator object.
+# No need to be familiar with using NumPy this way in Data 100!
 rng = np.random.default_rng()
+
+n_votes = len(votes)
+
+# Generate 1000 random integers from 0 to (number of votes - 1)
+idx = rng.integers(low=0, high=n_votes-1, size=1000)
+
+votes['voted_dem'].iloc[idx].mean()
 ```
 
-```{python}
-movie = pd.read_csv("data/movie.csv")
+Both of the estimates above are pretty close to 62.5%! They are much closer than the estimate from the Literary Digest poll, which predicted that 43% of votes would go to Roosevelt.
 
-# create a 1/0 int that indicates Barbie vote
-movie['barbie'] = (movie['movie'] == 'Barbie').astype(int)
-movie.head()
+This is no fluke! If we repeat this over and over, we tend to hover around 62.5%. 
+
+```{python}
+for _ in range(10):
+  idx = rng.integers(low=0, high=n_votes-1, size=1000)
+  print(votes['voted_dem'].iloc[idx].mean())
 ```
 
-What fraction of Berkeley residents chose Barbie?
+Let's randomly generate 10,000 estimates:
 
 ```{python}
-actual_barbie = np.mean(movie["barbie"])
-actual_barbie
-```
+nrep = 10000   # number of simulations
+n = 1000       # size of our sample
+results = []   # list to store the sampling results
 
-This is the **actual outcome** of the competition. Based on this result, Barbie would win. How did our sample of retirees do?
-
-#### Convenience Sample: Retirees
-Let's take a convenience sample of people who have retired (>= 65 years old). What proportion of them went to see Barbie instead of Oppenheimer? 
-
-```{python}
-convenience_sample = movie[movie['age'] >= 65] # take a convenience sample of retirees
-np.mean(convenience_sample["barbie"]) # what proportion of them saw Barbie? 
-```
-
-Based on this result, we would have predicted that Oppenheimer would win! What happened? Is it possible that our sample is too small or noisy?
-
-```{python}
-# what's the size of our sample? 
-len(convenience_sample)
-```
-
-```{python}
-# what proportion of our data is in the convenience sample? 
-len(convenience_sample)/len(movie)
-```
-
-Seems like our sample is rather large (roughly 360,000 people), so the error is likely not due to solely to chance. 
-
-#### Check for Bias
-Let us aggregate all choices by age and visualize the fraction of Barbie views, split by gender.
-
-```{python}
-votes_by_barbie = movie.groupby(["age","is_male"]).agg("mean", numeric_only=True).reset_index()
-votes_by_barbie.head()
-```
-
-```{python}
-#| code-fold: true
-# A common matplotlib/seaborn pattern: create the figure and axes object, pass ax
-# to seaborn for drawing into, and later fine-tune the figure via ax.
-fig, ax = plt.subplots();
-
-red_blue = ["#bf1518", "#397eb7"]
-with sns.color_palette(red_blue):
-    sns.pointplot(data=votes_by_barbie, x = "age", y = "barbie", hue = "is_male", ax=ax)
-
-new_ticks = [i.get_text() for i in ax.get_xticklabels()]
-ax.set_xticks(range(0, len(new_ticks), 10), new_ticks[::10])
-ax.set_title("Preferences by Demographics");
-```
-
-* We see that retirees (in Berkeley) tend to watch Oppenheimer.
-* We also see that residents who identify as non-male tend to prefer Barbie.
-
-#### Simple Random Sample
-Suppose we took a simple random sample (SRS) of the same size as our retiree sample:
-
-```{python}
-n = len(convenience_sample)
-random_sample = movie.sample(n, replace = False) ## By default, replace = False
-np.mean(random_sample["barbie"])
-```
-
-This is very close to the actual vote of 0.5302792307692308! 
-
-It turns out that we can get similar results with a **much smaller sample size**, say, 800:
-
-```{python}
-n = 800
-random_sample = movie.sample(n, replace = False)
-
-# Compute the sample average and the resulting relative error
-sample_barbie = np.mean(random_sample["barbie"])
-err = abs(sample_barbie-actual_barbie)/actual_barbie
-
-# We can print output with Markdown formatting too...
-from IPython.display import Markdown
-Markdown(f"**Actual** = {actual_barbie:.4f}, **Sample** = {sample_barbie:.4f}, "
-         f"**Err** = {100*err:.2f}%.")
-```
-
-We'll learn how to choose this number when we (re)learn the Central Limit Theorem later in the semester.
-
-#### Quantifying Chance Error
-In our SRS of size 800, what would be our chance error?
-
-Let's simulate 1000 versions of taking the 800-sized SRS from before:
-
-```{python}
-nrep = 1000   # number of simulations
-n = 800       # size of our sample
-poll_result = []
 for i in range(0, nrep):
-    random_sample = movie.sample(n, replace = False)
-    poll_result.append(np.mean(random_sample["barbie"]))
+    idx = rng.integers(low=0, high=n_votes, size=1000)
+    results.append(votes['voted_dem'].iloc[idx].mean())
+
+# First 10 simulated sample proportions
+results[:10]
+```
+
+Plotting our estimates with KDE:
+
+```{python}
+plt.figure(figsize=(12, 3))
+p = sns.histplot(x=results, kde=True, bins=10)
+
+# Make x-axis centered at 0.625 with 0.01 intervals
+p.set_xticks(np.arange(0.625 - 5 * 0.01, 0.625 + 5 * 0.01, 0.01));
+```
+
+We get an approximate normal distribution centered around 62.5%, with most of the mass of the distribution (say, 95\% of the mass) within about 3 percentage points (0.03) on each side.
+
+As it turns out, with a sample size of 1000, our estimate of the proportion of voters supporting Roosevelt has a margin of error of about 3 percentage points (3pp) at a 95\% confidence level (CL), so long as we take a simple random sample (SRS) of actual voters. 
+
+- Note: You tend to see 3pp and 95% CL quite a lot in political polling! 
+
+We'll learn what these values mean and how to calculate them when we (re)learn the Central Limit Theorem later in the semester.
+
+## Demo: Revisiting the 1936 Literary Digest Poll
+
+The `poll` `DataFrame` contains a summary of the 1936 Literary Digest Poll, along with polling results and actual election results from 1932 and 1936.
+
+* Each row of `poll` represents a U.S. state.
+* `state`: name of the U.S. state.
+* `electoral_votes`: # electoral votes allocated to the given state.
+* `actual_dem_1936`: # votes for Roosevelt (the Democratic candidate) in 1936.
+* `actual_rep_1936`: # votes for Landon (the Republican candidate) in 1936.
+* `ld_dem_1936`: # Literary Digest respondents who planned to vote for Roosevelt in 1936.
+* `ld_rep_1936`: # Literary Digest respondents who plannted to vote for Landon in 1936.
+
+Literary Digest also had a 1932 poll! We will use this data for post-stratification:
+* `actual_dem_1932`: # votes for the Democratic candidate in 1932.
+* `actual_rep_1932`: # votes for the Republican candidate in 1932.
+* `ld_dem_1932`: # of 1936 Literary Digest respondents who voted for the Democratic candidate in 1932.
+* `ld_rep_1932`: # of 1936 Literary Digest respondents who voted for Republican candidate in 1932.
+
+Note: Votes from parties other than Democratic and Republican are excluded from this dataset.
+
+```{python}
+poll = pd.read_csv('data/literary-digest-summary-data.csv')
+poll.head()
+```
+
+As a sanity check, let's make sure we have the same number of votes as the first dataset (44,430,549):
+
+```{python}
+poll['actual_dem_1936'].sum() + poll['actual_rep_1936'].sum()
+```
+
+Let's also check that we get the reported Literary Digest prediction of 43% for Roosevelt.
+
+- Remember, Roosevelt received 62.5% of the actual vote.
+
+```{python}
+poll['ld_dem_1936'].sum() / (poll['ld_dem_1936'].sum() + poll['ld_rep_1936'].sum())
+```
+
+### 🥞 Post-stratification with Literary Digest responses from 1932 and 1936
+
+Using **post-stratification**, let's see if we can improve the Literary Digest poll result using the **same information available to Literary Digest in 1936**. 
+
+- In other words, without using data from the future!
+
+Recall the steps of post-stratification:
+
+1. Divide the sample and population into cells defined by chosen characteristics.
+2. Calculate the overall response in each sample cell.
+3. Aggregate over sample cells, reweighting by the size of the corresponding population cell.
+
+**Sample**: Responses to the Literary Digest poll from 1932, among 1936 poll respondents
+
+**Population**: The actual election outcomes in 1932
+
+**Cells**: Every combination of state and political party
+
+> Wait, aren't we interested in the 1936 Literary Digest poll?
+> 
+> - Yes! But, we can use responses from the older 1932 poll and 1932 election results to get our **sample cell weights**, and then use these weights to turn the 1936 poll results into a prediction of the 1936 election results.
+>
+> - Note that this approach assumes that over- and under-representation of voters among the poll respondents in state and party is the same in 1932 and 1936!
+
+Let's start with step 1. We divide our population and sample into cells defined by each combination of **state** and **choice of party in 1932**:
+
+- Cell 1: Alabama + Republican in 1932
+- Cell 2: Alabama + Democratic in 1932
+- Cell 3: Arizona + Republican in 1932
+- Cell 4: Arizona + Democratic in 1932
+- ...
+
+> Note: Alaska and Hawaii were not U.S. states until after 1936.
+
+The population cells are already in `polls`: `actual_dem_1932` and `actual_rep_1932` provide the actual vote counts for each party and state in 1932.
+
+The sample cells are also in `polls`: `ld_dem_1932` and `ld_rep_1932` provide the number of responses to the 1932 Literary Digest poll, among 1936 poll respondents, for each party.
+
+Let's make the **big** assumption that respondents in `ld_dem_1932` are representative of all voters in `actual_dem_1932` for each state, and the same for `ld_rep_1932` and `actual_rep_1932`.
+
+- In other words, we claim that response rates and outreach for Democrats and Republicans from each state in 1932 can differ, but ultimately **poll respondents from a particular party+state combination are representative of actual voters for each party+state combination**.
+
+- Then, we can calculate the **reweighting factor**, or how over- or under-represented poll respondents are relative to actual voters.
+
+- All we need to do is divide the actual vote counts by the corresponding number of respondents, for each combination of party and state.
+
+```{python}
+poll['dem_reweight_factor'] = poll['actual_dem_1932'] / poll['ld_dem_1932']
+poll['rep_reweight_factor'] = poll['actual_rep_1932'] / poll['ld_rep_1932']
+poll.tail()
+```
+
+Note that `dem_reweight_factor` is about 36 for Arizona.
+
+- In other words, there were 36 times as many Democratic voters in Arizona than Democratic poll respondents.
+
+Similarly, `rep_reweight_factor` is about 21.5 for Arizona.
+
+- So, Democratic voters are **underrepresented** in the 1932 Literary Digest poll responses, relative to Republican voters.
+
+- Based on the Republican bias in the Literary Digest sample discussed in lecture (i.e., wealthier folks with phones, cars, and magazines), this is expected!
+
+Next, we apply these same weights to inflate the 1936 poll results into vote predictions.
+
+- Again, note that this approach assumes over- and under-representation patterns are the same in the 1932 and 1936 polls!
+
+```{python}
+poll['pred_dem_1936'] = round(poll['ld_dem_1936'] * poll['dem_reweight_factor'])
+poll['pred_rep_1936'] = round(poll['ld_rep_1936'] * poll['rep_reweight_factor'])
+poll.head()
+```
+
+Finally, let's calculate the proportion of **predicted** votes that are allocated to Roosevelt in 1936.
+
+- Remember that Roosevelt received 62.5% of the **actual** vote in 1936. 
+
+```{python}
+poll['pred_dem_1936'].sum() / (poll['pred_dem_1936'].sum() + poll['pred_rep_1936'].sum())
+```
+
+54% is a majority! Using post-stratification, we have shifted the Literary Digest prediction of a Roosevelt loss with 43% of the vote to a (correct) Roosevelt win with 54%. 
+
+- There is no cheating here; we used the same data available to Literary Digest in 1936.
+
+- Note that post-stratification is not perfect. We are still off by almost 10 percentage points. But, we've moved in the right direction.
+
+## 🎁 Bonus: Follow Up Improvements
+
+As a follow-up exercise, we can compare the predicted 1936 vote totals to the actual 1932 vote totals.
+
+- Then, we could apply a **correction factor** to change the predicted number of 1936 votes to be in line with the total number of votes in 1932.
+
+- This exercise assumes that the total number of votes cast in 1932 would be the same in 1936, but the poll response rates and outreach might change between 1932 and 1936.
+
+```{python}
+poll['pred_total_1936'] = poll['pred_dem_1936'] + poll['pred_rep_1936']
+poll['actual_total_1932'] = poll['actual_dem_1932'] + poll['actual_rep_1932']
+poll['correction_factor'] = poll['actual_total_1932'] / poll['pred_total_1936']
+poll.head()
 ```
 
 ```{python}
-#| code-fold: true
-fig, ax = plt.subplots()
-sns.histplot(poll_result, stat='density', ax=ax)
-ax.axvline(actual_barbie, color="orange", lw=4);
+poll['pred_dem_1936_corrected'] = poll['pred_dem_1936'] * poll['correction_factor']
+poll['pred_rep_1936_corrected'] = poll['pred_rep_1936'] * poll['correction_factor']
+
+poll['pred_dem_1936_corrected'].sum() / (poll['pred_dem_1936_corrected'].sum() + poll['pred_rep_1936_corrected'].sum())
 ```
 
-What fraction of these simulated samples would have predicted Barbie?
+Looks like a pretty similar prediction for Roosevelt of 54%.
+
+As it turns out, it looks like our original (i.e., uncorrected) predictions had a vote total closer to the true 1936 vote total:
 
 ```{python}
-poll_result = pd.Series(poll_result)
-np.sum(poll_result > 0.5)/1000
+print('Actual 1936 vote total:')
+print(poll['actual_dem_1936'].sum() + poll['actual_rep_1936'].sum())
+
+print('Predicted 1936 vote total, uncorrected:')
+print(poll['pred_dem_1936'].sum() + poll['pred_rep_1936'].sum())
+
+print('Predicted 1936 vote total, corrected:')
+print(poll['pred_dem_1936_corrected'].sum() + poll['pred_rep_1936_corrected'].sum())
 ```
 
-You can see the curve looks roughly Gaussian/normal. Using KDE:
+Furthermore, we can check whether post-stratification would have led to a predicted win for Roosevelt in the electoral college, which is what actually determines the election outcome. 
+
+- To do this, we allocate **all** of the electoral votes in each state to the candidate with the most predicted votes in that state, and then sum up the total number of electoral votes allocated to each candidate across states. 
 
 ```{python}
-#| code-fold: true
-sns.histplot(poll_result, stat='density', kde=True);
+poll['dem_wins'] = poll['pred_dem_1936'] > poll['pred_rep_1936']
+
+print('Total predicted Roosevelt electoral votes:')
+print(( poll['dem_wins'] * poll['electoral_votes'] ).sum())
+
+print('Total predicted Landon electoral votes:')
+print(( (1-poll['dem_wins']) * poll['electoral_votes'] ).sum())
 ```
+
+We (correctly) predict a Roosevelt landslide in the electoral college!
+
+- But, note that the actual electoral college landslide was much bigger: 523 to 8
+
+- This is the largest electoral college landslide since 1820 (as of 2025).
 
 ## Summary
 
 Understanding the sampling process is what lets us go from describing the data to understanding the world. Without knowing / assuming something about how the data were collected, there is no connection between the sample and the population. Ultimately, the dataset doesn’t tell us about the world behind the data.
+
