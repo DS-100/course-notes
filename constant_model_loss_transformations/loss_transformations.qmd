@@ -1,5 +1,5 @@
 ---
-title: 'Constant Model, Loss, and Transformations (Old Notes from Fall 2024)'
+title: Constant Model, Loss, and Transformations
 execute:
   echo: true
 format:
@@ -7,7 +7,7 @@ format:
     code-fold: true
     code-tools: true
     toc: true
-    toc-title: 'Constant Model, Loss, and Transformations'
+    toc-title: Constant Model, Loss, and Transformations
     page-layout: full
     theme:
       - cosmo
@@ -21,7 +21,7 @@ jupyter:
       format_version: '1.0'
       jupytext_version: 1.16.1
   kernelspec:
-    display_name: ds100env
+    display_name: data100quarto
     language: python
     name: python3
 ---
@@ -52,14 +52,6 @@ To illustrate this process, we derived the optimal model parameters under simple
 At the end of last lecture, we dived deeper into step 4 - evaluating model performance - using SLR as an example. In this lecture, we'll also explore the modeling process with new models, continue familiarizing ourselves with the modeling process by finding the best model parameters under a new model, the constant model, and test out two different loss functions to understand how our choice of loss influences model design. Later on, we'll consider what happens when a linear model isn't the best choice to capture trends in our data and what solutions there are to create better models.
 
 Before we get into the modeling process, let's quickly review some important terminology.
-
-### Prediction vs. Estimation
-
-The terms prediction and estimation are often used somewhat interchangeably, but there is a subtle difference between them. **Estimation** is the task of using data to calculate model parameters. **Prediction** is the task of using a model to predict outputs for unseen data. In our simple linear regression model,
-
-$$\hat{y} = \hat{\theta_0} + \hat{\theta_1}x$$
-
-we **estimate** the parameters by minimizing average loss; then, we **predict** using these estimations. **Least Squares Estimation** is when we choose the parameters that minimize MSE.
 
 ## Constant Model + MSE
 
@@ -95,14 +87,12 @@ We can **fit the model** by finding the optimal $\hat{\theta_0}$ that minimizes 
 
 1. Differentiate with respect to $\theta_0$:
 
-$$
 \begin{align}
 \frac{d}{d\theta_0}\text{R}(\theta) & = \frac{d}{d\theta_0}(\frac{1}{n}\sum^{n}_{i=1} (y_i - \theta_0)^2)
 \\ &= \frac{1}{n}\sum^{n}_{i=1} \frac{d}{d\theta_0}  (y_i - \theta_0)^2 \quad \quad \text{a derivative of sum is a sum of derivatives}
 \\ &= \frac{1}{n}\sum^{n}_{i=1} 2 (y_i - \theta_0) (-1) \quad \quad \text{chain rule}
 \\ &= {\frac{-2}{n}}\sum^{n}_{i=1} (y_i - \theta_0) \quad \quad \text{simplify constants}
 \end{align}
-$$
 
 2. Set the derivative equation equal to 0:
 
@@ -112,7 +102,6 @@ $$
 
 3. Solve for $\hat{\theta_0}$
 
-$$
 \begin{align}
 0 &= {\frac{-2}{n}}\sum^{n}_{i=1} (y_i - \hat{\theta_0})
 \\ &= \sum^{n}_{i=1} (y_i - \hat{\theta_0}) \quad \quad \text{divide both sides by} \frac{-2}{n}
@@ -122,7 +111,23 @@ $$
 \\ \hat{\theta_0} &= \frac{1}{n} \sum^{n}_{i=1} y_i
 \\ \hat{\theta_0} &= \bar{y}
 \end{align}
-$$
+
+::: {.callout-note}
+The **mean** of the outcomes achieves the minimum MSE of the constant model. Minimum MSE is the **sample variance** of $y$
+
+\begin{align}
+R(\hat{\theta_0}) & = R(\bar{y}) \\
+& = \frac{1}{n}\sum_{i=1}^{n}(y_i-\bar{y})^2\\
+&= \sigma_y^2
+\end{align}
+
+$R^2$ is interpreted as the fraction of **variance in $y$** "explained" by a linear model.
+
+\begin{align}
+R^2 &= \frac{\Delta \text{ in area}}{\text{Constant model area}}\\\\
+&= \frac{\text{MSE}_\text{constant model} - \text{MSE}_\text{linear model}}{\text{MSE}_\text{constant model}}
+\end{align}
+:::
 
 Let's take a moment to interpret this result. $\hat{\theta_0} = \bar{y}$ is the optimal parameter for constant model + MSE.
 It holds true regardless of what data sample you have, and it provides some formal reasoning as to why the mean is such a common summary statistic.
@@ -133,11 +138,11 @@ $$R(\hat{\theta_0}) = \min_{\theta_0} R(\theta_0)$$
 
 To restate the above in plain English: we are looking at the value of the cost function when it takes the best parameter as input. This optimal model parameter, $\hat{\theta_0}$, is the value of $\theta_0$ that minimizes the cost $R$.
 
-For modeling purposes, we care less about the minimum value of cost, $R(\hat{\theta_0})$, and more about the *value of $\theta$* that results in this lowest average loss. In other words, we concern ourselves with finding the best parameter value such that:
+For modeling purposes, we care less about the minimum value of cost, $R(\hat{\theta_0})$, and more about the *value of $\theta_0$* that results in this lowest average loss. In other words, we concern ourselves with finding the best parameter value such that:
 
-$$\hat{\theta} = \underset{\theta}{\operatorname{\arg\min}}\:R(\theta)$$
+$$\hat{\theta_0} = \underset{\theta_0}{\operatorname{\arg\min}}\:R(\theta_0)$$
 
-That is, we want to find the **arg**ument $\theta$ that **min**imizes the cost function.
+That is, we want to find the **arg**ument $\theta_0$ that **min**imizes the cost function.
 
 ### Comparing Two Different Models, Both Fit with MSE
 
@@ -343,13 +348,11 @@ To fit the model, we find the optimal parameter value $\hat{\theta_0}$ that mini
 
 1. Differentiate with respect to $\hat{\theta_0}$:
 
-$$
 \begin{align}
 \hat{R}(\theta_0) &= \frac{1}{n}\sum^{n}_{i=1} |y_i - \theta_0| \\
 \frac{d}{d\theta_0} R(\theta_0) &= \frac{d}{d\theta_0} \left(\frac{1}{n} \sum^{n}_{i=1} |y_i - \theta_0| \right) \\
 &= \frac{1}{n} \sum^{n}_{i=1} \frac{d}{d\theta_0} |y_i - \theta_0|
 \end{align}
-$$
 
 - Here, we seem to have run into a problem: the derivative of an absolute value is undefined when the argument is 0 (i.e. when $y_i = \theta_0$). For now, we'll ignore this issue. It turns out that disregarding this case doesn't influence our final result.
 - To perform the derivative, consider two cases. When $\theta_0$ is *less than or equal to* $y_i$, the term $y_i - \theta_0$ will be positive and the absolute value has no impact. When $\theta_0$ is *greater than* $y_i$, the term $y_i - \theta_0$ will be negative. Applying the absolute value will convert this to a positive value, which we can express by saying $-(y_i - \theta_0) = \theta_0 - y_i$.
@@ -467,7 +470,7 @@ To summarize our example,
 | Outliers                   | **Sensitive** to outliers (since they change mean substantially). Sensitivity also depends on the dataset size.                                                            | **More robust** to outliers.                                                                           |
 | $\hat{\theta_0}$ Uniqueness | **Unique** $\hat{\theta_0}$                              | **Infinitely many** $\hat{\theta_0}$s                                    |
 
-## Transformations to Fit Linear Models
+## Transformations of Linear Models
 
 At this point, we have an effective method of fitting models to predict linear relationships. Given a feature variable and target, we can apply our four-step process to find the optimal model parameters.
 
@@ -584,7 +587,7 @@ Earlier, we calculated the constant model MSE using calculus. It turns out that 
 In this calculation, we use the fact that the **sum of deviations from the mean is $0$** or that $\sum_{i=1}^{n} (y_i - \bar{y}) = 0$.
 
 Let's quickly walk through the proof for this:
-$$
+
 \begin{align}
 \sum_{i=1}^{n} (y_i - \bar{y}) &= \sum_{i=1}^{n} y_i - \sum_{i=1}^{n} \bar{y} \\
  &= \sum_{i=1}^{n} y_i - n\bar{y} \\
@@ -592,7 +595,7 @@ $$
  &= \sum_{i=1}^{n} y_i - \sum_{i=1}^{n}y_i \\
  & = 0
 \end{align}
-$$
+
 
 In our calculations, we'll also be using the definition of the variance as a sample. As a refresher:
 
@@ -600,7 +603,6 @@ $$\sigma_y^2 = \frac{1}{n}\sum_{i=1}^{n} (y_i - \bar{y})^2$$
 
 Getting into our calculation for MSE minimization:
 
-$$
 \begin{align}
 R(\theta) &= {\frac{1}{n}}\sum^{n}_{i=1} (y_i - \theta)^2
 \\ &= \frac{1}{n}\sum^{n}_{i=1} [(y_i - \bar{y}) + (\bar{y} - \theta)]^2\quad \quad \text{using trick that a-b can be written as (a-c) + (c-b) } \\
@@ -610,7 +612,6 @@ R(\theta) &= {\frac{1}{n}}\sum^{n}_{i=1} (y_i - \theta)^2
 \\ &= \frac{1}{n}\sum^{n}_{i=1}(y_i - \bar{y})^2 + \frac{2}{n}(\bar{y} - \theta)\cdot0 + (\bar{y} - \theta)^2 \quad \quad  \text{sum of deviations from mean is 0}
 \\ &= \sigma_y^2 + (\bar{y} - \theta)^2
 \end{align}
-$$
 
 Since variance can't be negative, we know that our first term, $\sigma_y^2$ is greater than or equal to $0$. Also note, that **the first term doesn't involve $\theta$ at all**, meaning changing our model won't change this value. For the purposes of determining $\hat{\theta}#, we can then essentially ignore this term.
 
