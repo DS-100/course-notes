@@ -1,5 +1,5 @@
 ---
-title: Ordinary Least Squares (Old Notes from Fall 2024)
+title: Ordinary Least Squares
 execute:
   echo: true
 format:
@@ -43,12 +43,14 @@ We can explore this idea further by looking at a dataset containing aggregate pe
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 import pandas as pd
 nba = pd.read_csv('data/nba18-19.csv', index_col=0)
 nba.index.name = None # Drops name of index (players are ordered by rank)
 ```
 
 ```{python}
+#| vscode: {languageId: python}
 nba.head(5)
 ```
 
@@ -61,6 +63,7 @@ Suppose we want to fit a linear model by using some characteristics, or **featur
 * `3PA`, the average number of 3-point field goals attempted per game
 
 ```{python}
+#| vscode: {languageId: python}
 nba[['FG', 'AST', '3PA', 'PTS']].head()
 ```
 
@@ -398,39 +401,6 @@ This is called the **least squares estimate** of $\theta$: it is the value of $\
 
 Note that the least squares estimate was derived under the assumption that $\mathbb{X}^T \mathbb{X}$ is *invertible*. This condition holds true when $\mathbb{X}^T \mathbb{X}$ is full column rank, which, in turn, happens when $\mathbb{X}$ is full column rank. We will get to the proof for why $\mathbb{X}$ needs to be full column rank in the OLS Properties section.
 
-## Evaluating Model Performance
-
-Our geometric view of multiple linear regression has taken us far! We have identified the optimal set of parameter values to minimize MSE in a model of multiple features. Now, we want to understand how well our fitted model performs. 
-
-### RMSE
-One measure of model performance is the **Root Mean Squared Error**, or RMSE. The RMSE is simply the square root of MSE. Taking the square root converts the value back into the original, non-squared units of $y_i$, which is useful for understanding the model's performance. A low RMSE indicates more "accurate" predictions – that there is a lower average loss across the dataset.
-
-$$\text{RMSE} = \sqrt{\frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2}$$
-
-### Residual Plots
-When working with SLR, we generated plots of the residuals against a single feature to understand the behavior of residuals. When working with several features in multiple linear regression, it no longer makes sense to consider a single feature in our residual plots. Instead, multiple linear regression is evaluated by making plots of the residuals against the predicted values. As was the case with SLR, a multiple linear model performs well if its residual plot shows no patterns.
-
-<div align="middle">
-  <table style="width:100%">
-    <tr align="center">
-      <td>
-        <img src="images/residual_plot.png" alt='residual_plot' width='500'>
-      </td>
-    </tr>
-  </table>
-</div>
-
-### Multiple $R^2$
-For SLR, we used the correlation coefficient to capture the association between the target variable and a single feature variable. In a multiple linear model setting, we will need a performance metric that can account for multiple features at once. **Multiple $R^2$**, also called the **coefficient of determination**, is the **proportion of variance** of our **fitted values** (predictions) $\hat{y}_i$ to our true values $y_i$. It ranges from 0 to 1 and is effectively the *proportion* of variance in the observations that the **model explains**. 
-
-$$R^2 = \frac{\text{variance of } \hat{y}_i}{\text{variance of } y_i} = \frac{\sigma^2_{\hat{y}}}{\sigma^2_y}$$
-
-Note that for OLS with an intercept term, for example $\hat{y} = \theta_0 + \theta_1x_1 + \theta_2x_2 + \cdots + \theta_px_p$, $R^2$ is equal to the square of the correlation between $y$ and $\hat{y}$. On the other hand for SLR, $R^2$ is equal to $r^2$, the correlation between $x$ and $y$. The proof of these last two properties is out of scope for this course.
-
-Additionally, as we add more features, our fitted values tend to become closer and closer to our actual values. Thus, $R^2$ increases.
-
-Adding more features doesn't always mean our model is better though! We'll see why later in the course.
-
 ## OLS Properties
 
 ### Residuals
@@ -531,4 +501,43 @@ Therefore, if $\mathbb{X}$ is not full column rank, we will not have unique esti
     * Example: If “Width”, “Height”, and “Perimeter” are all columns,
       * Perimeter = 2 * Width + 2 * Height  $\rightarrow$  $\mathbb{X}$ is not full rank.
     * Important with one-hot encoding (to discuss later).
+
+## Evaluating Model Performance
+
+Our geometric view of multiple linear regression has taken us far! We have identified the optimal set of parameter values to minimize MSE in a model of multiple features. Now, we want to understand how well our fitted model performs. 
+
+### RMSE
+One measure of model performance is the **Root Mean Squared Error**, or RMSE. The RMSE is simply the square root of MSE. Taking the square root converts the value back into the original, non-squared units of $y_i$, which is useful for understanding the model's performance. A low RMSE indicates more "accurate" predictions – that there is a lower average loss across the dataset.
+
+$$\text{RMSE} = \sqrt{\frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2}$$
+
+::: {.callout-note}
+
+Note that RMSE is more interpretable as it is in the same units as the original data. On the other hand, MSE is differentiable everywhere making it useful for running optimization algorithms like gradient descent.
+
+:::
+
+### Residual Plots
+When working with SLR, we generated plots of the residuals against a single feature to understand the behavior of residuals. When working with several features in multiple linear regression, it no longer makes sense to consider a single feature in our residual plots. Instead, multiple linear regression is evaluated by making plots of the residuals against the predicted values. As was the case with SLR, a multiple linear model performs well if its residual plot shows no patterns.
+
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/residual_plot.png" alt='residual_plot' width='500'>
+      </td>
+    </tr>
+  </table>
+</div>
+
+### Multiple $R^2$
+For SLR, we used the correlation coefficient to capture the association between the target variable and a single feature variable. In a multiple linear model setting, we will need a performance metric that can account for multiple features at once. **Multiple $R^2$**, also called the **coefficient of determination**, is the **proportion of variance** of our **fitted values** (predictions) $\hat{y}_i$ to our true values $y_i$. It ranges from 0 to 1 and is effectively the *proportion* of variance in the observations that the **model explains**. 
+
+$$R^2 = \frac{\text{variance of } \hat{y}_i}{\text{variance of } y_i} = \frac{\sigma^2_{\hat{y}}}{\sigma^2_y}$$
+
+Note that for OLS with an intercept term, for example $\hat{y} = \theta_0 + \theta_1x_1 + \theta_2x_2 + \cdots + \theta_px_p$, $R^2$ is equal to the square of the correlation between $y$ and $\hat{y}$. On the other hand for SLR, $R^2$ is equal to $r^2$, the correlation between $x$ and $y$. The proof of these last two properties is out of scope for this course.
+
+Additionally, as we add more features, our fitted values tend to become closer and closer to our actual values. Thus, $R^2$ increases.
+
+Adding more features doesn't always mean our model is better though! We'll see why later in the course.
 
