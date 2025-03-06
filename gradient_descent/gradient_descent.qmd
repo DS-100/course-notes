@@ -1,5 +1,5 @@
 ---
-title: sklearn and Gradient Descent (Old Notes from Fall 2024)
+title: sklearn and Gradient Descent
 execute:
   echo: true
   warning: false
@@ -22,7 +22,7 @@ jupyter:
       format_version: '1.0'
       jupytext_version: 1.16.1
   kernelspec:
-    display_name: ds100env
+    display_name: data100quarto
     language: python
     name: python3
 ---
@@ -303,8 +303,14 @@ Below, we call `.predict` to generate model predictions on the original training
 
 ```{python}
 Y_hat_one_feature = my_model.predict(penguins[["flipper_length_mm"]])
+Y_hat_one_feature[:10]
+```
 
-print(f"The RMSE of the model is {np.sqrt(np.mean((Y-Y_hat_one_feature)**2))}")
+The `sklearn` package also provides a function `mean_squared_error()` [documentation](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.mean_squared_error.html) that computes the MSE from a list of observations and predictions. This avoids us having to manually compute MSE by first computing residuals.
+
+```{python}
+from sklearn.metrics import mean_squared_error
+print(f"The MSE of the model is {mean_squared_error(Y, Y_hat_one_feature)}")
 ```
 
 What if we wanted a model with two features? 
@@ -326,7 +332,7 @@ two_feature_model.fit(X_two_features, Y)
 # Step 3: make predictions
 Y_hat_two_features = two_feature_model.predict(X_two_features)
 
-print(f"The RMSE of the model is {np.sqrt(np.mean((Y-Y_hat_two_features)**2))}")
+print(f"The MSE of the model is {mean_squared_error(Y, Y_hat_two_features)}")
 ```
 
 We can also see that we obtain the same predictions using `sklearn` as we did when applying the ordinary least squares formula before! 
@@ -528,6 +534,12 @@ Let's update our algorithm to use a **learning rate** (also sometimes called the
 $$x^{(t+1)} = x^{(t)} - \alpha \frac{d}{dx} f(x^{(t)})$$
 
 A small $\alpha$ means that we will take small steps; a large $\alpha$ means we will take large steps. When do we stop updating? We stop updating either after a fixed number of updates or after a subsequent update doesn't change much.
+
+::: {.callout-note}
+
+In Data 100, the learning rate is constant. More generally, however, $\alpha$ could also decrease over time, or decay.
+
+:::
 
 Updating our function to use $\alpha=0.3$, our algorithm successfully **converges** (settles on a solution and stops updating significantly, or at all) on the minimum value.
 
