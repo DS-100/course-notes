@@ -1,5 +1,5 @@
 ---
-title: Feature Engineering (Old Notes from Fall 2024)
+title: Gradient Descent Continuation, Feature Engineering
 execute:
   echo: true
   warning: false
@@ -8,7 +8,7 @@ format:
     code-fold: false
     code-tools: true
     toc: true
-    toc-title: Feature Engineering
+    toc-title: Gradient Descent Continuation, Feature Engineering
     page-layout: full
     theme:
       - cosmo
@@ -22,11 +22,10 @@ jupyter:
       format_version: '1.0'
       jupytext_version: 1.16.1
   kernelspec:
-    display_name: ds100env
+    display_name: Python 3 (ipykernel)
     language: python
     name: python3
 ---
-
 ::: {.callout-note collapse="false"}
 ## Learning Outcomes
 * Recognize the value of feature engineering as a tool to improve model performance
@@ -207,7 +206,7 @@ $$\nabla_{\theta} l(\vec{\theta}, \vec{x}, y_i) =  \begin{bmatrix} -2(y_i - \the
 
 Remember that we need to keep updating $\theta$ until the algorithm **converges** to a solution and stops updating significantly (or at all). When updating $\theta$, we'll have a fixed number of updates and subsequent updates will be quite small (we won't change $\theta$ by much).
 
-<!-- ### Stochastic (Mini-batch) Gradient Descent
+### Stochastic (Mini-batch) Gradient Descent
 
 Formally, the algorithm we derived above is called **batch gradient descent.** For each iteration of the algorithm, the derivative of loss is computed across the *entire* batch of all $n$ datapoints. While this update rule works well in theory, it is not practical in most circumstances. For large datasets (with perhaps billions of datapoints), finding the gradient across all the data is incredibly computationally taxing; gradient descent will converge slowly because each individual update is slow.
 
@@ -234,7 +233,7 @@ The diagrams below represent a "bird's eye view" of a loss surface from above. N
     </tr>
   </table>
 </div>
- -->
+
 
 ### Batch, Mini-batch, Stochastic Gradient Descent
 The time complexity of a single gradient descent step takes only $O(nd)$ time where $n$ is the number of samples (rows) and $d$ is the number of features (columns).
@@ -247,29 +246,31 @@ We know that our true gradient of $\nabla_{\vec{\theta}} L (\vec{\theta^{(t)}}) 
 
 Say we sample $b$ records ($s_1, \cdots, s_b$) from our $n$ datapoints. Our new (stochastic) gradient descent function will be: $$\nabla_{\vec{\theta}} L (\vec{\theta}^{(t)}) \approx \frac{1}{\textcolor{red}{b}}\sum_{i=1}^{\textcolor{red}{b}}\nabla_{\vec{\theta}} l(y_{\textcolor{red}{s_i}}, f_{\vec{\theta}^{(t)}}(X_{\textcolor{red}{s_i}}))$$ and will now have a time complexity of $O(bd)$, which is much faster! For more on computational complexity, see the bonus section at the end.
 
-But how do we decide our mini-batch size ($b$), or the number of datapoints in our sample? Mini-batch size is typically **small**. 
+::: {.callout-tip}
 
-- The original **Stochastic Gradient Descent** algorithm uses $\boldsymbol{b=1}$ so that only one sample is used to approximate the gradient at a time. 
-- When choosing $b$, there are several factors to consider: 
-  - **Larger b** $\rightarrow$ better **gradient estimates**, **parallelism**, and other **systems factors**, but also rapidly diminishing returns with more complexity
-  - **Smaller b** $\rightarrow$ **faster** and has **more frequent updates**
+How do we decide our mini-batch size ($b$), or the number of datapoints in our sample? Mini-batch size is typically **small**. 
+
+The original Stochastic Gradient Descent algorithm uses $b=1$ so that *only one sample is used* to approximate the gradient at a time. 
+When choosing $b$, there are several factors to consider: 
+  - larger $b$: better *gradient estimates*, *parallelism*, and other *systems factors*, but also rapidly diminishing returns with more complexity
+  - smaller $b$: faster and has *more frequent updates*
   
 It is up to data scientists to balance the tradeoff between batch size and time complexity.
 
-Stochastic gradient descent helps us **estimate** the **true gradient** of the loss surface using just that sample of data, and this allows us to compute gradients quicker. To sample data, there are two sampling strategies we can use:
+Stochastic gradient descent helps us *estimate* the true gradient of the loss surface using just that sample of data, and this allows us to compute gradients quicker. To sample data, there are two sampling strategies we can use:
 
 1. **Shuffle the data** and select batch size records at a time.
 2. Take a **simple random sample** for each gradient computation.
-
+:::
 
 
 Summarizing our two gradient descent techniques:
 
-- **(Batch) Gradient Descent**: Gradient descent computes the **true** descent and always descends towards the true minimum of the loss. While accurate, it can often be computationally expensive.
+- **(Batch) Gradient Descent**: GD computes the **true** descent and always descends towards the true minimum of the loss based on a batch (a full dataset). While accurate, it can often be computationally expensive.
 
 <center><img src="images/gd.png" alt='batch_grad_descent' width='300'></center>
 
-- **(Minibatch) Stochastic gradient descent**: Stochastic gradient descent **approximates** the true gradient descent. It may not descend towards the true minimum with each update, but it's often less computationally expensive than batch gradient descent.
+- **(Mini-batch) Stochastic Gradient Descent**: SGD **approximates** the true gradient descent based off of mini-batch (a subset of a dataset). It may not descend towards the true minimum with each update, but it's often less computationally expensive than batch gradient descent. Note that it is mini-batch, because we create a smaller, randomized sample of the batch to run SGD on it.
 
 <center><img src="images/sgd.png" alt='stochastic_grad_descent' width='300'></center>
 
@@ -285,9 +286,14 @@ The typical solution is to set batch size to ensure sufficient hardware utilizat
 
 ## Feature Engineering
 
+::: {.callout-tip}
+### Motivation
+
 At this point in the course, we've equipped ourselves with some powerful techniques to build and optimize models. We've explored how to develop models of multiple variables, as well as how to transform variables to help **linearize** a dataset and fit these models to maximize their performance.
 
 All of this was done with one major caveat: the regression models we've worked with so far are all **linear in the input variables**. We've assumed that our predictions should be some combination of linear variables. While this works well in some cases, the real world isn't always so straightforward. We'll learn an important method to address this issue – feature engineering – and consider some new problems that can arise when we do so.
+
+:::
 
 Feature engineering is the process of *transforming* raw features into *more informative features* that can be used in modeling or EDA tasks and improve model performance.
 
@@ -297,9 +303,9 @@ Feature engineering allows you to:
 * Express non-linear relationships using linear models
 * Use non-numeric (qualitative) features in models
 
-## Feature Functions
+### Feature Functions
 
-A **feature function** describes the transformations we apply to raw features in a dataset to create a design matrix of transformed features. We typically denote the feature function as $\Phi$ (the Greek letter "phi" that we use to represent the true function). When we apply the feature function to our original dataset $\mathbb{X}$, the result, $\Phi(\mathbb{X})$, is a transformed design matrix ready to be used in modeling. 
+A **feature function** describes the transformations we apply to raw features in a dataset to create a design matrix of transformed features (typically denoted as $\Phi$). When we apply the feature function to our original dataset $\mathbb{X}$, the result, $\Phi(\mathbb{X})$, is a transformed design matrix ready to be used in modeling. 
 
 For example, we might design a feature function that computes the square of an existing feature and adds it to the design matrix. In this case, our existing matrix $[x]$ is transformed to $[x, x^2]$. Its *dimension* increases from 1 to 2. Often, the dimension of the *featurized* dataset increases as seen here.
 
@@ -322,10 +328,8 @@ More formally, we describe a feature function as transforming the original $\mat
 
 $$\mathbb{X} \in \mathbb{R}^{n \times p} \longrightarrow \Phi \in \mathbb{R}^{n \times p'}$$
 
-## One-Hot Encoding
-Feature engineering opens up a whole new set of possibilities for designing better-performing models. As you will see in lab and homework, feature engineering is one of the most important parts of the entire modeling process.
-
-A particularly powerful use of feature engineering is to allow us to perform regression on *non-numeric* features. **One-hot encoding** is a feature engineering technique that generates numeric features from categorical data, allowing us to use our usual methods to fit a regression model on the data. 
+### One-Hot Encoding
+A particularly powerful use of feature engineering is to allow us to perform regression on non-numeric features. **One-hot encoding** is a feature engineering technique that generates numeric features from categorical data, allowing us to use our usual methods to fit a regression model on the data.
 
 To illustrate how this works, we'll refer back to the `tips` dataset from previous lectures. Consider the `"day"` column of the dataset:
 
@@ -339,7 +343,7 @@ tips = sns.load_dataset("tips")
 tips.head()
 ```
 
-   At first glance, it doesn't seem possible to fit a regression model to this data – we can't directly perform any mathematical operations on the entry "Sun". 
+   At first glance, it doesn't seem possible to fit a regression model to this non-numeric data – we can't directly perform any mathematical operations on the entry "Sun". 
   
 To resolve this, we instead create a new table with a feature for each unique value in the original `"day"` column. We then iterate through the `"day"` column. For each entry in `"day"` we fill the corresponding feature in the new table with 1. All other features are set to 0.
 
@@ -357,7 +361,7 @@ In short, each category of a categorical variable gets its own feature
    </li>
 </ul>
 
-The `OneHotEncoder` class of `sklearn` ([documentation](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OneHotEncoder.html#sklearn.preprocessing.OneHotEncoder.get_feature_names_out)) offers a quick way to perform this one-hot encoding. You will explore its use in detail in the lab. For now, recognize that we follow a very similar workflow to when we were working with the `LinearRegression` class: we initialize a `OneHotEncoder` object, fit it to our data, and finally use `.transform` to apply the fitted encoder.
+The `OneHotEncoder` class of `sklearn` ([documentation](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OneHotEncoder.html#sklearn.preprocessing.OneHotEncoder.get_feature_names_out)) offers a quick way to perform this one-hot encoding. You will explore its use in detail in the lab. For now, recognize that we follow a very similar workflow to when we were working with the `LinearRegression` class: we initialize a `OneHotEncoder` object, fit it to our data, and finally use `.transform()` to apply the fitted encoder.
 
 ```{python}
 #| code-fold: false
@@ -413,9 +417,9 @@ To resolve this issue, we simply omit one of the one-hot encoded columns *or* do
 
 Either approach works — we still retain the same information as the omitted column being a linear combination of the remaining columns.
 
-## Polynomial Features
+### Polynomial Features
 
-We have encountered a few cases now where models with linear features have performed poorly on datasets that show clear non-linear curvature. 
+We have encountered a few cases now where models with linear features have performed poorly on datasets that show clear *non-linear* curvature. 
 
 As an example, consider the `vehicles` dataset, which contains information about cars. Suppose we want to use the `hp` (horsepower) of a car to predict its `"mpg"` (gas mileage in miles per gallon). If we visualize the relationship between these two variables, we see a non-linear curvature. Fitting a linear model to these variables results in a high (poor) value of RMSE. 
 
@@ -466,7 +470,7 @@ print(f"MSE of model with (hp^2) feature: {np.mean((Y-hp2_model_predictions)**2)
 
 Looking a lot better! By incorporating a squared feature, we are able to capture the curvature of the dataset. Our model is now a parabola centered on our data. Notice that our new model's error has decreased relative to the original model with linear features.
 
-## Complexity and Overfitting
+### Complexity and Overfitting
 
 We've seen now that feature engineering allows us to build all sorts of features to improve the performance of the model. In particular, we saw that designing a more complex feature (squaring `hp` in the `vehicles` data previously) substantially improved the model's ability to capture non-linear relationships. To take full advantage of this, we might be inclined to design increasingly complex features. Consider the following three models, each of different order (the maximum exponent power of each model):
 
