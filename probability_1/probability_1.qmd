@@ -1,5 +1,5 @@
 ---
-title: Random Variables (Old Notes from Fall 2024)
+title: Random Variables
 execute:
   echo: true
 format:
@@ -118,9 +118,15 @@ But, what exactly is a distribution? Let's dive into this!
 To define any random variable $X$, we need to be able to specify 2 things: 
 
 1. **Possible values**: the set of values the random variable can take on.
+
+    * **Discrete**: finite number of possible outcomes. For example, coin flips (heads or tails) can be described as a RV $X_i \in \{0, 1\}$, where $X_i$ is the $i$th toss.
+    * **Continuous**: infinite number of possible outcomes. For example, let $Y_i$ be an RV representing the number of seconds a coin is in the air during the $i$th toss.
+
 2. **Probabilities**: the chance that the random variable will take each possible value.
     - Each probability should be a real-number between 0 and 1 (inclusive) 
     - The total probability of all possible values should be 1.
+
+
 
 If $X$ is discrete (has a finite number of possible values), the probability that a random variable $X$ takes on the value $x$ is given by $P(X=x)$, and probabilities must sum to 1: $\underset{\text{all } x}{\sum} P(X=x) = 1$,
 
@@ -131,12 +137,13 @@ We can often display this using a **probability distribution table**. In the coi
 | 0 | $\frac{1}{2}$ | 
 | 1 | $\frac{1}{2}$ |
 
-The **distribution** of a random variable $X$ describes how the total probability of 100% is split across all the possible values of $X$, and it fully defines a random variable. If you know the distribution of a random variable you can:
+The distribution of a random variable $X$ fully defines an RV (i.e. describes how the total probability of 100% is split across all the possible values of $X$). With the distribution of a RV, you can:
 
-- **compute properties** of the random variables and derived variables
-- **simulate** the random variables by randomly picking values of $X$ according to its distribution using `np.random.choice`, `df.sample`, or `scipy.stats.<dist>.rvs(...)`
+* compute *properties* of the RV and other derived variables (e.g., mean, median, variance, …)
+* *simulate* random draws of the RV (e.g., flip 100 coins, what happens?)
+    * randomly pick values of $X$ according to its distribution using `np.random.choice()` or `df.sample()`
 
-The distribution of a discrete random variable can also be represented using a histogram. If a variable is **continuous**, meaning it can take on infinitely many values, we can illustrate its distribution using a density curve. 
+The *theoretical* distribution of a **discrete** random variable can also be represented using a histogram, since there are a finite number of possible outcomes. If a variable is **continuous**, meaning it can take on infinitely many values, we can illustrate its distribution using a density curve. 
 
 <p align="center">
 <img src="images/discrete_continuous.png" alt='discrete_continuous' width='700'>
@@ -176,23 +183,32 @@ Rather than fully write out a probability distribution or show a histogram, ther
 
 These common distributions are listed below:
 
+**Discrete:**
+
 1. **Bernoulli**($p$): If $X$ ~ Bernoulli($p$), then $X$ takes on a value 1 with probability $p$, and 0 with probability $1 - p$. Bernoulli random variables are also termed the **"indicator" random variables**.
 2. **Binomial**($n$, $p$): If $X$ ~ Binomial($n$, $p$), then $X$ counts the number of 1s in $n$ independent Bernoulli($p$) trials.
 3. **Categorical**($p_1, ..., p_k$) of values: The probability of each value is 1 / (number of possible values).
-4. **Uniform** on the unit interval (0, 1): The density is flat at 1 on (0, 1) and 0 elsewhere. We won't get into what density means as much here, but intuitively, this is saying that there's an equally likely chance of getting any value on the interval (0, 1).
-5. **Normal**($\mu$, $\sigma^2$): The probability density is specified by $\frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{(x-\mu)^2}{2\sigma^2}}$. This bell-shaped distribution comes up fairly often in data, in part due to the Central Limit Theorem you saw back in Data 8.
+
+**Continuous:**
+
+1. **Uniform** on the unit interval (0, 1): The density is flat at 1 on (0, 1) and 0 elsewhere. We won't get into what density means as much here, but intuitively, this is saying that there's an equally likely chance of getting any value on the interval (0, 1).
+2. **Normal**($\mu$, $\sigma^2$): The probability density is specified by $\frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{(x-\mu)^2}{2\sigma^2}}$. This bell-shaped distribution comes up fairly often in data, in part due to the Central Limit Theorem you saw back in Data 8.
 
 ## Expectation and Variance
 
 There are several ways to describe a random variable. The methods shown above — a table of all samples $s, X(s)$, distribution table $P(X=x)$, and histograms — are all definitions that *fully describe* a random variable. Often, it is easier to describe a random variable using some *numerical summary* rather than fully defining its distribution. These numerical summaries are numbers that characterize some properties of the random variable. Because they give a "summary" of how the variable tends to behave, they are *not* random. Instead, think of them as a static number that describes a certain property of the random variable. In Data 100, we will focus our attention on the expectation and variance of a random variable.
 
 ### Expectation
-The **expectation** of a random variable $X$ is the **weighted average** of the values of $X$, where the weights are the probabilities of each value occurring. There are two equivalent ways to compute the expectation: 
+The **expectation** of a *discrete* random variable $X$ is the **weighted average** of the values of $X$, where the weights are the probabilities of each value occurring. There are two equivalent ways to compute the expectation: 
 
 1. Apply the weights one *sample* at a time: $$\mathbb{E}[X] = \sum_{\text{all possible } s} X(s) P(s)$$.
-2. Apply the weights one possible *value* at a time: $$\mathbb{E}[X] = \sum_{\text{all possible } x} x P(X=x)$$
+2. Apply the weights one possible *value* at a time: $$\mathbb{E}[X] = \sum_{x \in X} x \cdot P(X = x)$$
 
 The latter is more commonly used as we are usually just given the distribution, not all possible samples.
+
+The expectation of a continuous random variable $X$ can be derived via integration of its probability density function $f(x)$:
+$$\mathbb{E}[X] = \int_{-\infty}^{\infty} x \cdot f(x) dx$$
+Exact computations are *out-of-scope* for Data 100.
 
 We want to emphasize that the **expectation is a *number*, not a random variable**. Expectation is a generalization of the average, and it has the same units as the random variable. It is also the **center of gravity** of the **probability distribution histogram**, meaning if we simulate the variable many times, it is the **long-run average of the simulated values**.
 
@@ -326,12 +342,14 @@ $$\mathbb{E}[aX+b] = aE[\mathbb{X}] + b$$
 
 ::: {.callout-tip collapse="true"}
 ## Proof
-$$\begin{align}
+
+\begin{align}
         \mathbb{E}[aX+b] &= \sum_{x} (ax + b) P(X=x) \\
         &= \sum_{x} (ax P(X=x) + bP(X=x)) \\
         &= a\sum_{x}P(X=x) + b\sum_{x}P(X=x)\\
         &= a\mathbb{E}(X) + b * 1
-    \end{align}$$
+\end{align}
+
 :::
 
 2. Expectation is also linear in *sums* of random variables. 
@@ -339,30 +357,37 @@ $$\begin{align}
 $$\mathbb{E}[X+Y] = \mathbb{E}[X] + \mathbb{E}[Y]$$
 
 ::: {.callout-tip collapse="true"}
+
 ## Proof
-$$\begin{align}
+
+\begin{align}
     \mathbb{E}[X+Y] &= \sum_{s} (X+Y)(s) P(s) \\
     &= \sum_{s} (X(s)P(s) + Y(s)P(s)) \\
     &= \sum_{s} X(s)P(s) + \sum_{s} Y(s)P(s)\\
     &= \mathbb{E}[X] + \mathbb{E}[Y]
-\end{align}$$
+\end{align}
+
 :::
 
 3. If $g$ is a non-linear function, then in general, 
-$$\mathbb{E}[g(X)] \neq g(\mathbb{E}[X])$$ For example, if $X$ is -1 or 1 with equal probability, then $\mathbb{E}[X] = 0$, but $\mathbb{E}[X^2] = 1 \neq 0$.
+$$\mathbb{E}[g(X)] \neq g(\mathbb{E}[X])$$ 
+
+For example, if $X$ is -1 or 1 with equal probability, then $\mathbb{E}[X] = 0$, but $\mathbb{E}[X^2] = 1 \neq 0$.
 
 Using these properties, we can again better understand how we got from the original definition of variance to the computational definition.
 
 ::: {.callout-tip collapse="false"}
 ## Proof
-$$\begin{align}
+
+\begin{align}
    \text{Var}(X) &= \mathbb{E}[(X-\textcolor{blue}{\mathbb{E}[X]})^2] \hspace{2em} \text{Constants inside expectations are colored \textcolor{blue}{blue}} \\
    &= \mathbb{E}[X^2 - \textcolor{blue}{2\mathbb{E}[X]}X + \textcolor{blue}{\mathbb{E}[X]}^2] \hspace{2em} \text{Expanding the square}\\
    &= \mathbb{E}[X^2] - \mathbb{E}[\textcolor{blue}{2\mathbb{E}[X]}X] +\mathbb{E}[\textcolor{blue}{\mathbb{E}[X]}^2] \hspace{2em} \text{by Property 2}\\
    &= \mathbb{E}[X^2] - 2 \mathbb{E}[X]\mathbb{E}[X] +\mathbb{E}[X]^2 \hspace{2em} \text{by Property 1}\\
    &= \mathbb{E}[X^2] - 2 \mathbb{E}[X]^2 +\mathbb{E}[X]^2 \hspace{2em} \text{Algebra}\\
    &= \mathbb{E}[X^2] - (\mathbb{E}[X])^2
-\end{align}$$
+\end{align}
+
 :::
 
 ### Properties of Variance
@@ -417,6 +442,31 @@ $$ \begin{align}
 &= \mathbb{E}[(X - \mu_x)^2] + \mathbb{E}[(Y - \mu_y)^2] + \mathbb{E}[(X - \mu_x)(Y - \mu_y)] \\
 &= \text{Var}(X) + \text{Var}(Y) + \mathbb{E}[(X - \mu_x)(Y - \mu_y)] 
 \end{align}$$
+:::
+
+### Example: Two Dice
+
+Let $X_1$ and $X_2$ be numbers on two dice rolls. Assume $X_1, X_2$ are i.i.d.
+
+::: {.callout-note title="Is the expectation of $2X_1$ and $X_1 + X_2$ the same?" collapse="true"}
+
+Yes.
+$$\mathbb{E}(2X_1) = 2\mathbb{E}(X_1) = 2*3.5 = 7$$
+
+$$\mathbb{E}(X_1 + X_2) = \mathbb{E}(X_1) + \mathbb{E}(X_2) = 3.5 + 3.5 = 7$$
+
+:::
+
+::: {.callout-note title="Is the variance of $2X_1$ and $X_1 + X_2$ the same?" collapse="true"}
+
+No. Note that $2X_1$ is twice the value of the first die, which is *different* from summing the values of two dice.
+
+$$ \text{Var}(2X_1) = 2^2\text{Var}(X) = 4\text{Var}(X_1)$$
+
+$$ \text{Var}(X_1 + X_2) = \text{Var}(X_1) + \text{Var}(X_2) + \text{Cov}(X_1, X_2) = 2\text{Var}(X_1)$$
+
+Note that $\text{Var}(X_1) = \text{Var}(X_2)$, and $\text{Cov}(X_1, X_2) = 0$ since $X_1, X_2$ are independent.
+
 :::
 
 ### Covariance and Correlation
@@ -474,4 +524,5 @@ However, looking at the graphs and running this through simulation, we can see t
     * $\text{Var}(X + Y) = \text{Var}(X) + \text{Var}(Y) + 2\text{Cov}(X,Y)$
 
 Note that $\text{Cov}(X,Y)$ would equal 0 if $X$ and $Y$ are independent.
+
 

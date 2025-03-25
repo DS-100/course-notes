@@ -1,0 +1,1974 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.40">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>18&nbsp; Estimators, Bias, and Variance (Old Notes from Fall 2024) – Principles and Techniques of Data Science</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../probability_1/probability_1.html" rel="prev">
+<link href="../data100_logo.png" rel="icon" type="image/png">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-549806ee2085284f45b00abea8c6df48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-ca5a086e270bb62b76934925835b48c3.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../probability_2/probability_2.html"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Estimators, Bias, and Variance (Old Notes from Fall 2024)</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="../index.html" class="sidebar-logo-link">
+      <img src="../data100_logo.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Principles and Techniques of Data Science</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/DS-100/course-notes" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Welcome</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../intro_lec/introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pandas_1/pandas_1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Pandas I</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pandas_2/pandas_2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Pandas II</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pandas_3/pandas_3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Pandas III</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../eda/eda.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Data Cleaning and EDA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../regex/regex.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Regular Expressions</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../visualization_1/visualization_1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Visualization I</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../visualization_2/visualization_2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Visualization II</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../sampling/sampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Sampling</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../modeling_slr/modeling_slr.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Modeling &amp; SLR</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../constant_model_loss_transformations/loss_transformations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Constant Model, Loss, and Transformations</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ols/ols.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Ordinary Least Squares</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../gradient_descent/gradient_descent.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">sklearn and Gradient Descent</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../feature_engineering/feature_engineering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient Descent Continuation, Feature Engineering</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../case_study_HCE/case_study_HCE.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Case Study in Human Contexts and Ethics</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../cv_regularization/cv_reg.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Cross Validation and Regularization</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../probability_1/probability_1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Random Variables</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../probability_2/probability_2.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Estimators, Bias, and Variance (Old Notes from Fall 2024)</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Estimators, Bias, and Variance</h2>
+   
+  <ul>
+  <li><a href="#brief-recap" id="toc-brief-recap" class="nav-link active" data-scroll-target="#brief-recap"><span class="header-section-number">18.1</span> Brief Recap</a></li>
+  <li><a href="#common-random-variables" id="toc-common-random-variables" class="nav-link" data-scroll-target="#common-random-variables"><span class="header-section-number">18.2</span> Common Random Variables</a>
+  <ul>
+  <li><a href="#properties-of-bernoulli-random-variables" id="toc-properties-of-bernoulli-random-variables" class="nav-link" data-scroll-target="#properties-of-bernoulli-random-variables"><span class="header-section-number">18.2.1</span> Properties of Bernoulli Random Variables</a></li>
+  <li><a href="#properties-of-binomial-random-variables" id="toc-properties-of-binomial-random-variables" class="nav-link" data-scroll-target="#properties-of-binomial-random-variables"><span class="header-section-number">18.2.2</span> Properties of Binomial Random Variables</a></li>
+  <li><a href="#example" id="toc-example" class="nav-link" data-scroll-target="#example"><span class="header-section-number">18.2.3</span> Example</a></li>
+  </ul></li>
+  <li><a href="#sample-statistics" id="toc-sample-statistics" class="nav-link" data-scroll-target="#sample-statistics"><span class="header-section-number">18.3</span> Sample Statistics</a>
+  <ul>
+  <li><a href="#sample-mean-properties" id="toc-sample-mean-properties" class="nav-link" data-scroll-target="#sample-mean-properties"><span class="header-section-number">18.3.1</span> Sample Mean Properties</a></li>
+  <li><a href="#central-limit-theorem" id="toc-central-limit-theorem" class="nav-link" data-scroll-target="#central-limit-theorem"><span class="header-section-number">18.3.2</span> Central Limit Theorem</a></li>
+  <li><a href="#using-the-sample-mean-to-estimate-the-population-mean" id="toc-using-the-sample-mean-to-estimate-the-population-mean" class="nav-link" data-scroll-target="#using-the-sample-mean-to-estimate-the-population-mean"><span class="header-section-number">18.3.3</span> Using the Sample Mean to Estimate the Population Mean</a></li>
+  </ul></li>
+  <li><a href="#population-vs-sample-statistics" id="toc-population-vs-sample-statistics" class="nav-link" data-scroll-target="#population-vs-sample-statistics"><span class="header-section-number">18.4</span> Population vs Sample Statistics</a>
+  <ul>
+  <li><a href="#training-and-prediction-as-estimation" id="toc-training-and-prediction-as-estimation" class="nav-link" data-scroll-target="#training-and-prediction-as-estimation"><span class="header-section-number">18.4.1</span> Training and Prediction as Estimation</a></li>
+  </ul></li>
+  <li><a href="#sec-bias-variance-tradeoff" id="toc-sec-bias-variance-tradeoff" class="nav-link" data-scroll-target="#sec-bias-variance-tradeoff"><span class="header-section-number">18.5</span> Bias-Variance Tradeoff</a>
+  <ul>
+  <li><a href="#model-risk" id="toc-model-risk" class="nav-link" data-scroll-target="#model-risk"><span class="header-section-number">18.5.1</span> Model Risk</a></li>
+  <li><a href="#observation-variance" id="toc-observation-variance" class="nav-link" data-scroll-target="#observation-variance"><span class="header-section-number">18.5.2</span> 1. Observation Variance</a></li>
+  <li><a href="#model-variance" id="toc-model-variance" class="nav-link" data-scroll-target="#model-variance"><span class="header-section-number">18.5.3</span> 2. Model Variance</a></li>
+  <li><a href="#model-bias" id="toc-model-bias" class="nav-link" data-scroll-target="#model-bias"><span class="header-section-number">18.5.4</span> 3. Model Bias</a></li>
+  <li><a href="#proof-of-the-decomposition" id="toc-proof-of-the-decomposition" class="nav-link" data-scroll-target="#proof-of-the-decomposition"><span class="header-section-number">18.5.5</span> Proof of the Decomposition</a></li>
+  <li><a href="#the-decomposition" id="toc-the-decomposition" class="nav-link" data-scroll-target="#the-decomposition"><span class="header-section-number">18.5.11</span> The Decomposition</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content column-body" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Estimators, Bias, and Variance (Old Notes from Fall 2024)</span></h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta column-body">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="true" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Learning Outcomes
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse show">
+<div class="callout-body-container callout-body">
+<ul>
+<li>Explore commonly seen random variables like Bernoulli and Binomial distributions</li>
+<li>Understand the impact of model complexity on the tradeoff between bias and variance</li>
+<li>Derive the bias-variance decomposition and differentiate model risk, observation bias, model variance, and model bias</li>
+</ul>
+</div>
+</div>
+</div>
+<p>Last time, we introduced the idea of random variables: numerical functions of a sample. Most of our work in the last lecture was done to build a background in probability and statistics. Now that we’ve established some key ideas, we’re in a good place to apply what we’ve learned to our original goal – understanding how the randomness of a sample impacts the model design process.</p>
+<p>In this lecture, we will delve more deeply into the idea of fitting a model to a sample. We’ll explore how to re-express our modeling process in terms of random variables and use this new understanding to steer model complexity.</p>
+<section id="brief-recap" class="level2" data-number="18.1">
+<h2 data-number="18.1" class="anchored" data-anchor-id="brief-recap"><span class="header-section-number">18.1</span> Brief Recap</h2>
+<ul>
+<li>Let <span class="math inline">\(X\)</span> be a random variable with distribution <span class="math inline">\(P(X=x)\)</span>.
+<ul>
+<li><span class="math inline">\(\mathbb{E}[X] = \sum_{x} x P(X=x)\)</span></li>
+<li><span class="math inline">\(\text{Var}(X) = \mathbb{E}[(X-\mathbb{E}[X])^2] = \mathbb{E}[X^2] - (\mathbb{E}[X])^2\)</span></li>
+</ul></li>
+<li>Let <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> be scalar values.
+<ul>
+<li><span class="math inline">\(\mathbb{E}[aX+b] = aE[\mathbb{X}] + b\)</span></li>
+<li><span class="math inline">\(\text{Var}(aX+b) = a^2 \text{Var}(X)\)</span></li>
+</ul></li>
+<li>Let <span class="math inline">\(Y\)</span> be another random variable.
+<ul>
+<li><span class="math inline">\(\mathbb{E}[X+Y] = \mathbb{E}[X] + \mathbb{E}[Y]\)</span></li>
+<li><span class="math inline">\(\text{Var}(X + Y) = \text{Var}(X) + \text{Var}(Y) + 2\text{Cov}(X,Y)\)</span></li>
+</ul></li>
+</ul>
+<p>Note that <span class="math inline">\(\text{Cov}(X,Y)\)</span> would equal 0 if <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> are independent.</p>
+<p>There is also one more important property of expectation that we should look at. Let <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> be <strong>independent</strong> random variables: <span class="math display">\[ \mathbb{E}[XY] = \mathbb{E}[X]\mathbb{E}[Y] \]</span></p>
+<div class="callout callout-style-default callout-tip no-icon callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="true" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Proof
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse show">
+<div class="callout-body-container callout-body">
+<p><span class="math display">\[\begin{align}
+   \mathbb{E}[XY] &amp;= \sum_x\sum_y xy\ \textbf{P}(X=x, Y=y) &amp;\text{Definition} \\
+   &amp;= \sum_x\sum_y xy\ \textbf{P}(X=x)\textbf{P}(Y=y) &amp;\text{Independence}\\
+   &amp;= \sum_x x\textbf{P}(X=x) \sum_y y \textbf{P}(Y=y) &amp;\text{Algebra}\\
+   &amp;= \left(\sum_x x\textbf{P}(X=x)\right) \left(\sum_y y \textbf{P}(Y=y)\right) &amp;\text{Algebra}\\
+   &amp;= \mathbb{E}[X]\mathbb{E}[Y] &amp;\text{Definition}
+\end{align}\]</span></p>
+</div>
+</div>
+</div>
+</section>
+<section id="common-random-variables" class="level2" data-number="18.2">
+<h2 data-number="18.2" class="anchored" data-anchor-id="common-random-variables"><span class="header-section-number">18.2</span> Common Random Variables</h2>
+<p>There are several cases of random variables that appear often and have useful properties. Below are the ones we will explore further in this course. The numbers in parentheses are the parameters of a random variable, which are constants. Parameters define a random variable’s shape (i.e., distribution) and its values. For this lecture, we’ll focus more heavily on the bolded random variables and their special properties, but you should familiarize yourself with all the ones listed below:</p>
+<ul>
+<li><strong>Bernoulli(<span class="math inline">\(p\)</span>)</strong>
+<ul>
+<li>Takes on value 1 with probability <span class="math inline">\(p\)</span>, and 0 with probability <span class="math inline">\((1 - p)\)</span>.</li>
+<li>AKA the “indicator” random variable.</li>
+<li>Let <span class="math inline">\(X\)</span> be a Bernoulli(<span class="math inline">\(p\)</span>) random variable.
+<ul>
+<li><span class="math inline">\(\mathbb{E}[X] = 1 * p + 0 * (1-p) = p\)</span>
+<ul>
+<li><span class="math inline">\(\mathbb{E}[X^2] = 1^2 * p + 0^2 * (1-p) = p\)</span></li>
+</ul></li>
+<li><span class="math inline">\(\text{Var}(X) = \mathbb{E}[X^2] - (\mathbb{E}[X])^2 = p - p^2 = p(1-p)\)</span></li>
+</ul></li>
+</ul></li>
+<li><strong>Binomial(<span class="math inline">\(n\)</span>, <span class="math inline">\(p\)</span>)</strong>
+<ul>
+<li>Number of 1s in <span class="math inline">\(n\)</span> independent Bernoulli(<span class="math inline">\(p\)</span>) trials.</li>
+<li>Let <span class="math inline">\(Y\)</span> be a Binomial(<span class="math inline">\(n\)</span>, <span class="math inline">\(p\)</span>) random variable.
+<ul>
+<li>The distribution of <span class="math inline">\(Y\)</span> is given by the binomial formula, and we can write <span class="math inline">\(Y = \sum_{i=1}^n X_i\)</span> where:
+<ul>
+<li><span class="math inline">\(X_i\)</span> s the indicator of success on trial i. <span class="math inline">\(X_i = 1\)</span> if trial i is a success, else 0.</li>
+<li>All <span class="math inline">\(X_i\)</span> are i.i.d. and Bernoulli(<span class="math inline">\(p\)</span>).</li>
+</ul></li>
+<li><span class="math inline">\(\mathbb{E}[Y] = \sum_{i=1}^n \mathbb{E}[X_i] = np\)</span></li>
+<li><span class="math inline">\(\text{Var}(X) = \sum_{i=1}^n \text{Var}(X_i) = np(1-p)\)</span>
+<ul>
+<li><span class="math inline">\(X_i\)</span>’s are independent, so <span class="math inline">\(\text{Cov}(X_i, X_j) = 0\)</span> for all i, j.</li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li>Uniform on a finite set of values
+<ul>
+<li>The probability of each value is <span class="math inline">\(\frac{1}{\text{(number of possible values)}}\)</span>.</li>
+<li>For example, a standard/fair die.</li>
+</ul></li>
+<li>Uniform on the unit interval (0, 1)
+<ul>
+<li>Density is flat at 1 on (0, 1) and 0 elsewhere.</li>
+</ul></li>
+<li>Normal(<span class="math inline">\(\mu, \sigma^2\)</span>), a.k.a Gaussian
+<ul>
+<li><span class="math inline">\(f(x) = \frac{1}{\sigma\sqrt{2\pi}} \exp\left( -\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^{\!2}\,\right)\)</span></li>
+</ul></li>
+</ul>
+<section id="properties-of-bernoulli-random-variables" class="level3" data-number="18.2.1">
+<h3 data-number="18.2.1" class="anchored" data-anchor-id="properties-of-bernoulli-random-variables"><span class="header-section-number">18.2.1</span> Properties of Bernoulli Random Variables</h3>
+<p>To get some practice with the formulas discussed so far, let’s derive the expectation and variance for a Bernoulli(<span class="math inline">\(p\)</span>) random variable. If <span class="math inline">\(X\)</span> ~ Bernoulli(<span class="math inline">\(p\)</span>), <span class="math display">\[\mathbb{E}[X] = 1 \cdot p + 0 \cdot (1 - p) = p\]</span></p>
+<p>We will get an average value of p across many, many samples. To compute the variance, we will use the computational formula. We first find that: <span class="math display">\[\mathbb{E}[X^2] = 1^2 \cdot p + 0^2 \cdot (1 - p) = p\]</span></p>
+<p>From there, let’s calculate our variance: <span class="math display">\[\text{Var}(X) = \mathbb{E}[X^2] - \mathbb{E}[X]^2 = p - p^2 = p(1-p)\]</span></p>
+<p>Looking at this equation, we can see that we get a lower var at more extreme probabilities like p = 0.1 or 0.9, and we get a higher variance when p close to 0.5.</p>
+</section>
+<section id="properties-of-binomial-random-variables" class="level3" data-number="18.2.2">
+<h3 data-number="18.2.2" class="anchored" data-anchor-id="properties-of-binomial-random-variables"><span class="header-section-number">18.2.2</span> Properties of Binomial Random Variables</h3>
+<p>Let <span class="math inline">\(Y\)</span> ~ Binomial(<span class="math inline">\(n\)</span>, <span class="math inline">\(p\)</span>). We can think of <span class="math inline">\(Y\)</span> as the number (i.e., count) of 1s in <span class="math inline">\(n\)</span> independent Bernoulli(<span class="math inline">\(p\)</span>) trials. Distribution of Y given by the binomial formula:</p>
+<p><span class="math display">\[ \textbf{P}(Y=y) = \binom{n}{y} p^y (1-p)^{n-y}\]</span></p>
+<p>We can write:</p>
+<p><span class="math display">\[Y = \sum_{i=1}^n X_i\]</span></p>
+<ul>
+<li><span class="math inline">\(X_i\)</span> is the indicator of a success on trial <span class="math inline">\(i\)</span>. <span class="math inline">\(X_i\)</span> = 1 if trial i is a success, else 0.</li>
+<li>All <span class="math inline">\(X_i\)</span>s are <strong>i.i.d.</strong> (independent and identically distributed) and <strong>Bernoulli(p)</strong>.</li>
+</ul>
+<p>Using linearity of expectation,</p>
+<p><span class="math display">\[\mathbb{E}[Y] = \sum_{i=1}^n \mathbb{E}[X_i] = np\]</span></p>
+<p>For the variance, since each <span class="math inline">\(X_i\)</span> is independent of the other, <span class="math inline">\(\text{Cov}(X_i, X_j) = 0\)</span>,</p>
+<p><span class="math display">\[\text{Var}(Y) =  \sum_{i=1}^n \text{Var}[X_i] = np(1-p)\]</span></p>
+</section>
+<section id="example" class="level3" data-number="18.2.3">
+<h3 data-number="18.2.3" class="anchored" data-anchor-id="example"><span class="header-section-number">18.2.3</span> Example</h3>
+<p>Suppose you win cash based on the number of heads you get in a series of 20 coin flips. Let <span class="math inline">\(X_i = 1\)</span> if the <span class="math inline">\(i\)</span>-th coin is heads, <span class="math inline">\(0\)</span> otherwise. Which payout strategy would you choose?</p>
+<p>A. <span class="math inline">\(Y_A = 10 * X_1 + 10 * X_2\)</span></p>
+<p>B. <span class="math inline">\(Y_B = \sum_{i=1}^{20} X_i\)</span></p>
+<p>C. <span class="math inline">\(Y_C = 20 * X_1\)</span></p>
+<div class="callout callout-style-default callout-caution no-icon callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Let <span class="math inline">\(X_1, X_2, ... X_{20}\)</span> be 20 i.i.d Bernoulli(0.5) random variables. Since the <span class="math inline">\(X_i\)</span>’s are independent, <span class="math inline">\(\text{Cov}(X_i, X_j) = 0\)</span> for all pairs <span class="math inline">\(i, j\)</span>. Additionally, Since <span class="math inline">\(X_i\)</span> is Bernoulli(0.5), we know that <span class="math inline">\(\mathbb{E}[X] = p = 0.5\)</span> and <span class="math inline">\(\text{Var}(X) = p(1-p) = 0.25\)</span>. We can calculate the following for each scenario:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>A. <span class="math inline">\(Y_A = 10 * X_1 + 10 * X_2\)</span></th>
+<th>B. <span class="math inline">\(Y_B = \sum_{i=1}^{20} X_i\)</span></th>
+<th>C. <span class="math inline">\(Y_C = 20 * X_1\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Expectation</td>
+<td><span class="math inline">\(\mathbb{E}[Y_A] = 10 (0.5) + 10(0.5) = 10\)</span></td>
+<td><span class="math inline">\(\mathbb{E}[Y_B] = 0.5 + ... + 0.5 = 10\)</span></td>
+<td><span class="math inline">\(\mathbb{E}[Y_C] = 20(0.5) = 10\)</span></td>
+</tr>
+<tr class="even">
+<td>Variance</td>
+<td><span class="math inline">\(\text{Var}(Y_A) = 10^2 (0.25) + 10^2 (0.25) = 50\)</span></td>
+<td><span class="math inline">\(\text{Var}(Y_B) = 0.25 + ... + 0.25 = 5\)</span></td>
+<td><span class="math inline">\(\text{Var}(Y_C) = 20^2 (0.25) = 100\)</span></td>
+</tr>
+<tr class="odd">
+<td>Standard Deviation</td>
+<td><span class="math inline">\(\text{SD}(Y_A) \approx 7.07\)</span></td>
+<td><span class="math inline">\(\text{SD}(Y_B) \approx 2.24\)</span></td>
+<td><span class="math inline">\(\text{SD}(Y_C) = 10\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>As we can see, all the scenarios have the same expected value but different variances. The higher the variance, the greater the risk and uncertainty, so the “right” strategy depends on your personal preference. Would you choose the “safest” option B, the most “risky” option C, or somewhere in the middle (option A)?</p>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="sample-statistics" class="level2" data-number="18.3">
+<h2 data-number="18.3" class="anchored" data-anchor-id="sample-statistics"><span class="header-section-number">18.3</span> Sample Statistics</h2>
+<p>Today, we’ve talked extensively about populations; if we know the distribution of a random variable, we can reliably compute expectation, variance, functions of the random variable, etc. Note that:</p>
+<ul>
+<li>The distribution of a <em>population</em> describes how a random variable behaves across <em>all</em> individuals of interest.</li>
+<li>The distribution of a <em>sample</em> describes how a random variable behaves in a <em>specific sample</em> from the population.</li>
+</ul>
+<p>In Data Science, however, we often do not have access to the whole population, so we don’t know its distribution. As such, we need to collect a sample and use its distribution to estimate or infer properties of the population. In cases like these, we can take several samples of size <span class="math inline">\(n\)</span> from the population (an easy way to do this is using <code>df.sample(n, replace=True)</code>), and compute the mean of each <em>sample</em>. When sampling, we make the (big) assumption that we sample uniformly at random <em>with replacement</em> from the population; each observation in our sample is a random variable drawn i.i.d from our population distribution. Remember that our sample mean is a random variable since it depends on our randomly drawn sample! On the other hand, our population mean is simply a number (a fixed value).</p>
+<section id="sample-mean-properties" class="level3" data-number="18.3.1">
+<h3 data-number="18.3.1" class="anchored" data-anchor-id="sample-mean-properties"><span class="header-section-number">18.3.1</span> Sample Mean Properties</h3>
+<p>Consider an i.i.d. sample <span class="math inline">\(X_1, X_2, ..., X_n\)</span> drawn from a population with mean 𝜇 and SD 𝜎. We define the <strong>sample mean</strong> as <span class="math display">\[\bar{X}_n = \frac{1}{n} \sum_{i=1}^n X_i\]</span></p>
+<p>The expectation of the sample mean is given by: <span class="math display">\[\begin{align}
+    \mathbb{E}[\bar{X}_n] &amp;= \frac{1}{n} \sum_{i=1}^n \mathbb{E}[X_i] \\
+    &amp;= \frac{1}{n} (n \mu) \\
+    &amp;= \mu
+\end{align}\]</span></p>
+<p>The variance is given by: <span class="math display">\[\begin{align}
+    \text{Var}(\bar{X}_n) &amp;= \frac{1}{n^2} \text{Var}( \sum_{i=1}^n X_i) \\
+    &amp;=  \frac{1}{n^2} \left( \sum_{i=1}^n \text{Var}(X_i) \right) \\
+    &amp;=  \frac{1}{n^2} (n \sigma^2) = \frac{\sigma^2}{n}
+\end{align}\]</span></p>
+<p>The standard deviation is: <span class="math display">\[ \text{SD}(\bar{X}_n) = \frac{\sigma}{\sqrt{n}} \]</span></p>
+<p><span class="math inline">\(\bar{X}_n\)</span> is <strong>normally distributed</strong> (in the limit) by the <strong>Central Limit Theorem</strong> (CLT).</p>
+</section>
+<section id="central-limit-theorem" class="level3" data-number="18.3.2">
+<h3 data-number="18.3.2" class="anchored" data-anchor-id="central-limit-theorem"><span class="header-section-number">18.3.2</span> Central Limit Theorem</h3>
+<p>In <a href="https://inferentialthinking.com/chapters/14/4/Central_Limit_Theorem.html?">Data 8</a> and in the previous lecture, you encountered the <strong>Central Limit Theorem (CLT)</strong>. This is a powerful theorem for estimating the distribution of a population with mean <span class="math inline">\(\mu\)</span> and standard deviation <span class="math inline">\(\sigma\)</span> from a collection of smaller samples. The CLT tells us that if an i.i.d sample of size <span class="math inline">\(n\)</span> is large, then the probability distribution of the <strong>sample mean</strong> is <strong>roughly normal</strong> with mean <span class="math inline">\(\mu\)</span> and SD of <span class="math inline">\(\frac{\sigma}{\sqrt{n}}\)</span>. More generally, any theorem that provides the rough distribution of a statistic and <strong>doesn’t need the distribution of the population</strong> is valuable to data scientists! This is because we rarely know a lot about the population.</p>
+<p align="center">
+</p><p><img src="images/clt.png" alt="clt" width="400"></p>
+<p></p>
+<p>Importantly, the CLT assumes that each observation in our samples is drawn i.i.d from the distribution of the population. In addition, the CLT is accurate only when <span class="math inline">\(n\)</span> is “large”, but what counts as a “large” sample size depends on the specific distribution. If a population is highly symmetric and unimodal, we could need as few as <span class="math inline">\(n=20\)</span>; if a population is very skewed, we need a larger <span class="math inline">\(n\)</span>. If in doubt, you can bootstrap the sample mean and see if the bootstrapped distribution is bell-shaped. Classes like Data 140 investigate this idea in great detail. <!-- The CLT states that no matter what population you are drawing from, if an i.i.d. sample of size $n$ is large, the probability distribution of the sample mean is roughly normal with mean 𝜇 and SD $\sigma/\sqrt{n}$. --></p>
+<p>For a more in-depth demo, check out <a href="https://onlinestatbook.com/stat_sim/sampling_dist/">onlinestatbook</a>.</p>
+</section>
+<section id="using-the-sample-mean-to-estimate-the-population-mean" class="level3" data-number="18.3.3">
+<h3 data-number="18.3.3" class="anchored" data-anchor-id="using-the-sample-mean-to-estimate-the-population-mean"><span class="header-section-number">18.3.3</span> Using the Sample Mean to Estimate the Population Mean</h3>
+<p>Now let’s say we want to use the sample mean to <strong>estimate</strong> the population mean, for example, the average height of Cal undergraduates. We can typically collect a <strong>single sample</strong>, which has just one average. However, what if we happened, by random chance, to draw a sample with a different mean or spread than that of the population? We might get a skewed view of how the population behaves (consider the extreme case where we happen to sample the exact same value <span class="math inline">\(n\)</span> times!).</p>
+<p align="center">
+<img src="images/CLTdiff.png" alt="clt" width="400">
+</p>
+<p>For example, notice the difference in variation between these two distributions that are different in sample size. The distribution with a bigger sample size (<span class="math inline">\(n=800\)</span>) is tighter around the mean than the distribution with a smaller sample size (<span class="math inline">\(n=200\)</span>). Try plugging in these values into the standard deviation equation for the sample mean to make sense of this!</p>
+<p>Applying the CLT allows us to make sense of all of this and resolve this issue. By drawing many samples, we can consider how the sample distribution varies across multiple subsets of the data. This allows us to approximate the properties of the population without the need to survey every single member.</p>
+<p>Given this potential variance, it is also important that we consider the <strong>average value and spread</strong> of all possible sample means, and what this means for how big <span class="math inline">\(n\)</span> should be. For every sample size, the expected value of the sample mean is the population mean: <span class="math display">\[\mathbb{E}[\bar{X}_n] = \mu\]</span> We call the sample mean an <strong>unbiased estimator</strong> of the population mean and will explore this idea more in the next lecture.</p>
+<div class="callout callout-style-default callout-tip no-icon callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="true" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Data 8 Recap: Square Root Law
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse show">
+<div class="callout-body-container callout-body">
+<p>The square root law (<a href="https://inferentialthinking.com/chapters/14/5/Variability_of_the_Sample_Mean.html#the-square-root-law">Data 8</a>) states that if you increase the sample size by a factor, the SD of the sample mean decreases by the square root of the factor. <span class="math display">\[\text{SD}(\bar{X_n}) = \frac{\sigma}{\sqrt{n}}\]</span> The sample mean is more likely to be close to the population mean if we have a larger sample size.</p>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="population-vs-sample-statistics" class="level2" data-number="18.4">
+<h2 data-number="18.4" class="anchored" data-anchor-id="population-vs-sample-statistics"><span class="header-section-number">18.4</span> Population vs Sample Statistics</h2>
+<p>At this point in the course, we’ve spent a great deal of time working with models. When we first introduced the idea of modeling a few weeks ago, we did so in the context of <strong>prediction</strong>: using models to make <em>accurate predictions</em> about unseen data. Another reason we might build models is to better understand complex phenomena in the world around us. <strong>Inference</strong> is the task of using a model to infer the true underlying relationships between the feature and response variables. For example, if we are working with a set of housing data, <em>prediction</em> might ask: given the attributes of a house, how much is it worth? <em>Inference</em> might ask: how much does having a local park impact the value of a house?</p>
+<p>A major goal of inference is to draw conclusions about the full population of data given only a random sample. To do this, we aim to estimate the value of a <strong>parameter</strong>, which is a numerical function of the <em>population</em> (for example, the population mean <span class="math inline">\(\mu\)</span>). We use a collected sample to construct a <strong>statistic</strong>, which is a numerical function of the random <em>sample</em> (for example, the sample mean <span class="math inline">\(\bar{X}_n\)</span>). It’s helpful to think “p” for “parameter” and “population,” and “s” for “sample” and “statistic.”</p>
+<p>Since the sample represents a <em>random</em> subset of the population, any statistic we generate will likely deviate from the true population parameter, and it <em>could have been different</em>. We say that the sample statistic is an <strong>estimator</strong> of the true population parameter. Notationally, the population parameter is typically called <span class="math inline">\(\theta\)</span>, while its estimator is denoted by <span class="math inline">\(\hat{\theta}\)</span>.</p>
+<p>To address our inference question, we aim to construct estimators that closely estimate the value of the population parameter. We evaluate how “good” an estimator is by answering three questions:</p>
+<ul>
+<li>How close is our answer to the parameter? <strong>(Risk / MSE)</strong> <span class="math display">\[ MSE(\hat{\theta}) = E[(\hat{\theta} - \theta)]^2\]</span></li>
+<li>Do we get the right answer for the parameter, on average? <strong>(Bias)</strong> <span class="math display">\[\text{Bias}(\hat{\theta}) = E[\hat{\theta} - \theta] = E[\hat{\theta}] - \theta\]</span></li>
+<li>How variable is the answer? <strong>(Variance)</strong> <span class="math display">\[Var(\hat{\theta}) = E[(\hat{\theta} - E[\hat{\theta}])^2] \]</span></li>
+</ul>
+<p>If the Bias of an estimator <span class="math inline">\(\hat{theta}\)</span> is <strong>zero</strong>, then it is said to be an <strong>unbiased estimator</strong>. For example, sample mean is unbiased for the population mean.</p>
+<p>This relationship between bias and variance can be illustrated with an archery analogy. Imagine that the center of the target is the <span class="math inline">\(\theta\)</span> and each arrow corresponds to a separate parameter estimate <span class="math inline">\(\hat{\theta}\)</span></p>
+<p align="center">
+<img src="images/bias_v_variance.png" width="600">
+</p>
+<p>Ideally, we want our estimator to have low bias and low variance, but how can we mathematically quantify that? See <a href="#sec-bias-variance-tradeoff" class="quarto-xref"><span>Section 18.5</span></a> for more detail.</p>
+<section id="training-and-prediction-as-estimation" class="level3" data-number="18.4.1">
+<h3 data-number="18.4.1" class="anchored" data-anchor-id="training-and-prediction-as-estimation"><span class="header-section-number">18.4.1</span> Training and Prediction as Estimation</h3>
+<p>Now that we’ve established the idea of an estimator, let’s see how we can apply this learning to the modeling process. To do so, we’ll take a moment to formalize our data collection and models in the language of random variables.</p>
+<p>Say we are working with an input variable, <span class="math inline">\(x\)</span>, and a response variable, <span class="math inline">\(Y\)</span>. We assume that <span class="math inline">\(Y\)</span> and <span class="math inline">\(x\)</span> are linked by some relationship <span class="math inline">\(g\)</span>; in other words, <span class="math inline">\(Y = g(x)\)</span> where <span class="math inline">\(g\)</span> represents some “universal truth” or “law of nature” that defines the <strong>true underlying relationship</strong> between <span class="math inline">\(x\)</span> and <span class="math inline">\(Y\)</span>. In the image below, <span class="math inline">\(g\)</span> is denoted by the red line.</p>
+<p>As data scientists, however, we have no way of directly “seeing” the underlying relationship <span class="math inline">\(g\)</span>. The best we can do is collect observed data out in the real world to try to understand this relationship. Unfortunately, the data collection process will always have some inherent error (think of the randomness you might encounter when taking measurements in a scientific experiment). We say that each observation comes with some <strong>random error or noise</strong> term, <span class="math inline">\(\epsilon\)</span> (read: “epsilon”). This error is assumed to be a random variable with expectation <span class="math inline">\(\mathbb{E}(\epsilon)=0\)</span>, variance <span class="math inline">\(\text{Var}(\epsilon) = \sigma^2\)</span>, and be i.i.d. across each observation. The existence of this random noise means that our observations, <span class="math inline">\(Y(x)\)</span>, are <em>random variables</em>, where <span class="math inline">\(Y = g(x) + \epsilon\)</span>. This can be seen on our graph because the points do not line perfectly with the true underlying relationship, and the residual is the noise <span class="math inline">\(\epsilon\)</span>.</p>
+<p align="center">
+<img src="images/data.png" alt="data" width="700">
+</p>
+<p>We can only observe our <strong>IID random sample of data</strong>, represented by the blue points above. From this sample, we want to estimate the true relationship <span class="math inline">\(g\)</span>. We do this by <strong>training</strong> a model on the data to obtain our optimal <span class="math inline">\(\hat{\theta}\)</span>, <span class="math display">\[ {\hat{\theta}} = \text{arg}\underset{\theta}{\text{min}}\  \left(\frac{1}{n} \sum_{i=1}^n \textbf{Loss}(Y_i, f_{\theta}(X_i))\right) + \lambda\ \textbf{Regularizer}(\theta)\]</span></p>
+<p>and <strong>predicting</strong> the value of <span class="math inline">\(Y\)</span> at a given <span class="math inline">\(x\)</span> location, <span class="math display">\[ \hat{Y}(x) = f_{\hat{\theta}}(x)\]</span></p>
+<p>where the model <span class="math inline">\(\hat{Y}(x)\)</span> can be used to estimate <span class="math inline">\(g\)</span>. The error in our prediction is: <span class="math display">\[ (Y-\hat{Y}(x))^2\]</span></p>
+<p>Here, <span class="math inline">\(X_i\)</span>, <span class="math inline">\(Y_i\)</span>, <span class="math inline">\(\hat{\theta}\)</span>, and <span class="math inline">\(\hat{Y}(x)\)</span> are random variables. An example prediction model <span class="math inline">\(\hat{Y}(x)\)</span> is shown below.</p>
+<p><span class="math display">\[\text{True relationship: } g(x)\]</span></p>
+<p><span class="math display">\[\text{Observed relationship: }Y = g(x) + \epsilon\]</span></p>
+<p><span class="math display">\[\text{Prediction: }\hat{Y}(x) = f_{\hat{\theta}}(x)\]</span></p>
+<p align="center">
+<img src="images/y_hat.png" alt="y_hat" width="600">
+</p>
+<p>When building models, it is also important to note that our choice of features will also significantly impact our estimation. In the plot below, you can see how the different models (green and purple) can lead to different estimates.</p>
+<p align="center">
+<img src="images/y_hat2.png" alt="y_hat" width="400">
+</p>
+<p>Overall, we fit (train) a model based on our <strong>sample of (x,y) pairs</strong>, and our model <strong>estimates</strong> the true relationship <span class="math inline">\(Y=g(x)+\epsilon\)</span>, where at every <span class="math inline">\(x\)</span>, our <strong>prediction</strong> for <span class="math inline">\(Y\)</span> is <span class="math inline">\(\hat{Y}(x) = f_{\hat{\theta}}(x)\)</span>.</p>
+<!-- #### Estimating a Linear Relationship
+If we assume that the true relationship $g$ is linear, we can express the response as $Y = f_{\theta}(x)$, where our true relationship is modeled by 
+$$Y = g(x) + \epsilon$$
+$$ f_{\theta}(x) = Y = \theta_0 + \sum_{j=1}^p \theta_j x_j + \epsilon$$
+
+::: {.callout-warning collapse="true"}
+##### Which expressions are random? 
+In our two equations above, the true relationship $g(x) = \theta_0 + \sum_{j=1}^p \theta_j x_j$ is not random, but $\epsilon$ is random. Hence, $Y = f_{\theta}(x)$ is also random. 
+:::
+
+This true relationship has true, unobservable parameters $\theta$, and it has random noise $\epsilon$, so we can never observe the true relationship. Instead, the next best thing we can do is obtain a sample $\Bbb{X}$, $\Bbb{Y}$ of $n$ observed relationships, $(x, Y)$ and use it to train a model and obtain an estimate of $\hat{\theta}$
+$$\hat{Y}(x) = f_{\hat{\theta}}(x) = \hat{\theta_0} + \sum_{j=1}^p \hat{\theta_j} x_j$$
+
+::: {.callout-warning collapse="true"}
+##### Which expressions are random? 
+In our estimating equation above, our sample $\Bbb{X}$, $\Bbb{Y}$ are random (often due to human error). Hence, the estimates we calculate from our samples $\hat{\theta}$ are also random, so our predictor $\hat{Y}(x)$ is also random. 
+:::
+
+Now taking a look at our original equations, we can see that they both have differing sources of randomness. For our observed relationship, $Y = g(x) + \epsilon$, $\epsilon$ represents errors which occur during or after the observation or measurement process. For the estimation model, the data we have is a random sample collected from the population, which was constructed from decisions made before the measurement process. -->
+</section>
+</section>
+<section id="sec-bias-variance-tradeoff" class="level2" data-number="18.5">
+<h2 data-number="18.5" class="anchored" data-anchor-id="sec-bias-variance-tradeoff"><span class="header-section-number">18.5</span> Bias-Variance Tradeoff</h2>
+<p>Recall the model and the data we generated from that model in the last section:</p>
+<p><span class="math display">\[\text{True relationship: } g(x)\]</span></p>
+<p><span class="math display">\[\text{Observed relationship: }Y = g(x) + \epsilon\]</span></p>
+<p><span class="math display">\[\text{Prediction: }\hat{Y}(x)\]</span></p>
+<p>With this reformulated modeling goal, we can now revisit the Bias-Variance Tradeoff from two lectures ago (shown below):</p>
+<p align="center">
+<img src="images/bvt_old.png" width="600">
+</p>
+<p>In today’s lecture, we’ll explore a more mathematical version of the graph you see above by introducing the terms model risk, observation variance, model bias, and model variance. Eventually, we’ll work our way up to an updated version of the Bias-Variance Tradeoff graph that you see below</p>
+<p align="center">
+<img src="images/bvt.png" width="600">
+</p>
+<section id="model-risk" class="level3" data-number="18.5.1">
+<h3 data-number="18.5.1" class="anchored" data-anchor-id="model-risk"><span class="header-section-number">18.5.1</span> Model Risk</h3>
+<p>Recall the data-generating process we established earlier. There is a true underlying relationship <span class="math inline">\(g\)</span>, observed data (with random noise) <span class="math inline">\(Y\)</span>, and model <span class="math inline">\(\hat{Y}\)</span>.</p>
+<p align="center">
+<img src="images/errors.png" alt="errors" width="600">
+</p>
+<p>To begin to understand model risk, we’ll zoom in on a single data point in the plot above and look at its residual.</p>
+<p align="center">
+<img src="images/breakdown.png" alt="breakdown" width="600">
+</p>
+<p><strong>Model risk</strong> is defined as the mean square prediction error of the random variable <span class="math inline">\(\hat{Y}\)</span>. It is an expectation across <strong>all possible samples</strong> we could have possibly gotten when fitting the model, which we can denote as random variables <span class="math inline">\(X_1, X_2, \ldots, X_n, Y\)</span>. Model risk considers the model’s performance on any sample that is theoretically possible, rather than the specific data that we have collected.</p>
+<p><span class="math display">\[\text{model risk }=\mathbb{E}\left[(Y-\hat{Y}(x))^2\right]\]</span></p>
+<p>What is the origin of the error encoded by model risk? Note that there are three types of errors:</p>
+<ul>
+<li><strong>Chance errors</strong>: happen due to randomness alone
+<ul>
+<li>Source 1 <strong>(Observation Variance)</strong>: randomness in new observations <span class="math inline">\(Y\)</span> due to random noise <span class="math inline">\(\epsilon\)</span></li>
+<li>Source 2 <strong>(Model Variance)</strong>: randomness in the sample we used to train the models, as samples <span class="math inline">\(X_1, X_2, \ldots, X_n, Y\)</span> are random</li>
+</ul></li>
+<li><strong>Bias</strong>: non-random error due to our model being different from the true underlying function <span class="math inline">\(g\)</span></li>
+</ul>
+<p>Remember that <span class="math inline">\(\hat{Y}(x)\)</span> is a random variable – it is the prediction made for <span class="math inline">\(x\)</span> after being fit on the specific sample used for training. If we had used a different sample for training, a different prediction might have been made for this value of <span class="math inline">\(x\)</span>. To capture this, the diagram below considers both the prediction <span class="math inline">\(\hat{Y}(x)\)</span> made for a particular random training sample, and the <em>expected</em> prediction across all possible training samples, <span class="math inline">\(E[\hat{Y}(x)]\)</span>.</p>
+<p>We can use this simplified diagram to break down the prediction error into smaller components. First, start by considering the error on a single prediction, <span class="math inline">\(Y(x)-\hat{Y}(x)\)</span>.</p>
+<p align="center">
+<img src="images/error.png" alt="error" width="300">
+</p>
+<p>We can identify three components of this error. Note that these points could be in any sequence, but this analysis would still work. This is just a convenient way to visualize it.</p>
+<p align="center">
+<img src="images/decomposition.png" alt="decomposition" width="600">
+</p>
+<p>That is, the error can be written as:</p>
+<p><span class="math display">\[Y-\hat{Y}(x) = \epsilon + \left(g(x)-\mathbb{E}\left[\hat{Y}(x)\right]\right) + \left(\mathbb{E}\left[\hat{Y}(x)\right] - \hat{Y}(x)\right)\]</span> <span class="math display">\[\newline   \]</span></p>
+<p>The model risk is the expected square of the expression above, <span class="math inline">\(\mathbb{E}\left[(Y(x)-\hat{Y}(x))^2\right]\)</span>. If we square both sides and then take the expectation, we will get the following decomposition of model risk:</p>
+<p><span class="math display">\[\mathbb{E}\left[(Y-\hat{Y}(x))^2\right] = \mathbb{E}[\epsilon^2] + \left(g(x)-\mathbb{E}\left[\hat{Y}(x)\right]\right)^2 + \mathbb{E}\left[\left(\mathbb{E}\left[\hat{Y}(x)\right] - \hat{Y}(x)\right)^2\right]\]</span></p>
+<p>It looks like we are missing some cross-product terms when squaring the right-hand side, but it turns out that all of those cross-product terms are zero. The detailed derivation is included in the “Proof of the Decomposition” section of this note for your reference.</p>
+<p>This expression may look complicated at first glance, but we’ve actually already defined each term earlier in this lecture! Let’s look at them term by term.</p>
+</section>
+<section id="observation-variance" class="level3" data-number="18.5.2">
+<h3 data-number="18.5.2" class="anchored" data-anchor-id="observation-variance"><span class="header-section-number">18.5.2</span> 1. Observation Variance</h3>
+<p>The first term in the above decomposition is <span class="math inline">\(\mathbb{E}[\epsilon^2]\)</span>. Remember <span class="math inline">\(\epsilon\)</span> is the random noise when observing <span class="math inline">\(Y\)</span>, with expectation <span class="math inline">\(\mathbb{E}(\epsilon)=0\)</span> and variance <span class="math inline">\(\text{Var}(\epsilon) = \sigma^2\)</span>. We can show that <span class="math inline">\(\mathbb{E}[\epsilon^2]\)</span> is the variance of <span class="math inline">\(\epsilon\)</span>: <span class="math display">\[
+\begin{align*}
+\text{Var}(\epsilon) &amp;= \mathbb{E}[\epsilon^2] + \left(\mathbb{E}[\epsilon]\right)^2\\
+&amp;= \mathbb{E}[\epsilon^2] + 0^2\\
+&amp;= \sigma^2.
+\end{align*}
+\]</span></p>
+<p>This term describes how variable the random error <span class="math inline">\(\epsilon\)</span> (and <span class="math inline">\(Y\)</span>) is for each observation. This is called the <strong>observation variance</strong>. It exists due to the randomness in our observations <span class="math inline">\(Y\)</span>. It is a form of <em>chance error</em> we talked about in the Sampling lecture.</p>
+<p><span class="math display">\[\text{observation variance} = \text{Var}(\epsilon) = \sigma^2.\]</span></p>
+<p>The observation variance results from measurement errors when observing data or missing information that acts like noise. To reduce this observation variance, we could try to get more precise measurements, but it is often beyond the control of data scientists. Because of this, the observation variance <span class="math inline">\(\sigma^2\)</span> is sometimes called “irreducible error.”</p>
+</section>
+<section id="model-variance" class="level3" data-number="18.5.3">
+<h3 data-number="18.5.3" class="anchored" data-anchor-id="model-variance"><span class="header-section-number">18.5.3</span> 2. Model Variance</h3>
+<p>We will then look at the last term: <span class="math inline">\(\mathbb{E}\left[\left(\mathbb{E}\left[\hat{Y}(x)\right] - \hat{Y}(x)\right)^2\right]\)</span>. If you recall the definition of variance from the last lecture, this is precisely <span class="math inline">\(\text{Var}(\hat{Y}(x))\)</span>. We call this the <strong>model variance</strong>.</p>
+<p>It describes how much the prediction <span class="math inline">\(\hat{Y}(x)\)</span> tends to vary when we fit the model on different samples. Remember the sample we collect can come out very differently, thus the prediction <span class="math inline">\(\hat{Y}(x)\)</span> will also be different. The model variance describes this variability due to the randomness in our sampling process. Like observation variance, it is also a form of <em>chance error</em>—even though the sources of randomness are different.</p>
+<p><span class="math display">\[\text{model variance} = \text{Var}(\hat{Y}(x)) = \mathbb{E}\left[\left(\hat{Y}(x) - \mathbb{E}\left[\hat{Y}(x)\right]\right)^2\right]\]</span></p>
+<p>The main reason for the large model variance is because of <strong>overfitting</strong>: we paid too much attention to the details in our sample that small differences in our random sample lead to large differences in the fitted model. To remedy this, we try to reduce model complexity (e.g.&nbsp;take out some features and limit the magnitude of estimated model coefficients) and not fit our model on the noises.</p>
+</section>
+<section id="model-bias" class="level3" data-number="18.5.4">
+<h3 data-number="18.5.4" class="anchored" data-anchor-id="model-bias"><span class="header-section-number">18.5.4</span> 3. Model Bias</h3>
+<p>Finally, the second term is <span class="math inline">\(\left(g(x)-\mathbb{E}\left[\hat{Y}(x)\right]\right)^2\)</span>. What is this? The term <span class="math inline">\(g(x) - \mathbb{E}\left[\hat{Y}(x)\right]\)</span> is called the <strong>model bias</strong>.</p>
+<p>Remember that <span class="math inline">\(g(x)\)</span> is the fixed underlying truth and <span class="math inline">\(\hat{Y}(x)\)</span> is our fitted model, which is random. Model bias therefore measures how far off <span class="math inline">\(g(x)\)</span> and <span class="math inline">\(\hat{Y}(x)\)</span> are on average over all possible samples.</p>
+<p><span class="math display">\[\text{model bias} = \mathbb{E}\left[g(x) - \hat{Y}(x)\right] = g(x) - \mathbb{E}\left[\hat{Y}(x)\right]\]</span></p>
+<p>The model bias is not random; it is computed for the expected prediction (averaged over all possible training datasets). If bias is positive, our model tends to <strong>underestimate</strong> <span class="math inline">\(g(x)\)</span> at this <span class="math inline">\(x\)</span> value; if it’s negative, our model tends to <strong>overestimate</strong> <span class="math inline">\(g(x)\)</span> at this <span class="math inline">\(x\)</span> value. And if it’s 0, we can say that our model is <strong>unbiased</strong>.</p>
+<div class="callout callout-style-default callout-tip no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Unbiased Estimators
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>An <strong>unbiased model</strong> has a <span class="math inline">\(\text{model bias } = 0\)</span>. In other words, our model predicts <span class="math inline">\(g(x)\)</span> on average.</p>
+<p>Similarly, we can define bias for estimators like the mean. The sample mean is an <strong>unbiased estimator</strong> of the population mean, as by CLT, <span class="math inline">\(\mathbb{E}[\bar{X}_n] = \mu\)</span>. Therefore, the <span class="math inline">\(\text{estimator bias } = \mathbb{E}[\bar{X}_n] - \mu = 0\)</span>.</p>
+</div>
+</div>
+<p>The main reason for large model biases is <strong>underfitting</strong>:</p>
+<ul>
+<li>Over regularized: our model is too simple for the data and has insufficient complexity</li>
+<li>Not optimizing loss adequately</li>
+</ul>
+<p>To fix this, we increase model complexity (but we don’t want to overfit!) or consult domain experts to see which models make sense. You can start to see a tradeoff here: if we increase model complexity, we decrease the model bias, but we also risk increasing the model variance.</p>
+</section>
+<section id="proof-of-the-decomposition" class="level3" data-number="18.5.5">
+<h3 data-number="18.5.5" class="anchored" data-anchor-id="proof-of-the-decomposition"><span class="header-section-number">18.5.5</span> Proof of the Decomposition</h3>
+<p>This section walks through the detailed derivation of the Bias-Variance Decomposition in the model risk section above.</p>
+<div class="callout callout-style-simple callout-none no-icon callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Click to show
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>We want to prove that the model risk can be decomposed as</p>
+<p><span class="math display">\[
+\begin{align*}
+\mathbb{E}\left[(Y-\hat{Y}(x))^2\right] &amp;= \mathbb{E}[\epsilon^2] + \left(g(x)-\mathbb{E}\left[\hat{Y}(x)\right]\right)^2 + \mathbb{E}\left[\left(\mathbb{E}\left[\hat{Y}(x)\right] - \hat{Y}(x)\right)^2\right].
+\end{align*}
+\]</span></p>
+To prove this, we will first need the following lemma:
+<center>
+If <span class="math inline">\(V\)</span> and <span class="math inline">\(W\)</span> are independent random variables then <span class="math inline">\(E[VW] = E[V]E[W]\)</span>.
+</center>
+<p>We will prove this in the discrete finite case. Trust that it’s true in greater generality.</p>
+<p>The job is to calculate the weighted average of the values of <span class="math inline">\(VW\)</span>, where the weights are the probabilities of those values. Here goes.</p>
+<p><span class="math display">\[\begin{align*}
+\mathbb{E}[VW] ~ &amp;= ~ \sum_v\sum_w vwP(V=v \text{ and } W=w) \\
+&amp;= ~ \sum_v\sum_w vwP(V=v)P(W=w) ~~~~ \text{by independence} \\
+&amp;= ~ \sum_v vP(V=v)\sum_w wP(W=w) \\
+&amp;= ~ \mathbb{E}[V]\mathbb{E}[W]
+\end{align*}\]</span></p>
+<p>Now we go into the actual proof:</p>
+<section id="goal" class="level3" data-number="18.5.6">
+<h3 data-number="18.5.6" class="anchored" data-anchor-id="goal"><span class="header-section-number">18.5.6</span> Goal</h3>
+<p>Decompose the model risk into recognizable components.</p>
+</section>
+<section id="step-1" class="level3" data-number="18.5.7">
+<h3 data-number="18.5.7" class="anchored" data-anchor-id="step-1"><span class="header-section-number">18.5.7</span> Step 1</h3>
+<p><span class="math display">\[
+\begin{align*}
+\text{model risk} ~ &amp;= ~ \mathbb{E}\left[\left(Y - \hat{Y}(x)\right)^2 \right] \\
+&amp;= ~ \mathbb{E}\left[\left(g(x) + \epsilon - \hat{Y}(x)\right)^2 \right] \\
+&amp;= ~ \mathbb{E}\left[\left(\epsilon + \left(g(x)- \hat{Y}(x)\right)\right)^2 \right] \\
+&amp;= ~ \mathbb{E}\left[\epsilon^2\right] + 2\mathbb{E}\left[\epsilon \left(g(x)- \hat{Y}(x)\right)\right] + \mathbb{E}\left[\left(g(x) - \hat{Y}(x)\right)^2\right]\\
+\end{align*}
+\]</span></p>
+<p>On the right hand side:</p>
+<ul>
+<li>The first term is the observation variance <span class="math inline">\(\sigma^2\)</span>.</li>
+<li>The cross term is 0 because <span class="math inline">\(\epsilon\)</span> is independent of <span class="math inline">\(g(x) - \hat{Y}(x)\)</span> and <span class="math inline">\(\mathbb{E}(\epsilon) = 0\)</span></li>
+<li>The last term is the mean squared difference between our predicted value and the value of the true function at <span class="math inline">\(x\)</span></li>
+</ul>
+</section>
+<section id="step-2" class="level3" data-number="18.5.8">
+<h3 data-number="18.5.8" class="anchored" data-anchor-id="step-2"><span class="header-section-number">18.5.8</span> Step 2</h3>
+<p>At this stage we have</p>
+<p><span class="math display">\[
+\text{model risk} ~ = ~ \mathbb{E}\left[\epsilon^2\right] + \mathbb{E}\left[\left(g(x) - \hat{Y}(x)\right)^2\right]
+\]</span></p>
+<p>We don’t yet have a good understanding of <span class="math inline">\(g(x) - \hat{Y}(x)\)</span>. But we do understand the deviation <span class="math inline">\(D_{\hat{Y}(x)} = \hat{Y}(x) - \mathbb{E}\left[\hat{Y}(x)\right]\)</span>. We know that</p>
+<ul>
+<li><span class="math inline">\(\mathbb{E}\left[D_{\hat{Y}(x)}\right] ~ = ~ 0\)</span></li>
+<li><span class="math inline">\(\mathbb{E}\left[D_{\hat{Y}(x)}^2\right] ~ = ~ \text{model variance}\)</span></li>
+</ul>
+<p>So let’s add and subtract <span class="math inline">\(\mathbb{E}\left[\hat{Y}(x)\right]\)</span> and see if that helps.</p>
+<p><span class="math display">\[
+g(x) - \hat{Y}(x) ~ = ~ \left(g(x) - \mathbb{E}\left[\hat{Y}(x)\right] \right) + \left(\mathbb{E}\left[\hat{Y}(x)\right] - \hat{Y}(x)\right)
+\]</span></p>
+<p>The first term on the right hand side is the model bias at <span class="math inline">\(x\)</span>. The second term is <span class="math inline">\(-D_{\hat{Y}(x)}\)</span>. So</p>
+<p><span class="math display">\[
+g(x) - \hat{Y}(x) ~ = ~ \text{model bias} - D_{\hat{Y}(x)}
+\]</span></p>
+</section>
+<section id="step-3" class="level3" data-number="18.5.9">
+<h3 data-number="18.5.9" class="anchored" data-anchor-id="step-3"><span class="header-section-number">18.5.9</span> Step 3</h3>
+<p>Remember that the model bias at <span class="math inline">\(x\)</span> is a constant, not a random variable. Think of it as your favorite number, say 10. Then <span class="math display">\[
+\begin{align*}
+\mathbb{E}\left[ \left(g(x) - \hat{Y}(x)\right)^2 \right] ~ &amp;= ~ \text{model bias}^2 - 2(\text{model bias})\mathbb{E}\left[D_{\hat{Y}(x)}\right] + \mathbb{E}\left[D_{\hat{Y}(x)}^2\right] \\
+&amp;= ~ \text{model bias}^2 - 0 + \text{model variance} \\
+&amp;= ~ \text{model bias}^2 + \text{model variance}
+\end{align*}
+\]</span></p>
+<p>Again, the cross-product term is <span class="math inline">\(0\)</span> because <span class="math inline">\(\mathbb{E}\left[D_{\hat{Y}(x)}\right] ~ = ~ 0\)</span>.</p>
+</section>
+<section id="step-4-bias-variance-decomposition" class="level3" data-number="18.5.10">
+<h3 data-number="18.5.10" class="anchored" data-anchor-id="step-4-bias-variance-decomposition"><span class="header-section-number">18.5.10</span> Step 4: Bias-Variance Decomposition</h3>
+<p>In Step 2, we had:</p>
+<p><span class="math display">\[
+\text{model risk} ~ = ~ \text{observation variance} + \mathbb{E}\left[\left(g(x) - \hat{Y}(x)\right)^2\right]
+\]</span></p>
+<p>Step 3 showed:</p>
+<p><span class="math display">\[
+\mathbb{E}\left[ \left(g(x) - \hat{Y}(x)\right)^2 \right] ~ = ~ \text{model bias}^2 + \text{model variance}
+\]</span></p>
+<p>Thus, we have proven the bias-variance decomposition:</p>
+<p><span class="math display">\[
+\text{model risk} = \text{observation variance} + \text{model bias}^2 + \text{model variance}.
+\]</span></p>
+<p>That is,</p>
+<p><span class="math display">\[
+\mathbb{E}\left[(Y-\hat{Y}(x))^2\right] = \sigma^2 + \left(g(x) - \mathbb{E}\left[\hat{Y}(x)\right]\right)^2 + \mathbb{E}\left[\left(\hat{Y}(x)-\mathbb{E}\left[\hat{Y}(x)\right]\right)^2\right]
+\]</span></p>
+</section>
+</div>
+</div>
+</div>
+</section>
+<section id="the-decomposition" class="level3" data-number="18.5.11">
+<h3 data-number="18.5.11" class="anchored" data-anchor-id="the-decomposition"><span class="header-section-number">18.5.11</span> The Decomposition</h3>
+<p>To summarize:</p>
+<ul>
+<li>The <strong>model risk</strong>, <span class="math inline">\(\mathbb{E}\left[(Y(x)-\hat{Y}(x))^2\right]\)</span>, is the mean squared prediction error of the model. It is an expectation and is therefore a <strong>fixed number</strong> (for a given x).</li>
+<li>The <strong>observation variance</strong>, <span class="math inline">\(\sigma^2\)</span>, is the variance of the random noise in the observations. It describes how variable the random error <span class="math inline">\(\epsilon\)</span> is for each observation and <strong>cannot be addressed by modeling</strong>.</li>
+<li>The <strong>model bias</strong>, <span class="math inline">\(g(x) - \mathbb{E}\left[\hat{Y}(x)\right]\)</span>, is how “off” the <span class="math inline">\(\hat{Y}(x)\)</span> is as an estimator of the true underlying relationship <span class="math inline">\(g(x)\)</span>.</li>
+<li>The <strong>model variance</strong>, <span class="math inline">\(\text{Var}(\hat{Y}(x))\)</span>, describes how much the prediction <span class="math inline">\(\hat{Y}(x)\)</span> tends to vary when we fit the model on different samples.</li>
+</ul>
+<p>The above definitions enable us to simplify the decomposition of model risk before as:</p>
+<p><span class="math display">\[ \mathbb{E}\left[\left(Y - \hat{Y}(x)\right)^2\right] = \sigma^2 + \left(g(x) - \mathbb{E}[\hat{Y}(x)]\right)^2 + \text{Var}\left(\hat{Y}(x)\right) \]</span> <span class="math display">\[\text{model risk } = \text{observation variance} + (\text{model bias})^2 \text{+ model variance}\]</span></p>
+<p>This is known as the <strong>bias-variance tradeoff</strong>. What does it mean? Remember that the model risk is a measure of the model’s performance. Our goal in building models is to keep model risk low; this means that we will want to ensure that each component of model risk is kept at a small value.</p>
+<p>Observation variance is an inherent, random part of the data collection process. We aren’t able to reduce the observation variance, so we’ll focus our attention on the model bias and model variance.</p>
+<p>In the Feature Engineering lecture, we considered the issue of overfitting.</p>
+<ul>
+<li><p>To decrease model bias, we <strong>increase model complexity</strong> and the model will to make predictions that are closer to the true relationship <span class="math inline">\(g\)</span>, but if we design a highly complex model, the model can overfit the sample data and will have <strong>higher model variance</strong>. Small differences in the random samples used for training could lead to large differences in the fitted model.</p></li>
+<li><p>To decrease model variance, we <strong>decrease model complexity</strong>. As a result, the model underfits the sample data and will have <strong>higher model bias</strong>.</p></li>
+</ul>
+<p align="center">
+<img src="images/bvt.png" alt="bvt" width="600">
+</p>
+<p>We need to strike a balance. Our goal in model creation is to use a complexity level that is high enough to keep bias low, but not so high that model variance is large.</p>
+
+
+<!-- -->
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation column-body">
+  <div class="nav-page nav-page-previous">
+      <a href="../probability_1/probability_1.html" class="pagination-link" aria-label="Random Variables">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Random Variables</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> 'Estimators, Bias, and Variance (Old Notes from Fall 2024)'</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="an">execute:</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">  echo: true</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">    code-fold: true</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools: true</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">    toc: true</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">    toc-title: 'Estimators, Bias, and Variance'</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co">    page-layout: full</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co">    theme:</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co">      - cosmo</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co">      - cerulean</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co">    callout-icon: false</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="an">jupyter:</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co">  jupytext:</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">    text_representation:</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co">      extension: .qmd</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co">      format_name: quarto</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co">      format_version: '1.0'</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="co">      jupytext_version: 1.16.1</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="co">  kernelspec:</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="co">    display_name: Python 3 (ipykernel)</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="co">    language: python</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="co">    name: python3</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="false"}</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="fu">## Learning Outcomes</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Explore commonly seen random variables like Bernoulli and Binomial distributions</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Understand the impact of model complexity on the tradeoff between bias and variance</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Derive the bias-variance decomposition and differentiate model risk, observation bias, model variance, and model bias</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>Last time, we introduced the idea of random variables: numerical functions of a sample. Most of our work in the last lecture was done to build a background in probability and statistics. Now that we've established some key ideas, we're in a good place to apply what we've learned to our original goal -- understanding how the randomness of a sample impacts the model design process. </span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>In this lecture, we will delve more deeply into the idea of fitting a model to a sample. We'll explore how to re-express our modeling process in terms of random variables and use this new understanding to steer model complexity. </span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a><span class="fu">## Brief Recap</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Let $X$ be a random variable with distribution $P(X=x)$. </span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="ss">    * </span>$\mathbb{E}<span class="co">[</span><span class="ot">X</span><span class="co">]</span> = \sum_{x} x P(X=x)$</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a><span class="ss">    * </span>$\text{Var}(X) = \mathbb{E}<span class="co">[</span><span class="ot">(X-\mathbb{E}[X])^2</span><span class="co">]</span> = \mathbb{E}<span class="co">[</span><span class="ot">X^2</span><span class="co">]</span> - (\mathbb{E}<span class="co">[</span><span class="ot">X</span><span class="co">]</span>)^2$</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Let $a$ and $b$ be scalar values. </span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a><span class="ss">    * </span>$\mathbb{E}<span class="co">[</span><span class="ot">aX+b</span><span class="co">]</span> = aE<span class="co">[</span><span class="ot">\mathbb{X}</span><span class="co">]</span> + b$</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a><span class="ss">    * </span>$\text{Var}(aX+b) = a^2 \text{Var}(X)$</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Let $Y$ be another random variable. </span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a><span class="ss">    * </span>$\mathbb{E}<span class="co">[</span><span class="ot">X+Y</span><span class="co">]</span> = \mathbb{E}<span class="co">[</span><span class="ot">X</span><span class="co">]</span> + \mathbb{E}<span class="co">[</span><span class="ot">Y</span><span class="co">]</span>$</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a><span class="ss">    * </span>$\text{Var}(X + Y) = \text{Var}(X) + \text{Var}(Y) + 2\text{Cov}(X,Y)$</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>Note that $\text{Cov}(X,Y)$ would equal 0 if $X$ and $Y$ are independent.</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>There is also one more important property of expectation that we should look at. Let $X$ and $Y$ be **independent** random variables: </span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>$$ \mathbb{E}<span class="co">[</span><span class="ot">XY</span><span class="co">]</span> = \mathbb{E}<span class="co">[</span><span class="ot">X</span><span class="co">]</span>\mathbb{E}<span class="co">[</span><span class="ot">Y</span><span class="co">]</span> $$</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip collapse="false"}</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a><span class="fu">## Proof</span></span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>$$\begin{align}</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>   \mathbb{E}<span class="co">[</span><span class="ot">XY</span><span class="co">]</span> &amp;= \sum_x\sum_y xy\ \textbf{P}(X=x, Y=y) &amp;\text{Definition} <span class="sc">\\</span></span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>   &amp;= \sum_x\sum_y xy\ \textbf{P}(X=x)\textbf{P}(Y=y) &amp;\text{Independence}<span class="sc">\\</span></span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>   &amp;= \sum_x x\textbf{P}(X=x) \sum_y y \textbf{P}(Y=y) &amp;\text{Algebra}<span class="sc">\\</span></span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>   &amp;= \left(\sum_x x\textbf{P}(X=x)\right) \left(\sum_y y \textbf{P}(Y=y)\right) &amp;\text{Algebra}<span class="sc">\\</span></span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>   &amp;= \mathbb{E}<span class="co">[</span><span class="ot">X</span><span class="co">]</span>\mathbb{E}<span class="co">[</span><span class="ot">Y</span><span class="co">]</span> &amp;\text{Definition}</span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a>\end{align}$$</span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a><span class="fu">## Common Random Variables</span></span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a>There are several cases of random variables that appear often and have useful properties. Below are the ones we will explore further in this course. The numbers in parentheses are the parameters of a random variable, which are constants. Parameters define a random variable’s shape (i.e., distribution) and its values. For this lecture, we'll focus more heavily on the bolded random variables and their special properties, but you should familiarize yourself with all the ones listed below: </span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>**Bernoulli($p$)**</span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a><span class="ss">  * </span>Takes on value 1 with probability $p$, and 0 with probability $(1 - p)$.</span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a><span class="ss">  * </span>AKA the “indicator” random variable.</span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a><span class="ss">  * </span>Let $X$ be a Bernoulli($p$) random variable.</span>
+<span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a><span class="ss">    * </span>$\mathbb{E}<span class="co">[</span><span class="ot">X</span><span class="co">]</span> = 1 * p + 0 * (1-p) = p$</span>
+<span id="cb1-76"><a href="#cb1-76" aria-hidden="true" tabindex="-1"></a><span class="ss">        * </span>$\mathbb{E}<span class="co">[</span><span class="ot">X^2</span><span class="co">]</span> = 1^2 * p + 0^2 * (1-p) = p$</span>
+<span id="cb1-77"><a href="#cb1-77" aria-hidden="true" tabindex="-1"></a><span class="ss">    * </span>$\text{Var}(X) = \mathbb{E}<span class="co">[</span><span class="ot">X^2</span><span class="co">]</span> - (\mathbb{E}<span class="co">[</span><span class="ot">X</span><span class="co">]</span>)^2 = p - p^2 = p(1-p)$</span>
+<span id="cb1-78"><a href="#cb1-78" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>**Binomial($n$, $p$)**</span>
+<span id="cb1-79"><a href="#cb1-79" aria-hidden="true" tabindex="-1"></a><span class="ss">  * </span>Number of 1s in $n$ independent Bernoulli($p$) trials.</span>
+<span id="cb1-80"><a href="#cb1-80" aria-hidden="true" tabindex="-1"></a><span class="ss">  * </span>Let $Y$ be a Binomial($n$, $p$) random variable.</span>
+<span id="cb1-81"><a href="#cb1-81" aria-hidden="true" tabindex="-1"></a><span class="ss">    * </span>The distribution of $Y$ is given by the binomial formula, and we can write $Y = \sum_{i=1}^n X_i$ where:</span>
+<span id="cb1-82"><a href="#cb1-82" aria-hidden="true" tabindex="-1"></a><span class="ss">        * </span>$X_i$ s the indicator of success on trial i. $X_i = 1$ if trial i is a success, else 0.</span>
+<span id="cb1-83"><a href="#cb1-83" aria-hidden="true" tabindex="-1"></a><span class="ss">        * </span>All $X_i$ are i.i.d. and Bernoulli($p$).</span>
+<span id="cb1-84"><a href="#cb1-84" aria-hidden="true" tabindex="-1"></a><span class="ss">    * </span>$\mathbb{E}<span class="co">[</span><span class="ot">Y</span><span class="co">]</span> = \sum_{i=1}^n \mathbb{E}<span class="co">[</span><span class="ot">X_i</span><span class="co">]</span> = np$</span>
+<span id="cb1-85"><a href="#cb1-85" aria-hidden="true" tabindex="-1"></a><span class="ss">    * </span>$\text{Var}(X) = \sum_{i=1}^n \text{Var}(X_i) = np(1-p)$ </span>
+<span id="cb1-86"><a href="#cb1-86" aria-hidden="true" tabindex="-1"></a><span class="ss">      * </span>$X_i$'s are independent, so $\text{Cov}(X_i, X_j) = 0$ for all i, j.</span>
+<span id="cb1-87"><a href="#cb1-87" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Uniform on a finite set of values</span>
+<span id="cb1-88"><a href="#cb1-88" aria-hidden="true" tabindex="-1"></a><span class="ss">  * </span>The probability of each value is $\frac{1}{\text{(number of possible values)}}$.</span>
+<span id="cb1-89"><a href="#cb1-89" aria-hidden="true" tabindex="-1"></a><span class="ss">  * </span>For example, a standard/fair die.</span>
+<span id="cb1-90"><a href="#cb1-90" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Uniform on the unit interval (0, 1)</span>
+<span id="cb1-91"><a href="#cb1-91" aria-hidden="true" tabindex="-1"></a><span class="ss">  * </span>Density is flat at 1 on (0, 1) and 0 elsewhere.</span>
+<span id="cb1-92"><a href="#cb1-92" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Normal($\mu, \sigma^2$), a.k.a Gaussian</span>
+<span id="cb1-93"><a href="#cb1-93" aria-hidden="true" tabindex="-1"></a><span class="ss">  * </span>$f(x) = \frac{1}{\sigma\sqrt{2\pi}} \exp\left( -\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^{<span class="sc">\!</span>2}\,\right)$</span>
+<span id="cb1-94"><a href="#cb1-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-95"><a href="#cb1-95" aria-hidden="true" tabindex="-1"></a><span class="fu">### Properties of Bernoulli Random Variables</span></span>
+<span id="cb1-96"><a href="#cb1-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-97"><a href="#cb1-97" aria-hidden="true" tabindex="-1"></a>To get some practice with the formulas discussed so far, let's derive the expectation and variance for a Bernoulli($p$) random variable. If $X$ ~ Bernoulli($p$),</span>
+<span id="cb1-98"><a href="#cb1-98" aria-hidden="true" tabindex="-1"></a>$$\mathbb{E}<span class="co">[</span><span class="ot">X</span><span class="co">]</span> = 1 \cdot p + 0 \cdot (1 - p) = p$$</span>
+<span id="cb1-99"><a href="#cb1-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-100"><a href="#cb1-100" aria-hidden="true" tabindex="-1"></a>We will get an average value of p across many, many samples. To compute the variance, we will use the computational formula. We first find that:</span>
+<span id="cb1-101"><a href="#cb1-101" aria-hidden="true" tabindex="-1"></a>$$\mathbb{E}<span class="co">[</span><span class="ot">X^2</span><span class="co">]</span> = 1^2 \cdot p + 0^2 \cdot (1 - p) = p$$</span>
+<span id="cb1-102"><a href="#cb1-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-103"><a href="#cb1-103" aria-hidden="true" tabindex="-1"></a>From there, let's calculate our variance: </span>
+<span id="cb1-104"><a href="#cb1-104" aria-hidden="true" tabindex="-1"></a>$$\text{Var}(X) = \mathbb{E}<span class="co">[</span><span class="ot">X^2</span><span class="co">]</span> - \mathbb{E}<span class="co">[</span><span class="ot">X</span><span class="co">]</span>^2 = p - p^2 = p(1-p)$$</span>
+<span id="cb1-105"><a href="#cb1-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-106"><a href="#cb1-106" aria-hidden="true" tabindex="-1"></a>Looking at this equation, we can see that we get a lower var at more extreme probabilities like p = 0.1 or 0.9, and we get a higher variance when p close to 0.5.</span>
+<span id="cb1-107"><a href="#cb1-107" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-108"><a href="#cb1-108" aria-hidden="true" tabindex="-1"></a><span class="fu">### Properties of Binomial Random Variables</span></span>
+<span id="cb1-109"><a href="#cb1-109" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-110"><a href="#cb1-110" aria-hidden="true" tabindex="-1"></a>Let $Y$ ~ Binomial($n$, $p$). We can think of $Y$ as the number (i.e., count) of 1s in $n$ independent Bernoulli($p$) trials. Distribution of Y given by the binomial formula:</span>
+<span id="cb1-111"><a href="#cb1-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-112"><a href="#cb1-112" aria-hidden="true" tabindex="-1"></a>$$ \textbf{P}(Y=y) = \binom{n}{y} p^y (1-p)^{n-y}$$</span>
+<span id="cb1-113"><a href="#cb1-113" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-114"><a href="#cb1-114" aria-hidden="true" tabindex="-1"></a>We can write: </span>
+<span id="cb1-115"><a href="#cb1-115" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-116"><a href="#cb1-116" aria-hidden="true" tabindex="-1"></a>$$Y = \sum_{i=1}^n X_i$$</span>
+<span id="cb1-117"><a href="#cb1-117" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-118"><a href="#cb1-118" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>$X_i$ is the indicator of a success on trial $i$. $X_i$ = 1 if trial i is a success, else 0. </span>
+<span id="cb1-119"><a href="#cb1-119" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>All $X_i$s are **i.i.d.** (independent and identically distributed) and **Bernoulli(p)**.</span>
+<span id="cb1-120"><a href="#cb1-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-121"><a href="#cb1-121" aria-hidden="true" tabindex="-1"></a>Using linearity of expectation,</span>
+<span id="cb1-122"><a href="#cb1-122" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-123"><a href="#cb1-123" aria-hidden="true" tabindex="-1"></a>$$\mathbb{E}<span class="co">[</span><span class="ot">Y</span><span class="co">]</span> = \sum_{i=1}^n \mathbb{E}<span class="co">[</span><span class="ot">X_i</span><span class="co">]</span> = np$$</span>
+<span id="cb1-124"><a href="#cb1-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-125"><a href="#cb1-125" aria-hidden="true" tabindex="-1"></a>For the variance, since each $X_i$ is independent of the other, $\text{Cov}(X_i, X_j) = 0$,</span>
+<span id="cb1-126"><a href="#cb1-126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-127"><a href="#cb1-127" aria-hidden="true" tabindex="-1"></a>$$\text{Var}(Y) =  \sum_{i=1}^n \text{Var}<span class="co">[</span><span class="ot">X_i</span><span class="co">]</span> = np(1-p)$$</span>
+<span id="cb1-128"><a href="#cb1-128" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-129"><a href="#cb1-129" aria-hidden="true" tabindex="-1"></a><span class="fu">### Example</span></span>
+<span id="cb1-130"><a href="#cb1-130" aria-hidden="true" tabindex="-1"></a>Suppose you win cash based on the number of heads you get in a series of 20 coin flips.</span>
+<span id="cb1-131"><a href="#cb1-131" aria-hidden="true" tabindex="-1"></a>Let $X_i = 1$ if the $i$-th coin is heads, $0$ otherwise. Which payout strategy would you choose?</span>
+<span id="cb1-132"><a href="#cb1-132" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-133"><a href="#cb1-133" aria-hidden="true" tabindex="-1"></a>A. $Y_A = 10 * X_1 + 10 * X_2$</span>
+<span id="cb1-134"><a href="#cb1-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-135"><a href="#cb1-135" aria-hidden="true" tabindex="-1"></a>B. $Y_B = \sum_{i=1}^{20} X_i$</span>
+<span id="cb1-136"><a href="#cb1-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-137"><a href="#cb1-137" aria-hidden="true" tabindex="-1"></a>C. $Y_C = 20 * X_1$</span>
+<span id="cb1-138"><a href="#cb1-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-139"><a href="#cb1-139" aria-hidden="true" tabindex="-1"></a>::: {.callout-caution collapse="true"}</span>
+<span id="cb1-140"><a href="#cb1-140" aria-hidden="true" tabindex="-1"></a><span class="fu">## Solution</span></span>
+<span id="cb1-141"><a href="#cb1-141" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-142"><a href="#cb1-142" aria-hidden="true" tabindex="-1"></a>Let $X_1, X_2, ... X_{20}$ be 20 i.i.d Bernoulli(0.5) random variables. Since the $X_i$'s are independent, $\text{Cov}(X_i, X_j) = 0$ for all pairs $i, j$. Additionally, Since $X_i$ is Bernoulli(0.5), we know that $\mathbb{E}<span class="co">[</span><span class="ot">X</span><span class="co">]</span> = p = 0.5$ and $\text{Var}(X) = p(1-p) = 0.25$. We can calculate the following for each scenario: </span>
+<span id="cb1-143"><a href="#cb1-143" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-144"><a href="#cb1-144" aria-hidden="true" tabindex="-1"></a>|   | A. $Y_A = 10 * X_1 + 10 * X_2$ | B. $Y_B = \sum_{i=1}^{20} X_i$ | C. $Y_C = 20 * X_1$ | </span>
+<span id="cb1-145"><a href="#cb1-145" aria-hidden="true" tabindex="-1"></a>| --- | --- | --- | --- |</span>
+<span id="cb1-146"><a href="#cb1-146" aria-hidden="true" tabindex="-1"></a>| Expectation | $\mathbb{E}<span class="co">[</span><span class="ot">Y_A</span><span class="co">]</span> = 10 (0.5) + 10(0.5) = 10$ | $\mathbb{E}<span class="co">[</span><span class="ot">Y_B</span><span class="co">]</span> = 0.5 + ... + 0.5 = 10$ | $\mathbb{E}<span class="co">[</span><span class="ot">Y_C</span><span class="co">]</span> = 20(0.5) = 10$  | </span>
+<span id="cb1-147"><a href="#cb1-147" aria-hidden="true" tabindex="-1"></a>| Variance | $\text{Var}(Y_A) = 10^2 (0.25) + 10^2 (0.25) = 50$ | $\text{Var}(Y_B) = 0.25 + ... + 0.25 = 5$ | $\text{Var}(Y_C) = 20^2 (0.25) = 100$ | </span>
+<span id="cb1-148"><a href="#cb1-148" aria-hidden="true" tabindex="-1"></a>| Standard Deviation | $\text{SD}(Y_A) \approx 7.07$ | $\text{SD}(Y_B) \approx 2.24$ | $\text{SD}(Y_C) = 10$  | </span>
+<span id="cb1-149"><a href="#cb1-149" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-150"><a href="#cb1-150" aria-hidden="true" tabindex="-1"></a>As we can see, all the scenarios have the same expected value but different variances. The higher the variance, the greater the risk and uncertainty, so the "right" strategy depends on your personal preference. Would you choose the "safest" option B, the most "risky" option C, or somewhere in the middle (option A)?</span>
+<span id="cb1-151"><a href="#cb1-151" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb1-152"><a href="#cb1-152" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-153"><a href="#cb1-153" aria-hidden="true" tabindex="-1"></a><span class="fu">## Sample Statistics </span></span>
+<span id="cb1-154"><a href="#cb1-154" aria-hidden="true" tabindex="-1"></a>Today, we've talked extensively about populations; if we know the distribution of a random variable, we can reliably compute expectation, variance, functions of the random variable, etc. </span>
+<span id="cb1-155"><a href="#cb1-155" aria-hidden="true" tabindex="-1"></a>Note that:</span>
+<span id="cb1-156"><a href="#cb1-156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-157"><a href="#cb1-157" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>The distribution of a *population* describes how a random variable behaves across *all* individuals of interest. </span>
+<span id="cb1-158"><a href="#cb1-158" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>The distribution of a *sample* describes how a random variable behaves in a *specific sample* from the population. </span>
+<span id="cb1-159"><a href="#cb1-159" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-160"><a href="#cb1-160" aria-hidden="true" tabindex="-1"></a>In Data Science, however, we often do not have access to the whole population, so we don’t know its distribution. As such, we need to collect a sample and use its distribution to estimate or infer properties of the population. In cases like these, we can take several samples of size $n$ from the population (an easy way to do this is using <span class="in">`df.sample(n, replace=True)`</span>), and compute the mean of each *sample*. When sampling, we make the (big) assumption that we sample uniformly at random *with replacement* from the population; each observation in our sample is a random variable drawn i.i.d from our population distribution. Remember that our sample mean is a random variable since it depends on our randomly drawn sample! On the other hand, our population mean is simply a number (a fixed value).</span>
+<span id="cb1-161"><a href="#cb1-161" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-162"><a href="#cb1-162" aria-hidden="true" tabindex="-1"></a><span class="fu">### Sample Mean Properties</span></span>
+<span id="cb1-163"><a href="#cb1-163" aria-hidden="true" tabindex="-1"></a>Consider an i.i.d. sample $X_1, X_2, ..., X_n$ drawn from a population with mean 𝜇 and SD 𝜎.</span>
+<span id="cb1-164"><a href="#cb1-164" aria-hidden="true" tabindex="-1"></a>We define the **sample mean** as $$\bar{X}_n = \frac{1}{n} \sum_{i=1}^n X_i$$</span>
+<span id="cb1-165"><a href="#cb1-165" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-166"><a href="#cb1-166" aria-hidden="true" tabindex="-1"></a>The expectation of the sample mean is given by: </span>
+<span id="cb1-167"><a href="#cb1-167" aria-hidden="true" tabindex="-1"></a>$$\begin{align} </span>
+<span id="cb1-168"><a href="#cb1-168" aria-hidden="true" tabindex="-1"></a>    \mathbb{E}<span class="co">[</span><span class="ot">\bar{X}_n</span><span class="co">]</span> &amp;= \frac{1}{n} \sum_{i=1}^n \mathbb{E}<span class="co">[</span><span class="ot">X_i</span><span class="co">]</span> <span class="sc">\\</span></span>
+<span id="cb1-169"><a href="#cb1-169" aria-hidden="true" tabindex="-1"></a>    &amp;= \frac{1}{n} (n \mu) <span class="sc">\\</span></span>
+<span id="cb1-170"><a href="#cb1-170" aria-hidden="true" tabindex="-1"></a>    &amp;= \mu </span>
+<span id="cb1-171"><a href="#cb1-171" aria-hidden="true" tabindex="-1"></a>\end{align}$$</span>
+<span id="cb1-172"><a href="#cb1-172" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-173"><a href="#cb1-173" aria-hidden="true" tabindex="-1"></a>The variance is given by: </span>
+<span id="cb1-174"><a href="#cb1-174" aria-hidden="true" tabindex="-1"></a>$$\begin{align} </span>
+<span id="cb1-175"><a href="#cb1-175" aria-hidden="true" tabindex="-1"></a>    \text{Var}(\bar{X}_n) &amp;= \frac{1}{n^2} \text{Var}( \sum_{i=1}^n X_i) <span class="sc">\\</span></span>
+<span id="cb1-176"><a href="#cb1-176" aria-hidden="true" tabindex="-1"></a>    &amp;=  \frac{1}{n^2} \left( \sum_{i=1}^n \text{Var}(X_i) \right) <span class="sc">\\</span></span>
+<span id="cb1-177"><a href="#cb1-177" aria-hidden="true" tabindex="-1"></a>    &amp;=  \frac{1}{n^2} (n \sigma^2) = \frac{\sigma^2}{n}</span>
+<span id="cb1-178"><a href="#cb1-178" aria-hidden="true" tabindex="-1"></a>\end{align}$$</span>
+<span id="cb1-179"><a href="#cb1-179" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-180"><a href="#cb1-180" aria-hidden="true" tabindex="-1"></a>The standard deviation is:</span>
+<span id="cb1-181"><a href="#cb1-181" aria-hidden="true" tabindex="-1"></a>$$ \text{SD}(\bar{X}_n) = \frac{\sigma}{\sqrt{n}} $$</span>
+<span id="cb1-182"><a href="#cb1-182" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb1-183"><a href="#cb1-183" aria-hidden="true" tabindex="-1"></a>$\bar{X}_n$ is **normally distributed** (in the limit) by the **Central Limit Theorem** (CLT).</span>
+<span id="cb1-184"><a href="#cb1-184" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-185"><a href="#cb1-185" aria-hidden="true" tabindex="-1"></a><span class="fu">### Central Limit Theorem</span></span>
+<span id="cb1-186"><a href="#cb1-186" aria-hidden="true" tabindex="-1"></a>In <span class="co">[</span><span class="ot">Data 8</span><span class="co">](https://inferentialthinking.com/chapters/14/4/Central_Limit_Theorem.html?)</span> and in the previous lecture, you encountered the **Central Limit Theorem (CLT)**. </span>
+<span id="cb1-187"><a href="#cb1-187" aria-hidden="true" tabindex="-1"></a>This is a powerful theorem for estimating the distribution of a population with mean $\mu$ and standard deviation $\sigma$ from a collection of smaller samples. The CLT tells us that if an i.i.d sample of size $n$ is large, then the probability distribution of the **sample mean** is **roughly normal** with mean $\mu$ and SD of $\frac{\sigma}{\sqrt{n}}$. More generally, any theorem that provides the rough distribution of a statistic and **doesn't need the distribution of the population** is valuable to data scientists! This is because we rarely know a lot about the population. </span>
+<span id="cb1-188"><a href="#cb1-188" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-189"><a href="#cb1-189" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-190"><a href="#cb1-190" aria-hidden="true" tabindex="-1"></a>&lt;p align="center"&gt;</span>
+<span id="cb1-191"><a href="#cb1-191" aria-hidden="true" tabindex="-1"></a>&lt;img src="images/clt.png" alt='clt' width='400'&gt;</span>
+<span id="cb1-192"><a href="#cb1-192" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-193"><a href="#cb1-193" aria-hidden="true" tabindex="-1"></a>&lt;/p&gt;</span>
+<span id="cb1-194"><a href="#cb1-194" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-195"><a href="#cb1-195" aria-hidden="true" tabindex="-1"></a>Importantly, the CLT assumes that each observation in our samples is drawn i.i.d from the distribution of the population. In addition, the CLT is accurate only when $n$ is "large", but what counts as a "large" sample size depends on the specific distribution. If a population is highly symmetric and unimodal, we could need as few as $n=20$; if a population is very skewed, we need a larger $n$. If in doubt, you can bootstrap the sample mean and see if the bootstrapped distribution is bell-shaped. Classes like Data 140 investigate this idea in great detail.</span>
+<span id="cb1-196"><a href="#cb1-196" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- The CLT states that no matter what population you are drawing from, if an i.i.d. sample of size $n$ is large, the probability distribution of the sample mean is roughly normal with mean 𝜇 and SD $\sigma/\sqrt{n}$. --&gt;</span></span>
+<span id="cb1-197"><a href="#cb1-197" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-198"><a href="#cb1-198" aria-hidden="true" tabindex="-1"></a>For a more in-depth demo, check out <span class="co">[</span><span class="ot">onlinestatbook</span><span class="co">](https://onlinestatbook.com/stat_sim/sampling_dist/)</span>. </span>
+<span id="cb1-199"><a href="#cb1-199" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-200"><a href="#cb1-200" aria-hidden="true" tabindex="-1"></a><span class="fu">### Using the Sample Mean to Estimate the Population Mean</span></span>
+<span id="cb1-201"><a href="#cb1-201" aria-hidden="true" tabindex="-1"></a>Now let's say we want to use the sample mean to **estimate** the population mean, for example, the average height of Cal undergraduates. We can typically collect a **single sample**, which has just one average. However, what if we happened, by random chance, to draw a sample with a different mean or spread than that of the population? We might get a skewed view of how the population behaves (consider the extreme case where we happen to sample the exact same value $n$ times!). </span>
+<span id="cb1-202"><a href="#cb1-202" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-203"><a href="#cb1-203" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-204"><a href="#cb1-204" aria-hidden="true" tabindex="-1"></a>&lt;p align="center"&gt;</span>
+<span id="cb1-205"><a href="#cb1-205" aria-hidden="true" tabindex="-1"></a>&lt;img src="images/CLTdiff.png" alt='clt' width='400'&gt;</span>
+<span id="cb1-206"><a href="#cb1-206" aria-hidden="true" tabindex="-1"></a>&lt;/p&gt;</span>
+<span id="cb1-207"><a href="#cb1-207" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-208"><a href="#cb1-208" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-209"><a href="#cb1-209" aria-hidden="true" tabindex="-1"></a>For example, notice the difference in variation between these two distributions that are different in sample size. The distribution with a bigger sample size ($n=800$) is tighter around the mean than the distribution with a smaller sample size ($n=200$). Try plugging in these values into the standard deviation equation for the sample mean to make sense of this! </span>
+<span id="cb1-210"><a href="#cb1-210" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-211"><a href="#cb1-211" aria-hidden="true" tabindex="-1"></a>Applying the CLT allows us to make sense of all of this and resolve this issue. By drawing many samples, we can consider how the sample distribution varies across multiple subsets of the data. This allows us to approximate the properties of the population without the need to survey every single member. </span>
+<span id="cb1-212"><a href="#cb1-212" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-213"><a href="#cb1-213" aria-hidden="true" tabindex="-1"></a>Given this potential variance, it is also important that we consider the **average value and spread** of all possible sample means, and what this means for how big $n$ should be. For every sample size, the expected value of the sample mean is the population mean: $$\mathbb{E}[\bar{X}_n] = \mu$$ We call the sample mean an **unbiased estimator** of the population mean and will explore this idea more in the next lecture. </span>
+<span id="cb1-214"><a href="#cb1-214" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-215"><a href="#cb1-215" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-216"><a href="#cb1-216" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip collapse="false"}</span>
+<span id="cb1-217"><a href="#cb1-217" aria-hidden="true" tabindex="-1"></a><span class="fu">## Data 8 Recap: Square Root Law</span></span>
+<span id="cb1-218"><a href="#cb1-218" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-219"><a href="#cb1-219" aria-hidden="true" tabindex="-1"></a>The square root law (<span class="co">[</span><span class="ot">Data 8</span><span class="co">](https://inferentialthinking.com/chapters/14/5/Variability_of_the_Sample_Mean.html#the-square-root-law)</span>) states that if you increase the sample size by a factor, the SD of the sample mean decreases by the square root of the factor. $$\text{SD}(\bar{X_n}) = \frac{\sigma}{\sqrt{n}}$$ The sample mean is more likely to be close to the population mean if we have a larger sample size.</span>
+<span id="cb1-220"><a href="#cb1-220" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb1-221"><a href="#cb1-221" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-222"><a href="#cb1-222" aria-hidden="true" tabindex="-1"></a><span class="fu">## Population vs Sample Statistics</span></span>
+<span id="cb1-223"><a href="#cb1-223" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-224"><a href="#cb1-224" aria-hidden="true" tabindex="-1"></a>At this point in the course, we've spent a great deal of time working with models. When we first introduced the idea of modeling a few weeks ago, we did so in the context of **prediction**: using models to make *accurate predictions* about unseen data. Another reason we might build models is to better understand complex phenomena in the world around us. **Inference** is the task of using a model to infer the true underlying relationships between the feature and response variables. For example, if we are working with a set of housing data, *prediction* might ask: given the attributes of a house, how much is it worth? *Inference* might ask: how much does having a local park impact the value of a house?</span>
+<span id="cb1-225"><a href="#cb1-225" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-226"><a href="#cb1-226" aria-hidden="true" tabindex="-1"></a>A major goal of inference is to draw conclusions about the full population of data given only a random sample. To do this, we aim to estimate the value of a **parameter**, which is a numerical function of the *population* (for example, the population mean $\mu$). We use a collected sample to construct a **statistic**, which is a numerical function of the random *sample* (for example, the sample mean $\bar{X}_n$). It's helpful to think "p" for "parameter" and "population," and "s" for "sample" and "statistic."</span>
+<span id="cb1-227"><a href="#cb1-227" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-228"><a href="#cb1-228" aria-hidden="true" tabindex="-1"></a>Since the sample represents a *random* subset of the population, any statistic we generate will likely deviate from the true population parameter, and it *could have been different*. We say that the sample statistic is an **estimator** of the true population parameter. Notationally, the population parameter is typically called $\theta$, while its estimator is denoted by $\hat{\theta}$.</span>
+<span id="cb1-229"><a href="#cb1-229" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-230"><a href="#cb1-230" aria-hidden="true" tabindex="-1"></a>To address our inference question, we aim to construct estimators that closely estimate the value of the population parameter. We evaluate how "good" an estimator is by answering three questions:</span>
+<span id="cb1-231"><a href="#cb1-231" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-232"><a href="#cb1-232" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>How close is our answer to the parameter? **(Risk / MSE)**</span>
+<span id="cb1-233"><a href="#cb1-233" aria-hidden="true" tabindex="-1"></a>  $$ MSE(\hat{\theta}) = E<span class="co">[</span><span class="ot">(\hat{\theta} - \theta)</span><span class="co">]</span>^2$$</span>
+<span id="cb1-234"><a href="#cb1-234" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Do we get the right answer for the parameter, on average? **(Bias)** </span>
+<span id="cb1-235"><a href="#cb1-235" aria-hidden="true" tabindex="-1"></a>  $$\text{Bias}(\hat{\theta}) = E<span class="co">[</span><span class="ot">\hat{\theta} - \theta</span><span class="co">]</span> = E<span class="co">[</span><span class="ot">\hat{\theta}</span><span class="co">]</span> - \theta$$</span>
+<span id="cb1-236"><a href="#cb1-236" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>How variable is the answer? **(Variance)**</span>
+<span id="cb1-237"><a href="#cb1-237" aria-hidden="true" tabindex="-1"></a>  $$Var(\hat{\theta}) = E<span class="co">[</span><span class="ot">(\hat{\theta} - E[\hat{\theta}])^2</span><span class="co">]</span> $$</span>
+<span id="cb1-238"><a href="#cb1-238" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-239"><a href="#cb1-239" aria-hidden="true" tabindex="-1"></a>If the Bias of an estimator $\hat{theta}$ is **zero**, then it is said to be an **unbiased estimator**. For example, sample mean is unbiased for the population mean.</span>
+<span id="cb1-240"><a href="#cb1-240" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-241"><a href="#cb1-241" aria-hidden="true" tabindex="-1"></a>This relationship between bias and variance can be illustrated with an archery analogy. Imagine that the center of the target is the $\theta$ and each arrow corresponds to a separate parameter estimate $\hat{\theta}$</span>
+<span id="cb1-242"><a href="#cb1-242" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-243"><a href="#cb1-243" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-244"><a href="#cb1-244" aria-hidden="true" tabindex="-1"></a>&lt;p align="center"&gt;</span>
+<span id="cb1-245"><a href="#cb1-245" aria-hidden="true" tabindex="-1"></a>&lt;img src="images/bias_v_variance.png" width='600'&gt;</span>
+<span id="cb1-246"><a href="#cb1-246" aria-hidden="true" tabindex="-1"></a>&lt;/p&gt;</span>
+<span id="cb1-247"><a href="#cb1-247" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-248"><a href="#cb1-248" aria-hidden="true" tabindex="-1"></a>Ideally, we want our estimator to have low bias and low variance, but how can we mathematically quantify that? See @sec-bias-variance-tradeoff for more detail.</span>
+<span id="cb1-249"><a href="#cb1-249" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-250"><a href="#cb1-250" aria-hidden="true" tabindex="-1"></a><span class="fu">### Training and Prediction as Estimation</span></span>
+<span id="cb1-251"><a href="#cb1-251" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-252"><a href="#cb1-252" aria-hidden="true" tabindex="-1"></a>Now that we've established the idea of an estimator, let's see how we can apply this learning to the modeling process. To do so, we'll take a moment to formalize our data collection and models in the language of random variables.</span>
+<span id="cb1-253"><a href="#cb1-253" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-254"><a href="#cb1-254" aria-hidden="true" tabindex="-1"></a>Say we are working with an input variable, $x$, and a response variable, $Y$. We assume that $Y$ and $x$ are linked by some relationship $g$; in other words, $Y = g(x)$ where $g$ represents some "universal truth" or "law of nature" that defines the **true underlying relationship** between $x$ and $Y$. In the image below, $g$ is denoted by the red line.</span>
+<span id="cb1-255"><a href="#cb1-255" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-256"><a href="#cb1-256" aria-hidden="true" tabindex="-1"></a>As data scientists, however, we have no way of directly "seeing" the underlying relationship $g$. The best we can do is collect observed data out in the real world to try to understand this relationship. Unfortunately, the data collection process will always have some inherent error (think of the randomness you might encounter when taking measurements in a scientific experiment). We say that each observation comes with some **random error or noise** term, $\epsilon$ (read: "epsilon"). This error is assumed to be a random variable with expectation $\mathbb{E}(\epsilon)=0$, variance $\text{Var}(\epsilon) = \sigma^2$, and be i.i.d. across each observation. The existence of this random noise means that our observations, $Y(x)$, are *random variables*, where $Y = g(x) + \epsilon$. This can be seen on our graph because the points do not line perfectly with the true underlying relationship, and the residual is the noise $\epsilon$.</span>
+<span id="cb1-257"><a href="#cb1-257" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-258"><a href="#cb1-258" aria-hidden="true" tabindex="-1"></a>&lt;p align="center"&gt;</span>
+<span id="cb1-259"><a href="#cb1-259" aria-hidden="true" tabindex="-1"></a>&lt;img src="images/data.png" alt='data' width='700'&gt;</span>
+<span id="cb1-260"><a href="#cb1-260" aria-hidden="true" tabindex="-1"></a>&lt;/p&gt;</span>
+<span id="cb1-261"><a href="#cb1-261" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-262"><a href="#cb1-262" aria-hidden="true" tabindex="-1"></a>We can only observe our **IID random sample of data**, represented by the blue points above. From this sample, we want to estimate the true relationship $g$. We do this by **training** a model on the data to obtain our optimal $\hat{\theta}$,</span>
+<span id="cb1-263"><a href="#cb1-263" aria-hidden="true" tabindex="-1"></a>$$ {\hat{\theta}} = \text{arg}\underset{\theta}{\text{min}}\  \left(\frac{1}{n} \sum_{i=1}^n \textbf{Loss}(Y_i, f_{\theta}(X_i))\right) + \lambda\ \textbf{Regularizer}(\theta)$$</span>
+<span id="cb1-264"><a href="#cb1-264" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-265"><a href="#cb1-265" aria-hidden="true" tabindex="-1"></a>and **predicting** the value of $Y$ at a given $x$ location,</span>
+<span id="cb1-266"><a href="#cb1-266" aria-hidden="true" tabindex="-1"></a>$$ \hat{Y}(x) = f_{\hat{\theta}}(x)$$</span>
+<span id="cb1-267"><a href="#cb1-267" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-268"><a href="#cb1-268" aria-hidden="true" tabindex="-1"></a>where the model $\hat{Y}(x)$ can be used to estimate $g$. The error in our prediction is:</span>
+<span id="cb1-269"><a href="#cb1-269" aria-hidden="true" tabindex="-1"></a>$$ (Y-\hat{Y}(x))^2$$</span>
+<span id="cb1-270"><a href="#cb1-270" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-271"><a href="#cb1-271" aria-hidden="true" tabindex="-1"></a>Here, $X_i$, $Y_i$, $\hat{\theta}$, and $\hat{Y}(x)$ are random variables. An example prediction model $\hat{Y}(x)$ is shown below.</span>
+<span id="cb1-272"><a href="#cb1-272" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-273"><a href="#cb1-273" aria-hidden="true" tabindex="-1"></a>$$\text{True relationship: } g(x)$$</span>
+<span id="cb1-274"><a href="#cb1-274" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-275"><a href="#cb1-275" aria-hidden="true" tabindex="-1"></a>$$\text{Observed relationship: }Y = g(x) + \epsilon$$</span>
+<span id="cb1-276"><a href="#cb1-276" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-277"><a href="#cb1-277" aria-hidden="true" tabindex="-1"></a>$$\text{Prediction: }\hat{Y}(x) = f_{\hat{\theta}}(x)$$</span>
+<span id="cb1-278"><a href="#cb1-278" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-279"><a href="#cb1-279" aria-hidden="true" tabindex="-1"></a>&lt;p align="center"&gt;</span>
+<span id="cb1-280"><a href="#cb1-280" aria-hidden="true" tabindex="-1"></a>&lt;img src="images/y_hat.png" alt='y_hat' width='600'&gt;</span>
+<span id="cb1-281"><a href="#cb1-281" aria-hidden="true" tabindex="-1"></a>&lt;/p&gt;</span>
+<span id="cb1-282"><a href="#cb1-282" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-283"><a href="#cb1-283" aria-hidden="true" tabindex="-1"></a>When building models, it is also important to note that our choice of features will also significantly impact our estimation. In the plot below, you can see how the different models (green and purple) can lead to different estimates.</span>
+<span id="cb1-284"><a href="#cb1-284" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-285"><a href="#cb1-285" aria-hidden="true" tabindex="-1"></a>&lt;p align="center"&gt;</span>
+<span id="cb1-286"><a href="#cb1-286" aria-hidden="true" tabindex="-1"></a>&lt;img src="images/y_hat2.png" alt='y_hat' width='400'&gt;</span>
+<span id="cb1-287"><a href="#cb1-287" aria-hidden="true" tabindex="-1"></a>&lt;/p&gt;</span>
+<span id="cb1-288"><a href="#cb1-288" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-289"><a href="#cb1-289" aria-hidden="true" tabindex="-1"></a>Overall, we fit (train) a model based on our **sample of (x,y) pairs**, and our model **estimates** the true relationship $Y=g(x)+\epsilon$, where at every $x$, our **prediction** for $Y$ is $\hat{Y}(x) = f_{\hat{\theta}}(x)$.</span>
+<span id="cb1-290"><a href="#cb1-290" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-291"><a href="#cb1-291" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- #### Estimating a Linear Relationship</span></span>
+<span id="cb1-292"><a href="#cb1-292" aria-hidden="true" tabindex="-1"></a><span class="co">If we assume that the true relationship $g$ is linear, we can express the response as $Y = f_{\theta}(x)$, where our true relationship is modeled by </span></span>
+<span id="cb1-293"><a href="#cb1-293" aria-hidden="true" tabindex="-1"></a><span class="co">$$Y = g(x) + \epsilon$$</span></span>
+<span id="cb1-294"><a href="#cb1-294" aria-hidden="true" tabindex="-1"></a><span class="co">$$ f_{\theta}(x) = Y = \theta_0 + \sum_{j=1}^p \theta_j x_j + \epsilon$$</span></span>
+<span id="cb1-295"><a href="#cb1-295" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-296"><a href="#cb1-296" aria-hidden="true" tabindex="-1"></a><span class="co">::: {.callout-warning collapse="true"}</span></span>
+<span id="cb1-297"><a href="#cb1-297" aria-hidden="true" tabindex="-1"></a><span class="co">##### Which expressions are random? </span></span>
+<span id="cb1-298"><a href="#cb1-298" aria-hidden="true" tabindex="-1"></a><span class="co">In our two equations above, the true relationship $g(x) = \theta_0 + \sum_{j=1}^p \theta_j x_j$ is not random, but $\epsilon$ is random. Hence, $Y = f_{\theta}(x)$ is also random. </span></span>
+<span id="cb1-299"><a href="#cb1-299" aria-hidden="true" tabindex="-1"></a><span class="co">:::</span></span>
+<span id="cb1-300"><a href="#cb1-300" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-301"><a href="#cb1-301" aria-hidden="true" tabindex="-1"></a><span class="co">This true relationship has true, unobservable parameters $\theta$, and it has random noise $\epsilon$, so we can never observe the true relationship. Instead, the next best thing we can do is obtain a sample $\Bbb{X}$, $\Bbb{Y}$ of $n$ observed relationships, $(x, Y)$ and use it to train a model and obtain an estimate of $\hat{\theta}$</span></span>
+<span id="cb1-302"><a href="#cb1-302" aria-hidden="true" tabindex="-1"></a><span class="co">$$\hat{Y}(x) = f_{\hat{\theta}}(x) = \hat{\theta_0} + \sum_{j=1}^p \hat{\theta_j} x_j$$</span></span>
+<span id="cb1-303"><a href="#cb1-303" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-304"><a href="#cb1-304" aria-hidden="true" tabindex="-1"></a><span class="co">::: {.callout-warning collapse="true"}</span></span>
+<span id="cb1-305"><a href="#cb1-305" aria-hidden="true" tabindex="-1"></a><span class="co">##### Which expressions are random? </span></span>
+<span id="cb1-306"><a href="#cb1-306" aria-hidden="true" tabindex="-1"></a><span class="co">In our estimating equation above, our sample $\Bbb{X}$, $\Bbb{Y}$ are random (often due to human error). Hence, the estimates we calculate from our samples $\hat{\theta}$ are also random, so our predictor $\hat{Y}(x)$ is also random. </span></span>
+<span id="cb1-307"><a href="#cb1-307" aria-hidden="true" tabindex="-1"></a><span class="co">:::</span></span>
+<span id="cb1-308"><a href="#cb1-308" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-309"><a href="#cb1-309" aria-hidden="true" tabindex="-1"></a><span class="co">Now taking a look at our original equations, we can see that they both have differing sources of randomness. For our observed relationship, $Y = g(x) + \epsilon$, $\epsilon$ represents errors which occur during or after the observation or measurement process. For the estimation model, the data we have is a random sample collected from the population, which was constructed from decisions made before the measurement process. --&gt;</span></span>
+<span id="cb1-310"><a href="#cb1-310" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-311"><a href="#cb1-311" aria-hidden="true" tabindex="-1"></a><span class="fu">## Bias-Variance Tradeoff {#sec-bias-variance-tradeoff}</span></span>
+<span id="cb1-312"><a href="#cb1-312" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-313"><a href="#cb1-313" aria-hidden="true" tabindex="-1"></a>Recall the model and the data we generated from that model in the last section:</span>
+<span id="cb1-314"><a href="#cb1-314" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-315"><a href="#cb1-315" aria-hidden="true" tabindex="-1"></a>$$\text{True relationship: } g(x)$$</span>
+<span id="cb1-316"><a href="#cb1-316" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-317"><a href="#cb1-317" aria-hidden="true" tabindex="-1"></a>$$\text{Observed relationship: }Y = g(x) + \epsilon$$</span>
+<span id="cb1-318"><a href="#cb1-318" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-319"><a href="#cb1-319" aria-hidden="true" tabindex="-1"></a>$$\text{Prediction: }\hat{Y}(x)$$</span>
+<span id="cb1-320"><a href="#cb1-320" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-321"><a href="#cb1-321" aria-hidden="true" tabindex="-1"></a>With this reformulated modeling goal, we can now revisit the Bias-Variance Tradeoff from two lectures ago (shown below): </span>
+<span id="cb1-322"><a href="#cb1-322" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-323"><a href="#cb1-323" aria-hidden="true" tabindex="-1"></a>&lt;p align="center"&gt;</span>
+<span id="cb1-324"><a href="#cb1-324" aria-hidden="true" tabindex="-1"></a>&lt;img src="images/bvt_old.png" width='600'&gt;</span>
+<span id="cb1-325"><a href="#cb1-325" aria-hidden="true" tabindex="-1"></a>&lt;/p&gt;</span>
+<span id="cb1-326"><a href="#cb1-326" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-327"><a href="#cb1-327" aria-hidden="true" tabindex="-1"></a>In today's lecture, we'll explore a more mathematical version of the graph you see above by introducing the terms model risk, observation variance, model bias, and model variance. Eventually, we'll work our way up to an updated version of the Bias-Variance Tradeoff graph that you see below </span>
+<span id="cb1-328"><a href="#cb1-328" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-329"><a href="#cb1-329" aria-hidden="true" tabindex="-1"></a>&lt;p align="center"&gt;</span>
+<span id="cb1-330"><a href="#cb1-330" aria-hidden="true" tabindex="-1"></a>&lt;img src="images/bvt.png" width='600'&gt;</span>
+<span id="cb1-331"><a href="#cb1-331" aria-hidden="true" tabindex="-1"></a>&lt;/p&gt;</span>
+<span id="cb1-332"><a href="#cb1-332" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-333"><a href="#cb1-333" aria-hidden="true" tabindex="-1"></a><span class="fu">### Model Risk</span></span>
+<span id="cb1-334"><a href="#cb1-334" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-335"><a href="#cb1-335" aria-hidden="true" tabindex="-1"></a>Recall the data-generating process we established earlier. There is a true underlying relationship $g$, observed data (with random noise) $Y$, and model $\hat{Y}$. </span>
+<span id="cb1-336"><a href="#cb1-336" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-337"><a href="#cb1-337" aria-hidden="true" tabindex="-1"></a>&lt;p align="center"&gt;</span>
+<span id="cb1-338"><a href="#cb1-338" aria-hidden="true" tabindex="-1"></a>&lt;img src="images/errors.png" alt='errors' width='600'&gt;</span>
+<span id="cb1-339"><a href="#cb1-339" aria-hidden="true" tabindex="-1"></a>&lt;/p&gt;</span>
+<span id="cb1-340"><a href="#cb1-340" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-341"><a href="#cb1-341" aria-hidden="true" tabindex="-1"></a>To begin to understand model risk, we'll zoom in on a single data point in the plot above and look at its residual.</span>
+<span id="cb1-342"><a href="#cb1-342" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-343"><a href="#cb1-343" aria-hidden="true" tabindex="-1"></a>&lt;p align="center"&gt;</span>
+<span id="cb1-344"><a href="#cb1-344" aria-hidden="true" tabindex="-1"></a>&lt;img src="images/breakdown.png" alt='breakdown' width='600'&gt;</span>
+<span id="cb1-345"><a href="#cb1-345" aria-hidden="true" tabindex="-1"></a>&lt;/p&gt;</span>
+<span id="cb1-346"><a href="#cb1-346" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-347"><a href="#cb1-347" aria-hidden="true" tabindex="-1"></a>**Model risk** is defined as the mean square prediction error of the random variable $\hat{Y}$. It is an expectation across **all possible samples** we could have possibly gotten when fitting the model, which we can denote as random variables $X_1, X_2, \ldots, X_n, Y$. Model risk considers the model's performance on any sample that is theoretically possible, rather than the specific data that we have collected.</span>
+<span id="cb1-348"><a href="#cb1-348" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-349"><a href="#cb1-349" aria-hidden="true" tabindex="-1"></a>$$\text{model risk }=\mathbb{E}\left<span class="co">[</span><span class="ot">(Y-\hat{Y}(x))^2\right</span><span class="co">]</span>$$ </span>
+<span id="cb1-350"><a href="#cb1-350" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-351"><a href="#cb1-351" aria-hidden="true" tabindex="-1"></a>What is the origin of the error encoded by model risk? Note that there are three types of errors:</span>
+<span id="cb1-352"><a href="#cb1-352" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-353"><a href="#cb1-353" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>**Chance errors**: happen due to randomness alone</span>
+<span id="cb1-354"><a href="#cb1-354" aria-hidden="true" tabindex="-1"></a><span class="ss">    * </span>Source 1 **(Observation Variance)**: randomness in new observations $Y$ due to random noise $\epsilon$</span>
+<span id="cb1-355"><a href="#cb1-355" aria-hidden="true" tabindex="-1"></a><span class="ss">    * </span>Source 2 **(Model Variance)**: randomness in the sample we used to train the models, as samples $X_1, X_2, \ldots, X_n, Y$ are random</span>
+<span id="cb1-356"><a href="#cb1-356" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>**Bias**: non-random error due to our model being different from the true underlying function $g$</span>
+<span id="cb1-357"><a href="#cb1-357" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-358"><a href="#cb1-358" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-359"><a href="#cb1-359" aria-hidden="true" tabindex="-1"></a>Remember that $\hat{Y}(x)$ is a random variable – it is the prediction made for $x$ after being fit on the specific sample used for training. If we had used a different sample for training, a different prediction might have been made for this value of $x$. To capture this, the diagram below considers both the prediction $\hat{Y}(x)$ made for a particular random training sample, and the *expected* prediction across all possible training samples, $E<span class="co">[</span><span class="ot">\hat{Y}(x)</span><span class="co">]</span>$. </span>
+<span id="cb1-360"><a href="#cb1-360" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-361"><a href="#cb1-361" aria-hidden="true" tabindex="-1"></a>We can use this simplified diagram to break down the prediction error into smaller components. First, start by considering the error on a single prediction, $Y(x)-\hat{Y}(x)$.</span>
+<span id="cb1-362"><a href="#cb1-362" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-363"><a href="#cb1-363" aria-hidden="true" tabindex="-1"></a>&lt;p align="center"&gt;</span>
+<span id="cb1-364"><a href="#cb1-364" aria-hidden="true" tabindex="-1"></a>&lt;img src="images/error.png" alt='error' width='300'&gt;</span>
+<span id="cb1-365"><a href="#cb1-365" aria-hidden="true" tabindex="-1"></a>&lt;/p&gt;</span>
+<span id="cb1-366"><a href="#cb1-366" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-367"><a href="#cb1-367" aria-hidden="true" tabindex="-1"></a>We can identify three components of this error. Note that these points could be in any sequence, but this analysis would still work. This is just a convenient way to visualize it.</span>
+<span id="cb1-368"><a href="#cb1-368" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-369"><a href="#cb1-369" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-370"><a href="#cb1-370" aria-hidden="true" tabindex="-1"></a>&lt;p align="center"&gt;</span>
+<span id="cb1-371"><a href="#cb1-371" aria-hidden="true" tabindex="-1"></a>&lt;img src="images/decomposition.png" alt='decomposition' width='600'&gt;</span>
+<span id="cb1-372"><a href="#cb1-372" aria-hidden="true" tabindex="-1"></a>&lt;/p&gt;</span>
+<span id="cb1-373"><a href="#cb1-373" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-374"><a href="#cb1-374" aria-hidden="true" tabindex="-1"></a>That is, the error can be written as:</span>
+<span id="cb1-375"><a href="#cb1-375" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-376"><a href="#cb1-376" aria-hidden="true" tabindex="-1"></a>$$Y-\hat{Y}(x) = \epsilon + \left(g(x)-\mathbb{E}\left<span class="co">[</span><span class="ot">\hat{Y}(x)\right</span><span class="co">]</span>\right) + \left(\mathbb{E}\left<span class="co">[</span><span class="ot">\hat{Y}(x)\right</span><span class="co">]</span> - \hat{Y}(x)\right)$$</span>
+<span id="cb1-377"><a href="#cb1-377" aria-hidden="true" tabindex="-1"></a>$$\newline   $$</span>
+<span id="cb1-378"><a href="#cb1-378" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-379"><a href="#cb1-379" aria-hidden="true" tabindex="-1"></a>The model risk is the expected square of the expression above, $\mathbb{E}\left<span class="co">[</span><span class="ot">(Y(x)-\hat{Y}(x))^2\right</span><span class="co">]</span>$. If we square both sides and then take the expectation, we will get the following decomposition of model risk:</span>
+<span id="cb1-380"><a href="#cb1-380" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-381"><a href="#cb1-381" aria-hidden="true" tabindex="-1"></a>$$\mathbb{E}\left<span class="co">[</span><span class="ot">(Y-\hat{Y}(x))^2\right</span><span class="co">]</span> = \mathbb{E}<span class="co">[</span><span class="ot">\epsilon^2</span><span class="co">]</span> + \left(g(x)-\mathbb{E}\left<span class="co">[</span><span class="ot">\hat{Y}(x)\right</span><span class="co">]</span>\right)^2 + \mathbb{E}\left<span class="co">[</span><span class="ot">\left(\mathbb{E}\left[\hat{Y}(x)\right] - \hat{Y}(x)\right)^2\right</span><span class="co">]</span>$$</span>
+<span id="cb1-382"><a href="#cb1-382" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-383"><a href="#cb1-383" aria-hidden="true" tabindex="-1"></a>It looks like we are missing some cross-product terms when squaring the right-hand side, but it turns out that all of those cross-product terms are zero. The detailed derivation is included in the "Proof of the Decomposition" section of this note for your reference.</span>
+<span id="cb1-384"><a href="#cb1-384" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-385"><a href="#cb1-385" aria-hidden="true" tabindex="-1"></a>This expression may look complicated at first glance, but we've actually already defined each term earlier in this lecture! Let's look at them term by term.</span>
+<span id="cb1-386"><a href="#cb1-386" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-387"><a href="#cb1-387" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-388"><a href="#cb1-388" aria-hidden="true" tabindex="-1"></a><span class="fu">### 1. Observation Variance</span></span>
+<span id="cb1-389"><a href="#cb1-389" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-390"><a href="#cb1-390" aria-hidden="true" tabindex="-1"></a>The first term in the above decomposition is $\mathbb{E}<span class="co">[</span><span class="ot">\epsilon^2</span><span class="co">]</span>$. Remember $\epsilon$ is the random noise when observing $Y$, with expectation $\mathbb{E}(\epsilon)=0$ and variance $\text{Var}(\epsilon) = \sigma^2$. We can show that $\mathbb{E}<span class="co">[</span><span class="ot">\epsilon^2</span><span class="co">]</span>$ is the variance of $\epsilon$:</span>
+<span id="cb1-391"><a href="#cb1-391" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb1-392"><a href="#cb1-392" aria-hidden="true" tabindex="-1"></a>\begin{align*}</span>
+<span id="cb1-393"><a href="#cb1-393" aria-hidden="true" tabindex="-1"></a>\text{Var}(\epsilon) &amp;= \mathbb{E}<span class="co">[</span><span class="ot">\epsilon^2</span><span class="co">]</span> + \left(\mathbb{E}<span class="co">[</span><span class="ot">\epsilon</span><span class="co">]</span>\right)^2<span class="sc">\\</span></span>
+<span id="cb1-394"><a href="#cb1-394" aria-hidden="true" tabindex="-1"></a>&amp;= \mathbb{E}<span class="co">[</span><span class="ot">\epsilon^2</span><span class="co">]</span> + 0^2<span class="sc">\\</span></span>
+<span id="cb1-395"><a href="#cb1-395" aria-hidden="true" tabindex="-1"></a>&amp;= \sigma^2.</span>
+<span id="cb1-396"><a href="#cb1-396" aria-hidden="true" tabindex="-1"></a>\end{align*}</span>
+<span id="cb1-397"><a href="#cb1-397" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb1-398"><a href="#cb1-398" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-399"><a href="#cb1-399" aria-hidden="true" tabindex="-1"></a>This term describes how variable the random error $\epsilon$ (and $Y$) is for each observation. This is called the **observation variance**. It exists due to the randomness in our observations $Y$. It is a form of *chance error* we talked about in the Sampling lecture.</span>
+<span id="cb1-400"><a href="#cb1-400" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-401"><a href="#cb1-401" aria-hidden="true" tabindex="-1"></a>$$\text{observation variance} = \text{Var}(\epsilon) = \sigma^2.$$</span>
+<span id="cb1-402"><a href="#cb1-402" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-403"><a href="#cb1-403" aria-hidden="true" tabindex="-1"></a>The observation variance results from measurement errors when observing data or missing information that acts like noise. To reduce this observation variance, we could try to get more precise measurements, but it is often beyond the control of data scientists. Because of this, the observation variance $\sigma^2$ is sometimes called "irreducible error."</span>
+<span id="cb1-404"><a href="#cb1-404" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-405"><a href="#cb1-405" aria-hidden="true" tabindex="-1"></a><span class="fu">### 2. Model Variance</span></span>
+<span id="cb1-406"><a href="#cb1-406" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-407"><a href="#cb1-407" aria-hidden="true" tabindex="-1"></a>We will then look at the last term: $\mathbb{E}\left<span class="co">[</span><span class="ot">\left(\mathbb{E}\left[\hat{Y}(x)\right] - \hat{Y}(x)\right)^2\right</span><span class="co">]</span>$. If you recall the definition of variance from the last lecture, this is precisely $\text{Var}(\hat{Y}(x))$. We call this the **model variance**.</span>
+<span id="cb1-408"><a href="#cb1-408" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-409"><a href="#cb1-409" aria-hidden="true" tabindex="-1"></a>It describes how much the prediction $\hat{Y}(x)$ tends to vary when we fit the model on different samples. Remember the sample we collect can come out very differently, thus the prediction $\hat{Y}(x)$ will also be different. The model variance describes this variability due to the randomness in our sampling process. Like observation variance, it is also a form of *chance error*—even though the sources of randomness are different.</span>
+<span id="cb1-410"><a href="#cb1-410" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-411"><a href="#cb1-411" aria-hidden="true" tabindex="-1"></a>$$\text{model variance} = \text{Var}(\hat{Y}(x)) = \mathbb{E}\left<span class="co">[</span><span class="ot">\left(\hat{Y}(x) - \mathbb{E}\left[\hat{Y}(x)\right]\right)^2\right</span><span class="co">]</span>$$</span>
+<span id="cb1-412"><a href="#cb1-412" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-413"><a href="#cb1-413" aria-hidden="true" tabindex="-1"></a>The main reason for the large model variance is because of **overfitting**: we paid too much attention to the details in our sample that small differences in our random sample lead to large differences in the fitted model. To remedy this, we try to reduce model complexity (e.g. take out some features and limit the magnitude of estimated model coefficients) and not fit our model on the noises.</span>
+<span id="cb1-414"><a href="#cb1-414" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-415"><a href="#cb1-415" aria-hidden="true" tabindex="-1"></a><span class="fu">### 3. Model Bias</span></span>
+<span id="cb1-416"><a href="#cb1-416" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-417"><a href="#cb1-417" aria-hidden="true" tabindex="-1"></a>Finally, the second term is $\left(g(x)-\mathbb{E}\left<span class="co">[</span><span class="ot">\hat{Y}(x)\right</span><span class="co">]</span>\right)^2$. What is this? The term $g(x) - \mathbb{E}\left<span class="co">[</span><span class="ot">\hat{Y}(x)\right</span><span class="co">]</span>$ is called the **model bias**.</span>
+<span id="cb1-418"><a href="#cb1-418" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-419"><a href="#cb1-419" aria-hidden="true" tabindex="-1"></a>Remember that $g(x)$ is the fixed underlying truth and $\hat{Y}(x)$ is our fitted model, which is random. Model bias therefore measures how far off $g(x)$ and $\hat{Y}(x)$ are on average over all possible samples.</span>
+<span id="cb1-420"><a href="#cb1-420" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-421"><a href="#cb1-421" aria-hidden="true" tabindex="-1"></a>$$\text{model bias} = \mathbb{E}\left<span class="co">[</span><span class="ot">g(x) - \hat{Y}(x)\right</span><span class="co">]</span> = g(x) - \mathbb{E}\left<span class="co">[</span><span class="ot">\hat{Y}(x)\right</span><span class="co">]</span>$$</span>
+<span id="cb1-422"><a href="#cb1-422" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-423"><a href="#cb1-423" aria-hidden="true" tabindex="-1"></a>The model bias is not random; it is computed for the expected prediction (averaged over all possible training datasets). If bias is positive, our model tends to **underestimate** $g(x)$ at this $x$ value; if it's negative, our model tends to **overestimate** $g(x)$ at this $x$ value. And if it's 0, we can say that our model is **unbiased**.</span>
+<span id="cb1-424"><a href="#cb1-424" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-425"><a href="#cb1-425" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip}</span>
+<span id="cb1-426"><a href="#cb1-426" aria-hidden="true" tabindex="-1"></a><span class="fu">##### Unbiased Estimators </span></span>
+<span id="cb1-427"><a href="#cb1-427" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-428"><a href="#cb1-428" aria-hidden="true" tabindex="-1"></a>An **unbiased model** has a $\text{model bias } = 0$. In other words, our model predicts $g(x)$ on average. </span>
+<span id="cb1-429"><a href="#cb1-429" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-430"><a href="#cb1-430" aria-hidden="true" tabindex="-1"></a>Similarly, we can define bias for estimators like the mean. The sample mean is an **unbiased estimator** of the population mean, as by CLT, $\mathbb{E}<span class="co">[</span><span class="ot">\bar{X}_n</span><span class="co">]</span> = \mu$. Therefore, the $\text{estimator bias } = \mathbb{E}<span class="co">[</span><span class="ot">\bar{X}_n</span><span class="co">]</span> - \mu = 0$.</span>
+<span id="cb1-431"><a href="#cb1-431" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb1-432"><a href="#cb1-432" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-433"><a href="#cb1-433" aria-hidden="true" tabindex="-1"></a>The main reason for large model biases is **underfitting**:</span>
+<span id="cb1-434"><a href="#cb1-434" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-435"><a href="#cb1-435" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Over regularized: our model is too simple for the data and has insufficient complexity</span>
+<span id="cb1-436"><a href="#cb1-436" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Not optimizing loss adequately</span>
+<span id="cb1-437"><a href="#cb1-437" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-438"><a href="#cb1-438" aria-hidden="true" tabindex="-1"></a>To fix this, we increase model complexity (but we don't want to overfit!) or consult domain experts to see which models make sense. You can start to see a tradeoff here: if we increase model complexity, we decrease the model bias, but we also risk increasing the model variance.</span>
+<span id="cb1-439"><a href="#cb1-439" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-440"><a href="#cb1-440" aria-hidden="true" tabindex="-1"></a><span class="fu">### Proof of the Decomposition</span></span>
+<span id="cb1-441"><a href="#cb1-441" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-442"><a href="#cb1-442" aria-hidden="true" tabindex="-1"></a>This section walks through the detailed derivation of the Bias-Variance Decomposition in the model risk section above.</span>
+<span id="cb1-443"><a href="#cb1-443" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-444"><a href="#cb1-444" aria-hidden="true" tabindex="-1"></a>:::{.callout collapse="true"}</span>
+<span id="cb1-445"><a href="#cb1-445" aria-hidden="true" tabindex="-1"></a><span class="fu">### Click to show</span></span>
+<span id="cb1-446"><a href="#cb1-446" aria-hidden="true" tabindex="-1"></a>We want to prove that the model risk can be decomposed as</span>
+<span id="cb1-447"><a href="#cb1-447" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-448"><a href="#cb1-448" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb1-449"><a href="#cb1-449" aria-hidden="true" tabindex="-1"></a>\begin{align*}</span>
+<span id="cb1-450"><a href="#cb1-450" aria-hidden="true" tabindex="-1"></a>\mathbb{E}\left<span class="co">[</span><span class="ot">(Y-\hat{Y}(x))^2\right</span><span class="co">]</span> &amp;= \mathbb{E}<span class="co">[</span><span class="ot">\epsilon^2</span><span class="co">]</span> + \left(g(x)-\mathbb{E}\left<span class="co">[</span><span class="ot">\hat{Y}(x)\right</span><span class="co">]</span>\right)^2 + \mathbb{E}\left<span class="co">[</span><span class="ot">\left(\mathbb{E}\left[\hat{Y}(x)\right] - \hat{Y}(x)\right)^2\right</span><span class="co">]</span>.</span>
+<span id="cb1-451"><a href="#cb1-451" aria-hidden="true" tabindex="-1"></a>\end{align*}</span>
+<span id="cb1-452"><a href="#cb1-452" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb1-453"><a href="#cb1-453" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-454"><a href="#cb1-454" aria-hidden="true" tabindex="-1"></a>To prove this, we will first need the following lemma:</span>
+<span id="cb1-455"><a href="#cb1-455" aria-hidden="true" tabindex="-1"></a>&lt;center&gt;If $V$ and $W$ are independent random variables then $E<span class="co">[</span><span class="ot">VW</span><span class="co">]</span> = E<span class="co">[</span><span class="ot">V</span><span class="co">]</span>E<span class="co">[</span><span class="ot">W</span><span class="co">]</span>$.&lt;/center&gt;</span>
+<span id="cb1-456"><a href="#cb1-456" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-457"><a href="#cb1-457" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-458"><a href="#cb1-458" aria-hidden="true" tabindex="-1"></a>We will prove this in the discrete finite case. Trust that it's true in greater generality.</span>
+<span id="cb1-459"><a href="#cb1-459" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-460"><a href="#cb1-460" aria-hidden="true" tabindex="-1"></a>The job is to calculate the weighted average of the values of $VW$, where the weights are the probabilities of those values. Here goes.</span>
+<span id="cb1-461"><a href="#cb1-461" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-462"><a href="#cb1-462" aria-hidden="true" tabindex="-1"></a>\begin{align*}</span>
+<span id="cb1-463"><a href="#cb1-463" aria-hidden="true" tabindex="-1"></a>\mathbb{E}<span class="co">[</span><span class="ot">VW</span><span class="co">]</span> ~ &amp;= ~ \sum_v\sum_w vwP(V=v \text{ and } W=w) <span class="sc">\\</span></span>
+<span id="cb1-464"><a href="#cb1-464" aria-hidden="true" tabindex="-1"></a>&amp;= ~ \sum_v\sum_w vwP(V=v)P(W=w) ~~~~ \text{by independence} <span class="sc">\\</span></span>
+<span id="cb1-465"><a href="#cb1-465" aria-hidden="true" tabindex="-1"></a>&amp;= ~ \sum_v vP(V=v)\sum_w wP(W=w) <span class="sc">\\</span></span>
+<span id="cb1-466"><a href="#cb1-466" aria-hidden="true" tabindex="-1"></a>&amp;= ~ \mathbb{E}<span class="co">[</span><span class="ot">V</span><span class="co">]</span>\mathbb{E}<span class="co">[</span><span class="ot">W</span><span class="co">]</span></span>
+<span id="cb1-467"><a href="#cb1-467" aria-hidden="true" tabindex="-1"></a>\end{align*}</span>
+<span id="cb1-468"><a href="#cb1-468" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-469"><a href="#cb1-469" aria-hidden="true" tabindex="-1"></a>Now we go into the actual proof:</span>
+<span id="cb1-470"><a href="#cb1-470" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-471"><a href="#cb1-471" aria-hidden="true" tabindex="-1"></a><span class="fu">### Goal</span></span>
+<span id="cb1-472"><a href="#cb1-472" aria-hidden="true" tabindex="-1"></a>Decompose the model risk into recognizable components.</span>
+<span id="cb1-473"><a href="#cb1-473" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-474"><a href="#cb1-474" aria-hidden="true" tabindex="-1"></a><span class="fu">### Step 1</span></span>
+<span id="cb1-475"><a href="#cb1-475" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb1-476"><a href="#cb1-476" aria-hidden="true" tabindex="-1"></a>\begin{align*}</span>
+<span id="cb1-477"><a href="#cb1-477" aria-hidden="true" tabindex="-1"></a>\text{model risk} ~ &amp;= ~ \mathbb{E}\left<span class="co">[</span><span class="ot">\left(Y - \hat{Y}(x)\right)^2 \right</span><span class="co">]</span> <span class="sc">\\</span></span>
+<span id="cb1-478"><a href="#cb1-478" aria-hidden="true" tabindex="-1"></a>&amp;= ~ \mathbb{E}\left<span class="co">[</span><span class="ot">\left(g(x) + \epsilon - \hat{Y}(x)\right)^2 \right</span><span class="co">]</span> <span class="sc">\\</span></span>
+<span id="cb1-479"><a href="#cb1-479" aria-hidden="true" tabindex="-1"></a>&amp;= ~ \mathbb{E}\left<span class="co">[</span><span class="ot">\left(\epsilon + \left(g(x)- \hat{Y}(x)\right)\right)^2 \right</span><span class="co">]</span> <span class="sc">\\</span></span>
+<span id="cb1-480"><a href="#cb1-480" aria-hidden="true" tabindex="-1"></a>&amp;= ~ \mathbb{E}\left<span class="co">[</span><span class="ot">\epsilon^2\right</span><span class="co">]</span> + 2\mathbb{E}\left<span class="co">[</span><span class="ot">\epsilon \left(g(x)- \hat{Y}(x)\right)\right</span><span class="co">]</span> + \mathbb{E}\left<span class="co">[</span><span class="ot">\left(g(x) - \hat{Y}(x)\right)^2\right</span><span class="co">]</span><span class="sc">\\</span></span>
+<span id="cb1-481"><a href="#cb1-481" aria-hidden="true" tabindex="-1"></a>\end{align*}</span>
+<span id="cb1-482"><a href="#cb1-482" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb1-483"><a href="#cb1-483" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-484"><a href="#cb1-484" aria-hidden="true" tabindex="-1"></a>On the right hand side: </span>
+<span id="cb1-485"><a href="#cb1-485" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-486"><a href="#cb1-486" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The first term is the observation variance $\sigma^2$.</span>
+<span id="cb1-487"><a href="#cb1-487" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The cross term is 0 because $\epsilon$ is independent of $g(x) - \hat{Y}(x)$ and $\mathbb{E}(\epsilon) = 0$</span>
+<span id="cb1-488"><a href="#cb1-488" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The last term is the mean squared difference between our predicted value and the value of the true function at $x$</span>
+<span id="cb1-489"><a href="#cb1-489" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-490"><a href="#cb1-490" aria-hidden="true" tabindex="-1"></a><span class="fu">### Step 2</span></span>
+<span id="cb1-491"><a href="#cb1-491" aria-hidden="true" tabindex="-1"></a>At this stage we have</span>
+<span id="cb1-492"><a href="#cb1-492" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-493"><a href="#cb1-493" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb1-494"><a href="#cb1-494" aria-hidden="true" tabindex="-1"></a>\text{model risk} ~ = ~ \mathbb{E}\left<span class="co">[</span><span class="ot">\epsilon^2\right</span><span class="co">]</span> + \mathbb{E}\left<span class="co">[</span><span class="ot">\left(g(x) - \hat{Y}(x)\right)^2\right</span><span class="co">]</span></span>
+<span id="cb1-495"><a href="#cb1-495" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb1-496"><a href="#cb1-496" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-497"><a href="#cb1-497" aria-hidden="true" tabindex="-1"></a>We don't yet have a good understanding of $g(x) - \hat{Y}(x)$. But we do understand the deviation $D_{\hat{Y}(x)} = \hat{Y}(x) - \mathbb{E}\left<span class="co">[</span><span class="ot">\hat{Y}(x)\right</span><span class="co">]</span>$. We know that</span>
+<span id="cb1-498"><a href="#cb1-498" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-499"><a href="#cb1-499" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$\mathbb{E}\left<span class="co">[</span><span class="ot">D_{\hat{Y}(x)}\right</span><span class="co">]</span> ~ = ~ 0$</span>
+<span id="cb1-500"><a href="#cb1-500" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$\mathbb{E}\left<span class="co">[</span><span class="ot">D_{\hat{Y}(x)}^2\right</span><span class="co">]</span> ~ = ~ \text{model variance}$</span>
+<span id="cb1-501"><a href="#cb1-501" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-502"><a href="#cb1-502" aria-hidden="true" tabindex="-1"></a>So let's add and subtract $\mathbb{E}\left<span class="co">[</span><span class="ot">\hat{Y}(x)\right</span><span class="co">]</span>$ and see if that helps.</span>
+<span id="cb1-503"><a href="#cb1-503" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-504"><a href="#cb1-504" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb1-505"><a href="#cb1-505" aria-hidden="true" tabindex="-1"></a>g(x) - \hat{Y}(x) ~ = ~ \left(g(x) - \mathbb{E}\left<span class="co">[</span><span class="ot">\hat{Y}(x)\right</span><span class="co">]</span> \right) + \left(\mathbb{E}\left<span class="co">[</span><span class="ot">\hat{Y}(x)\right</span><span class="co">]</span> - \hat{Y}(x)\right) </span>
+<span id="cb1-506"><a href="#cb1-506" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb1-507"><a href="#cb1-507" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-508"><a href="#cb1-508" aria-hidden="true" tabindex="-1"></a>The first term on the right hand side is the model bias at $x$. The second term is $-D_{\hat{Y}(x)}$. So</span>
+<span id="cb1-509"><a href="#cb1-509" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-510"><a href="#cb1-510" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb1-511"><a href="#cb1-511" aria-hidden="true" tabindex="-1"></a>g(x) - \hat{Y}(x) ~ = ~ \text{model bias} - D_{\hat{Y}(x)}</span>
+<span id="cb1-512"><a href="#cb1-512" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb1-513"><a href="#cb1-513" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-514"><a href="#cb1-514" aria-hidden="true" tabindex="-1"></a><span class="fu">### Step 3</span></span>
+<span id="cb1-515"><a href="#cb1-515" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-516"><a href="#cb1-516" aria-hidden="true" tabindex="-1"></a>Remember that the model bias at $x$ is a constant, not a random variable. Think of it as your favorite number, say 10. Then </span>
+<span id="cb1-517"><a href="#cb1-517" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb1-518"><a href="#cb1-518" aria-hidden="true" tabindex="-1"></a>\begin{align*}</span>
+<span id="cb1-519"><a href="#cb1-519" aria-hidden="true" tabindex="-1"></a>\mathbb{E}\left<span class="co">[</span><span class="ot"> \left(g(x) - \hat{Y}(x)\right)^2 \right</span><span class="co">]</span> ~ &amp;= ~ \text{model bias}^2 - 2(\text{model bias})\mathbb{E}\left<span class="co">[</span><span class="ot">D_{\hat{Y}(x)}\right</span><span class="co">]</span> + \mathbb{E}\left<span class="co">[</span><span class="ot">D_{\hat{Y}(x)}^2\right</span><span class="co">]</span> <span class="sc">\\</span></span>
+<span id="cb1-520"><a href="#cb1-520" aria-hidden="true" tabindex="-1"></a>&amp;= ~ \text{model bias}^2 - 0 + \text{model variance} <span class="sc">\\</span></span>
+<span id="cb1-521"><a href="#cb1-521" aria-hidden="true" tabindex="-1"></a>&amp;= ~ \text{model bias}^2 + \text{model variance}</span>
+<span id="cb1-522"><a href="#cb1-522" aria-hidden="true" tabindex="-1"></a>\end{align*}</span>
+<span id="cb1-523"><a href="#cb1-523" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb1-524"><a href="#cb1-524" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-525"><a href="#cb1-525" aria-hidden="true" tabindex="-1"></a>Again, the cross-product term is $0$ because $\mathbb{E}\left<span class="co">[</span><span class="ot">D_{\hat{Y}(x)}\right</span><span class="co">]</span> ~ = ~ 0$.</span>
+<span id="cb1-526"><a href="#cb1-526" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-527"><a href="#cb1-527" aria-hidden="true" tabindex="-1"></a><span class="fu">### Step 4: Bias-Variance Decomposition</span></span>
+<span id="cb1-528"><a href="#cb1-528" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-529"><a href="#cb1-529" aria-hidden="true" tabindex="-1"></a>In Step 2, we had:</span>
+<span id="cb1-530"><a href="#cb1-530" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-531"><a href="#cb1-531" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb1-532"><a href="#cb1-532" aria-hidden="true" tabindex="-1"></a>\text{model risk} ~ = ~ \text{observation variance} + \mathbb{E}\left<span class="co">[</span><span class="ot">\left(g(x) - \hat{Y}(x)\right)^2\right</span><span class="co">]</span></span>
+<span id="cb1-533"><a href="#cb1-533" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb1-534"><a href="#cb1-534" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-535"><a href="#cb1-535" aria-hidden="true" tabindex="-1"></a>Step 3 showed:</span>
+<span id="cb1-536"><a href="#cb1-536" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-537"><a href="#cb1-537" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb1-538"><a href="#cb1-538" aria-hidden="true" tabindex="-1"></a>\mathbb{E}\left<span class="co">[</span><span class="ot"> \left(g(x) - \hat{Y}(x)\right)^2 \right</span><span class="co">]</span> ~ = ~ \text{model bias}^2 + \text{model variance}</span>
+<span id="cb1-539"><a href="#cb1-539" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb1-540"><a href="#cb1-540" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-541"><a href="#cb1-541" aria-hidden="true" tabindex="-1"></a>Thus, we have proven the bias-variance decomposition:</span>
+<span id="cb1-542"><a href="#cb1-542" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-543"><a href="#cb1-543" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb1-544"><a href="#cb1-544" aria-hidden="true" tabindex="-1"></a>\text{model risk} = \text{observation variance} + \text{model bias}^2 + \text{model variance}.</span>
+<span id="cb1-545"><a href="#cb1-545" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb1-546"><a href="#cb1-546" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-547"><a href="#cb1-547" aria-hidden="true" tabindex="-1"></a>That is,</span>
+<span id="cb1-548"><a href="#cb1-548" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-549"><a href="#cb1-549" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb1-550"><a href="#cb1-550" aria-hidden="true" tabindex="-1"></a>\mathbb{E}\left<span class="co">[</span><span class="ot">(Y-\hat{Y}(x))^2\right</span><span class="co">]</span> = \sigma^2 + \left(g(x) - \mathbb{E}\left<span class="co">[</span><span class="ot">\hat{Y}(x)\right</span><span class="co">]</span>\right)^2 + \mathbb{E}\left<span class="co">[</span><span class="ot">\left(\hat{Y}(x)-\mathbb{E}\left[\hat{Y}(x)\right]\right)^2\right</span><span class="co">]</span></span>
+<span id="cb1-551"><a href="#cb1-551" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb1-552"><a href="#cb1-552" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb1-553"><a href="#cb1-553" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-554"><a href="#cb1-554" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-555"><a href="#cb1-555" aria-hidden="true" tabindex="-1"></a><span class="fu">### The Decomposition</span></span>
+<span id="cb1-556"><a href="#cb1-556" aria-hidden="true" tabindex="-1"></a>To summarize: </span>
+<span id="cb1-557"><a href="#cb1-557" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-558"><a href="#cb1-558" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>The **model risk**, $\mathbb{E}\left[(Y(x)-\hat{Y}(x))^2\right]$, is the mean squared prediction error of the model. It is an expectation and is therefore a **fixed number** (for a given x).</span>
+<span id="cb1-559"><a href="#cb1-559" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>The **observation variance**, $\sigma^2$, is the variance of the random noise in the observations. It describes how variable the random error $\epsilon$ is for each observation and **cannot be addressed by modeling**.</span>
+<span id="cb1-560"><a href="#cb1-560" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>The **model bias**, $g(x) - \mathbb{E}\left<span class="co">[</span><span class="ot">\hat{Y}(x)\right</span><span class="co">]</span>$, is how "off" the $\hat{Y}(x)$ is as an estimator of the true underlying relationship $g(x)$. </span>
+<span id="cb1-561"><a href="#cb1-561" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>The **model variance**, $\text{Var}(\hat{Y}(x))$, describes how much the prediction $\hat{Y}(x)$ tends to vary when we fit the model on different samples. </span>
+<span id="cb1-562"><a href="#cb1-562" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-563"><a href="#cb1-563" aria-hidden="true" tabindex="-1"></a>The above definitions enable us to simplify the decomposition of model risk before as:</span>
+<span id="cb1-564"><a href="#cb1-564" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-565"><a href="#cb1-565" aria-hidden="true" tabindex="-1"></a>$$ \mathbb{E}\left<span class="co">[</span><span class="ot">\left(Y - \hat{Y}(x)\right)^2\right</span><span class="co">]</span> = \sigma^2 + \left(g(x) - \mathbb{E}<span class="co">[</span><span class="ot">\hat{Y}(x)</span><span class="co">]</span>\right)^2 + \text{Var}\left(\hat{Y}(x)\right) $$</span>
+<span id="cb1-566"><a href="#cb1-566" aria-hidden="true" tabindex="-1"></a>$$\text{model risk } = \text{observation variance} + (\text{model bias})^2 \text{+ model variance}$$</span>
+<span id="cb1-567"><a href="#cb1-567" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-568"><a href="#cb1-568" aria-hidden="true" tabindex="-1"></a>This is known as the **bias-variance tradeoff**. What does it mean? Remember that the model risk is a measure of the model's performance. Our goal in building models is to keep model risk low; this means that we will want to ensure that each component of model risk is kept at a small value. </span>
+<span id="cb1-569"><a href="#cb1-569" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-570"><a href="#cb1-570" aria-hidden="true" tabindex="-1"></a>Observation variance is an inherent, random part of the data collection process. We aren't able to reduce the observation variance, so we'll focus our attention on the model bias and model variance. </span>
+<span id="cb1-571"><a href="#cb1-571" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-572"><a href="#cb1-572" aria-hidden="true" tabindex="-1"></a>In the Feature Engineering lecture, we considered the issue of overfitting. </span>
+<span id="cb1-573"><a href="#cb1-573" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-574"><a href="#cb1-574" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>To decrease model bias, we **increase model complexity** and the model will to make predictions that are closer to the true relationship $g$, but if we design a highly complex model, the model can overfit the sample data and will have **higher model variance**. Small differences in the random samples used for training could lead to large differences in the fitted model.</span>
+<span id="cb1-575"><a href="#cb1-575" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-576"><a href="#cb1-576" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>To decrease model variance, we **decrease model complexity**. As a result, the model underfits the sample data and will have **higher model bias**.</span>
+<span id="cb1-577"><a href="#cb1-577" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-578"><a href="#cb1-578" aria-hidden="true" tabindex="-1"></a>&lt;p align="center"&gt;</span>
+<span id="cb1-579"><a href="#cb1-579" aria-hidden="true" tabindex="-1"></a>&lt;img src="images/bvt.png" alt='bvt' width='600'&gt;</span>
+<span id="cb1-580"><a href="#cb1-580" aria-hidden="true" tabindex="-1"></a>&lt;/p&gt;</span>
+<span id="cb1-581"><a href="#cb1-581" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-582"><a href="#cb1-582" aria-hidden="true" tabindex="-1"></a>We need to strike a balance. Our goal in model creation is to use a complexity level that is high enough to keep bias low, but not so high that model variance is large.</span>
+<span id="cb1-583"><a href="#cb1-583" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-584"><a href="#cb1-584" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
