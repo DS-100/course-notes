@@ -295,6 +295,12 @@ window.Quarto = {
  <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Estimators, Bias, and Variance (Old Notes from Fall 2024)</span></span></a>
   </div>
 </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../inference_causality/inference_causality.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Causal Inference and Confounding (Old Notes from Fall 2024)</span></span></a>
+  </div>
+</li>
     </ul>
     </div>
 </nav>
@@ -397,7 +403,7 @@ Learning Outcomes
 <p><br></p>
 <p>In <code>sklearn</code>, the <code>train_test_split</code> function (<a href="https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html">documentation</a>) of the <code>model_selection</code> module allows us to automatically generate train-test splits.</p>
 <p>We will work with the <code>vehicles</code> dataset from previous lectures. As before, we will attempt to predict the <code>mpg</code> of a vehicle from transformations of its <code>hp</code>. In the cell below, we allocate 20% of the full dataset to testing, and the remaining 80% to training.</p>
-<div id="f48701bd" class="cell" data-execution_count="1">
+<div id="db78d6ab" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -416,7 +422,7 @@ Learning Outcomes
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>Y <span class="op">=</span> vehicles[<span class="st">"mpg"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="32dfd81f" class="cell" data-execution_count="2">
+<div id="3b0ab118" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># `test_size` specifies the proportion of the full dataset that should be allocated to testing</span></span>
@@ -438,7 +444,7 @@ Size of test set: 79 points</code></pre>
 </div>
 </div>
 <p>After performing our train-test split, we fit a model to the training set and assess its performance on the test set.</p>
-<div id="5bb598c4" class="cell" data-execution_count="3">
+<div id="bf5aaea7" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sklearn.linear_model <span class="im">as</span> lm</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> mean_squared_error</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -572,7 +578,7 @@ Note
 <img src="images/constrained_gd.png" alt="constrained_gd" width="450">
 </center>
 <p><br> With no constraint, the optimal <span class="math inline">\(\hat{\theta}\)</span> is in the center. We denote this as <span class="math inline">\(\hat{\theta}_\text{No Reg}\)</span>.</p>
-<p>Applying this constraint limits what combinations of model parameters are valid. We can now only consider parameter combinations with a total absolute sum less than or equal to our number <span class="math inline">\(Q\)</span>. For our 2D example, the constraint <span class="math inline">\(\sum_{i=1}^p |\theta_i| \leq Q\)</span> can be rewritten as <span class="math inline">\(|\theta_0| + |\theta_1| \leq Q\)</span>. This means that we can only assign our <em>regularized</em> parameter vector <span class="math inline">\(\hat{\theta}_{\text{Reg}}\)</span> to positions in the green diamond below.</p>
+<p>Applying this constraint limits what combinations of model parameters are valid. We can now only consider parameter combinations with a total absolute sum less than or equal to our number <span class="math inline">\(Q\)</span>. For our 2D example, the constraint <span class="math inline">\(\sum_{i=1}^p |\theta_i| \leq Q\)</span> can be rewritten as <span class="math inline">\(|\theta_1| + |\theta_2| \leq Q\)</span>. This means that we can only assign our <em>regularized</em> parameter vector <span class="math inline">\(\hat{\theta}_{\text{Reg}}\)</span> to positions in the green diamond below.</p>
 <center>
 <img src="images/diamondreg.png" alt="diamondreg" width="450">
 </center>
@@ -630,7 +636,7 @@ Note
 <p>We call <span class="math inline">\(\lambda\)</span> the <strong>regularization penalty hyperparameter</strong>; it needs to be determined <em>prior</em> to training the model, so we must find the best value via cross-validation.</p>
 <p>The process of finding the optimal <span class="math inline">\(\hat{\theta}\)</span> to minimize our new objective function is called <strong>L1 regularization</strong>. It is also sometimes known by the acronym “LASSO”, which stands for “Least Absolute Shrinkage and Selection Operator.”</p>
 <p>Unlike ordinary least squares, which can be solved via the closed-form solution <span class="math inline">\(\hat{\theta}_{OLS} = (\mathbb{X}^{\top}\mathbb{X})^{-1}\mathbb{X}^{\top}\mathbb{Y}\)</span>, <strong>there is no closed-form solution for the optimal parameter vector under L1 regularization</strong>. Instead, we use the <code>Lasso</code> model class of <code>sklearn</code>.</p>
-<div id="3da57d6b" class="cell" data-execution_count="4">
+<div id="1ab82d7b" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sklearn.linear_model <span class="im">as</span> lm</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># The alpha parameter represents our lambda term</span></span>
@@ -648,7 +654,7 @@ Note
 <section id="scaling-features-for-regularization" class="level3" data-number="16.2.3">
 <h3 data-number="16.2.3" class="anchored" data-anchor-id="scaling-features-for-regularization"><span class="header-section-number">16.2.3</span> Scaling Features for Regularization</h3>
 <p>The regularization procedure we just performed had one subtle issue. To see what it is, let’s take a look at the design matrix for our <code>lasso_model</code>.</p>
-<div id="6dcd99b0" class="cell" data-execution_count="5">
+<div id="eefe11a8" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>X_train.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -711,7 +717,7 @@ Note
 </div>
 <p>Our features – <code>hp</code>, <code>hp^2</code>, <code>hp^3</code>, and <code>hp^4</code> – are on drastically different numeric scales! The values contained in <code>hp^4</code> are orders of magnitude larger than those contained in <code>hp</code>. This can be a problem because the value of <code>hp^4</code> will naturally contribute more to each predicted <span class="math inline">\(\hat{y}\)</span> because it is so much greater than the values of the other features. For <code>hp</code> to have much of an impact at all on the prediction, it must be scaled by a large model parameter.</p>
 <p>By inspecting the fitted parameters of our model, we see that this is the case – the parameter for <code>hp</code> is much larger in magnitude than the parameter for <code>hp^4</code>.</p>
-<div id="89b1f3d7" class="cell" data-execution_count="6">
+<div id="a2fd9a37" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>pd.DataFrame({<span class="st">"Feature"</span>:X_train.columns, <span class="st">"Parameter"</span>:lasso_model.coef_})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
 <div>
@@ -775,7 +781,7 @@ Note
 <p><span class="math display">\[\hat\theta_{\text{ridge}} = (\mathbb{X}^{\top}\mathbb{X} + n\lambda I)^{-1}\mathbb{X}^{\top}\mathbb{Y}\]</span></p>
 <p>This solution exists <strong>even if <span class="math inline">\(\mathbb{X}\)</span> is not full column rank</strong>. This is a major reason why L2 regularization is often used – it can produce a solution even when there is collinearity in the features. We will discuss the concept of collinearity in a future lecture, but we will not derive this result in Data 100, as it involves a fair bit of matrix calculus.</p>
 <p>In <code>sklearn</code>, we perform L2 regularization using the <code>Ridge</code> class. It runs gradient descent to minimize the L2 objective function. Notice that we scale the data before regularizing.</p>
-<div id="51eff1c0" class="cell" data-execution_count="7">
+<div id="60a4b4c9" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>ridge_model <span class="op">=</span> lm.Ridge(alpha<span class="op">=</span><span class="dv">1</span>) <span class="co"># alpha represents the hyperparameter lambda</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>ridge_model.fit(X_train, Y_train)</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>

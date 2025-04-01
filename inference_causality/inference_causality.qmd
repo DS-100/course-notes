@@ -156,6 +156,7 @@ Suppose we collected a sample of 20 cars from a population. For the purposes of 
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 import numpy as np
 import pandas as pd
 import plotly.express as px
@@ -175,6 +176,7 @@ Fitting a linear model, we get an estimate of the slope:
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 model = lm.LinearRegression().fit(mpg_sample[['weight']], mpg_sample['mpg'])
 model.coef_[0] 
 ```
@@ -184,6 +186,7 @@ We can use bootstrapping to estimate the distribution of that coefficient. Here 
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 def estimator(sample):
     model = lm.LinearRegression().fit(sample[['weight']], sample['mpg'])
     return model.coef_[0]
@@ -193,6 +196,7 @@ The code below uses `df.sample` [(documentation)](https://pandas.pydata.org/pand
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 def bootstrap(sample, statistic, num_repetitions):
     """
     Returns the statistic computed on a num_repetitions  
@@ -213,6 +217,7 @@ After constructing many bootstrap slope estimates (in this case, 10,000), we can
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 #Construct 10,000 bootstrap slope estimates
 bs_thetas = bootstrap(mpg_sample, estimator, 10000)
 
@@ -226,6 +231,7 @@ We can now compute the confidence interval for the slopes using the percentiles 
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 def bootstrap_ci(bootstrap_samples, confidence_level=95):
     """
     Returns the confidence interval for the bootstrap samples.
@@ -241,6 +247,7 @@ In practice, you don't have access to the population. In this example, we took a
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 mpg_pop = sns.load_dataset('mpg')
 theta_est = [estimator(mpg_pop.sample(20)) for i in range(10000)]
 print(bootstrap_ci(theta_est))
@@ -250,6 +257,7 @@ Visualizing the two distributions:
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 thetas = pd.DataFrame({"bs_thetas": bs_thetas, "thetas": theta_est})
 px.histogram(thetas.melt(), x='value', facet_row='variable', 
              title='Distribution of the Slope', width=800)
@@ -348,6 +356,7 @@ Note that `Egg Length` and `Egg Breadth` (widest diameter) are measured in milli
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 import pandas as pd
 eggs = pd.read_csv("data/snowy_plover.csv")
 eggs.head(5)
@@ -370,6 +379,7 @@ Next, we use our data to fit a model $\hat{Y} = f_{\hat{\theta}}(x)$ that approx
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 from sklearn.linear_model import LinearRegression
 import numpy as np
 
@@ -401,6 +411,7 @@ We draw a bootstrap sample, use this sample to fit a model, and record the resul
 
 ```{python}
 #| code-fold: false
+#| vscode: {languageId: python}
 # Set a random seed so you generate the same random sample as staff
 # In the "real world", we wouldn't do this
 import numpy as np
@@ -440,6 +451,7 @@ Our bootstrapped 95% confidence interval for $\theta_1$ is $[-0.259, 1.103]$. Im
 We can repeat this process to construct 95% confidence intervals for the other parameters of the model.
 
 ```{python}
+#| vscode: {languageId: python}
 np.random.seed(1337)
 
 theta_0_estimates = []
@@ -480,6 +492,7 @@ How can we explain this result? Think back to how we first interpreted the param
 To support this conclusion, we can visualize the relationships between our feature variables. Notice the strong positive association between the features.
 
 ```{python}
+#| vscode: {languageId: python}
 import seaborn as sns
 sns.pairplot(eggs[["egg_length", "egg_breadth", "egg_weight", 'bird_weight']]);
 ```
@@ -501,6 +514,7 @@ Let us now consider a more interpretable model: we instead assume a true relatio
 $$f_\theta(x) = \theta_0 + \theta_1 \text{egg\_weight} + \epsilon$$
 
 ```{python}
+#| vscode: {languageId: python}
 from sklearn.linear_model import LinearRegression
 X_int = eggs[["egg_weight"]]
 Y_int = eggs["bird_weight"]
@@ -518,6 +532,7 @@ pd.DataFrame({"theta_hat":[model_int.intercept_, thetas_int[0]]}, index=["theta_
 
 ```{python}
 #| code-fold: true
+#| vscode: {languageId: python}
 import matplotlib.pyplot as plt
 
 # Set a random seed so you generate the same random sample as staff
@@ -552,6 +567,7 @@ plt.title(r"Bootstrapped estimates $\hat{\theta}_1$ Under the Interpretable Mode
 Notice how the interpretable model performs almost as well as our other model:
 
 ```{python}
+#| vscode: {languageId: python}
 from sklearn.metrics import mean_squared_error
 
 rmse = mean_squared_error(Y, model.predict(X))
@@ -563,6 +579,7 @@ print(f'RMSE of Interpretable Model: {rmse_int}')
 Yet, the confidence interval for the true parameter $\theta_{1}$ does not contain zero.
 
 ```{python}
+#| vscode: {languageId: python}
 lower_int = np.percentile(estimates_int, 2.5)
 upper_int = np.percentile(estimates_int, 97.5)
 
