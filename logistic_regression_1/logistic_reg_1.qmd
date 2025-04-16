@@ -13,68 +13,6 @@ format:
 jupyter: python3
 ---
 
-::: {.callout-note collapse="false"}
-## Learning Outcomes
-* Understand the difference between regression and classification
-* Derive the logistic regression model for classifying data
-* Quantify the error of our logistic regression model with cross-entropy loss
-:::
-
-
-Up until this point in the class , we've focused on **regression** tasks - that is, predicting an *unbounded numerical quantity* from a given dataset. We discussed optimization, feature engineering, and regularization all in the context of performing regression to predict some quantity. 
-
-Now that we have this deep understanding of the modeling process, let's expand our knowledge of possible modeling tasks. 
-
-
-## Classification
-
-In the next two lectures, we'll tackle the task of **classification**. A classification problem aims to classify data into  *categories*. Unlike in regression, where we predicted a numeric output, classification involves predicting some **categorical variable**, or **response**, $y$. Examples of classification tasks include:
-
-* Predicting which team won from its turnover percentage 
-* Predicting the day of the week of a meal from the total restaurant bill 
-* Predicting the model of car from its horsepower
-
-There are a couple of different types of classification:
-
-* **Binary classification**: classify data into two classes, and responses $y$ are either 0 or 1
-* **Multiclass classification**: classify data into multiple classes (e.g., image labeling, next word in a sentence, etc.)
-
-We can further combine multiple related classfication predictions (e.g., translation, voice recognition, etc.) to tackle complex problems through structured prediction tasks.
-
-In Data 100, we will mostly deal with **binary classification**, where we are attempting to classify data into one of two classes. 
-
-### Modeling Process
-To build a classification model, we need to modify our modeling workflow slightly. Recall that in regression we:
-
-1. Created a design matrix of numeric features
-2. Defined our model as a linear combination of these numeric features
-3. Used the model to output numeric predictions
-
-In classification, however, we no longer want to output numeric predictions; instead, we want to predict the class to which a datapoint belongs. This means that we need to update our workflow. To build a classification model, we will:
-
-1. Create a design matrix of numeric features.
-2. Define our model as a linear combination of these numeric features, transformed by a non-linear **sigmoid function**. This outputs a numeric quantity.
-3. Apply a **decision rule** to interpret the outputted quantity and decide a classification.
-4. Output a predicted class.
-
-There are two key differences: as we'll soon see, we need to incorporate a non-linear transformation to capture the non-linear relationships hidden in our data. We do so by applying the sigmoid function to a linear combination of the features. Secondly, we must apply a decision rule to convert the numeric quantities computed by our model into an actual class prediction. This can be as simple as saying that any datapoint with a feature greater than some number $x$ belongs to Class 1.
-
-**Regression:**
-
-<center><img src="images/reg.png" alt='reg' width='750'></center>
-
-**Classification:**
-
-<center><img src="images/class.png" alt='class' width='750'></center>
-
-This was a very high-level overview. Let's walk through the process in detail to clarify what we mean.
-
-## Deriving the Logistic Regression Model
-
-Throughout this lecture, we will work with the `games` dataset, which contains information about games played in the NBA basketball league. Our goal will be to use a basketball team's `"GOAL_DIFF"` to predict whether or not a given team won their game (`"WON"`). If a team wins their game, we'll say they belong to Class 1. If they lose, they belong to Class 0.
-
-For those who are curious, `"GOAL_DIFF"` represents the difference in successful field goal percentages between the two competing teams. 
-
 ```{python}
 #| code-fold: true
 import warnings
@@ -158,76 +96,60 @@ $$ p = P(Y = 1 | \text{ x} )$$
 
 In logistic regression, we have a new modeling goal. We want to model the **probability that a particular datapoint belongs to Class 1** by approximating the S-shaped curve we plotted above. However, we've only learned about linear modeling techniques like Linear Regression and OLS.
 
-### Handling Non-Linear Output
 
-Fortunately for us, we're already well-versed with a technique to model non-linear relationships – we can apply non-linear transformations like log or exponents to make a non-linear relationship more linear. Recall the steps we've applied previously:
+### The Sigmoid Function
 
-1. Apply **transformations to linearize** the relationship.
-2. **Fit a linear model** to the transformed variables
-3. "Undo" our transformations to identify the **underlying relationship** between the original variables
+Let's start by identifying an S-shaped function that maps ($-\infty$, $\infty$) inputs to (0,1) outputs—the **sigmoid ($\sigma$) function**. It is also known as the logistic function or the inverse logit function.
 
-In past examples, we used the bulge diagram to help us decide what transformations may be useful. The S-shaped curve we saw above, however, looks nothing like any relationship we've seen in the past. We'll need to think carefully about what transformations will linearize this curve.
+$$\sigma(x) = \frac{1}{1+e^{-x}}$$
 
-#### Step 1: Linearize the Relationship
-Let's consider our eventual goal: determining if we should predict a Class of 0 or 1 for each datapoint. Rephrased, we want to decide if it seems more "likely" that the datapoint belongs to Class 0 or to Class 1. One way of deciding this is to see which class has the higher predicted probability for a given datapoint. The **odds** is defined as the probability of a datapoint Y belonging to Class 1 divided by the probability of it belonging to Class 0. 
+<center><img src="images/sigmoid.png" alt='log_reg' width='400'></center>
 
-$$\text{odds} = \frac{P(Y=1|x)}{P(Y=0|x)} = \frac{p}{1-p}$$
+As it turns out, the logistic regression model fits a sigmoid function to the data. We can also shift and scale the sigmoid function just as if we were transforming any other function to fit our data:
+$$\sigma(\theta_0+\theta x) = \frac{1}{1+e^{-(\theta_0+\theta_1x)}}$$
 
-If we plot the odds for each input `"GOAL_DIFF"` ($x$), we see something that looks more promising.
+Note that our input to the sigmoid function here looks exactly like simple linear regression! And just like in ordinary least squares, we're not limited to one input:
+$$P(Y=1 \mid x) = \sigma(\theta_0 + \theta_1 x_1 + \theta_2 x_2 ) = \frac{1}{1+e^{-(\theta_0 + \theta_1 x_1 + \theta_2 x_2)}}$$
 
 ```{python}
 #| code-fold: true
-p = win_rates_by_bin
-odds = p/(1-p) 
+import plotly.graph_objects as go
 
-plt.plot(odds.index, odds)
-plt.xlabel("GOAL_DIFF")
-plt.ylabel(r"Odds $= \frac{p}{1-p}$");
+# Plot a 3D sigmoid surface
+x1 = np.linspace(-10, 10, 100)
+x2 = np.linspace(-10, 10, 100)
+X1, X2 = np.meshgrid(x1, x2)
+y_values = 1/(1 + np.exp(-(X1 + X2)))
+
+# Create a 3D surface plot for the sigmoid function
+fig = go.Figure(data=[go.Surface(z=y_values, x=X1[0], y=X2[:, 0])])
+
+# Update layout for better visualization
+fig.update_layout(
+  title="Sigmoid with two inputs",
+  scene=dict(
+    xaxis_title="X1",
+    yaxis_title="X2",
+    zaxis_title="\u03C3(X1, X2)"
+  ),
+  width=800,
+  height=600
+)
+
+# Reduce tick label size
+fig.update_layout(
+    scene=dict(
+        xaxis=dict(tickfont=dict(size=14)),
+        yaxis=dict(tickfont=dict(size=14)),
+        zaxis=dict(tickfont=dict(size=14))
+    )
+)
+
+fig.show()
 ```
 
-It turns out that the relationship between our input `"GOAL_DIFF"` and the odds is roughly exponential! Let's linearize the exponential by taking the logarithm (as suggested by the [Tukey-Mosteller Bulge Diagram](https://ds100.org/course-notes/visualization_2/visualization_2.html#tukey-mosteller-bulge-diagram)). As a reminder, you should assume that any logarithm in Data 100 is the base $e$ natural logarithm unless told otherwise.
 
-```{python}
-#| code-fold: true
-import numpy as np
-log_odds = np.log(odds)
-plt.plot(odds.index, log_odds, c="tab:green")
-plt.xlabel("GOAL_DIFF")
-plt.ylabel(r"Log-Odds $= \log{\frac{p}{1-p}}$");
-```
-
-#### Step 2: Find a Linear Combination of the Features
-
-We see something promising in the graph above – the relationship between the log-odds and our input feature is approximately linear. We can represent this relationship as a linear combination of the features. In other words:
-
-\begin{align}
-z &= x^{\top} \theta = \theta_0 + \theta_1 x_1 + ... + \theta_p x_p\\
-\end{align}
-
-Here, we use $x^{\top}$ to represent an observation in our dataset, stored as a row vector. You can imagine it as a single row in our design matrix. $x^{\top} \theta$ indicates a linear combination of the features for this observation (just as we used in multiple linear regression). Remember that our goal is to predict the probability of Class 1. This linear combination z isn’t our final prediction! Recall that z was the log-odds, so we can also write the following below.
-
-$$z = \text{log(odds)} = \text{log} \left(\frac{p}{1-p}\right)$$
-
-
-#### Step 3: Transforming Back to Original Variables
-
-We're in good shape! We have now derived the following relationship by setting the two values in Step 2 equal to each other:
-
-$$\log{(\frac{p}{1-p})} = x^{\top} \theta$$
-
-Remember that our goal is to predict the probability of a datapoint belonging to Class 1, $p$. Let's rearrange this relationship to uncover the original relationship between $p$ and our input data, $x^{\top}$.
-
-\begin{align}
-\log{(\frac{p}{1-p})} &= x^T \theta\\
-\frac{p}{1-p} &= e^{x^T \theta}\\
-p &= (1-p)e^{x^T \theta}\\
-p &= e^{x^T \theta}- p e^{x^T \theta}\\
-p(1 + e^{x^T \theta}) &= e^{x^T \theta} \\
-p &= \frac{e^{x^T \theta}}{1+e^{x^T \theta}}\\
-p &= \frac{1}{1+e^{-x^T \theta}}\\
-\end{align}
-
-Phew, that was a lot of algebra. What we've uncovered is the **logistic regression model** to predict the probability of a datapoint $x^{\top}$ belonging to Class 1. If we plot this relationship for our data, we see the S-shaped curve from earlier!
+Below, we fit a logistic regression model to our data. You do not need to worry about what's going on "under the hood" for now. Just notice how similar the logistic regression model is to our graph of averages.
 
 ```{python}
 #| code-fold: true
@@ -245,42 +167,20 @@ plt.legend(loc="upper left")
 plt.gca().invert_yaxis();
 ```
 
-The S-shaped curve is formally known as the **sigmoid function** and is typically denoted by $\sigma$. 
+### Formalizing the Logistic Regression Model
+Let's now generalize our model to multiple inputs rather than just one or two inputs. The probability of a datapoint belonging to Class 1 is:
+$$P(Y=1|x) = \frac{1}{1+e^{-x^T \theta}}  = \frac{1}{1+e^{-(\theta_0 + \theta_1 x_1 + \theta_2 x_2 + \ldots + \theta_p x_p)}}$$
 
-$$\sigma(t) = \frac{1}{1+e^{-t}}$$
-
-::: {.callout-tip}
-## Properties of the Sigmoid
-* Reflection/Symmetry: $$1-\sigma(t) = \frac{e^{-t}}{1+e^{-t}}=\sigma(-t)$$
-* Inverse: $$t=\sigma^{-1}(p)=\log{(\frac{p}{1-p})}$$
-* Derivative: $$\frac{d}{dz} \sigma(t) = \sigma(t) (1-\sigma(t))=\sigma(t)\sigma(-t)$$
-* Domain: $-\infty < t < \infty$
-* Range: $0 < \sigma(t) < 1$
-:::
-
-In the context of our modeling process, the sigmoid is considered an **activation function**. It takes in a linear combination of the features and applies a non-linear transformation.
-
-## The Logistic Regression Model
 To predict a probability using the logistic regression model, we:
 
 1. Compute a linear combination of the features, $x^{\top}\theta$
 2. Apply the sigmoid activation function, $\sigma(x^{\top} \theta)$.
 
-Our predicted probabilities are of the form $P(Y=1|x) = p = \frac{1}{1+e^{-x^T \theta}}  = \frac{1}{1+e^{-(\theta_0 + \theta_1 x_1 + \theta_2 x_2 + \ldots + \theta_p x_p)}}$
-
-An important note: despite its name, logistic regression is used for *classification* tasks, not regression tasks. In Data 100, we always apply logistic regression with the goal of classifying data.
-
-
-Let's summarize our logistic regression modeling workflow:
-
-<center><img src="images/log_reg.png" alt='log_reg' width='750'></center>
-
-Our main takeaways from this section are:
+Our main takeaway from this section is that we can:
 
 * Model the **probability $P(Y = 1 | x)$** using a **sigmoid transformation** of a **linear model**
-* The **log-odds** is a **linear combination of $x$ and $\theta$**
 
-Putting this together, we know that the estimated probability that response is 1 given the features $x$ is equal to the logistic function $\sigma()$ at the value $x^{\top}\theta$:
+Indeed, the estimated probability that the response is 1 given the features $x$, is equal to the logistic function $\sigma()$ at the value $x^{\top}\theta$:
 
 \begin{align}
 \hat{P}_{\theta}(Y = 1 | x) = \frac{1}{1 + e^{-x^{\top}\theta}}
@@ -306,7 +206,7 @@ Suppose we want to predict the probability that a team wins a game, given `"GOAL
 \hat{P}_{\hat{\theta}}(Y = 1 | x) = \sigma(x^{\top}\hat{\theta}) = \sigma(0.1 \cdot 15 + (-0.5) \cdot 1) = \sigma(1) = \frac{1}{1+e^{-1}} \approx 0.7311
 \end{align}
 
-We see that the response is more likely to be 1 than 0, indicating that a reasonable prediction is $\hat{y} = 1$. We'll dive deeper into this in the next lecture.
+We see that the response is more likely to be 1 than 0, indicating that a reasonable prediction is $\hat{y} = 1$. We'll dive deeper into this later.
 
 :::
 
@@ -326,177 +226,55 @@ Properties:
 
 :::
 
+With our logistic regression model formalized, we have 2 natural questions about the parameters that follow:
 
-## Cross-Entropy Loss
+1. How do we **interpret** the $\theta$'s?
+2. How do we **estimate** the $\theta$'s?
 
-To quantify the error of our logistic regression model, we'll need to define a new loss function. 
+We'll dive deep into answering the first question in the next section, and answer the second question in the next lecture.
 
-### Why Not MSE?
-You may wonder: why not use our familiar mean squared error? It turns out that the MSE is not well suited for logistic regression. To see why, let's consider a simple, artificially generated `toy` dataset with just one feature (this will be easier to work with than the more complicated `games` data).
+## Log-Odds and Linearity
 
-```{python}
-#| code-fold: true
-toy_df = pd.DataFrame({
-        "x": [-4, -2, -0.5, 1, 3, 5],
-        "y": [0, 0, 1, 0, 1, 1]})
-toy_df.head()
-```
+### Interpreting Logistic Regression Coefficients
 
-We'll construct a basic logistic regression model with only one feature and no intercept term. Our predicted probabilities take the form:
+Let's focus on the simple logistic regression model with just one input: $$P(Y=1|x) = \frac{1}{1+e^{-(\theta_0+\theta_1x)}}$$
 
-$$p=\hat{P}_\theta(Y=1|x)= \sigma({x^{T}\theta}) = \frac{1}{1+e^{-\theta_1 x}}$$
+Recall that in simple linear regression ($y = \theta_0 + \theta_1 x$), we interpret $\theta_1$ as the change in $y$ for a one-unit increase in $x$.
+However, in logistic regression, the change in the predicted outcome is not constant for every one-unit increase in $x$ since the sigmoid function is nonlinear (not a straight line). To make interpretation a little easier, we can isolate the linear combination $\theta_0 + \theta_1$ using some algebra:
+$$\begin{align*}
+& P(Y=1 \mid x) = \frac{1}{1+e^{-(\theta_0 + \theta_1 x)}} \\
+& 1+e^{-(\theta_0 + \theta_1 x)} = \frac{1}{P(Y=1 \mid x)} \\
+& e^{-(\theta_0 + \theta_1 x)} = \frac{1}{P(Y=1 \mid x)} - 1 \\
+& e^{-(\theta_0 + \theta_1 x)} = \frac{1 - P(Y=1 \mid x)}{P(Y=1 \mid x)} \\
+& e^{\theta_0 + \theta_1 x} = \frac{P(Y=1 \mid x)}{1 - P(Y=1 \mid x)} \\
+& \theta_0 + \theta_1 x = \log \left( \frac{P(Y=1 \mid x)}{1 - P(Y=1 \mid x)} \right) 
+\end{align*}$$
 
-In the cell below, we plot the MSE for our model on the data.
+We have just derived that as $x$ increases by one, $\log \left( \frac{P(Y=1 \mid x)}{1 - P(Y=1 \mid x)} \right)$ increases by $\theta_1$. Does this really have a meaningful interpretation?
 
-```{python}
-#| code-fold: true
-def sigmoid(z):
-    return 1/(1+np.e**(-z))
-    
-def mse_on_toy_data(theta):
-    p_hat = sigmoid(toy_df['x'] * theta)
-    return np.mean((toy_df['y'] - p_hat)**2)
+To help with our interpretation, consider the expression: "Cal has 10 to 1 odds of winning the game." These $10:1$ odds means that $P(\text{Cal wins}) = 10 \cdot P(\text{Cal loses})$. The **odds** is defined as the probability of a datapoint Y belonging to Class 1 divided by the probability of it belonging to Class 0. 
 
-thetas = np.linspace(-15, 5, 100)
-plt.plot(thetas, [mse_on_toy_data(theta) for theta in thetas])
-plt.title("MSE on toy classification data")
-plt.xlabel(r'$\theta_1$')
-plt.ylabel('MSE');
-```
+$$\text{odds} = \frac{P(Y=1|x)}{P(Y=0|x)} = \frac{P(Y=1 \mid x)}{1 - P(Y=1 \mid x)} $$
 
-This looks nothing like the parabola we found when plotting the MSE of a linear regression model! In particular, we can identify two flaws with using the MSE for logistic regression:
+Great! Now we have a much more meaningful interpretation of the logistic regression coefficients as **log-odds**:
 
-1. The MSE loss surface is *non-convex*. There is both a global minimum and a (barely perceptible) local minimum in the loss surface above. This means that there is the risk of gradient descent converging on the local minimum of the loss surface, missing the true optimum parameter $\theta_1$.
-<center><img src="images/global_local_min.png" alt='reg' width='400'></center>
+- For every one-unit increase in $x$, $\text{log}(\text{Odds}(Y=1|x))$ increases by $\theta_1$.
 
-2. Squared loss is *bounded* for a classification task. MSE never gets very large, because both response and predicted probability are bounded by 1. Recall that each true $y$ has a value of either 0 or 1. This means that even if our model makes the worst possible prediction (e.g. predicting $p=0$ for $y=1$), the squared loss for an observation will be no greater than 1: $$(y-p)^2=(1-0)^2=1$$ The MSE does not strongly penalize poor predictions.
-<center><img src="images/squared_loss.png" alt='reg' width='400'></center>
+### Linearity
 
-
-### Motivating Cross-Entropy Loss
-Suffice to say, we don't want to use the MSE when working with logistic regression. Instead, we'll consider what kind of behavior we would *like* to see in a loss function.
-
-Let $y$ be the binary label (it can either be 0 or 1), and $p$ be the model's predicted probability of the label $y$ being 1. 
-
-* When the true $y$ is 1, we should incur *low loss* when the model predicts *large* $p$
-* When the true $y$ is 0, we should incur *high loss* when the model predicts *large* $p$
-
-In other words, our loss function should behave differently depending on the value of the true class, $y$. 
-
-The **cross-entropy loss** incorporates this changing behavior. We will use it throughout our work on logistic regression. Below, we write out the cross-entropy loss for a *single* datapoint (no averages just yet). Again let $y$ be a binary label {0, 1}, and $p$ be the probability of the label being 1.
-
-$$\text{Cross-Entropy Loss} = \begin{cases}
-  -\log{(p)}  & \text{if } y=1 \\
-  -\log{(1-p)} & \text{if } y=0
-\end{cases}$$
-
-Why does this (seemingly convoluted) loss function "work"? Let's break it down.
-
-| When $y=1$ | When $y=0$ | 
-| -- | -- | 
-| <img src="images/y=1.png" alt='cross-entropy loss when Y=1' width='300'> | <img src="images/y=0.png" alt='cross-entropy loss when Y=0' width='300'> |
-| As $p \rightarrow 0$, loss approches $\infty$ | As $p \rightarrow 0$, loss approches 0 | 
-|  As $p \rightarrow 1$, loss approaches 0 | As $p \rightarrow 1$, loss approaches $\infty$ | 
-
-<!-- :::: {.columns}
-
-::: {.column width="35%"}
-When $y=1$
-<center><img src="images/y=1.png" alt='cross-entropy loss when Y=1' width='300'></center>
-
-* As $p \rightarrow 0$, loss approches $\infty$
-* As $p \rightarrow 1$, loss approaches 0
-  
-:::
-
-::: {.column width="20%"}
-:::
-
-::: {.column width="35%"}
-When $y=0$
-<center><img src="images/y=0.png" alt='cross-entropy loss when Y=0' width='300'></center>
-
-* As $p \rightarrow 0$, loss approches 0
-* As $p \rightarrow 1$, loss approaches $\infty$
-  
-:::
-
-:::: -->
-
-All good – we are seeing the behavior we want for our logistic regression model.
-
-The piecewise function we outlined above is difficult to optimize: we don't want to constantly "check" which form of the loss function we should be using at each step of choosing the optimal model parameters. We can re-express cross-entropy loss in a more convenient way:
-
-$$\text{Cross-Entropy Loss} = -\left(y\log{(p)}+(1-y)\log{(1-p)}\right)$$
-
-By setting $y$ to 0 or 1, we see that this new form of cross-entropy loss gives us the same behavior as the original formulation. Another way to think about this is that in either scenario (y being equal to 0 or 1), only one of the cross-entropy loss terms is activated, which gives us a convenient way to combine the two independent loss functions.
-
-:::: {.columns}
-
-::: {.column width="35%"}
-When $y=1$:
-
-\begin{align}
-\text{CE} &= -\left((1)\log{(p)}+(1-1)\log{(1-p)}\right)\\
-&= -\log{(p)}
-\end{align}
-:::
-
-::: {.column width="20%"}
-:::
-
-::: {.column width="35%"}
-When $y=0$:
-
-\begin{align}
-\text{CE} &= -\left((0)\log{(p)}+(1-0)\log{(1-p)}\right)\\
-&= -\log{(1-p)}
-\end{align}
-:::
-
-::::
-
-The empirical risk of the logistic regression model is then the mean cross-entropy loss across all datapoints in the dataset. When fitting the model, we want to determine the model parameter $\theta$ that leads to the lowest mean cross-entropy loss possible. For logistic regression, the empirical risk over a sample of size n is:
-
-$$
-\begin{align}
-R(\theta) &= - \frac{1}{n} \sum_{i=1}^n \left(y_i\log{(p_i)}+(1-y_i)\log{(1-p_i)}\right) \\
-&= - \frac{1}{n} \sum_{i=1}^n \left(y_i\log{\sigma(\mathbb{X}_i^{\top}\theta)}+(1-y_i)\log{(1-\sigma(\mathbb{X}_i^{\top}\theta))}\right)
-\end{align}
-$$
-
-The optimization problem is therefore to find the estimate $\hat{\theta}$ that minimizes $R(\theta)$:
-
-$$
-\hat{\theta} = \underset{\theta}{\arg\min} - \frac{1}{n} \sum_{i=1}^n \left(y_i\log{(\sigma(\mathbb{X}_i^{\top}\theta))}+(1-y_i)\log{(1-\sigma(\mathbb{X}_i^{\top}\theta))}\right) 
-$$
-
-Plotting the cross-entropy loss surface for our `toy` dataset gives us a more encouraging result – our loss function is now convex. This means we can optimize it using gradient descent. Computing the gradient of the logistic model is fairly challenging, so we'll let `sklearn` take care of this for us. You won't need to compute the gradient of the logistic model in Data 100.
-
-```{python}
-#| code-fold: true
-def cross_entropy(y, p_hat):
-    return - y * np.log(p_hat) - (1 - y) * np.log(1 - p_hat)
-
-def mean_cross_entropy_on_toy_data(theta):
-    p_hat = sigmoid(toy_df['x'] * theta)
-    return np.mean(cross_entropy(toy_df['y'], p_hat))
-
-plt.plot(thetas, [mean_cross_entropy_on_toy_data(theta) for theta in thetas], color = 'green')
-plt.ylabel(r'Mean Cross-Entropy Loss($\theta$)')
-plt.xlabel(r'$\theta$');
-```
+To summarize, probability is a **nonlinear** function of the features because $P(Y=1|x) =\sigma(x^{\top}\theta)$ applies a nonlinear sigmoid transformation to $x^{\top}\theta$. However, we have just found that the log-odds are a **linear** function with respect to the $\theta$'s. Namely, $\text{log}(\text{Odds}(Y=1|x)) = x^{\top}\theta$. Indeed, this means there is linearity in the logistic regression model! This linearity in the log-odds leads to a linear decision boundary between Class 0 and Class 1, which we will explore more in the next section.
 
 ## Decision Boundaries
 In logistic regression, we model the *probability* that a datapoint belongs to Class 1. 
 
 <center><img src="images/log_reg_summary.png" alt='log_reg_summary' width='800'></center>
 <br>
-In this lecture, we developed the logistic regression model to predict that probability, but we never actually made any *classifications* for whether our prediction $y$ belongs in Class 0 or Class 1. 
+In this lecture, we developed the logistic regression model to predict that probability, but the model itself does not classify whether a prediction is Class 0 or Class 1.
+
 
 $$ p = \hat{P}_\theta(Y=1 | x) = \frac{1}{1 + e^{-x^{\top}\theta}}$$
 
-A **decision rule** tells us how to interpret the output of the model to make a decision on how to classify a datapoint. We commonly make decision rules by specifying a **threshold**, $T$. If the predicted probability is greater than or equal to $T$, predict Class 1. Otherwise, predict Class 0. 
+A **decision rule** tells us how to convert model outputs into classifications. We commonly make decision rules by specifying a **threshold**, $T$. If the predicted probability is greater than or equal to $T$, predict Class 1. Otherwise, predict Class 0. 
 
 $$\hat y = \text{classify}(x) = \begin{cases}
         1, & p \ge T\\
@@ -505,16 +283,11 @@ $$\hat y = \text{classify}(x) = \begin{cases}
     
 The threshold is often set to $T = 0.5$, but *not always*. We'll discuss why we might want to use other thresholds  $T \neq 0.5$ later in this lecture and the next.
 
-Using our decision rule, we can define a **decision boundary** as the “line” that splits the data into classes based on its features. For logistic regression, since we are working in $p$ dimensions, the decision boundary is a **hyperplane** -- a linear combination of the features in $p$-dimensions -- and we can recover it from the final logistic regression model. For example, if we have a model with 2 features (2D), we have $\theta = [\theta_0, \theta_1, \theta_2]$ including the intercept term, and we can solve for the decision boundary like so: 
+Using our decision rule, we can define a **decision boundary** as the “line” that splits the data into classes based on its features. For logistic regression, since we are working in $p$ dimensions, the decision boundary is a **hyperplane**—a linear combination of the features in $p$-dimensions—and we can recover it from the log-odds. 
 
-$$
-\begin{align}
-T &= \frac{1}{1 + e^{-(\theta_0 + \theta_1 * \text{feature1} +  \theta_2 * \text{feature2})}} \\
-1 + e^{-(\theta_0 + \theta_1 \cdot \text{feature1} +  \theta_2  \cdot  \text{feature2})} &= \frac{1}{T} \\
-e^{-(\theta_0 + \theta_1  \cdot  \text{feature1} +  \theta_2  \cdot  \text{feature2})} &= \frac{1}{T} - 1 \\
-\theta_0 + \theta_1  \cdot  \text{feature1} +  \theta_2  \cdot  \text{feature2} &= -\log(\frac{1}{T} - 1)
-\end{align} 
-$$
+For instance, suppose we decide to classify all new data points with $P(Y=1|x) \geq 0.5$ as Class 1, and all points with $P(Y=1|x) < 0.5$ as Class 0. In other words, we choose 0.5 as our chosen probability threshold. We can calculate our log-odds as follows:
+$$\text{log}(\text{Odds}(Y=1|x))=\log \left( \frac{P(Y=1 \mid x)}{1 - P(Y=1 \mid x)} \right) = \log\left(\frac{0.5}{1 - 0.5}\right) = \log(1) = 0$$
+This is the same as labeling all points with $\text{log}(\text{Odds}(Y=1|x)) \geq 0$  as Class 1, and all points with $\text{log}(\text{Odds}(Y=1|x)) < 0$ as Class 0. Since $\text{log}(\text{Odds}(Y=1|x)) = x^{\top}\theta$, we have just found that $$\theta_0 + \theta_1 x_1 + \theta_2 x_2 + \ldots + \theta_p x_p = 0$$ is our **linear decision boundary** for classification given a threshold of 0.5.
 
 For a model with 2 features, the decision boundary is a line in terms of its features. To make it easier to visualize, we've included an example of a 1-dimensional and a 2-dimensional decision boundary below. Notice how the decision boundary predicted by our logistic regression model perfectly separates the points into two classes. Here the color is the *predicted* class, rather than the true class.
 
