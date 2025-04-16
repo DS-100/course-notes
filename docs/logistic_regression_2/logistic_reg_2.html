@@ -68,6 +68,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -260,8 +289,43 @@ ul.task-list li input[type="checkbox"] {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#review-decision-boundaries" id="toc-review-decision-boundaries" class="nav-link active" data-scroll-target="#review-decision-boundaries"><span class="header-section-number">23.1</span> Review : Decision Boundaries</a></li>
+  <li><a href="#linear-separability-and-regularization" id="toc-linear-separability-and-regularization" class="nav-link" data-scroll-target="#linear-separability-and-regularization"><span class="header-section-number">23.2</span> Linear Separability and Regularization</a>
+  <ul>
+  <li><a href="#regularized-logistic-regression" id="toc-regularized-logistic-regression" class="nav-link" data-scroll-target="#regularized-logistic-regression"><span class="header-section-number">23.2.1</span> Regularized Logistic Regression</a></li>
+  </ul></li>
+  <li><a href="#performance-metrics" id="toc-performance-metrics" class="nav-link" data-scroll-target="#performance-metrics"><span class="header-section-number">23.3</span> Performance Metrics</a>
+  <ul>
+  <li><a href="#types-of-classification" id="toc-types-of-classification" class="nav-link" data-scroll-target="#types-of-classification"><span class="header-section-number">23.3.1</span> Types of Classification</a></li>
+  <li><a href="#accuracy-precision-and-recall" id="toc-accuracy-precision-and-recall" class="nav-link" data-scroll-target="#accuracy-precision-and-recall"><span class="header-section-number">23.3.2</span> Accuracy, Precision, and Recall</a></li>
+  <li><a href="#example-calculation" id="toc-example-calculation" class="nav-link" data-scroll-target="#example-calculation"><span class="header-section-number">23.3.3</span> Example Calculation</a>
+  <ul>
+  <li><a href="#model-1" id="toc-model-1" class="nav-link" data-scroll-target="#model-1"><span class="header-section-number">23.3.3.1</span> Model 1</a></li>
+  <li><a href="#model-2" id="toc-model-2" class="nav-link" data-scroll-target="#model-2"><span class="header-section-number">23.3.3.2</span> Model 2</a></li>
+  </ul></li>
+  <li><a href="#precision-vs.-recall" id="toc-precision-vs.-recall" class="nav-link" data-scroll-target="#precision-vs.-recall"><span class="header-section-number">23.3.4</span> Precision vs.&nbsp;Recall</a></li>
+  <li><a href="#three-more-metrics" id="toc-three-more-metrics" class="nav-link" data-scroll-target="#three-more-metrics"><span class="header-section-number">23.3.5</span> Three More Metrics</a></li>
+  </ul></li>
+  <li><a href="#adjusting-the-classification-threshold" id="toc-adjusting-the-classification-threshold" class="nav-link" data-scroll-target="#adjusting-the-classification-threshold"><span class="header-section-number">23.4</span> Adjusting the Classification Threshold</a>
+  <ul>
+  <li><a href="#precision-recall-curves" id="toc-precision-recall-curves" class="nav-link" data-scroll-target="#precision-recall-curves"><span class="header-section-number">23.4.1</span> Precision-Recall Curves</a></li>
+  <li><a href="#f1-score" id="toc-f1-score" class="nav-link" data-scroll-target="#f1-score"><span class="header-section-number">23.4.2</span> F1 Score</a></li>
+  <li><a href="#the-roc-curve" id="toc-the-roc-curve" class="nav-link" data-scroll-target="#the-roc-curve"><span class="header-section-number">23.4.3</span> The ROC Curve</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">23.4.4</span> Summary</a></li>
+  </ul></li>
+  <li><a href="#bonus-gradient-descent-for-logistic-regression" id="toc-bonus-gradient-descent-for-logistic-regression" class="nav-link" data-scroll-target="#bonus-gradient-descent-for-logistic-regression"><span class="header-section-number">23.5</span> [BONUS] Gradient Descent for Logistic Regression</a>
+  <ul>
+  <li><a href="#gradient-descent-update-rule" id="toc-gradient-descent-update-rule" class="nav-link" data-scroll-target="#gradient-descent-update-rule"><span class="header-section-number">23.5.1</span> Gradient Descent Update Rule</a></li>
+  <li><a href="#stochastic-gradient-descent-update-rule" id="toc-stochastic-gradient-descent-update-rule" class="nav-link" data-scroll-target="#stochastic-gradient-descent-update-rule"><span class="header-section-number">23.5.2</span> Stochastic Gradient Descent Update Rule</a></li>
+  </ul></li>
+  <li><a href="#bonus-auc-of-the-random-predictor" id="toc-bonus-auc-of-the-random-predictor" class="nav-link" data-scroll-target="#bonus-auc-of-the-random-predictor"><span class="header-section-number">23.6</span> [BONUS] AUC of the Random Predictor</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -285,8 +349,432 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<div class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="true" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Learning Outcomes
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse show">
+<div class="callout-body-container callout-body">
+<ul>
+<li>Apply decision rules to make a classification</li>
+<li>Learn when logistic regression works well and when it does not</li>
+<li>Introduce new metrics for model performance</li>
+</ul>
+</div>
+</div>
+</div>
+<p>Today, we will continue studying the Logistic Regression model and discuss decision boundaries that help inform the classification of a particular prediction and learn about linear separability. Picking up from last lecture’s discussion of cross-entropy loss, we’ll study a few of its pitfalls, and learn potential remedies. We will also provide an implementation of <code>sklearn</code>’s logistic regression model. Lastly, we’ll return to decision rules and discuss metrics that allow us to determine our model’s performance in different scenarios.</p>
+<p>This will introduce us to the process of <strong>thresholding</strong> – a technique used to <em>classify</em> data from our model’s predicted probabilities, or <span class="math inline">\(P(Y=1|x)\)</span>. In doing so, we’ll focus on how these thresholding decisions affect the behavior of our model and learn various evaluation metrics useful for binary classification, and apply them to our study of logistic regression.</p>
+<section id="review-decision-boundaries" class="level2" data-number="23.1">
+<h2 data-number="23.1" class="anchored" data-anchor-id="review-decision-boundaries"><span class="header-section-number">23.1</span> Review : Decision Boundaries</h2>
+<p>Let’s start with a recap of decision boundaries that we covered at the end of the previous lecture. In logistic regression, we model the <em>probability</em> that a datapoint belongs to Class 1.</p>
+<center>
+<img src="images/log_reg_summary.png" alt="tpr_fpr" width="800">
+</center>
+<p><br> In the last lecture, we developed the logistic regression model to predict that probability, but we never actually made any <em>classifications</em> for whether our prediction <span class="math inline">\(y\)</span> belongs in Class 0 or Class 1.</p>
+<p><span class="math display">\[ p = \hat{P}_\theta(Y=1 | x) = \frac{1}{1 + e^{-x^{\top}\theta}}\]</span></p>
+<p>A <strong>decision rule</strong> tells us how to interpret the output of the model to make a decision on how to classify a datapoint. We commonly make decision rules by specifying a <strong>threshold</strong>, <span class="math inline">\(T\)</span>. If the predicted probability is greater than or equal to <span class="math inline">\(T\)</span>, predict Class 1. Otherwise, predict Class 0.</p>
+<p><span class="math display">\[\hat y = \text{classify}(x) = \begin{cases}
+        \text{Class 1}, &amp; p \ge T\\
+        \text{Class 0}, &amp; p &lt; T
+    \end{cases}\]</span></p>
+<p>The threshold is often set to <span class="math inline">\(T = 0.5\)</span>, but <em>not always</em>. We’ll discuss why we might want to use other thresholds <span class="math inline">\(T \neq 0.5\)</span> later in this lecture.</p>
+<p>Using our decision rule, we can define a <strong>decision boundary</strong> as the “line” that splits the data into classes based on its features. For logistic regression, since we are working in <span class="math inline">\(p\)</span> dimensions, the decision boundary is a <strong>hyperplane</strong> – a linear combination of the features in <span class="math inline">\(p\)</span>-dimensions – and we can recover it from the final logistic regression model. For example, if we have a model with 2 features (2D), we have <span class="math inline">\(\theta = [\theta_0, \theta_1, \theta_2]\)</span> including the intercept term, and we can solve for the decision boundary like so:</p>
+<p><span class="math display">\[
+\begin{align}
+T &amp;= \frac{1}{1 + e^{-(\theta_0 + \theta_1 * \text{feature1} +  \theta_2 * \text{feature2})}} \\
+1 + e^{-(\theta_0 + \theta_1 \cdot \text{feature1} +  \theta_2  \cdot  \text{feature2})} &amp;= \frac{1}{T} \\
+e^{-(\theta_0 + \theta_1  \cdot  \text{feature1} +  \theta_2  \cdot  \text{feature2})} &amp;= \frac{1}{T} - 1 \\
+\theta_0 + \theta_1  \cdot  \text{feature1} +  \theta_2  \cdot  \text{feature2} &amp;= -\log(\frac{1}{T} - 1)
+\end{align}
+\]</span></p>
+<p>For a model with 2 features, the decision boundary is a line in terms of its features. Let’s prove this by again looking at the basketball example from the previous lecture where our two features are <code>GOAL_DIFF</code> and <code>AST</code>. Rewriting the previous equation in terms of these features, we get the following:</p>
+<p><span class="math display">\[\theta_0 + \theta_1  \cdot  \text{GOAL\_DIFF} +  \theta_2  \cdot  \text{AST} = -\log(\frac{1}{T} - 1)\]</span></p>
+<p>Now if we assume that the threshold T = 0.5, then <span class="math inline">\(\log(\frac{1}{0.5} - 1) = \log(1) = 0\)</span>, so substituting this in and rearranging terms, we get the following:</p>
+<p><span class="math display">\[
+\begin{align}
+0 &amp;= \theta_0 + \theta_1  \cdot  \text{GOAL\_DIFF} +  \theta_2  \cdot  \text{AST} \\
+\text{AST} &amp;= \frac{\theta_0 + \theta_1  \cdot  \text{GOAL\_DIFF}}{-\theta_2}
+\end{align}
+\]</span></p>
+<p>This is the equation of a line of form <span class="math inline">\(y=mx+b\)</span> relating <code>AST</code> to <code>GOAL_DIFF</code>, so we’ve just proved that the decision boundary is a <strong>hyperplane</strong> that can split points into two classes! To make it easier to visualize, we’ve included an example of a 1-dimensional and a 2-dimensional decision boundary below. Notice how the decision boundary predicted by our logistic regression model perfectly separates the points into two classes. Here the color is the <em>predicted</em> class, rather than the true class.</p>
+<center>
+<img src="images/decision_boundary.png" alt="varying_threshold" width="800">
+</center>
+<p>In real life, however, that is often not the case, and we often see some overlap between points of different classes across the decision boundary. The <em>true</em> classes of the 2D data are shown below:</p>
+<center>
+<img src="images/decision_boundary_true.png" alt="varying_threshold" width="400">
+</center>
+<p>As you can see, the decision boundary predicted by our logistic regression does not perfectly separate the two classes. There’s a “muddled” region near the decision boundary where our classifier predicts the wrong class. What would the data have to look like for the classifier to make perfect predictions?</p>
+</section>
+<section id="linear-separability-and-regularization" class="level2" data-number="23.2">
+<h2 data-number="23.2" class="anchored" data-anchor-id="linear-separability-and-regularization"><span class="header-section-number">23.2</span> Linear Separability and Regularization</h2>
+<p>A classification dataset is said to be <strong>linearly separable</strong> if there exists a hyperplane <strong>among input features <span class="math inline">\(x\)</span></strong> that separates the two classes <span class="math inline">\(y\)</span>.</p>
+<p>Linear separability in 1D can be found with a rugplot of a single feature where a point perfectly separates the classes (Remember that in 1D, our decision boundary is just a point). For example, notice how the plot on the bottom left is linearly separable along the vertical line <span class="math inline">\(x=0\)</span>. However, no such line perfectly separates the two classes on the bottom right.</p>
+<center>
+<img src="images/linear_separability_1D.png" alt="linear_separability_1D" width="800">
+</center>
+<p>This same definition holds in higher dimensions. If there are two features, the separating hyperplane must exist in two dimensions (any line of the form <span class="math inline">\(y=mx+b\)</span>). We can visualize this using a scatter plot.</p>
+<center>
+<img src="images/linear_separability_2D.png" alt="linear_separability_1D" width="800">
+</center>
+<p>This sounds great! When the dataset is linearly separable, a <strong>logistic regression classifier can perfectly assign datapoints into classes</strong>. Can it achieve <strong>0 cross-entropy loss</strong>?</p>
+<p><span class="math display">\[-(y \log(p) + (1 - y) \log(1 - p))\]</span></p>
+<p>Cross-entropy loss is 0 if <span class="math inline">\(p = 1\)</span> when <span class="math inline">\(y = 1\)</span>, and <span class="math inline">\(p = 0\)</span> when <span class="math inline">\(y = 0\)</span>. Consider a simple model with one feature and no intercept.</p>
+<p><span class="math display">\[P_{\theta}(Y = 1|x) = \sigma(\theta x) = \frac{1}{1 + e^{-\theta x}}\]</span></p>
+<p>What <span class="math inline">\(\theta\)</span> will achieve 0 loss if we train on the datapoint <span class="math inline">\(x = 1, y = 1\)</span>? We would want <span class="math inline">\(p = 1\)</span> which occurs when <span class="math inline">\(\theta \rightarrow \infty\)</span>.</p>
+<p>However, (unexpected) complications may arise. When data is linearly separable, the <strong>optimal model parameters diverge to <span class="math inline">\(\pm \infty\)</span></strong>. <em>The sigmoid can never output exactly 0 or 1</em>, so no finite optimal <span class="math inline">\(\theta\)</span> exists. This can be a problem when using gradient descent to fit the model. Consider a simple, linearly separable “toy” dataset with two datapoints.</p>
+<center>
+<img src="images/toy_linear_separable_dataset.png" alt="toy_linear_separability" width="500">
+</center>
+<p>Let’s also visualize the mean cross entropy loss along with the direction of the gradient (how this loss surface is calculated is out of scope).</p>
+<center>
+<img src="images/mean_cross_entropy_loss_plot.png" alt="mean_cross_entropy_loss_plot" width="450">
+</center>
+<p>It’s nearly impossible to see, but the plateau to the right is slightly tilted. Because gradient descent follows the tilted loss surface downwards, it never converges. Loss keeps approaching 0 as <span class="math inline">\(\theta\)</span> increases.</p>
+<p>The diverging weights cause the model to be <strong>overconfident</strong>. Say we add a new point <span class="math inline">\((x, y) = (-0.5, 1)\)</span>. Following the behavior above, our model will incorrectly predict <span class="math inline">\(p=0\)</span>, and thus, <span class="math inline">\(\hat y = 0\)</span>.</p>
+<center>
+<img src="images/toy_linear_separable_dataset_2.png" alt="toy_linear_separability" width="450">
+</center>
+<p><br> The loss incurred by this misclassified point is infinite.</p>
+<p><span class="math display">\[-(y\text{ log}(p) + (1-y)\text{ log}(1-p))=1 * \text{log}(0)\]</span></p>
+<p>Thus, diverging weights (<span class="math inline">\(|\theta| \rightarrow \infty\)</span>) occur with <strong>linearly separable</strong> data. “Overconfidence”, as shown here, is a particularly dangerous version of overfitting.</p>
+<section id="regularized-logistic-regression" class="level3" data-number="23.2.1">
+<h3 data-number="23.2.1" class="anchored" data-anchor-id="regularized-logistic-regression"><span class="header-section-number">23.2.1</span> Regularized Logistic Regression</h3>
+<p>To avoid large weights and infinite loss (particularly on linearly separable data), we use <strong>regularization</strong>. The same principles apply as with linear regression - make sure to standardize your features first.</p>
+<p>For example, <span class="math inline">\(L2\)</span> (Ridge) Logistic Regression takes on the form:</p>
+<p><span class="math display">\[\underset{\theta}{\arg\min} -\frac{1}{n} \sum_{i=1}^{n} (y_i \text{log}(\sigma(X_i^T\theta)) + (1-y_i)\text{log}(1-\sigma(X_i^T\theta))) + \lambda \sum_{j=1}^{d} \theta_j^2\]</span></p>
+<p>Now, let us compare the loss functions of un-regularized and regularized logistic regression.</p>
+<center>
+<img src="images/unreg_loss_infinite_argmin.png" alt="unreg_loss" width="450">
+</center>
+<center>
+<img src="images/reg_loss_finite_argmin.png" alt="reg_loss" width="450">
+</center>
+<p>As we can see, <span class="math inline">\(L2\)</span> regularization helps us prevent diverging weights and deters against “overconfidence.”</p>
+<p><code>sklearn</code>’s logistic regression defaults to <span class="math inline">\(L2\)</span> regularization and <code>C=1.0</code>; <code>C</code> is the inverse of <span class="math inline">\(\lambda\)</span>: <span class="math display">\[C = \frac{1}{\lambda}\]</span> Setting <code>C</code> to a large value, for example, <code>C=300.0</code>, results in minimal regularization.</p>
+<pre><code># sklearn defaults
+model = LogisticRegression(penalty = 'l2', C = 1.0, ...)
+model.fit()</code></pre>
+<p>Note that in Data 100, we only use <code>sklearn</code> to fit logistic regression models. There is no closed-form solution to the optimal theta vector, and the gradient is a little messy (see the bonus section below for details).</p>
+<p>From here, the <code>.predict</code> function returns the predicted class <span class="math inline">\(\hat y\)</span> of the point. In the simple binary case where the threshold is 0.5,</p>
+<p><span class="math display">\[\hat y = \begin{cases}
+        1, &amp; P(Y=1|x) \ge 0.5\\
+        0, &amp; \text{otherwise }
+    \end{cases}\]</span></p>
+</section>
+</section>
+<section id="performance-metrics" class="level2" data-number="23.3">
+<h2 data-number="23.3" class="anchored" data-anchor-id="performance-metrics"><span class="header-section-number">23.3</span> Performance Metrics</h2>
+<p>You might be thinking, if we’ve already introduced cross-entropy loss, why do we need additional ways of assessing how well our models perform? In linear regression, we made numerical predictions and used a loss function to determine how “good” these predictions were. In logistic regression, our ultimate goal is to <strong><em>classify</em> data</strong> – we are much more concerned with whether or not each datapoint was assigned the correct class using the decision rule. As such, we are interested in the <strong><em>quality</em> of classifications decisions for a choice of threshold</strong>, not the predicted probabilities.</p>
+<p>The most basic evaluation metric is <strong>accuracy</strong>, that is, the proportion of correctly classified points.</p>
+<p><span class="math display">\[\text{accuracy} = \frac{\# \text{ of points classified correctly}}{\# \text{ of total points}}\]</span></p>
+<p>Translated to code:</p>
+<pre><code>def accuracy(X, Y):
+    return np.mean(model.predict(X) == Y)
+    
+model.score(X, y) # built-in accuracy function</code></pre>
+<p>You can find the <code>sklearn</code> documentation <a href="https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html#sklearn.linear_model.LogisticRegression.score">here</a>.</p>
+<p>However, accuracy is not always a great metric for classification. To understand why, let’s consider a classification problem with 100 emails where only 5 are truly spam, and the remaining 95 are truly ham. We’ll investigate two models where accuracy is a poor metric.</p>
+<ul>
+<li><strong>Model 1</strong>: Our first model classifies every email as non-spam. The model’s accuracy is high (<span class="math inline">\(\frac{95}{100} = 0.95\)</span>), but it doesn’t detect any spam emails. Despite the high accuracy, this is a bad model.</li>
+<li><strong>Model 2</strong>: The second model classifies every email as spam. The accuracy is low (<span class="math inline">\(\frac{5}{100} = 0.05\)</span>), but the model correctly labels every spam email. Unfortunately, it also misclassifies every non-spam email.</li>
+</ul>
+<p>As this example illustrates, accuracy is not always a good metric for classification, particularly when your data could exhibit <strong>class imbalance</strong> (e.g., very few 1’s compared to 0’s).</p>
+<section id="types-of-classification" class="level3" data-number="23.3.1">
+<h3 data-number="23.3.1" class="anchored" data-anchor-id="types-of-classification"><span class="header-section-number">23.3.1</span> Types of Classification</h3>
+<p>There are 4 different different classifications that our model might make:</p>
+<ol type="1">
+<li><strong>True positive</strong>: correctly classify a positive point as being positive (<span class="math inline">\(y=1\)</span> and <span class="math inline">\(\hat{y}=1\)</span>)</li>
+<li><strong>True negative</strong>: correctly classify a negative point as being negative (<span class="math inline">\(y=0\)</span> and <span class="math inline">\(\hat{y}=0\)</span>)</li>
+<li><strong>False positive</strong>: incorrectly classify a negative point as being positive (<span class="math inline">\(y=0\)</span> and <span class="math inline">\(\hat{y}=1\)</span>)</li>
+<li><strong>False negative</strong>: incorrectly classify a positive point as being negative (<span class="math inline">\(y=1\)</span> and <span class="math inline">\(\hat{y}=0\)</span>)</li>
+</ol>
+<p>These classifications can be concisely summarized in a <strong>confusion matrix</strong>.</p>
+<center>
+<img src="images/confusion_matrix.png" alt="confusion_matrix" width="450">
+</center>
+<p>An easy way to remember this terminology is as follows:</p>
+<ol type="1">
+<li>Look at the second word in the phrase. <em>Positive</em> means a prediction of 1. <em>Negative</em> means a prediction of 0.</li>
+<li>Look at the first word in the phrase. <em>True</em> means our prediction was correct. <em>False</em> means it was incorrect.</li>
+</ol>
+<p>We can now write the accuracy calculation as <span class="math display">\[\text{accuracy} = \frac{TP + TN}{n}\]</span></p>
+<p>In <code>sklearn</code>, we use the following syntax to plot a confusion matrix:</p>
+<pre><code>from sklearn.metrics import confusion_matrix
+cm = confusion_matrix(Y_true, Y_pred)</code></pre>
+<center>
+<img src="images/confusion_matrix_sklearn.png" alt="confusion_matrix" width="300">
+</center>
+</section>
+<section id="accuracy-precision-and-recall" class="level3" data-number="23.3.2">
+<h3 data-number="23.3.2" class="anchored" data-anchor-id="accuracy-precision-and-recall"><span class="header-section-number">23.3.2</span> Accuracy, Precision, and Recall</h3>
+<p>The purpose of our discussion of the confusion matrix was to motivate better performance metrics for classification problems with class imbalance - namely, precision and recall.</p>
+<p><strong>Precision</strong> is defined as</p>
+<p><span class="math display">\[\text{precision} = \frac{\text{TP}}{\text{TP + FP}}\]</span></p>
+<p>Precision answers the question: “Of all observations that were predicted to be <span class="math inline">\(1\)</span>, what proportion was actually <span class="math inline">\(1\)</span>?” It measures how <strong>precise</strong> the classifier is <em>when the predictions are positive</em>, and it penalizes false positives.</p>
+<p><strong>Recall</strong> (or <strong>sensitivity</strong>) is defined as</p>
+<p><span class="math display">\[\text{recall} = \frac{\text{TP}}{\text{TP + FN}}\]</span></p>
+<p>Recall aims to answer: “Of all observations that were actually <span class="math inline">\(1\)</span>, what proportion was predicted to be <span class="math inline">\(1\)</span>?” It measures how <strong>sensitive</strong> our classifier is to <em>actual positive observations</em>, and it penalizes false negatives.</p>
+<p>Here’s a helpful graphic that summarizes our discussion above.</p>
+<center>
+<img src="images/precision_recall_graphic.png" alt="confusion_matrix" width="700">
+</center>
+</section>
+<section id="example-calculation" class="level3" data-number="23.3.3">
+<h3 data-number="23.3.3" class="anchored" data-anchor-id="example-calculation"><span class="header-section-number">23.3.3</span> Example Calculation</h3>
+<p>In this section, we will calculate the accuracy, precision, and recall performance metrics for our earlier spam classification example. As a reminder, we had 100 emails, 5 of which were truly spam and 95 of which were ham. We designed two models:</p>
+<ul>
+<li>Model 1: Predict that every email is <em>non-spam</em></li>
+<li>Model 2: Predict that every email is <em>spam</em></li>
+</ul>
+<section id="model-1" class="level4" data-number="23.3.3.1">
+<h4 data-number="23.3.3.1" class="anchored" data-anchor-id="model-1"><span class="header-section-number">23.3.3.1</span> Model 1</h4>
+<p>First, let’s begin by creating the confusion matrix.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 27%">
+<col style="width: 27%">
+<col style="width: 38%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>0</th>
+<th>1</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>True Negative: 95</td>
+<td>False Positive: 0</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>False Negative: 5</td>
+<td>True Positive: 0</td>
+</tr>
+</tbody>
+</table>
+<p><span class="math display">\[\text{accuracy} = \frac{95}{100} = 0.95\]</span> <span class="math display">\[\text{precision} = \frac{0}{0 + 0} = \text{undefined}\]</span> <span class="math display">\[\text{recall} = \frac{0}{0 + 5} = 0\]</span></p>
+<p>Notice how our precision is undefined because we never predicted class <span class="math inline">\(1\)</span>. Our recall is 0 for the same reason – the numerator is 0 (we had no positive predictions).</p>
+</section>
+<section id="model-2" class="level4" data-number="23.3.3.2">
+<h4 data-number="23.3.3.2" class="anchored" data-anchor-id="model-2"><span class="header-section-number">23.3.3.2</span> Model 2</h4>
+<p>The confusion matrix for Model 2 is:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 27%">
+<col style="width: 27%">
+<col style="width: 38%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>0</th>
+<th>1</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>True Negative: 0</td>
+<td>False Positive: 95</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>False Negative: 0</td>
+<td>True Positive: 5</td>
+</tr>
+</tbody>
+</table>
+<p><span class="math display">\[\text{accuracy} = \frac{5}{100} = 0.05\]</span> <span class="math display">\[\text{precision} = \frac{5}{5 + 95} = 0.05\]</span> <span class="math display">\[\text{recall} = \frac{5}{5 + 0} = 1\]</span></p>
+<p>Our precision is low because we have many false positives, and our recall is perfect - we correctly classified all spam emails (we never predicted class <span class="math inline">\(0\)</span>).</p>
+</section>
+</section>
+<section id="precision-vs.-recall" class="level3" data-number="23.3.4">
+<h3 data-number="23.3.4" class="anchored" data-anchor-id="precision-vs.-recall"><span class="header-section-number">23.3.4</span> Precision vs.&nbsp;Recall</h3>
+<p>Precision (<span class="math inline">\(\frac{\text{TP}}{\text{TP} + \textbf{ FP}}\)</span>) penalizes false positives, while recall (<span class="math inline">\(\frac{\text{TP}}{\text{TP} + \textbf{ FN}}\)</span>) penalizes false negatives. In fact, precision and recall are <em>inversely related</em>. This is evident in our second model – we observed a high recall and low precision. Usually, there is a tradeoff in these two (most models can either minimize the number of FP or FN; and in rare cases, both).</p>
+<p>The specific performance metric(s) to prioritize depends on the context. In many medical settings, there might be a much higher cost to missing positive cases. For instance, in our breast cancer example, it is more costly to misclassify malignant tumors (false negatives) than it is to incorrectly classify a benign tumor as malignant (false positives). In the case of the latter, pathologists can conduct further studies to verify malignant tumors. As such, we should minimize the number of false negatives. This is equivalent to maximizing recall.</p>
+</section>
+<section id="three-more-metrics" class="level3" data-number="23.3.5">
+<h3 data-number="23.3.5" class="anchored" data-anchor-id="three-more-metrics"><span class="header-section-number">23.3.5</span> Three More Metrics</h3>
+<p>The <strong>True Positive Rate (TPR)</strong> is defined as</p>
+<p><span class="math display">\[\text{true positive rate} = \frac{\text{TP}}{\text{TP + FN}}\]</span></p>
+<p>You’ll notice this is equivalent to <em>recall</em>. In the context of our spam email classifier, it answers the question: “What proportion of spam did I mark correctly?”. We’d like this to be close to <span class="math inline">\(1\)</span>.</p>
+<p>The <strong>True Negative Rate (TNR)</strong> is defined as</p>
+<p><span class="math display">\[\text{true negative rate} = \frac{\text{TN}}{\text{TN + FP}}\]</span></p>
+<p>Another word for TNR is <em>specificity</em>. This answers the question: “What proportion of ham did I mark correctly?”. We’d like this to be close to <span class="math inline">\(1\)</span>.</p>
+<p>The <strong>False Positive Rate (FPR)</strong> is defined as</p>
+<p><span class="math display">\[\text{false positive rate} = \frac{\text{FP}}{\text{FP + TN}}\]</span></p>
+<p>FPR is equal to <em>1 - specificity</em>, or <em>1 - TNR</em>. This answers the question: “What proportion of regular email did I mark as spam?”. We’d like this to be close to <span class="math inline">\(0\)</span>.</p>
+<p>As we increase threshold <span class="math inline">\(T\)</span>, both TPR and FPR decrease. We’ve plotted this relationship below for some model on a <code>toy</code> dataset.</p>
+<center>
+<img src="images/tpr_fpr.png" alt="tpr_fpr" width="800">
+</center>
+</section>
+</section>
+<section id="adjusting-the-classification-threshold" class="level2" data-number="23.4">
+<h2 data-number="23.4" class="anchored" data-anchor-id="adjusting-the-classification-threshold"><span class="header-section-number">23.4</span> Adjusting the Classification Threshold</h2>
+<p>One way to minimize the number of FP vs.&nbsp;FN (equivalently, maximizing precision vs.&nbsp;recall) is by adjusting the classification threshold <span class="math inline">\(T\)</span>.</p>
+<p><span class="math display">\[\hat y = \begin{cases}
+        \text{Class 1}, &amp; p \ge T\\
+        \text{Class 0}, &amp; p &lt; T
+    \end{cases}\]</span></p>
+<p>The default threshold in <code>sklearn</code> is <span class="math inline">\(T = 0.5\)</span>. As we increase the threshold <span class="math inline">\(T\)</span>, we “raise the standard” of how confident our classifier needs to be to predict 1 (i.e., “positive”).</p>
+<center>
+<img src="images/varying_threshold.png" alt="varying_threshold" width="700">
+</center>
+<p>As you may notice, the choice of threshold <span class="math inline">\(T\)</span> impacts our classifier’s performance.</p>
+<ul>
+<li>High <span class="math inline">\(T\)</span>: Most predictions are <span class="math inline">\(0\)</span>.
+<ul>
+<li>Lots of false negatives</li>
+<li>Fewer false positives</li>
+</ul></li>
+<li>Low <span class="math inline">\(T\)</span>: Most predictions are <span class="math inline">\(1\)</span>.
+<ul>
+<li>Lots of false positives</li>
+<li>Fewer false negatives</li>
+</ul></li>
+</ul>
+<p>In fact, we can choose a threshold <span class="math inline">\(T\)</span> based on our desired number, or proportion, of false positives and false negatives. We can do so using a few different tools. We’ll touch on three of the most important ones in Data 100.</p>
+<ol type="1">
+<li>Precision-Recall Curve (PR Curve)</li>
+<li>F1 Score</li>
+<li>“Receiver Operating Characteristic” Curve (ROC Curve)</li>
+</ol>
+<section id="precision-recall-curves" class="level3" data-number="23.4.1">
+<h3 data-number="23.4.1" class="anchored" data-anchor-id="precision-recall-curves"><span class="header-section-number">23.4.1</span> Precision-Recall Curves</h3>
+<p>A <strong>Precision-Recall Curve (PR Curve)</strong> is a curve that displays the relationship between precision and recall for various threshold values. In this curve, we test out many different possible thresholds and for each one we compute the precision and recall of the classifier.</p>
+<p>Let’s first consider how precision and recall change as a function of the threshold <span class="math inline">\(T\)</span>. We know this quite well from earlier – precision will generally increase, and recall will decrease.</p>
+<center>
+<img src="images/precision-recall-thresh.png" alt="precision-recall-thresh" width="650">
+</center>
+<p>Displayed below is the PR Curve for the same <code>toy</code> dataset. Notice how threshold values increase as we move to the left.</p>
+<center>
+<img src="images/pr_curve_thresholds.png" alt="pr_curve_thresholds" width="600">
+</center>
+<p>Once again, the perfect classifier will resemble the orange curve, this time, facing the opposite direction.</p>
+<center>
+<img src="images/pr_curve_perfect.png" alt="pr_curve_perfect" width="600">
+</center>
+<p>We want our PR curve to be as close to the “top right” of this graph as possible. We can use the <strong>area under curve (or AUC)</strong> to determine “closeness”, with the perfect classifier exhibiting an AUC = 1 (and the worst with an AUC = 0.5).</p>
+</section>
+<section id="f1-score" class="level3" data-number="23.4.2">
+<h3 data-number="23.4.2" class="anchored" data-anchor-id="f1-score"><span class="header-section-number">23.4.2</span> F1 Score</h3>
+<p>Another way to <strong><u>balance</u> precision and recall</strong> is to maximize the <strong><span class="math inline">\(F_1\)</span> Score</strong>:</p>
+<p><span class="math display">\[ F_1\ \text{Score} = \frac{2}{\frac{1}{\text{Precision}} + \frac{1}{\text{Recall}}} = \frac{2 \times \text{Precision} \times \text{Recall}}{\text{Precision}+\text{Recall}}\]</span></p>
+<p>The <span class="math inline">\(F_1\)</span> score is the <strong>harmonic mean of precision and recall</strong>, and it is often used when there is a <strong>large class imbalance</strong>. The score optimizes for the <strong>true-positive case</strong> and <strong>balances precision and recall</strong>, so if we want to optimize for <strong>true-negatives</strong> or favor either precision or recall, it may be better to pick a different metric.</p>
+<p>We can begin by calculating the <span class="math inline">\(F_1\)</span> score for different thresholds, and plotting the results below:</p>
+<center>
+<img src="images/f1_score.png" alt="f1_score" width="500">
+</center>
+<p>From this, we want to pick the threshold that <strong>maximizes the <span class="math inline">\(F_1\)</span> score</strong> and <strong>report the <span class="math inline">\(F_1\)</span> score</strong> as a metric describing the classifier. We can also plot this point on a PR curve to see how the <span class="math inline">\(F_1\)</span> score determined a point with balance between precision and recall.</p>
+<center>
+<img src="images/f1_score_plot.png" alt="f1_score_plot" width="400">
+</center>
+</section>
+<section id="the-roc-curve" class="level3" data-number="23.4.3">
+<h3 data-number="23.4.3" class="anchored" data-anchor-id="the-roc-curve"><span class="header-section-number">23.4.3</span> The ROC Curve</h3>
+<p>The “Receiver Operating Characteristic” Curve (<strong>ROC Curve</strong>) is another method that plots the tradeoff between FPR and TPR. Notice how the far-left of the curve corresponds to higher threshold <span class="math inline">\(T\)</span> values. At lower thresholds, the FPR and TPR are both high as there are many positive predictions while at higher thresholds the FPR and TPR are both low as there are fewer positive predictions.</p>
+<center>
+<img src="images/roc_curve.png" alt="roc_curve" width="600">
+</center>
+<p>The “perfect” classifier is the one that has a TPR of 1, and FPR of 0. This is achieved at the top-left of the plot below. More generally, it’s ROC curve resembles the curve in orange.</p>
+<center>
+<img src="images/roc_curve_perfect.png" alt="roc_curve_perfect" width="600">
+</center>
+<p>We want our model to be as close to this orange curve as possible. How do we quantify “closeness”?</p>
+<p>We can compute the <strong>area under curve (AUC)</strong> of the ROC curve. Notice how the perfect classifier has an AUC = 1. The closer our model’s AUC is to 1, the better it is.</p>
+<p>On the other hand, a terrible model will have an AUC closer to 0.5. A predictor that <strong>predicts randomly</strong> has an AUC of 0.5. This indicates the classifier is not able to distinguish between positive and negative classes, and thus, randomly predicts one of the two. The proof for this is out of scope and is in the Bonus section.</p>
+<center>
+<img src="images/roc_curve_worst_predictor.png" alt="roc_curve_worst_predictor" width="700">
+</center>
+<p>Real-world classifiers have an AUC between 0.5 and 1.</p>
+</section>
+<section id="summary" class="level3" data-number="23.4.4">
+<h3 data-number="23.4.4" class="anchored" data-anchor-id="summary"><span class="header-section-number">23.4.4</span> Summary</h3>
+<ol type="1">
+<li>When classes are <strong>relatively balanced</strong> or performance on <strong>both classes is equally important</strong>:
+<ul>
+<li>Pick a threshold to <strong>maximize accuracy</strong> (often close to 0.5)</li>
+<li><strong>Accuracy</strong> or <strong>area under the ROC</strong> are appropriate metrics to report.</li>
+</ul></li>
+<li>When classes are <strong>imbalanced</strong> and performance on the <strong>positive class is more important</strong>:
+<ul>
+<li>Pick a threshold to <strong>maximize <span class="math inline">\(F_1\)</span> score</strong></li>
+<li><strong><span class="math inline">\(F_1\)</span> score or area under the Precision-Recall Curve</strong> are appropriate metrics to report</li>
+</ul></li>
+</ol>
+<p>Note that both the Accuracy and <span class="math inline">\(F_1\)</span> score are <strong>threshold dependent</strong> while area under the curve metrics are not.</p>
+<p>Overall, be warned that working with class imbalance <em>can be challenging</em> because</p>
+<ul>
+<li>Many <strong>modeling techniques don’t work well</strong> with highly imbalance data.</li>
+<li><strong>Results can be misleading</strong> (e.g., 95% accuracy from always guessing not spam)</li>
+</ul>
+</section>
+</section>
+<section id="bonus-gradient-descent-for-logistic-regression" class="level2" data-number="23.5">
+<h2 data-number="23.5" class="anchored" data-anchor-id="bonus-gradient-descent-for-logistic-regression"><span class="header-section-number">23.5</span> [BONUS] Gradient Descent for Logistic Regression</h2>
+<p>Let’s define the following terms: <span class="math display">\[
+\begin{align}
+t_i &amp;= \phi(x_i)^T \theta \\
+p_i &amp;= \sigma(t_i) \\
+t_i &amp;= \log(\frac{p_i}{1 - p_i}) \\
+1 - \sigma(t_i) &amp;= \sigma(-t_i) \\
+\frac{d}{dt}  \sigma(t) &amp;=  \sigma(t) \sigma(-t)
+\end{align}
+\]</span></p>
+<p>Now, we can simplify the cross-entropy loss <span class="math display">\[
+\begin{align}
+y_i \log(p_i) + (1 - y_i) \log(1 - p_i) &amp;= y_i \log(\frac{p_i}{1 - p_i}) + \log(1 - p_i) \\
+&amp;= y_i \phi(x_i)^T + \log(\sigma(-\phi(x_i)^T \theta))
+\end{align}
+\]</span></p>
+<p>Hence, the optimal <span class="math inline">\(\hat{\theta}\)</span> is <span class="math display">\[\text{argmin}_{\theta} - \frac{1}{n} \sum_{i=1}^n (y_i \phi(x_i)^T + \log(\sigma(-\phi(x_i)^T \theta)))\]</span></p>
+<p>We want to minimize <span class="math display">\[L(\theta) = - \frac{1}{n} \sum_{i=1}^n (y_i \phi(x_i)^T + \log(\sigma(-\phi(x_i)^T \theta)))\]</span></p>
+<p>So we take the derivative <span class="math display">\[
+\begin{align}
+\triangledown_{\theta} L(\theta) &amp;= - \frac{1}{n} \sum_{i=1}^n \triangledown_{\theta} y_i \phi(x_i)^T + \triangledown_{\theta} \log(\sigma(-\phi(x_i)^T \theta)) \\
+&amp;= - \frac{1}{n} \sum_{i=1}^n y_i \phi(x_i) + \triangledown_{\theta} \log(\sigma(-\phi(x_i)^T \theta)) \\
+&amp;= - \frac{1}{n} \sum_{i=1}^n y_i \phi(x_i) + \frac{1}{\sigma(-\phi(x_i)^T \theta)} \triangledown_{\theta} \sigma(-\phi(x_i)^T \theta) \\
+&amp;= - \frac{1}{n} \sum_{i=1}^n y_i \phi(x_i) + \frac{\sigma(-\phi(x_i)^T \theta)}{\sigma(-\phi(x_i)^T \theta)} \sigma(\phi(x_i)^T \theta)\triangledown_{\theta} \sigma(-\phi(x_i)^T \theta) \\
+&amp;= - \frac{1}{n} \sum_{i=1}^n (y_i - \sigma(\phi(x_i)^T \theta)\phi(x_i))
+\end{align}
+\]</span></p>
+<p>Setting the derivative equal to 0 and solving for <span class="math inline">\(\hat{\theta}\)</span>, we find that there’s no general analytic solution. Therefore, we must solve using numeric methods.</p>
+<section id="gradient-descent-update-rule" class="level3" data-number="23.5.1">
+<h3 data-number="23.5.1" class="anchored" data-anchor-id="gradient-descent-update-rule"><span class="header-section-number">23.5.1</span> Gradient Descent Update Rule</h3>
+<p><span class="math display">\[\theta^{(0)} \leftarrow \text{initial vector (random, zeros, ...)} \]</span></p>
+<p>For <span class="math inline">\(\tau\)</span> from 0 to convergence: <span class="math display">\[ \theta^{(\tau + 1)} \leftarrow \theta^{(\tau)} - \rho(\tau)\left( \frac{1}{n} \sum_{i=1}^n \triangledown_{\theta} L_i(\theta) \mid_{\theta = \theta^{(\tau)}}\right) \]</span></p>
+</section>
+<section id="stochastic-gradient-descent-update-rule" class="level3" data-number="23.5.2">
+<h3 data-number="23.5.2" class="anchored" data-anchor-id="stochastic-gradient-descent-update-rule"><span class="header-section-number">23.5.2</span> Stochastic Gradient Descent Update Rule</h3>
+<p><span class="math display">\[\theta^{(0)} \leftarrow \text{initial vector (random, zeros, ...)} \]</span></p>
+<p>For <span class="math inline">\(\tau\)</span> from 0 to convergence, let <span class="math inline">\(B\)</span> ~ <span class="math inline">\(\text{Random subset of indices}\)</span>. <span class="math display">\[ \theta^{(\tau + 1)} \leftarrow \theta^{(\tau)} - \rho(\tau)\left( \frac{1}{|B|} \sum_{i \in B} \triangledown_{\theta} L_i(\theta) \mid_{\theta = \theta^{(\tau)}}\right) \]</span></p>
+</section>
+</section>
+<section id="bonus-auc-of-the-random-predictor" class="level2" data-number="23.6">
+<h2 data-number="23.6" class="anchored" data-anchor-id="bonus-auc-of-the-random-predictor"><span class="header-section-number">23.6</span> [BONUS] AUC of the Random Predictor</h2>
+<p>Recall that the best possible AUC = 1. On the other hand, a terrible model will have an AUC closer to 0.5. A <strong>random predictor</strong> randomly predicts <span class="math inline">\(P(Y = 1 | x)\)</span> to be uniformly between 0 and 1. This indicates the classifier is not able to distinguish between positive and negative classes, and thus, randomly predicts one of the two.</p>
+<center>
+<img src="images/roc_curve_worst_predictor.png" alt="roc_curve_worst_predictor" width="700">
+</center>
+<p>We can illustrate this by comparing different thresholds and seeing their points on the ROC curve.</p>
+<center>
+<img src="images/roc_curve_worse_predictor_differing_T.png" alt="roc_curve_worse_predictor_differing_T" width="700">
+</center>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
