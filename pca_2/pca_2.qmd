@@ -1,5 +1,5 @@
 ---
-title: PCA II (Old Notes from Fall 2024)
+title: PCA II
 format:
   html:
     toc: true
@@ -18,7 +18,7 @@ jupyter:
       format_version: '1.0'
       jupytext_version: 1.16.1
   kernelspec:
-    display_name: ds100env
+    display_name: data100quarto
     language: python
     name: python3
 ---
@@ -32,18 +32,17 @@ jupyter:
 - See applications of PCA in some real-world contexts
 :::
 
-## Dimensionality Reduction
+## PCA as Loss Minimization
 
-We often work with **high-dimensional** data that contain *many* columns/features. Given all these dimensions, this data can be difficult to visualize and model. However, not all the data in this high-dimensional space is useful — there could be repeated features or outliers that make the data seem more complex than it really is. The most concise representation of high-dimensional data is its **intrinsic dimension**. Our goal with this lecture is to use **dimensionality reduction** to find the intrinsic dimension of a high-dimensional dataset. In other words, we want to **find a smaller set** of **new features/columns** that approximates the original data well without losing that much information. This is especially useful because this smaller set of features allows us to better visualize the data and do EDA to understand which modeling techniques would fit the data well. Let's treat this as a matrix factorization problem, and review what we covered in the previous lecture.
+We often work with **high-dimensional** data that contain *many* columns/features. Given all these dimensions, this data can be difficult to visualize and model. However, not all the data in this high-dimensional space is useful — there could be repeated features or outliers that make the data seem more complex than it really is. The most concise representation of high-dimensional data is its **intrinsic dimension**. 
 
-### Loss Minimization
-In order to find the intrinsic dimension of a high-dimensional dataset, we'll use techniques from linear algebra. Suppose we have a high-dimensional dataset, $X$, that has $n$ rows and $d$ columns. We want to factor (split) $X$ into two matrices, $Z$ and $W$. $Z$ has $n$ rows and $k$ columns; $W$ has $k$ rows and $d$ columns.
+Our goal with this lecture is to use **dimensionality reduction** to find the intrinsic dimension of a high-dimensional dataset. In other words, we want to *find a smaller set of new features/columns* that approximates the original data well without losing that much information. This is especially useful because this smaller set of features allows us to better visualize the data and do EDA to understand which modeling techniques would fit the data well. Let's treat this as *a matrix factorization problem*, and review what we covered in the previous lecture.
 
-$$ X \approx ZW$$
+In order to find the intrinsic dimension of a high-dimensional dataset, we'll use techniques from linear algebra. Suppose we have a high-dimensional dataset, $X$, that has $n$ rows and $d$ columns. We want to factor (split) $X \in \mathbb{R}^{n \times d}$ into two matrices, $Z \in \mathbb{R}^{n \times k}$ and $W \in \mathbb{R}^{k \times d}$:
+$$X \approx ZW$$
 
-We can reframe this problem as a loss function: in other words, if we want $X$ to roughly equal $ZW$, their difference should be as small as possible, ideally 0. This difference becomes our loss function, $L(Z, W)$: 
-
-$$L(Z, W) = \frac{1}{n}\sum_{i=1}^{n}||X_i - Z_iW||^2$$
+We can reframe this problem as **a loss function**, minimizing difference between $X$ and $ZW$:
+$$L(Z, W) = \frac{1}{n}\sum_{i=1}^{n}||X_i - Z_i W||^2$$
 
 Breaking down the variables in this formula:
 
@@ -52,24 +51,35 @@ Breaking down the variables in this formula:
 * $W$: The rows of $W$ are the **principal components**. We constrain our model so that $W$ is a row-orthonormal matrix (e.g., $WW^T = I$). 
 
 Using calculus and optimization techniques (take EECS 127 if you're interested!), we find that this loss is minimized when 
-$$Z = XW^T$$ 
+$$Z = XW^T$$
 The proof for this is out of scope for Data 100, but for those who are interested, we:
 
 * Use Lagrangian multipliers to introduce the orthonormality constraint on $W$.
 * Took the derivative with respect to $W$ (which requires vector calculus) and solve for 0.
 
-Take a look at the previous lecture for the full proof. This gives us a very cool result of
-
+Take a look at the previous lecture note for the full proof. This gives us a very cool result of
 $$\Sigma w^T = \lambda w^T$$
 
-$\Sigma$ is the covariance matrix of $X$. The equation above implies that:
+$\Sigma$ is the **covariance matrix** of $X$. The equation above implies that:
 
-1. $w$ is a **unitary eigenvector** of the **covariance matrix** $\Sigma$. In other words, its norm is equal to 1: $||w||^2 = ww^T = 1$.
-2. The **error is minimized** when $w$ is the eigenvector with the **largest eigenvalue** $\lambda$.
+1. $w$ is a *unitary eigenvector* of the covariance matrix $\Sigma$. In other words, its norm is equal to 1: $||w||^2 = ww^T = 1$.
+2. The error is minimized when $w$ is the eigenvector with the *largest eigenvalue* $\lambda$.
 
-This tells us that the **principal components** (rows of $W$) are the **eigenvectors** with the **largest eigenvalues** of the covariance matrix $\Sigma$. They represent the directions of **maximum variance** in the data. We can construct the **latent factors**, or the $Z$ matrix, by projecting the *centered data $X$* onto the *principal component vectors*, $W^T$.
+::: {.callout-tip}
+### [Linear Algebra Review] Covariance Matrix
+**Covariance matrix** defines spread (variance) and orientation (covariance) of our data.
 
-<center><img src = "images/slide10.png" width="400vw"></center>
+Geometrically, we can represent the covariance matrix with a vector, pointing into the direction of the largest *spread* of the data, and whose magnitude equals the *spread* (variance) in this direction.
+
+<center><img src = "images/cov_matrix.png" width="400vw"></center>
+
+- Diagonal elements: variance of data along each dimension.
+- Off-diagonal elements: covariance of different dimensions.
+:::
+
+This tells us that the **principal components** (rows of $W$) are the *eigenvectors* with the *largest eigenvalues* of the covariance matrix $\Sigma$. Thus, principal components represent the **directions of maximum variance** in the data. We can construct the *latent factors*, or the $Z$ matrix, by projecting the centered data $X$ onto the principal component vectors, $W^T$.
+
+<center><img src = "images/slide10.png" width="600vw"></center>
 
 But how do we compute the eigenvectors of $\Sigma$? Let's dive into SVD to answer this question. 
 
@@ -77,7 +87,7 @@ But how do we compute the eigenvectors of $\Sigma$? Let's dive into SVD to answe
 
 Singular value decomposition (SVD) is an important concept in linear algebra. Since this class requires a linear algebra course (MATH 54, MATH 56, or EECS 16A) as a pre/co-requisite, we assume you have taken or are taking a linear algebra course, so we won't explain SVD in its entirety. In particular, we will not prove why SVD is a valid decomposition of rectangular matrices.
 
-We will not dive deep into the theory and details of SVD. Instead, we will only cover what is needed for a data science interpretation. If you'd like more information, check out [EECS 16B Note 14](https://inst.eecs.berkeley.edu/~ee16b/sp23/notes/sp23/note14.pdf) or [EECS 16B Note 15](https://inst.eecs.berkeley.edu/~ee16b/sp23/notes/sp23/note15.pdf).
+We will not dive deep into the theory and details of SVD. Instead, we will only cover what is needed for a data science interpretation. If you'd like more information, check out [EECS 16B Note 14](https://inst.eecs.berkeley.edu/~ee16b/sp23/notes/sp23/note14.pdf) and [EECS 16B Note 15](https://inst.eecs.berkeley.edu/~ee16b/sp23/notes/sp23/note15.pdf).
 
 ::: {.callout-tip}
 
@@ -171,12 +181,14 @@ X^TX V &= VS^T S V^T V \\
 &= VS^T S
 \end{align}
 
-<!-- ### SVD: Geometric Perspective
+::: {.callout-tip}
+### SVD: Geometric Perspective
 
-<center><img src = "images/svd.png" width="500vw"></center>
+<center><img src = "images/svd.png" width="400vw"></center>
 <br>
 We’ve seen that $U$ and $V$ represent rotations, and $S$ represents scaling. Therefore, SVD says that any matrix can be decomposed into a rotation, then a scaling, and another rotation.
-<center><img src = "images/svd_geo.png" width="600vw"></center> -->
+<center><img src = "images/svd_geo.png" width="600vw"></center>
+:::
 
 ### SVD in `NumPy`
 
@@ -261,12 +273,20 @@ Principal Component Analysis (PCA) and Singular Value Decomposition (SVD) can be
 - SVD: a linear algebra algorithm that splits a matrix into 3 component parts.
 - PCA: a data science procedure used for dimensionality reduction that _uses_ SVD as one of the steps.
 
-<!-- ### Derivation
-::: {.callout-tip}
-### [Linear Algebra Review] Covariance Matrix
-[TO DO if time]
+Let's summarize first the steps to obtain Principal Components via SVD:
 
-::: -->
+1. **Center the data matrix** $X$ by subtracting the mean of each attribute column.
+    a. The Scikit-Learn PCA code does this automatically
+        - `X = X - np.mean(X, axis = 0)`
+    b. You should also consider **standardizing your data** (ensure unit variance on each dimension)
+	    - `X = (X - np.mean(X, axis = 0)) / np.std(X, axis = 0)`
+        - The Scikit-Learn PCA code **does not do this**, but you should standardize your data if features have **vastly different ranges**. 
+        - You should not standardize your data if the units are all the same and the **differences in variability** across dimensions is **meaningful** (e.g., everything is in the same units)
+
+
+2. To find the $k$ **principal components**:
+    a. Compute the SVD of the data matrix ($X = U{S}V^{T}$).
+    b. The first $k$ columns of $V$ contain the $k$ **principal components** of $X$. The $k$-th column of $V$ is also known as the $k$-th principal component and corresponds to the $k$-th largest singular value of $X$. 
 
 ### Deriving Principal Components From SVD
 
@@ -275,12 +295,14 @@ $$ X = U S V^T $$
 
 Because $X$ is centered, the covariance matrix of $X$, $\Sigma$, is equal to $\frac{1}{n}X^T X$. Rearranging this equation, we get
 
+$$
 \begin{align}
 \Sigma &= \frac{1}{n}X^T X \\
  &= \frac{1}{n}(U S V^T)^T U S V^T \\
  &= \frac{1}{n}V S^T U^T U S V^T & \text{U is orthonormal, so $U^T U = I$} \\
  &= \frac{1}{n}V S^2 V^T
 \end{align}
+$$
 
 Multiplying both sides by $V$, we get
 
@@ -291,7 +313,7 @@ $$
 \end{align}
 $$
 
-This shows that the columns of $V$ are the **eigenvectors** of the covariance matrix $\Sigma$ and, therefore, the **principal components**. Additionally, the **squared singular values $S^2$** (divided by $n$) are the **eigenvalues** of $\Sigma$.
+This shows that the columns of $V$ are the **eigenvectors** of the covariance matrix $\Sigma$ and, therefore, the principal components. Additionally, the **squared singular values $S^2$** (divided by $n$) are the **eigenvalues** of $\Sigma$.
 
 <!-- <center><img src="images/slide15.png" alt='slide15' width='500'></center> -->
 
@@ -351,23 +373,6 @@ Coupled together, this interpretation also allows us to understand that:
 - Principal components are **axis-aligned**. That is, if you plot two PCs on a 2D plane, one will lie on the x-axis and the other on the y-axis.
 - The **latent factors** are obtained by **projecting** X onto the principal components.
 
-### Using Principal Components
-
-Let's summarize the steps to obtain Principal Components via SVD:
-
-1. **Center the data matrix** $X$ by subtracting the mean of each attribute column.
-    a. The Scikit-Learn PCA code does this automatically
-        - `X = X - np.mean(X, axis = 0)`
-    b. You should also consider **standardizing your data** (ensure unit variance on each dimension)
-	    - `X = (X - np.mean(X, axis = 0)) / np.std(X, axis = 0)`
-        - The Scikit-Learn PCA code **does not do this**, but you should standardize your data if features have **vastly different ranges**. 
-        - You should not standardize your data if the units are all the same and the **differences in variability** across dimensions is **meaningful** (e.g., everything is in the same units)
-
-
-2. To find the $k$ **principal components**:
-    a. Compute the SVD of the data matrix ($X = U{S}V^{T}$).
-    b. The first $k$ columns of $V$ contain the $k$ **principal components** of $X$. The $k$-th column of $V$ is also known as the $k$-th principal component and corresponds to the $k$-th largest singular value of $X$. 
-
 ### Code Demo
 
 Let's now walk through an example where we compute PCA using SVD. In order to get the first $k$ principal components from an $n \times d$ matrix $X$, we:
@@ -393,7 +398,7 @@ two_PCs = Vt.T[:, :2]
 pd.DataFrame(two_PCs).head()
 ```
 
-## Data Variance and Centering
+## Centering Data and Computing Variance
 
 We define the **total variance** of a data matrix as the sum of variances of attributes. The principal components are a low-dimension representation that capture as much of the original data's total variance as possible. Formally, the $i$-th singular value tells us the **component score**, or how much of the data variance is captured by the $i$-th principal component. Assuming the number of datapoints is $n$:
 
@@ -432,6 +437,8 @@ In other words, the variance ratio is a principal component's singular value squ
 
 <center><img src="images/scree_plot.png" alt='scree_plot' width='500'></center>
 
+Interpreting this graph, first principal component explains 80% of the total variance in the data.
+
 ### Biplots
 
 Biplots superimpose the **directions** onto the plot of PC1 vs. PC2, where vector $j$ corresponds to the direction for feature $j$ (e.g., $v_{1j}, v_{2j}$). There are several ways to scale biplot vectors — in this course, we plot the direction itself. For other scalings, which can lead to more interpretable directions/loadings, see [SAS biplots](https://blogs.sas.com/content/iml/2019/11/06/what-are-biplots.html).
@@ -448,7 +455,7 @@ Say we were considering feature 3, and say that was the purple arrow labeled "52
 - Here, we would infer that $v_1$ (in the $x$/PC1-direction) is positive, meaning that a linear increase in feature 3 would correspond to a linear increase of PC1, meaning feature 3 and PC1 are positively correlated.
 - $v_2$ (in the $y$/pc2-direction) is negative, meaning a linear increase in feature 3 would correspond to a linear decrease in PC2, meaning feature 3 and PC2 are negatively correlated.
 
-## Example 1: House of Representatives Voting
+## Example: House of Representatives Voting
 
 Let's examine how the House of Representatives (of the 116th Congress, 1st session) voted in the month of September 2019.
 
@@ -675,7 +682,7 @@ $$ \text{variance ratio of principal component j} = \frac{\text{component score 
 
 In Python, assuming you had a 1D `NumPy` array of singular values `s` returned by `np.linalg.svd`, you could compute the list of variances ratios with `s**2 / sum(s**2)`. -->
 
-## Example 2: Image Classification
+## Example: Image Classification
 
 In machine learning, PCA is often used as a preprocessing step prior to training a supervised model.
 
@@ -940,7 +947,7 @@ pca = PCA(n_components=n_comps)
 pca.fit(X)
 ```
 
-### Examining PCA Results
+#### Examining PCA Results
 
 Now that `sklearn` helped us find the principal components, let's visualize a scree plot.
 
@@ -953,12 +960,14 @@ fig.show()
 We can see that the line starts flattening out around 2 or 3, which suggests that most of the data is explained by just the first two or three dimensions. To illustrate this, let's plot the first three principal components and the datapoints' corresponding classes. Can you identify any patterns? 
 
 ```{python}
+#| scrolled: true
 images[['z1', 'z2', 'z3']] = pca.transform(X)[:, :3]
 fig = px.scatter_3d(images, x='z1', y='z2', z='z3', color='class', hover_data=['labels'], 
               width=1000, height=800)
 # set marker size to 5
 fig.update_traces(marker=dict(size=5))
 ```
+
 
 ## Why Perform PCA
 
@@ -976,17 +985,15 @@ As we saw in the demos, we often perform PCA during the Exploratory Data Analysi
 
 <center><img src="images/slide21.png" alt='slide21' width='500'></center>
 
-## (Bonus) Applications of PCA
 
-### PCA in Biology
+## [BONUS] Applications of PCA in Biology
 
 PCA is commonly used in biomedical contexts, which have many named variables! It can be used to:
 
 1. Cluster data ([Paper 1](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-019-2680-1), [Paper 2](https://www.science.org/doi/10.1126/scirobotics.abk2378)).
 2. Identify correlated variables ([interpret](https://docs.google.com/presentation/d/1-aDu0ILCkPx3iCcJGB3YXci-L4g90Q6AarXU6wffLB8/edit#slide=id.g62cb86badb_0_1128) rows of $V^{T}$ as linear coefficients) ([Paper 3](https://www.nature.com/articles/s41598-017-05714-1)). Uses [biplots](<https://www.google.com/url?q=https://www.geo.fu-berlin.de/en/v/soga/Geodata-analysis/Principal-Component-Analysis/principal-components-basics/Interpretation-and-visualization/index.html%23:~:text%3DThe%2520biplot%2520is%2520a%2520very,in%2520a%2520single%2520biplot%2520display.%26text%3DThe%2520plot%2520shows%2520the%2520observations,principal%2520components%2520(synthetic%2520variables).&sa=D&source=editors&ust=1682131633152964&usg=AOvVaw2H9SOeMP5kUS890Fkhfthx>).
 
-
-## (Bonus) PCA vs. Regression
+## [BONUS] PCA vs. Regression
 
 ### Regression: Minimizing Horizontal/Verticle Error
 
@@ -1008,7 +1015,7 @@ The rank-1 approximation is close but not the same as the mortality regression l
 
 Even in higher dimensions, the idea behind principal components is the same! Suppose we have 30-dimensional data and decide to use the first 5 principal components. Our procedure minimizes the error between the original 30-dimensional data and the projection of that 30-dimensional data onto the “best” 5-dimensional subspace. See [CS 189 Note 10](https://eecs189.org/docs/notes/n10.pdf) for more details.
 
-## (Bonus) Automatic Factorization
+## [BONUS] Automatic Factorization
 
 One key fact to remember is that the decomposition is not arbitrary. The _rank_ of a matrix limits how small our inner dimensions can be if we want to perfectly recreate our matrix. The proof for this is out of scope.
 
@@ -1019,7 +1026,7 @@ Even if we know we have to factorize our matrix using an inner dimension of $R$,
 
 What if we wanted a 2D representation? It's valuable to compress all of the data that is relevant into as few dimensions as possible in order to plot it efficiently. Some 2D matrices yield better approximations than others. How well can we do?
 
-## (Bonus) Proof of Component Score
+## [BONUS] Proof of Component Score
 
 The proof defining component score is out of scope for this class, but it is included below for your convenience.
 
@@ -1045,4 +1052,5 @@ V^T \frac{1}{n} \tilde{X}^T \tilde{X} V &= V^T V \left( \frac{1}{n} S \right) = 
 $$
 
 The last line defines the $j$-th component score.
+
 
