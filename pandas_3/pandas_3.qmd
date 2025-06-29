@@ -1,5 +1,5 @@
 ---
-title: Pandas III (from Spring 2025)
+title: Pandas III
 execute:
   echo: true
   enabled: true
@@ -22,7 +22,7 @@ jupyter:
       format_version: '1.0'
       jupytext_version: 1.16.1
   kernelspec:
-    display_name: data100quarto
+    display_name: Python 3 (ipykernel)
     language: python
     name: python3
 ---
@@ -37,19 +37,12 @@ jupyter:
 
 We will introduce the concept of aggregating data – we will familiarize ourselves with `GroupBy` objects and used them as tools to consolidate and summarize a`DataFrame`. In this lecture, we will explore working with the different aggregation functions and dive into some advanced `.groupby` methods to show just how powerful of a resource they can be for understanding our data. We will also introduce other techniques for data aggregation to provide flexibility in how we manipulate our tables. 
 
-## Custom Sorts
-
-First, let's finish our discussion about sorting. Let's try to solve a sorting problem using different approaches. Assume we want to find the longest baby names and sort our data accordingly.
-
-We'll start by loading the `babynames` dataset. Note that this dataset is filtered to only contain data from California.
+First, let's load `babynames` dataset.
 
 ```{python}
 #| code-fold: true
 # This code pulls census data and loads it into a DataFrame
 # We won't cover it explicitly in this class, but you are welcome to explore it on your own
-import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning)
-
 import pandas as pd
 import numpy as np
 import urllib.request
@@ -69,69 +62,7 @@ field_names = ['State', 'Sex', 'Year', 'Name', 'Count']
 with zf.open(ca_name) as fh:
     babynames = pd.read_csv(fh, header=None, names=field_names)
 
-babynames.tail(10)
-```
-
-### Approach 1: Create a Temporary Column
-
-One method to do this is to first start by creating a column that contains the lengths of the names.
-
-```{python}
-# Create a Series of the length of each name
-babyname_lengths = babynames["Name"].str.len()
-
-# Add a column named "name_lengths" that includes the length of each name
-babynames["name_lengths"] = babyname_lengths
-babynames.head(5)
-```
-
-We can then sort the `DataFrame` by that column using `.sort_values()`:
-
-```{python}
-# Sort by the temporary column
-babynames = babynames.sort_values(by="name_lengths", ascending=False)
-babynames.head(5)
-```
-
-Finally, we can drop the `name_length` column from `babynames` to prevent our table from getting cluttered.
-
-```{python}
-# Drop the 'name_length' column
-babynames = babynames.drop("name_lengths", axis='columns')
-babynames.head(5)
-```
-
-### Approach 2: Sorting using the `key` Argument
-
-Another way to approach this is to use the `key` argument of `.sort_values()`. Here we can specify that we want to sort `"Name"` values by their length.
-
-```{python}
-babynames.sort_values("Name", key=lambda x: x.str.len(), ascending=False).head()
-```
-
-### Approach 3: Sorting using the `map` Function
-
-We can also use the `map` function on a `Series` to solve this. Say we want to sort the `babynames` table by the number of `"dr"`'s and `"ea"`'s in each `"Name"`. We'll define the function `dr_ea_count` to help us out.
-
-```{python}
-# First, define a function to count the number of times "dr" or "ea" appear in each name
-def dr_ea_count(string):
-    return string.count('dr') + string.count('ea')
-
-# Then, use `map` to apply `dr_ea_count` to each name in the "Name" column
-babynames["dr_ea_count"] = babynames["Name"].map(dr_ea_count)
-
-# Sort the DataFrame by the new "dr_ea_count" column so we can see our handiwork
-babynames = babynames.sort_values(by="dr_ea_count", ascending=False)
 babynames.head()
-```
-
-We can drop the `dr_ea_count` once we're done using it to maintain a neat table.
-
-```{python}
-# Drop the `dr_ea_count` column
-babynames = babynames.drop("dr_ea_count", axis = 'columns')
-babynames.head(5)
 ```
 
 ## Aggregating Data with `.groupby`

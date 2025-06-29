@@ -1,5 +1,5 @@
 ---
-title: Introduction (from Spring 2025)
+title: Introduction
 format:
   html:
     toc: true
@@ -25,8 +25,10 @@ jupyter:
 
 ::: {.callout-note collapse="false"}
 ## Learning Outcomes
-- Acquaint yourself with the overarching goals of Data 100
-- Understand the stages of the data science lifecycle
+- Acquaint yourself with the overarching goals of Data 100.
+- Understand the stages of the data science lifecycle.
+- Build familiarity with `pandas` and `pandas` syntax.
+- Learn a key data structure: `Series`.
 :::
 
 Data science is an interdisciplinary field with a variety of applications and offers great potential to address challenging societal issues. By building data science skills, you can empower yourself to participate in and drive conversations that shape your life and society as a whole, whether that be fighting against climate change, launching diversity initiatives, or more. 
@@ -46,14 +48,14 @@ Ultimately, data science is the application of data-centric, computational, and 
 
 A true mastery of data science requires a deep theoretical understanding and strong grasp of domain expertise. This course will help you build on the former -- specifically, the foundation of your technical knowledge, allowing you to take data and produce useful insights on the world's most challenging and ambiguous problems. 
 
-::: {.callout-note collapse="false"}
+::: {.callout-note collapse="true"}
 ## Course Goals
 - Prepare you for advanced Berkeley courses in **data management, machine learning, and statistics.**
 - Enable you to launch a career as a data scientist by providing experience working with **real-world data, tools, and techniques**.
 - Empower you to apply computational and inferential thinking to address **real-world problems**.
 :::
 
-::: {.callout-note collapse="false"}
+::: {.callout-note collapse="true"}
 ## Some Topics We'll Cover
 - `pandas` and `NumPy`
 - Exploratory Data Analysis
@@ -157,8 +159,149 @@ Key procedures: *model creation*, *prediction*, *inference*.
 
 <div style="text-align: center;"><img src="images/understand_world.PNG" alt='understand_world' width='500'></div>
 
-## Conclusion
-
 The data science lifecycle is meant to be a set of general guidelines rather than a hard set of requirements. In our journey exploring the lifecycle, we'll cover both the underlying theory and technologies used in data science. By the end of the course, we hope that you start to see yourself as a data scientist.
 
 With that, we'll begin by introducing one of the most important tools in exploratory data analysis: `pandas`.
+
+---
+
+In this sequence of lectures, we will dive right into things by having you explore and manipulate real-world data. We'll first introduce `pandas`, a popular Python library for interacting with **tabular data**.
+
+## Tabular Data and `pandas`
+
+Data scientists work with data stored in a variety of formats. This class focuses primarily on *tabular data* — data that is stored in a table.
+
+Tabular data is one of the most common systems that data scientists use to organize data. This is in large part due to the simplicity and flexibility of tables. Tables allow us to represent each **observation**, or instance of collecting data from an individual, as its own *row*. We can record each observation's distinct characteristics, or **features**, in separate *columns*.
+
+
+To see this in action, we'll explore the `elections` dataset, which stores information about political candidates who ran for president of the United States in previous years.
+
+In the `elections` dataset, each row (blue box) represents one instance of a candidate running for president in a particular year. For example, the first row represents Andrew Jackson running for president in the year 1824. Each column (yellow box) represents one characteristic piece of information about each presidential candidate. For example, the column named "Result" stores whether or not the candidate won the election. 
+
+<center><img src = "images/row_col.png" width = "600"></img></a></center>
+
+Your work in Data 8 helped you grow very familiar with using and interpreting data stored in a tabular format. Back then, you used the `Table` class of the `datascience` library, a special programming library created specifically for Data 8 students.
+
+In Data 100, we will be working with the programming library `pandas`, which is generally accepted in the data science community as the industry- and academia-standard tool for manipulating tabular data (as well as the inspiration for Petey, our panda bear mascot).
+
+Using `pandas`, we can
+
+- Arrange data in a tabular format.
+- Extract useful information filtered by specific conditions.
+- Operate on data to gain new insights.
+- Apply `NumPy` functions to our data (our friends from Data 8).
+- Perform vectorized computations to speed up our analysis (Lab 1).
+
+To begin our work in `pandas`, we must first import the library into our Python environment. This will allow us to use `pandas` data structures and methods in our code.
+
+```{python}
+# `pd` is the conventional alias for Pandas, as `np` is for NumPy
+import pandas as pd
+```
+
+There are three fundamental data structures in `pandas`:
+
+1. **`Series`**: 1D labeled array data; best thought of as columnar data.
+2. **`DataFrame`**: 2D tabular data with rows and columns.
+3. **`Index`**: A sequence of row/column labels.
+
+`DataFrame`s, `Series`, and Indices can be represented visually in the following diagram, which considers the first few rows of the `elections` dataset.
+
+<center><img src = "images/df_elections.png" width = "600"></img></a></center>
+
+Notice how the **DataFrame** is a two-dimensional object — it contains both rows and columns. The **Series** above is a singular column of this `DataFrame`, namely the `Result` column. Both contain an **Index**, or a shared list of row labels (the integers from 0 to 4, inclusive).
+
+Today, we will start off from `Series` object.
+
+## `Series`
+
+A `Series` represents a column of a `DataFrame`; more generally, it can be any 1-dimensional array-like object. It contains both:
+
+- A sequence of **values** of the same type.
+- A sequence of data labels called the **index**.
+
+In the cell below, we create a `Series` named `s`.
+
+```{python}
+s = pd.Series(["welcome", "to", "data 100"])
+s
+```
+
+```{python}
+ # Accessing data values within the Series
+ s.values
+```
+
+```{python}
+ # Accessing the Index of the Series
+ s.index
+```
+
+By default, the `index` of a `Series` is a sequential list of integers beginning from 0. Optionally, a manually specified list of desired indices can be passed to the `index` argument.
+
+```{python}
+s = pd.Series([-1, 10, 2], index = ["a", "b", "c"])
+s
+```
+
+```{python}
+s.index
+```
+
+Indices can also be changed after initialization.
+
+```{python}
+s.index = ["first", "second", "third"]
+s
+```
+
+```{python}
+s.index
+```
+
+#### Selection in `Series`
+
+Much like when working with `NumPy` arrays, we can select a single value or a set of values from a `Series`. To do so, there are three primary methods:
+
+1. A single label.
+2. A list of labels.
+3. A filtering condition.
+
+To demonstrate this, let's define a new Series `s`.
+
+```{python}
+s = pd.Series([4, -2, 0, 6], index = ["a", "b", "c", "d"])
+s
+```
+
+##### A Single Label
+
+```{python}
+# We return the value stored at the index label "a"
+s["a"] 
+```
+
+##### A List of Labels
+
+```{python}
+# We return a Series of the values stored at the index labels "a" and "c"
+s[["a", "c"]] 
+```
+
+##### A Filtering Condition
+
+Perhaps the most interesting (and useful) method of selecting data from a `Series` is by using a filtering condition. 
+
+First, we apply a boolean operation to the `Series`. This creates **a new `Series` of boolean values**.
+
+```{python}
+# Filter condition: select all elements greater than 0
+s > 0 
+```
+
+We then use this boolean condition to index into our original `Series`. `pandas` will select only the entries in the original `Series` that satisfy the condition.
+
+```{python}
+s[s > 0] 
+```
+
