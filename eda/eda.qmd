@@ -1,5 +1,5 @@
 ---
-title: Data Cleaning and EDA (from Spring 2025)
+title: Data Cleaning and EDA
 execute:
   echo: true
 format:
@@ -19,12 +19,13 @@ jupyter:
       extension: .qmd
       format_name: quarto
       format_version: '1.0'
-      jupytext_version: 1.16.1
+      jupytext_version: 1.17.2
   kernelspec:
-    display_name: data100quarto
+    display_name: Python 3 (ipykernel)
     language: python
     name: python3
 ---
+
 
 ```{python}
 #| code-fold: true
@@ -150,183 +151,154 @@ JSON files can be loaded into `pandas` using `pd.read_json`.
 pd.read_json('data/elections.json').head(3)
 ```
 
-##### EDA with JSON: Berkeley COVID-19 Data
-The City of Berkeley Open Data [website](https://data.cityofberkeley.info/Health/COVID-19-Confirmed-Cases/xn6j-b766) has a dataset with COVID-19 Confirmed Cases among Berkeley residents by date. Let's download the file and save it as a JSON (note the source URL file type is also a JSON). In the interest of reproducible data science, we will download the data programatically. We have defined some helper functions in the [`ds100_utils.py`](https://ds100.org/fa23/resources/assets/lectures/lec05/lec05-eda.html) file that we can reuse these helper functions in many different notebooks.
+##### EDA with JSON: United States Congress Data
+The congress.gov API (Application Programming Interface) provides data about the activities and members of the United States Congress (i.e., the House of Representatives and the Senate). 
+<br>
 
-```{python}
-#| code-fold: false
-from ds100_utils import fetch_and_cache
+To get a JSON file containing information about the current members of Congress from California, you could use the following **API call**:
 
-covid_file = fetch_and_cache(
-    "https://data.cityofberkeley.info/api/views/xn6j-b766/rows.json?accessType=DOWNLOAD",
-    "confirmed-cases.json",
-    force=False)
-covid_file          # a file path wrapper object
-```
+- `https://api.congress.gov/v3/member/CA?api_key=[INSERT_KEY]&limit=250&format=json&currentMember=True`
 
-###### File Size
-Let's start our analysis by getting a rough estimate of the size of the dataset to inform the tools we use to view the data. For relatively small datasets, we can use a text editor or spreadsheet. For larger datasets, more programmatic exploration or distributed computing tools may be more fitting. Here we will use `Python` tools to probe the file.
+- You can instantly sign up for a congress.gov **API key** [here](https://gpo.congress.gov/sign-up/). Once you have your key, replace `[INSERT_KEY]` above with your key, and enter the API call as a URL in your browser. What happens? 
 
-Since there seem to be text files, let's investigate the number of lines, which often corresponds to the number of records
+- Once the JSON from the API call is visible in your browser, you can click `File` --> `Save Page As` to save the JSON file to your coputer.
 
-```{python}
-#| code-fold: false
-import os
+- Coarsely, API keys are used to track how much a given user engages with the API. There might be limits to the number of API calls (e.g., congress.gov API limits to 5,000 calls per hour), or a cost for API calls (e.g., using the OpenAI API for programmatically using ChatGPT).
 
-print(covid_file, "is", os.path.getsize(covid_file) / 1e6, "MB")
+<br>
 
-with open(covid_file, "r") as f:
-    print(covid_file, "is", sum(1 for l in f), "lines.")
-```
-
-###### Unix Commands
-As part of the EDA workflow, Unix commands can come in very handy. In fact, there's an entire book called ["Data Science at the Command Line"](https://datascienceatthecommandline.com/) that explores this idea in depth! 
-In Jupyter/IPython, you can prefix lines with `!` to execute arbitrary Unix commands, and within those lines, you can refer to Python variables and expressions with the syntax `{expr}`.
-
-Here, we use the `ls` command to list files, using the `-lh` flags, which request "long format with information in human-readable form." We also use the `wc` command for "word count," but with the `-l` flag, which asks for line counts instead of words.
-
-These two give us the same information as the code above, albeit in a slightly different form:
-
-```{python}
-#| code-fold: false
-!ls -lh {covid_file}
-!wc -l {covid_file}
-```
+After following these steps, we save this JSON file as `data/ca-congress-members.json`. 
 
 ###### File Contents
-Let's explore the data format using `Python`. 
+Let's examine this file using Python. We can programmatically view the first couple lines of the file using the same functions we used with CSVs:
 
 ```{python}
 #| code-fold: false
-with open(covid_file, "r") as f:
+congress_file = "data/ca-congress-members.json"
+
+# Inspect the first five lines of the file
+with open(congress_file, "r") as f:
     for i, row in enumerate(f):
-        print(repr(row)) # print raw strings
+        print(row)
         if i >= 4: break
 ```
 
-We can use the `head` Unix command (which is where `pandas`' `head` method comes from!) to see the first few lines of the file:
+###### EDA: Digging into JSON with Python
 
-```{python}
-#| code-fold: false
-!head -5 {covid_file}
-```
+JSON data closely matches the internal Python object model.  
 
-In order to load the JSON file into `pandas`, Let's first do some EDA with Python's `json` package to understand the particular structure of this JSON file so that we can decide what (if anything) to load into `pandas`. Python has relatively good support for JSON data since it closely matches the internal python object model. In the following cell we import the entire JSON datafile into a python dictionary using the `json` package.
+- In the following cell, we import the entire JSON datafile into a Python dictionary using the `json` package.
 
 ```{python}
 #| code-fold: false
 import json
 
-with open(covid_file, "rb") as f:
-    covid_json = json.load(f)
+# Import the JSON file into Python as a dictionary
+with open(congress_file, "rb") as f:
+    congress_json = json.load(f)
+
+type(congress_json)
 ```
 
-The `covid_json` variable is now a dictionary encoding the data in the file:
+The `congress_json` variable is a dictionary encoding the data in the JSON file.
+
+Below, we access the first element of the `members` element of the `congress_json` dictionary.
+
+- This first element is also a dictionary (and there are more dictionaries inside of it!)
 
 ```{python}
 #| code-fold: false
-type(covid_json)
+# Grab the list corresponding to the `members` key in the JSON dictionary, 
+# and then grab the first element of this list.
+# In a moment, we'll see how we knew to use the key `members`, and that
+# the resulting object is a list.
+congress_json['members'][0]
 ```
 
-We can examine what keys are in the top level JSON object by listing out the keys. 
+How should we probe a nested dictionary like `congress_json`?
+
+We can start by identifying the top-level **keys** of the dictionary:
 
 ```{python}
 #| code-fold: false
-covid_json.keys()
+# Grab the top-level keys of the JSON dictionary
+congress_json.keys()
 ```
 
-**Observation**: The JSON dictionary contains a `meta` key which likely refers to metadata (data about the data).  Metadata is often maintained with the data and can be a good source of additional information.
+Looks like we have three top-level keys: `members`, `pagination`, and `request`.
 
+> You'll often see a top-level `meta` key in JSON files. This does not refer to Meta (formerly Facebook). Instead, it typically refers to metadata (data about the data).  Metadata are often maintained alongside the data.
 
-We can investigate the metadata further by examining the keys associated with the metadata.
+Let's check the type of the `members` element:
 
 ```{python}
 #| code-fold: false
-covid_json['meta'].keys()
+type(congress_json['members'])
 ```
 
-The `meta` key contains another dictionary called `view`.  This likely refers to metadata about a particular "view" of some underlying database. We will learn more about views when we study SQL later in the class.    
+Looks like a list! What are the first two elements?
 
 ```{python}
 #| code-fold: false
-covid_json['meta']['view'].keys()
+congress_json['members'][:2]
 ```
 
-Notice that this a nested/recursive data structure.  As we dig deeper we reveal more and more keys and the corresponding data:
+More dictionaries! You can repeat the process above to traverse the nested dictionary.
 
-```
-meta
-|-> data
-    | ... (haven't explored yet)
-|-> view
-    | -> id
-    | -> name
-    | -> attribution 
-    ...
-    | -> description
-    ...
-    | -> columns
-    ...
-```
+You'll notice that each record of `congress_json['members']` looks like it could be a column of a DataFrame.
 
+- The keys look a lot like column names, and the values could be the entries in each row.
 
-There is a key called description in the view sub dictionary.  This likely contains a description of the data:
+<br> 
+
+But, the two other elements of `congress_json` don't have the same structure as `congress_json['members']`.
+
+- So, they probably don't belong in a DataFrame containing the members of Congress from CA.
+
+- We'll see the implications of this inconsistency in the next section.
 
 ```{python}
 #| code-fold: false
-print(covid_json['meta']['view']['description'])
+print(congress_json['pagination'])
+print(congress_json['request'])
 ```
 
-###### Examining the Data Field for Records
+###### JSON with pandas
 
-We can look at a few entries in the `data` field. This is what we'll load into `pandas`.
+`pandas` has a built in function called `pd.read_json` for reading in JSON files. In order to read in this JSON file, you might want to try something like the code in the cell below. However, if we tried to run this code, it would error.
 
 ```{python}
 #| code-fold: false
-for i in range(3):
-    print(f"{i:03} | {covid_json['data'][i]}")
+#pd.read_json(congress_file)
 ```
 
-Observations:
+- The code above tries to import the entire JSON file located at `congress_file` (`congress_json`), including `congress_json['pagination']` and `congress_json['request']`.
 
-* These look like equal-length records, so maybe `data` is a table!
-* But what do each of values in the record mean? Where can we find column headers?
+- We only want to make a DataFrame out of `congress_json['members']`.
 
-For that, we'll need the `columns` key in the metadata dictionary. This returns a list: 
+Instead, let's try converting the `members` element of `congress_json` to a DataFrame by using `pd.DataFrame`:
 
 ```{python}
 #| code-fold: false
-type(covid_json['meta']['view']['columns'])
+# Convert dictionary to DataFrame
+congress_df = pd.DataFrame(congress_json['members'])
+congress_df.head()
 ```
 
-###### Summary of exploring the JSON file
+We've successfully begun to rectangularize our JSON data!
 
-1. The above **metadata** tells us a lot about the columns in the data including column names, potential data anomalies, and a basic statistic. 
-1. Because of its non-tabular structure, JSON makes it easier (than CSV) to create **self-documenting data**, meaning that information about the data is stored in the same file as the data.
-1. Self-documenting data can be helpful since it maintains its own description and these descriptions are more likely to be updated as data changes. 
+ 
 
-###### Loading COVID Data into `pandas`
-Finally, let's load the data (not the metadata) into a `pandas` `DataFrame`. In the following block of code we:
+### Other Data Formats
 
-1. Translate the JSON records into a `DataFrame`:
+So far, we've looked at text data that comes in a quite nice format. Although some data cleaning might be necessary, it has still had all of the components of a rectangular dataset. However, not all data comes like this, and there are also different kinds of data we can use. Some examples include:
 
-    * fields: `covid_json['meta']['view']['columns']`
-    * records: `covid_json['data']`
+* **Image Data**: Used for medical diagnosis
+* **Audio Data**: Used for speech recognition, sentiment analysis
+* **Video Data**: Used for object tracking, facial recognition
+* **Text**: Used for LLMs, document review
 
-    
-1. Remove columns that have no metadata description.  This would be a bad idea in general, but here we remove these columns since the above analysis suggests they are unlikely to contain useful information.
-   
-1. Examine the `tail` of the table.
-
-```{python}
-#| code-fold: false
-# Load the data from JSON and assign column titles
-covid = pd.DataFrame(
-    covid_json['data'],
-    columns=[c['name'] for c in covid_json['meta']['view']['columns']])
-
-covid.tail()
-```
+Even though this may not look tabular at first, all of these formats can be represented in tabular/matrix form! So by learning how to work with tabular data, you are well equipped to deal with other kinds of data as well.
 
 ### Variable Types
 
@@ -795,7 +767,32 @@ for year in [2019, 2020, 2021]:
   print(tb_per_100k_50_states)
 ```
 
-## EDA Demo 2: Mauna Loa CO<sub>2</sub> Data -- A Lesson in Data Faithfulness
+## Summary
+We went over a lot of content this lecture; let's summarize the most important points: 
+
+### Dealing with Missing Values
+There are a few options we can take to deal with missing data:
+
+* Drop missing records
+* Keep `NaN` missing values
+* Impute using an interpolated column
+
+### EDA and Data Wrangling
+There are several ways to approach EDA and Data Wrangling: 
+
+* Examine the **data and metadata**: what is the date, size, organization, and structure of the data? 
+* Examine each **field/attribute/dimension** individually.
+* Examine pairs of related dimensions (e.g. breaking down grades by major).
+* Along the way, we can:
+    * **Visualize** or summarize the data.
+    * **Validate assumptions** about data and its collection process. Pay particular attention to when the data was collected. 
+    * Identify and **address anomalies**.
+    * Apply data transformations and corrections (we'll cover this in the upcoming lecture).
+    * **Record everything you do!** Developing in Jupyter Notebook promotes *reproducibility* of your own work!
+
+## [BONUS] EDA Demo 2: Mauna Loa CO<sub>2</sub> Data -- A Lesson in Data Faithfulness
+
+We no longer cover the following demo in lecture, but we provide the following section in the course notes for interested students.
 
 [Mauna Loa Observatory](https://gml.noaa.gov/ccgg/trends/data.html) has been monitoring CO<sub>2</sub> concentrations since 1958.
 
@@ -1123,27 +1120,3 @@ plt.title("CO2 Average By Year");
 ```
 
 Indeed, we see a rise by nearly 100 ppm of CO<sub>2</sub> since Mauna Loa began recording in 1958.
-
-## Summary
-We went over a lot of content this lecture; let's summarize the most important points: 
-
-### Dealing with Missing Values
-There are a few options we can take to deal with missing data:
-
-* Drop missing records
-* Keep `NaN` missing values
-* Impute using an interpolated column
-
-### EDA and Data Wrangling
-There are several ways to approach EDA and Data Wrangling: 
-
-* Examine the **data and metadata**: what is the date, size, organization, and structure of the data? 
-* Examine each **field/attribute/dimension** individually.
-* Examine pairs of related dimensions (e.g. breaking down grades by major).
-* Along the way, we can:
-    * **Visualize** or summarize the data.
-    * **Validate assumptions** about data and its collection process. Pay particular attention to when the data was collected. 
-    * Identify and **address anomalies**.
-    * Apply data transformations and corrections (we'll cover this in the upcoming lecture).
-    * **Record everything you do!** Developing in Jupyter Notebook promotes *reproducibility* of your own work!
-
