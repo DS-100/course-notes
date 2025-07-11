@@ -1,5 +1,5 @@
 ---
-title: "Modeling & SLR (from Spring 2025)"
+title: Modeling & SLR
 execute:
   echo: true
 format:
@@ -7,7 +7,7 @@ format:
     code-fold: true
     code-tools: true
     toc: true
-    toc-title: "Modeling & SLR"
+    toc-title: Modeling & SLR
     page-layout: full
     theme:
       - cosmo
@@ -34,39 +34,40 @@ A model is an **idealized representation** of a system. A system is a set of pri
 Example:
 We model the fall of an object on Earth as subject to a constant acceleration of $9.81 m/s^2$ due to gravity.
 
-- While this describes the behavior of our system, it is merely an approximation.
-- It doesn’t account for the effects of air resistance, local variations in gravity, etc.
-- In practice, it’s accurate enough to be useful!
+- This is an **approximate** description of a system
+- It doesn't account for air resistance, topography, etc
+- But in practice, it's **accurate enough** to be useful!
 
 ### Reasons for Building Models
 
 Why do we want to build models? As far as data scientists and statisticians are concerned, there are three reasons, and each implies a different focus on modeling.
 
-1. To explain complex phenomena occurring in the world we live in. Examples of this might be:
-
-    - How are the parents' average height related to their children's average height?
-    - How does an object’s velocity and acceleration impact how far it travels? (Physics: $d = d_0 + vt + \frac{1}{2}at^2$) 
+1. **Inference**: Make sense of *phenomena*. For example,
+    - How do parents' heights <ins>relate</ins> to children's heights?
+    - What is the <ins>correlation</ins> of income and education?
     
-    In these cases, we care about creating models that are *simple and interpretable*, allowing us to understand what the relationships between our variables are.
+    We often want *simple* and *interpretable* models to help us understand relationships
 
-2. To make accurate predictions about unseen data. Some examples include:
+2. **Prediction**: Make accurate predictions about unseen data. Some examples include:
 
-    - Can we predict if an email is spam or not?
-    - Can we generate a one-sentence summary of this 10-page long article?
+    - Is an email spam or not?
+    - Generate a summary of a 10-page long article
 
-    When making predictions, we care more about making extremely accurate predictions, at the cost of having an uninterpretable model. These are sometimes called black-box models and are common in fields like deep learning.
+    When making prediction, we care more about making extremely *accurate* predictions, at the cost of having a *less interpretable* or *black-box* model. Uninterpretable models are common in fields like deep learning.
 
-3. To measure the causal effects of one event on some other event. For example,
+3. **Causality**: Assess whether one thing *causes* something else. For example,
    
-    - Does smoking *cause* lung cancer?
-    - Does a job training program *cause* increases in employment and wages?
+    - Does smoking <ins>cause</ins> lung cancer?
+    - Does a job training program <ins>increase</ins> in employment and wages?
 
-    This is a much harder question because most statistical tools are designed to infer association, not causation. We will not focus on this task in Data 100, but you can take other advanced classes on causal inference (e.g., Stat 156, Data 102) if you are intrigued! 
+    This is a much harder question! Most statistical tools are designed to infer association, not causation. We will not focus on this task in Data 100, but you can take other advanced classes on causal inference (e.g., Stat 156, Data 102) if you are intrigued! 
 
 Most of the time, we aim to strike a balance between building **interpretable** models and building **accurate models**.
 
+Note that these three reasons can overlap! The distinctions are not always clear cut.
 
-### Common Types of Models
+
+### [NOT IN SCOPE] Common Types of Models 
 
 In general, models can be split into two categories:
 
@@ -89,6 +90,8 @@ Note: These specific models are not in the scope of Data 100 and exist to serve 
 ## Simple Linear Regression 
 
 The **regression line** is the unique straight line that minimizes the **mean squared error** of estimation among all straight lines. As with any straight line, it can be defined by a slope and a y-intercept:
+
+- $r = \text{\textbf{correlation}} \text{ between }x \text{ and } y$
 
 - $\text{slope} = r \cdot \frac{\text{Standard Deviation of } y}{\text{Standard Deviation of }x}$
 - $y\text{-intercept} = \text{average of }y - \text{slope}\cdot\text{average of }x$
@@ -128,11 +131,21 @@ To convert a variable $x_i$ into standard units, we subtract its mean from it an
 
 The correlation ($r$) is the average of the product of $x$ and $y$, both measured in *standard units*.
 
+In general,
+
 $$r = \frac{1}{n} \sum_{i=1}^n (\frac{x_i - \bar{x}}{\sigma_x})(\frac{y_i - \bar{y}}{\sigma_y})$$
+
+However, when $\bar{x} = 0$,  $\bar{y} = 0$,  $\sigma_x = 1$, or $\sigma_y = 1$ (which are all satisfied when x and y are both in standard units),
+
+$$r = \frac{1}{n} \sum_{i=1}^{n} x_i y_i$$
+
+This simpler formula is convenient to work with when possible.
 
 1. Correlation measures the strength of a **linear association** between two variables.
 2. Correlations range between -1 and 1: $|r| \leq 1$, with $r=1$ indicating perfect positive linear association, and $r=-1$ indicating perfect negative association. The closer $r$ is to $0$, the weaker the linear association is.
 3. Correlation says nothing about causation and non-linear association. Correlation does **not** imply causation. When $r = 0$, the two variables are uncorrelated. However, they could still be related through some non-linear relationship.
+
+For an intuitive understanding of correlation, when $x_i$ and $y_i$ have the same sign (in standard units), the ($x_i$, $y_i$) pair contributes <ins>positively</ins> to correlation. *Opposite* signs contrinbute <ins>negatively</ins>.
 
 ```{python}
 def plot_and_get_corr(ax, x, y, title):
@@ -174,6 +187,8 @@ plt.show()
 When the variables $y$ and $x$ are measured in *standard units*, the regression line for predicting $y$ based on $x$ has slope $r$ and passes through the origin.
 
  $$\hat{y}_{su} = r \cdot x_{su}$$
+
+ Notice that when r = 1, we have perfect prediction!
 
 ![](images/reg_line_1.png)
 
@@ -237,12 +252,16 @@ The examples above are known as **parametric models**. They relate the collected
 
 Notice that we don't immediately know the values of these parameters. While the features, $x_i$, are taken from our observed data, we need to decide what values to give $\theta$, $\theta_0$, and $\theta_1$ ourselves. This is the heart of parametric modeling: *what parameter values should we choose so our model makes the best possible predictions?*
 
+$\hat{\theta}$ is an estimate of a parameter $\theta$ based on a sample. The "hat" denotes an estimated or predicted quantity. For example, $\hat{y}$ is a prediction. $\hat{\theta}$ is estimated from data.
+
+Before we move on, note that not all statistical models have parameters! k-Nearest Neighbor classifiers (from Data 8) and KDEs are **non-parametric** models.
+
 To choose our model parameters, we'll work through the **modeling process**. 
 
-1. Choose a model: how should we represent the world?
-2. Choose a loss function: how do we quantify prediction error?
-3. Fit the model: how do we choose the best parameters of our model given our data?
-4. Evaluate model performance: how do we evaluate whether this process gave rise to a good model?
+1. **Choose a model**: How should we <ins>represent</ins> the world?
+2. **Choose a loss function**: How do we quantify prediction <ins>error</ins>?
+3. **Fit the model**: How do we <ins>choose</ins> the best parameters of our model given our data?
+4. **Evaluate model performance**: How do we <ins>evaluate</ins> whether this process gave rise to a good model?
 
 ## Choosing a Model
 
