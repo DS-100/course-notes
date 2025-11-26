@@ -1,0 +1,95 @@
+name: Accessibility Checks
+
+on:
+  push:
+  workflow_dispatch:
+
+env:
+  PRODUCTION_URL: "https://ds100.org/course-notes/"
+  # must match the end of PRODUCTION_URL
+  # leave blank if at root
+  SITE_SUBDIR: "course-notes"
+
+jobs:
+  axe-audit:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1. Checkout Code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Setup Quarto with TinyTex
+      - name: Set up Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tinytex: true
+
+      # 3. Setup Node.js (for Axe and http-server)
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 4. Setup Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11.9' 
+          cache: 'pip' 
+
+      # 5. Install Python dependencies
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+      
+      # 6. Render the Site
+      - name: Render Quarto Site
+        run: quarto render
+
+      # 7. Install Tools
+      - name: Install Axe and Server
+        run: npm install -g @axe-core/cli http-server
+
+      # 8. Start Local Server (Background Process)
+      - name: Start Local Server
+        run: |
+          # Mimic the production path structure exactly with
+          # the local server
+          mkdir -p public/${{ env.SITE_SUBDIR }}
+          cp -r docs/* public/${{ env.SITE_SUBDIR }}/
+          
+          # Serve the 'public' folder on port 3000
+          npx http-server ./public -p 3000 > /dev/null 2>&1 &
+          
+          sleep 5
+
+      # 9. Run Axe Scan
+      - name: Run Accessibility Scan
+        id: axe-scan
+        run: |
+          # Swap the Production URL for Localhost + Subdirectory
+          LOCAL_URL="http://localhost:3000/${{ env.SITE_SUBDIR }}"
+          
+          URLS=$(cat docs/sitemap.xml | \
+            sed -n 's/.*<loc>\(.*\)<\/loc>.*/\1/p' | \
+            sed "s|${{ env.PRODUCTION_URL }}|$LOCAL_URL|" | \
+            tr '\n' ' ')
+
+          echo "Scanning the following pages:"
+          echo "$URLS"
+
+          # Run Axe
+          axe $URLS \
+            --tags wcag2a,wcag2aa,wcag21a,wcag21aa \
+            --save axe-report.json \
+            --exit
+
+      # 10. Upload Report (Runs even if previous step fails)
+      - name: Upload Accessibility Report
+        if: always() 
+        uses: actions/upload-artifact@v4
+        with:
+          name: axe-report
+          path: axe-report.json
