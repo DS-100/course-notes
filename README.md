@@ -1,5 +1,7 @@
 # course-notes
 
+[![Accessibility Checks](https://github.com/DS-100/course-notes/actions/workflows/a11y.yml/badge.svg)](https://github.com/DS-100/course-notes/actions/workflows/a11y.yml)
+
 ## Setup
 ### Quarto Set-Up
 
