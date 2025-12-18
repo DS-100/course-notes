@@ -1,0 +1,36 @@
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+    // 1. Select the specific parent div within the callout header that has the 
+    //    collapse attributes (data-bs-toggle).
+    var calloutToggles = document.querySelectorAll(
+        '.callout-header[data-bs-toggle="collapse"]'
+    );
+
+    calloutToggles.forEach(function(toggle) {
+        // 2. Force the ARIA role to be 'button'
+        // This is crucial because a 'div' is not allowed to use aria-expanded.
+        toggle.setAttribute('role', 'button');
+        
+        // 3. Ensure it is keyboard-focusable (critical accessibility fix)
+        if (toggle.getAttribute('tabindex') === null) {
+             toggle.setAttribute('tabindex', '0');
+        }
+    });
+
+    // Scrollable Region Accessibility Fix:
+    // Target ALL <pre> elements, as they are the source of the scrollable-region-focusable errors.
+    var scrollableRegions = document.querySelectorAll('pre'); 
+
+    scrollableRegions.forEach(function(region) {
+        // Check if the element has horizontal overflow (is scrollable).
+        const hasScrollbar = region.scrollWidth > region.clientWidth || region.scrollHeight > region.clientHeight;
+
+        if (hasScrollbar) {
+            // If it is scrollable AND it doesn't already have tabindex="0" (or a different value)
+            if (region.getAttribute('tabindex') === null || region.getAttribute('tabindex') === undefined) {
+                    region.setAttribute('tabindex', '0');
+            }
+        }
+    });
+});
+</script>
