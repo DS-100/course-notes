@@ -439,7 +439,7 @@ window.Quarto = {
 <section id="why-not-mse" class="level3">
 <h3 class="anchored" data-anchor-id="why-not-mse">Why Not MSE?</h3>
 <p>You may wonder: why not use our familiar mean squared error? It turns out that the MSE is not well suited for logistic regression. To see why, let’s consider a simple, artificially generated <code>toy</code> dataset with just one feature (this will be easier to work with than the more complicated <code>games</code> data).</p>
-<div id="b0147979" class="cell" data-execution_count="1">
+<div id="b5247a59" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
@@ -454,7 +454,7 @@ window.Quarto = {
 <pre><code>{'divide': 'warn', 'over': 'warn', 'under': 'ignore', 'invalid': 'warn'}</code></pre>
 </div>
 </div>
-<div id="9ba3771a" class="cell" data-execution_count="2">
+<div id="d61c95c7" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>toy_df <span class="op">=</span> pd.DataFrame({</span>
@@ -509,7 +509,7 @@ window.Quarto = {
 <p>We’ll construct a basic logistic regression model with only one feature and no intercept term. Our predicted probabilities take the form:</p>
 <p><span class="math display">\[p=\hat{P}_\theta(Y=1|x)= \sigma({x^{T}\theta}) = \frac{1}{1+e^{-\theta_1 x}}\]</span></p>
 <p>In the cell below, we plot the MSE for our model on the data.</p>
-<div id="dcd4a181" class="cell" data-execution_count="3">
+<div id="bb5b2350" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sigmoid(z):</span>
@@ -537,11 +537,11 @@ window.Quarto = {
 <ol type="1">
 <li>The MSE loss surface is <em>non-convex</em>. There is both a global minimum and a (barely perceptible) local minimum in the loss surface above. This means that there is the risk of gradient descent converging on the local minimum of the loss surface, missing the true optimum parameter <span class="math inline">\(\theta_1\)</span>.
 <center>
-<img src="images/global_local_min.png" alt="reg" width="400">
+<img src="images/global_local_min.png" alt="MSE on toy classification data showing two possible minima" width="400">
 </center></li>
 <li>Squared loss is <em>bounded</em> for a classification task. MSE never gets very large, because both response and predicted probability are bounded by 1. Recall that each true <span class="math inline">\(y\)</span> has a value of either 0 or 1. This means that even if our model makes the worst possible prediction (e.g.&nbsp;predicting <span class="math inline">\(p=0\)</span> for <span class="math inline">\(y=1\)</span>), the squared loss for an observation will be no greater than 1: <span class="math display">\[(y-p)^2=(1-0)^2=1\]</span> The MSE does not strongly penalize poor predictions.
 <center>
-<img src="images/squared_loss.png" alt="reg" width="400">
+<img src="images/squared_loss.png" alt="Graph of squared loss for one individual showing a downward sloping curve" width="400">
 </center></li>
 </ol>
 </section>
@@ -586,30 +586,6 @@ window.Quarto = {
 </tr>
 </tbody>
 </table>
-<!-- :::: {.columns}
-
-::: {.column width="35%"}
-When $y=1$
-<center><img src="images/y=1.png" alt='cross-entropy loss when Y=1' width='300'></center>
-
-* As $p \rightarrow 0$, loss approches $\infty$
-* As $p \rightarrow 1$, loss approaches 0
-  
-:::
-
-::: {.column width="20%"}
-:::
-
-::: {.column width="35%"}
-When $y=0$
-<center><img src="images/y=0.png" alt='cross-entropy loss when Y=0' width='300'></center>
-
-* As $p \rightarrow 0$, loss approches 0
-* As $p \rightarrow 1$, loss approaches $\infty$
-  
-:::
-
-:::: -->
 <p>All good – we are seeing the behavior we want for our logistic regression model.</p>
 <p>The piecewise function we outlined above is difficult to optimize: we don’t want to constantly “check” which form of the loss function we should be using at each step of choosing the optimal model parameters. We can re-express cross-entropy loss in a more convenient way:</p>
 <p><span class="math display">\[\text{Cross-Entropy Loss} = -\left(y\log{(p)}+(1-y)\log{(1-p)}\right)\]</span></p>
@@ -643,7 +619,7 @@ R(\theta) &amp;= - \frac{1}{n} \sum_{i=1}^n \left(y_i\log{(p_i)}+(1-y_i)\log{(1-
 \hat{\theta} = \underset{\theta}{\arg\min} - \frac{1}{n} \sum_{i=1}^n \left(y_i\log{(\sigma(\mathbb{X}_i^{\top}\theta))}+(1-y_i)\log{(1-\sigma(\mathbb{X}_i^{\top}\theta))}\right)
 \]</span></p>
 <p>Plotting the cross-entropy loss surface for our <code>toy</code> dataset gives us a more encouraging result – our loss function is now convex. This means we can optimize it using gradient descent. Computing the gradient of the logistic model is fairly challenging, so we’ll let <code>sklearn</code> take care of this for us. You won’t need to compute the gradient of the logistic model in Data 100.</p>
-<div id="d1e8fe1f" class="cell" data-execution_count="4">
+<div id="01536561" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> cross_entropy(y, p_hat):</span>
@@ -671,7 +647,7 @@ R(\theta) &amp;= - \frac{1}{n} \sum_{i=1}^n \left(y_i\log{(p_i)}+(1-y_i)\log{(1-
 <h2 class="anchored" data-anchor-id="review-decision-boundaries">Review : Decision Boundaries</h2>
 <p>Let’s start with a recap of decision boundaries that we covered at the end of the previous lecture. In logistic regression, we model the <em>probability</em> that a datapoint belongs to Class 1.</p>
 <center>
-<img src="images/log_reg_summary.png" alt="tpr_fpr" width="800">
+<img src="images/log_reg_summary.png" alt="The input is numeric features, the model is a linear combination transformed by a sigmoid, then comes a decision rule followed by an output class." width="800">
 </center>
 <p><br> In the last lecture, we developed the logistic regression model to predict that probability, but we never actually made any <em>classifications</em> for whether our prediction <span class="math inline">\(y\)</span> belongs in Class 0 or Class 1.</p>
 <p><span class="math display">\[ p = \hat{P}_\theta(Y=1 | x) = \frac{1}{1 + e^{-x^{\top}\theta}}\]</span></p>
@@ -701,11 +677,11 @@ e^{-(\theta_0 + \theta_1  \cdot  \text{feature1} +  \theta_2  \cdot  \text{featu
 \]</span></p>
 <p>This is the equation of a line of form <span class="math inline">\(y=mx+b\)</span> relating <code>AST</code> to <code>GOAL_DIFF</code>, so we’ve just proved that the decision boundary is a <strong>hyperplane</strong> that can split points into two classes! To make it easier to visualize, we’ve included an example of a 1-dimensional and a 2-dimensional decision boundary below. Notice how the decision boundary predicted by our logistic regression model perfectly separates the points into two classes. Here the color is the <em>predicted</em> class, rather than the true class.</p>
 <center>
-<img src="images/decision_boundary.png" alt="varying_threshold" width="800">
+<img src="images/decision_boundary.png" alt="With one feature, the decision boundary is a single 1-dimensional point. With two features, the decision boundary is a 2-dimensional line." width="800">
 </center>
 <p>In real life, however, that is often not the case, and we often see some overlap between points of different classes across the decision boundary. The <em>true</em> classes of the 2D data are shown below:</p>
 <center>
-<img src="images/decision_boundary_true.png" alt="varying_threshold" width="400">
+<img src="images/decision_boundary_true.png" alt="A scatterplot where datapoints' true classification is shown by two different colors. The decision boundary is drawn and datapoints of both colors are shown on both sides of the boundary." width="400">
 </center>
 <p>As you can see, the decision boundary predicted by our logistic regression does not perfectly separate the two classes. There’s a “muddled” region near the decision boundary where our classifier predicts the wrong class. What would the data have to look like for the classifier to make perfect predictions?</p>
 </section>
@@ -714,11 +690,11 @@ e^{-(\theta_0 + \theta_1  \cdot  \text{feature1} +  \theta_2  \cdot  \text{featu
 <p>A classification dataset is said to be <strong>linearly separable</strong> if there exists a hyperplane <strong>among input features <span class="math inline">\(x\)</span></strong> that separates the two classes <span class="math inline">\(y\)</span>.</p>
 <p>Linear separability in 1D can be found with a rugplot of a single feature where a point perfectly separates the classes (Remember that in 1D, our decision boundary is just a point). For example, notice how the plot on the bottom left is linearly separable along the vertical line <span class="math inline">\(x=0\)</span>. However, no such line perfectly separates the two classes on the bottom right.</p>
 <center>
-<img src="images/linear_separability_1D.png" alt="linear_separability_1D" width="800">
+<img src="images/linear_separability_1D.png" alt="" width="800">
 </center>
 <p>This same definition holds in higher dimensions. If there are two features, the separating hyperplane must exist in two dimensions (any line of the form <span class="math inline">\(y=mx+b\)</span>). We can visualize this using a scatter plot.</p>
 <center>
-<img src="images/linear_separability_2D.png" alt="linear_separability_1D" width="800">
+<img src="images/linear_separability_2D.png" alt="Linear separability is possible for the plot on the left because you can draw a line that completely separates the blue datapoints from the orange datapoints. However, on the right no such line can be drawn to separate the orange datapoint from the green datapoints." width="800">
 </center>
 <p>This sounds great! When the dataset is linearly separable, a <strong>logistic regression classifier can perfectly assign datapoints into classes</strong>. Can it achieve <strong>0 cross-entropy loss</strong>?</p>
 <p><span class="math display">\[-(y \log(p) + (1 - y) \log(1 - p))\]</span></p>
@@ -727,16 +703,16 @@ e^{-(\theta_0 + \theta_1  \cdot  \text{feature1} +  \theta_2  \cdot  \text{featu
 <p>What <span class="math inline">\(\theta\)</span> will achieve 0 loss if we train on the datapoint <span class="math inline">\(x = 1, y = 1\)</span>? We would want <span class="math inline">\(p = 1\)</span> which occurs when <span class="math inline">\(\theta \rightarrow \infty\)</span>.</p>
 <p>However, (unexpected) complications may arise. When data is linearly separable, the <strong>optimal model parameters diverge to <span class="math inline">\(\pm \infty\)</span></strong>. <em>The sigmoid can never output exactly 0 or 1</em>, so no finite optimal <span class="math inline">\(\theta\)</span> exists. This can be a problem when using gradient descent to fit the model. Consider a simple, linearly separable “toy” dataset with two datapoints.</p>
 <center>
-<img src="images/toy_linear_separable_dataset.png" alt="toy_linear_separability" width="500">
+<img src="images/toy_linear_separable_dataset.png" alt="A scatterplot where a single blue datapoint is shown in the lower left corner and a single orange datapoint is shown in the upper right corner." width="500">
 </center>
 <p>Let’s also visualize the mean cross entropy loss along with the direction of the gradient (how this loss surface is calculated is out of scope).</p>
 <center>
-<img src="images/mean_cross_entropy_loss_plot.png" alt="mean_cross_entropy_loss_plot" width="450">
+<img src="images/mean_cross_entropy_loss_plot.png" alt="Mean cross entropy plot. The direction of the gradient is down and to the right." width="450">
 </center>
 <p>It’s nearly impossible to see, but the plateau to the right is slightly tilted. Because gradient descent follows the tilted loss surface downwards, it never converges. Loss keeps approaching 0 as <span class="math inline">\(\theta\)</span> increases.</p>
 <p>The diverging weights cause the model to be <strong>overconfident</strong>. Say we add a new point <span class="math inline">\((x, y) = (-0.5, 1)\)</span>. Following the behavior above, our model will incorrectly predict <span class="math inline">\(p=0\)</span>, and thus, <span class="math inline">\(\hat y = 0\)</span>.</p>
 <center>
-<img src="images/toy_linear_separable_dataset_2.png" alt="toy_linear_separability" width="450">
+<img src="images/toy_linear_separable_dataset_2.png" alt="A third datapoint has been added to the toy dataset that is incorrectly classified." width="450">
 </center>
 <p><br> The loss incurred by this misclassified point is infinite.</p>
 <p><span class="math display">\[-(y\text{ log}(p) + (1-y)\text{ log}(1-p))=1 * \text{log}(0)\]</span></p>
@@ -748,10 +724,10 @@ e^{-(\theta_0 + \theta_1  \cdot  \text{feature1} +  \theta_2  \cdot  \text{featu
 <p><span class="math display">\[\underset{\theta}{\arg\min} -\frac{1}{n} \sum_{i=1}^{n} (y_i \text{log}(\sigma(X_i^T\theta)) + (1-y_i)\text{log}(1-\sigma(X_i^T\theta))) + \lambda \sum_{j=1}^{d} \theta_j^2\]</span></p>
 <p>Now, let us compare the loss functions of un-regularized and regularized logistic regression.</p>
 <center>
-<img src="images/unreg_loss_infinite_argmin.png" alt="unreg_loss" width="450">
+<img src="images/unreg_loss_infinite_argmin.png" alt="Mean cross entropy plot. The direction of the gradient is down and to the right, and there is an infinite argmin" width="450">
 </center>
 <center>
-<img src="images/reg_loss_finite_argmin.png" alt="reg_loss" width="450">
+<img src="images/reg_loss_finite_argmin.png" alt="Mean loss + L2 regularization (lambda = 0.1) which shows a finite argmin" width="450">
 </center>
 <p>As we can see, <span class="math inline">\(L2\)</span> regularization helps us prevent diverging weights and deters against “overconfidence.”</p>
 <p><code>sklearn</code>’s logistic regression defaults to <span class="math inline">\(L2\)</span> regularization and <code>C=1.0</code>; <code>C</code> is the inverse of <span class="math inline">\(\lambda\)</span>: <span class="math display">\[C = \frac{1}{\lambda}\]</span> Setting <code>C</code> to a large value, for example, <code>C=300.0</code>, results in minimal regularization.</p>
@@ -794,7 +770,7 @@ model.score(X, y) # built-in accuracy function</code></pre>
 </ol>
 <p>These classifications can be concisely summarized in a <strong>confusion matrix</strong>.</p>
 <center>
-<img src="images/confusion_matrix.png" alt="confusion_matrix" width="450">
+<img src="images/confusion_matrix.png" alt="Confusion matrix definition is shown. When the predicted y is 0 and the actual y is 0, that is a true negative. When the predicted y is 0 and the actual y is 1, that is a false negative. When the predicted y is 1 and the actual y is 0, that is a false positive. When the predicted y is 1 and the actual y is 1, that is a true positive." width="450">
 </center>
 <p>An easy way to remember this terminology is as follows:</p>
 <ol type="1">
@@ -806,7 +782,7 @@ model.score(X, y) # built-in accuracy function</code></pre>
 <pre><code>from sklearn.metrics import confusion_matrix
 cm = confusion_matrix(Y_true, Y_pred)</code></pre>
 <center>
-<img src="images/confusion_matrix_sklearn.png" alt="confusion_matrix" width="300">
+<img src="images/confusion_matrix_sklearn.png" alt="Confusion matrix produced by sklearn" width="300">
 </center>
 </section>
 <section id="accuracy-precision-and-recall" class="level3">
@@ -820,7 +796,7 @@ cm = confusion_matrix(Y_true, Y_pred)</code></pre>
 <p>Recall aims to answer: “Of all observations that were actually <span class="math inline">\(1\)</span>, what proportion was predicted to be <span class="math inline">\(1\)</span>?” It measures how <strong>sensitive</strong> our classifier is to <em>actual positive observations</em>, and it penalizes false negatives.</p>
 <p>Here’s a helpful graphic that summarizes our discussion above.</p>
 <center>
-<img src="images/precision_recall_graphic.png" alt="confusion_matrix" width="700">
+<img src="images/precision_recall_graphic.png" alt="A visual representation of the datapoints represented in a confusion matrix is shown as well as a visual representation of how to calculate precision and recall." width="700">
 </center>
 </section>
 <section id="example-calculation" class="level3">
@@ -913,7 +889,7 @@ cm = confusion_matrix(Y_true, Y_pred)</code></pre>
 <p>FPR is equal to <em>1 - specificity</em>, or <em>1 - TNR</em>. This answers the question: “What proportion of regular email did I mark as spam?”. We’d like this to be close to <span class="math inline">\(0\)</span>.</p>
 <p>As we increase threshold <span class="math inline">\(T\)</span>, both TPR and FPR decrease. We’ve plotted this relationship below for some model on a <code>toy</code> dataset.</p>
 <center>
-<img src="images/tpr_fpr.png" alt="tpr_fpr" width="800">
+<img src="images/tpr_fpr.png" alt="FPR decreases much faster than TPR." width="800">
 </center>
 </section>
 </section>
@@ -926,7 +902,7 @@ cm = confusion_matrix(Y_true, Y_pred)</code></pre>
     \end{cases}\]</span></p>
 <p>The default threshold in <code>sklearn</code> is <span class="math inline">\(T = 0.5\)</span>. As we increase the threshold <span class="math inline">\(T\)</span>, we “raise the standard” of how confident our classifier needs to be to predict 1 (i.e., “positive”).</p>
 <center>
-<img src="images/varying_threshold.png" alt="varying_threshold" width="700">
+<img src="images/varying_threshold.png" alt="Three plots showing how classification changes from T=0.25, T=0.5, and T=0.75" width="700">
 </center>
 <p>As you may notice, the choice of threshold <span class="math inline">\(T\)</span> impacts our classifier’s performance.</p>
 <ul>
@@ -952,15 +928,15 @@ cm = confusion_matrix(Y_true, Y_pred)</code></pre>
 <p>A <strong>Precision-Recall Curve (PR Curve)</strong> is a curve that displays the relationship between precision and recall for various threshold values. In this curve, we test out many different possible thresholds and for each one we compute the precision and recall of the classifier.</p>
 <p>Let’s first consider how precision and recall change as a function of the threshold <span class="math inline">\(T\)</span>. We know this quite well from earlier – precision will generally increase, and recall will decrease.</p>
 <center>
-<img src="images/precision-recall-thresh.png" alt="precision-recall-thresh" width="650">
+<img src="images/precision-recall-thresh.png" alt="Graph showing how precision and recall change as the threshold varies" width="650">
 </center>
 <p>Displayed below is the PR Curve for the same <code>toy</code> dataset. Notice how threshold values increase as we move to the left.</p>
 <center>
-<img src="images/pr_curve_thresholds.png" alt="pr_curve_thresholds" width="600">
+<img src="images/pr_curve_thresholds.png" alt="The precision recall curve" width="600">
 </center>
 <p>Once again, the perfect classifier will resemble the orange curve, this time, facing the opposite direction.</p>
 <center>
-<img src="images/pr_curve_perfect.png" alt="pr_curve_perfect" width="600">
+<img src="images/pr_curve_perfect.png" alt="The actual precision recall curve is shown along with a perfect predictor where prevcsion and recall are both 1." width="600">
 </center>
 <p>We want our PR curve to be as close to the “top right” of this graph as possible. We can use the <strong>area under curve (or AUC)</strong> to determine “closeness”, with the perfect classifier exhibiting an AUC = 1 (and the worst with an AUC = 0.5).</p>
 </section>
@@ -971,28 +947,28 @@ cm = confusion_matrix(Y_true, Y_pred)</code></pre>
 <p>The <span class="math inline">\(F_1\)</span> score is the <strong>harmonic mean of precision and recall</strong>, and it is often used when there is a <strong>large class imbalance</strong>. The score optimizes for the <strong>true-positive case</strong> and <strong>balances precision and recall</strong>, so if we want to optimize for <strong>true-negatives</strong> or favor either precision or recall, it may be better to pick a different metric.</p>
 <p>We can begin by calculating the <span class="math inline">\(F_1\)</span> score for different thresholds, and plotting the results below:</p>
 <center>
-<img src="images/f1_score.png" alt="f1_score" width="500">
+<img src="images/f1_score.png" alt="Plot showing the F1 score with the maximum marked." width="500">
 </center>
 <p>From this, we want to pick the threshold that <strong>maximizes the <span class="math inline">\(F_1\)</span> score</strong> and <strong>report the <span class="math inline">\(F_1\)</span> score</strong> as a metric describing the classifier. We can also plot this point on a PR curve to see how the <span class="math inline">\(F_1\)</span> score determined a point with balance between precision and recall.</p>
 <center>
-<img src="images/f1_score_plot.png" alt="f1_score_plot" width="400">
+<img src="images/f1_score_plot.png" alt="The max F1 score is marked on the precision recall curve" width="400">
 </center>
 </section>
 <section id="the-roc-curve" class="level3">
 <h3 class="anchored" data-anchor-id="the-roc-curve">The ROC Curve</h3>
 <p>The “Receiver Operating Characteristic” Curve (<strong>ROC Curve</strong>) is another method that plots the tradeoff between FPR and TPR. Notice how the far-left of the curve corresponds to higher threshold <span class="math inline">\(T\)</span> values. At lower thresholds, the FPR and TPR are both high as there are many positive predictions while at higher thresholds the FPR and TPR are both low as there are fewer positive predictions.</p>
 <center>
-<img src="images/roc_curve.png" alt="roc_curve" width="600">
+<img src="images/roc_curve.png" alt="Plot showing the true positive rate is plotted against the false positive rate with different values of T plotted." width="600">
 </center>
 <p>The “perfect” classifier is the one that has a TPR of 1, and FPR of 0. This is achieved at the top-left of the plot below. More generally, it’s ROC curve resembles the curve in orange.</p>
 <center>
-<img src="images/roc_curve_perfect.png" alt="roc_curve_perfect" width="600">
+<img src="images/roc_curve_perfect.png" alt="A perfect predictor is shown overlaid on the plot from directly above." width="600">
 </center>
 <p>We want our model to be as close to this orange curve as possible. How do we quantify “closeness”?</p>
 <p>We can compute the <strong>area under curve (AUC)</strong> of the ROC curve. Notice how the perfect classifier has an AUC = 1. The closer our model’s AUC is to 1, the better it is.</p>
 <p>On the other hand, a terrible model will have an AUC closer to 0.5. A predictor that <strong>predicts randomly</strong> has an AUC of 0.5. This indicates the classifier is not able to distinguish between positive and negative classes, and thus, randomly predicts one of the two. The proof for this is out of scope and is in the Bonus section.</p>
 <center>
-<img src="images/roc_curve_worst_predictor.png" alt="roc_curve_worst_predictor" width="700">
+<img src="images/roc_curve_worst_predictor.png" alt="Area under the curve of a random predictor is 0.5 whereas area under the curve of a perfect predictor is 1. Typically AOC will be between the two numbers for the predictors we can create and use." width="700">
 </center>
 <p>Real-world classifiers have an AUC between 0.5 and 1.</p>
 </section>
@@ -1025,7 +1001,7 @@ cm = confusion_matrix(Y_true, Y_pred)</code></pre>
 <section id="building-intuition-the-coin-flip" class="level3">
 <h3 class="anchored" data-anchor-id="building-intuition-the-coin-flip">Building Intuition: The Coin Flip</h3>
 <p>To build some intuition for logistic regression, let’s look at an introductory example to classification: the coin flip. Suppose we observe some outcomes of a coin flip (1 = Heads, 0 = Tails).</p>
-<div id="c64ffa19" class="cell" data-execution_count="5">
+<div id="7223c7aa" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>flips <span class="op">=</span> [<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>]</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>flips</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
@@ -1048,7 +1024,7 @@ cm = confusion_matrix(Y_true, Y_pred)</code></pre>
 <p>We define the <strong>likelihood</strong> of obtaining our observed data as a quantity <em>proportional</em> to the probability above. To find it, simply multiply the probabilities of obtaining each coin flip.</p>
 <p><span class="math display">\[(p)^{4} (1-p)^6\]</span></p>
 <p>The technique known as <strong>maximum likelihood estimation</strong> finds the <span class="math inline">\(p\)</span> that maximizes the above likelihood. You can find this maximum by taking the derivative of the likelihood, but we’ll provide a more intuitive graphical solution.</p>
-<div id="3a2e13fc" class="cell" data-execution_count="6">
+<div id="54dbfb59" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>thetas <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">1</span>)</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>plt.plot(thetas, (thetas<span class="op">**</span><span class="dv">4</span>)<span class="op">*</span>(<span class="dv">1</span><span class="op">-</span>thetas)<span class="op">**</span><span class="dv">6</span>)</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="vs">r"</span><span class="dv">$</span><span class="ch">\t</span><span class="vs">heta</span><span class="dv">$</span><span class="vs">"</span>)</span>
@@ -1142,11 +1118,11 @@ y_i \log(p_i) + (1 - y_i) \log(1 - p_i) &amp;= y_i \log(\frac{p_i}{1 - p_i}) + \
 <h2 class="anchored" data-anchor-id="bonus-auc-of-the-random-predictor">[BONUS] AUC of the Random Predictor</h2>
 <p>Recall that the best possible AUC = 1. On the other hand, a terrible model will have an AUC closer to 0.5. A <strong>random predictor</strong> randomly predicts <span class="math inline">\(P(Y = 1 | x)\)</span> to be uniformly between 0 and 1. This indicates the classifier is not able to distinguish between positive and negative classes, and thus, randomly predicts one of the two.</p>
 <center>
-<img src="images/roc_curve_worst_predictor.png" alt="roc_curve_worst_predictor" width="700">
+<img src="images/roc_curve_worst_predictor.png" alt="" width="700">
 </center>
 <p>We can illustrate this by comparing different thresholds and seeing their points on the ROC curve.</p>
 <center>
-<img src="images/roc_curve_worse_predictor_differing_T.png" alt="roc_curve_worse_predictor_differing_T" width="700">
+<img src="images/roc_curve_worse_predictor_differing_T.png" alt="On average, if your dataset is size n (wuth n_1 true class 1's and n_0's true class 0's)... if T=0.5, the point on the ROC curve is (0.5, 0.5)... if T=0.8, the point on the ROC curve is (0.2, 0.2)... if T-0.3, the point on the ROC curve is (0.7, 0.7)" width="700">
 </center>
 
 

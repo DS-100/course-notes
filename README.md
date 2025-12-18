@@ -158,8 +158,8 @@ git push # push your changes to github
 
 2. **Github Desktop** ([download](https://desktop.github.com/)). This is the GUI version of the command line. 
 
-  * Choose the files you want to commit on the left hand menu. By default, github will select all changes/new files. ![](git_files.png)
-  * Write an informative comment on the bottom left hand corner and click "commit to main" once finished ![](git_comment.png)
+  * Choose the files you want to commit on the left hand menu. By default, github will select all changes/new files. ![](assets/images/_readme/git_files.png)
+  * Write an informative comment on the bottom left hand corner and click "commit to main" once finished ![](assets/images/_readme/git_comment.png)
   * Push your changes using the button on the top right. 
 
 
