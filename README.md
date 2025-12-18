@@ -1,6 +1,6 @@
 # course-notes
 
-[![Accessibility Checks](https://github.com/DS-100/course-notes/actions/workflows/a11y.yml/badge.svg)](https://github.com/DS-100/course-notes/actions/workflows/a11y.yml)
+[![pages-build-deployment](https://github.com/DS-100/course-notes/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/DS-100/course-notes/actions/workflows/pages/pages-build-deployment) [![Accessibility Checks](https://github.com/DS-100/course-notes/actions/workflows/a11y.yml/badge.svg)](https://github.com/DS-100/course-notes/actions/workflows/a11y.yml)
 
 ## Accessibility Checks
 
@@ -68,7 +68,6 @@ ipython kernel install --user
 If you get an `error: externally-managed-environment` on the third line, run `pip3 install -r requirements.txt --break-system-packages`
 
 Remember to always activate the right environment before running anything with `conda activate data100quarto`.
-
 
 ### Repo Organization 
 This website uses Quarto to render pages and is organized based on the Quarto API. Here are some important files: 
