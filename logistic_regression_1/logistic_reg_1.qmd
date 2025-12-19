@@ -50,11 +50,11 @@ There are two key differences: as we'll soon see, we need to incorporate a non-l
 
 **Regression:**
 
-<center><img src="images/reg.png" alt='reg' width='750'></center>
+<center><img src="images/reg.png" alt='Overview of regression: You start with an input of numeric features, apply a model (linear combination), and then get a numeric prediction as output.' width='750'></center>
 
 **Classification:**
 
-<center><img src="images/class.png" alt='class' width='750'></center>
+<center><img src="images/class.png" alt='class' width='750' alt="Overview of classification: You start with an input of numeric features, apply a model (linear combination transformed by non-linear sigmoid), apply a decision rule, and then get a class as output."></center>
 
 This was a very high-level overview. Let's walk through the process in detail to clarify what we mean.
 
@@ -88,6 +88,7 @@ Let's visualize the relationship between `"GOAL_DIFF"` and `"WON"` using the Sea
 
 ```{python}
 #| code-fold: true
+#| fig-alt: In the plot, the blob of blue datapoints is centered to the left of the blob of orange datapoints. There is a significant amount of overlap in x values between the two blobs.
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -102,6 +103,7 @@ The regression models we have worked with always assumed that we were attempting
 
 ```{python}
 #| code-fold: true
+#| fig-alt: Now a linear regression has been overlaid on the plot.
 import sklearn.linear_model as lm
 
 X, Y = games[["GOAL_DIFF"]], games["WON"]
@@ -124,6 +126,7 @@ Back in [Data 8](https://inferentialthinking.com/chapters/08/1/Applying_a_Functi
 Let's take the same approach as we grapple with our new classification task. In the cell below, we 1) bucket the `"GOAL_DIFF"` data into bins of similar values and 2) compute the average `"WON"` value of all datapoints in a bin.
 
 ```{python}
+#| fig-alt: A red curve now overlays the data. It starts in the center of the blue blob of datapoints, increases fairly fast, and then ends centered in the orange blob of datapoints.
 # bucket the GOAL_DIFF data into 20 bins
 bins = pd.cut(games["GOAL_DIFF"], 20)
 games["bin"] = [(b.left + b.right) / 2 for b in bins]
@@ -161,7 +164,7 @@ Let's start by identifying an S-shaped function that maps ($-\infty$, $\infty$) 
 
 $$\sigma(x) = \frac{1}{1+e^{-x}}$$
 
-<center><img src="images/sigmoid.png" alt='log_reg' width='400'></center>
+<center><img src="images/sigmoid.png" alt='The signmoid curve' width='400'></center>
 
 As it turns out, the logistic regression model fits a sigmoid function to the data. We can also shift and scale the sigmoid function just as if we were transforming any other function to fit our data:
 $$\sigma(\theta_0+\theta x) = \frac{1}{1+e^{-(\theta_0+\theta_1x)}}$$
@@ -210,6 +213,7 @@ Below, we fit a logistic regression model to our data. You do not need to worry 
 
 ```{python}
 #| code-fold: true
+#| fig-alt: The graph of averages curve is extremely similar to the logistic regression model.
 # We'll discuss the `LogisticRegression` class next time
 xs = np.linspace(-0.3, 0.3)
 
@@ -324,7 +328,7 @@ To summarize, probability is a **non-linear** function of the features because $
 ## Decision Boundaries
 In logistic regression, we model the *probability* that a datapoint belongs to Class 1. 
 
-<center><img src="images/log_reg_summary.png" alt='log_reg_summary' width='800'></center>
+<center><img src="images/log_reg_summary.png" alt='Overview of classification which takes in numeric features and ultimately outputs a class.' width='800'></center>
 <br>
 In this lecture, we developed the logistic regression model to predict that probability, but the model itself does not classify whether a prediction is Class 0 or Class 1.
 
@@ -348,11 +352,11 @@ This is the same as labeling all points with $\text{log}(\text{Odds}(Y=1|x)) \ge
 
 For a model with 2 features, the decision boundary is a line in terms of its features. To make it easier to visualize, we've included an example of a 1-dimensional and a 2-dimensional decision boundary below. Notice how the decision boundary predicted by our logistic regression model perfectly separates the points into two classes. Here the color is the *predicted* class, rather than the true class.
 
-<center><img src="images/decision_boundary.png" alt='decision_boundary' width='800'></center>
+<center><img src="images/decision_boundary.png" alt='Illustration of how to use the decision boundary in 1D and 2D.' width='800'></center>
 
 In real life, however, that is often not the case, and we often see some overlap between points of different classes across the decision boundary. The *true* classes of the 2D data are shown below: 
 
-<center><img src="images/decision_boundary_true.png" alt='decision_boundary_true' width='400'></center>
+<center><img src="images/decision_boundary_true.png" alt='A decision boundary is shown in addition to all the true values of the datapoints. Some datapoints are not correctly classified by the decision boundary.' width='400'></center>
 
 As you can see, the decision boundary predicted by our logistic regression does not perfectly separate the two classes. There's a “muddled” region near the decision boundary where our classifier predicts the wrong class. What would the data have to look like for the classifier to make perfect predictions?
 
@@ -396,6 +400,7 @@ $$(p)^{4} (1-p)^6$$
 The technique known as **maximum likelihood estimation** finds the $p$ that maximizes the above likelihood. You can find this maximum by taking the derivative of the likelihood, but we'll provide a more intuitive graphical solution.
 
 ```{python}
+#| fig-alt: Plot showing the liklelihood of each theta, which peaks around 0.4
 thetas = np.linspace(0, 1)
 plt.plot(thetas, (thetas**4)*(1-thetas)**6)
 plt.xlabel(r"$\theta$")
