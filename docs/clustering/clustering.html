@@ -737,20 +737,29 @@ Agglomerative clustering is one form of “hierarchical clustering.” It is int
     });
 
     // Scrollable Region Accessibility Fix:
-    // Target ALL <pre> elements, as they are the source of the scrollable-region-focusable errors.
-    var scrollableRegions = document.querySelectorAll('pre'); 
+    const selectors = '.cell-output-display, .cell-output, pre, code';
+    
+    const fixScrollability = () => {
+        const regions = document.querySelectorAll(selectors);
+        regions.forEach(el => {
+            const hasHorizontalScroll = el.scrollWidth > el.clientWidth;
+            const hasVerticalScroll = el.scrollHeight > el.clientHeight;
 
-    scrollableRegions.forEach(function(region) {
-        // Check if the element has horizontal overflow (is scrollable).
-        const hasScrollbar = region.scrollWidth > region.clientWidth || region.scrollHeight > region.clientHeight;
-
-        if (hasScrollbar) {
-            // If it is scrollable AND it doesn't already have tabindex="0" (or a different value)
-            if (region.getAttribute('tabindex') === null || region.getAttribute('tabindex') === undefined) {
-                    region.setAttribute('tabindex', '0');
+            if (hasHorizontalScroll || hasVerticalScroll) {
+                if (!el.hasAttribute('tabindex')) {
+                    el.setAttribute('tabindex', '0');
+                    // Add a label so screen readers explain why this is focusable
+                    el.setAttribute('aria-label', 'Scrollable content');
+                }
             }
-        }
-    });
+        });
+    };
+
+    // Run once on load
+    fixScrollability();
+
+    // Run again if the window is resized (which might trigger scrollbars)
+    window.addEventListener('resize', fixScrollability);
 });
 </script>
 <script id="quarto-html-after-body" type="application/javascript">

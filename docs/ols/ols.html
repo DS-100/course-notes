@@ -423,7 +423,7 @@ window.Quarto = {
 <p><span class="math display">\[\hat{y} = \theta_0\:+\:\theta_1x_{1}\:+\:\theta_2 x_{2}\:+\:...\:+\:\theta_p x_{p}\]</span></p>
 <p>Our predicted value of <span class="math inline">\(y\)</span>, <span class="math inline">\(\hat{y}\)</span>, is a linear combination of the single <strong>observations</strong> (features), <span class="math inline">\(x_i\)</span>, and the parameters, <span class="math inline">\(\theta_i\)</span>.</p>
 <p>We can explore this idea further by looking at a dataset containing aggregate per-player data from the 2018-19 NBA season, downloaded from <a href="https://www.kaggle.com/schmadam97/nba-regular-season-stats-20182019">Kaggle</a>.</p>
-<div id="31de950a" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;vscode&quot;,&quot;value&quot;:{&quot;languageId&quot;:&quot;python&quot;}}" data-execution_count="1">
+<div id="1bdbfa34" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;vscode&quot;,&quot;value&quot;:{&quot;languageId&quot;:&quot;python&quot;}}" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -431,7 +431,7 @@ window.Quarto = {
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>nba.index.name <span class="op">=</span> <span class="va">None</span> <span class="co"># Drops name of index (players are ordered by rank)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="3e783e41" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;vscode&quot;,&quot;value&quot;:{&quot;languageId&quot;:&quot;python&quot;}}" data-execution_count="2">
+<div id="5f3ed8b5" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;vscode&quot;,&quot;value&quot;:{&quot;languageId&quot;:&quot;python&quot;}}" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>nba.head(<span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -602,7 +602,7 @@ window.Quarto = {
 <li><code>AST</code>, the average number of assists per game</li>
 <li><code>3PA</code>, the average number of 3-point field goals attempted per game</li>
 </ul>
-<div id="f7745649" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;vscode&quot;,&quot;value&quot;:{&quot;languageId&quot;:&quot;python&quot;}}" data-execution_count="3">
+<div id="b2be8d5a" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;vscode&quot;,&quot;value&quot;:{&quot;languageId&quot;:&quot;python&quot;}}" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>nba[[<span class="st">'FG'</span>, <span class="st">'AST'</span>, <span class="st">'3PA'</span>, <span class="st">'PTS'</span>]].head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -1212,20 +1212,29 @@ Note
     });
 
     // Scrollable Region Accessibility Fix:
-    // Target ALL <pre> elements, as they are the source of the scrollable-region-focusable errors.
-    var scrollableRegions = document.querySelectorAll('pre'); 
+    const selectors = '.cell-output-display, .cell-output, pre, code';
+    
+    const fixScrollability = () => {
+        const regions = document.querySelectorAll(selectors);
+        regions.forEach(el => {
+            const hasHorizontalScroll = el.scrollWidth > el.clientWidth;
+            const hasVerticalScroll = el.scrollHeight > el.clientHeight;
 
-    scrollableRegions.forEach(function(region) {
-        // Check if the element has horizontal overflow (is scrollable).
-        const hasScrollbar = region.scrollWidth > region.clientWidth || region.scrollHeight > region.clientHeight;
-
-        if (hasScrollbar) {
-            // If it is scrollable AND it doesn't already have tabindex="0" (or a different value)
-            if (region.getAttribute('tabindex') === null || region.getAttribute('tabindex') === undefined) {
-                    region.setAttribute('tabindex', '0');
+            if (hasHorizontalScroll || hasVerticalScroll) {
+                if (!el.hasAttribute('tabindex')) {
+                    el.setAttribute('tabindex', '0');
+                    // Add a label so screen readers explain why this is focusable
+                    el.setAttribute('aria-label', 'Scrollable content');
+                }
             }
-        }
-    });
+        });
+    };
+
+    // Run once on load
+    fixScrollability();
+
+    // Run again if the window is resized (which might trigger scrollbars)
+    window.addEventListener('resize', fixScrollability);
 });
 </script>
 <script id="quarto-html-after-body" type="application/javascript">
