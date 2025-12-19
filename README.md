@@ -25,24 +25,19 @@ To set up the document, create a new Raw NBConvert cell. This will be used to se
 ```
 ---
 title: "Name of the Lecture"
-execute:
-    echo: true
+---
+```
+
+Previously the yaml was much longer, but this has been moved into `_quarto.yml`. If you want something to be different for a page, you can override the project settings in this yaml. For example, you can add the following if you don't want code cells to be shown by default on the page:
+```
 format:
   html:
     code-fold: true
-    code-tools: true
-    toc: true
-    toc-title: Name of the Lecture
-    page-layout: full
-    theme: [cosmo, cerulean]
-    callout-icon: false
-jupyter: python3
----
 ```
 
 Now, the notebook is ready for writing content. Quarto supports all the functionality of a standard ipynb file – code cells, markdown, and LaTeX. To begin writing lecture notes, it's a good idea to first set out the main headings of the document. These typically correspond to the title slides of each lecture ([example](https://docs.google.com/presentation/d/1FZJhOS8S1lCqZCRxbyys9rCZT0QxdY4hcmvZDskEHFI/edit#slide=id.g1150ea2fb2b_0_220)) and are written with the Markdown second headng level (`##`). Quarto will auto-populate the table of contents as these headings are created.
 
-To view the Quarto file, open a terminal window (either [within Jupyter](https://docs.google.com/presentation/d/1FZJhOS8S1lCqZCRxbyys9rCZT0QxdY4hcmvZDskEHFI/edit#slide=id.g1150ea2fb2b_0_220) or through your machine's terminal) and navigate to the notebook's directory. Running the command `quarto preview notebook.ipynb` will render the document and open it in a new web browser tab.
+To view the Quarto file, open a terminal window (either [within Jupyter](https://docs.google.com/presentation/d/1FZJhOS8S1lCqZCRxbyys9rCZT0QxdY4hcmvZDskEHFI/edit#slide=id.g1150ea2fb2b_0_220) or through your machine's terminal) and navigate to the notebook's directory. Running the command `quarto preview notebook.ipynb` will render the document and open it in a new web browser tab. You can also preview the whole site with `quarto preview` which may take a little longer to run the first time you do so or after many changes.
 
 With the preview activated, the rendered view will update every time a change is saved in the notebook. When editing the document, it's helpful to have side-by-side views of the notebook and preview so you can watch changes in real-time.
 
@@ -69,15 +64,16 @@ If you get an `error: externally-managed-environment` on the third line, run `pi
 
 Remember to always activate the right environment before running anything with `conda activate data100quarto`.
 
+Requirements.txt was updated and `.python-version` was added in December 2025 to match the environment on Data 100's Datahub. You may want to use [pyenv](https://github.com/pyenv/pyenv) to manage your Python environments.
+
 ### Repo Organization 
 This website uses Quarto to render pages and is organized based on the Quarto API. Here are some important files: 
 
 * `index.md` is a markdown file that contains the text to be displayed on the landing page for the course notes website. You should update this text to reflect the current semester.
 * `_quarto.yml` is a YAML file that specifies which notes should be visible to students. For Sp24, the entire Fa23 course notes ([repo](https://github.com/DS-100/fa23-course-notes), [website](https://ds100.org/fa23-course-notes/)) was made available to students at the start of the semester, and notes for Sp24 were updated a few hours before/after lecture to give course staff sufficient time to edit the note. To edit which notes are visible to students, 
-  * Under `chapters`, comment out any note that should not be visible to students. `index.md` should always be visible. 
-  * The `downloads` line specifies what downloadable export formats for the course notes should be allowed. While it’s possible to set this up such that Quarto creates a downloadable pdf of all notes, pdf conversion often errors because Quarto can only parse a limited amount of text into an output file. It’s recommended to leave this line commented out to avoid this issue. 
+  * Under `contents`, comment out any note that should not be visible to students. `index.md` should always be visible. To ensure files are not rendered, folders can be exluded from rendering by prepending `_` to the folder name. For example in Fall 2025, PCA was a single page from the `pca` dir, not two `pca_1` and `pca_2` dirs, so these were renamed to `_pca_1` and `_pca_2`.
+  * The `downloads` line specifies what downloadable export formats for the course notes should be allowed. Due to the difficulty of creating PDFs that meet our accessibility legal obligations, we do not recommend creating PDFs of this or any other site.
 * Each subpage has it's own folder and `.qmd` (quarto) file. 
-
 
 ## Editing Notes
 **Always `git pull` before making any new changes**. 
@@ -91,15 +87,13 @@ To edit a note, navigate to the directory for the corresponding lecture in your 
 
 Some directories may not contain every component (eg some lectures don’t use any dataset files).
 
+If you're able to get comfortable working with `.qmd` files (which closely resemble `.Rmd` files), you can edit those files directly. Otherwise...
+
 Notes are edited by converting the `.qmd` file to an `.ipynb`. In your terminal, run `quarto convert path/to/note_name.qmd` to generate an editable `.ipynb` file (the `.qmd` files are also editable, but it is often harder to format things). This will create a Jupyter notebook named `note_name.ipynb`. Open the notebook to begin editing. 
 
 Quarto converted notebooks work just like a typical Jupyter notebook. Markdown cells are used to write narrative text, while code cells are used to run example code. To preview how your changes will render, run `quarto preview path/to/note_name.ipynb` in your terminal. This will open the HTML output of the notebook in a new browser tab. The preview will update every time you save the notebook, so it’s often helpful to have this tab open side-by-side with the notebook.
 
-### Document Formatting
-
-A pdf view of how this notebook renders in Quarto can be found [here](https://drive.google.com/file/d/17ga5wvfcmvAzQ1rbnCP4kEf5bckST3--/view?usp=sharing).
-
-#### Formatting Code
+### Formatting Code
 
 The `code-fold: true` option in the YAML set-up will automatically collapse all code cells in the rendered document. If a particular code cell should be uncollapsed by default (e.g. to explicitly show a `pandas` example), a cell-specific YAML option can be specified:
 
@@ -115,6 +109,23 @@ Inserting images in a Quarto document is similar to the standard Markdown syntax
 ```
 #![The best class at Berkeley](data.png)
 ```
+
+Captions and alt text are considered separately, to add alt text using the above formatting, instead write:
+```
+#![The best class at Berkeley](data.png)\
+```
+
+Check the [Quarto documentation](https://quarto.org/docs/authoring/figures.html#alt-text) for the most up to date information. 
+
+You may alternatively insert html for images like so:
+```
+<center><img src = "IMAGE_NAME" width = "IMAGE_WIDTH_IN_PIXELS" alt="ALT TEXT HERE"></img></a></center>
+```
+
+For example, `<center><img src = "images/updated_basic.png" width = "700" alt="description of image"></img></a></center>`
+
+In some instances, the images may be completely described in the text of the page. In these cases, you may leave the alt text blank i.e. `alt=""`, but **alt text must still be included to meet our legal obligations.**
+
 
 #### Formatting Learning Outcomes
 
@@ -132,18 +143,21 @@ Each lecture note should start with a brief list of intended student learning ou
 ### Previewing Note
 To see how your ipynb renders as an HTML file, run `quarto preview path/to/note_name.ipynb`. This will open a website view of your note in the browser. 
 
-Once you're satisfied with your changes, **revert the `.ipynb` file to a `.qmd`** by running `quarto convert path/to/note_name.ipynb`. Then, **delete the `.ipynb` and `.html` files** so that only the `.qmd` file remains in the folder. From here, push your changes to github.
+Once you're satisfied with your changes, **revert the `.ipynb` file to a `.qmd`** by running `quarto convert path/to/note_name.ipynb`. Any `.ipynb` and `.html` files created during this process are in the `.gitignore` and won't be committed. Only the `.qmd` needs to be committed and pushed to GitHub.
+
+You can also preview the whole site with `quarto preview` which may take a little longer to run the first time you do so or after many changes.
 
 ### Rendering Changes
-These steps should only be taken when the note is finalized. When a note is in the development stage, just push the changes to the `.qmd` file and do not render the note. 
+These steps should only be taken when the note is finalized. When a note is in the development stage, just save the changes to the `.qmd` file. 
 
 Navigate to the main folder and run `conda activate data100quarto`. 
 
-To render the whole website, run `quarto render`. This process might take a while if you have many notes. **Check that the `docs/search.json` file exists**. In the Fa23 and Sp24 semesters, running `quarto render` would delete this file, making it so that students cannot search the textbook. If this happens, run `quarto preview` and individually click into each course note to populate the `search.json` file.
+To render the whole website, run `quarto render`. This process might take a while if you have many notes. **Check that the `docs/search.json` file exists**.
 
 If you only made *edits* to one note, you can skip the (sometimes long) process of rendering the whole website and just do the following: 
 `quarto render path/to/note.qmd`
 
+**What you see rendered locally is exactly what will be shown on the deployed site. There is no intermediate step or GitHub Action that renders and deploys the site; it is deployed directly from the `docs` directory.**
 
 ## Pushing to Github
 Once you're satisfied and *thoroughly tested* your changes, you can push your edits onto Github. There are two ways to do this: 
@@ -169,7 +183,6 @@ Editing a note:
 2. Make edits on the `.ipynb` file
 3. Preview notebook: `quarto preview path/to/note.ipynb`
 4. Convert to `.qmd` for rendering: `quarto convert note_name.ipynb` (must cancel `quarto preview` first)
-5. Delete the `path/to/note.ipynb` and `path/to/note.html` 
 
 Rendering a Note: 
 1. Update `_quarto.yml` with the new note to be added
@@ -185,7 +198,7 @@ General commands/notes:
   * `quarto render`: renders HTML to `docs`. Note `qmd` has to exist for rendering
   * Edit `_quarto.yml` to include note in sidebar/table of contents
 * Quick local development:
-  * TODO: how to quickly render just one notes directory and not all notes?
+  * quarto render path/to/note.qmd
 * Publish notes to GitHub pages:
   * `quarto render` everything
   * `git add`, `git commit`, `git push`
