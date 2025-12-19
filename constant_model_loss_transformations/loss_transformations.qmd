@@ -1,19 +1,8 @@
 ---
 title: Constant Model, Loss, and Transformations
-execute:
-  echo: true
 format:
   html:
     code-fold: true
-    code-tools: true
-    toc: true
-    toc-title: Constant Model, Loss, and Transformations
-    page-layout: full
-    theme:
-      - cosmo
-      - cerulean
-    callout-icon: false
-jupyter: python3
 ---
 
 ::: {.callout-note collapse="false"}
@@ -36,7 +25,7 @@ Last time, we introduced the modeling process. We set up a framework to predict 
 To illustrate this process, we derived the optimal model parameters under simple linear regression (SLR) with mean squared error (MSE) as the cost function. A summary of the SLR modeling process is shown below:
 
 <div align="middle">
-<img src="images/slr_modeling.png" alt='modeling' width='600'>
+<img src="images/slr_modeling.png" alt='First, choose a model. Second, choose a loss function. Third, fit the model. And fourth, evaluate the model performance.' width='600'>
 </div>
 
 At the end of last lecture, we dived deeper into step 4 - evaluating model performance - using SLR as an example. In this lecture, we'll also explore the modeling process with new models, continue familiarizing ourselves with the modeling process by finding the best model parameters under a new model, the constant model, and test out two different loss functions to understand how our choice of loss influences model design. Later on, we'll consider what happens when a linear model isn't the best choice to capture trends in our data and what solutions there are to create better models.
@@ -136,17 +125,17 @@ That is, we want to find the **arg**ument $\theta_0$ that **min**imizes the cost
 
 ### Comparing Two Different Models, Both Fit with MSE
 
-Now that we've explored the constant model with an L2 loss, we can compare it to the SLR model that we learned last lecture. Consider the dataset below, which contains information about the ages and lengths of dugongs. Supposed we wanted to predict dugong ages:
+Now that we've explored the constant model with an L2 loss, we can compare it to the SLR model that we learned last lecture. Consider the dataset below, which contains information about the ages and lengths of dugongs. Suppose we wanted to predict dugong ages:
 
 |                        | Constant Model                                                   | Simple Linear Regression                                                        |
 | ---------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | model                  | $\hat{y} = \theta_0$                                             | $\hat{y} = \theta_0 + \theta_1 x$                                                |
 | data                   | sample of ages $D = \{y_1, y_2, ..., y_n\}$                      | sample of ages $D = \{(x_1, y_1), (x_2, y_2), ..., (x_n, y_n)\}$                |
 | dimensions             | $\hat{\theta_0}$ is 1-D                                          | $\hat{\theta} = [\hat{\theta_0}, \hat{\theta_1}]$ is 2-D                        |
-| loss surface           | 2-D ![](images/constant_loss_surface.png)                        | 3-D ![](images/slr_loss_surface.png)                                            |
+| loss surface           | 2-D ![2D graph of the constant model's loss surface with a singular minimum](images/constant_loss_surface.png)\                        | 3-D ![3D graph of simple linear regression's loss surface with the minimum marked](images/slr_loss_surface.png)\                                            |
 | loss model             | $\hat{R}(\theta) = \frac{1}{n}\sum^{n}_{i=1} (y_i - \theta_0)^2$ | $\hat{R}(\theta_0, \theta_1) = \frac{1}{n}\sum^{n}_{i=1} (y_i - (\theta_0 + \theta_1 x))^2$ |
 | RMSE                   | 7.72                                                             | 4.31                                                                            |
-| predictions visualized | rug plot ![](images/dugong_rug.png)                              | scatter plot ![](images/dugong_scatter.png)                                     |
+| predictions visualized | rug plot ![Rug plot with theta_0_hat marked](images/dugong_rug.png) | scatter plot ![Scatterplot showing the datapoints along with a line representing the predictions.](images/dugong_scatter.png) |
 
 (Notice how the points for our SLR scatter plot are visually not a great linear fit. We'll come back to this).
 
@@ -189,6 +178,7 @@ plt.style.use("default")  # Revert style to default mpl
 
 ```{python}
 #| code-fold: true
+#| fig-alt: The loss surface for the constant model is plotted with the global minimum marked.
 # Constant Model + MSE
 plt.style.use('default') # Revert style to default mpl
 adjust_fontsize(size=16)
@@ -214,6 +204,7 @@ plt.legend();
 
 ```{python}
 #| code-fold: true
+#| fig-alt: 3D loss surface with varying values of theta_0 and theta_1. The minimum point on the loss surface is marked
 # SLR + MSE
 def mse_linear(theta_0, theta_1, data_linear):
     data_x, data_y = data_linear.iloc[:, 0], data_linear.iloc[:, 1]
@@ -280,7 +271,7 @@ yhats_linear = [theta_0_hat + theta_1_hat * x for x in xs]
 
 ```{python}
 #| code-fold: true
-# Constant Model Rug Plot
+#| fig-alt: Constant Model Rug Plot
 # In case we're in a weird style state
 sns.set_theme()
 adjust_fontsize(size=16)
@@ -296,7 +287,7 @@ plt.yticks([]);
 
 ```{python}
 #| code-fold: true
-# SLR model scatter plot 
+#| fig-alt: SLR model scatter plot 
 # In case we're in a weird style state
 sns.set_theme()
 adjust_fontsize(size=16)
@@ -420,7 +411,7 @@ np.mean(drinks), np.median(drinks)
 
 If we plot each empirical risk function across several possible values of $\theta$, we find that each $\hat{\theta}$ does indeed correspond to the lowest value of error:
 
-<img src="images/error.png" alt='error' width='600'>
+<img src="images/error.png" alt='error' width='600' alt="The graph on the left is the constant model loss with MSE error. The lowest point on the curve is annotated as theta = 25.0. The graph on the right is the constant model with MAE error. The lowest point on the curve is annotated as theta = 22.0.">
 
 Notice that the MSE above is a **smooth** function – it is differentiable at all points, making it easy to minimize using numerical methods. The MAE, in contrast, is not differentiable at each of its "kinks." We'll explore how the smoothness of the cost function can impact our ability to apply numerical optimization in a few weeks.
 
@@ -433,7 +424,7 @@ display(drinks_with_outlier)
 np.mean(drinks_with_outlier), np.median(drinks_with_outlier)
 ```
 
-<img src="images/outliers.png" alt='outliers' width='700'>
+<img src="images/outliers.png" alt='outliers' width='700' alt="On the left, MSE curve is shown with theta=193. On the right, MAE is shown with theata=25.5.">
 
 This means that under the MSE, the optimal model parameter $\hat{\theta}$ is strongly affected by the presence of outliers. Under the MAE, the optimal parameter is not as influenced by outlying data. We can generalize this by saying that the MSE is **sensitive** to outliers, while the MAE is **robust** to outliers.
 
@@ -447,7 +438,7 @@ drinks_with_additional_observation
 
 When we again visualize the cost functions, we find that the MAE now plots a horizontal line between 22 and 29. This means that there are _infinitely_ many optimal values for the model parameter: any value $\hat{\theta} \in [22, 29]$ will minimize the MAE. In contrast, the MSE still has a single best value for $\hat{\theta}$. In other words, the MSE has a **unique** solution for $\hat{\theta}$; the MAE is not guaranteed to have a single unique solution.
 
-<img src="images/mse_loss_26.png" width='350'> <img src="images/mae_loss_infinite.png" width='350'>
+<img src="images/mse_loss_26.png" width='350' alt="MSE is shown with theta=26.7"> <img src="images/mae_loss_infinite.png" width='350' alt="MAE is shown with theta close to 5.">
 
 To summarize our example,
 
@@ -455,7 +446,7 @@ To summarize our example,
 | ---------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | Loss Function                  | $\hat{R}(\theta) = \frac{1}{n}\sum^{n}_{i=1} (y_i - \theta_0)^2$                                            | $\hat{R}(\theta) = \frac{1}{n}\sum^{n}_{i=1} |y_i - \theta_0|$                                               |
 | Optimal $\hat{\theta_0}$                   | $\hat{\theta_0} = mean(y) = \bar{y}$                      | $\hat{\theta_0} = median(y)$                 |
-| Loss Surface           | <img src="images/mse_loss_26.png" width='250'>                        | <img src="images/mae_loss_infinite.png" width='250'>                                          |
+| Loss Surface           | <img src="images/mse_loss_26.png" width='250' alt="MSE is shown with theta=26.7">                        | <img src="images/mae_loss_infinite.png" width='250' alt="MAE is shown with theta close to 5.">                                          |
 | Shape            | **Smooth** - easy to minimize using numerical methods (in a few weeks)  | **Piecewise** - at each of the “kinks,” it’s not differentiable. Harder to minimize. |
 | Outliers                   | **Sensitive** to outliers (since they change mean substantially). Sensitivity also depends on the dataset size.                                                            | **More robust** to outliers.                                                                           |
 | $\hat{\theta_0}$ Uniqueness | **Unique** $\hat{\theta_0}$                              | **Infinitely many** $\hat{\theta_0}$s                                    |
@@ -468,7 +459,7 @@ A key word above is _linear_. When we computed parameter estimates earlier, we a
 
 The **Tukey-Mosteller Bulge Diagram** is a useful tool for summarizing what transformations can linearize the relationship between two variables. To determine what transformations might be appropriate, trace the shape of the "bulge" made by your data. Find the quadrant of the diagram that matches this bulge. The transformations shown on the vertical and horizontal axes of this quadrant can help improve the fit between the variables.
 
-<img src="images/bulge.png" alt='bulge' width='600'>
+<img src="images/bulge.png" alt='Illustration of how to use the tukey-mosteller bulge diagram.' width='600'>
 
 Note that:
 
@@ -484,6 +475,7 @@ Let's revisit our dugongs example. The lengths and ages are plotted below:
 
 ```{python}
 #| code-fold: true
+#| fig-alt: Two scatterplots are shown. On the left, length is plotted against age with the datapoints in blue and showing a positive correlation, although there is some curvature. On the right is the same plot with the addition of a red line that appears centered in the data. Some of the data points are very far from the line.
 # `corrcoef` computes the correlation coefficient between two variables
 # `std` finds the standard deviation
 x = dugongs["Length"]
@@ -511,6 +503,7 @@ An important word on $\log$: in Data 100 (and most upper-division STEM courses),
 
 ```{python}
 #| code-fold: true
+#| fig-alt: Two scatterplots are shown. On the left, length is plotted against log(Age) with the datapoints in blue and showing a positive correlation. On the right is the same plot with the addition of a red line that appears centered in the data. This time all datapoints appear close to the line.
 z = np.log(y)
 
 r = np.corrcoef(x, z)[0, 1]
@@ -548,6 +541,7 @@ $y$ is an *exponential* function of $x$. Applying an exponential fit to the untr
 
 ```{python}
 #| code-fold: true
+#| fig-alt: The untransformed variables length and age are plotted against each other along with the prediction curve. The curve follows the points.
 plt.figure(dpi=120, figsize=(4, 3))
 
 plt.scatter(x, y)

@@ -1,20 +1,7 @@
 ---
 title: Gradient Descent Continuation, Feature Engineering
 execute:
-  echo: true
   warning: false
-format:
-  html:
-    code-fold: false
-    code-tools: true
-    toc: true
-    toc-title: Gradient Descent Continuation, Feature Engineering
-    page-layout: full
-    theme:
-      - cosmo
-      - cerulean
-    callout-icon: false
-jupyter: python3
 ---
 
 
@@ -116,7 +103,7 @@ On a 2D (or higher) surface, the best way to go down (gradient) is described by 
 <div align="middle">
   <table style="width:100%">
     <tr align="center">
-      <td><img src="images/loss_surface.png" alt='loss_surface' width='600'>
+      <td><img src="images/loss_surface.png" alt='3D loss surface' width='600'>
       </td>
     </tr>
   </table>
@@ -220,7 +207,7 @@ The diagrams below represent a "bird's eye view" of a loss surface from above. N
 <div align="middle">
   <table style="width:100%">
     <tr align="center">
-      <td><img src="images/stochastic.png" alt='stochastic' width='600'>
+      <td><img src="images/stochastic.png" alt='Comparison of batch gradient descent and stochastic gradient descent. Batch gradient descent moves smoothly whereas stochastic gradient descent bounces back and forth.' width='600'>
       </td>
     </tr>
   </table>
@@ -230,7 +217,7 @@ The diagrams below represent a "bird's eye view" of a loss surface from above. N
 ### Batch, Mini-batch, Stochastic Gradient Descent
 The time complexity of a single gradient descent step takes only $O(nd)$ time where $n$ is the number of samples (rows) and $d$ is the number of features (columns).
 
-<center><img src="images/complexity_grad_descent.png" alt='complexity_grad_descent' width='600'></center>
+<center><img src="images/complexity_grad_descent.png" alt='Complexity of gradient descent is O(nd)' width='600'></center>
 
 Suppose we run $T$ iterations. The final complexity would then be $O(Tnd)$. Typically, $n$ is much larger than $T$ and $d$. How can we reduce the cost of this algorithm using a technique from Data 100? Do we really need to use $n$ data points? We don't! Instead, we can use stochastic gradient descent.
 
@@ -260,11 +247,11 @@ Summarizing our two gradient descent techniques:
 
 - **(Batch) Gradient Descent**: GD computes the **true** descent and always descends towards the true minimum of the loss based on a batch (a full dataset). While accurate, it can often be computationally expensive.
 
-<center><img src="images/gd.png" alt='batch_grad_descent' width='300'></center>
+<center><img src="images/gd.png" alt='Example of batch gradient descent being calculated.' width='300'></center>
 
 - **(Mini-batch) Stochastic Gradient Descent**: SGD **approximates** the true gradient descent based off of mini-batch (a subset of a dataset). It may not descend towards the true minimum with each update, but it's often less computationally expensive than batch gradient descent. Note that it is mini-batch, because we create a smaller, randomized sample of the batch to run SGD on it.
 
-<center><img src="images/sgd.png" alt='stochastic_grad_descent' width='300'></center>
+<center><img src="images/sgd.png" alt='Example of stochastic gradient descent being calculated.' width='300'></center>
 
 
 To summarize the tradeoffs of batch size: 
@@ -301,7 +288,7 @@ A **feature function** describes the transformations we apply to raw features in
 
 For example, we might design a feature function that computes the square of an existing feature and adds it to the design matrix. In this case, our existing matrix $[x]$ is transformed to $[x, x^2]$. Its *dimension* increases from 1 to 2. Often, the dimension of the *featurized* dataset increases as seen here.
 
-<center><img src="images/phi.png" alt='phi' width='700'></center>
+<center><img src="images/phi.png" alt='In this example, applying a feature function adds a column to the dataset.' width='700'></center>
 
 The new features introduced by the feature function can then be used in modeling. Often, we use the symbol $\phi_i$ to represent transformed features after feature engineering. 
 
@@ -339,7 +326,7 @@ tips.head()
   
 To resolve this, we instead create a new table with a feature for each unique value in the original `"day"` column. We then iterate through the `"day"` column. For each entry in `"day"` we fill the corresponding feature in the new table with 1. All other features are set to 0.
 
-<center><img src="images/ohe.png" alt='ohe' width='600'></center>
+<center><img src="images/ohe.png" alt='Illustration of one hot encoding.' width='600'></center>
 
 <br> 
 
@@ -374,7 +361,7 @@ encoded_day_df.head()
 
 The one-hot encoded features can then be used in the design matrix to train a model:
 
-<center><img src="images/ohemodel.png" alt='ohemodel' width='600'></center>
+<center><img src="images/ohemodel.png" alt='Design matrix showing raw features highlighted separately from one-hot encoded features.' width='600'></center>
 
 $$\hat{y} = \theta_1 (\text{total}\_\text{bill}) + \theta_2 (\text{size}) + \theta_3 (\text{day}\_\text{Fri}) + \theta_4 (\text{day}\_\text{Sat}) + \theta_5 (\text{day}\_\text{Sun}) + \theta_6 (\text{day}\_\text{Thur})$$
 
@@ -399,13 +386,13 @@ For example, when looking at the coefficient for `day_Fri`, we can now understan
 
 When one-hot encoding, keep in mind that any set of one-hot encoded columns will always sum to a column of all ones, representing the bias column. More formally, the bias column is a linear combination of the OHE columns.
 
-<center><img src="images/bias.png" alt='bias' width='600'></center>
+<center><img src="images/bias.png" alt='Illustration of how the original data is transformed with one hot encoding and a bias column.' width='600'></center>
 
 We must be careful not to include this bias column in our design matrix. Otherwise, there will be linear dependence in the model, meaning $\mathbb{X}^{\top}\mathbb{X}$ would no longer be invertible, and our OLS estimate $\hat{\theta} = (\mathbb{X}^{\top}\mathbb{X})^{-1}\mathbb{X}^{\top}\mathbb{Y}$ fails.
 
 To resolve this issue, we simply omit one of the one-hot encoded columns *or* do not include an intercept term. The adjusted design matrices are shown below.
 
-<center><img src="images/remove.png" alt='remove' width='600'></center>
+<center><img src="images/remove.png" alt='Illustration of removing one of the columns from one hot encoding or the bias column.' width='600'></center>
 
 Either approach works — we still retain the same information as the omitted column being a linear combination of the remaining columns.
 
@@ -419,6 +406,7 @@ $$\hat{y} = \theta_0 + \theta_1 (\text{hp})$$
 
 ```{python}
 #| code-fold: true
+#| fig-alt: "MSE of model with (hp) feature: 23.943662938603104"
 pd.options.mode.chained_assignment = None 
 vehicles = sns.load_dataset("mpg").dropna().rename(columns = {"horsepower": "hp"}).sort_values("hp")
 
@@ -445,6 +433,7 @@ $$\hat{y} = \theta_0 + \theta_1 \phi_1 + \theta_2 \phi_2$$
 How can we fit a model with non-linear features? We can use the exact same techniques as before: ordinary least squares, gradient descent, or `sklearn`. This is because our new model is still a **linear model**. Although it contains non-linear *features*, it is linear with respect to the model *parameters*. All of our previous work on fitting models was done under the assumption that we were working with linear models. Because our new model is still linear, we can apply our existing methods to determine the optimal parameters. 
 
 ```{python}
+#| fig-alt: "Untransformed data. MSE of model with (hp^2) feature: 18.98476890761722"
 # Add a hp^2 feature to the design matrix
 X = vehicles[["hp"]]
 X["hp^2"] = vehicles["hp"]**2
@@ -470,15 +459,15 @@ We've seen now that feature engineering allows us to build all sorts of features
 * Model with order 3: $\hat{y} = \theta_0 + \theta_1 (\text{hp}) + \theta_2 (\text{hp}^2) + \theta_3 (\text{hp}^3)$
 * Model with order 4: $\hat{y} = \theta_0 + \theta_1 (\text{hp}) + \theta_2 (\text{hp}^2) + \theta_3 (\text{hp}^3) + \theta_4 (\text{hp}^4)$
 
-<center><img src="images/degree_comparison.png" alt='degree_comparison' width='900'></center>
+<center><img src="images/degree_comparison.png" alt='Three different plots with differening numbers of polynomial terms.' width='900'></center>
 
 As we can see in the plots above, MSE continues to decrease with each additional polynomial term. To visualize it further, let's plot models as the complexity increases from 0 to 7: 
 
-<center><img src="images/degree_comparison2.png" alt='degree_comparison' width='850'></center>
+<center><img src="images/degree_comparison2.png" alt='Comparison of plots with different numbers of polynomial terms.' width='850'></center>
 
 When we use our model to make predictions on the same data that was used to fit the model, we find that the MSE decreases with each additional polynomial term (as our model gets more complex). The **training error** is the model's error when generating predictions from the same data that was used for training purposes. We can conclude that the training error goes down as the complexity of the model increases. 
 
-<center><img src="images/train_error.png" alt='train_error' width='400'></center>
+<center><img src="images/train_error.png" alt='Conceptual plotting of training error. As model complexity increases, training error decreases.' width='400'></center>
 
 This seems like good news – when working on the **training data**, we can improve model performance by designing increasingly complex models. 
 
@@ -487,25 +476,25 @@ This seems like good news – when working on the **training data**, we can impr
 Given $N$ overlapping data points, we can always find a polynomial of degree $N-1$ that goes through all those points.
 
 For example, there always exists a degree-4 polynomial curve that can perfectly model a dataset of 5 datapoints:
-<center><img src="images/perfect_poly_fits.png" alt='train_error' width='600'></center>
+<center><img src="images/perfect_poly_fits.png" alt='Three different datasets consisting of five datapoints. Each dataset is perfectly fit by a degree-4 polynomial curve.' width='600'></center>
 :::
 
 However, high model complexity comes with its own set of issues. When building the `vehicles` models above, we trained the models on the *entire* dataset and then evaluated their performance on this same dataset. In reality, we are likely to instead train the model on a *sample* from the population, then use it to make predictions on data it didn't encounter during training. 
 
 Let's walk through a more realistic example. Say we are given a training dataset of just 6 datapoints and want to train a model to then make predictions on a *different* set of points. We may be tempted to make a highly complex model (e.g., degree 5), especially given it makes perfect predictions on the training data as clear on the left. However, as shown in the graph on the right, this model would perform *horribly* on the rest of the population! 
 
-<center><img src="images/complex.png" alt='complex' width='600'></center>
+<center><img src="images/complex.png" alt='On the left is the six datapoints with a perfectly fit curve. On the right, the rest of the population is shown and it is clear that the curve does not fit the population.' width='600'></center>
 
 This phenomenon called **overfitting**. The model effectively just memorized the training data it encountered when it was fitted, leaving it unable to **generalize** well to data it didn't encounter during training. This is a problem: we want models that are generalizable to “unseen” data.
 
 
 Additionally, since complex models are sensitive to the specific dataset used to train them, they have high **variance**. A model with high variance tends to *vary* more dramatically when trained on different datasets. Going back to our example above, we can see our degree-5 model varies erratically when we fit it to different samples of 6 points from `vehicles`. 
 
-<center><img src="images/resamples.png" alt='resamples' width='800'></center>
+<center><img src="images/resamples.png" alt='Three different resamples from the above population.' width='800'></center>
 
 We now face a dilemma: we know that we can **decrease training error** by increasing model complexity, but models that are *too* complex start to overfit and can't be reapplied to new datasets due to **high variance**.
 
-<center><img src="images/bvt.png" alt='bvt' width='400'></center>
+<center><img src="images/bvt.png" alt='Illustration of underfitting and overfitting. ' width='400'></center>
 
 We can see that there is a clear trade-off that comes from the complexity of our model. As model complexity increases, the model's error on the training data decreases. At the same time, the model's variance tends to increase.
 
@@ -520,7 +509,7 @@ Let's now dive deeper into gradient and stochastic gradient descent. We discusse
 
 We know that the solution to the normal equation is $\hat{\theta} = (\mathbb{X}^T\mathbb{X})^{-1}\mathbb{X}^T\mathbb{Y}$. Let's break this down and determine the computational complexity for this solution.
 
-<center><img src="images/complexity_normal_solution.png" alt='complexity_normal_solution' width='600'></center>
+<center><img src="images/complexity_normal_solution.png" alt='Illustration of the normal equation with matrices.' width='600'></center>
 
  Let $n$ be the number of samples (rows) and $d$ be the number of features (columns). 
 
@@ -542,7 +531,7 @@ In practice, you will use software packages such as `PyTorch` when computing gra
 2. Compute the loss and the gradient.
 3. Update your gradient until you reach an appropriate estimate of the true gradient.
 
-<center><img src="images/pytorchsgd.png" alt='pytorch_sgd' width='500'></center>
+<center><img src="images/pytorchsgd.png" alt='Code for using pytorch to calculate stochastic gradient descent.' width='500'></center>
 
 If you want to learn more, this [Intro to PyTorch tutorial](https://pytorch.org/tutorials/beginner/deep_learning_60min_blitz.html) is a great resource to get started! 
 

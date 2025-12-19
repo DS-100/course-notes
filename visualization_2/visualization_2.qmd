@@ -1,16 +1,5 @@
 ---
 title: Visualization II
-format:
-  html:
-    toc: true
-    toc-depth: 5
-    toc-location: right
-    code-fold: false
-    theme:
-      - cosmo
-      - cerulean
-    callout-icon: false
-jupyter: python3
 ---
 
 ::: {.callout-note collapse="false"}
@@ -25,7 +14,7 @@ Up until now, we've discussed how to visualize single-variable distributions. Go
 
 The following diagram is a high-level overview of univariate, bivariate, and multivariate distributions.
 
-<img src="images/distribution_summary.png" alt='distribution_summary.png' width='700'>
+<img src="images/distribution_summary.png" alt='Illustration of what plots are appropriate based on the variables being used.' width='700'>
 
 #### Scatter Plots
 
@@ -52,6 +41,7 @@ wb.head()
 
 ```{python}
 #| scrolled: true
+#| fig-alt: Female adult literacy against percent growth
 plt.scatter(wb["per capita: % growth: 2016"], \
             wb['Adult literacy rate: Female: % ages 15 and older: 2005-14'])
 
@@ -63,6 +53,7 @@ plt.title("Female adult literacy against % growth");
 In `seaborn`, we call the function `sns.scatterplot`. We use the `x` and `y` parameters to indicate the values to be plotted along the x and y axes, respectively. By using the `hue` parameter, we can specify a third variable to be used for coloring each scatter point.
 
 ```{python}
+#| fig-alt: Female adult literacy against percent growth broken out by continent. 
 sns.scatterplot(data = wb, x = "per capita: % growth: 2016", \
                y = "Adult literacy rate: Female: % ages 15 and older: 2005-14", 
                hue = "Continent")
@@ -82,6 +73,7 @@ We have a few methods to help reduce overplotting:
 In the cell below, we first jitter the data using `np.random.uniform`, then re-plot it with smaller markers. The resulting plot is much easier to interpret.
 
 ```{python}
+#| fig-alt: Female adult literacy against percent growth with jittering applied and the size of datapoints changed.
 # Setting a seed ensures that we produce the same plot each time
 # This means that the course notes will not change each time you access them
 np.random.seed(150)
@@ -110,6 +102,7 @@ plt.title("Female adult literacy against % growth");
 `sns.lmplot` plots both a scatter plot *and* a linear regression line, all in one function call. We'll discuss linear regression in a few lectures. 
 
 ```{python}
+#| fig-alt: Female adult literacy against percent growth with a linear regression line overlaid.
 sns.lmplot(data = wb, x = "per capita: % growth: 2016", \
            y = "Adult literacy rate: Female: % ages 15 and older: 2005-14")
 
@@ -119,6 +112,7 @@ plt.title("Female adult literacy against % growth");
 `sns.jointplot` creates a visualization with three components: a scatter plot, a histogram of the distribution of x values, and a histogram of the distribution of y values.
 
 ```{python}
+#| fig-alt: Female adult literacy against percent growth joint plot. Both a scatterplot, a histogram for the x values, and a histogram for the y values are shown.
 sns.jointplot(data = wb, x = "per capita: % growth: 2016", \
            y = "Adult literacy rate: Female: % ages 15 and older: 2005-14")
 
@@ -135,6 +129,7 @@ For datasets with a very large number of datapoints, jittering is unlikely to fu
 We can generate a hex plot using `sns.jointplot` modified with the `kind` parameter.
 
 ```{python}
+#| fig-alt: Female adult literacy against percent growth jointplot with two histograms and instead of a scatterplot, a hex plot.
 sns.jointplot(data = wb, x = "per capita: % growth: 2016", \
               y = "Adult literacy rate: Female: % ages 15 and older: 2005-14", \
               kind = "hex")
@@ -151,6 +146,7 @@ plt.subplots_adjust(top=0.9);
 `sns.kdeplot` will generate a contour plot if we specify both x and y data.
 
 ```{python}
+#| fig-alt: Female adult literacy against percent growth contour plot.
 sns.kdeplot(data = wb, x = "per capita: % growth: 2016", \
             y = "Adult literacy rate: Female: % ages 15 and older: 2005-14", \
             fill = True)
@@ -169,6 +165,7 @@ To see why we may want to transform data, consider the following plot of adult l
 
 ```{python}
 #| code-fold: true
+#| fig-alt: Adult literacy rate against GNI per capita
 
 # Some data cleaning to help with the next example
 df = pd.DataFrame(index=wb.index)
@@ -194,7 +191,7 @@ We will most commonly apply a transformation to **linearize a relationship** bet
 
 In the remainder of this note, we will discuss how to linearize a dataset to produce the result below. Notice that the resulting plot displays a rough linear relationship between the values plotted on the x and y axes.
 
-<img src="images/linearize.png" alt='linearize' width='800'>
+<img src="images/linearize.png" alt='The original data is plotted on the left with a clear non-linear relationship. On the right, the data has been transformed via log and a line is drawn on top of the data.' width='800'>
 
 ### Linearization and Applying Transformations
 
@@ -202,7 +199,7 @@ To linearize a relationship, begin by asking yourself: what makes the data non-l
 
 Let's start by considering the gross national income variable in our plot above. Looking at the y values in the scatter plot, we can see that many large y values are all clumped together, compressing the vertical axis. The scale of the horizontal axis is also being distorted by the few large outlying x values on the right. 
 
-<img src="images/horizontal.png" alt='horizontal' width='450'>
+<img src="images/horizontal.png" alt='The outliers with large x, y values are highlighted.' width='450'>
 
 If we decreased the size of these outliers relative to the bulk of the data, we could reduce the distortion of the horizontal axis. How can we do this? We need a transformation that will:
 
@@ -214,6 +211,7 @@ One function that produces this result is the **log transformation**. When we ta
 In Data 100 (and most upper-division STEM classes), $\log$ is used to refer to the natural logarithm with base $e$.
 
 ```{python}
+#| fig-alt: Adult literacy rate against Log(GNI per capita)
 # np.log takes the logarithm of an array or Series
 plt.scatter(np.log(df["inc"]), df["lit"])
 
@@ -234,6 +232,7 @@ If we were to "spread out" these large values of y more, we would no longer see 
 In this case, it is helpful to apply a **power transformation** – that is, raise our y values to a power. Let's try raising our adult literacy rate values to the power of 4. Large values raised to the power of 4 will increase in magnitude proportionally much more than small values raised to the power of 4 (consider the difference between $2^4 = 16$ and $200^4 = 1600000000$). 
 
 ```{python}
+#| fig-alt: Apply a log transformation to the x values and a power transformation to the y values
 # Apply a log transformation to the x values and a power transformation to the y values
 plt.scatter(np.log(df["inc"]), df["lit"]**4)
 
@@ -255,6 +254,7 @@ The cell below computes $m$ and $b$ for our transformed data. We'll discuss how 
 
 ```{python}
 #| code-fold: true
+#| fig-alt: The transformed data is plotted along with a linear regression line in red.
 # The code below fits a linear regression model. We'll discuss it at length in a future lecture
 from sklearn.linear_model import LinearRegression
 
@@ -287,6 +287,7 @@ When we plug in the values for $m$ and $b$ computed above, something interesting
 
 ```{python}
 #| code-fold: true
+#| fig-alt: The untransformed data and the modeled relationship.
 # Now, plug the values for m and b into the relationship between the untransformed x and y
 plt.scatter(df["inc"], df["lit"], label="Untransformed data")
 plt.plot(df["inc"], (m*np.log(df["inc"])+b)**(1/4), c="red", label="Modeled relationship")
@@ -309,7 +310,7 @@ Linearization will be an important tool as we begin our work on linear modeling 
 
 The **Tukey-Mosteller Bulge Diagram** is a good guide when determining possible transformations to achieve linearity. It is a visual summary of the reasoning we just worked through above. 
 
-<img src="images/tukey_mosteller.png" alt='tukey_mosteller' width='300'>
+<img src="images/tukey_mosteller.png" alt='Tukey Mosteller Bulge Diagram' width='300'>
 
 How does it work? Each curved "bulge" represents a possible shape of non-linear data. To use the diagram, find which of the four bulges resembles your dataset the most closely. Then, look at the axes of the quadrant for this bulge. The horizontal axis will list possible transformations that could be applied to your x data for linearization. Similarly, the vertical axis will list possible transformations that could be applied to your y data. Note that each axis lists two possible transformations. While *either* of these transformations has the *potential* to linearize your dataset, note that this is an iterative process. It's important to try out these transformations and look at the results to see whether you've actually achieved linearity. If not, you'll need to continue testing other possible transformations.
 
@@ -319,7 +320,7 @@ Generally:
 * Powers ($^2$ and $^3$) will increase the spread in magnitude of large values.
 
 
-<center><img src="images/bulge.png" alt='bulge' width='800'></img></a></center>
+<center><img src="images/bulge.png" alt='Example of applying the Tukey Mosteller Diagram' width='800'></img></a></center>
 
 
 **Important:** You should still understand the *logic* we worked through to determine how best to transform the data. The bulge diagram is just a summary of this same reasoning. You will be expected to be able to explain why a given transformation is or is not appropriate for linearization.
@@ -364,7 +365,7 @@ Visualizations are able to convey information through various encodings. In the 
 
 One detail that we may have overlooked in our earlier discussion of rugplots is the importance of encodings. Rugplots are effective visuals because they utilize line thickness to encode frequency. Consider the following diagram:
 
-<img src="images/rugplot_encoding.png" alt='rugplot_encoding' width='600'> 
+<img src="images/rugplot_encoding.png" alt='A dataframe is shown with an arrow pointing to lines, one per row labeled Mark (represents a datum). From there, another arrow points to values like 10x, 15px, and NONE labeled Encoding (Maps datum to visual position). Finally, a last arrow points to a rug plot.' width='600'> 
 
 #### Multi-Dimensional Encodings
 
@@ -375,7 +376,7 @@ Encodings are also useful for representing multi-dimensional data. Notice how th
 - Area
 - Color
 
-<img src="images/mutli_dim_encodings.png" alt='multi_dim_encoding' width='400'> 
+<img src="images/mutli_dim_encodings.png" alt='Example plot using four dimensions of the data.' width='400'> 
 
 The human visual perception system is only capable of visualizing data in a three-dimensional plane, but as you've seen, we can encode many more channels of information.
 
@@ -385,7 +386,7 @@ The human visual perception system is only capable of visualizing data in a thre
 
 However, we should be careful to not misrepresent relationships in our data by manipulating the scale or axes. The visualization below improperly portrays two seemingly independent relationships on the same plot. The authors have clearly changed the scale of the y-axis to mislead their audience.
 
-<img src="images/wrong_scale_viz.png" alt='wrong_scale_viz' width='350'> 
+<img src="images/wrong_scale_viz.png" alt='Two lines representing two very differnt things, cancer screenings and abortions are shown overlapping with each other.' width='350'> 
 
 Notice how the downwards-facing line segment contains values in the millions, while the upwards-trending segment only contains values near three hundred thousand. These lines should not be intersecting.
 
@@ -395,7 +396,7 @@ When there is a large difference in the magnitude of the data, it's advised to a
 
 
 ::: {.column width="30%"}
-<img src="images/good_viz_scale_1.png" alt='good_viz_scale_1' width='345'>
+<img src="images/good_viz_scale_1.png" alt='Now you can see that the cancer screen line is way above the line for abortions.' width='345'>
 :::
 
 ::: {.column width="20%"}
@@ -403,7 +404,7 @@ When there is a large difference in the magnitude of the data, it's advised to a
 :::
 
 ::: {.column width="30%"}
-<img src="images/good_viz_scale_2.png" alt='good_viz_scale_2' width='345'>
+<img src="images/good_viz_scale_2.png" alt='Another way to visualize the percent change in the number of procedures, this time with a bar chart.' width='345'>
 :::
 
 ::::
@@ -416,7 +417,7 @@ Great visualizations not only consider the scale of the data but also utilize th
 
 
 ::: {.column width="30%"}
-<img src="images/unrevealed_viz.png" alt='unrevealed_viz' width='345'>
+<img src="images/unrevealed_viz.png" alt='Line plot showing COVID-19 cases from March 2020 to April 2021.' width='345'>
 :::
 
 ::: {.column width="20%"}
@@ -424,7 +425,7 @@ Great visualizations not only consider the scale of the data but also utilize th
 :::
 
 ::: {.column width="30%"}
-<img src="images/revealed_viz.png" alt='revealed_viz' width='345'>
+<img src="images/revealed_viz.png" alt='The same data is shown, this time zoomed in on March 2020 to May 2020.' width='345'>
 :::
 
 ::::
@@ -448,7 +449,7 @@ Colormaps are mappings from pixel data to color values, and they're often used t
 
 ::: {.column width="30%"}
 **Jet Colormap**
-<img src="images/jet_colormap.png" alt='jet_colormap' width='250'>
+<img src="images/jet_colormap.png" alt='Jet Colormap with vivid colors' width='250'>
 :::
 
 ::: {.column width="20%"}
@@ -457,7 +458,7 @@ Colormaps are mappings from pixel data to color values, and they're often used t
 
 ::: {.column width="30%"}
 **Viridis Colormap**
-<img src="images/viridis_colormap.png" alt='viridis_colormap' width='250'>
+<img src="images/viridis_colormap.png" alt='Viridis Colormap with less bright colors.' width='250'>
 :::
 
 ::::
@@ -468,7 +469,7 @@ The jet colormap is infamous for being misleading. While it seems more vibrant t
 
 
 ::: {.column width="30%"}
-<img src="images/jet_four_by_four.png" alt='four_by_four_colormap' width='300'>
+<img src="images/jet_four_by_four.png" alt='Four different color palettes are used to show the same four sets of data.' width='300'>
 :::
 
 ::: {.column width="20%"}
@@ -476,7 +477,7 @@ The jet colormap is infamous for being misleading. While it seems more vibrant t
 :::
 
 ::: {.column width="30%"}
-<img src="images/jet_3_images.png" alt='jet_3_colormap' width='250'>
+<img src="images/jet_3_images.png" alt='Comparison of black and white with Jet.' width='250'>
 :::
 
 ::::
@@ -492,7 +493,7 @@ Why is the jet colormap so much worse? The answer lies in how its color composit
 
 ::: {.column width="30%"}
 **Jet Colormap Perception**
-<img src="images/jet_perceptually_uniform.png" alt='jet_perceptually_uniform' width='300'>
+<img src="images/jet_perceptually_uniform.png" alt='Jet colormap is percieved as a piecewise linear function.' width='300'>
 :::
 
 ::: {.column width="20%"}
@@ -501,7 +502,7 @@ Why is the jet colormap so much worse? The answer lies in how its color composit
 
 ::: {.column width="30%"}
 **Viridis Colormap Perception**
-<img src="images/viridis_perceptually_uniform.png" alt='viridis_perceptually_uniform' width='336'>
+<img src="images/viridis_perceptually_uniform.png" alt='Viridis colormap is percieved as a straight line.' width='336'>
 :::
 
 ::::
@@ -514,7 +515,7 @@ Notice how the said uniformity is present within the linear trend displayed in t
 
 In our earlier discussion of multi-dimensional encodings, we analyzed a scatter plot with four pseudo-dimensions: the two axes, area, and color. Were these appropriate to use? The following diagram analyzes how well the human eye can distinguish between these "markings".
 
-<img src="images/markings_viz.png" alt='markings_viz' width='400'>
+<img src="images/markings_viz.png" alt='Examples of markings.' width='400'>
 
 There are a few key takeaways from this diagram
 
@@ -532,7 +533,7 @@ Consider an example where we want to analyze income earnings for males and femal
 
 
 ::: {.column width="30%"}
-<img src="images/male_female_earnings_barplot.png" alt='jet_perceptually_uniform' width='360'>
+<img src="images/male_female_earnings_barplot.png" alt='Bar plot of earnings separated by gender.' width='360'>
 :::
 
 ::: {.column width="20%"}
@@ -540,7 +541,7 @@ Consider an example where we want to analyze income earnings for males and femal
 :::
 
 ::: {.column width="30%"}
-<img src="images/male_female_earnings_scatterplot.png" alt='viridis_perceptually_uniform' width='340'>
+<img src="images/male_female_earnings_scatterplot.png" alt='Scatterplot of earnings separated by gender.' width='340'>
 :::
 
 ::::
@@ -549,7 +550,7 @@ The barplot is an example of **juxtaposition**: placing multiple plots side by s
 
 Which is better depends on the problem at hand. Here, superposition makes the precise wage difference very clear from a quick glance. However, many sophisticated plots convey information that favors the use of juxtaposition. Below is one example.
 
-<img src="images/small_multiples.png" alt='small_multiples' width='600'>
+<img src="images/small_multiples.png" alt='Plot example with the geographic representation of the United States repeated multiple times.' width='600'>
                                                         
 
 ### Harnessing Context

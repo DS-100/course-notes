@@ -1,16 +1,5 @@
 ---
 title: Cross Validation and Regularization
-format:
-  html:
-    toc: true
-    toc-depth: 5
-    toc-location: right
-    code-fold: false
-    theme:
-      - cosmo
-      - cerulean
-    callout-icon: false
-jupyter: python3
 ---
 
 ::: {.callout-note collapse="false"}
@@ -27,7 +16,7 @@ To answer this question, we will need to address two things: first, we need to u
 ## Cross-validation
 ### Training, Test, and Validation Sets
 
-<center><img src="images/simple_under_overfit.png" alt='train-test-split' width='400'></center><br>
+<center><img src="images/simple_under_overfit.png" alt='Conceptual illustration of underfitting and overfitting' width='400'></center><br>
 
 From lecture 14, we learned that *increasing* model complexity *decreased* our model's training error but *increased* its  variance. This makes intuitive sense: adding more features causes our model to fit more closely to data it encountered during training, but it generalizes worse to new data that hasn't been seen before. For this reason, a low training error is not always representative of our model's underlying performance -- we need to also assess how well it performs on unseen data to ensure that it is not overfitting.
 
@@ -46,7 +35,7 @@ Importantly, the optimal model parameters were found by *only* considering the d
 
 The process of sub-dividing our dataset into training and test sets is known as a **train-test split**. Typically, between 10% and 20% of the data is allocated to the test set.
 
-<center><img src="images/train-test-split.png" alt='train-test-split' width='500'></center><br>
+<center><img src="images/train-test-split.png" alt='Illustration of how a full dataset is transformed by a train/test split.' width='500'></center><br>
 
 In `sklearn`, the `train_test_split` function ([documentation](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html)) of the `model_selection` module allows us to automatically generate train-test splits. 
 
@@ -121,13 +110,13 @@ Our solution is to introduce a **validation set**. A validation set is a random 
 
 The process of creating a validation set is called a **validation split**.
 
-<center><img src="images/validation-split.png" alt='validation-split' width='600'></center><br>
+<center><img src="images/validation-split.png" alt='Illustration of how after a train/test split, a validation split further splits the training set into a training set and a validation set.' width='600'></center><br>
 
 Note that the validation error behaves quite differently from the training error explored previously. As the model becomes more complex, it makes better predictions on the training data; the variance of the model typically increases as model complexity increases. Validation error, on the other hand, decreases *then increases* as we increase model complexity. This reflects the transition from underfitting to overfitting: at low model complexity, the model underfits because it is not complex enough to capture the main trends in the data; at high model complexity, the model overfits because it "memorizes" the training data too closely. 
 
 We can update our understanding of the relationships between error, complexity, and model variance:
 
-<center><img src="images/training_validation_curve.png" alt='training_validation_curve' width='500'></center><br>
+<center><img src="images/training_validation_curve.png" alt='Illustration of the relationships between error, complexity, and model variance' width='500'></center><br>
 
 Our goal is to train a model with complexity near the orange dotted line – this is where our model minimizes the validation error. Note that this relationship is a simplification of the real-world, but it's a good enough approximation for the purposes of Data 100.
 
@@ -139,11 +128,11 @@ But what if, by random chance, our validation set just happened to contain many 
 
 Let's think back to our validation framework. Earlier, we set aside $x$% of our training data (say, 20%) to use for validation. 
 
-<center><img src="images/validation_set.png" alt='validation_set' width='220'></center>
+<center><img src="images/validation_set.png" alt='Basic illustration of how the training data can be split into training and validation.' width='220'></center>
 
 In the example above, we set aside the first 20% of training datapoints for the validation set. This was an arbitrary choice. We could have set aside *any* 20% portion of the training data for validation. In fact, there are 5 non-overlapping "chunks" of training points that we could have designated as the validation set.
 
-<center><img src="images/possible_validation_sets.png" alt='possible_validation_sets' width='750'></center>
+<center><img src="images/possible_validation_sets.png" alt='Four different basic illustrations of how the training data can be split into training and validation; validation data can be taken from any section of the training data.' width='750'></center>
 
 The common term for one of these chunks is a **fold**. In the example above, we had 5 folds, each containing 20% of the training data. This gives us a new perspective: we really have *5* validation sets "hidden" in our training set. 
 
@@ -155,12 +144,12 @@ In **cross-validation**, we perform validation splits for each fold in the train
 4. Repeat for all $K$ folds
 
 The **cross-validation error** is then the *average* error across all $K$ validation folds. In the example below, the cross-validation error is the mean of validation errors #1 to #5.
-<center><img src="images/cross_validation.png" alt='cross_validation' width='800'></center>
+<center><img src="images/cross_validation.png" alt='Illustration of cross validation' width='800'></center>
 
 ### Model Selection Workflow
 At this stage, we have refined our model selection workflow. We begin by performing a train-test split to set aside a test set for the final evaluation of model performance. Then, we alternate between adjusting our design matrix and computing the cross-validation error to finetune the model's design. In the example below, we illustrate the use of 4-fold cross-validation to help inform model design.
 
-<center><img src="images/model_selection.png" alt='model_selection' width='800'></center>
+<center><img src="images/model_selection.png" alt='Illustration of cross validation with model selection.' width='800'></center>
 
 ### Hyperparameters
 An important use of cross-validation is for **hyperparameter** selection. A hyperparameter is some value in a model that is chosen *before* the model is fit to any data. This means that it is distinct from the *model parameters*, $\theta_i$, because its value is selected *before* the training process begins. We cannot use our usual techniques – calculus, ordinary least squares, or gradient descent – to choose its value. Instead, we must decide it ourselves. 
@@ -175,7 +164,7 @@ To select a hyperparameter value via cross-validation, we first list out several
 
 For example, we may wish to use cross-validation to decide what value we should use for $\alpha$, which controls the step size of each gradient descent update. To do so, we list out some possible guesses for the best $\alpha$, like 0.1, 1, and 10. For each possible value, we decide to apply 3-fold cross-validation to see what error the model has when we use that value of $\alpha$ to train it.
 
-<center><img src="images/hyperparameter_tuning.png" alt='hyperparameter_tuning' width='600'></center>
+<center><img src="images/hyperparameter_tuning.png" alt='Illustration of hyperparameter tuning. Annotation says Choose the hyperparameter with lowest CV error. Select alpha = 0.1' width='600'></center>
 
 ## Regularization
 
@@ -189,7 +178,7 @@ In most machine learning problems, complexity is defined differently from what w
 
 Think back to our work using gradient descent to descend down a loss surface. You may find it helpful to refer back to the Gradient Descent note to refresh your memory. Our aim was to find the combination of model parameters that the smallest, minimum loss. We visualized this using a contour map by plotting possible parameter values on the horizontal and vertical axes, which allows us to take a bird's eye view above the loss surface. In the image below, we are looking at a 3D parabolic surface from above. Notice that the contour map has $p=2$ parameters for ease of visualization. We want to find the model parameters corresponding to the lowest point on the loss surface.
 
-<center><img src="images/unconstrained.png" alt='unconstrained' width='450'></center>
+<center><img src="images/unconstrained.png" alt='Loss surface.' width='450'></center>
 
 Let's review our current modeling framework.
 
@@ -216,17 +205,17 @@ Notice that the intercept term, $\theta_0$, is excluded from this constraint. **
 
 Now, let's think back to gradient descent and visualize the loss surface as a contour map. As a refresher, a loss surface means that each point represents the model's loss for a particular combination of $\theta_1$, $\theta_2$. Let's say our goal is to find the combination of parameters that gives us the lowest loss. 
 
-<center><img src="images/constrained_gd.png" alt='constrained_gd' width='450'></center>
+<center><img src="images/constrained_gd.png" alt='Loss surface' width='450'></center>
 </br>
 With no constraint, the optimal $\hat{\theta}$ is in the center. We denote this as $\hat{\theta}_\text{No Reg}$.
 
 Applying this constraint limits what combinations of model parameters are valid. We can now only consider parameter combinations with a total absolute sum less than or equal to our number $Q$. For our 2D example, the constraint $\sum_{i=1}^p |\theta_i| \leq Q$ can be rewritten as $|\theta_1| + |\theta_2| \leq Q$. This means that we can only assign our *regularized* parameter vector $\hat{\theta}_{\text{Reg}}$ to positions in the green diamond below.
 
-<center><img src="images/diamondreg.png" alt='diamondreg' width='450'></center>
+<center><img src="images/diamondreg.png" alt='Loss surface with a green diamond overlaid.' width='450'></center>
 </br>
 We can no longer select the parameter vector that *truly* minimizes the loss surface, $\hat{\theta}_{\text{No Reg}}$, because this combination of parameters does not lie within our allowed region. Instead, we select whatever allowable combination brings us *closest* to the true minimum loss, which is depicted by the red point below.
 
-<center><img src="images/diamond.png" alt='diamond' width='450'></center>
+<center><img src="images/diamond.png" alt='Loss surface with a green diamond overlaid and a red point chosen within the green diamond.' width='450'></center>
 </br>
 Notice that, under regularization, our optimized $\theta_1$ and $\theta_2$ values are much smaller than they were without regularization (indeed, $\theta_1$ has decreased to 0). The model has *decreased in complexity* because we have limited how much our features contribute to the model. In fact, by setting its parameter to 0, we have effectively removed the influence of feature $x_1$ from the model altogether. 
 
@@ -234,16 +223,16 @@ If we change the value of $Q$, we change the region of allowed parameter combina
 
 When $Q$ is small, we severely restrict the size of our parameters. $\theta_i$s are small in value, and features $x_i$ only contribute a little to the model. The allowed region of model parameters contracts, and the model becomes much simpler:
 
-<center><img src="images/diamondpoint.png" alt='diamondpoint' width='450'></center><br>
+<center><img src="images/diamondpoint.png" alt='Loss surface with a green diamond overlaid and a red point chosen within the green diamond.' width='450'></center><br>
 
 When $Q$ is large, we do not restrict our parameter sizes by much. $\theta_i$s are large in value, and features $x_i$ contribute more to the model. The allowed region of model parameters expands, and the model becomes more complex:
 
-<center><img src="images/largerq.png" alt='largerq' width='450'></center><br>
+<center><img src="images/largerq.png" alt='Loss surface with a larger green diamond overlaid and a red point chosen within the green diamond. The point is now closer to the global minimum.' width='450'></center><br>
 
 
 Consider the extreme case of when $Q$ is extremely large. In this situation, our restriction has essentially no effect, and the allowed region includes the OLS solution!
 
-<center><img src="images/verylarge.png" alt='verylarge' width='450'></center>
+<center><img src="images/verylarge.png" alt='Loss surface with a very large green diamond overlaid.' width='450'></center>
 </br>
 
 Now what if $Q$ was extremely small? Most parameters are then set to (essentially) 0. 
@@ -253,7 +242,7 @@ Now what if $Q$ was extremely small? Most parameters are then set to (essentiall
 
 Let's summarize what we have seen. 
 
-<center><img src="images/summary.png" alt='summary' width='700'></center>
+<center><img src="images/summary.png" alt='Conceptual understanding of model complexity, variance, training error, validation error, and under/overfitting.' width='700'></center>
 
 ### L1 (LASSO) Regularization
 
@@ -342,7 +331,7 @@ As before, **we typically do not regularize the intercept term**.
 
 In our 2D example, the constraint becomes $\theta_1^2 + \theta_2^2 \leq Q$. Can you see how this is similar to the equation for a circle, $x^2 + y^2 = r^2$? The allowed region of parameters for a given value of $Q$ is now shaped like a ball.
 
-<center><img src="images/green_constrained_gd_sol.png" alt='green_constrained_gd_sol' width='400'></center>
+<center><img src="images/green_constrained_gd_sol.png" alt='Loss surface' width='400'></center>
 
 If we modify our objective function like before, we find that our new goal is to minimize the function:
 $$\frac{1}{n} \sum_{i=1}^n (y_i - (\theta_0 + \theta_1 x_{i, 1} + \theta_2 x_{i, 2} + \ldots + \theta_p x_{i, p}))^2\:\text{such that} \sum_{i=1}^p \theta_i^2 \leq Q$$

@@ -1,16 +1,5 @@
 ---
 title: Visualization I
-format:
-  html:
-    toc: true
-    toc-depth: 5
-    toc-location: right
-    code-fold: false
-    theme:
-      - cosmo
-      - cerulean
-    callout-icon: false
-jupyter: python3
 ---
 
 ::: {.callout-note collapse="false"}
@@ -30,11 +19,11 @@ You've likely encountered several forms of data visualizations in your studies. 
 
 | Line Chart | Scatter Plot | 
 | --- | --- | 
-| <img src="images/line_chart_viz.png" alt='bad_distro' width='300'> |  <img src="images/scatter.png" alt='bad_distro' width='300'> | 
+| <img src="images/line_chart_viz.png" alt='Example of a line chart' width='300'> |  <img src="images/scatter.png" alt='Example of a scatterplot' width='300'> | 
 
 | Histogram | 
 | --- |
-| <img src="images/histogram_viz.png" alt='bad_distro' width='400'> |
+| <img src="images/histogram_viz.png" alt='Example of a histogram' width='400'> |
 
 ## Goals of Visualization
 
@@ -56,14 +45,14 @@ A distribution describes both the set of values that a single variable can take 
    
 | Not a Valid Distribution | Valid Distribution | 
 | --- | --- | 
-| <img src="images/bad_distro.png" alt='bad_distro' width='350'> | <img src="images/good_distro.png" alt='good_distro' width='300'> | 
+| <img src="images/bad_distro.png" alt='Example of a non-valid distribution' width='350'> | <img src="images/good_distro.png" alt='Example of a valid distribution where the sum of categories totals 100.' width='300'> | 
 | This is not a valid distribution since individuals can be associated with more than one category and the bar values demonstrate values in minutes and not probability. | This example satisfies the two properties of distributions, so it is a valid distribution. | 
 
 ## Variable Types Should Inform Plot Choice
 
 Different plots are more or less suited for displaying particular types of variables, laid out in the diagram below:
 
-<center><img src = "images/variables.png" width = "500"></img></a></center>
+<center><img src = "images/variables.png" width = "500" alt="Variables can either be qualitative or quantitative. If a variable is qualitative, it can be either ordinal or nominal"></img></a></center>
 
 The first step of any visualization is to identify the type(s) of variables we're working with. From here, we can select an appropriate plot type: 
 
@@ -90,6 +79,7 @@ We can visualize the distribution of the `Continent` column using a bar plot. Th
 ### Plotting in Pandas
 
 ```{python}
+#| fig-alt: A bar plot with each continent on the x-axis. The heights of the bars correspond to the value count for each continent. Africa has the tallest bar and S. America has the shortest.
 wb['Continent'].value_counts().plot(kind='bar');
 ```
 
@@ -100,6 +90,7 @@ Plotting methods in `pandas` are the least preferred and not supported in Data 1
 ### Plotting in Matplotlib
 
 ```{python}
+#| fig-alt: A bar plot with each continent on the x-axis and count on the y-axis. The heights of the bars correspond to the value count for each continent. Africa has the tallest bar and S. America has the shortest.
 import matplotlib.pyplot as plt # matplotlib is typically given the alias plt
 
 continent = wb['Continent'].value_counts()
@@ -115,6 +106,7 @@ However, note how we needed to label the axes with `plt.xlabel` and `plt.ylabel`
 ### Plotting in `Seaborn`
 
 ```{python}
+#| fig-alt: A bar plot with each continent on the x-axis and count on the y-axis. The heights of the bars correspond to the value count for each continent. Africa has the tallest bar and S. America has the shortest.
 import seaborn as sns # seaborn is typically given the alias sns
 sns.countplot(data = wb, x = 'Continent');
 ```
@@ -144,6 +136,7 @@ How should we define our categories for this variable? In the previous example, 
 Under this assumption, let's plot this distribution using the `seaborn.countplot` function.
 
 ```{python}
+#| fig-alt: "Countplot is used to create a plot with Gross national income per capita, Atlas method: $: 2016 on the x-axis and count on the y. Most data has a count of 1, some have a count of 2, and one has a count of 3."
 sns.countplot(data = wb, x = 'Gross national income per capita, Atlas method: $: 2016');
 ```
 
@@ -168,6 +161,7 @@ Each bin reflects the density of datapoints with values that lie between the lef
 Below, we plot a histogram using matplotlib and seaborn. Which graph do you prefer? 
 
 ```{python}
+#| fig-alt: Histogram plotted using matplotlib. The bars are solid blue and the density value labels on the y-axis are integers 0 to 7 with the annotation 1e-5.
 # The `edgecolor` argument controls the color of the bin edges
 gni = wb["Gross national income per capita, Atlas method: $: 2016"]
 plt.hist(gni, density=True, edgecolor="white")
@@ -179,6 +173,7 @@ plt.title("Distribution of gross national income per capita");
 ```
 
 ```{python}
+#| fig-alt: Histogram plotted using seaborn. The bars are a lighter blue with black outlines. The density value labels on the y-axis are decimal points with leading zeroes.
 sns.histplot(data=wb, x="Gross national income per capita, Atlas method: $: 2016", stat="density")
 plt.title("Distribution of gross national income per capita");
 ```
@@ -200,6 +195,7 @@ wb.loc[wb["Continent"].isin(south), "Hemisphere"] = "Southern"
 ```
 
 ```{python}
+#| fig-alt: Overlaid histograms with the south hemisphere in blue and the north hemisphere in orange. Easy comparisons can be made within the same bin for each hemisphere.
 sns.histplot(data=wb, x="Gross national income per capita, Atlas method: $: 2016", hue="Hemisphere", stat="density")
 plt.title("Distribution of gross national income per capita");
 ```
@@ -207,6 +203,7 @@ plt.title("Distribution of gross national income per capita");
 Again, each bin of a histogram is scaled such that its **area** is proportional to the **percentage** of all datapoints that it contains.
 
 ```{python}
+#| fig-alt: Histogram of gross national income per capita. 
 densities, bins, _ = plt.hist(gni, density=True, edgecolor="white", bins=5)
 plt.xlabel("Gross national income per capita")
 plt.ylabel("Density")
@@ -235,15 +232,17 @@ The skew of a histogram describes the direction in which its "tail" extends.
 - A good way to remember this is that it looks like a "**P**" on its side for **P**ositive skew! 
 
 ```{python}
+#| fig-alt: Distribution with a long right tail. The highest bars are on the very left of the graph and as you progress to the right side of the graph, the bars stay short.
 sns.histplot(data = wb, x = 'Gross national income per capita, Atlas method: $: 2016', stat = 'density');
-plt.title('Distribution with a long right tail')
+plt.title('Distribution with a long right tail');
 ```
 
 - A distribution with a long left tail is **skewed left**  (has **negative skew**) (such as `Access to an improved water source`). In a left-skewed distribution, the few small outliers "pull" the **mean** to the **left** of the **median**. 
 
 ```{python}
+#| fig-alt: Distribution with a long right tail. The highest bars are on the very right of the graph and as you progress to the left side of the graph, the bars are short.
 sns.histplot(data = wb, x = 'Access to an improved water source: % of population: 2015', stat = 'density');
-plt.title('Distribution with a long left tail')
+plt.title('Distribution with a long left tail');
 ```
 
 In the case where a distribution has equal-sized right and left tails, it is **symmetric**. The mean is approximately **equal** to the median. Think of mean as the balancing point of the distribution.
@@ -255,6 +254,7 @@ The **mode** is the **mo**st frequent value in a distribution. In Data 100, we d
 If we set the number of bins to 5, the distribution appears **unimodal** (has one clear peak/mode).
 
 ```{python}
+#| fig-alt:  Histogram with five bins.
 # Rename the very long column name for convenience
 wb = wb.rename(columns={'Antiretroviral therapy coverage: % of people living with HIV: 2015':"HIV rate"})
 # With 5 bins, it seems that there is only one peak
@@ -263,6 +263,7 @@ plt.title("5 histogram bins");
 ```
 
 ```{python}
+#| fig-alt: The same data is plotted again in a histogram, this time with ten bins. Here you can see there seems to be two peaks. 
 # With 10 bins, there seem to be two peaks
 
 sns.histplot(data=wb, x="HIV rate", stat="density", bins=10)
@@ -272,6 +273,7 @@ plt.title("10 histogram bins");
 If a distribution has two peaks/modes, it is called **bimodal**. If a distribution has more peaks than that, we say it is **multimodal**.
 
 ```{python}
+#| fig-alt: The same data is plotted again in a histogram, this time with twenty bins. Here it becomes hard to say what counts as a "peak"!
 # And with 20 bins, it becomes hard to say what counts as a "peak"!
 
 sns.histplot(data=wb, x ="HIV rate", stat="density", bins=20)
@@ -298,6 +300,7 @@ The interval **[Q1, Q3]** contains the "middle 50% of the data."
 This concept is illustrated in the histogram below, where the three quartiles are marked with red vertical bars.R)
 
 ```{python}
+#| fig-alt: A Histogram is overlaid with a rug plot. The histogram consists of two colors of bars. The middle 50% is in blue and has the tallest bars in the center of the distribution. The other bars are in orange and they are shorter and on either side of the center blue bars. The rug plot marks the 25th, 50th, and 75th percentiles which align with the start, middle, and end of the blue bars respectively.
 #| code-fold: true
 gdp = wb['Gross domestic product: % growth : 2016']
 gdp = gdp[~gdp.isna()]
@@ -330,6 +333,7 @@ Box plots display the distribution of a variable using information about **quart
 In a box plot, the lower extent of the box lies at Q1, while the upper extent of the box lies at Q3. The horizontal line in the middle of the box corresponds to Q2 (equivalently, the median). This can be seen in the box plot below.
 
 ```{python}
+#| fig-alt: Example box plot.
 sns.boxplot(data=wb, y='Gross domestic product: % growth : 2016');
 ```
 
@@ -337,7 +341,7 @@ The **whiskers** of a box-plot are the two points that lie at the \[$1^{st}$ Qua
 
 The different forms of information contained in a box plot can be summarised as follows:
 
-<center><img src = "images/box_plot_diagram_updated_2.png" width = "600"></img></a></center>
+<center><img src = "images/box_plot_diagram_updated_2.png" width = "600" alt="An annotated boxplot showing outliers, whiskers, and quartiles."></img></a></center>
 
 ### Side-by-Side Box plots
 
@@ -348,6 +352,7 @@ With `seaborn`, we can easily create side-by-side plots by specifying both an x 
 In the example below, we plot the distribution of a quantitative variable, GDP % growth, across different categories, which are different continents in this case
 
 ```{python}
+#| fig-alt: Example of side-by-side box plots. On the x-axis is the Continent with separate box plots per continent. Each continent box plot shares the same y-axis leading to easy comparison. 
 sns.boxplot(data=wb, x="Continent", y='Gross domestic product: % growth : 2016');
 ```
 
@@ -356,6 +361,7 @@ sns.boxplot(data=wb, x="Continent", y='Gross domestic product: % growth : 2016')
 Violin plots are just box plots with smoothed density curves. The width indicates the density of points. Q1, the median, Q3, and whiskers are still present, just harder to see at first. 
 
 ```{python}
+#| fig-alt: Example violin plot.
 sns.violinplot(data=wb, y="Gross national income per capita, Atlas method: $: 2016");
 ```
 
@@ -370,7 +376,7 @@ Important note about Violin plots:
 
   
 
-  <center><img src = "images/box_vs_violin_width.png" width = "600"></img></a></center>
+  <center><img src = "images/box_vs_violin_width.png" width = "600" alt="The same data is plotted twice, on the left with a box plot and on the right with a violin plot."></img></a></center>
 
 Observe that the width of a box in a box plot has no meaning, but the width in a violin plot is meaningful, and gives us information about the density of data points at a given range of values!
 
@@ -408,6 +414,7 @@ wb.head()
 ```
 
 ```{python}
+#| fig-alt: "Plot titled 'Distribution of HIV rates' with both the histogram and KDE plotted"
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -435,6 +442,7 @@ To make things simpler, let's construct a KDE for a small, artificially generate
 
 ```{python}
 #| code-fold: true
+#| fig-alt: Rug plot of the five datapoints in our artifically generated dataset. The points are between 2 and 6.
 data = [2.2, 2.8, 3.7, 5.3, 5.7]
 
 sns.rugplot(data, height=0.3)
@@ -449,6 +457,8 @@ Our goal is to create the following KDE curve, which was generated automatically
 
 ```{python}
 #| code-fold: true
+#| fig-alt: Plot showing both the histogram and KDE
+
 plt.xlabel("Data")
 plt.xlim(-3, 10)
 plt.ylim(0, 0.5)
@@ -461,6 +471,8 @@ Alternatively, we can use `sns.histplot`. You can also get a very similar result
 
 ```{python}
 #| code-fold: true
+#| fig-alt: The same plot with the histogram and KDE, this time created using seaborn
+
 plt.xlabel("Data")
 plt.xlim(-3, 10)
 plt.ylim(0, 0.5)
@@ -480,6 +492,7 @@ Below, we place a **Gaussian kernel**, plotted in orange, over the datapoint $2.
 
 ```{python}
 #| code-fold: true
+#| fig-alt: "A Gaussian kernel is plotted over one of the datapoints in the artificially generated dataset."
 
 def gaussian_kernel(x, z, a):
     # We'll discuss where this mathematical formulation came from later
@@ -502,6 +515,7 @@ To begin creating our KDE, we place a kernel on *each* datapoint in our dataset.
 
 ```{python}
 #| code-fold: true
+#| fig-alt: "A Gaussian kernel is plotted over all of the datapoints in the artificially generated dataset."
 
 # You will work with the functions below in Lab 4
 def create_kde(kernel, pts, a):
@@ -548,6 +562,7 @@ In the cell below, we multiply each of our 5 kernels by $\frac{1}{5}$ to apply n
 
 ```{python}
 #| code-fold: true
+#| fig-alt: "A Gaussian kernel is plotted over all of the datapoints in the artificially generated dataset. The kernels have been normalized, so they are more stout than in the previous plot"
 plt.xlim(-3, 10)
 plt.ylim(0, 0.5)
 plt.xlabel("Data")
@@ -563,6 +578,7 @@ Our KDE curve is the sum of the normalized kernels. Notice that the final curve 
 
 ```{python}
 #| code-fold: true
+#| fig-alt: The KDE plotted.
 plt.xlim(-3, 10)
 plt.ylim(0, 0.5)
 plt.xlabel("Data")
@@ -575,13 +591,13 @@ Note that it would be equivalent to sum the kernels and then normalize the resul
 
 ### Mathematical Notation of KDE
 
-<center><img src = "images/kde_function.png" width = "345"></img></a></center>
+<center><img src = "images/kde_function.png" width = "345" alt="KDE formula"></img ></a></center>
 
 A general “KDE formula” function is given above.
 
 1. $f_{\alpha}(x)$ is the end result.$\rightarrow$ **Height** of the final KDE curve at any x-value.
 
-2. $K_{\alpha}(x, x_i)$ is the kernel centered on the observation `i`. 
+2. $K_{\alpha}(x, x_i)$ is tfhe kernel centered on the observation `i`. 
     - Each kernel individually has area 1.
     - x represents any number on the number line. It is the input to our function.
 3. $n$ is the number of observed datapoints that we have.
@@ -615,11 +631,11 @@ The details of this (admittedly intimidating) formula are less important than un
 
 | Gaussian Kernel, $\alpha$ = 0.1 | Gaussian Kernel, $\alpha$ = 1 | 
 | --- | --- |
-| <img src="images/gaussian_0.1.png" alt='gaussian_0.1' width='345'> | <img src="images/gaussian_1.png" alt='gaussian_1' width='345'> | 
+| <img src="images/gaussian_0.1.png" alt='Gaussian kernel with alpha=0.1' width='345'> | <img src="images/gaussian_1.png" alt='Gaussian kernel with alpha=1' width='345'> | 
 
 | Gaussian Kernel, $\alpha$ = 2 | Gaussian Kernel, $\alpha$ = 5 | 
 |  --- | --- | 
-| <img src="images/gaussian_2.png" alt='gaussian_2' width='345'> | <img src="images/gaussian_5.png" alt='gaussian_5' width='345'> | 
+| <img src="images/gaussian_2.png" alt='Gaussian kernel with alpha=2' width='345'> | <img src="images/gaussian_5.png" alt='Gaussian kernel with alpha=5' width='345'> | 
 
 #### Boxcar Kernel
 
@@ -635,6 +651,7 @@ The boxcar kernel is seldom used in practice – we include it here to demonstra
 ```{python}
 #| code-fold: true
 #| fig-cap: The Boxcar kernel centered at 0 with bandwidth $\alpha$ = 1.
+#| fig-alt: The Boxcar kernel centered at 0 with bandwidth $\alpha$ = 1.
 
 def boxcar_kernel(alpha, x, z):
     return (((x-z)>=-alpha/2)&((x-z)<=alpha/2))/alpha
@@ -649,7 +666,7 @@ The diagram on the right is how the density curve for our 5 point dataset would 
 
 | KDE | Boxcar | 
 | --- | --- | 
-| <img src="images/gaussian_kernel.png" alt='kde_step_3' width='350'> | <img src="images/boxcar_kernel.png" alt='boxcar_kernel' width='350'> | 
+| <img src="images/gaussian_kernel.png" alt='KDE of toy data with Gaussian kernel and alpha=1.' width='350'> | <img src="images/boxcar_kernel.png" alt='KDE of toy data with Boxcar kernel and alpha=1.' width='350'> | 
 
 We'll continue covering visualization in the next lecture!
 
