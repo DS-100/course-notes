@@ -1,7 +1,5 @@
 # course-notes
 
-# Data 89 Course Notes
-
 BADGES HERE
 
 This was built with [Jupyter Book (MyST flavor)](https://jupyterbook.org/en/stable/intro.html). 
