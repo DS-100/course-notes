@@ -1,7 +1,7 @@
 # Welcome 
 
 ## Authors
-In alphabetical order, Bella Crouch, Yash Dave, Ian Dong, Sardaana Eginova, Kanu Grover, Ishani Gupta, Ella Hammond, Prabhleen Kaur, Xiaorui Liu, Emrie Loh, Minh Phan, Nikhil Reddy, Milad Shafaie, Matthew Shen, Conan Smallwood, Lillian Weng, and Wesley Zheng.
+In alphabetical order, Bella Crouch, Yash Dave, Ian Dong, Sardaana Eginova, Kanu Grover, Ishani Gupta, Eli Hammond, Prabhleen Kaur, Xiaorui Liu, Emrie Loh, Minh Phan, Nikhil Reddy, Milad Shafaie, Matthew Shen, Conan Smallwood, Lillian Weng, and Wesley Zheng.
 
 ## About the Course Notes
 
