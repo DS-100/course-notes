@@ -1,5 +1,5 @@
 ---
-title: Case Study in Human Contexts and Ethics
+title: Case Study in Human Contexts and Ethics (Fall 2025)
 ---
 
 :::{attention}
