@@ -1,5 +1,5 @@
 ---
-title: Random Variables (Fall 2025)
+title: Random Variables
 ---
 
 ::: {note} Learning Outcomes
