@@ -1,5 +1,5 @@
 ---
-title: Estimators, Bias, and Variance (Fall 2025)
+title: Estimators, Bias, and Variance
 ---
 
 ::: {note} Learning Outcomes
