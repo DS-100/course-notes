@@ -36,8 +36,10 @@ jobs:
       - name: Install Axe CLI and HTTP Server
         run: npm install -g @axe-core/cli http-server
 
-      - name: Get Matching Chrome version
-        run: npx browser-driver-manager install chrome
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v2
+        with:
+          chrome-version: stable
 
       # 3. Serve, Discover URLs, and Run Axe
       - name: Run Axe Checks
@@ -54,6 +56,7 @@ jobs:
           axe $URLS \
             --tags wcag2a,wcag2aa,wcag21a,wcag21aa \
             --save axe-report.json \
+            --browser-options="no-sandbox,disable-setuid-sandbox,disable-dev-shm-usage,disable-gpu" \
             --exit
 
       - name: Upload Accessibility Report
@@ -61,4 +64,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: axe-report
-          path: _build/html/axe-report.json
+          path: _build/html/axe-report.json 
