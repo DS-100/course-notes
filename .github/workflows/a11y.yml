@@ -34,12 +34,7 @@ jobs:
           node-version: '20'
 
       - name: Install Axe CLI and HTTP Server
-        run: npm install -g @axe-core/cli http-server wait-on
-
-      - name: Setup Chrome
-        uses: browser-actions/setup-chrome@v2
-        with:
-          chrome-version: stable
+        run: npm install -g selenium-webdriver @axe-core/webdriverjs chromedriver http-server wait-on
 
       # 3. Serve, Discover URLs, and Run Axe
       - name: Run Axe Checks
@@ -48,21 +43,13 @@ jobs:
           npx http-server ./_build/html -p 8080 -s &
           npx wait-on http://localhost:8080
 
-          # A2. Sanity Check
-          echo "Verifying server response..."
-          curl -I http://localhost:8080/index.html
-          
           # B. Generate the URL list from the actual build artifacts
           cd _build/html
-          URLS=$(find . -name "*.html" -not -path "*/build/*" | sed 's|^\./||' | sed 's|^|http://localhost:8080/|' | tr '\n' ' ')          
+          URLS=$(find . -name "*.html" -not -path "*/build/*" | sed 's|^\./||' | sed 's|^|http://localhost:8080/|' | tr '\n' ' ')  
+          cd ../..        
           
-          # C. Run Axe CLI on the discovered URLs
-          xvfb-run axe $URLS \
-            --tags wcag2a,wcag2aa,wcag21a,wcag21aa \
-            --save axe-report.json \
-            --timeout 120 \
-            --chrome-options="headless no-sandbox disable-gpu disable-dev-shm-usage window-size=1280,1024" \
-            --exit
+          # C. Run custom script
+          node axe-scan.js $URLS
 
       - name: Upload Accessibility Report
         if: always() 
