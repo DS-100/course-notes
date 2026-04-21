@@ -34,31 +34,26 @@ jobs:
           node-version: '20'
 
       - name: Install Axe CLI and HTTP Server
-        run: npm install -g @axe-core/cli http-server
-
-      - name: Get Matching Chrome version
-        run: npx browser-driver-manager install chrome
+        run: npm install selenium-webdriver @axe-core/webdriverjs chromedriver http-server wait-on
 
       # 3. Serve, Discover URLs, and Run Axe
       - name: Run Axe Checks
         run: |
           # A. Start a local server in the background
           npx http-server ./_build/html -p 8080 -s &
-          sleep 5
-          
+          npx wait-on http://localhost:8080
+
           # B. Generate the URL list from the actual build artifacts
           cd _build/html
-          URLS=$(find . -name "*.html" -not -path "*/build/*" | sed 's|^\./||' | sed 's|^|http://localhost:8080/|' | tr '\n' ' ')          
+          URLS=$(find . -name "*.html" -not -path "*/build/*" | sed 's|^\./||' | sed 's|^|http://localhost:8080/|' | tr '\n' ' ')  
+          cd ../..        
           
-          # C. Run Axe CLI on the discovered URLs
-          axe $URLS \
-            --tags wcag2a,wcag2aa,wcag21a,wcag21aa \
-            --save axe-report.json \
-            --exit
+          # C. Run custom script
+          node axe-scan.js $URLS
 
       - name: Upload Accessibility Report
         if: always() 
         uses: actions/upload-artifact@v4
         with:
           name: axe-report
-          path: _build/html/axe-report.json
+          path: axe-report.json 
