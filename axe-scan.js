@@ -11,9 +11,10 @@ console.log(`\nStarting Axe scan on ${urls.length} pages...\n`);
   const options = new chrome.Options();
   options.addArguments('--headless=new'); 
   options.addArguments('--no-sandbox');
+  options.addArguments('--disable-setuid-sandbox');
   options.addArguments('--disable-dev-shm-usage'); 
   options.addArguments('--disable-gpu');
-  // see if these help with the production/shifts page crashing
+  options.addArguments('--remote-debugging-pipe');
   options.addArguments('--window-size=1920,1080');
   options.addArguments('--disable-extensions');
   options.addArguments('--disable-infobars');
@@ -38,6 +39,7 @@ console.log(`\nStarting Axe scan on ${urls.length} pages...\n`);
 
       try {
         await driver.get(url);
+        await driver.sleep(2000);
 
         const results = await new AxeBuilder(driver)
           .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
