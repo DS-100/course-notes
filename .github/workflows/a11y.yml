@@ -47,6 +47,10 @@ jobs:
           # A. Start a local server in the background
           npx http-server ./_build/html -p 8080 -s &
           npx wait-on http://localhost:8080
+
+          # A2. Sanity Check
+          echo "Verifying server response..."
+          curl -I http://localhost:8080/index.html
           
           # B. Generate the URL list from the actual build artifacts
           cd _build/html
@@ -56,7 +60,8 @@ jobs:
           axe $URLS \
             --tags wcag2a,wcag2aa,wcag21a,wcag21aa \
             --save axe-report.json \
-            --chrome-options="no-sandbox disable-setuid-sandbox disable-dev-shm-usage disable-gpu" \
+            --timeout 120 \
+            --chrome-options="headless=new no-sandbox disable-setuid-sandbox disable-dev-shm-usage disable-gpu" \
             --exit
 
       - name: Upload Accessibility Report
