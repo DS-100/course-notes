@@ -1,5 +1,5 @@
 ---
-title: Clustering (Fall 2025)
+title: Clustering
 ---
 
 ::: {note} Learning Outcomes
