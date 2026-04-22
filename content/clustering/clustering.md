@@ -243,6 +243,18 @@ Agglomerative clustering is one form of "hierarchical clustering." It is interpr
 
 ![Hierarchical clustering dendrogram example 2](images/dendro_2.png)
 
+## Choosing a Clustering Algorithm
+
+A natural question is: if hierarchical clustering can recover the cluster structure "better", why would we ever use K-means?
+
+In practice, K-means is much more computationally efficient, especially for large datasets. It also scales well when new data points are added, since they can be easily assigned to existing clusters without recomputing the entire model.
+
+On the other hand, hierarchical clustering can reveal more complex and potentially insightful structure in the data, making it useful for exploratory analysis.
+
+Examples of different clustering algorithms on various datasets, along with their runtimes, are shown below.
+
+![A grid comparing five clustering algorithms (K-means, three agglomerative methods, and DBSCAN) on six datasets. Each panel shows colored points for clusters, with a small label indicating runtime in seconds. K-means is fastest but struggles with curved shapes. Agglomerative methods are slower and vary in performance. DBSCAN is fast, handles curved shapes well, and marks some points as noise.](images/Clustering_Algorithm_Comparison.png)
+
 ## Picking K
 
 The algorithms we’ve discussed require us to pick a $K$ before we start. But how do we pick $K$? Often, the best $K$ is subjective. For example, consider the state plot below. 
