@@ -430,6 +430,51 @@ Note that $\text{Var}(X_1) = \text{Var}(X_2)$, and $\text{Cov}(X_1, X_2) = 0$ si
 
 :::
 
+### Example: Bernoulli Distribution
+Let $X \sim \mathrm{Bernoulli}(p)$, where $X$ takes the value $1$ with probability $p$ and $0$ with probability $1-p$.
+
+The expectation of $X$ is
+$$
+\mathbb{E}[X] = 1 \cdot p + 0 \cdot (1-p) = p.
+$$
+This means that over many repeated trials, the average value of a Bernoulli random variable approaches $p$.
+
+To find the variance, first note that
+$$
+\mathbb{E}[X^2] = 1^2 \cdot p + 0^2 \cdot (1-p) = p.
+$$
+Therefore,
+$$
+\mathrm{Var}(X) = \mathbb{E}[X^2] - (\mathbb{E}[X])^2 = p - p^2 = p(1-p).
+$$
+
+Thus, a Bernoulli random variable has expectation $p$ and variance $p(1-p)$. The variance is smallest when $p$ is close to $0$ or $1$, and largest when $p=0.5$.
+
+### Example: Binomial Distribution
+Let $Y \sim \mathrm{Binomial}(n,p)$. A binomial random variable can be expressed as the sum of $n$ independent Bernoulli random variables:
+$$
+Y=\sum_{i=1}^n X_i,
+$$
+where each $X_i \sim \mathrm{Bernoulli}(p)$.
+
+Using the linearity of expectation and the fact that $\mathbb{E}[X_i]=p$, we obtain
+$$
+\mathbb{E}[Y]
+=\mathbb{E}\!\left[\sum_{i=1}^n X_i\right]
+=\sum_{i=1}^n \mathbb{E}[X_i]
+=np.
+$$
+
+Since the $X_i$ are independent, their variances add, and because $\mathrm{Var}(X_i)=p(1-p)$, it follows that
+$$
+\mathrm{Var}(Y)
+=\mathrm{Var}\!\left(\sum_{i=1}^n X_i\right)
+=\sum_{i=1}^n \mathrm{Var}(X_i)
+=np(1-p).
+$$
+
+Therefore, if $Y$ is a binomial random variable with parameters $n$ and $p$, then its expectation is $np$ and its variance is $np(1-p)$.
+
 ### Covariance and Correlation
 We define the **covariance** of two random variables as the expected product of deviations from expectation. Put more simply, covariance is a generalization of variance to variance: 
 
