@@ -78,7 +78,7 @@ In this example, we grouped regions based on average temperatures to understand 
 
 ![In the taxonomy of clustering approaches, there are two main groups: one where you group data into nested clusters, and another where you identify a set of distinct clusters.](images/taxonomy_new.png)
 
-There are many types of clustering algorithms, and they all have strengths, inherent weaknesses, and different use cases. There are two main groups of clustering algorithms we will focus on: Agglomerative approaches to clustering, and Partitional approaches to clustering.
+There are many types of clustering algorithms, and they all have strengths, inherent weaknesses, and different use cases. There are two main groups of clustering algorithms we will focus on: Hierarchical approaches to clustering, and Partitional approaches to clustering.
 
 We will first focus on a partitional approach: K-Means clustering.
 
@@ -318,7 +318,7 @@ We discussed using the elbow method to pick a k with inertia, but let's also dis
 
 ### Silhouette Plot
 
-We can plot the **silhouette scores** for all of our datapoints. The x-axis represents the silhouette coefficient value or silhouette score. The y-axis tells us which cluster label the points belong to, as well as the number of points within a particular cluster. Points with large silhouette widths are deeply embedded in their cluster; the red dotted line shows the average. Below, we plot the silhouette score for our plot with $K=2$. 
+We can plot the **silhouette scores** for all of our datapoints. The x-axis represents the silhouette coefficient value or silhouette score. The y-axis tells us which cluster label the points belong to, as well as the number of points within a particular cluster. Points with large silhouette scores are deeply embedded in their cluster; the red dotted line shows the average. Below, we plot the silhouette score for our plot with $K=2$. 
 
 ![The same clustering scatterplot with two clusters is shown again with a high score point and a low score point annotated.](images/high_low.png)
 
@@ -354,4 +354,4 @@ Our version of these algorithms required a hyperparameter $K$. There are 4 ways 
 
 There are many machine learning problems. Each can be addressed by many different solution techniques. Each has many metrics for evaluating success / loss. Many techniques can be used to solve different problem types. For example, linear models can be used for regression and classification.
 
-We’ve only scratched the surface and haven’t discussed many important ideas, such as neural networks and deep learning. In the next lecture, we'll provide some specific course recommendations on how to explore these topics further.
+We’ve only scratched the surface and haven’t discussed many important ideas, such as neural networks and deep learning.
