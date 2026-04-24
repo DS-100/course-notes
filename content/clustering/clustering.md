@@ -277,9 +277,9 @@ The agglomerative clustering algorithm starts with the individual data points at
 
 In order to choose K, we can cut the dendrogram just before the first "big" gap between the horizontal lines. This gap indicates a *significant jump in distance* and suggests that merging clusters beyond this point combines dissimilar groups.
 
-The number of cut vertical lines represents the optimal K.
+The number of vertical lines intersected by the horizontal cut represents the chosen value of K, based on what we consider to be a “big gap.”
 
-In this example, the horizontal line crosses 4 vertical lines so the optimal K is 4 clusters ([9,41], [5,20], [17,12], [17,8,7,14]). However, this measure of how "big" the gap is is subjective, so depending on your data you might choose a different place to cut the line, and end up with a different optimal K.
+In this example, the horizontal line crosses four vertical lines, so the optimal K is 4 clusters ([9,41], [5,20], [17,12], [17,8,7,14]). If a different cut is chosen, it may result in a different optimal K.
 
 ### Silhouette Scores
 
