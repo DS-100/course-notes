@@ -273,7 +273,7 @@ For agglomerative clustering, one approach to pick K is to use a dendrogram.
 
 The agglomerative clustering algorithm starts with the individual data points at the bottom. When two clusters are merged, they are bridged in the dendrogram. The y-axis reports the distance (according to our chosen linkage criterion) between points/clusters when they are merged.
 
-![This dendrogram shows diminishing returns beyond four clusters.](images/dendrogram_picking_k.png)
+![This dendrogram shows diminishing returns beyond four clusters.](images\dendrogram_picking_k.png)
 
 In order to choose K, we can cut the dendrogram just before the first "big" gap between the horizontal lines. This gap indicates a *significant jump in distance* and suggests that merging clusters beyond this point combines dissimilar groups.
 
