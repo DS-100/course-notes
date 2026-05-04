@@ -5,64 +5,15 @@ on:
     branches:
       - main
   pull_request:
-  workflow_dispatch:
-env:
-  # `BASE_URL` determines, relative to the root of the domain, the URL that your site is served from.
-  # E.g., if your site lives at `https://mydomain.org/myproject`, set `BASE_URL=/myproject`.
-  # If, instead, your site lives at the root of the domain, at `https://mydomain.org`, set `BASE_URL=''`.
-  BASE_URL: /${{ github.event.repository.name }}
 
 jobs:
-  axe-check:
+  check-a11y:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      # 1. Setup Python & Build the Book
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      
+      - name: Run Accessibility Checks
+        uses: berkeley-cdss/myst-a11y@v1
         with:
-          python-version: '3.11'
-          cache: 'pip'
-          
-      - name: Install Python dependencies
-        run: pip install -r requirements.txt
-
-      - name: Build Jupyter Book
-        run: jupyter-book build --html
-
-      # 2. Setup Node environment for Axe
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install Axe CLI and HTTP Server
-        run: npm install selenium-webdriver @axe-core/webdriverjs chromedriver http-server wait-on
-
-      # 3. Serve, Discover URLs, and Run Axe
-      - name: Run Axe Checks
-        run: |
-          # A. Create a subdirectory structure that matches the BASE_URL
-          mkdir -p staging${BASE_URL}
-          cp -r _build/html/* staging${BASE_URL}/
-          
-          # B. Start a local server in the background
-          npx http-server staging -p 8080 -s &
-          npx wait-on http://localhost:8080${BASE_URL}/
-
-          # C. Generate the URL list from the actual build artifacts
-          cd _build/html
-          URLS=$(find . -name "*.html" -not -path "*/build/*" | sed 's|^\./||' | sed "s|^|http://localhost:8080${BASE_URL}/|" | tr '\n' ' ')          
-          cd ../..        
-          
-          # D. Run custom script
-          node axe-scan.js $URLS
-
-      - name: Upload Accessibility Report
-        if: always() 
-        uses: actions/upload-artifact@v4
-        with:
-          name: axe-report
-          path: axe-report.json 
+          base_url: '/${{ github.event.repository.name }}'
+          exclude: "iframe[src*='youtube.com'], #movie_player"
