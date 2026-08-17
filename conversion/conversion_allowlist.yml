@@ -51,14 +51,122 @@
 #         reason: toc entries repointed at content/polars_{1,2,3} after the tier-D rename
 #
 # ---------------------------------------------------------------------------------------
-# No per-chapter exceptions are recorded yet. Two committed error outputs exist in the
-# baseline -- eda cell a3fde967 and pandas_2 cell ccf796ec, both ValueError -- and both are
-# *expected to survive* the conversion, so neither needs an entry. G9 checks them in both
-# directions: a new error fails, and so does one of these going quiet.
+# Two committed error outputs exist in the baseline -- eda cell a3fde967 and pandas_2 cell
+# ccf796ec, both ValueError in pandas. Neither raises a ValueError any more:
+#
+#   * `eda`'s stopped raising entirely (`pl.read_json` succeeds) -- see its `resolved_errors`.
+#   * `pandas_2`'s survives in `polars_1` under the same cell id, now raising
+#     `TypeError: the truth value of an Expr is ambiguous`. It needs no entry, because G9 keys on
+#     **cell id alone** and never inspects the exception type.
+#
+# That last point is worth knowing before trusting G9: it catches a demo that goes quiet, but it
+# would not notice one that starts raising the *wrong* exception. Only the cell's own comment and
+# the prose beside it assert which error the reader should see.
+#
+# Do not add a `raises-exception` tag to `ccf796ec`. G10 is id-aligned, and after the tier-D
+# rewrite that cell is the only one in `polars_1` still aligned with the baseline -- tagging it
+# would fail G10 until allowlisted, spending the one cell G10 can still check to duplicate a
+# guarantee the executor's hard stop already provides.
 # ---------------------------------------------------------------------------------------
+
+polars_1:
+  frontmatter:
+    - cell_id: "0"
+      reason: >-
+        'Pandas II' -> 'Polars I'. The chapter's baseline is `pandas_2` because that is the
+        directory `git mv` moved, but the chapter itself is the merge of `pandas_1` and `pandas_2`
+        into the first of two tier-D chapters. The numbered title matches the convention this slot
+        already used ('Pandas I/II/III'); the rest of the book uses descriptive titles, and these
+        library-teaching chapters were the deliberate exception.
+
+polars_2:
+  frontmatter:
+    - cell_id: "0"
+      reason: >-
+        'Pandas III' -> 'Polars II', alongside the content/pandas_3 -> content/polars_2 rename.
+
+  removed_figures:
+    - cell_id: p2-rtp-explain
+      reason: >-
+        `images/error.png` dropped. It is a screenshot of a *pandas* traceback --
+        `return series.iloc[-1] / np.max(series)` raising
+        `TypeError: unsupported operand type(s) for /: 'str' and 'str'` -- rendered as pixels, so
+        `no-pandas-code` cannot see inside it. It was the last pandas artifact reaching a reader.
+
+        Three things were wrong with keeping it. The prose describes a **sum** failing; the image
+        shows a **division** failing. The image's function is named `ratio_to_peak`, which this
+        chapter defines two sections later with a different body -- same name, two bodies, one of
+        them pandas. And its `:alt:` described the prose's claim rather than what is drawn, so a
+        screen-reader user was told an aggregation hit an unsupported dtype while a sighted reader
+        saw a string division inside a user function.
+
+        The prose now states the real message, verified live:
+        `InvalidOperationError: `sum` operation not supported for dtype `str``. It also gained the
+        more useful half of the lesson -- `pl.all().mean()` over the same frame does **not** raise,
+        it leaves `null` in the text columns, which is the more dangerous behaviour because nothing
+        announces it.
+
+        Restore the figure when staff retake the screenshot. It must use `sum`: `mean` does not
+        raise, so a screenshot of it would show no error at all.
+
+eda:
+  resolved_errors:
+    - cell_id: a3fde967
+      reason: >-
+        The baseline raised `ValueError: Mixing dicts with non-Series may lead to ambiguous
+        ordering` from `pd.read_json`, and the section existed to show that failure. Polars
+        has no equivalent failure: `pl.read_json` reads this file successfully, returning
+        (1, 3) with all 54 members packed into one `list[struct]` cell. Verified live on
+        polars 1.43.1.
+
+        Keeping a raising cell was tried first and rejected on review. It required switching
+        to `pl.read_ndjson`, which fails only because the file is not newline-delimited --
+        demonstrating a format mismatch rather than the structural point the section is
+        about, and calling `read_ndjson` a "reasonable first guess" eight cells after the
+        chapter had already shown `read_json` working. Both the output and prose reviewers
+        independently flagged that section as the chapter's weakest seam.
+
+        The cell now shows `pl.read_json` succeeding, which makes the real lesson visible
+        instead of asserting it in a bullet: the rectangularized result has the wrong
+        granularity -- one row per API response rather than one row per member -- which is
+        precisely why the chapter goes on to build from `congress_json['members']`. It also
+        sets up the `.struct` paragraph three cells later, which previously arrived cold.
+
+        Prose re-aimed on both sides: the paragraph above introduces `pl.read_json` and its
+        documentation link rather than predicting an error, and the paragraph below reads the
+        (1, 3) output and keeps `read_ndjson` as a one-sentence aside. Course staff chose this
+        over keeping an error demo.
+
+inference_causality:
+  interop:
+    - cell_id: fcd8d006
+      reason: >-
+        sns.pairplot() type-checks its `data` argument and raises
+        `TypeError: 'data' must be pandas DataFrame object` on a Polars frame -- seaborn
+        0.13.2, verified live. This is the one seaborn entry point in the batch that rejects
+        Polars outright rather than going through its usual duck-typed path: every other
+        seaborn call in these chapters (scatterplot, jointplot, kdeplot, lmplot, stripplot,
+        rugplot) takes a Polars frame in `data=` and renders pixel-identically. No cheaper
+        rung on the interop ladder is available here, because pairplot draws a grid over the
+        whole frame -- there is no per-Series or .to_numpy() form of the call.
 
 _repo:
   changed_paths:
+    - path: myst.yml
+      reason: >-
+        Tier-D rename. `content/pandas_2` -> `content/polars_1` and `content/pandas_3` ->
+        `content/polars_2`, both via `git mv` so history follows the files and pandas_2's 146 MB of
+        data is not duplicated. The TOC drops from three entries to two because course staff cut
+        tier D from three chapters to two: `pandas_1` is no longer a chapter of its own. Its Index
+        material is deleted -- Polars has no index -- and its DataFrame, attribute and extraction
+        sections are carried into the front half of `polars_1`, which then continues into
+        `pandas_2`'s utility-function, column and sorting material.
+
+        The split follows the lectures these chapters mirror: `polars_1` covers lec02 + lec03,
+        `polars_2` covers lec04. Verified that nothing under `content/` cross-references these
+        chapters -- the three TOC lines were the only in-repo references -- so this file is the whole
+        in-repo blast radius. Published URLs change (`/pandas-1` -> `/polars-1`, and one fewer page),
+        which is open question 3 and outside what this repo can check.
     - path: requirements.txt
       reason: >-
         Pin polars==1.43.1 so local execution matches the version every mapping in the

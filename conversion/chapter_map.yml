@@ -15,7 +15,34 @@
 # These three entries are declared ahead of the rename so the map is already correct when the
 # move happens. A key that does not exist yet is inert.
 
+# Course staff cut tier D from three chapters to two, so this is no longer a 1:1:1 rename.
+# `pandas_1` is not a chapter any more: its Index material is deleted (Polars has none) and its
+# DataFrame, attribute and extraction sections are carried into the front half of `polars_1`.
+#
+#   polars_1 <- pandas_2 (the directory that moved, and the larger contributor) + pandas_1 content
+#   polars_2 <- pandas_3
+#
+# polars_1 is mapped at pandas_2 because that is the directory `git mv` moved and the source of most
+# of its material. The mapping cannot express "two parents", so the id-aligned gates will not line up
+# for an authored rewrite -- G1 fails, and by the anti-vacuous-pass contract every id-aligned gate
+# then returns INCONCLUSIVE rather than a bogus PASS. That is the correct outcome here: tier D
+# carries human sign-off precisely because no structural diff can stand in for it. The gates that do
+# not depend on cell alignment -- no-pandas-code, prose-code-blocks, doc-links, alt-text -- still run
+# against a real baseline and still give real signal.
 renames:
-  polars_1: pandas_1
-  polars_2: pandas_2
-  polars_3: pandas_3
+  polars_1: pandas_2
+  polars_2: pandas_3
+
+# Chapters that stopped existing rather than moving. `pandas_1` was two-thirds about the Index;
+# with that concept gone, what remained (DataFrame construction, attributes, `.head`/`.tail`,
+# `[]` extraction) was not a chapter's worth of material, so it opens `polars_1` instead. The
+# baseline site capture still lists its rendered pages, and the site gate needs to know their
+# disappearance is intended rather than a page that failed to build.
+absorbed:
+  - pandas_1
+
+# `content/pandas_1/` was deleted by course-staff decision once its material had been carried
+# into `polars_1`. Its data was byte-identical to `content/polars_2/data/elections.csv`
+# (md5 47b93a15, 187 rows through 2024) and its eight images were all Index/`.loc` diagrams that
+# die with the concept -- `intro_lec` keeps its own copy of the one shared filename,
+# `df_elections.png`. Verified before deleting; recoverable from git at 4f842ef7.

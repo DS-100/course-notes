@@ -71,8 +71,15 @@ PASS, FAIL, INCONCLUSIVE = "PASS", "FAIL", "INCONCLUSIVE"
 ADVISORY = {"output-churn"}
 
 DATAWRANGLER_MIME = "application/vnd.microsoft.datawrangler.viewer.v0+json"
-PANDAS_HTML_REPR = 'class="dataframe"'
-POLARS_HTML_REPR = "shape: ("
+
+# `class="dataframe"` is NOT a pandas marker: polars emits the same class on its own HTML
+# table, so a detector built on it flags every correctly-converted chapter and can never reach
+# zero. The two libraries differ in where they put the alignment style -- pandas writes it
+# inline on the header row, polars in a <style> block -- and polars prefixes the table with a
+# shape header that pandas has no equivalent for. Either one discriminates; using both means a
+# chapter that hides the shape header via pl.Config is still classified correctly.
+PANDAS_HTML_REPR = '<tr style="text-align: right;'
+POLARS_HTML_REPR = "<small>shape: ("
 PANDAS_DOCS = "pandas.pydata.org"
 POLARS_DOCS = "pola.rs"
 
@@ -80,6 +87,18 @@ FRONTMATTER_RE = re.compile(r"\A---\n(.*?)\n---\s*$", re.S | re.M)
 IMAGE_DIRECTIVE_RE = re.compile(r"^`{3,}\{image\}", re.M)
 FIG_ALT_RE = re.compile(r"^\s*#\|\s*fig-alt\s*:(.*)$", re.M)
 ALT_OPTION_RE = re.compile(r"^:alt:(.*)$", re.M)
+
+
+def alt_is_empty(raw: str) -> bool:
+    """Is this alt text actually absent?
+
+    `.strip()` alone is not enough. `:alt:""` captures the two literal quote characters,
+    which strip to a two-character string and read as present -- so the gate reported
+    "all non-empty" on `gradient_descent`, which carries three empty alts (`ols_matrices_new.png`,
+    `grad_descent_1.png`, `grad_descent_2.png`). A presence gate that cannot see an absence is
+    the same failure as a removal gate that cannot see a survivor.
+    """
+    return not raw.strip().strip("\"'").strip()
 
 
 # ------------------------------------------------------------------ collector
@@ -240,6 +259,25 @@ def outputs_digest(cell) -> str:
     return hashlib.sha1(json.dumps(payload, sort_keys=True, default=str).encode()).hexdigest()[:12]
 
 
+CELL_DIRECTIVE_RE = re.compile(r"^\s*#\|")
+
+
+def mirror_normalize(src: str) -> str:
+    """A mirror's text, ignoring cell directives the dropdown never repeats.
+
+    A code cell often opens with `#| fig-alt: ...`, which its dropdown copy omits -- the
+    directive configures the cell, it is not part of the code being shown. Pairing on exact
+    equality therefore *failed to register those pairs at all*, and an unregistered pair is
+    never checked: 4 of modeling_slr's 5 mirrors and 1 of visualization_1's were invisible
+    to the gate that exists to catch exactly this defect. Since the pair list is built from
+    the baseline, the miss was permanent rather than something a conversion could trip.
+
+    `#| fig-alt` content is not going unchecked -- G12 owns it.
+    """
+    lines = [l for l in src.strip().splitlines() if not CELL_DIRECTIVE_RE.match(l)]
+    return "\n".join(lines).strip()
+
+
 def mirror_pairs(nb) -> Dict[Tuple[str, str], str]:
     """(markdown cell id, code cell id) -> the shared text, for verbatim mirrors.
 
@@ -254,15 +292,15 @@ def mirror_pairs(nb) -> Dict[Tuple[str, str], str]:
     for i, c in enumerate(cells):
         if c.cell_type != "markdown":
             continue
-        for m in ch.MD_CODE_FENCE.finditer(c.get("source", "")):
-            body = m.group(1).strip()
+        for block in ch.markdown_code_blocks(c.get("source", "")):
+            body = mirror_normalize(block)
             if not body:
                 continue
             nxt = next(
                 (cells[j] for j in range(i + 1, min(i + 3, len(cells))) if cells[j].cell_type == "code"),
                 None,
             )
-            if nxt is not None and body == nxt.get("source", "").strip():
+            if nxt is not None and body == mirror_normalize(nxt.get("source", "")):
                 pairs[(c.get("id"), nxt.get("id"))] = body
     return pairs
 
@@ -333,8 +371,8 @@ def gate_no_pandas_code(chapter: ch.Chapter, conv_nb, base_nb, res: Result) -> N
 def gate_prose_code_blocks(chapter: ch.Chapter, conv_path: Path, base_path: Path, res: Result) -> None:
     conv_md = markdown_text(conv_path)
     base_md = markdown_text(base_path)
-    n_base = len(ch.MD_CODE_FENCE.findall(base_md))
-    n_conv = len(ch.MD_CODE_FENCE.findall(conv_md))
+    n_base = len(ch.markdown_code_blocks(base_md))
+    n_conv = len(ch.markdown_code_blocks(conv_md))
     hits = ch.markdown_pandas_sites(conv_md)
     details = hits[:8] if hits else [f"{n_conv} fenced block(s) in markdown, none carrying pandas"]
     res.add("prose-code-blocks", not hits, n_conv, n_base, details)
@@ -352,8 +390,8 @@ def gate_dropdown_mirror(base_nb, conv_nb, res: Result) -> None:
             missing.append(f"pair {md_id}/{code_id}: a cell no longer exists")
             continue
         checked += 1
-        blocks = [m.group(1).strip() for m in ch.MD_CODE_FENCE.finditer(md_cell.get("source", ""))]
-        code_src = code_cell.get("source", "").strip()
+        blocks = [mirror_normalize(b) for b in ch.markdown_code_blocks(md_cell.get("source", ""))]
+        code_src = mirror_normalize(code_cell.get("source", ""))
         if code_src not in blocks:
             broken.append(
                 f"{md_id} no longer mirrors {code_id}: the dropdown shows different code "
@@ -401,7 +439,7 @@ def gate_outputs_fresh(chapter: ch.Chapter, base_nb, conv_nb, res: Result) -> No
                 stale_df.append(f"{c.get('id')}: pandas HTML repr still committed")
             if DATAWRANGLER_MIME in o.get("data", {}):
                 stale_dw.append(f"{c.get('id')}: VS Code Data Wrangler mime -- cell was not re-executed")
-            if POLARS_HTML_REPR in html or POLARS_HTML_REPR in text:
+            if POLARS_HTML_REPR in html or "shape: (" in text:
                 polars_reprs += 1
 
     w = conv_nb.metadata.get("polars_conversion") or {}
@@ -495,9 +533,23 @@ def gate_error_outputs(chapter: ch.Chapter, base_nb, conv_nb, res: Result) -> No
                 f"{cid}: baseline raised {ename}, now silent -- the prose around it "
                 "describes an error the reader will not see"
             )
-    details = problems[:8] if problems else [
-        f"{len(conv)} erroring cell(s), matching the baseline's {len(base)}"
-    ]
+    if problems:
+        details = problems[:8]
+    elif len(conv) == len(base):
+        details = [f"{len(conv)} erroring cell(s), matching the baseline's {len(base)}"]
+    else:
+        # Counts differ and nothing was flagged, so the allowlist is what carried it. Say so:
+        # "0 erroring cell(s), matching the baseline's 1" is self-contradictory on its face and
+        # would sit in gate logs indefinitely, reading like a bug in the gate rather than a
+        # recorded decision.
+        resolved = sorted(cid for cid in base if cid not in conv)
+        added = sorted(cid for cid in conv if cid not in base)
+        via = []
+        if resolved:
+            via.append(f"{len(resolved)} resolved via allowlist ({', '.join(resolved)})")
+        if added:
+            via.append(f"{len(added)} expected via allowlist ({', '.join(added)})")
+        details = [f"{len(conv)} erroring cell(s); baseline had {len(base)} -- " + "; ".join(via)]
     res.add("error-outputs", not problems, len(code_cells(conv_nb)), len(code_cells(base_nb)), details)
 
 
@@ -560,26 +612,51 @@ def gate_frontmatter(chapter: ch.Chapter, base_path: Path, conv_path: Path, res:
     res.add("frontmatter", not problems, 1, 1, details)
 
 
-def gate_alt_text(base_path: Path, conv_path: Path, res: Result) -> None:
+def gate_alt_text(chapter_name: str, base_path: Path, conv_path: Path, res: Result) -> None:
     base_text, conv_text = source_of(base_path), source_of(conv_path)
     b_img, c_img = len(IMAGE_DIRECTIVE_RE.findall(base_text)), len(IMAGE_DIRECTIVE_RE.findall(conv_text))
     b_alt, c_alt = len(FIG_ALT_RE.findall(base_text)), len(FIG_ALT_RE.findall(conv_text))
 
+    # Losing an accessibility surface is the defect; adding one is the goal. An authored tier-D
+    # chapter writes new figures and gives each a `#| fig-alt`, which under an equality check reads
+    # as a failure for doing exactly the right thing -- polars_2 went 0 -> 6 and failed. So the
+    # gate is one-sided: a decrease fails, an increase is reported and passes. Emptiness is still
+    # checked separately below, so this cannot be gamed by adding blank alts.
     problems = []
-    if b_img != c_img:
-        problems.append(f"{{image}} directives {b_img} -> {c_img}")
-    if b_alt != c_alt:
-        problems.append(f"#| fig-alt comments {b_alt} -> {c_alt}")
-    for m in FIG_ALT_RE.finditer(conv_text):
-        if not m.group(1).strip():
-            problems.append("an empty #| fig-alt: a11y.yml will fail this in CI")
-            break
-    for m in ALT_OPTION_RE.finditer(conv_text):
-        if not m.group(1).strip():
-            problems.append("an empty :alt: option on an {image}")
-            break
+    # A figure may legitimately be dropped -- `polars_2` removed a screenshot of a *pandas*
+    # traceback that no code gate can see inside. That needs a recorded reason, like every other
+    # removal in this harness, so it is an allowlist entry rather than a silent count change.
+    dropped_ok = len(allow(chapter_name, "removed_figures"))
+    if c_img < b_img - dropped_ok:
+        problems.append(f"{{image}} directives {b_img} -> {c_img}: a figure lost its directive")
+    if c_alt < b_alt:
+        problems.append(f"#| fig-alt comments {b_alt} -> {c_alt}: a figure lost its alt text")
+    gained = (c_img - b_img) + (c_alt - b_alt)
+    # Empties are counted on both sides rather than merely detected on one. Several chapters
+    # carry empty alts in the baseline -- gradient_descent has three -- and failing a
+    # conversion for content debt it inherited would block work on a defect it did not cause.
+    # What must never happen is the conversion *emptying* one, so the comparison is the gate
+    # and the pre-existing count is reported rather than swallowed.
+    def empties(text: str) -> Tuple[int, int]:
+        return (
+            sum(1 for m in FIG_ALT_RE.finditer(text) if alt_is_empty(m.group(1))),
+            sum(1 for m in ALT_OPTION_RE.finditer(text) if alt_is_empty(m.group(1))),
+        )
 
-    details = problems if problems else [f"{c_img} {{image}} + {c_alt} fig-alt, all non-empty"]
+    b_efa, b_ealt = empties(base_text)
+    c_efa, c_ealt = empties(conv_text)
+    if c_efa > b_efa:
+        problems.append(f"conversion emptied a #| fig-alt ({b_efa} -> {c_efa}): a11y.yml fails this in CI")
+    if c_ealt > b_ealt:
+        problems.append(f"conversion emptied an :alt: option on an {{image}} ({b_ealt} -> {c_ealt})")
+
+    inherited = c_efa + c_ealt
+    details = problems if problems else [
+        f"{c_img} {{image}} + {c_alt} fig-alt"
+        + (f"; {gained} added" if gained > 0 else "")
+        + (f"; {inherited} empty in the baseline too, none emptied here" if inherited
+           else ", all non-empty")
+    ]
     res.add("alt-text", not problems, c_img + c_alt, b_img + b_alt, details)
 
 
@@ -688,7 +765,7 @@ def validate(chapter: ch.Chapter, self_test: bool = False) -> Result:
         # gates apply, and they are the whole story for it.
         gate_prose_code_blocks(chapter, conv_path, base_path, res)
         gate_frontmatter(chapter, base_path, conv_path, res)
-        gate_alt_text(base_path, conv_path, res)
+        gate_alt_text(chapter.name, base_path, conv_path, res)
         gate_doc_links(chapter, base_path, conv_path, res)
         return res
 
@@ -699,7 +776,7 @@ def validate(chapter: ch.Chapter, self_test: bool = False) -> Result:
     gate_no_pandas_code(chapter, conv_nb, base_nb, res)
     gate_prose_code_blocks(chapter, conv_path, base_path, res)
     gate_frontmatter(chapter, base_path, conv_path, res)
-    gate_alt_text(base_path, conv_path, res)
+    gate_alt_text(chapter.name, base_path, conv_path, res)
     gate_doc_links(chapter, base_path, conv_path, res)
 
     # Rule 4: everything below pairs cells by id. If the id sequence itself moved, those

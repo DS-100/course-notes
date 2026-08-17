@@ -54,13 +54,18 @@ SHRINK_TOLERANCE = 0.5
 PANDAS_DOCS = "pandas.pydata.org"
 WARNING_RE = re.compile(r"^.*?\b(warn|warning|error)\b.*$", re.I | re.M)
 
-# Jupyter Book v2 does not emit pre-rendered page HTML. `_build/html/<slug>.json` carries the
-# content and the .html files are the React shell that hydrates from it -- so the pandas repr
-# reaches the reader as JSON-escaped `class=\"dataframe\"`, and a search for the literal
-# `class="dataframe"` finds nothing at all. Measured on the unconverted tree: 147 reprs across
-# 16 pages that the literal form scored as zero. A gate written the obvious way would have read
-# green from the first run to the last.
-PANDAS_REPR_RE = re.compile(r'class=\\?"dataframe')
+# Two traps stacked on top of each other here, both found by building the negative control.
+#
+# First, Jupyter Book v2 emits no pre-rendered page HTML: `_build/html/<slug>.json` carries the
+# content and the .html files are the React shell that hydrates from it. Whatever the reader
+# receives is therefore JSON-escaped, so the pattern has to tolerate a backslash before each
+# quote or it finds nothing at all on a site full of matches.
+#
+# Second, `class="dataframe"` is not a pandas marker -- polars puts the same class on its own
+# HTML table. A gate built on it can never reach zero, because a correctly converted page still
+# matches. pandas writes its alignment style inline on the header row; polars puts it in a
+# <style> block. That difference is the actual discriminator.
+PANDAS_REPR_RE = re.compile(r'<tr style=\\?"text-align: right;')
 
 
 def git(*args: str) -> str:
@@ -85,6 +90,51 @@ def changed_paths(baseline_sha: str) -> List[str]:
     return sorted(set(p for p in tracked + untracked if p.strip()))
 
 
+def pure_moves(baseline_sha: str) -> set:
+    """Paths that only changed address, byte-for-byte.
+
+    `FROZEN` means "do not edit these files", not "never move a directory". The tier-D rename
+    moved 146 MB of frozen data with `git mv`, and every one of those files then read as a
+    frozen-path violation despite having identical content -- which would drown the real signal
+    the gate exists to give. A 100%-similarity rename is not an edit, so both its endpoints are
+    exempt; anything below 100% is a genuine content change and still fails.
+    """
+    out = git("diff", "--name-status", "--find-renames=100%", baseline_sha)
+    moved = set()
+    for line in out.splitlines():
+        parts = line.split("\t")
+        if parts and parts[0].startswith("R") and len(parts) == 3:
+            moved.update(parts[1:])
+    return moved
+
+
+def removed_with_absorbed_chapters(baseline_sha: str) -> set:
+    """Deleted files under a chapter directory that no longer exists by recorded decision.
+
+    Deleting a frozen file is a violation and should stay one -- but removing a whole chapter by
+    recorded decision is topology, not an edit to a file someone had no business touching. Scoped
+    deliberately: only *deletions*, and only under a chapter directory that `chapter_map.yml` says
+    is gone, so this cannot become a general licence to delete data or images from a chapter that
+    still exists.
+
+    Rename *sources* count as well as absorbed chapters, and the reason is subtle: git pairs a
+    rename by content, so when two chapters held byte-identical files -- `pandas_1` and `pandas_3`
+    both carried the same `elections.csv` -- deleting one can consume the pairing the other needed,
+    leaving a moved file looking like a bare deletion at its old path.
+    """
+    gone_dirs = ch.load_absorbed_chapters() + list(ch.load_chapter_map().values())
+    if not gone_dirs:
+        return set()
+    prefixes = tuple(f"content/{name}/" for name in gone_dirs)
+    out = git("diff", "--name-status", baseline_sha)
+    gone = set()
+    for line in out.splitlines():
+        parts = line.split("\t")
+        if parts and parts[0].startswith("D") and len(parts) == 2 and parts[1].startswith(prefixes):
+            gone.add(parts[1])
+    return gone
+
+
 def matches(path: str, patterns: List[str]) -> bool:
     return any(Path(path).match(p) for p in patterns)
 
@@ -92,12 +142,22 @@ def matches(path: str, patterns: List[str]) -> bool:
 def gate_repo_invariants(baseline_sha: str) -> Tuple[bool, List[str]]:
     allowed = repo_allowlist()
     changed = changed_paths(baseline_sha)
+    moved = pure_moves(baseline_sha)
+    absorbed_gone = removed_with_absorbed_chapters(baseline_sha)
     problems = []
+    moved_frozen = 0
+    absorbed_frozen = 0
 
     for p in changed:
         if p in allowed:
             continue
         if matches(p, FROZEN):
+            if p in moved:
+                moved_frozen += 1
+                continue
+            if p in absorbed_gone:
+                absorbed_frozen += 1
+                continue
             problems.append(f"frozen path modified: {p}")
         elif p in NEEDS_REASON:
             problems.append(
@@ -108,6 +168,10 @@ def gate_repo_invariants(baseline_sha: str) -> Tuple[bool, List[str]]:
     detail = problems or [
         f"{len(changed)} path(s) changed, none of them frozen"
         + (f"; {len(allowed)} allowlisted" if allowed else "")
+        + (f"; {moved_frozen} frozen file(s) moved byte-identically by the tier-D rename"
+           if moved_frozen else "")
+        + (f"; {absorbed_frozen} deleted with absorbed chapter(s) per chapter_map.yml"
+           if absorbed_frozen else "")
     ]
     return not problems, detail
 
@@ -182,10 +246,19 @@ def gate_site_build(capture: bool) -> Tuple[bool, List[str]]:
     else:
         capture_data = json.loads(BASELINE_SITE.read_text())
         baseline = capture_data.get("artifacts", {})
-        renames = ch.load_chapter_map()
+        # Build artifacts are named by URL slug, which hyphenates: `content/pandas_2/` renders to
+        # `pandas-2.json`. The chapter map speaks in directory names, which use underscores. This
+        # comparison used the raw names and so never matched anything -- `"pandas_2" in
+        # "pandas-2.json"` is False -- meaning the rename skip had never once fired, and every
+        # tier-D rename was always going to be reported as a page that vanished. Normalize both
+        # sides so the check does what it says.
+        gone_on_purpose = [
+            old.replace("_", "-")
+            for old in list(ch.load_chapter_map().values()) + ch.load_absorbed_chapters()
+        ]
         for path, size in baseline.items():
-            if any(old in path for old in renames.values()):
-                continue  # the chapter moved on purpose; the rename map records it
+            if any(old in path.replace("_", "-") for old in gone_on_purpose):
+                continue  # renamed or absorbed on purpose; chapter_map.yml records which
             now = sizes.get(path)
             if now is None:
                 problems.append(f"artifact no longer rendered: {path}")

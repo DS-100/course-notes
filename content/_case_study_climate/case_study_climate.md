@@ -149,14 +149,14 @@ Xarrry provides the ability to weigh your data
 :width: 700
 ```
 
-Xarray methods like .weighted() can be combined with .mean() to create means across coordinates. 
+Xarray methods like `.weighted()` can be combined with `.mean()` to create means across coordinates. 
 
 ```{image} images/slide66.png
 :alt: Code showing how to calculate a weighted mean.
 :width: 700
 ```
 
-We can use .groupby() in combination with the above methods to calculate the annual temperature cycle.
+We can use Xarray's `.groupby()` in combination with the above methods to calculate the annual temperature cycle.
 
 ```{image} images/slide70.png
 :alt: Plot of annual temperature cycle.

@@ -96,3 +96,30 @@ string escaped inside MyST's page JSON.
 | `.claude/agents/` | the writer and reviewer contracts |
 | `conversion/` | the toolchain, the gates, the allowlist, and `state.json` |
 | `README.md` | the site build, for course staff who are not converting anything |
+
+## The gates are migration-time only
+
+`.github/workflows/conversion-gates.yml` was removed when the conversion finished. It existed only on
+this branch, never on `main`, and deleting it restored `.github/` to its baseline state.
+
+The reason is structural rather than convenience: **every gate in `nb_validate.py` diffs a chapter
+against a pinned pre-conversion commit.** Once this branch merges, that comparison is frozen history
+— each chapter differs from `887a578b` permanently and by design — so the battery would report the
+same diffs forever and guard nothing. It is an instrument for performing a migration, not for
+maintaining one.
+
+Run it locally while the conversion is live:
+
+```bash
+python conversion/nb_validate.py --all --self-test   # negative control, first
+python conversion/nb_validate.py --all
+python conversion/site_gate.py
+```
+
+`deploy.yml` and `a11y.yml` are untouched and stay: the a11y workflow runs on every PR and is the
+durable accessibility check, which matters more here than usual because several chapters carry alt
+text that quotes computed values.
+
+**If ongoing protection is ever wanted, the one check worth lifting out is `site_gate.py`'s
+"0 pandas reprs reach the reader".** That claim is absolute rather than relative to a baseline, so
+unlike the rest of the battery it would keep its meaning after the merge.
