@@ -1,0 +1,69 @@
+# Reviewed exceptions to the conversion gates.
+#
+# Every entry needs a written reason. This file exists so a known-good anomaly can be waved
+# through without weakening a gate for everyone -- not as a place to park failures. If you
+# find yourself writing "the gate is annoying" as a reason, the conversion is wrong, or the
+# gate is, and either way the fix is not here.
+#
+# Entries are keyed by chapter, then by section. Cells are addressed by **id**, never by
+# index: a cell id survives an edit that inserts a cell above it, and every notebook in this
+# repo is nbformat 4.5 with an id on every cell.
+#
+#   <chapter>:
+#     interop:            # a surviving .to_pandas() -- G2
+#       - cell_id: 4f2a91cc
+#         reason: >-
+#           why Polars could not be handed to this library directly. Polars goes straight to
+#           seaborn, plotly and sklearn in most places; this records the ones where it cannot.
+#
+#     expected_errors:    # a cell that raises on purpose and did NOT raise in the baseline -- G9
+#       - cell_id: 91ab77de
+#         reason: >-
+#           why the error is the teaching output. Note the old and new exception names.
+#
+#     resolved_errors:    # a baseline error that legitimately no longer raises -- G9
+#       - cell_id: a3fde967
+#         reason: >-
+#           why it is correct for this demo to stop raising, AND where the surrounding prose
+#           was re-aimed. A vanished error leaves prose describing something the reader will
+#           never see, so this entry is only valid alongside a prose edit.
+#
+#     tag_changes:        # remove-input / remove-cell moved on a cell -- G10
+#       - cell_id: d9f7079b
+#         reason: why the cell's visibility legitimately changed
+#
+#     frontmatter:        # the --- title: --- block changed -- G11
+#       - cell_id: "0"
+#         reason: 'Pandas III -> Polars III, alongside the content/pandas_3 -> polars_3 rename'
+#
+#     doc_links:          # a pandas.pydata.org link that must stay -- G13
+#       - line: "https://pandas.pydata.org/..."
+#         reason: why this chapter genuinely needs to point at pandas documentation
+#
+# `_repo` is the repo-level section, read by site_gate.py's G14. myst.yml and
+# requirements.txt are changeable but never silently:
+#
+#   _repo:
+#     changed_paths:
+#       - path: requirements.txt
+#         reason: pin polars==1.43.1 for local execution
+#       - path: myst.yml
+#         reason: toc entries repointed at content/polars_{1,2,3} after the tier-D rename
+#
+# ---------------------------------------------------------------------------------------
+# No per-chapter exceptions are recorded yet. Two committed error outputs exist in the
+# baseline -- eda cell a3fde967 and pandas_2 cell ccf796ec, both ValueError -- and both are
+# *expected to survive* the conversion, so neither needs an entry. G9 checks them in both
+# directions: a new error fails, and so does one of these going quiet.
+# ---------------------------------------------------------------------------------------
+
+_repo:
+  changed_paths:
+    - path: requirements.txt
+      reason: >-
+        Pin polars==1.43.1 so local execution matches the version every mapping in the
+        pandas-to-polars skill was verified against. pandas==2.3.0 stays: the gates read the
+        pandas baseline, and the allowlisted interop sites still need it. Note that
+        deploy.yml never installs requirements at all -- it builds from committed outputs --
+        so this file only governs local execution and the conversion-gates workflow.
+
