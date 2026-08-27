@@ -453,13 +453,66 @@ fig.show()
 # ```
 # ````
 
-# %% tags=["remove-input"] id="3afb0822"
+# %% tags=["remove-input", "remove-output"] id="3afb0822"
 import numpy as np
 import seaborn as sns
 import polars as pl
 import sklearn.linear_model as lm
 tips = pl.from_pandas(sns.load_dataset("tips"))
 tips.head()
+
+# %% [markdown]
+# <!-- tab-twins:begin 3afb0822 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# import numpy as np
+# import seaborn as sns
+# import polars as pl
+# import sklearn.linear_model as lm
+# tips = pl.from_pandas(sns.load_dataset("tips"))
+# tips.head()
+# ```
+#
+# ```text
+# shape: (5, 7)
+# ┌────────────┬──────┬────────┬────────┬─────┬────────┬──────┐
+# │ total_bill ┆ tip  ┆ sex    ┆ smoker ┆ day ┆ time   ┆ size │
+# │ ---        ┆ ---  ┆ ---    ┆ ---    ┆ --- ┆ ---    ┆ ---  │
+# │ f64        ┆ f64  ┆ cat    ┆ cat    ┆ cat ┆ cat    ┆ i64  │
+# ╞════════════╪══════╪════════╪════════╪═════╪════════╪══════╡
+# │ 16.99      ┆ 1.01 ┆ Female ┆ No     ┆ Sun ┆ Dinner ┆ 2    │
+# │ 10.34      ┆ 1.66 ┆ Male   ┆ No     ┆ Sun ┆ Dinner ┆ 3    │
+# │ 21.01      ┆ 3.5  ┆ Male   ┆ No     ┆ Sun ┆ Dinner ┆ 3    │
+# │ 23.68      ┆ 3.31 ┆ Male   ┆ No     ┆ Sun ┆ Dinner ┆ 2    │
+# │ 24.59      ┆ 3.61 ┆ Female ┆ No     ┆ Sun ┆ Dinner ┆ 4    │
+# └────────────┴──────┴────────┴────────┴─────┴────────┴──────┘
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# import numpy as np
+# import seaborn as sns
+# import pandas as pd
+# import sklearn.linear_model as lm
+# tips = sns.load_dataset("tips")
+# tips.head()
+# ```
+#
+# ```text
+#    total_bill   tip     sex smoker  day    time  size
+# 0       16.99  1.01  Female     No  Sun  Dinner     2
+# 1       10.34  1.66    Male     No  Sun  Dinner     3
+# 2       21.01  3.50    Male     No  Sun  Dinner     3
+# 3       23.68  3.31    Male     No  Sun  Dinner     2
+# 4       24.59  3.61  Female     No  Sun  Dinner     4
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="37675037"
 #    At first glance, it doesn't seem possible to fit a regression model to this non-numeric data – we can't directly perform any mathematical operations on the entry "Sun". 
@@ -485,7 +538,7 @@ tips.head()
 #
 # The `OneHotEncoder` class of `sklearn` ([documentation](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OneHotEncoder.html#sklearn.preprocessing.OneHotEncoder.get_feature_names_out)) offers a quick way to perform this one-hot encoding. You will explore its use in detail in the lab. For now, recognize that we follow a very similar workflow to when we were working with the `LinearRegression` class: we initialize a `OneHotEncoder` object, fit it to our data, and finally use `.transform()` to apply the fitted encoder.
 
-# %% id="88a7f85b"
+# %% tags=["remove-input", "remove-output"] id="88a7f85b"
 from sklearn.preprocessing import OneHotEncoder
 
 # Initialize a OneHotEncoder object
@@ -499,6 +552,73 @@ encoded_day = ohe.transform(tips[["day"]]).toarray()
 encoded_day_df = pl.DataFrame(encoded_day, schema=list(ohe.get_feature_names_out()))
 
 encoded_day_df.head()
+
+# %% [markdown]
+# <!-- tab-twins:begin 88a7f85b -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# from sklearn.preprocessing import OneHotEncoder
+#
+# # Initialize a OneHotEncoder object
+# ohe = OneHotEncoder()
+#
+# # Fit the encoder
+# ohe.fit(tips[["day"]])
+#
+# # Use the encoder to transform the raw "day" feature
+# encoded_day = ohe.transform(tips[["day"]]).toarray()
+# encoded_day_df = pl.DataFrame(encoded_day, schema=list(ohe.get_feature_names_out()))
+#
+# encoded_day_df.head()
+# ```
+#
+# ```text
+# shape: (5, 4)
+# ┌─────────┬─────────┬─────────┬──────────┐
+# │ day_Fri ┆ day_Sat ┆ day_Sun ┆ day_Thur │
+# │ ---     ┆ ---     ┆ ---     ┆ ---      │
+# │ f64     ┆ f64     ┆ f64     ┆ f64      │
+# ╞═════════╪═════════╪═════════╪══════════╡
+# │ 0.0     ┆ 0.0     ┆ 1.0     ┆ 0.0      │
+# │ 0.0     ┆ 0.0     ┆ 1.0     ┆ 0.0      │
+# │ 0.0     ┆ 0.0     ┆ 1.0     ┆ 0.0      │
+# │ 0.0     ┆ 0.0     ┆ 1.0     ┆ 0.0      │
+# │ 0.0     ┆ 0.0     ┆ 1.0     ┆ 0.0      │
+# └─────────┴─────────┴─────────┴──────────┘
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# from sklearn.preprocessing import OneHotEncoder
+#
+# # Initialize a OneHotEncoder object
+# ohe = OneHotEncoder()
+#
+# # Fit the encoder
+# ohe.fit(tips[["day"]])
+#
+# # Use the encoder to transform the raw "day" feature
+# encoded_day = ohe.transform(tips[["day"]]).toarray()
+# encoded_day_df = pd.DataFrame(encoded_day, columns=ohe.get_feature_names_out())
+#
+# encoded_day_df.head()
+# ```
+#
+# ```text
+#    day_Fri  day_Sat  day_Sun  day_Thur
+# 0      0.0      0.0      1.0       0.0
+# 1      0.0      0.0      1.0       0.0
+# 2      0.0      0.0      1.0       0.0
+# 3      0.0      0.0      1.0       0.0
+# 4      0.0      0.0      1.0       0.0
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="a0a8e7b9"
 # The one-hot encoded features can then be used in the design matrix to train a model:
@@ -518,13 +638,68 @@ encoded_day_df.head()
 #
 # Using `sklearn` to fit the new model, we can determine the model coefficients, allowing us to understand how each feature impacts the predicted tip.
 
-# %% id="1a0cbb95"
+# %% tags=["remove-input", "remove-output"] id="1a0cbb95"
 from sklearn.linear_model import LinearRegression
 data_w_ohe = tips.select(["total_bill", "size"]).hstack(encoded_day_df)
 ohe_model = lm.LinearRegression(fit_intercept=False) #Tell sklearn to not add an additional bias column. Why?
 ohe_model.fit(data_w_ohe, tips["tip"])
 
 pl.DataFrame({"Feature":data_w_ohe.columns, "Model Coefficient":ohe_model.coef_})
+
+# %% [markdown]
+# <!-- tab-twins:begin 1a0cbb95 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# from sklearn.linear_model import LinearRegression
+# data_w_ohe = tips.select(["total_bill", "size"]).hstack(encoded_day_df)
+# ohe_model = lm.LinearRegression(fit_intercept=False) #Tell sklearn to not add an additional bias column. Why?
+# ohe_model.fit(data_w_ohe, tips["tip"])
+#
+# pl.DataFrame({"Feature":data_w_ohe.columns, "Model Coefficient":ohe_model.coef_})
+# ```
+#
+# ```text
+# shape: (6, 2)
+# ┌────────────┬───────────────────┐
+# │ Feature    ┆ Model Coefficient │
+# │ ---        ┆ ---               │
+# │ str        ┆ f64               │
+# ╞════════════╪═══════════════════╡
+# │ total_bill ┆ 0.092994          │
+# │ size       ┆ 0.187132          │
+# │ day_Fri    ┆ 0.745787          │
+# │ day_Sat    ┆ 0.621129          │
+# │ day_Sun    ┆ 0.732289          │
+# │ day_Thur   ┆ 0.668294          │
+# └────────────┴───────────────────┘
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# from sklearn.linear_model import LinearRegression
+# data_w_ohe = tips[["total_bill", "size", "day"]].join(encoded_day_df).drop(columns = "day")
+# ohe_model = lm.LinearRegression(fit_intercept=False) #Tell sklearn to not add an additional bias column. Why?
+# ohe_model.fit(data_w_ohe, tips["tip"])
+#
+# pd.DataFrame({"Feature":data_w_ohe.columns, "Model Coefficient":ohe_model.coef_})
+# ```
+#
+# ```text
+#       Feature  Model Coefficient
+# 0  total_bill           0.092994
+# 1        size           0.187132
+# 2     day_Fri           0.745787
+# 3     day_Sat           0.621129
+# 4     day_Sun           0.732289
+# 5    day_Thur           0.668294
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="18c377cc"
 # For example, when looking at the coefficient for `day_Fri`, we can now understand the impact of it being Friday on the predicted tip — if it is a Friday, the predicted tip increases by approximately $0.75.
@@ -576,7 +751,7 @@ pl.DataFrame({"Feature":data_w_ohe.columns, "Model Coefficient":ohe_model.coef_}
 # ```
 # ````
 
-# %% tags=["remove-input"] id="edc98ac8"
+# %% tags=["remove-input", "remove-output"] id="edc98ac8"
 #| fig-alt: "MSE of model with (hp) feature: 23.943662938603108"
 vehicles = pl.from_pandas(sns.load_dataset("mpg")).drop_nulls().rename({"horsepower": "hp"}).sort("hp")
 
@@ -594,6 +769,62 @@ plt.plot(vehicles["hp"].to_numpy(), hp_model_predictions, c="tab:red");
 
 print(f"MSE of model with (hp) feature: {((Y - hp_model_predictions)**2).mean()}")
 
+# %% [markdown]
+# <!-- tab-twins:begin edc98ac8 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# vehicles = pl.from_pandas(sns.load_dataset("mpg")).drop_nulls().rename({"horsepower": "hp"}).sort("hp")
+#
+# X = vehicles[["hp"]]
+# Y = vehicles["mpg"]
+#
+# hp_model = lm.LinearRegression()
+# hp_model.fit(X, Y)
+# hp_model_predictions = hp_model.predict(X)
+#
+# import matplotlib.pyplot as plt
+#
+# sns.scatterplot(data=vehicles, x="hp", y="mpg")
+# plt.plot(vehicles["hp"].to_numpy(), hp_model_predictions, c="tab:red");
+#
+# print(f"MSE of model with (hp) feature: {((Y - hp_model_predictions)**2).mean()}")
+# ```
+#
+# ```text
+# MSE of model with (hp) feature: 23.943662938603108
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# pd.options.mode.chained_assignment = None
+# vehicles = sns.load_dataset("mpg").dropna().rename(columns = {"horsepower": "hp"}).sort_values("hp")
+#
+# X = vehicles[["hp"]]
+# Y = vehicles["mpg"]
+#
+# hp_model = lm.LinearRegression()
+# hp_model.fit(X, Y)
+# hp_model_predictions = hp_model.predict(X)
+#
+# import matplotlib.pyplot as plt
+#
+# sns.scatterplot(data=vehicles, x="hp", y="mpg")
+# plt.plot(vehicles["hp"], hp_model_predictions, c="tab:red");
+#
+# print(f"MSE of model with (hp) feature: {np.mean((Y-hp_model_predictions)**2)}")
+# ```
+#
+# ```text
+# MSE of model with (hp) feature: 23.943662938603104
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
+
 # %% [markdown] id="b2d8fba9"
 # As we can see from the plot, the data follows a curved line rather than a straight one. To capture this non-linearity, we can incorporate **non-linear** features. Let's introduce a **polynomial** term, $\text{hp}^2$, into our regression model. The model now takes the form:
 #
@@ -602,7 +833,7 @@ print(f"MSE of model with (hp) feature: {((Y - hp_model_predictions)**2).mean()}
 #
 # How can we fit a model with non-linear features? We can use the exact same techniques as before: ordinary least squares, gradient descent, or `sklearn`. This is because our new model is still a **linear model**. Although it contains non-linear *features*, it is linear with respect to the model *parameters*. All of our previous work on fitting models was done under the assumption that we were working with linear models. Because our new model is still linear, we can apply our existing methods to determine the optimal parameters.
 
-# %% id="21180eea"
+# %% tags=["remove-input", "remove-output"] id="21180eea"
 #| fig-alt: "Untransformed data. MSE of model with (hp^2) feature: 18.984768907617216"
 # Add a hp^2 feature to the design matrix
 X = vehicles[["hp"]].with_columns((pl.col("hp") ** 2).alias("hp^2"))
@@ -616,6 +847,56 @@ sns.scatterplot(data=vehicles, x="hp", y="mpg")
 plt.plot(vehicles["hp"].to_numpy(), hp2_model_predictions, c="tab:red");
 
 print(f"MSE of model with (hp^2) feature: {((Y - hp2_model_predictions)**2).mean()}")
+
+# %% [markdown]
+# <!-- tab-twins:begin 21180eea -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# # Add a hp^2 feature to the design matrix
+# X = vehicles[["hp"]].with_columns((pl.col("hp") ** 2).alias("hp^2"))
+#
+# # Use sklearn to fit the model
+# hp2_model = lm.LinearRegression()
+# hp2_model.fit(X, Y)
+# hp2_model_predictions = hp2_model.predict(X)
+#
+# sns.scatterplot(data=vehicles, x="hp", y="mpg")
+# plt.plot(vehicles["hp"].to_numpy(), hp2_model_predictions, c="tab:red");
+#
+# print(f"MSE of model with (hp^2) feature: {((Y - hp2_model_predictions)**2).mean()}")
+# ```
+#
+# ```text
+# MSE of model with (hp^2) feature: 18.984768907617216
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# # Add a hp^2 feature to the design matrix
+# X = vehicles[["hp"]]
+# X["hp^2"] = vehicles["hp"]**2
+#
+# # Use sklearn to fit the model
+# hp2_model = lm.LinearRegression()
+# hp2_model.fit(X, Y)
+# hp2_model_predictions = hp2_model.predict(X)
+#
+# sns.scatterplot(data=vehicles, x="hp", y="mpg")
+# plt.plot(vehicles["hp"], hp2_model_predictions, c="tab:red");
+#
+# print(f"MSE of model with (hp^2) feature: {np.mean((Y-hp2_model_predictions)**2)}")
+# ```
+#
+# ```text
+# MSE of model with (hp^2) feature: 18.98476890761722
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="59274c81"
 # Looking a lot better! By incorporating a squared feature, we are able to capture the curvature of the dataset. Our model is now a parabola centered on our data. Notice that our new model's error has decreased relative to the original model with linear features.

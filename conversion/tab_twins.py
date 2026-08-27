@@ -24,7 +24,7 @@ import nbformat
 MARK_BEGIN = "<!-- tab-twins:begin {cell} -->"
 MARK_END = "<!-- tab-twins:end -->"
 
-from tab_twins_data import TWINS, OUTPUT_CHURNS
+from tab_twins_data import BASELINE_SKIP, TWINS, OUTPUT_CHURNS
 
 
 def repr_of(code: str, env: dict) -> str:
@@ -45,9 +45,16 @@ def repr_of(code: str, env: dict) -> str:
     val = eval(compile(ast.Expression(body=last.value), "<twin>", "eval"), env)
     if val is None:
         return ""
+    # Render it the way a notebook would, which is IPython's pretty printer -- not `repr`. The two
+    # differ in exactly the places a comparison tab lands on: `type(x)` shows as
+    # `pandas.core.groupby.generic.DataFrameGroupBy`, not `<class '...'>`, and a long list wraps at
+    # 79 columns. A tab built with `repr` claims pandas prints something it does not, while the
+    # Polars pane beside it -- taken from a real executed cell -- shows the notebook form. Frames
+    # and Series are unaffected: `pretty` defers to their own repr.
+    from IPython.lib.pretty import pretty
     buf = io.StringIO()
     with contextlib.redirect_stdout(buf):
-        print(val if hasattr(val, "to_string") else repr(val))
+        print(pretty(val))
     return buf.getvalue().rstrip("\n")
 
 
@@ -140,6 +147,25 @@ def order_unstable(pl_code: str) -> bool:
     if lines and lines[-1].strip().startswith("type("):
         return False
     return bool(ORDER_UNSTABLE.search(pl_code)) and not ORDER_FIXED.search(pl_code)
+
+
+def chapter_files(chapter: str) -> tuple:
+    """The chapter's built notebook and its jupytext source, resolved by glob.
+
+    Eight chapters name their notebook something other than their directory --
+    `cv_regularization/cv_reg.ipynb`, `intro_lec/introduction.ipynb`, `_pca_1/pca_1.ipynb` and so
+    on. Assuming `<ch>/<ch>.ipynb` made this tool report "no built notebook" for every one of
+    them and return 0, so a third of the corpus was skipped while the run looked clean. Every
+    chapter directory holds at most one notebook and every pytext directory exactly one `.py`, so
+    a glob is unambiguous; `None` here means the chapter genuinely has no notebook (five are
+    markdown only).
+    """
+    nbs = sorted(Path(f"content/{chapter}").glob("*.ipynb"))
+    pys = sorted(Path(f"conversion/pytext/polars/{chapter}").glob("*.py"))
+    return (nbs[0] if nbs else None), (pys[0] if pys else None)
+
+
+FIGURE_STUB = re.compile(r"\A<Figure size [^>]*>\Z")
 
 
 def baseline_code_cells(chapter: str) -> dict:
@@ -241,14 +267,23 @@ def collect_from_baseline(chapter: str, code_cells: list):
         pd_out, pl_out = committed_output(b), committed_output(cell)
         if not pd_out or not pl_out:
             continue                      # nothing to compare on one side
+        # A plotting cell's only text output is `<Figure size 640x480 with 1 Axes>`, identical on
+        # both sides and identical to the pandas original. The figure itself cannot go in a tab --
+        # the panes are frozen text -- so the tab would promise a comparison and hand the reader a
+        # stub, twice, while the real plot sits above it. Twenty of these were built before anyone
+        # looked at what was in the pane.
+        if FIGURE_STUB.match(pl_out.strip()) or FIGURE_STUB.match(pd_out.strip()):
+            continue
+        if cell.get("id") in BASELINE_SKIP.get(chapter, set()):
+            continue                      # the two halves are not the same operation; see the note
         items.append((i, cell, locator_for(pl_code), pd_code, pd_out))
     return items, []
 
 
 def run(chapter: str, verify: bool, from_baseline: bool = False) -> int:
-    nbp = Path(f"content/{chapter}/{chapter}.ipynb")
-    if not nbp.exists():
-        print(f"  {chapter}: no built notebook")
+    nbp, _ = chapter_files(chapter)
+    if nbp is None:
+        print(f"  {chapter}: no notebook in content/{chapter}/ -- markdown-only chapter")
         return 0, {}
     nb = nbformat.read(str(nbp), as_version=4)
     code_cells = [c for c in nb.cells if c.cell_type == "code"]
@@ -323,6 +358,17 @@ def run(chapter: str, verify: bool, from_baseline: bool = False) -> int:
                 continue
             if want not in text:
                 problems.append(f"{locator[:40]!r}: the tab block on the page does not match a fresh run")
+        # Count the blocks actually on the page, not just the declared ones. `--verify` used to ask
+        # only "is every twin I know about present?", which cannot see a block nobody declares any
+        # more. Renaming a marker leaves the old block behind -- the replace looks for the *new*
+        # spelling, misses, and inserts a second copy -- and polars_2 published the same
+        # `read_csv` tab-set twice for exactly that reason.
+        on_page = text.count(MARK_BEGIN.split("{")[0])
+        if on_page != len(blocks):
+            problems.append(
+                f"{on_page} tab block(s) on the page but {len(blocks)} declared -- "
+                f"{abs(on_page - len(blocks))} orphaned, most likely left by a renamed marker"
+            )
         note = f", {code_only} checked code-only (output churns by design)" if code_only else ""
         print(f"  {chapter}: {len(blocks)} twin(s), {'STALE' if problems else 'fresh'}{note}")
     else:
@@ -338,10 +384,16 @@ def apply_to_pytext(chapter: str, blocks: dict) -> int:
 
     The live Polars cell keeps executing -- that is what proves the Polars code still runs and
     what `outputs-fresh` checks -- but it is hidden, because the tab beneath it shows the same
-    code and the same output. Note `remove-cell` does *not* work in mystmd 1.6.6; only
-    `remove-input` and `remove-output` set visibility, so hiding a whole cell needs both.
+    code and the same output. Hiding takes both `remove-input` and `remove-output`: mystmd 1.6.6
+    records them on the code and output *children* of the block (the block itself stays
+    `visibility: "show"`), so a review that reads only the block's own visibility will conclude
+    the cell is still on the page. `remove-cell` sets the block's visibility instead, but it drops
+    the cell entirely -- including from `outputs-fresh`'s view -- which hard rule 5 forbids.
     """
-    path = Path(f"conversion/pytext/polars/{chapter}/{chapter}.py")
+    _, path = chapter_files(chapter)
+    if path is None:
+        print(f"  {chapter}: no jupytext source in conversion/pytext/polars/{chapter}/")
+        return 1
     text = path.read_text()
     added = 0
     for key, block in blocks.items():
@@ -356,37 +408,91 @@ def apply_to_pytext(chapter: str, blocks: dict) -> int:
             text, re.S,
         )
         if existing:
-            text = text[:existing.start()] + commented + text[existing.end():]
+            # Normalize the run of blank lines that opens this cell while replacing it. Percent
+            # format separates cells with exactly one, and any extra ends up inside the *previous*
+            # cell's source -- which changes that cell's source, which makes the output splice
+            # drop its output. Removing a block by hand is enough to leave a stray line behind, so
+            # repair it here rather than trusting whatever produced the file.
+            head_ = re.search(r"\n\n+# %% \[markdown\]\n\Z", text[:existing.start()])
+            start = head_.start() if head_ else existing.start()
+            text = text[:start] + "\n\n# %% [markdown]\n" + commented + text[existing.end():]
             added += 1
             continue
-        # locate the live cell containing the key, and the start of the next cell
-        idx = text.find(key)
-        if idx == -1:
-            print(f"    {key[:44]!r}: not found in pytext")
-            continue
-        head = text.rfind("\n# %%", 0, idx)
-        nxt = text.find("\n# %%", idx)
-        if head == -1 or nxt == -1:
-            print(f"    {key[:44]!r}: could not bound the cell")
-            continue
-        # tag the live cell so it stays executable but stops rendering
+        # Locate the live *code* cell containing the key.
+        #
+        # Not simply the first textual match. A `{dropdown}` repeats its cell's source verbatim and
+        # the chapter intros quote the loader, so the first match is often the prose copy. Walking
+        # back from one of those lands on a markdown header, and tagging it rewrites
+        # `# %% [markdown]` into `# %% tags=[...] [markdown]`, which jupytext stops reading as
+        # markdown -- that is exactly how the Polars II frontmatter cell became a code cell and the
+        # chapter lost its title.
+        #
+        # Refusing the markdown match was the first fix and it stopped the corruption, but it also
+        # meant 26 of the 87 baseline-paired twins had nowhere to go. So skip past prose matches and
+        # keep looking: the code cell is almost always further down.
+        # Prefer the cell *id*. A baseline-paired marker names the cell it twins, and the `.py`
+        # carries ids in its headers (`# %% id="fea17420"`), so the match is exact. Matching on
+        # source text instead is only nearly right: a locator line can appear in more than one
+        # code cell, and the block then lands under an earlier cell whose output it does not
+        # describe. That is not hypothetical -- five chapters placed a twin against the wrong
+        # cell this way, and the page showed a pandas pane next to unrelated Polars code.
+        head = nxt = -1
+        m = re.match(r"<!-- tab-twins:begin (\S+) -->", marker)
+        if m:
+            h = re.search(r'^# %%(?![^\n]*\[markdown\])[^\n]*\bid="%s"' % re.escape(m.group(1)),
+                          text, re.M)
+            if h and h.start() > 0:
+                head, nxt = h.start() - 1, text.find("\n# %%", h.end())
+
+        if head == -1:
+            # No id to go on (hand-written twins in the rewritten chapters). Fall back to source
+            # text, skipping prose matches: a `{dropdown}` repeats its cell's source verbatim, and
+            # walking back from one lands on a markdown header. Tagging that rewrites
+            # `# %% [markdown]` into `# %% tags=[...] [markdown]`, which jupytext stops reading as
+            # markdown -- exactly how Polars II lost its title.
+            search_from = 0
+            while True:
+                idx = text.find(key, search_from)
+                if idx == -1:
+                    break
+                head = text.rfind("\n# %%", 0, idx)
+                nxt = text.find("\n# %%", idx)
+                if head == -1 or nxt == -1:
+                    search_from = idx + 1
+                    continue
+                if "[markdown]" not in text[head + 1:text.find("\n", head + 1)]:
+                    break                  # a real code cell
+                search_from = idx + 1      # that was the dropdown mirror; keep going
+            if idx == -1:
+                print(f"    {key[:44]!r}: no live code cell carries this locator")
+                continue
+        if nxt == -1:
+            nxt = len(text)
+        header = text[head + 1:text.find("\n", head + 1)]
         line_end = text.find("\n", head + 1)
-        header = text[head + 1:line_end]
-        # A locator can match inside prose -- a `{dropdown}` repeats its cell's code verbatim, and
-        # the chapter intro quotes the loader. Walking back from such a match lands on a *markdown*
-        # header, and tagging that wrecks it: `# %% [markdown]` becomes
-        # `# %% tags=[...] [markdown]`, which jupytext no longer reads as markdown, so the cell
-        # renders as code. That is how the Polars II title stopped rendering and the frontmatter
-        # showed up as comments on the page. Never tag a markdown cell; report instead.
-        if "[markdown]" in header:
-            print(f"    {key[:44]!r}: matched inside a markdown cell -- pick a locator that only "
-                  "appears in the live code cell")
-            continue
-        if "tags=" not in header:
-            header = header.replace("# %%", '# %% tags=["remove-input", "remove-output"]', 1)
-            text = text[:head + 1] + header + text[line_end:]
-            nxt = text.find("\n# %%", text.find(key))
-        text = text[:nxt] + "\n\n# %% [markdown]\n" + commented + "\n" + text[nxt:]
+        # Merge, do not skip. A cell that already carried `remove-input` -- the "hide the loader,
+        # show the table" pattern that runs through this book -- used to be left alone, so its
+        # output rendered above a tab-set repeating the same table. Thirty-five cells did that.
+        m_tags = re.search(r'tags=\[([^\]]*)\]', header)
+        have = set(re.findall(r'"([^"]+)"', m_tags.group(1))) if m_tags else set()
+        want = have | {"remove-input", "remove-output"}
+        if want != have:
+            rendered = "tags=[" + ", ".join('"%s"' % t for t in sorted(want)) + "]"
+            new_header = (header[:m_tags.start()] + rendered + header[m_tags.end():]) if m_tags \
+                else header.replace("# %%", "# %% " + rendered, 1)
+            text = text[:head + 1] + new_header + text[line_end:]
+            # The insert shifted everything after `head`, so the cell's end moves with it. Recompute
+            # from this header, never from a fresh search for the key: the key is not unique and a
+            # search would find the first occurrence in the file rather than this cell.
+            nxt = text.find("\n# %%", head + 1 + len(new_header))
+            if nxt == -1:
+                nxt = len(text)
+        # Exactly one blank line between the twinned cell and the block. `nxt` lands on the newline
+        # that opens the next `# %%`, and a cell already separated by a blank line leaves a trailing
+        # newline in `text[:nxt]` -- adding two more gives jupytext a second blank line, which it
+        # reads back as part of the *previous cell's source*. That changes the source, so the output
+        # splice drops the cell's output and the chapter publishes a figure cell with no figure.
+        text = text[:nxt].rstrip("\n") + "\n\n# %% [markdown]\n" + commented + "\n" + text[nxt:]
         added += 1
     path.write_text(text)
     print(f"  {chapter}: applied {added} block(s) to {path}")

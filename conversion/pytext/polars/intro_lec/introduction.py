@@ -235,37 +235,263 @@ import polars as pl
 #
 # In the cell below, we create a `Series` and assign it to the variable `s`.
 
-# %% id="bace57e2"
+# %% tags=["remove-input", "remove-output"] id="bace57e2"
 s = pl.Series(["welcome", "to", "data 100"])
 s
 
-# %% id="3117fc63"
+# %% [markdown]
+# <!-- tab-twins:begin bace57e2 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# s = pl.Series(["welcome", "to", "data 100"])
+# s
+# ```
+#
+# ```text
+# shape: (3,)
+# Series: '' [str]
+# [
+# 	"welcome"
+# 	"to"
+# 	"data 100"
+# ]
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# s = pd.Series(["welcome", "to", "data 100"])
+# s
+# ```
+#
+# ```text
+# 0     welcome
+# 1          to
+# 2    data 100
+# dtype: object
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
+
+# %% tags=["remove-input", "remove-output"] id="3117fc63"
 # Accessing data values within the Series
 s.to_list()
 
-# %% id="9371d026"
+# %% [markdown]
+# <!-- tab-twins:begin 3117fc63 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# # Accessing data values within the Series
+# s.to_list()
+# ```
+#
+# ```text
+# ['welcome', 'to', 'data 100']
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# # Accessing data values within the Series
+# s.values
+# ```
+#
+# ```text
+# array(['welcome', 'to', 'data 100'], dtype=object)
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
+
+# %% tags=["remove-input", "remove-output"] id="9371d026"
 # Accessing the name and data type of the Series
 s.name, s.dtype
+
+# %% [markdown]
+# <!-- tab-twins:begin 9371d026 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# # Accessing the name and data type of the Series
+# s.name, s.dtype
+# ```
+#
+# ```text
+# ('', String)
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# # Accessing the Index of the Series
+# s.index
+# ```
+#
+# ```text
+# RangeIndex(start=0, stop=3, step=1)
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="863eba40"
 # By default, a `Series` built from a list of values is unnamed, and its data type is inferred from the values it holds. Optionally, a name can be passed as the first argument to the constructor.
 
-# %% id="fba44498"
+# %% tags=["remove-input", "remove-output"] id="fba44498"
 s = pl.Series("ratings", [-1, 10, 2])
 s
 
-# %% id="12449aec"
+# %% [markdown]
+# <!-- tab-twins:begin fba44498 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# s = pl.Series("ratings", [-1, 10, 2])
+# s
+# ```
+#
+# ```text
+# shape: (3,)
+# Series: 'ratings' [i64]
+# [
+# 	-1
+# 	10
+# 	2
+# ]
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# s = pd.Series([-1, 10, 2], index = ["a", "b", "c"])
+# s
+# ```
+#
+# ```text
+# a    -1
+# b    10
+# c     2
+# dtype: int64
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
+
+# %% tags=["remove-input", "remove-output"] id="12449aec"
 s.name
+
+# %% [markdown]
+# <!-- tab-twins:begin 12449aec -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# s.name
+# ```
+#
+# ```text
+# 'ratings'
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# s.index
+# ```
+#
+# ```text
+# Index(['a', 'b', 'c'], dtype='object')
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="2b2664ca"
 # The data type can also be changed after initialization. `.cast()` returns a new `Series`, so we assign the result back to `s`.
 
-# %% id="cb6cff88"
+# %% tags=["remove-input", "remove-output"] id="cb6cff88"
 s = s.cast(pl.Float64)
 s
 
-# %% id="53a863ee"
+# %% [markdown]
+# <!-- tab-twins:begin cb6cff88 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# s = s.cast(pl.Float64)
+# s
+# ```
+#
+# ```text
+# shape: (3,)
+# Series: 'ratings' [f64]
+# [
+# 	-1.0
+# 	10.0
+# 	2.0
+# ]
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# s.index = ["first", "second", "third"]
+# s
+# ```
+#
+# ```text
+# first     -1
+# second    10
+# third      2
+# dtype: int64
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
+
+# %% tags=["remove-input", "remove-output"] id="53a863ee"
 s.dtype
+
+# %% [markdown]
+# <!-- tab-twins:begin 53a863ee -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# s.dtype
+# ```
+#
+# ```text
+# Float64
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# s.index
+# ```
+#
+# ```text
+# Index(['first', 'second', 'third'], dtype='object')
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="80abf10b"
 # #### Selection in `Series`
@@ -278,23 +504,128 @@ s.dtype
 #
 # To demonstrate this, let's define a new Series `s`.
 
-# %% id="168aebad"
+# %% tags=["remove-input", "remove-output"] id="168aebad"
 s = pl.Series([4, -2, 0, 6])
 s
+
+# %% [markdown]
+# <!-- tab-twins:begin 168aebad -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# s = pl.Series([4, -2, 0, 6])
+# s
+# ```
+#
+# ```text
+# shape: (4,)
+# Series: '' [i64]
+# [
+# 	4
+# 	-2
+# 	0
+# 	6
+# ]
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# s = pd.Series([4, -2, 0, 6], index = ["a", "b", "c", "d"])
+# s
+# ```
+#
+# ```text
+# a    4
+# b   -2
+# c    0
+# d    6
+# dtype: int64
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="78675566"
 # ##### A Single Position
 
-# %% id="120afc0f"
+# %% tags=["remove-input", "remove-output"] id="120afc0f"
 # We return the value stored at position 0
 s[0]
+
+# %% [markdown]
+# <!-- tab-twins:begin 120afc0f -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# # We return the value stored at position 0
+# s[0]
+# ```
+#
+# ```text
+# 4
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# # We return the value stored at the index label "a"
+# s["a"]
+# ```
+#
+# ```text
+# 4
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="2898c534"
 # ##### A List of Positions
 
-# %% id="641029d4"
+# %% tags=["remove-input", "remove-output"] id="641029d4"
 # We return a Series of the values stored at positions 0 and 2
 s[[0, 2]]
+
+# %% [markdown]
+# <!-- tab-twins:begin 641029d4 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# # We return a Series of the values stored at positions 0 and 2
+# s[[0, 2]]
+# ```
+#
+# ```text
+# shape: (2,)
+# Series: '' [i64]
+# [
+# 	4
+# 	0
+# ]
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# # We return a Series of the values stored at the index labels "a" and "c"
+# s[["a", "c"]]
+# ```
+#
+# ```text
+# a    4
+# c    0
+# dtype: int64
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="43085643"
 # ##### A Filtering Condition
@@ -310,5 +641,39 @@ s > 0
 # %% [markdown] id="e029c730"
 # We then pass this boolean condition to the `.filter()` method of our original `Series`. `polars` will keep only the entries that satisfy the condition.
 
-# %% id="a53e4de1"
+# %% tags=["remove-input", "remove-output"] id="a53e4de1"
 s.filter(s > 0)
+
+# %% [markdown]
+# <!-- tab-twins:begin a53e4de1 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# s.filter(s > 0)
+# ```
+#
+# ```text
+# shape: (2,)
+# Series: '' [i64]
+# [
+# 	4
+# 	6
+# ]
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# s[s > 0]
+# ```
+#
+# ```text
+# a    4
+# d    6
+# dtype: int64
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->

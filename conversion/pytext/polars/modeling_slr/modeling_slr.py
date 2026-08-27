@@ -762,13 +762,108 @@ plt.show()
 # %% [markdown] id="06d9c0af"
 # While these four sets of datapoints look very different, they actually all have identical means $\bar x$, $\bar y$, standard deviations $\sigma_x$, $\sigma_y$, correlation $r$, and RMSE! If we only look at these statistics, we would probably be inclined to say that these datasets are similar.
 
-# %% id="e83b8086"
+# %% tags=["remove-input", "remove-output"] id="e83b8086"
 for dataset in ["I", "II", "III", "IV"]:
     print(f">>> Dataset {dataset}:")
     ans = anscombe[dataset]
     fig = least_squares_evaluation(ans["x"].to_numpy(), ans["y"].to_numpy(), visualize=NO_VIZ)
     print()
     print()
+
+# %% [markdown]
+# <!-- tab-twins:begin e83b8086 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# for dataset in ["I", "II", "III", "IV"]:
+#     print(f">>> Dataset {dataset}:")
+#     ans = anscombe[dataset]
+#     fig = least_squares_evaluation(ans["x"].to_numpy(), ans["y"].to_numpy(), visualize=NO_VIZ)
+#     print()
+#     print()
+# ```
+#
+# ```text
+# >>> Dataset I:
+# x_mean : 9.00, y_mean : 7.50
+# x_stdev: 3.16, y_stdev: 1.94
+# r = Correlation(x, y): 0.816
+# theta_0: 3.00, theta_1: 0.50
+# RMSE: 1.119
+#
+#
+# >>> Dataset II:
+# x_mean : 9.00, y_mean : 7.50
+# x_stdev: 3.16, y_stdev: 1.94
+# r = Correlation(x, y): 0.816
+# theta_0: 3.00, theta_1: 0.50
+# RMSE: 1.119
+#
+#
+# >>> Dataset III:
+# x_mean : 9.00, y_mean : 7.50
+# x_stdev: 3.16, y_stdev: 1.94
+# r = Correlation(x, y): 0.816
+# theta_0: 3.00, theta_1: 0.50
+# RMSE: 1.118
+#
+#
+# >>> Dataset IV:
+# x_mean : 9.00, y_mean : 7.50
+# x_stdev: 3.16, y_stdev: 1.94
+# r = Correlation(x, y): 0.817
+# theta_0: 3.00, theta_1: 0.50
+# RMSE: 1.118
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# for dataset in ["I", "II", "III", "IV"]:
+#     print(f">>> Dataset {dataset}:")
+#     ans = anscombe[dataset]
+#     fig = least_squares_evaluation(ans["x"], ans["y"], visualize=NO_VIZ)
+#     print()
+#     print()
+# ```
+#
+# ```text
+# >>> Dataset I:
+# x_mean : 9.00, y_mean : 7.50
+# x_stdev: 3.16, y_stdev: 1.94
+# r = Correlation(x, y): 0.816
+# 	heta_0: 3.00, 	heta_1: 0.50
+# RMSE: 1.119
+#
+#
+# >>> Dataset II:
+# x_mean : 9.00, y_mean : 7.50
+# x_stdev: 3.16, y_stdev: 1.94
+# r = Correlation(x, y): 0.816
+# 	heta_0: 3.00, 	heta_1: 0.50
+# RMSE: 1.119
+#
+#
+# >>> Dataset III:
+# x_mean : 9.00, y_mean : 7.50
+# x_stdev: 3.16, y_stdev: 1.94
+# r = Correlation(x, y): 0.816
+# 	heta_0: 3.00, 	heta_1: 0.50
+# RMSE: 1.118
+#
+#
+# >>> Dataset IV:
+# x_mean : 9.00, y_mean : 7.50
+# x_stdev: 3.16, y_stdev: 1.94
+# r = Correlation(x, y): 0.817
+# 	heta_0: 3.00, 	heta_1: 0.50
+# RMSE: 1.118
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="ef0e8aaa"
 # We may also wish to visualize the model's **residuals**, defined as the difference between the observed and predicted $y_i$ value ($e_i = y_i - \hat{y}_i$). This gives a high-level view of how "off" each prediction is from the true observed value. Recall that you explored this concept in [Data 8](https://inferentialthinking.com/chapters/15/5/Visual_Diagnostics.html?highlight=heteroscedasticity#detecting-heteroscedasticity): a good regression fit should display no clear pattern in its plot of residuals. The residual plots for Anscombe's quartet are displayed below. Note how only the first plot shows no clear pattern to the magnitude of residuals. This is an indication that SLR is not the best choice of model for the remaining three sets of points.

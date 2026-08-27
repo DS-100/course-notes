@@ -56,7 +56,7 @@
 # ```
 # ````
 
-# %% tags=["remove-input"] id="48397013"
+# %% tags=["remove-input", "remove-output"] id="48397013"
 import polars as pl
 import numpy as np
 import matplotlib.pyplot as plt
@@ -67,6 +67,201 @@ wb = pl.read_csv("data/world_bank.csv").drop("")
 wb = wb.rename({'Antiretroviral therapy coverage: % of people living with HIV: 2015':"HIV rate",
                 'Gross national income per capita, Atlas method: $: 2016':'gni'})
 wb.head()
+
+# %% [markdown]
+# <!-- tab-twins:begin 48397013 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# import polars as pl
+# import numpy as np
+# import matplotlib.pyplot as plt
+# import seaborn as sns
+#
+# # The first column of the CSV is an unnamed row counter, so we drop it
+# wb = pl.read_csv("data/world_bank.csv").drop("")
+# wb = wb.rename({'Antiretroviral therapy coverage: % of people living with HIV: 2015':"HIV rate",
+#                 'Gross national income per capita, Atlas method: $: 2016':'gni'})
+# wb.head()
+# ```
+#
+# ```text
+# shape: (5, 47)
+# ┌───────────┬──────────┬───────────┬───────────┬───┬───────────┬───────────┬───────────┬───────────┐
+# │ Continent ┆ Country  ┆ Primary   ┆ Primary   ┆ … ┆ Children  ┆ Children  ┆ Tuberculo ┆ Tuberculo │
+# │ ---       ┆ ---      ┆ completio ┆ completio ┆   ┆ sleeping  ┆ with      ┆ sis:      ┆ sis:      │
+# │ str       ┆ str      ┆ n rate:   ┆ n rate:   ┆   ┆ under     ┆ fever     ┆ Treatment ┆ Cases     │
+# │           ┆          ┆ Male:…    ┆ Femal…    ┆   ┆ treate…   ┆ receiving ┆ succes…   ┆ detection │
+# │           ┆          ┆ ---       ┆ ---       ┆   ┆ ---       ┆ …         ┆ ---       ┆ …         │
+# │           ┆          ┆ f64       ┆ f64       ┆   ┆ f64       ┆ ---       ┆ f64       ┆ ---       │
+# │           ┆          ┆           ┆           ┆   ┆           ┆ f64       ┆           ┆ f64       │
+# ╞═══════════╪══════════╪═══════════╪═══════════╪═══╪═══════════╪═══════════╪═══════════╪═══════════╡
+# │ Africa    ┆ Algeria  ┆ 106.0     ┆ 105.0     ┆ … ┆ null      ┆ null      ┆ 88.0      ┆ 80.0      │
+# │ Africa    ┆ Angola   ┆ null      ┆ null      ┆ … ┆ 25.9      ┆ 28.3      ┆ 34.0      ┆ 64.0      │
+# │ Africa    ┆ Benin    ┆ 83.0      ┆ 73.0      ┆ … ┆ 72.7      ┆ 25.9      ┆ 89.0      ┆ 61.0      │
+# │ Africa    ┆ Botswana ┆ 98.0      ┆ 101.0     ┆ … ┆ null      ┆ null      ┆ 77.0      ┆ 62.0      │
+# │ Africa    ┆ Burundi  ┆ 58.0      ┆ 66.0      ┆ … ┆ 53.8      ┆ 25.4      ┆ 91.0      ┆ 51.0      │
+# └───────────┴──────────┴───────────┴───────────┴───┴───────────┴───────────┴───────────┴───────────┘
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# import pandas as pd
+# import numpy as np
+# import matplotlib.pyplot as plt
+# import seaborn as sns
+# import warnings
+#
+# warnings.filterwarnings("ignore", "use_inf_as_na") # Suppresses distracting deprecation warnings
+#
+# wb = pd.read_csv("data/world_bank.csv", index_col=0)
+# wb = wb.rename(columns={'Antiretroviral therapy coverage: % of people living with HIV: 2015':"HIV rate",
+#                        'Gross national income per capita, Atlas method: $: 2016':'gni'})
+# wb.head()
+# ```
+#
+# ```text
+#   Continent   Country  \
+# 0    Africa   Algeria
+# 1    Africa    Angola
+# 2    Africa     Benin
+# 3    Africa  Botswana
+# 5    Africa   Burundi
+#
+#    Primary completion rate: Male: % of relevant age group: 2015  \
+# 0                                              106.0
+# 1                                                NaN
+# 2                                               83.0
+# 3                                               98.0
+# 5                                               58.0
+#
+#    Primary completion rate: Female: % of relevant age group: 2015  \
+# 0                                              105.0
+# 1                                                NaN
+# 2                                               73.0
+# 3                                              101.0
+# 5                                               66.0
+#
+#    Lower secondary completion rate: Male: % of relevant age group: 2015  \
+# 0                                               68.0
+# 1                                                NaN
+# 2                                               50.0
+# 3                                               86.0
+# 5                                               35.0
+#
+#    Lower secondary completion rate: Female: % of relevant age group: 2015  \
+# 0                                               85.0
+# 1                                                NaN
+# 2                                               37.0
+# 3                                               87.0
+# 5                                               30.0
+#
+#    Youth literacy rate: Male: % of ages 15-24: 2005-14  \
+# 0                                               96.0
+# 1                                               79.0
+# 2                                               55.0
+# 3                                               96.0
+# 5                                               90.0
+#
+#    Youth literacy rate: Female: % of ages 15-24: 2005-14  \
+# 0                                               92.0
+# 1                                               67.0
+# 2                                               31.0
+# 3                                               99.0
+# 5                                               88.0
+#
+#    Adult literacy rate: Male: % ages 15 and older: 2005-14  \
+# 0                                               83.0
+# 1                                               82.0
+# 2                                               41.0
+# 3                                               87.0
+# 5                                               89.0
+#
+#    Adult literacy rate: Female: % ages 15 and older: 2005-14  ...  \
+# 0                                               68.0          ...
+# 1                                               60.0          ...
+# 2                                               18.0          ...
+# 3                                               89.0          ...
+# 5                                               85.0          ...
+#
+#    Access to improved sanitation facilities: % of population: 1990  \
+# 0                                               80.0
+# 1                                               22.0
+# 2                                                7.0
+# 3                                               39.0
+# 5                                               42.0
+#
+#    Access to improved sanitation facilities: % of population: 2015  \
+# 0                                               88.0
+# 1                                               52.0
+# 2                                               20.0
+# 3                                               63.0
+# 5                                               48.0
+#
+#    Child immunization rate: Measles: % of children ages 12-23 months: 2015  \
+# 0                                               95.0
+# 1                                               55.0
+# 2                                               75.0
+# 3                                               97.0
+# 5                                               93.0
+#
+#    Child immunization rate: DTP3: % of children ages 12-23 months: 2015  \
+# 0                                               95.0
+# 1                                               64.0
+# 2                                               79.0
+# 3                                               95.0
+# 5                                               94.0
+#
+#    Children with acute respiratory infection taken to health provider: % of children under age 5 with ARI: 2009-2016  \
+# 0                                               66.0
+# 1                                                NaN
+# 2                                               23.0
+# 3                                                NaN
+# 5                                               55.0
+#
+#    Children with diarrhea who received oral rehydration and continuous feeding: % of children under age 5 with diarrhea: 2009-2016  \
+# 0                                               42.0
+# 1                                                NaN
+# 2                                               33.0
+# 3                                                NaN
+# 5                                               43.0
+#
+#    Children sleeping under treated bed nets: % of children under age 5: 2009-2016  \
+# 0                                                NaN
+# 1                                               25.9
+# 2                                               72.7
+# 3                                                NaN
+# 5                                               53.8
+#
+#    Children with fever receiving antimalarial drugs: % of children under age 5 with fever: 2009-2016  \
+# 0                                                NaN
+# 1                                               28.3
+# 2                                               25.9
+# 3                                                NaN
+# 5                                               25.4
+#
+#    Tuberculosis: Treatment success rate: % of new cases: 2014  \
+# 0                                               88.0
+# 1                                               34.0
+# 2                                               89.0
+# 3                                               77.0
+# 5                                               91.0
+#
+#    Tuberculosis: Cases detection rate: % of new estimated cases: 2015
+# 0                                               80.0
+# 1                                               64.0
+# 2                                               61.0
+# 3                                               62.0
+# 5                                               51.0
+#
+# [5 rows x 47 columns]
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% id="ae7f04f3"
 #| fig-alt: Female adult literacy against percent growth
@@ -327,7 +522,7 @@ plt.subplots_adjust(top=0.9);
 # ```
 # ````
 
-# %% tags=["remove-input"] id="38ca2d00"
+# %% tags=["remove-input", "remove-output"] id="38ca2d00"
 #| fig-alt: The transformed data is plotted along with a linear regression line in red.
 # The code below fits a linear regression model. We'll discuss it at length in a future lecture
 from sklearn.linear_model import LinearRegression
@@ -345,6 +540,65 @@ plt.plot(np.log(df["inc"]), m*np.log(df["inc"])+b, c="red", label="Linear regres
 plt.xlabel("Log(gross national income per capita)")
 plt.ylabel("Adult literacy rate (4th power)")
 plt.legend();
+
+# %% [markdown]
+# <!-- tab-twins:begin 38ca2d00 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# # The code below fits a linear regression model. We'll discuss it at length in a future lecture
+# from sklearn.linear_model import LinearRegression
+#
+# model = LinearRegression()
+# model.fit(np.log(df[["inc"]]), df["lit"]**4)
+# m, b = model.coef_[0], model.intercept_
+#
+# print(f"The slope, m, of the transformed data is: {m}")
+# print(f"The intercept, b, of the transformed data is: {b}")
+#
+# df = df.sort("inc")
+# plt.scatter(np.log(df["inc"]), df["lit"]**4, label="Transformed data")
+# plt.plot(np.log(df["inc"]), m*np.log(df["inc"])+b, c="red", label="Linear regression")
+# plt.xlabel("Log(gross national income per capita)")
+# plt.ylabel("Adult literacy rate (4th power)")
+# plt.legend();
+# ```
+#
+# ```text
+# The slope, m, of the transformed data is: 336400693.43172693
+# The intercept, b, of the transformed data is: -1802204836.0479977
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# # The code below fits a linear regression model. We'll discuss it at length in a future lecture
+# from sklearn.linear_model import LinearRegression
+#
+# model = LinearRegression()
+# model.fit(np.log(df[["inc"]]), df["lit"]**4)
+# m, b = model.coef_[0], model.intercept_
+#
+# print(f"The slope, m, of the transformed data is: {m}")
+# print(f"The intercept, b, of the transformed data is: {b}")
+#
+# df = df.sort_values("inc")
+# plt.scatter(np.log(df["inc"]), df["lit"]**4, label="Transformed data")
+# plt.plot(np.log(df["inc"]), m*np.log(df["inc"])+b, c="red", label="Linear regression")
+# plt.xlabel("Log(gross national income per capita)")
+# plt.ylabel("Adult literacy rate (4th power)")
+# plt.legend();
+# ```
+#
+# ```text
+# The slope, m, of the transformed data is: 336400693.43172705
+# The intercept, b, of the transformed data is: -1802204836.0479987
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="17c18974"
 # What if we want to understand the *underlying* relationship between our original variables, before they were transformed? We can simply rearrange our linear expression above! 

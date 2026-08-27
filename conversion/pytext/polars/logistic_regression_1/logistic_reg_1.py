@@ -102,7 +102,7 @@
 # ```
 # ````
 
-# %% tags=["remove-input"] id="838394a9"
+# %% tags=["remove-input", "remove-output"] id="838394a9"
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -112,6 +112,65 @@ np.seterr(divide='ignore')
 
 games = pl.read_csv("data/games").drop_nulls()
 games.head()
+
+# %% [markdown]
+# <!-- tab-twins:begin 838394a9 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# import warnings
+# warnings.filterwarnings("ignore")
+#
+# import polars as pl
+# import numpy as np
+# np.seterr(divide='ignore')
+#
+# games = pl.read_csv("data/games").drop_nulls()
+# games.head()
+# ```
+#
+# ```text
+# shape: (5, 6)
+# ┌──────────┬───────────────────┬─────────────┬─────┬───────────┬─────┐
+# │ GAME_ID  ┆ TEAM_NAME         ┆ MATCHUP     ┆ WON ┆ GOAL_DIFF ┆ AST │
+# │ ---      ┆ ---               ┆ ---         ┆ --- ┆ ---       ┆ --- │
+# │ i64      ┆ str               ┆ str         ┆ i64 ┆ f64       ┆ i64 │
+# ╞══════════╪═══════════════════╪═════════════╪═════╪═══════════╪═════╡
+# │ 21701216 ┆ Dallas Mavericks  ┆ DAL vs. PHX ┆ 0   ┆ -0.251    ┆ 20  │
+# │ 21700846 ┆ Phoenix Suns      ┆ PHX @ GSW   ┆ 0   ┆ -0.237    ┆ 13  │
+# │ 21700071 ┆ San Antonio Spurs ┆ SAS @ ORL   ┆ 0   ┆ -0.234    ┆ 19  │
+# │ 21700221 ┆ New York Knicks   ┆ NYK @ TOR   ┆ 0   ┆ -0.234    ┆ 17  │
+# │ 21700306 ┆ Miami Heat        ┆ MIA @ NYK   ┆ 0   ┆ -0.222    ┆ 21  │
+# └──────────┴───────────────────┴─────────────┴─────┴───────────┴─────┘
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# import warnings
+# warnings.filterwarnings("ignore")
+#
+# import pandas as pd
+# import numpy as np
+# np.seterr(divide='ignore')
+#
+# games = pd.read_csv("data/games").dropna()
+# games.head()
+# ```
+#
+# ```text
+#     GAME_ID          TEAM_NAME      MATCHUP  WON  GOAL_DIFF  AST
+# 0  21701216   Dallas Mavericks  DAL vs. PHX    0     -0.251   20
+# 1  21700846       Phoenix Suns    PHX @ GSW    0     -0.237   13
+# 2  21700071  San Antonio Spurs    SAS @ ORL    0     -0.234   19
+# 3  21700221    New York Knicks    NYK @ TOR    0     -0.234   17
+# 4  21700306         Miami Heat    MIA @ NYK    0     -0.222   21
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="161ba745"
 # Let's visualize the relationship between `"GOAL_DIFF"` and `"WON"` using the Seaborn function `sns.stripplot`. A strip plot automatically introduces a small amount of random noise to **jitter** the data. Recall that all values in the `"WON"` column are either 1 (won) or 0 (lost) – if we were to directly plot them without jittering, we would see severe overplotting.

@@ -114,6 +114,75 @@ It was reconciled against the sister repo's corpus-wide cleanup: matplotlib, plo
 sklearn take Polars directly, and the conversions that added `.to_numpy()` there were churn.
 
 
+## Orchestration — the waves
+
+Conversion runs in waves. The ordering is not a style preference; two of the constraints are hard.
+
+| Wave | What | Parallel? |
+|---|---|---|
+| 0 | `nb_baseline` · `nb_triage` · **`nb_validate --all --self-test`** | serial, cheap |
+| 1 | `notes-converter` / `chapter-author` per chapter; `tab_twins --from-baseline` needs no agent | yes, cap ~6 |
+| 2 | `nb_execute` per chapter | **NO — strictly serial** |
+| 3 | `nb_validate` per chapter | yes |
+| 4 | reviewer fan-out, per tier | yes, across chapters *and* reviewers |
+| 5 | one refuter per blocking finding | yes |
+| 6 | fix list back to the converter, re-enter at wave 2 | — |
+
+**The negative control runs first, every time.** A battery that passes on the pandas baseline is
+broken, and every result after it is meaningless.
+
+**Wave 2 must not be parallelised.** One kernel at a time: Polars takes all cores and several
+chapters read 20–150 MB. Order by data size ascending so failures surface in the first minute.
+
+**A chapter that fails wave 3 never reaches wave 4.** Reviewer attention is the expensive resource;
+mechanical defects must never consume it.
+
+### Who reviews what
+
+| Tier | Reviewers |
+|---|---|
+| A | none — the predicate is an empty diff, and any change is the defect |
+| B | `notes-output-reviewer` + `notes-claim-verifier` + `notes-render-reviewer` |
+| C | + `notes-prose-reviewer` |
+| D | + `notes-prose-reviewer` + human sign-off |
+
+`notes-a11y-reviewer` joins wherever figure outputs moved — under full re-execution, most chapters
+with figures.
+
+### Wave 5, and why it exists
+
+Every **blocking** finding goes to an independent agent told to *refute* it; the finding survives
+only if refutation fails. This is not ceremony. Reviewers on this project reported a BLAS attribution
+that was environmental drift, a "pixel-identical" claim that differed in 1.4% of pixels, and "two win
+rates moved" that was three — each caught only because something re-derived it. A converter sent
+chasing a finding that was never true burns an attempt against the floor.
+
+Refuting is also how the *real* defect gets found. A render review reported all 28 of `eda`'s
+comparison tabs as duplicating their code cell; checking it showed mystmd 1.6.6 records
+`remove-input`/`remove-output` on a block's **code and output children**, leaving the block itself
+`visibility: "show"` — so 23 were correctly hidden and 5 were not, and those 5 were a real bug in a
+different place. The finding was wrong, the instinct behind it was right, and only re-deriving it
+separated the two.
+
+### The floor
+
+Three attempts per chapter. `debt` must fall strictly between them. An identical failure fingerprint
+twice running bails. Three consecutive `NEEDS_HUMAN_REVIEW` halts the batch — that pattern means the
+problem is systemic, not chapter-specific.
+
+### What each layer can and cannot see
+
+Worth keeping in view when deciding whether a layer is missing:
+
+- **Gates** read files. They cannot see meaning, and they cannot see the rendered page.
+- **The executor** refuses to write a notebook that lost an error demo. It cannot see anything that
+  executes cleanly.
+- **Reviewers** read the notebook and its outputs. Until `notes-claim-verifier` they never executed a
+  *sentence*, and until `notes-render-reviewer` nobody opened the built artifact.
+
+All three defects that reached course staff — a chapter's title silently unrendering, a comment
+whose own output disproved it, and tab density — lived in one of those blind spots.
+
 ## The gates are migration-time only
 
 `.github/workflows/conversion-gates.yml` was removed when the conversion finished. It existed only on

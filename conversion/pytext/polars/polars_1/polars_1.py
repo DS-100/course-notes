@@ -12,7 +12,7 @@
 #     name: python3
 # ---
 
-# %% [markdown]
+# %% [markdown] id="25b4d24f"
 # ---
 # title: Polars I
 # ---
@@ -46,12 +46,12 @@
 # ::::
 # :::::
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="1c442585"
 # `pl` is the conventional alias for Polars, as `np` is for NumPy
 import polars as pl
 
 
-# %% [markdown]
+# %% [markdown] id="9db5657e"
 # <!-- tab-twins:begin import polars as pl -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -72,7 +72,7 @@ import polars as pl
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="58b0c4f2"
 # ## `DataFrame`s and `Series`
 #
 # A `DataFrame` is a two-dimensional table of data with named columns, where each row is identified by its position in the table. Every column of a `DataFrame` is a `Series`, and a `DataFrame` is a collection of `Series` that all have the same length.
@@ -88,12 +88,12 @@ import polars as pl
 #
 # Polars reads a number of file formats. We will use `read_csv` throughout the course to load a comma-separated file into a `DataFrame`.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="b30b8999"
 elections = pl.read_csv("data/elections.csv")
 elections
 
 
-# %% [markdown]
+# %% [markdown] id="d331d68b"
 # <!-- tab-twins:begin elections = pl.read_csv("data/elections.csv") -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -152,19 +152,19 @@ elections
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="97423f5f"
 # The code above stores our `DataFrame` object in the `elections` variable. Upon inspection, our `elections` `DataFrame` has 182 rows and 6 columns (`Year`, `Candidate`, `Party`, `Popular vote`, `Result`, `%`). Each row represents a single record — in our example, a presidential candidate from some particular year. Each column represents a single attribute or feature of the record.
 #
 # Notice the three lines Polars prints above the data itself. The first gives the shape of the table, the second names the columns, and the third gives the data type of each column: `str` for the text columns, `i64` for whole numbers, `f64` for decimals. Every table you print tells you how big it is and what it holds.
 #
 # `read_csv` also takes optional arguments that shape the table as it is read.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="3093ab49"
 # `columns` chooses which columns to read; they arrive in file order, not the order named here
 pl.read_csv("data/elections.csv", columns=["Candidate", "Year", "%"])
 
 
-# %% [markdown]
+# %% [markdown] id="2107958a"
 # <!-- tab-twins:begin pl.read_csv("data/elections.csv", columns=["Candidate", "Year", "%"]) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -222,12 +222,12 @@ pl.read_csv("data/elections.csv", columns=["Candidate", "Year", "%"])
 # :::::
 # <!-- tab-twins:end -->
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="bb730f16"
 # `n_rows` stops reading after the first few rows, which is handy for a very large file
 pl.read_csv("data/elections.csv", n_rows=5)
 
 
-# %% [markdown]
+# %% [markdown] id="4795d09b"
 # <!-- tab-twins:begin pl.read_csv("data/elections.csv", n_rows=5) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -273,14 +273,14 @@ pl.read_csv("data/elections.csv", n_rows=5)
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="49d18268"
 # ### From a List of Rows
 #
 # We'll now explore creating a `DataFrame` with data of our own. The two cells below build the same two-row table of fruit prices, one row at a time.
 #
 # The first passes a list of lists. `schema` names the columns, and `orient="row"` tells Polars to read each inner list as a row rather than as a column.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="340731ba"
 df_list_1 = pl.DataFrame(
     [["Kiwi", 5.49],
      ["Orange", 3.99]],
@@ -289,7 +289,7 @@ df_list_1 = pl.DataFrame(
 df_list_1
 
 
-# %% [markdown]
+# %% [markdown] id="67979e35"
 # <!-- tab-twins:begin df_list_1 = pl.DataFrame( -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -336,10 +336,10 @@ df_list_1
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="21078267"
 # The second passes a list of dictionaries. Each dictionary is a row, and its keys supply the column names, so there is no schema to write out.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="9fad839e"
 df_list_2 = pl.DataFrame(
     [{"Fruit": "Kiwi", "Price": 5.49},
      {"Fruit": "Orange", "Price": 3.99}]
@@ -347,7 +347,7 @@ df_list_2 = pl.DataFrame(
 df_list_2
 
 
-# %% [markdown]
+# %% [markdown] id="45d489c4"
 # <!-- tab-twins:begin df_list_2 = pl.DataFrame( -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -392,12 +392,12 @@ df_list_2
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="8e1c361d"
 # ### From a Dictionary of Columns
 #
 # A dictionary describes the table by column instead of by row: each key is a column name, and each value holds that column's data.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="3408cdde"
 df_dict = pl.DataFrame(
     {"Fruit": ["Kiwi", "Orange"],
      "Price": [5.49, 3.99]}
@@ -405,7 +405,7 @@ df_dict = pl.DataFrame(
 df_dict
 
 
-# %% [markdown]
+# %% [markdown] id="ed033769"
 # <!-- tab-twins:begin df_dict = pl.DataFrame( -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -450,18 +450,18 @@ df_dict
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="981a5a50"
 # ### From a `Series`
 #
 # Since a `DataFrame` is a collection of equal-length `Series`, we can build one out of `Series` we already have. Consider `ser_a` and `ser_b`.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="304e0525"
 ser_a = pl.Series("ser_a", ["a1", "a2", "a3"])
 ser_b = pl.Series("ser_b", ["b1", "b2", "b3"])
 ser_a
 
 
-# %% [markdown]
+# %% [markdown] id="94141424"
 # <!-- tab-twins:begin ser_a = pl.Series("ser_a", ["a1", "a2", "a3"]) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -501,16 +501,16 @@ ser_a
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="dbb5b8bc"
 # Passing them in a dictionary puts them side by side, under whatever column names we choose.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="d1d42c64"
 pl.DataFrame(
     {"ColumnA": ser_a, "ColumnB": ser_b}
 )
 
 
-# %% [markdown]
+# %% [markdown] id="eb647b8f"
 # <!-- tab-twins:begin {"ColumnA": ser_a, "ColumnB": ser_b} -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -553,14 +553,14 @@ pl.DataFrame(
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="e3020963"
 # A single `Series` makes a one-column `DataFrame`, either by handing it to the constructor or by calling `.to_frame()` on it. Either way, the name of the `Series` becomes the name of the column.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="18855ea8"
 pl.DataFrame(ser_a)
 
 
-# %% [markdown]
+# %% [markdown] id="599b3601"
 # <!-- tab-twins:begin pl.DataFrame(ser_a) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -599,11 +599,11 @@ pl.DataFrame(ser_a)
 # :::::
 # <!-- tab-twins:end -->
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="4b73724f"
 ser_a.to_frame()
 
 
-# %% [markdown]
+# %% [markdown] id="caf20aa4"
 # <!-- tab-twins:begin ser_a.to_frame() -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -642,18 +642,18 @@ ser_a.to_frame()
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="89209a13"
 # ## `DataFrame` Attributes: `columns`, `dtypes`, and `shape`
 #
 # Column names in a `DataFrame` are almost always unique. Looking back to the `elections` dataset, it wouldn't make sense to have two columns named `"Candidate"`. Sometimes you'll want to extract the names, the types, or the size of a table rather than the data itself, most often when meeting a dataset for the first time.
 #
 # For the column names, use `DataFrame.columns`:
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="7f746d89"
 elections.columns
 
 
-# %% [markdown]
+# %% [markdown] id="dc5641a8"
 # <!-- tab-twins:begin elections.columns -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -680,14 +680,14 @@ elections.columns
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="d78d08c3"
 # For the data type of each column, use `DataFrame.dtypes`. The types come back in the same order as the names above.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="a2f55f5a"
 elections.dtypes
 
 
-# %% [markdown]
+# %% [markdown] id="2067bab2"
 # <!-- tab-twins:begin elections.dtypes -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -720,14 +720,14 @@ elections.dtypes
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="3dd70041"
 # `DataFrame.schema` reports both at once, pairing each column with its type. This is the quickest way to check that a file was read the way you expected: that a column of years arrived as `Int64` rather than as `String`, for instance.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="d77b992c"
 elections.schema
 
 
-# %% [markdown]
+# %% [markdown] id="72454ae1"
 # <!-- tab-twins:begin elections.schema -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -753,19 +753,24 @@ elections.schema
 # ```
 #
 # ```text
-# {'Year': dtype('int64'), 'Candidate': dtype('O'), 'Party': dtype('O'), 'Popular vote': dtype('int64'), 'Result': dtype('O'), '%': dtype('float64')}
+# {'Year': dtype('int64'),
+#  'Candidate': dtype('O'),
+#  'Party': dtype('O'),
+#  'Popular vote': dtype('int64'),
+#  'Result': dtype('O'),
+#  '%': dtype('float64')}
 # ```
 # ::::
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="357cdcd1"
 # And for the size of the `DataFrame`, `DataFrame.shape` gives the number of rows followed by the number of columns:
 
-# %%
+# %% id="de7741d5"
 elections.shape
 
-# %% [markdown]
+# %% [markdown] id="c97a340e"
 # ## Extracting Data from a `DataFrame`
 #
 # Now that we've learned more about `DataFrame`s, let's dive deeper into their capabilities.
@@ -792,12 +797,12 @@ elections.shape
 #
 # To extract the first `n` rows of a `DataFrame` `df`, we use the syntax `df.head(n)`. Called with no argument at all, `.head` gives us five.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="5e522140"
 # Extract the first 5 rows of the DataFrame
 elections.head()
 
 
-# %% [markdown]
+# %% [markdown] id="46a72c89"
 # <!-- tab-twins:begin elections.head() -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -843,15 +848,15 @@ elections.head()
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="573b87b4"
 # Similarly, calling `df.tail(n)` allows us to extract the last `n` rows of the `DataFrame`.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="3f9bd208"
 # Extract the last 5 rows of the DataFrame
 elections.tail(5)
 
 
-# %% [markdown]
+# %% [markdown] id="17b531c5"
 # <!-- tab-twins:begin elections.tail(5) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -895,7 +900,7 @@ elections.tail(5)
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="0d9e8c1f"
 # ### Extraction with `[]`
 #
 # The `[]` selection operator takes up to two arguments: the first names the rows we want, and the second names the columns. It selects rows by **position**, counting from 0 in the order the rows currently sit in the table, and columns by **label**.
@@ -908,11 +913,11 @@ elections.tail(5)
 #
 # For example, to select a single value, we can ask for the row at position `0` and the column labeled `Candidate`.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="ae0fa1ba"
 elections[0, "Candidate"]
 
 
-# %% [markdown]
+# %% [markdown] id="95ae9af9"
 # <!-- tab-twins:begin elections[0, "Candidate"] -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -939,16 +944,16 @@ elections[0, "Candidate"]
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="86dc040c"
 # Two single values pick out one cell, and what comes back is the value sitting in it: here, the string `'Andrew Jackson'`.
 #
 # Two lists pick out a rectangle of the table. The rows arrive in the order we asked for them rather than in table order.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="47d72677"
 elections[[87, 25, 179], ["Year", "Party", "%"]]
 
 
-# %% [markdown]
+# %% [markdown] id="8b99844c"
 # <!-- tab-twins:begin elections[[87, 25, 179], ["Year", "Party", "%"]] -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -987,14 +992,14 @@ elections[[87, 25, 179], ["Year", "Party", "%"]]
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="10f474bc"
 # A slice of column labels runs from one column to another and includes both ends. `"%"` is the last column of `elections`, and it appears in the result below.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="334bf7ef"
 elections[[87, 25, 179], "Popular vote":"%"]
 
 
-# %% [markdown]
+# %% [markdown] id="2adfccb2"
 # <!-- tab-twins:begin elections[[87, 25, 179], "Popular vote":"%"] -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1033,14 +1038,14 @@ elections[[87, 25, 179], "Popular vote":"%"]
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="735d0b76"
 # Suppose instead that we want *all* rows and only a few columns. The shorthand `:` is useful for this.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="496493f7"
 elections[:, ["Year", "Candidate", "Result"]]
 
 
-# %% [markdown]
+# %% [markdown] id="25d0aa20"
 # <!-- tab-twins:begin elections[:, ["Year", "Candidate", "Result"]] -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1097,14 +1102,14 @@ elections[:, ["Year", "Candidate", "Result"]]
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="36043c7d"
 # We can use the same shorthand to ask for all columns.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="4c335442"
 elections[[87, 25, 179], :]
 
 
-# %% [markdown]
+# %% [markdown] id="ed13481b"
 # <!-- tab-twins:begin elections[[87, 25, 179], :] -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1145,14 +1150,14 @@ elections[[87, 25, 179], :]
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="2f22dba6"
 # A single column label returns that column as a `Series`.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="4126ef9d"
 elections[[87, 25, 179], "Popular vote"]
 
 
-# %% [markdown]
+# %% [markdown] id="8bad130a"
 # <!-- tab-twins:begin elections[[87, 25, 179], "Popular vote"] -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1188,14 +1193,14 @@ elections[[87, 25, 179], "Popular vote"]
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="47259a34"
 # Wrapping that same label in a list asks for a table of one column, and a table of one column is what comes back.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="b010aade"
 elections[[87, 25, 179], ["Popular vote"]]
 
 
-# %% [markdown]
+# %% [markdown] id="a9883a51"
 # <!-- tab-twins:begin elections[[87, 25, 179], ["Popular vote"]] -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1234,14 +1239,14 @@ elections[[87, 25, 179], ["Popular vote"]]
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="5b3744da"
 # When `[]` is given only one argument, and that argument is a list of integers or a slice, Polars reads it as rows and hands back every column.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="7c9c0870"
 elections[[180, 181]]
 
 
-# %% [markdown]
+# %% [markdown] id="fdd177b8"
 # <!-- tab-twins:begin elections[[180, 181]] -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1278,14 +1283,14 @@ elections[[180, 181]]
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="07b9c28a"
 # A single argument that is a *string*, on the other hand, names a column, and that column comes back as a `Series`. This is the shorthand we use whenever we want one column and nothing else, and it shows up throughout the rest of the chapter.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="d5a72acb"
 elections["Candidate"]
 
 
-# %% [markdown]
+# %% [markdown] id="a0f3a1ba"
 # <!-- tab-twins:begin elections["Candidate"] -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1337,20 +1342,20 @@ elections["Candidate"]
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="dfecff0b"
 # #### Selecting Columns by Position
 #
 # The second argument to `[]` accepts **column numbers** as well as column labels. The numbers count from the left edge of the table, starting at 0, so `elections[:, 1]` and `elections[:, "Candidate"]` name the same column.
 #
 # Slicing by column number, like slicing by row position, is **exclusive** of the right-hand side of the slice. The inclusive behavior we saw above belongs to label slices only.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="1f2bceeb"
 # Extracting the value at the first row (row 0) and the second column
 # Remember that Python indexing begins at position 0!
 elections[0, 1]
 
 
-# %% [markdown]
+# %% [markdown] id="7177a19f"
 # <!-- tab-twins:begin elections[0, 1] -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1379,13 +1384,13 @@ elections[0, 1]
 # :::::
 # <!-- tab-twins:end -->
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="3ea5558b"
 # Extracting the second, third, and fourth rows of the second column
 # (returns a Series, since we asked for a single column)
 elections[[1, 2, 3], 1]
 
 
-# %% [markdown]
+# %% [markdown] id="bff4e353"
 # <!-- tab-twins:begin elections[[1, 2, 3], 1] -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1423,13 +1428,13 @@ elections[[1, 2, 3], 1]
 # :::::
 # <!-- tab-twins:end -->
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="7a46e3b5"
 # Select the rows at positions 1, 2, and 3
 # Select the columns at positions 0, 1, and 2
 elections[[1, 2, 3], [0, 1, 2]]
 
 
-# %% [markdown]
+# %% [markdown] id="ff57f9b0"
 # <!-- tab-twins:begin elections[[1, 2, 3], [0, 1, 2]] -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1470,13 +1475,13 @@ elections[[1, 2, 3], [0, 1, 2]]
 # :::::
 # <!-- tab-twins:end -->
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="69f3c204"
 # A list of row positions and a slice of column numbers
 # The column at position 3 is left out, since number slices are exclusive
 elections[[1, 2, 3], 0:3]
 
 
-# %% [markdown]
+# %% [markdown] id="4bce6905"
 # <!-- tab-twins:begin elections[[1, 2, 3], 0:3] -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1517,12 +1522,12 @@ elections[[1, 2, 3], 0:3]
 # :::::
 # <!-- tab-twins:end -->
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="396e7319"
 # One argument, so Polars reads it as rows and returns all columns
 elections[138:144]
 
 
-# %% [markdown]
+# %% [markdown] id="c7703675"
 # <!-- tab-twins:begin elections[138:144] -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1568,14 +1573,14 @@ elections[138:144]
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="306e1d17"
 # A whole row on its own comes back from `.row()`, as a tuple of values in column order.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="b095a571"
 elections.row(0)
 
 
-# %% [markdown]
+# %% [markdown] id="9a3954e3"
 # <!-- tab-twins:begin elections.row(0) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1607,14 +1612,14 @@ elections.row(0)
 # ::::
 # :::::
 # <!-- tab-twins:end -->
-# %% [markdown]
+# %% [markdown] id="b0f9d831"
 # Passing `named=True` gives a dictionary instead, which is much easier to read when a table is wide.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="a37363f8"
 elections.row(0, named=True)
 
 
-# %% [markdown]
+# %% [markdown] id="efdbe2d8"
 # <!-- tab-twins:begin elections.row(0, named=True) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1640,13 +1645,18 @@ elections.row(0, named=True)
 # ```
 #
 # ```text
-# {'Year': 1824, 'Candidate': 'Andrew Jackson', 'Party': 'Democratic-Republican', 'Popular vote': 151271, 'Result': 'loss', '%': 57.21012204}
+# {'Year': 1824,
+#  'Candidate': 'Andrew Jackson',
+#  'Party': 'Democratic-Republican',
+#  'Popular vote': 151271,
+#  'Result': 'loss',
+#  '%': 57.21012204}
 # ```
 # ::::
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="71f7fa2a"
 # A row's position is the only handle we have on it, and that position belongs to the table rather than to the row. Any operation that reorders the table therefore hands out new positions, which is a point we return to at the end of the section.
 #
 # ### Extraction with `filter` and `select`
@@ -1657,12 +1667,12 @@ elections.row(0, named=True)
 #
 # Two rules cover most of the confusion: `filter` narrows the rows and leaves every column in place, and `select` decides which columns come back.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="13b248a7"
 # select takes a list of column names and returns a DataFrame
 elections.select(["Year", "Candidate", "Result"])
 
 
-# %% [markdown]
+# %% [markdown] id="252a988a"
 # <!-- tab-twins:begin elections.select(["Year", "Candidate", "Result"]) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1719,14 +1729,14 @@ elections.select(["Year", "Candidate", "Result"])
 # ::::
 # :::::
 # <!-- tab-twins:end -->
-# %% [markdown]
+# %% [markdown] id="3cb17307"
 # `select` also accepts a computed expression. `pl.col("Popular vote")` refers to that column, arithmetic on it applies to every value, and `.alias` names the result.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="4f29d006"
 elections.select((pl.col("Popular vote") / 1_000_000).alias("Popular vote (millions)"))
 
 
-# %% [markdown]
+# %% [markdown] id="825bbdcd"
 # <!-- tab-twins:begin elections.select((pl.col("Popular vote") / 1_000_000) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1784,14 +1794,14 @@ elections.select((pl.col("Popular vote") / 1_000_000).alias("Popular vote (milli
 # ::::
 # :::::
 # <!-- tab-twins:end -->
-# %% [markdown]
+# %% [markdown] id="1b6cc8e7"
 # `filter` takes a condition and returns the rows that satisfy it. Eight candidacies in the dataset drew more than 60 million popular votes, the earliest of them in 2004.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="d60a1e4a"
 elections.filter(pl.col("Popular vote") > 60000000)
 
 
-# %% [markdown]
+# %% [markdown] id="ebafccc8"
 # <!-- tab-twins:begin elections.filter(pl.col("Popular vote") > 60000000) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1839,14 +1849,14 @@ elections.filter(pl.col("Popular vote") > 60000000)
 # ::::
 # :::::
 # <!-- tab-twins:end -->
-# %% [markdown]
+# %% [markdown] id="e3bde64d"
 # Each of these methods returns a `DataFrame`, so the two can be chained: filter the rows first, then pick the columns to keep.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="122c5a2f"
 elections.filter(pl.col("Year") == 2008).select(["Year", "Candidate"])
 
 
-# %% [markdown]
+# %% [markdown] id="aa6ebbef"
 # <!-- tab-twins:begin elections.filter(pl.col("Year") == 2008).select(["Year", "Candidate"]) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1891,7 +1901,7 @@ elections.filter(pl.col("Year") == 2008).select(["Year", "Candidate"])
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="018e08ef"
 # ### Boolean Operators
 #
 # To filter on more than one condition at a time, we combine boolean masks using **bitwise operators**. In the table below, p and q are boolean expressions.
@@ -1907,12 +1917,12 @@ elections.filter(pl.col("Year") == 2008).select(["Year", "Candidate"])
 #
 # For example, to return every candidacy from 2008 *or* with at least 60% of the popular vote, we can write:
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="e499765b"
 # Grab rows from 2008 OR candidates winning over 60% of the vote (or both)
 elections.filter((pl.col("Year") == 2008) | (pl.col("%") >= 60))
 
 
-# %% [markdown]
+# %% [markdown] id="9b73bf67"
 # <!-- tab-twins:begin elections.filter((pl.col("Year") == 2008) | (pl.col("%") >= 60)) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1966,17 +1976,17 @@ elections.filter((pl.col("Year") == 2008) | (pl.col("%") >= 60))
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="74e6fd9b"
 # Ten rows satisfy that condition: the six candidates who stood in 2008, plus the four landslide winners of 1920, 1936, 1964, and 1972.
 #
 # If we want the rows where *both* conditions hold, we use `&`.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="0c3db1b1"
 # Grab post-2000 winners: rows where the year is after 2000 AND the result is a win
 elections.filter((pl.col("Year") > 2000) & (pl.col("Result") == "win"))
 
 
-# %% [markdown]
+# %% [markdown] id="73581125"
 # <!-- tab-twins:begin elections.filter((pl.col("Year") > 2000) & (pl.col("Result") == "win")) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -2020,7 +2030,7 @@ elections.filter((pl.col("Year") > 2000) & (pl.col("Result") == "win"))
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="7ff49750"
 # Note that we need the bitwise operators here, not Python's `and` and `or`. Those two ask a single
 # yes-or-no question about the whole object, and an expression stands for a column of many values,
 # so there is no one answer to give:
@@ -2030,7 +2040,7 @@ elections.filter((pl.col("Year") > 2000) & (pl.col("Result") == "win"))
 elections.filter((pl.col("Year") == 2008) and (pl.col("%") >= 60))
 
 
-# %% [markdown]
+# %% [markdown] id="6a7d0a41"
 # <!-- tab-twins:begin elections.filter((pl.col("Year") == 2008) and (pl.col("%") >= 60)) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -2065,10 +2075,10 @@ elections.filter((pl.col("Year") == 2008) and (pl.col("%") >= 60))
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="417030ce"
 # Conditions can be strung together as far as we need. Wrapping the whole call in parentheses lets us break a long one across several lines, which is worth doing well before it becomes hard to read.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="469d1df5"
 # To make code more readable, use multiple lines
 elections.filter(
     (pl.col("Year") < 2000) &
@@ -2078,7 +2088,7 @@ elections.filter(
 )
 
 
-# %% [markdown]
+# %% [markdown] id="daa99ead"
 # <!-- tab-twins:begin (pl.col("Year") < 2000) & -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -2132,19 +2142,19 @@ elections.filter(
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="6aa29c21"
 # ### Working with Row Positions
 #
 # A row is identified by its position in the table, counting from 0. Those positions are not stored anywhere; `with_row_index` writes them into a column of their own when we want to keep them.
 #
 # This matters as soon as we reorder a table. Below, we record each row's position and *then* sort by vote share, so the new first column says where each row started out. Lyndon Johnson's 1964 landslide is the largest share in the dataset, and it came from position 114.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="eea135a2"
 # with_row_index adds a column holding each row's current position
 elections.with_row_index("original_position").sort("%", descending=True).head()
 
 
-# %% [markdown]
+# %% [markdown] id="3ebc58dd"
 # <!-- tab-twins:begin elections.with_row_index("original_position").sort("%", descending=True).head() -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -2192,14 +2202,14 @@ elections.with_row_index("original_position").sort("%", descending=True).head()
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="2d2b5b2b"
 # `with_row_index` returns a new table rather than changing the one we called it on, so `elections` itself still has its original six columns and its original order.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="2a58cf86"
 elections.head(3)
 
 
-# %% [markdown]
+# %% [markdown] id="11f86309"
 # <!-- tab-twins:begin elections.head(3) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -2240,14 +2250,14 @@ elections.head(3)
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="effc775a"
 # Adding the index column *after* the sort numbers the rows in their new order instead, counting 0, 1, 2 down the sorted table. Which of the two you want depends on whether you care where a row came from or where it now sits.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="41b15586"
 elections.sort("%", descending=True).with_row_index().head()
 
 
-# %% [markdown]
+# %% [markdown] id="9c1b434e"
 # <!-- tab-twins:begin elections.sort("%", descending=True).with_row_index().head() -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -2290,7 +2300,7 @@ elections.sort("%", descending=True).with_row_index().head()
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="63b2e10c"
 # ## The `babynames` Dataset
 #
 # The rest of this chapter works with a second dataset: the names given to babies born in California, as recorded by the Social Security Administration. Each row holds one name, in one year, for one sex, along with the number of babies who were given it.
@@ -2324,9 +2334,10 @@ elections.sort("%", descending=True).with_row_index().head()
 # ````
 
 
-# %% [markdown]
+# %% [markdown] id="abc4e450"
+#
 
-# %% tags=["remove-input"]
+# %% tags=["remove-input"] id="c8bfdae2"
 # This code pulls census data and loads it into a DataFrame
 # We won't cover it explicitly in this class, but you are welcome to explore it on your own
 import urllib.request
@@ -2348,12 +2359,12 @@ with zf.open(ca_name) as fh:
 
 babynames.head()
 
-# %% [markdown]
+# %% [markdown] id="71233ceb"
 # ## More Ways to Build a Filter
 #
 # A boolean expression can describe any condition we can write down, but a long list of alternatives gets verbose in a hurry. Suppose we want every row whose name is one of four we care about.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="5c4d156a"
 # Note: The parentheses surrounding the code make it possible to
 # break the code into multiple lines for readability. But this is
 # still a lot of code just to check for four names...
@@ -2365,7 +2376,7 @@ babynames.head()
 )
 
 
-# %% [markdown]
+# %% [markdown] id="7c067316"
 # <!-- tab-twins:begin babynames.filter((pl.col("Name") == "Bella") | -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -2435,17 +2446,17 @@ babynames.head()
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="7529b7bd"
 # Fortunately, Polars offers more concise ways of saying the same thing.
 #
 # The `.is_in()` method checks each value of a column against a sequence of values (a list, an array, or another `Series`). It returns the same 317 rows as the four-way condition above, in one line.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="316de856"
 names = ["Bella", "Alex", "Narges", "Lisa"]
 babynames.filter(pl.col("Name").is_in(names))
 
 
-# %% [markdown]
+# %% [markdown] id="4f8a4c1d"
 # <!-- tab-twins:begin babynames.filter(pl.col("Name").is_in(names)) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -2504,15 +2515,15 @@ babynames.filter(pl.col("Name").is_in(names))
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="f9d318d8"
 # String columns carry a whole family of methods under `.str`. `.str.starts_with()` checks the beginning of each string, so the filter below keeps every row whose name begins with the letter `N`.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="203de3da"
 # Extracting names that begin with the letter "N"
 babynames.filter(pl.col("Name").str.starts_with("N"))
 
 
-# %% [markdown]
+# %% [markdown] id="5abad0f9"
 # <!-- tab-twins:begin babynames.filter(pl.col("Name").str.starts_with("N")) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -2570,7 +2581,7 @@ babynames.filter(pl.col("Name").str.starts_with("N"))
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="c3dbab66"
 # ## Useful Utility Functions
 #
 # Polars contains an extensive library of functions that can help shorten the process of setting and getting information from its data structures. In the following section, we will give overviews of each of the main utility functions that will help us in Data 100.
@@ -2590,13 +2601,13 @@ babynames.filter(pl.col("Name").str.starts_with("N"))
 #
 # The array functions you encountered in [Data 8](https://www.data8.org/su23/reference/#array-functions-and-methods) live here as methods you call on a `Series` itself. Below, we pull out the number of babies named Yash in each year the name was recorded.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="7b5d42be"
 # Pull out the number of babies named Yash each year
 yash_counts = babynames.filter(pl.col("Name") == "Yash")["Count"]
 yash_counts
 
 
-# %% [markdown]
+# %% [markdown] id="9c418693"
 # <!-- tab-twins:begin yash_counts = babynames.filter(pl.col("Name") == "Yash")["Count"] -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -2668,40 +2679,40 @@ yash_counts
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="67230dc8"
 # The name appears in 28 rows of the table, and `.mean()` averages the counts across them.
 
-# %%
+# %% id="062887e7"
 # Average number of babies named Yash each year
 # Keep in mind that even if Python gives you 10 decimal places of precision,
 # you should think carefully about how much precision is meaningful!
 # In this case, one decimal place or even no decimal places would be appropriate.
 yash_counts.mean()
 
-# %%
+# %% id="7587fbc6"
 # Max number of babies named Yash born in any single year
 yash_counts.max()
 
-# %% [markdown]
+# %% [markdown] id="ad709a3c"
 # ### `.shape`, `.height`, and `.width`
 #
 # These attributes measure the "amount" of data stored in a `DataFrame`. Calling `.shape` returns a tuple containing the number of rows followed by the number of columns.
 #
 # Many functions strictly require the dimensions of their arguments to match. Asking the table for its dimensions is much faster than counting the items by hand.
 
-# %%
+# %% id="4f88d5c3"
 # Return the shape of the DataFrame, in the format (num_rows, num_columns)
 babynames.shape
 
-# %% [markdown]
+# %% [markdown] id="5dc4627d"
 # `.height` and `.width` report those same two numbers one at a time, so multiplying them gives the total number of values the table holds.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="b733b3ae"
 # The total number of entries in the object, equal to num_rows * num_columns
 babynames.height * babynames.width
 
 
-# %% [markdown]
+# %% [markdown] id="07eb4fb8"
 # <!-- tab-twins:begin babynames.height * babynames.width -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -2729,23 +2740,23 @@ babynames.height * babynames.width
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="18aadad6"
 # Calling `len` on a `DataFrame` gives its height, which is the number we want far more often than the other two.
 
-# %%
+# %% id="373e3071"
 # Return the number of rows in the DataFrame
 len(babynames)
 
-# %% [markdown]
+# %% [markdown] id="06159aa3"
 # ### `.describe()`
 #
 # If many statistics are required from a `DataFrame` (minimum value, maximum value, mean value, etc.), then `.describe()` [(documentation)](https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.describe.html) can be used to compute all of them at once.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="aab9ee2a"
 babynames.describe()
 
 
-# %% [markdown]
+# %% [markdown] id="7e4b4d80"
 # <!-- tab-twins:begin babynames.describe() -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -2794,18 +2805,18 @@ babynames.describe()
 # ::::
 # :::::
 # <!-- tab-twins:end -->
-# %% [markdown]
+# %% [markdown] id="9b6cfaaa"
 # The statistics come back as rows, labeled by the `statistic` column on the left, with one column of results per column of the original table. Text columns are described too: they report a count, a null count, and their alphabetical minimum and maximum, and carry `null` wherever a statistic makes no sense for them.
 #
 # A few things stand out. No value anywhere in the table is missing, since `null_count` is 0 across the board. The years run from 1910 to 2022. And the smallest `Count` in the dataset is 5, so names rarer than that never made it into the file.
 #
 # A `Series` can describe itself in the same way, reporting the statistics that suit its data type.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="0e889dc6"
 babynames["Sex"].describe()
 
 
-# %% [markdown]
+# %% [markdown] id="999f2d33"
 # <!-- tab-twins:begin babynames["Sex"].describe() -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -2846,35 +2857,35 @@ babynames["Sex"].describe()
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="1107addb"
 # ### `.sample()`
 #
 # As we will see later in the semester, random processes are at the heart of many data science techniques (for example, train-test splits, bootstrapping, and cross-validation). `.sample()` [(documentation)](https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.sample.html) lets us quickly select random rows of a `DataFrame`.
 #
 # By default, `.sample()` selects rows *without* replacement. Pass in the argument `with_replacement=True` to sample with replacement.
 
-# %%
+# %% id="30e8fcf4"
 # Randomly sample a row from the DataFrame
 babynames.sample()
 
-# %% [markdown]
+# %% [markdown] id="314acaaf"
 # Naturally, this can be chained with the extraction tools from earlier in the chapter.
 
-# %%
+# %% id="ddc580a7"
 # Sample 5 random rows, and keep all columns from position 2 onwards
 babynames.sample(5)[:, 2:]
 
-# %% [markdown]
+# %% [markdown] id="a3eabf64"
 # Wrapping a chain of methods in parentheses lets us spread it across several lines. Here we narrow the table to the year 2000, sample four of those rows with replacement, and keep the last three columns.
 
-# %%
+# %% id="52177a8f"
 result = (
     babynames.filter(pl.col("Year") == 2000)
     .sample(4, with_replacement=True)[:, 2:]
 )
 result
 
-# %% [markdown]
+# %% [markdown] id="49aa8d76"
 # ::: {tip}
 # Rerun any of the cells above and you'll get different rows each time. Pass `seed=` to `.sample()` when you need the same rows on every run, which is most of the time once other people have to reproduce your results.
 # :::
@@ -2883,57 +2894,20 @@ result
 #
 # The `Series.value_counts()` [(documentation)](https://docs.pola.rs/api/python/stable/reference/series/api/polars.Series.value_counts.html) method counts the number of occurrences of each unique value in a `Series`. In other words, it *counts* the number of times each unique *value* appears. This is often useful for determining the most or least common entries in a `Series`.
 
-# %% tags=["remove-input", "remove-output"]
+# %% id="a5df03e2"
 babynames["Sex"].value_counts()
 
 
-# %% [markdown]
-# <!-- tab-twins:begin babynames["Sex"].value_counts() -->
-# :::::{tab-set}
-# :::: {tab-item} Polars
-# :sync: pl
-# ```python
-# babynames["Sex"].value_counts()
-# ```
-#
-# ```text
-# shape: (2, 2)
-# ┌─────┬────────┐
-# │ Sex ┆ count  │
-# │ --- ┆ ---    │
-# │ str ┆ u32    │
-# ╞═════╪════════╡
-# │ M   ┆ 167891 │
-# │ F   ┆ 239537 │
-# └─────┴────────┘
-# ```
-# ::::
-#
-# :::: {tab-item} pandas
-# :sync: pd
-# ```python
-# babynames_pd["Sex"].value_counts()
-# ```
-#
-# ```text
-# Sex
-# F    239537
-# M    167891
-# Name: count, dtype: int64
-# ```
-# ::::
-# :::::
-# <!-- tab-twins:end -->
-# %% [markdown]
+# %% [markdown] id="4fb55ec5"
 # The result is a two-column `DataFrame`: the distinct values, in a column that keeps the name of the original `Series`, and their counts, in a column named `count`. Those rows come back in no particular order, so pass `sort=True` when the ranking is what you are after.
 #
 # Below, we count the number of times each name appears in the `"Name"` column, which tells us the name recorded in the most sex-and-year combinations.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="e62c94e4"
 babynames["Name"].value_counts(sort=True).head()
 
 
-# %% [markdown]
+# %% [markdown] id="37462ab0"
 # <!-- tab-twins:begin babynames["Name"].value_counts(sort=True).head() -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -2977,67 +2951,25 @@ babynames["Name"].value_counts(sort=True).head()
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="229f0677"
 # `Jean` leads with 223 rows: 223 separate combinations of a sex and a year in which at least five California babies were given that name.
 #
 # ### `.unique()`
 #
 # If we have a `Series` with many repeated values, then `.unique()` [(documentation)](https://docs.pola.rs/api/python/stable/reference/series/api/polars.Series.unique.html) can be used to identify only the *unique* values. Here we return every name in `babynames`.
 
-# %% tags=["remove-input", "remove-output"]
+# %% id="54331d26"
 babynames["Name"].unique()
 
 
-# %% [markdown]
-# <!-- tab-twins:begin babynames["Name"].unique() -->
-# :::::{tab-set}
-# :::: {tab-item} Polars
-# :sync: pl
-# ```python
-# babynames["Name"].unique()
-# ```
-#
-# ```text
-# shape: (20_437,)
-# Series: 'Name' [str]
-# [
-# 	"Posie"
-# 	"Adelita"
-# 	"Shannon"
-# 	"Willem"
-# 	"Donell"
-# 	…
-# 	"Naveah"
-# 	"Anselmo"
-# 	"Issack"
-# 	"Yaretsy"
-# 	"Alexiah"
-# ]
-# ```
-# ::::
-#
-# :::: {tab-item} pandas
-# :sync: pd
-# ```python
-# babynames_pd["Name"].unique()
-# ```
-#
-# ```text
-# array(['Mary', 'Helen', 'Dorothy', ..., 'Zae', 'Zai', 'Zayvier'],
-#       dtype=object)
-# ```
-# ::::
-# :::::
-# <!-- tab-twins:end -->
-
-# %% [markdown]
+# %% [markdown] id="fd89d871"
 # The 407,428 rows of the table hold 20,437 distinct names between them, a count that `.n_unique()` reports directly.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="5b2afa22"
 babynames["Name"].n_unique()
 
 
-# %% [markdown]
+# %% [markdown] id="c4c11597"
 # <!-- tab-twins:begin babynames["Name"].n_unique() -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -3063,14 +2995,14 @@ babynames["Name"].n_unique()
 # ::::
 # :::::
 # <!-- tab-twins:end -->
-# %% [markdown]
+# %% [markdown] id="534e88ce"
 # The unique values arrive in no particular order. When the order matters, `maintain_order=True` returns them in the order they first appear in the `Series`, which here means starting from the top of the table.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="d393da06"
 babynames["Name"].unique(maintain_order=True).head(5)
 
 
-# %% [markdown]
+# %% [markdown] id="75ee87f0"
 # <!-- tab-twins:begin babynames["Name"].unique(maintain_order=True).head(5) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -3105,14 +3037,14 @@ babynames["Name"].unique(maintain_order=True).head(5)
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="4280df73"
 # ## Adding, Removing, and Modifying Columns
 #
 # In many data science tasks, we may need to change the columns contained in our `DataFrame` in some way. Fortunately, the syntax to do so is fairly straightforward.
 #
 # To add a new column, hand `.with_columns()` [(documentation)](https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.with_columns.html) a `Series` or an expression under the name we want it to have. Writing that name as a keyword argument, as below, is the most direct way to say it.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="034644cb"
 # Create a Series of the length of each name
 babyname_lengths = babynames["Name"].str.len_chars()
 
@@ -3120,9 +3052,7 @@ babyname_lengths = babynames["Name"].str.len_chars()
 babynames = babynames.with_columns(name_lengths=babyname_lengths)
 babynames.head()
 
-
-
-# %% [markdown]
+# %% [markdown] id="3bd987a7"
 # <!-- tab-twins:begin babynames = babynames.with_columns(name_lengths=babyname_lengths) babynames.head() -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -3175,18 +3105,19 @@ babynames.head()
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="5221b1d0"
+#
 
-# %% [markdown]
+# %% [markdown] id="7cd9b0b5"
 # If we need to later modify an existing column, we pass the new values to `.with_columns()` under that column's existing name. Inside the expression, `pl.col("name_lengths")` refers to the column as it stands right now.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="0bab8732"
 # Modify the "name_lengths" column to be one less than its original value
 babynames = babynames.with_columns(name_lengths=pl.col("name_lengths") - 1)
 babynames.head()
 
 
-# %% [markdown]
+# %% [markdown] id="be6fdd2d"
 # <!-- tab-twins:begin babynames = babynames.with_columns(name_lengths=pl.col("name_lengths") - 1) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -3233,16 +3164,16 @@ babynames.head()
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="a8db4117"
 # We can rename a column using the `.rename()` method. It takes in a dictionary that maps old column names to their new ones.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="5226c1c0"
 # Rename "name_lengths" to "Length"
 babynames = babynames.rename({"name_lengths": "Length"})
 babynames.head()
 
 
-# %% [markdown]
+# %% [markdown] id="b2d58a6b"
 # <!-- tab-twins:begin babynames = babynames.rename({"name_lengths": "Length"}) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -3289,16 +3220,16 @@ babynames.head()
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="a4dbe726"
 # If we want to remove a column of a `DataFrame`, we can call the `.drop()` [(documentation)](https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.drop.html) method with the name of the column to remove. Dropping rows, by contrast, is a job for `filter`.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="00318c2d"
 # Drop our new "Length" column from the DataFrame
 babynames = babynames.drop("Length")
 babynames.head()
 
 
-# %% [markdown]
+# %% [markdown] id="6a6e637b"
 # <!-- tab-twins:begin babynames = babynames.drop("Length") -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -3345,12 +3276,12 @@ babynames.head()
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="875e6f28"
 # Notice that each of the cells above *re-assigned* `babynames` to the result of the call. This is a subtle but important point: table operations **do not occur in place**. `.with_columns()`, `.rename()`, and `.drop()` each build a new table and hand it back, leaving the table they were called on exactly as it was. The same is true of `filter`, `select`, `.sort()`, and `with_row_index`, which is why `elections` was unchanged earlier in the chapter.
 #
 # In other words, if we simply call:
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="d749a213"
 # This produces a new table without the column "Name"...
 babynames.drop("Name")
 
@@ -3359,7 +3290,7 @@ babynames.drop("Name")
 babynames.head()
 
 
-# %% [markdown]
+# %% [markdown] id="39c1f83d"
 # <!-- tab-twins:begin babynames.drop("Name") -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -3412,17 +3343,17 @@ babynames.head()
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="e8011ccd"
 # ## Sorting
 #
 # Ordering a `DataFrame` can be useful for isolating extreme values. For example, the first 5 rows of a table sorted in descending order (that is, from highest to lowest) hold the 5 largest values. `.sort()` [(documentation)](https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.sort.html) orders a `DataFrame` by a column we name. It sorts from lowest to highest unless we ask otherwise with `descending=True`.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="7291ec4a"
 # Sort the "Count" column from lowest to highest
 babynames.sort("Count").head()
 
 
-# %% [markdown]
+# %% [markdown] id="0c00ef04"
 # <!-- tab-twins:begin babynames.sort("Count").head() -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -3465,12 +3396,12 @@ babynames.sort("Count").head()
 # ::::
 # :::::
 # <!-- tab-twins:end -->
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="20d2d0ca"
 # Sort the "Count" column from highest to lowest
 babynames.sort("Count", descending=True).head()
 
 
-# %% [markdown]
+# %% [markdown] id="31182353"
 # <!-- tab-twins:begin babynames.sort("Count", descending=True).head() -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -3513,17 +3444,17 @@ babynames.sort("Count", descending=True).head()
 # ::::
 # :::::
 # <!-- tab-twins:end -->
-# %% [markdown]
+# %% [markdown] id="b88888a1"
 # There are a lot of Michaels in California: all five of the largest counts in the dataset belong to that name, topping out at 8,260 babies in 1957.
 #
 # A `Series` sorts the same way. There is no column to name, since a `Series` is a single column, and only its values come back in their new order.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="a382a073"
 # Sort the "Name" Series alphabetically
 babynames["Name"].sort().head(5)
 
 
-# %% [markdown]
+# %% [markdown] id="af753b10"
 # <!-- tab-twins:begin babynames["Name"].sort().head(5) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -3564,19 +3495,19 @@ babynames["Name"].sort().head(5)
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="81dc72e0"
 # ::: {warning}
 # `.sort()` places null values **first**, ahead of every real value, in both sort directions. A `.head()` or a positional slice taken straight after a sort will therefore pick up missing values and push out the rows you were after. Nothing about that is an error, so nothing announces it. Pass `nulls_last=True` whenever a sort feeds a `.head()`, a `.tail()`, or a slice, unless you already know the column holds no nulls — as is the case for both datasets in this chapter.
 # :::
 #
 # `babynames` has no missing values, so the small table below has one instead.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="9ed57619"
 demo = pl.DataFrame({"Name": ["Aaliyah", "Bao", "Cyrus"], "Count": [3, None, 1]})
 demo.sort("Count", descending=True)
 
 
-# %% [markdown]
+# %% [markdown] id="f8ad6158"
 # <!-- tab-twins:begin demo = pl.DataFrame( -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -3618,14 +3549,14 @@ demo.sort("Count", descending=True)
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="9384cac3"
 # Sorting from highest to lowest put the missing count at the top. `nulls_last=True` sends it to the bottom, where it stays out of the way of a `.head()`.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="82a35df6"
 demo.sort("Count", descending=True, nulls_last=True)
 
 
-# %% [markdown]
+# %% [markdown] id="05ce993a"
 # <!-- tab-twins:begin demo.sort("Count", descending=True, nulls_last=True) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -3664,7 +3595,7 @@ demo.sort("Count", descending=True, nulls_last=True)
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="f969ebb1"
 # ## Custom Sorts
 #
 # Now, let's try to solve a sorting problem using different approaches. Assume we want to find the longest baby names and sort our data accordingly.
@@ -3673,7 +3604,7 @@ demo.sort("Count", descending=True, nulls_last=True)
 #
 # One method to do this is to first start by creating a column that contains the lengths of the names.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="b03313db"
 # Create a Series of the length of each name
 babyname_lengths = babynames["Name"].str.len_chars()
 
@@ -3682,7 +3613,7 @@ babynames = babynames.with_columns(name_lengths=babyname_lengths)
 babynames.head(5)
 
 
-# %% [markdown]
+# %% [markdown] id="b5abf721"
 # <!-- tab-twins:begin babynames = babynames.with_columns(name_lengths=babyname_lengths) babynames.head(5) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -3735,16 +3666,16 @@ babynames.head(5)
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="dcaf47bf"
 # We can then sort the `DataFrame` by that column using `.sort()`:
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="13b0ee0c"
 # Sort by the temporary column
 babynames = babynames.sort(by="name_lengths", descending=True)
 babynames.head(5)
 
 
-# %% [markdown]
+# %% [markdown] id="20fb2d16"
 # <!-- tab-twins:begin babynames = babynames.sort(by="name_lengths", descending=True) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -3791,16 +3722,16 @@ babynames.head(5)
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="40df830b"
 # The longest names in the dataset run to 15 characters. Finally, we can drop the `name_lengths` column from `babynames` to prevent our table from getting cluttered.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="1af7c9a5"
 # Drop the "name_lengths" column
 babynames = babynames.drop("name_lengths")
 babynames.head(5)
 
 
-# %% [markdown]
+# %% [markdown] id="49af424f"
 # <!-- tab-twins:begin babynames = babynames.drop("name_lengths") -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -3847,16 +3778,16 @@ babynames.head(5)
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="edad1790"
 # ### Approach 2: Sorting on an Expression
 #
 # Another way to approach this is to hand `.sort()` an expression instead of a column name. The sort key is then computed on the way in, so there is no temporary column to create and no temporary column to drop.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="3b1138f3"
 babynames.sort(pl.col("Name").str.len_chars(), descending=True).head()
 
 
-# %% [markdown]
+# %% [markdown] id="0604482f"
 # <!-- tab-twins:begin babynames.sort(pl.col("Name").str.len_chars(), descending=True).head() -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -3901,14 +3832,14 @@ babynames.sort(pl.col("Name").str.len_chars(), descending=True).head()
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="022f7146"
 # ### Approach 3: Sorting with `map_elements`
 #
 # We can also use `map_elements` [(documentation)](https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.Expr.map_elements.html) if we want to sort by an arbitrarily defined Python function. Say we want to sort the `babynames` table by the number of `"dr"`s and `"ea"`s in each `"Name"`. We'll define the function `dr_ea_count` to help us out.
 #
 # `map_elements` hands each value of the column to that function, one value at a time, and collects the results. `return_dtype` tells Polars what type those results will have.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="7c7f19d6"
 # First, define a function to count the number of times
 # "dr" or "ea" appear in each name
 def dr_ea_count(string):
@@ -3924,7 +3855,7 @@ babynames = babynames.sort(by="dr_ea_count", descending=True)
 babynames.head()
 
 
-# %% [markdown]
+# %% [markdown] id="7e59d5ac"
 # <!-- tab-twins:begin def dr_ea_count(string): -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -3989,18 +3920,18 @@ babynames.head()
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="14eabcd4"
 # Because it runs Python code once per row, `map_elements` is much slower than the expression in Approach 2, which Polars evaluates on the whole column at once. Save it for the cases where nothing in the expression API will do the job.
 #
 # We can drop `dr_ea_count` once we're done using it to maintain a neat table.
 
-# %% tags=["remove-input", "remove-output"]
+# %% tags=["remove-input", "remove-output"] id="246743e0"
 # Drop the "dr_ea_count" column
 babynames = babynames.drop("dr_ea_count")
 babynames.head(5)
 
 
-# %% [markdown]
+# %% [markdown] id="3b353c48"
 # <!-- tab-twins:begin babynames = babynames.drop("dr_ea_count") -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -4047,7 +3978,7 @@ babynames.head(5)
 # :::::
 # <!-- tab-twins:end -->
 
-# %% [markdown]
+# %% [markdown] id="3096db81"
 # ## Parting Note
 #
 # The Polars library is enormous and contains many useful functions. Here is a link to its [documentation](https://docs.pola.rs/api/python/stable/reference/index.html). We certainly don't expect you to memorize each and every method of the library, and we will give you a reference sheet for exams.

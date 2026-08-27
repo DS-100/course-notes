@@ -119,7 +119,7 @@ canonicalize_county("St. John the Baptist")
 #
 # Chaining multiple `Series` methods in this manner eliminates the need to use the `map` function (as this code is vectorized).
 
-# %% id="533afe7f"
+# %% tags=["remove-input", "remove-output"] id="533afe7f"
 def canonicalize_county_series(county_series):
     return (
         county_series
@@ -138,6 +138,77 @@ county_and_state = county_and_state.with_columns(
     canonicalize_county_series(county_and_state['County']).alias('clean_county_polars')
 )
 display(county_and_pop), display(county_and_state);
+
+# %% [markdown]
+# <!-- tab-twins:begin 533afe7f -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# def canonicalize_county_series(county_series):
+#     return (
+#         county_series
+#             .str.to_lowercase()
+#             .str.replace_all(' ', '', literal=True)
+#             .str.replace_all('&', 'and', literal=True)
+#             .str.replace_all('.', '', literal=True)
+#             .str.replace_all('county', '', literal=True)
+#             .str.replace_all('parish', '', literal=True)
+#     )
+#
+# county_and_pop = county_and_pop.with_columns(
+#     canonicalize_county_series(county_and_pop['County']).alias('clean_county_polars')
+# )
+# county_and_state = county_and_state.with_columns(
+#     canonicalize_county_series(county_and_state['County']).alias('clean_county_polars')
+# )
+# display(county_and_pop), display(county_and_state);
+# ```
+#
+# ```text
+# shape: (4, 3)
+# ┌──────────────────────┬────────────┬─────────────────────┐
+# │ County               ┆ Population ┆ clean_county_polars │
+# │ ---                  ┆ ---        ┆ ---                 │
+# │ str                  ┆ i64        ┆ str                 │
+# ╞══════════════════════╪════════════╪═════════════════════╡
+# │ DeWitt               ┆ 16798      ┆ dewitt              │
+# │ Lac Qui Parle        ┆ 8067       ┆ lacquiparle         │
+# │ Lewis & Clark        ┆ 55716      ┆ lewisandclark       │
+# │ St. John the Baptist ┆ 43044      ┆ stjohnthebaptist    │
+# └──────────────────────┴────────────┴─────────────────────┘
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# def canonicalize_county_series(county_series):
+#     return (
+#         county_series
+#             .str.lower()
+#             .str.replace(' ', '')
+#             .str.replace('&', 'and')
+#             .str.replace('.', '')
+#             .str.replace('county', '')
+#             .str.replace('parish', '')
+#     )
+#
+# county_and_pop['clean_county_pandas'] = canonicalize_county_series(county_and_pop['County'])
+# county_and_state['clean_county_pandas'] = canonicalize_county_series(county_and_state['County'])
+# display(county_and_pop), display(county_and_state);
+# ```
+#
+# ```text
+#                  County  Population clean_county_pandas
+# 0                DeWitt       16798              dewitt
+# 1         Lac Qui Parle        8067         lacquiparle
+# 2         Lewis & Clark       55716       lewisandclark
+# 3  St. John the Baptist       43044    stjohnthebaptist
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="95a6eb76"
 # ### Extraction
@@ -391,9 +462,47 @@ html_data = pl.DataFrame(data)
 # %% id="e903a9b6"
 html_data
 
-# %% id="16323c05"
+# %% tags=["remove-input", "remove-output"] id="16323c05"
 pattern = r"<[^>]+>"
 html_data['HTML'].str.replace_all(pattern, '')
+
+# %% [markdown]
+# <!-- tab-twins:begin 16323c05 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# pattern = r"<[^>]+>"
+# html_data['HTML'].str.replace_all(pattern, '')
+# ```
+#
+# ```text
+# shape: (3,)
+# Series: 'HTML' [str]
+# [
+# 	"Moo"
+# 	"Link"
+# 	"Bold text"
+# ]
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# pattern = r"<[^>]+>"
+# html_data['HTML'].str.replace(pattern, '', regex=True)
+# ```
+#
+# ```text
+# 0          Moo
+# 1         Link
+# 2    Bold text
+# Name: HTML, dtype: object
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="b1205e59"
 # ### Extraction
@@ -425,17 +534,95 @@ ssn_data = pl.DataFrame(data)
 # %% id="d55a5f10"
 ssn_data
 
-# %% id="cb4897da"
+# %% tags=["remove-input", "remove-output"] id="cb4897da"
 ssn_data["SSN"].str.extract_all(pattern)
+
+# %% [markdown]
+# <!-- tab-twins:begin cb4897da -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# ssn_data["SSN"].str.extract_all(pattern)
+# ```
+#
+# ```text
+# shape: (4,)
+# Series: 'SSN' [list[str]]
+# [
+# 	["987-65-4321"]
+# 	[]
+# 	["123-45-6789", "321-45-6789"]
+# 	["999-99-9999"]
+# ]
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# ssn_data["SSN"].str.findall(pattern)
+# ```
+#
+# ```text
+# 0                 [987-65-4321]
+# 1                            []
+# 2    [123-45-6789, 321-45-6789]
+# 3                 [999-99-9999]
+# Name: SSN, dtype: object
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="8f3978b8"
 # Notice the column type: `list[str]`. Every row holds a *list* of the matches found in that string, so the row for `"forty"` is an empty list rather than a missing value.
 #
 # As you may expect, there are similar `polars` equivalents for other `re` functions as well. `Series.str.extract_groups` takes a pattern and returns a **struct** — one field per capture group, holding that group's first match. Naming the groups in the pattern names the fields, and `.struct.unnest()` spreads them into columns. You can see the difference in the outputs below:
 
-# %% id="188458d4"
+# %% tags=["remove-input", "remove-output"] id="188458d4"
 pattern_cg = r"(?<area>[0-9]{3})-(?<group>[0-9]{2})-(?<serial>[0-9]{4})"
 ssn_data["SSN"].str.extract_groups(pattern_cg)
+
+# %% [markdown]
+# <!-- tab-twins:begin 188458d4 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# pattern_cg = r"(?<area>[0-9]{3})-(?<group>[0-9]{2})-(?<serial>[0-9]{4})"
+# ssn_data["SSN"].str.extract_groups(pattern_cg)
+# ```
+#
+# ```text
+# shape: (4,)
+# Series: 'SSN' [struct[3]]
+# [
+# 	{"987","65","4321"}
+# 	{null,null,null}
+# 	{"123","45","6789"}
+# 	{"999","99","9999"}
+# ]
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# pattern_cg = r"([0-9]{3})-([0-9]{2})-([0-9]{4})"
+# ssn_data["SSN"].str.extract(pattern_cg)
+# ```
+#
+# ```text
+#      0    1     2
+# 0  987   65  4321
+# 1  NaN  NaN   NaN
+# 2  123   45  6789
+# 3  999   99  9999
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% id="1ba6f098"
 ssn_data["SSN"].str.extract_groups(pattern_cg).struct.unnest()

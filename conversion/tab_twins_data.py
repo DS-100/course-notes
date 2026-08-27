@@ -37,6 +37,25 @@ OUTPUT_CHURNS = {
     },
 }
 
+# Baseline-paired twins to leave off the page, by chapter and cell id.
+#
+# Pairing on cell id assumes the conversion changed how a cell is *spelled*, not what it *does*.
+# Where that assumption fails, the two panes sit side by side under one heading and assert an
+# equivalence that is false -- which no gate can see, because both halves are real, executed output
+# of real code.
+BASELINE_SKIP = {
+    "regex": {
+        # Polars: `extract_groups` -> each group's FIRST match, non-matching rows kept as null.
+        # pandas baseline: `extractall` -> EVERY match, non-matching rows dropped, MultiIndex.
+        # On this data the row for "forty" appears in one pane and not the other, and the second
+        # SSN on line 2 appears in one and not the other. The conversion deliberately moved this
+        # cell from all-matches to first-match, and the chapter teaches all-matches separately at
+        # `cb4897da` (`.str.extract_all`) -- so the honest pandas twin here is `str.extract`, which
+        # cell `188458d4` already shows. Two tabs, not three.
+        "1ba6f098",
+    },
+}
+
 TWINS = {
     "polars_1": {
         "prelude": _BABYNAMES_PRELUDE,

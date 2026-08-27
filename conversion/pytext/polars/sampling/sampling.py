@@ -228,12 +228,63 @@ import zipfile
 sns.set_theme(style='darkgrid', font_scale = 1.5,
               rc={'figure.figsize':(7,5)})
 
-# %% id="85fabb88"
+# %% tags=["remove-input", "remove-output"] id="85fabb88"
 with zipfile.ZipFile("data/1936_votes.zip", 'r') as z:
     with z.open("1936_votes.csv") as csv_file:
         votes = pl.read_csv(csv_file)
 
 votes.head()
+
+# %% [markdown]
+# <!-- tab-twins:begin 85fabb88 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# with zipfile.ZipFile("data/1936_votes.zip", 'r') as z:
+#     with z.open("1936_votes.csv") as csv_file:
+#         votes = pl.read_csv(csv_file)
+#
+# votes.head()
+# ```
+#
+# ```text
+# shape: (5, 1)
+# ┌───────────┐
+# │ voted_dem │
+# │ ---       │
+# │ i64       │
+# ╞═══════════╡
+# │ 1         │
+# │ 1         │
+# │ 0         │
+# │ 1         │
+# │ 1         │
+# └───────────┘
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# with zipfile.ZipFile("data/1936_votes.zip", 'r') as z:
+#     with z.open("1936_votes.csv") as csv_file:
+#         votes = pd.read_csv(csv_file)
+#
+# votes.head()
+# ```
+#
+# ```text
+#    voted_dem
+# 0          1
+# 1          1
+# 2          0
+# 3          1
+# 4          1
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="b7c53b8c"
 # How many votes were cast for either Roosevelt or Landon in 1936?
@@ -290,15 +341,64 @@ votes['voted_dem'].gather(idx).mean()
 #
 # This is no fluke! If we repeat this over and over, we tend to hover around 62.5%.
 
-# %% id="b37cf863"
+# %% tags=["remove-input", "remove-output"] id="b37cf863"
 for _ in range(10):
   idx = rng.integers(low=0, high=n_votes-1, size=1000)
   print(votes['voted_dem'].gather(idx).mean())
 
+# %% [markdown]
+# <!-- tab-twins:begin b37cf863 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# for _ in range(10):
+#   idx = rng.integers(low=0, high=n_votes-1, size=1000)
+#   print(votes['voted_dem'].gather(idx).mean())
+# ```
+#
+# ```text
+# 0.599
+# 0.622
+# 0.614
+# 0.582
+# 0.634
+# 0.618
+# 0.623
+# 0.634
+# 0.632
+# 0.641
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# for _ in range(10):
+#   idx = rng.integers(low=0, high=n_votes-1, size=1000)
+#   print(votes['voted_dem'].iloc[idx].mean())
+# ```
+#
+# ```text
+# 0.637
+# 0.626
+# 0.602
+# 0.621
+# 0.65
+# 0.633
+# 0.621
+# 0.618
+# 0.627
+# 0.622
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
+
 # %% [markdown] id="5577cbce"
 # Let's randomly generate 10,000 estimates:
 
-# %% id="ba3f14e4"
+# %% tags=["remove-input", "remove-output"] id="ba3f14e4"
 nrep = 10000   # number of simulations
 n = 1000       # size of our sample
 results = []   # list to store the sampling results
@@ -309,6 +409,51 @@ for i in range(0, nrep):
 
 # First 10 simulated sample proportions
 results[:10]
+
+# %% [markdown]
+# <!-- tab-twins:begin ba3f14e4 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# nrep = 10000   # number of simulations
+# n = 1000       # size of our sample
+# results = []   # list to store the sampling results
+#
+# for i in range(0, nrep):
+#     idx = rng.integers(low=0, high=n_votes, size=1000)
+#     results.append(votes['voted_dem'].gather(idx).mean())
+#
+# # First 10 simulated sample proportions
+# results[:10]
+# ```
+#
+# ```text
+# [0.602, 0.624, 0.633, 0.629, 0.624, 0.639, 0.62, 0.621, 0.626, 0.602]
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# nrep = 10000   # number of simulations
+# n = 1000       # size of our sample
+# results = []   # list to store the sampling results
+#
+# for i in range(0, nrep):
+#     idx = rng.integers(low=0, high=n_votes, size=1000)
+#     results.append(votes['voted_dem'].iloc[idx].mean())
+#
+# # First 10 simulated sample proportions
+# results[:10]
+# ```
+#
+# ```text
+# [0.646, 0.632, 0.627, 0.618, 0.619, 0.64, 0.645, 0.643, 0.636, 0.627]
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="5a11e10c"
 # Plotting our estimates with KDE:
@@ -350,9 +495,63 @@ p.set_xticks(np.arange(0.625 - 5 * 0.01, 0.625 + 5 * 0.01, 0.01));
 #
 # Note: Votes from parties other than Democratic and Republican are excluded from this dataset.
 
-# %% id="cc6b2fcf"
+# %% tags=["remove-input", "remove-output"] id="cc6b2fcf"
 poll = pl.read_csv('data/literary-digest-summary-data.csv')
 poll.head()
+
+# %% [markdown]
+# <!-- tab-twins:begin cc6b2fcf -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# poll = pl.read_csv('data/literary-digest-summary-data.csv')
+# poll.head()
+# ```
+#
+# ```text
+# shape: (5, 10)
+# ┌───────────┬───────────┬───────────┬───────────┬───┬───────────┬───────────┬───────────┬──────────┐
+# │ state     ┆ electoral ┆ actual_de ┆ actual_re ┆ … ┆ actual_de ┆ actual_re ┆ ld_dem_19 ┆ ld_rep_1 │
+# │ ---       ┆ _votes    ┆ m_1936    ┆ p_1936    ┆   ┆ m_1932    ┆ p_1932    ┆ 32        ┆ 932      │
+# │ str       ┆ ---       ┆ ---       ┆ ---       ┆   ┆ ---       ┆ ---       ┆ ---       ┆ ---      │
+# │           ┆ i64       ┆ i64       ┆ i64       ┆   ┆ i64       ┆ i64       ┆ i64       ┆ i64      │
+# ╞═══════════╪═══════════╪═══════════╪═══════════╪═══╪═══════════╪═══════════╪═══════════╪══════════╡
+# │ Alabama   ┆ 11        ┆ 238196    ┆ 35358     ┆ … ┆ 207910    ┆ 34675     ┆ 9828      ┆ 1589     │
+# │ Arizona   ┆ 3         ┆ 86722     ┆ 33433     ┆ … ┆ 79264     ┆ 36104     ┆ 2202      ┆ 1679     │
+# │ Arkansas  ┆ 9         ┆ 146765    ┆ 32049     ┆ … ┆ 189602    ┆ 28467     ┆ 7608      ┆ 1566     │
+# │ Californi ┆ 22        ┆ 1766836   ┆ 836431    ┆ … ┆ 1324157   ┆ 847902    ┆ 69720     ┆ 80525    │
+# │ a         ┆           ┆           ┆           ┆   ┆           ┆           ┆           ┆          │
+# │ Colorado  ┆ 6         ┆ 295021    ┆ 181267    ┆ … ┆ 250877    ┆ 189617    ┆ 9970      ┆ 13619    │
+# └───────────┴───────────┴───────────┴───────────┴───┴───────────┴───────────┴───────────┴──────────┘
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# poll = pd.read_csv('data/literary-digest-summary-data.csv')
+# poll.head()
+# ```
+#
+# ```text
+#         state  electoral_votes  actual_dem_1936  actual_rep_1936  ld_rep_1936  \
+# 0     Alabama               11           238196            35358         3060
+# 1     Arizona                3            86722            33433         2337
+# 2    Arkansas                9           146765            32049         2724
+# 3  California               22          1766836           836431        89516
+# 4    Colorado                6           295021           181267        15949
+#
+#    ld_dem_1936  actual_dem_1932  actual_rep_1932  ld_dem_1932  ld_rep_1932
+# 0        10082           207910            34675         9828         1589
+# 1         1975            79264            36104         2202         1679
+# 2         7608           189602            28467         7608         1566
+# 3        77245          1324157           847902        69720        80525
+# 4        10025           250877           189617         9970        13619
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="95758133"
 # As a sanity check, let's make sure we have the same number of votes as the first dataset (44,430,549):
@@ -415,12 +614,82 @@ poll['ld_dem_1936'].sum() / (poll['ld_dem_1936'].sum() + poll['ld_rep_1936'].sum
 #
 # - All we need to do is divide the actual vote counts by the corresponding number of respondents, for each combination of party and state.
 
-# %% id="270e983e"
+# %% tags=["remove-input", "remove-output"] id="270e983e"
 poll = poll.with_columns(
     (pl.col('actual_dem_1932') / pl.col('ld_dem_1932')).alias('dem_reweight_factor'),
     (pl.col('actual_rep_1932') / pl.col('ld_rep_1932')).alias('rep_reweight_factor'),
 )
 poll.tail()
+
+# %% [markdown]
+# <!-- tab-twins:begin 270e983e -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# poll = poll.with_columns(
+#     (pl.col('actual_dem_1932') / pl.col('ld_dem_1932')).alias('dem_reweight_factor'),
+#     (pl.col('actual_rep_1932') / pl.col('ld_rep_1932')).alias('rep_reweight_factor'),
+# )
+# poll.tail()
+# ```
+#
+# ```text
+# shape: (5, 12)
+# ┌───────────┬───────────┬───────────┬───────────┬───┬───────────┬───────────┬───────────┬──────────┐
+# │ state     ┆ electoral ┆ actual_de ┆ actual_re ┆ … ┆ ld_dem_19 ┆ ld_rep_19 ┆ dem_rewei ┆ rep_rewe │
+# │ ---       ┆ _votes    ┆ m_1936    ┆ p_1936    ┆   ┆ 32        ┆ 32        ┆ ght_facto ┆ ight_fac │
+# │ str       ┆ ---       ┆ ---       ┆ ---       ┆   ┆ ---       ┆ ---       ┆ r         ┆ tor      │
+# │           ┆ i64       ┆ i64       ┆ i64       ┆   ┆ i64       ┆ i64       ┆ ---       ┆ ---      │
+# │           ┆           ┆           ┆           ┆   ┆           ┆           ┆ f64       ┆ f64      │
+# ╞═══════════╪═══════════╪═══════════╪═══════════╪═══╪═══════════╪═══════════╪═══════════╪══════════╡
+# │ Virginia  ┆ 11        ┆ 234980    ┆ 98336     ┆ … ┆ 16194     ┆ 6817      ┆ 12.595961 ┆ 13.14903 │
+# │           ┆           ┆           ┆           ┆   ┆           ┆           ┆           ┆ 9        │
+# │ Washingto ┆ 8         ┆ 459579    ┆ 206892    ┆ … ┆ 16223     ┆ 17122     ┆ 21.775257 ┆ 12.18578 │
+# │ n         ┆           ┆           ┆           ┆   ┆           ┆           ┆           ┆ 4        │
+# │ West      ┆ 8         ┆ 502582    ┆ 325358    ┆ … ┆ 10818     ┆ 11338     ┆ 37.449066 ┆ 29.17013 │
+# │ Virginia  ┆           ┆           ┆           ┆   ┆           ┆           ┆           ┆ 6        │
+# │ Wisconsin ┆ 12        ┆ 802984    ┆ 380828    ┆ … ┆ 24073     ┆ 25731     ┆ 29.386034 ┆ 13.51447 │
+# │           ┆           ┆           ┆           ┆   ┆           ┆           ┆           ┆ 7        │
+# │ Wyoming   ┆ 3         ┆ 62624     ┆ 38739     ┆ … ┆ 1654      ┆ 2072      ┆ 32.871826 ┆ 19.10376 │
+# │           ┆           ┆           ┆           ┆   ┆           ┆           ┆           ┆ 4        │
+# └───────────┴───────────┴───────────┴───────────┴───┴───────────┴───────────┴───────────┴──────────┘
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# poll['dem_reweight_factor'] = poll['actual_dem_1932'] / poll['ld_dem_1932']
+# poll['rep_reweight_factor'] = poll['actual_rep_1932'] / poll['ld_rep_1932']
+# poll.tail()
+# ```
+#
+# ```text
+#             state  electoral_votes  actual_dem_1936  actual_rep_1936  \
+# 43       Virginia               11           234980            98336
+# 44     Washington                8           459579           206892
+# 45  West Virginia                8           502582           325358
+# 46      Wisconsin               12           802984           380828
+# 47        Wyoming                3            62624            38739
+#
+#     ld_rep_1936  ld_dem_1936  actual_dem_1932  actual_rep_1932  ld_dem_1932  \
+# 43        10223        16783           203979            89637        16194
+# 44        21370        15300           353260           208645        16223
+# 45        13660        10235           405124           330731        10818
+# 46        33796        20781           707410           347741        24073
+# 47         2526         1533            54370            39583         1654
+#
+#     ld_rep_1932  dem_reweight_factor  rep_reweight_factor
+# 43         6817            12.595961            13.149039
+# 44        17122            21.775257            12.185784
+# 45        11338            37.449066            29.170136
+# 46        25731            29.386034            13.514477
+# 47         2072            32.871826            19.103764
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="c79b1161"
 # Note that `dem_reweight_factor` is about 36 for Arizona.
@@ -437,12 +706,78 @@ poll.tail()
 #
 # - Again, note that this approach assumes over- and under-representation patterns are the same in the 1932 and 1936 polls!
 
-# %% id="2ffa1838"
+# %% tags=["remove-input", "remove-output"] id="2ffa1838"
 poll = poll.with_columns(
     (pl.col('ld_dem_1936') * pl.col('dem_reweight_factor')).round().alias('pred_dem_1936'),
     (pl.col('ld_rep_1936') * pl.col('rep_reweight_factor')).round().alias('pred_rep_1936'),
 )
 poll.head()
+
+# %% [markdown]
+# <!-- tab-twins:begin 2ffa1838 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# poll = poll.with_columns(
+#     (pl.col('ld_dem_1936') * pl.col('dem_reweight_factor')).round().alias('pred_dem_1936'),
+#     (pl.col('ld_rep_1936') * pl.col('rep_reweight_factor')).round().alias('pred_rep_1936'),
+# )
+# poll.head()
+# ```
+#
+# ```text
+# shape: (5, 14)
+# ┌───────────┬───────────┬───────────┬───────────┬───┬───────────┬───────────┬───────────┬──────────┐
+# │ state     ┆ electoral ┆ actual_de ┆ actual_re ┆ … ┆ dem_rewei ┆ rep_rewei ┆ pred_dem_ ┆ pred_rep │
+# │ ---       ┆ _votes    ┆ m_1936    ┆ p_1936    ┆   ┆ ght_facto ┆ ght_facto ┆ 1936      ┆ _1936    │
+# │ str       ┆ ---       ┆ ---       ┆ ---       ┆   ┆ r         ┆ r         ┆ ---       ┆ ---      │
+# │           ┆ i64       ┆ i64       ┆ i64       ┆   ┆ ---       ┆ ---       ┆ f64       ┆ f64      │
+# │           ┆           ┆           ┆           ┆   ┆ f64       ┆ f64       ┆           ┆          │
+# ╞═══════════╪═══════════╪═══════════╪═══════════╪═══╪═══════════╪═══════════╪═══════════╪══════════╡
+# │ Alabama   ┆ 11        ┆ 238196    ┆ 35358     ┆ … ┆ 21.154864 ┆ 21.821901 ┆ 213283.0  ┆ 66775.0  │
+# │ Arizona   ┆ 3         ┆ 86722     ┆ 33433     ┆ … ┆ 35.996367 ┆ 21.503276 ┆ 71093.0   ┆ 50253.0  │
+# │ Arkansas  ┆ 9         ┆ 146765    ┆ 32049     ┆ … ┆ 24.921399 ┆ 18.178161 ┆ 189602.0  ┆ 49517.0  │
+# │ Californi ┆ 22        ┆ 1766836   ┆ 836431    ┆ … ┆ 18.992499 ┆ 10.529674 ┆ 1.467076e ┆ 942574.0 │
+# │ a         ┆           ┆           ┆           ┆   ┆           ┆           ┆ 6         ┆          │
+# │ Colorado  ┆ 6         ┆ 295021    ┆ 181267    ┆ … ┆ 25.16319  ┆ 13.922975 ┆ 252261.0  ┆ 222058.0 │
+# └───────────┴───────────┴───────────┴───────────┴───┴───────────┴───────────┴───────────┴──────────┘
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# poll['pred_dem_1936'] = round(poll['ld_dem_1936'] * poll['dem_reweight_factor'])
+# poll['pred_rep_1936'] = round(poll['ld_rep_1936'] * poll['rep_reweight_factor'])
+# poll.head()
+# ```
+#
+# ```text
+#         state  electoral_votes  actual_dem_1936  actual_rep_1936  ld_rep_1936  \
+# 0     Alabama               11           238196            35358         3060
+# 1     Arizona                3            86722            33433         2337
+# 2    Arkansas                9           146765            32049         2724
+# 3  California               22          1766836           836431        89516
+# 4    Colorado                6           295021           181267        15949
+#
+#    ld_dem_1936  actual_dem_1932  actual_rep_1932  ld_dem_1932  ld_rep_1932  \
+# 0        10082           207910            34675         9828         1589
+# 1         1975            79264            36104         2202         1679
+# 2         7608           189602            28467         7608         1566
+# 3        77245          1324157           847902        69720        80525
+# 4        10025           250877           189617         9970        13619
+#
+#    dem_reweight_factor  rep_reweight_factor  pred_dem_1936  pred_rep_1936
+# 0            21.154864            21.821901       213283.0        66775.0
+# 1            35.996367            21.503276        71093.0        50253.0
+# 2            24.921399            18.178161       189602.0        49517.0
+# 3            18.992499            10.529674      1467076.0       942574.0
+# 4            25.163190            13.922975       252261.0       222058.0
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="315b72c0"
 # Finally, let's calculate the proportion of **predicted** votes that are allocated to Roosevelt in 1936.
@@ -467,7 +802,7 @@ poll['pred_dem_1936'].sum() / (poll['pred_dem_1936'].sum() + poll['pred_rep_1936
 #
 # - This exercise assumes that the total number of votes cast in 1932 would be the same in 1936, but the poll response rates and outreach might change between 1932 and 1936.
 
-# %% id="1df8f9d3"
+# %% tags=["remove-input", "remove-output"] id="1df8f9d3"
 poll = poll.with_columns(
     (pl.col('pred_dem_1936') + pl.col('pred_rep_1936')).alias('pred_total_1936'),
     (pl.col('actual_dem_1932') + pl.col('actual_rep_1932')).alias('actual_total_1932'),
@@ -476,13 +811,124 @@ poll = poll.with_columns(
 )
 poll.head()
 
-# %% id="a950633d"
+# %% [markdown]
+# <!-- tab-twins:begin 1df8f9d3 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# poll = poll.with_columns(
+#     (pl.col('pred_dem_1936') + pl.col('pred_rep_1936')).alias('pred_total_1936'),
+#     (pl.col('actual_dem_1932') + pl.col('actual_rep_1932')).alias('actual_total_1932'),
+# ).with_columns(
+#     (pl.col('actual_total_1932') / pl.col('pred_total_1936')).alias('correction_factor')
+# )
+# poll.head()
+# ```
+#
+# ```text
+# shape: (5, 17)
+# ┌───────────┬───────────┬───────────┬───────────┬───┬───────────┬───────────┬───────────┬──────────┐
+# │ state     ┆ electoral ┆ actual_de ┆ actual_re ┆ … ┆ pred_rep_ ┆ pred_tota ┆ actual_to ┆ correcti │
+# │ ---       ┆ _votes    ┆ m_1936    ┆ p_1936    ┆   ┆ 1936      ┆ l_1936    ┆ tal_1932  ┆ on_facto │
+# │ str       ┆ ---       ┆ ---       ┆ ---       ┆   ┆ ---       ┆ ---       ┆ ---       ┆ r        │
+# │           ┆ i64       ┆ i64       ┆ i64       ┆   ┆ f64       ┆ f64       ┆ i64       ┆ ---      │
+# │           ┆           ┆           ┆           ┆   ┆           ┆           ┆           ┆ f64      │
+# ╞═══════════╪═══════════╪═══════════╪═══════════╪═══╪═══════════╪═══════════╪═══════════╪══════════╡
+# │ Alabama   ┆ 11        ┆ 238196    ┆ 35358     ┆ … ┆ 66775.0   ┆ 280058.0  ┆ 242585    ┆ 0.866196 │
+# │ Arizona   ┆ 3         ┆ 86722     ┆ 33433     ┆ … ┆ 50253.0   ┆ 121346.0  ┆ 115368    ┆ 0.950736 │
+# │ Arkansas  ┆ 9         ┆ 146765    ┆ 32049     ┆ … ┆ 49517.0   ┆ 239119.0  ┆ 218069    ┆ 0.911969 │
+# │ Californi ┆ 22        ┆ 1766836   ┆ 836431    ┆ … ┆ 942574.0  ┆ 2.40965e6 ┆ 2172059   ┆ 0.9014   │
+# │ a         ┆           ┆           ┆           ┆   ┆           ┆           ┆           ┆          │
+# │ Colorado  ┆ 6         ┆ 295021    ┆ 181267    ┆ … ┆ 222058.0  ┆ 474319.0  ┆ 440494    ┆ 0.928687 │
+# └───────────┴───────────┴───────────┴───────────┴───┴───────────┴───────────┴───────────┴──────────┘
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# poll['pred_total_1936'] = poll['pred_dem_1936'] + poll['pred_rep_1936']
+# poll['actual_total_1932'] = poll['actual_dem_1932'] + poll['actual_rep_1932']
+# poll['correction_factor'] = poll['actual_total_1932'] / poll['pred_total_1936']
+# poll.head()
+# ```
+#
+# ```text
+#         state  electoral_votes  actual_dem_1936  actual_rep_1936  ld_rep_1936  \
+# 0     Alabama               11           238196            35358         3060
+# 1     Arizona                3            86722            33433         2337
+# 2    Arkansas                9           146765            32049         2724
+# 3  California               22          1766836           836431        89516
+# 4    Colorado                6           295021           181267        15949
+#
+#    ld_dem_1936  actual_dem_1932  actual_rep_1932  ld_dem_1932  ld_rep_1932  \
+# 0        10082           207910            34675         9828         1589
+# 1         1975            79264            36104         2202         1679
+# 2         7608           189602            28467         7608         1566
+# 3        77245          1324157           847902        69720        80525
+# 4        10025           250877           189617         9970        13619
+#
+#    dem_reweight_factor  rep_reweight_factor  pred_dem_1936  pred_rep_1936  \
+# 0            21.154864            21.821901       213283.0        66775.0
+# 1            35.996367            21.503276        71093.0        50253.0
+# 2            24.921399            18.178161       189602.0        49517.0
+# 3            18.992499            10.529674      1467076.0       942574.0
+# 4            25.163190            13.922975       252261.0       222058.0
+#
+#    pred_total_1936  actual_total_1932  correction_factor
+# 0         280058.0             242585           0.866196
+# 1         121346.0             115368           0.950736
+# 2         239119.0             218069           0.911969
+# 3        2409650.0            2172059           0.901400
+# 4         474319.0             440494           0.928687
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
+
+# %% tags=["remove-input", "remove-output"] id="a950633d"
 poll = poll.with_columns(
     (pl.col('pred_dem_1936') * pl.col('correction_factor')).alias('pred_dem_1936_corrected'),
     (pl.col('pred_rep_1936') * pl.col('correction_factor')).alias('pred_rep_1936_corrected'),
 )
 
 poll['pred_dem_1936_corrected'].sum() / (poll['pred_dem_1936_corrected'].sum() + poll['pred_rep_1936_corrected'].sum())
+
+# %% [markdown]
+# <!-- tab-twins:begin a950633d -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# poll = poll.with_columns(
+#     (pl.col('pred_dem_1936') * pl.col('correction_factor')).alias('pred_dem_1936_corrected'),
+#     (pl.col('pred_rep_1936') * pl.col('correction_factor')).alias('pred_rep_1936_corrected'),
+# )
+#
+# poll['pred_dem_1936_corrected'].sum() / (poll['pred_dem_1936_corrected'].sum() + poll['pred_rep_1936_corrected'].sum())
+# ```
+#
+# ```text
+# 0.5419440974611632
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# poll['pred_dem_1936_corrected'] = poll['pred_dem_1936'] * poll['correction_factor']
+# poll['pred_rep_1936_corrected'] = poll['pred_rep_1936'] * poll['correction_factor']
+#
+# poll['pred_dem_1936_corrected'].sum() / (poll['pred_dem_1936_corrected'].sum() + poll['pred_rep_1936_corrected'].sum())
+# ```
+#
+# ```text
+# 0.5419440974611633
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="f3c26261"
 # Looks like a pretty similar prediction for Roosevelt of 54%.
@@ -504,7 +950,7 @@ print(poll['pred_dem_1936_corrected'].sum() + poll['pred_rep_1936_corrected'].su
 #
 # - To do this, we allocate **all** of the electoral votes in each state to the candidate with the most predicted votes in that state, and then sum up the total number of electoral votes allocated to each candidate across states.
 
-# %% id="a4c9e44f"
+# %% tags=["remove-input", "remove-output"] id="a4c9e44f"
 poll = poll.with_columns((pl.col('pred_dem_1936') > pl.col('pred_rep_1936')).alias('dem_wins'))
 
 print('Total predicted Roosevelt electoral votes:')
@@ -512,6 +958,51 @@ print(( poll['dem_wins'] * poll['electoral_votes'] ).sum())
 
 print('Total predicted Landon electoral votes:')
 print(( (~poll['dem_wins']) * poll['electoral_votes'] ).sum())
+
+# %% [markdown]
+# <!-- tab-twins:begin a4c9e44f -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# poll = poll.with_columns((pl.col('pred_dem_1936') > pl.col('pred_rep_1936')).alias('dem_wins'))
+#
+# print('Total predicted Roosevelt electoral votes:')
+# print(( poll['dem_wins'] * poll['electoral_votes'] ).sum())
+#
+# print('Total predicted Landon electoral votes:')
+# print(( (~poll['dem_wins']) * poll['electoral_votes'] ).sum())
+# ```
+#
+# ```text
+# Total predicted Roosevelt electoral votes:
+# 380
+# Total predicted Landon electoral votes:
+# 151
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# poll['dem_wins'] = poll['pred_dem_1936'] > poll['pred_rep_1936']
+#
+# print('Total predicted Roosevelt electoral votes:')
+# print(( poll['dem_wins'] * poll['electoral_votes'] ).sum())
+#
+# print('Total predicted Landon electoral votes:')
+# print(( (1-poll['dem_wins']) * poll['electoral_votes'] ).sum())
+# ```
+#
+# ```text
+# Total predicted Roosevelt electoral votes:
+# 380
+# Total predicted Landon electoral votes:
+# 151
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="d0685679"
 # We (correctly) predict a Roosevelt landslide in the electoral college!

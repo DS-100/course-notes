@@ -58,9 +58,69 @@ import seaborn as sns
 # ```
 # ````
 
-# %% tags=["remove-input"] id="63aeae39"
+# %% tags=["remove-input", "remove-output"] id="63aeae39"
 mpg = pl.from_pandas(sns.load_dataset("mpg")).drop_nulls()
 mpg.head()
+
+# %% [markdown]
+# <!-- tab-twins:begin 63aeae39 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# mpg = pl.from_pandas(sns.load_dataset("mpg")).drop_nulls()
+# mpg.head()
+# ```
+#
+# ```text
+# shape: (5, 9)
+# ┌──────┬───────────┬─────────────┬────────────┬───┬─────────────┬────────────┬────────┬────────────┐
+# │ mpg  ┆ cylinders ┆ displacemen ┆ horsepower ┆ … ┆ acceleratio ┆ model_year ┆ origin ┆ name       │
+# │ ---  ┆ ---       ┆ t           ┆ ---        ┆   ┆ n           ┆ ---        ┆ ---    ┆ ---        │
+# │ f64  ┆ i64       ┆ ---         ┆ f64        ┆   ┆ ---         ┆ i64        ┆ str    ┆ str        │
+# │      ┆           ┆ f64         ┆            ┆   ┆ f64         ┆            ┆        ┆            │
+# ╞══════╪═══════════╪═════════════╪════════════╪═══╪═════════════╪════════════╪════════╪════════════╡
+# │ 18.0 ┆ 8         ┆ 307.0       ┆ 130.0      ┆ … ┆ 12.0        ┆ 70         ┆ usa    ┆ chevrolet  │
+# │      ┆           ┆             ┆            ┆   ┆             ┆            ┆        ┆ chevelle   │
+# │      ┆           ┆             ┆            ┆   ┆             ┆            ┆        ┆ malibu     │
+# │ 15.0 ┆ 8         ┆ 350.0       ┆ 165.0      ┆ … ┆ 11.5        ┆ 70         ┆ usa    ┆ buick      │
+# │      ┆           ┆             ┆            ┆   ┆             ┆            ┆        ┆ skylark    │
+# │      ┆           ┆             ┆            ┆   ┆             ┆            ┆        ┆ 320        │
+# │ 18.0 ┆ 8         ┆ 318.0       ┆ 150.0      ┆ … ┆ 11.0        ┆ 70         ┆ usa    ┆ plymouth   │
+# │      ┆           ┆             ┆            ┆   ┆             ┆            ┆        ┆ satellite  │
+# │ 16.0 ┆ 8         ┆ 304.0       ┆ 150.0      ┆ … ┆ 12.0        ┆ 70         ┆ usa    ┆ amc rebel  │
+# │      ┆           ┆             ┆            ┆   ┆             ┆            ┆        ┆ sst        │
+# │ 17.0 ┆ 8         ┆ 302.0       ┆ 140.0      ┆ … ┆ 10.5        ┆ 70         ┆ usa    ┆ ford       │
+# │      ┆           ┆             ┆            ┆   ┆             ┆            ┆        ┆ torino     │
+# └──────┴───────────┴─────────────┴────────────┴───┴─────────────┴────────────┴────────┴────────────┘
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# mpg = sns.load_dataset("mpg").dropna()
+# mpg.head()
+# ```
+#
+# ```text
+#     mpg  cylinders  displacement  horsepower  weight  acceleration  \
+# 0  18.0          8         307.0       130.0    3504          12.0
+# 1  15.0          8         350.0       165.0    3693          11.5
+# 2  18.0          8         318.0       150.0    3436          11.0
+# 3  16.0          8         304.0       150.0    3433          12.0
+# 4  17.0          8         302.0       140.0    3449          10.5
+#
+#    model_year origin                       name
+# 0          70    usa  chevrolet chevelle malibu
+# 1          70    usa          buick skylark 320
+# 2          70    usa         plymouth satellite
+# 3          70    usa              amc rebel sst
+# 4          70    usa                ford torino
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="fa8ade7e"
 # We can plot one feature as a histogram to see its distribution. Since we only plot one feature, we consider this a 1-dimensional plot.
@@ -519,7 +579,7 @@ fig.update_layout(coloraxis_showscale=False)
 # ```
 # ````
 
-# %% tags=["remove-input"] id="6844db4c"
+# %% tags=["remove-input", "remove-output"] id="6844db4c"
 import polars as pl
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -533,6 +593,73 @@ sns.set()
 
 rectangle = pl.read_csv("data/rectangle_data.csv")
 rectangle.head(5)
+
+# %% [markdown]
+# <!-- tab-twins:begin 6844db4c -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# import polars as pl
+# import seaborn as sns
+# import matplotlib.pyplot as plt
+# import numpy as np
+#
+# np.random.seed(23)  # kallisti
+#
+# plt.rcParams["figure.figsize"] = (4, 4)
+# plt.rcParams["figure.dpi"] = 150
+# sns.set()
+#
+# rectangle = pl.read_csv("data/rectangle_data.csv")
+# rectangle.head(5)
+# ```
+#
+# ```text
+# shape: (5, 4)
+# ┌───────┬────────┬──────┬───────────┐
+# │ width ┆ height ┆ area ┆ perimeter │
+# │ ---   ┆ ---    ┆ ---  ┆ ---       │
+# │ i64   ┆ i64    ┆ i64  ┆ i64       │
+# ╞═══════╪════════╪══════╪═══════════╡
+# │ 8     ┆ 6      ┆ 48   ┆ 28        │
+# │ 2     ┆ 4      ┆ 8    ┆ 12        │
+# │ 1     ┆ 3      ┆ 3    ┆ 8         │
+# │ 9     ┆ 3      ┆ 27   ┆ 24        │
+# │ 9     ┆ 8      ┆ 72   ┆ 34        │
+# └───────┴────────┴──────┴───────────┘
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# import pandas as pd
+# import seaborn as sns
+# import matplotlib.pyplot as plt
+# import numpy as np
+#
+# np.random.seed(23)  # kallisti
+#
+# plt.rcParams["figure.figsize"] = (4, 4)
+# plt.rcParams["figure.dpi"] = 150
+# sns.set()
+#
+# rectangle = pd.read_csv("data/rectangle_data.csv")
+# rectangle.head(5)
+# ```
+#
+# ```text
+#    width  height  area  perimeter
+# 0      8       6    48         28
+# 1      2       4     8         12
+# 2      1       3     3          8
+# 3      9       3    27         24
+# 4      9       8    72         34
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="fb3bf1d3"
 # In `NumPy`, the SVD decomposition function can be called with `np.linalg.svd` ([documentation](https://numpy.org/doc/stable/reference/generated/numpy.linalg.svd.html)). There are multiple versions of SVD; to get the version that we will follow, we need to set the `full_matrices` parameter to `False`.
@@ -549,8 +676,51 @@ U.shape
 # %% [markdown] id="0f3ec1be"
 # The first 5 rows of `U` are shown below.
 
-# %% id="a4377823"
+# %% tags=["remove-input", "remove-output"] id="a4377823"
 pl.DataFrame(U).head(5)
+
+# %% [markdown]
+# <!-- tab-twins:begin a4377823 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# pl.DataFrame(U).head(5)
+# ```
+#
+# ```text
+# shape: (5, 4)
+# ┌───────────┬───────────┬───────────┬───────────┐
+# │ column_0  ┆ column_1  ┆ column_2  ┆ column_3  │
+# │ ---       ┆ ---       ┆ ---       ┆ ---       │
+# │ f64       ┆ f64       ┆ f64       ┆ f64       │
+# ╞═══════════╪═══════════╪═══════════╪═══════════╡
+# │ -0.155151 ┆ 0.06483   ┆ -0.029935 ┆ 0.894121  │
+# │ -0.03837  ┆ -0.089155 ┆ 0.062019  ┆ -0.353004 │
+# │ -0.020357 ┆ -0.081138 ┆ 0.058997  ┆ 0.013634  │
+# │ -0.101519 ┆ -0.076203 ┆ -0.14816  ┆ 0.048877  │
+# │ -0.218973 ┆ 0.206423  ┆ 0.007274  ┆ -0.035264 │
+# └───────────┴───────────┴───────────┴───────────┘
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# pd.DataFrame(U).head(5)
+# ```
+#
+# ```text
+#           0         1         2         3
+# 0 -0.155151  0.064830 -0.029935  0.967868
+# 1 -0.038370 -0.089155  0.062019 -0.151231
+# 2 -0.020357 -0.081138  0.058997  0.003355
+# 3 -0.101519 -0.076203 -0.148160  0.006977
+# 4 -0.218973  0.206423  0.007274 -0.042254
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="def45b95"
 # $S$ is a little different in `NumPy`. Since the only useful values in the diagonal matrix $S$ are the singular values on the diagonal axis, only those values are returned and they are stored in an array.
@@ -579,14 +749,98 @@ Sm
 # %% id="de755df9"
 Vt.shape
 
-# %% id="f5849357"
+# %% tags=["remove-input", "remove-output"] id="f5849357"
 pl.DataFrame(Vt)
+
+# %% [markdown]
+# <!-- tab-twins:begin f5849357 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# pl.DataFrame(Vt)
+# ```
+#
+# ```text
+# shape: (4, 4)
+# ┌───────────┬───────────┬─────────────┬───────────┐
+# │ column_0  ┆ column_1  ┆ column_2    ┆ column_3  │
+# │ ---       ┆ ---       ┆ ---         ┆ ---       │
+# │ f64       ┆ f64       ┆ f64         ┆ f64       │
+# ╞═══════════╪═══════════╪═════════════╪═══════════╡
+# │ -0.146436 ┆ -0.129942 ┆ -0.81002    ┆ -0.552756 │
+# │ -0.192736 ┆ -0.189128 ┆ 0.586348    ┆ -0.763727 │
+# │ -0.704957 ┆ 0.709155  ┆ 0.007952    ┆ 0.008396  │
+# │ -0.666667 ┆ -0.666667 ┆ -5.2721e-17 ┆ 0.333333  │
+# └───────────┴───────────┴─────────────┴───────────┘
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# pd.DataFrame(Vt)
+# ```
+#
+# ```text
+#           0         1             2         3
+# 0 -0.146436 -0.129942 -8.100201e-01 -0.552756
+# 1 -0.192736 -0.189128  5.863482e-01 -0.763727
+# 2 -0.704957  0.709155  7.951614e-03  0.008396
+# 3 -0.666667 -0.666667 -8.701245e-17  0.333333
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="ef97bd07"
 # To check that this SVD is a valid decomposition, we can reverse it and see if it matches our original table (it does, yay!).
 
-# %% id="39859318"
+# %% tags=["remove-input", "remove-output"] id="39859318"
 pl.DataFrame(U @ Sm @ Vt).head(5)
+
+# %% [markdown]
+# <!-- tab-twins:begin 39859318 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# pl.DataFrame(U @ Sm @ Vt).head(5)
+# ```
+#
+# ```text
+# shape: (5, 4)
+# ┌──────────┬──────────┬──────────┬──────────┐
+# │ column_0 ┆ column_1 ┆ column_2 ┆ column_3 │
+# │ ---      ┆ ---      ┆ ---      ┆ ---      │
+# │ f64      ┆ f64      ┆ f64      ┆ f64      │
+# ╞══════════╪══════════╪══════════╪══════════╡
+# │ 8.0      ┆ 6.0      ┆ 48.0     ┆ 28.0     │
+# │ 2.0      ┆ 4.0      ┆ 8.0      ┆ 12.0     │
+# │ 1.0      ┆ 3.0      ┆ 3.0      ┆ 8.0      │
+# │ 9.0      ┆ 3.0      ┆ 27.0     ┆ 24.0     │
+# │ 9.0      ┆ 8.0      ┆ 72.0     ┆ 34.0     │
+# └──────────┴──────────┴──────────┴──────────┘
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# pd.DataFrame(U @ Sm @ Vt).head(5)
+# ```
+#
+# ```text
+#      0    1     2     3
+# 0  8.0  6.0  48.0  28.0
+# 1  2.0  4.0   8.0  12.0
+# 2  1.0  3.0   3.0   8.0
+# 3  9.0  3.0  27.0  24.0
+# 4  9.0  8.0  72.0  34.0
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="eeb91aef"
 # ## [Optional for Spring 26] PCA with SVD
@@ -696,9 +950,54 @@ pl.DataFrame(U @ Sm @ Vt).head(5)
 #
 # 1. Center $X$ by subtracting the mean from each column. `pl.all().mean()` produces one mean per column.
 
-# %% id="30d7edc2"
+# %% tags=["remove-input", "remove-output"] id="30d7edc2"
 centered_df = rectangle.select(pl.all() - pl.all().mean())
 centered_df.head(5)
+
+# %% [markdown]
+# <!-- tab-twins:begin 30d7edc2 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# centered_df = rectangle.select(pl.all() - pl.all().mean())
+# centered_df.head(5)
+# ```
+#
+# ```text
+# shape: (5, 4)
+# ┌───────┬────────┬────────┬───────────┐
+# │ width ┆ height ┆ area   ┆ perimeter │
+# │ ---   ┆ ---    ┆ ---    ┆ ---       │
+# │ f64   ┆ f64    ┆ f64    ┆ f64       │
+# ╞═══════╪════════╪════════╪═══════════╡
+# │ 2.97  ┆ 1.35   ┆ 24.78  ┆ 8.64      │
+# │ -3.03 ┆ -0.65  ┆ -15.22 ┆ -7.36     │
+# │ -4.03 ┆ -1.65  ┆ -20.22 ┆ -11.36    │
+# │ 3.97  ┆ -1.65  ┆ 3.78   ┆ 4.64      │
+# │ 3.97  ┆ 3.35   ┆ 48.78  ┆ 14.64     │
+# └───────┴────────┴────────┴───────────┘
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# centered_df = rectangle - np.mean(rectangle, axis=0)
+# centered_df.head(5)
+# ```
+#
+# ```text
+#    width  height   area  perimeter
+# 0   2.97    1.35  24.78       8.64
+# 1  -3.03   -0.65 -15.22      -7.36
+# 2  -4.03   -1.65 -20.22     -11.36
+# 3   3.97   -1.65   3.78       4.64
+# 4   3.97    3.35  48.78      14.64
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="8b4c1f07"
 # 2. Get the Singular Value Decomposition of the centered $X$: $U$, $S$ and $V^T$
@@ -710,9 +1009,52 @@ Sm = pl.DataFrame(np.diag(np.round(S, 1)))
 # %% [markdown] id="dc658fd5"
 # 3. Take the first $k$ columns of $V$. These are the first $k$ principal components of $X$.
 
-# %% id="2914fede"
+# %% tags=["remove-input", "remove-output"] id="2914fede"
 two_PCs = Vt.T[:, :2]
 pl.DataFrame(two_PCs).head()
+
+# %% [markdown]
+# <!-- tab-twins:begin 2914fede -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# two_PCs = Vt.T[:, :2]
+# pl.DataFrame(two_PCs).head()
+# ```
+#
+# ```text
+# shape: (4, 2)
+# ┌───────────┬───────────┐
+# │ column_0  ┆ column_1  │
+# │ ---       ┆ ---       │
+# │ f64       ┆ f64       │
+# ╞═══════════╪═══════════╡
+# │ -0.098631 ┆ 0.66846   │
+# │ -0.072956 ┆ -0.374186 │
+# │ -0.931226 ┆ -0.258375 │
+# │ -0.343173 ┆ 0.588548  │
+# └───────────┴───────────┘
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# two_PCs = Vt.T[:, :2]
+# pd.DataFrame(two_PCs).head()
+# ```
+#
+# ```text
+#           0         1
+# 0 -0.098631  0.668460
+# 1 -0.072956 -0.374186
+# 2 -0.931226 -0.258375
+# 3 -0.343173  0.588548
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="bef2c810"
 # ## Centering Data and Computing Variance
@@ -795,7 +1137,7 @@ pl.DataFrame(two_PCs).head()
 # ```
 # ````
 
-# %% tags=["remove-input"] id="66688b1c"
+# %% tags=["remove-input", "remove-output"] id="66688b1c"
 import polars as pl
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -810,6 +1152,72 @@ votes = pl.read_csv("data/votes.csv")
 votes = votes.cast({"roll call": pl.String})
 votes.head()
 
+# %% [markdown]
+# <!-- tab-twins:begin 66688b1c -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# import polars as pl
+# import seaborn as sns
+# import matplotlib.pyplot as plt
+# import numpy as np
+# import yaml
+# from datetime import datetime
+# import plotly.express as px
+# import plotly.graph_objects as go
+#
+#
+# votes = pl.read_csv("data/votes.csv")
+# votes = votes.cast({"roll call": pl.String})
+# votes.head()
+# ```
+#
+# ```text
+# shape: (5, 5)
+# ┌─────────┬─────────┬───────────┬─────────┬────────────┐
+# │ chamber ┆ session ┆ roll call ┆ member  ┆ vote       │
+# │ ---     ┆ ---     ┆ ---       ┆ ---     ┆ ---        │
+# │ str     ┆ i64     ┆ str       ┆ str     ┆ str        │
+# ╞═════════╪═════════╪═══════════╪═════════╪════════════╡
+# │ House   ┆ 1       ┆ 555       ┆ A000374 ┆ Not Voting │
+# │ House   ┆ 1       ┆ 555       ┆ A000370 ┆ Yes        │
+# │ House   ┆ 1       ┆ 555       ┆ A000055 ┆ No         │
+# │ House   ┆ 1       ┆ 555       ┆ A000371 ┆ Yes        │
+# │ House   ┆ 1       ┆ 555       ┆ A000372 ┆ No         │
+# └─────────┴─────────┴───────────┴─────────┴────────────┘
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# import pandas as pd
+# import seaborn as sns
+# import matplotlib.pyplot as plt
+# import numpy as np
+# import yaml
+# from datetime import datetime
+# import plotly.express as px
+# import plotly.graph_objects as go
+#
+#
+# votes = pd.read_csv("data/votes.csv")
+# votes = votes.astype({"roll call": str})
+# votes.head()
+# ```
+#
+# ```text
+#   chamber  session roll call   member        vote
+# 0   House        1       555  A000374  Not Voting
+# 1   House        1       555  A000370         Yes
+# 2   House        1       555  A000055          No
+# 3   House        1       555  A000371         Yes
+# 4   House        1       555  A000372          No
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="e409e234"
 # Suppose we pivot this table to group each legislator and their voting pattern across every (roll call) vote in this month. We mark 1 if the legislator voted Yes ("yea"), and 0 otherwise ("No", "nay", no vote, speaker, etc.). Each legislator becomes one row, labelled by the `member` column, and each roll call becomes a column of 0s and 1s.
@@ -831,7 +1239,7 @@ votes.head()
 # ```
 # ````
 
-# %% tags=["remove-input"] id="5880e99c"
+# %% tags=["remove-input", "remove-output"] id="5880e99c"
 # 1 when the member's recorded vote on that roll call is a Yes
 was_yes = (pl.element().first() == "Yes").cast(pl.Int64)
 
@@ -844,6 +1252,52 @@ vote_pivot = votes.pivot(
 ).fill_null(0).sort("member")  # row order fixes the sign of each principal component
 print(vote_pivot.shape)
 vote_pivot.head()
+
+# %% [markdown]
+# <!-- tab-twins:begin 5880e99c -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# # 1 when the member's recorded vote on that roll call is a Yes
+# was_yes = (pl.element().first() == "Yes").cast(pl.Int64)
+#
+# vote_pivot = votes.pivot(
+#     on="roll call",
+#     index="member",
+#     values="vote",
+#     aggregate_function=was_yes,
+#     sort_columns=True,
+# ).fill_null(0).sort("member")  # row order fixes the sign of each principal component
+# print(vote_pivot.shape)
+# vote_pivot.head()
+# ```
+#
+# ```text
+# (441, 42)
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# def was_yes(s):
+#     return 1 if s.iloc[0] == "Yes" else 0
+#
+#
+# vote_pivot = votes.pivot_table(
+#     index="member", columns="roll call", values="vote", aggfunc=was_yes, fill_value=0
+# )
+# print(vote_pivot.shape)
+# vote_pivot.head()
+# ```
+#
+# ```text
+# (441, 41)
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="497a2b04"
 # **Do legislators' roll call votes show a relationship with their political party?**
@@ -1527,7 +1981,7 @@ def load_data():
 # ```
 # ````
 
-# %% tags=["remove-input"] id="cef56efa"
+# %% tags=["remove-input", "remove-output"] id="cef56efa"
 class_names = [
     "T-shirt/top",
     "Trouser",
@@ -1562,6 +2016,106 @@ images = pl.DataFrame(
     }
 )
 
+# %% [markdown]
+# <!-- tab-twins:begin cef56efa -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# class_names = [
+#     "T-shirt/top",
+#     "Trouser",
+#     "Pullover",
+#     "Dress",
+#     "Coat",
+#     "Sandal",
+#     "Shirt",
+#     "Sneaker",
+#     "Bag",
+#     "Ankle boot",
+# ]
+# class_dict = {i: class_name for i, class_name in enumerate(class_names)}
+#
+# (train_images, train_labels), (test_images, test_labels) = load_data()
+# print("Training images", train_images.shape)
+# print("Test images", test_images.shape)
+#
+# rng = np.random.default_rng(42)
+# n = 5000
+# sample_idx = rng.choice(np.arange(len(train_images)), size=n, replace=False)
+#
+# # Invert and normalize the images so they look better
+# img_mat = -1 * np.asarray(train_images[sample_idx], dtype=np.int16)
+# img_mat = (img_mat - img_mat.min()) / (img_mat.max() - img_mat.min())
+#
+# images = pl.DataFrame(
+#     {
+#         "images": img_mat,
+#         "labels": train_labels[sample_idx],
+#         "class": [class_dict[x] for x in train_labels[sample_idx]],
+#     }
+# )
+# ```
+#
+# ```text
+# Using cached version that was downloaded (UTC): Sun Aug 16 22:33:59 2026
+# Using cached version that was downloaded (UTC): Sun Aug 16 22:33:59 2026
+# Using cached version that was downloaded (UTC): Sun Aug 16 22:33:59 2026
+# Using cached version that was downloaded (UTC): Sun Aug 16 22:33:59 2026
+# Training images (60000, 28, 28)
+# Test images (10000, 28, 28)
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# class_names = [
+#     "T-shirt/top",
+#     "Trouser",
+#     "Pullover",
+#     "Dress",
+#     "Coat",
+#     "Sandal",
+#     "Shirt",
+#     "Sneaker",
+#     "Bag",
+#     "Ankle boot",
+# ]
+# class_dict = {i: class_name for i, class_name in enumerate(class_names)}
+#
+# (train_images, train_labels), (test_images, test_labels) = load_data()
+# print("Training images", train_images.shape)
+# print("Test images", test_images.shape)
+#
+# rng = np.random.default_rng(42)
+# n = 5000
+# sample_idx = rng.choice(np.arange(len(train_images)), size=n, replace=False)
+#
+# # Invert and normalize the images so they look better
+# img_mat = -1 * train_images[sample_idx].astype(np.int16)
+# img_mat = (img_mat - img_mat.min()) / (img_mat.max() - img_mat.min())
+#
+# images = pd.DataFrame(
+#     {
+#         "images": img_mat.tolist(),
+#         "labels": train_labels[sample_idx],
+#         "class": [class_dict[x] for x in train_labels[sample_idx]],
+#     }
+# )
+# ```
+#
+# ```text
+# Using cached version that was downloaded (UTC): Tue Dec 16 13:23:25 2025
+# Using cached version that was downloaded (UTC): Tue Dec 16 13:23:25 2025
+# Using cached version that was downloaded (UTC): Tue Dec 16 13:23:25 2025
+# Using cached version that was downloaded (UTC): Tue Dec 16 13:23:25 2025
+# Training images (60000, 28, 28)
+# Test images (10000, 28, 28)
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="d5145c56"
 # Let's see what some of the images contained in this dataset look like.
@@ -1620,12 +2174,45 @@ fig.show()
 # %% [markdown] id="fbf462ba"
 # Let's break this down further and look at it by class, or the category of clothing:
 
-# %% id="3ec83d53"
+# %% tags=["remove-input", "remove-output"] id="3ec83d53"
 print(class_dict)
 
 # keep two rows drawn at random from each class
 two_per_class = images.filter(pl.int_range(pl.len()).shuffle(seed=23).over("class") < 2).sort("class")
 show_images(two_per_class, ncols=6)
+
+# %% [markdown]
+# <!-- tab-twins:begin 3ec83d53 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# print(class_dict)
+#
+# # keep two rows drawn at random from each class
+# two_per_class = images.filter(pl.int_range(pl.len()).shuffle(seed=23).over("class") < 2).sort("class")
+# show_images(two_per_class, ncols=6)
+# ```
+#
+# ```text
+# {0: 'T-shirt/top', 1: 'Trouser', 2: 'Pullover', 3: 'Dress', 4: 'Coat', 5: 'Sandal', 6: 'Shirt', 7: 'Sneaker', 8: 'Bag', 9: 'Ankle boot'}
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# print(class_dict)
+#
+# show_images(images.groupby('class',as_index=False).sample(2), ncols=6)
+# ```
+#
+# ```text
+# {0: 'T-shirt/top', 1: 'Trouser', 2: 'Pullover', 3: 'Dress', 4: 'Coat', 5: 'Sandal', 6: 'Shirt', 7: 'Sneaker', 8: 'Bag', 9: 'Ankle boot'}
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="31cc6329"
 # ### Raw Data
@@ -1637,9 +2224,38 @@ images.head()
 # %% [markdown] id="c7cff209"
 # Each row represents one image. Every image belongs to a `"class"` of clothing with it's enumerated `"label"`. In place of a typically displayed image, the raw data contains a 28x28 *2D array of pixel values*; each pixel value is a float between 0 and 1. If we just focus on the images, we get a 3D matrix. You can think of this as a matrix containing 2D images.
 
-# %% id="d0992d63"
+# %% tags=["remove-input", "remove-output"] id="d0992d63"
 X = images["images"].to_numpy()
 X.shape
+
+# %% [markdown]
+# <!-- tab-twins:begin d0992d63 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# X = images["images"].to_numpy()
+# X.shape
+# ```
+#
+# ```text
+# (5000, 28, 28)
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# X = np.array(images["images"].to_list())
+# X.shape
+# ```
+#
+# ```text
+# (5000, 28, 28)
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="bc9ff651"
 # However, we're not used to working with 3D matrices for our training data `X`. Typical training data expects a *vector* of features for each datapoint, not a matrix per datapoint. We can reshape our 3D matrix so that it fits our typical training data by "unrolling" the the 28x28 pixels into a single row vector containing 28*28 = 784 dimensions.

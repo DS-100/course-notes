@@ -401,8 +401,49 @@ X_train.head()
 #
 # By inspecting the fitted parameters of our model, we see that this is the case – the parameter for `hp` is much larger in magnitude than the parameter for `hp^4`.
 
-# %% id="051dcedb"
+# %% tags=["remove-input", "remove-output"] id="051dcedb"
 pl.DataFrame({"Feature":X_train.columns, "Parameter":lasso_model.coef_})
+
+# %% [markdown]
+# <!-- tab-twins:begin 051dcedb -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# pl.DataFrame({"Feature":X_train.columns, "Parameter":lasso_model.coef_})
+# ```
+#
+# ```text
+# shape: (4, 2)
+# ┌─────────┬────────────┐
+# │ Feature ┆ Parameter  │
+# │ ---     ┆ ---        │
+# │ str     ┆ f64        │
+# ╞═════════╪════════════╡
+# │ hp      ┆ -0.254932  │
+# │ hp^2    ┆ -0.000949  │
+# │ hp^3    ┆ 0.000009   │
+# │ hp^4    ┆ -1.2287e-8 │
+# └─────────┴────────────┘
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# pd.DataFrame({"Feature":X_train.columns, "Parameter":lasso_model.coef_})
+# ```
+#
+# ```text
+#   Feature     Parameter
+# 0      hp -2.549321e-01
+# 1    hp^2 -9.485972e-04
+# 2    hp^3  8.919763e-06
+# 3    hp^4 -1.228723e-08
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="1dbcc545"
 # Recall that by applying regularization, we give our a model a "budget" for how it can allocate the values of model parameters. For `hp` to have much of an impact on each prediction, LASSO is forced to "spend" more of this budget on the parameter for `hp`.

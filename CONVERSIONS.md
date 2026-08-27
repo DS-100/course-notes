@@ -1812,6 +1812,86 @@ it is what a guard working correctly looks like from the inside.
    whose header contains `[markdown]`, reporting the locator instead. The two twins that caused it
    were dropped as redundant — the dropdown above each already shows that code.
 
+10. **Three defects in one tool, all in the code that decides *where* a comparison tab goes.**
+    Phase 2 paired 110 twins from the pinned baseline across 16 published chapters. Getting them onto
+    the page surfaced three separate faults in `tab_twins.py`, and only one of the three announced
+    itself.
+
+    **It resolved a chapter's notebook as `content/<ch>/<ch>.ipynb`.** Eight chapters name their
+    notebook something else — `cv_regularization/cv_reg.ipynb`, `intro_lec/introduction.ipynb`,
+    `_pca_1/pca_1.ipynb` and so on. Each printed `no built notebook` and returned **0**, so the run
+    looked clean while skipping 42% of the corpus. The plan for this phase was written around "87
+    twins across 11 chapters"; the real figure was **125 across 19**. A number produced by a tool
+    that silently skips is not a smaller version of the truth, it is a different number.
+
+    **It placed each block by searching for a line of the cell's source.** A locator line is not
+    unique — the same call appears in more than one cell in a long chapter — so five chapters put a
+    tab-set under an *earlier* cell, pairing a pandas pane with unrelated Polars code. This one was
+    caught, and only because the `structure` gate learned in the same sitting to check that a twin
+    *follows the cell it names*. The fix removes the guesswork: a baseline-paired marker carries the
+    cell id, the jupytext `.py` carries ids in its headers, so placement is now an exact match and
+    the text search survives only as a fallback for the hand-written twins.
+
+    **It inserted one blank line too many.** Where a cell was already separated from the next by a
+    blank line, the insert made two, and jupytext reads the second back as part of the *previous
+    cell's source*. A changed source means `splice_outputs` drops that cell's output as stale — nine
+    outputs across six chapters, several of them figures. The chapter would have published a plotting
+    cell with no plot. Nothing failed; the log line read `1 dropped as converted`, which is a normal
+    thing to see during a conversion, and it is the only trace the defect left.
+
+    All three are the same shape as note 9 and as the `columns=` comment: the tool did what it was
+    told, reported success, and was wrong about the page. The two additions that turn each into a
+    visible failure are in `nb_validate.py` — `structure` now accepts an added cell only if it is a
+    markdown twin naming a code cell that exists in *both* notebooks and immediately follows it, and
+    `tags` waives only the exact `remove-input`+`remove-output` pair on a cell an accepted twin
+    names. Both were run against eight negative probes (a plain added cell, a twin naming a
+    nonexistent cell, a twin detached from its cell, a marker on a code cell, an untwinned cell
+    hidden, a half pair, an extra tag, and tags kept after deleting the twin); all eight fail, which
+    is the point of writing them down.
+
+11. **Four more, found by pointing the two new reviewers at the result.** The tab work above
+    passed every gate, built with zero warnings, and still carried these.
+
+    **Thirty-five twinned cells showed their output twice.** `apply_to_pytext` added
+    `remove-input, remove-output` only when the cell's header had no `tags=` at all, so every cell
+    already carrying `remove-input` -- the "hide the loader, show the table" pattern that runs
+    through this book -- kept its output visible above a tab-set repeating the same table. It now
+    merges the tags instead of skipping. The render reviewer that surfaced this also got the
+    diagnosis wrong in an instructive way: it read the *block's* `visibility` and reported all 28
+    of `eda`'s twins as duplicated. mystmd 1.6.6 records `remove-input`/`remove-output` on the code
+    and output **children**, leaving the block itself `"show"` -- so 23 were correctly hidden and 5
+    were not. Refuting the finding is what found the real one, which is the whole point of wave 5.
+
+    **Twenty-four twins compared two identical stubs.** A plotting cell's only text output is
+    `<Figure size 640x480 with 1 Axes>`. The figure cannot go in a frozen tab, so the tab promised a
+    pandas/Polars comparison and delivered the same placeholder line on both sides, twice, while the
+    real plot sat above it. `constant_model_loss_transformations` was four such twins and nothing
+    else. Skipped now by output shape, which is why the corpus is 86 twins rather than 110.
+
+    **Three blocks on the page belonged to no twin.** `--verify` asked only "is every twin I declare
+    present?" -- it could not see a block nobody declares any more. Renaming a marker leaves the old
+    block behind, because the replace looks for the new spelling, misses, and inserts a second copy:
+    `polars_2` published the `read_csv` tab-set twice for exactly that reason. The other two were
+    `polars_1`'s `value_counts()` and `unique()` twins, dropped from the declared set when the
+    order-instability guard was added but never removed from the page, so the chapter was showing a
+    frozen ordering that a re-run does not reproduce. `--verify` now counts the blocks on the page
+    and fails on the difference.
+
+    **The pandas panes were rendered with `repr`, and a notebook does not use `repr`.** Six twins
+    claimed pandas prints something it does not: `type(x)` showed as `<class '...'>` where a notebook
+    shows `pandas.core.groupby.generic.DataFrameGroupBy`, and long one-line results did not wrap at
+    79 columns where the executed Polars pane beside them did. `repr_of` now renders through
+    `IPython.lib.pretty`, which frames and Series pass through unchanged.
+
+12. **`polars_1.py` had one cell id for 80 code cells, and a rebuild of it silently discarded every
+    output.** `splice_outputs` matches on id; jupytext mints fresh ids for a `.py` that carries
+    none, so nothing matched. The run logged `outputs: 1 preserved, 0 dropped as converted` and
+    exited 0 -- a line that looks like every other line, in a step that is run without reading its
+    output. The chapter would have published 80 code cells with no results. `to-ipynb` now refuses
+    the rebuild when fewer than half the original's ids survive the round trip, and says to
+    re-execute instead; `polars_1.py` was regenerated from its notebook and carries all 224 ids, so
+    it round-trips (79 preserved, 0 dropped).
+
 The general rule the first three incidents support: **a detector that reports zero is only good news if it
 found something on the baseline** — and a detector that reports a hit is only bad news if it cannot
 also fire on the correct answer. Every removal gate here is paired with the first check; the third
@@ -1917,3 +1997,39 @@ incident is what added the second.
    cross-references, so nothing checks them. There are a handful across the book — should they be
    converted to MyST cross-references (`(label)=` targets), which *would* be checkable, as part of
    this work or as a separate pass?
+
+10. **Two pre-existing errors in `regex` that the conversion did not introduce and did not fix.**
+    Both were found by executing the chapter's own claims against the pinned environment, and both
+    are about the Python standard library rather than about pandas or Polars, so they are the
+    course's content rather than the migration's.
+
+    The reference table's row for `5.*?5` lists `5005005` under "Doesn't Match". It does match --
+    `re.fullmatch(r"5.*?5", "5005005")` returns a match, because backtracking lets the lazy
+    quantifier expand to satisfy the anchor-free full match. Every other row of that table and the
+    two before it checks out. The row is present verbatim in the pinned baseline.
+
+    The mapping table pairs `'_' in s` with `ser.str.contains(_)`, which is right as an operation
+    mapping but omits that `contains` treats its pattern as a **regex** by default, exactly like
+    `replace_all` -- `pl.Series(["cowscom"]).str.contains("cow.com")` is `True`. The chapter warns
+    about that default for `replace_all` only, and the same gap existed in the pandas original.
+    Should either be corrected as part of this work, or filed for the content owners?
+
+11. **The pandas half of a baseline-paired twin is transcribed history, not a fresh run.** Pairing
+    on cell id takes the pandas output that was *published* when the book ran on pandas, which is
+    more honest for a tab captioned "pandas" and is deterministic, which `--verify` needs. It also
+    means the pane can carry a value today's environment does not reproduce:
+    `feature_engineering`'s pandas tab prints `MSE ... 23.943662938603104`, and the same code run
+    now gives `...108` -- a last-ULP difference from whatever built the original notebook. The two
+    tabs therefore imply a pandas/Polars difference at that site where there is none (the `hp^2`
+    pair beside it differs for real). Should transcribed pandas outputs be re-executed against the
+    pin, accepting that they then describe an environment students do not have either?
+
+12. **Pairing on cell id assumes the conversion changed how a cell is spelled, not what it does.**
+    `regex` cell `1ba6f098` broke that assumption: the pandas original used `str.extractall` (every
+    match, non-matching rows dropped) and the converted cell uses `extract_groups` (each group's
+    first match, nulls kept). Side by side under one heading they assert an equivalence that is
+    false, and no gate can see it -- both panes are real, executed output of real code. That twin is
+    now skipped with a written reason. The general question stands for the other 85: the only layer
+    that can catch this is `notes-claim-verifier`, which found this one, and it has so far swept
+    `polars_1`, `polars_2`, `regex` and `feature_engineering`.
+

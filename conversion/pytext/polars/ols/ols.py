@@ -57,8 +57,51 @@ nba.head(5)
 # * `AST`, the average number of assists per game
 # * `3PA`, the average number of 3-point field goals attempted per game
 
-# %% id="2ff5030e"
+# %% tags=["remove-input", "remove-output"] id="2ff5030e"
 nba.select(['FG', 'AST', '3PA', 'PTS']).head()
+
+# %% [markdown]
+# <!-- tab-twins:begin 2ff5030e -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# nba.select(['FG', 'AST', '3PA', 'PTS']).head()
+# ```
+#
+# ```text
+# shape: (5, 4)
+# ┌─────┬─────┬─────┬──────┐
+# │ FG  ┆ AST ┆ 3PA ┆ PTS  │
+# │ --- ┆ --- ┆ --- ┆ ---  │
+# │ f64 ┆ f64 ┆ f64 ┆ f64  │
+# ╞═════╪═════╪═════╪══════╡
+# │ 1.8 ┆ 0.6 ┆ 4.1 ┆ 5.3  │
+# │ 0.4 ┆ 0.8 ┆ 1.5 ┆ 1.7  │
+# │ 1.1 ┆ 1.9 ┆ 2.2 ┆ 3.2  │
+# │ 6.0 ┆ 1.6 ┆ 0.0 ┆ 13.9 │
+# │ 3.4 ┆ 2.2 ┆ 0.2 ┆ 8.9  │
+# └─────┴─────┴─────┴──────┘
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# nba[['FG', 'AST', '3PA', 'PTS']].head()
+# ```
+#
+# ```text
+#     FG  AST  3PA   PTS
+# 1  1.8  0.6  4.1   5.3
+# 2  0.4  0.8  1.5   1.7
+# 3  1.1  1.9  2.2   3.2
+# 4  6.0  1.6  0.0  13.9
+# 5  3.4  2.2  0.2   8.9
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="aa02d440"
 # Because we are now dealing with many parameter values, we've collected them all into a **parameter vector** with dimensions $(p+1) \times 1$ to keep things tidy. Remember that $p$ represents the number of features we have (in this case, 3).

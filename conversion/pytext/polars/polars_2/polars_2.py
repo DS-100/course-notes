@@ -109,7 +109,6 @@ babynames.group_by("Year")
 # %% tags=["remove-input", "remove-output"] id="p2-agg-unsorted"
 babynames.group_by("Year").agg(pl.col("Count").sum()).head(5)
 
-
 # %% [markdown]
 # <!-- tab-twins:begin babynames.group_by("Year").agg(pl.col("Count").sum()).head(5) -->
 # :::::{tab-set}
@@ -127,10 +126,10 @@ babynames.group_by("Year").agg(pl.col("Count").sum()).head(5)
 # │ i64  ┆ i64    │
 # ╞══════╪════════╡
 # │ 1971 ┆ 310020 │
-# │ 1977 ┆ 315011 │
+# │ 2004 ┆ 480892 │
 # │ 1992 ┆ 541054 │
-# │ 1980 ┆ 365973 │
-# │ 1983 ┆ 394608 │
+# │ 1998 ┆ 464300 │
+# │ 1995 ┆ 494635 │
 # └──────┴────────┘
 # ```
 # ::::
@@ -168,7 +167,6 @@ babynames.group_by("Year").agg(pl.col("Count").sum()).head(5)
 # %% tags=["remove-input", "remove-output"] id="p2-agg-sorted"
 babies_by_year = babynames.group_by("Year").agg(pl.col("Count").sum()).sort("Year")
 babies_by_year.head(5)
-
 
 # %% [markdown]
 # <!-- tab-twins:begin babies_by_year = babynames.group_by("Year").agg(pl.col("Count").sum()).sort("Year") -->
@@ -239,7 +237,6 @@ babies_by_year.head(5)
 # What is the minimum count for each name in any year?
 babynames.group_by("Name").agg(pl.col("Count").min()).sort("Name").head()
 
-
 # %% [markdown]
 # <!-- tab-twins:begin babynames.group_by("Name").agg(pl.col("Count").min()).sort("Name").head() -->
 # :::::{tab-set}
@@ -295,7 +292,6 @@ babynames.group_by("Name").agg(
     pl.col("Count").mean().alias("Mean Count"),
     pl.len().alias("Years Recorded"),
 ).sort("Name").head()
-
 
 # %% [markdown]
 # <!-- tab-twins:begin pl.col("Count").mean().alias("Mean Count"), -->
@@ -367,7 +363,6 @@ babynames_new = babynames.with_columns(
 
 babynames_new.head()
 
-
 # %% [markdown]
 # <!-- tab-twins:begin pl.col("Name").str.slice(0, 1).alias("First Letter") -->
 # :::::{tab-set}
@@ -430,7 +425,6 @@ babynames_new.group_by("Name").agg(
     pl.col("Year").max(),
 ).sort("Name").head()
 
-
 # %% [markdown]
 # <!-- tab-twins:begin pl.col("First Letter").first(), -->
 # :::::{tab-set}
@@ -491,7 +485,6 @@ df = pl.DataFrame({"letter": ["A", "A", "B", "C", "C", "C"],
                    "state": [None, "tx", "fl", "hi", None, "ak"]})
 df
 
-
 # %% [markdown]
 # <!-- tab-twins:begin df = pl.DataFrame({"letter": ["A", "A", "B", "C", "C", "C"], -->
 # :::::{tab-set}
@@ -549,7 +542,6 @@ df
 # %% tags=["remove-input", "remove-output"] id="p2-count-len"
 df.group_by("letter", maintain_order=True).len()
 
-
 # %% [markdown]
 # <!-- tab-twins:begin df.group_by("letter", maintain_order=True).len() -->
 # :::::{tab-set}
@@ -598,7 +590,6 @@ df.group_by("letter", maintain_order=True).len()
 # %% tags=["remove-input", "remove-output"] id="p2-count-all"
 df.group_by("letter", maintain_order=True).agg(pl.all().count())
 
-
 # %% [markdown]
 # <!-- tab-twins:begin df.group_by("letter", maintain_order=True).agg(pl.all().count()) -->
 # :::::{tab-set}
@@ -646,7 +637,6 @@ df.group_by("letter", maintain_order=True).agg(pl.all().count())
 
 # %% tags=["remove-input", "remove-output"] id="p2-value-counts"
 df["letter"].value_counts(sort=True)
-
 
 # %% [markdown]
 # <!-- tab-twins:begin df["letter"].value_counts(sort=True) -->
@@ -748,7 +738,6 @@ fig
 f_babynames = babynames.filter(pl.col("Sex") == "F").sort("Year")
 f_babynames.head()
 
-
 # %% [markdown]
 # <!-- tab-twins:begin f_babynames = babynames.filter(pl.col("Sex") == "F").sort("Year") -->
 # :::::{tab-set}
@@ -806,7 +795,6 @@ latest_jenn = jenn_counts.last()  # the most recent year's count
 
 latest_jenn / max_jenn
 
-
 # %% [markdown]
 # <!-- tab-twins:begin latest_jenn / max_jenn -->
 # :::::{tab-set}
@@ -853,7 +841,6 @@ rtp_table = f_babynames.group_by("Name").agg(
     (pl.col("Count").last() / pl.col("Count").max()).alias("Count RTP")
 )
 rtp_table.sort("Name").head()
-
 
 # %% [markdown]
 # <!-- tab-twins:begin rtp_table = f_babynames.group_by("Name").agg( -->
@@ -937,7 +924,6 @@ f_babynames.group_by("Name").agg(
       .alias("Count RTP")
 ).sort("Count RTP").head()
 
-
 # %% [markdown]
 # <!-- tab-twins:begin def ratio_to_peak(series): -->
 # :::::{tab-set}
@@ -1005,7 +991,6 @@ f_babynames.group_by("Name").agg(
 
 # %% tags=["remove-input", "remove-output"] id="p2-rtp-sorted"
 rtp_table.sort("Count RTP").head()
-
 
 # %% [markdown]
 # <!-- tab-twins:begin rtp_table.sort("Count RTP").head() -->
@@ -1083,7 +1068,6 @@ fig
 top10 = rtp_table.sort("Count RTP").head(10)["Name"].to_list()
 top10
 
-
 # %% [markdown]
 # <!-- tab-twins:begin top10 = rtp_table.sort("Count RTP").head(10)["Name"].to_list() -->
 # :::::{tab-set}
@@ -1116,7 +1100,16 @@ top10
 # ```
 #
 # ```text
-# ['Debra', 'Debbie', 'Carol', 'Tammy', 'Susan', 'Cheryl', 'Shannon', 'Tina', 'Michele', 'Terri']
+# ['Debra',
+#  'Debbie',
+#  'Carol',
+#  'Tammy',
+#  'Susan',
+#  'Cheryl',
+#  'Shannon',
+#  'Tina',
+#  'Michele',
+#  'Terri']
 # ```
 # ::::
 # :::::
@@ -1170,58 +1163,8 @@ fig
 elections = pl.read_csv("data/elections.csv")
 elections.head(5)
 
-
-
 # %% [markdown]
 # <!-- tab-twins:begin elections = pl.read_csv("data/elections.csv") elections.head(5) -->
-# :::::{tab-set}
-# :::: {tab-item} Polars
-# :sync: pl
-# ```python
-# elections = pl.read_csv("data/elections.csv")
-# elections.head(5)
-# ```
-#
-# ```text
-# shape: (5, 6)
-# ┌──────┬───────────────────┬───────────────────────┬──────────────┬────────┬───────────┐
-# │ Year ┆ Candidate         ┆ Party                 ┆ Popular vote ┆ Result ┆ %         │
-# │ ---  ┆ ---               ┆ ---                   ┆ ---          ┆ ---    ┆ ---       │
-# │ i64  ┆ str               ┆ str                   ┆ i64          ┆ str    ┆ f64       │
-# ╞══════╪═══════════════════╪═══════════════════════╪══════════════╪════════╪═══════════╡
-# │ 1824 ┆ Andrew Jackson    ┆ Democratic-Republican ┆ 151271       ┆ loss   ┆ 57.210122 │
-# │ 1824 ┆ John Quincy Adams ┆ Democratic-Republican ┆ 113142       ┆ win    ┆ 42.789878 │
-# │ 1828 ┆ Andrew Jackson    ┆ Democratic            ┆ 642806       ┆ win    ┆ 56.203927 │
-# │ 1828 ┆ John Quincy Adams ┆ National Republican   ┆ 500897       ┆ loss   ┆ 43.796073 │
-# │ 1832 ┆ Andrew Jackson    ┆ Democratic            ┆ 702735       ┆ win    ┆ 54.574789 │
-# └──────┴───────────────────┴───────────────────────┴──────────────┴────────┴───────────┘
-# ```
-# ::::
-#
-# :::: {tab-item} pandas
-# :sync: pd
-# ```python
-# elections_pd = pd.read_csv("data/elections.csv")
-# elections_pd.head(5)
-# ```
-#
-# ```text
-#    Year          Candidate  ... Result          %
-# 0  1824     Andrew Jackson  ...   loss  57.210122
-# 1  1824  John Quincy Adams  ...    win  42.789878
-# 2  1828     Andrew Jackson  ...    win  56.203927
-# 3  1828  John Quincy Adams  ...   loss  43.796073
-# 4  1832     Andrew Jackson  ...    win  54.574789
-#
-# [5 rows x 6 columns]
-# ```
-# ::::
-# :::::
-# <!-- tab-twins:end -->
-
-# %% [markdown]
-# <!-- tab-twins:begin elections = pl.read_csv("data/elections.csv")
-# elections.head(5) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
 # :sync: pl
@@ -1286,7 +1229,6 @@ elections.head(5)
 # %% tags=["remove-input", "remove-output"] id="p2-over-small"
 df.filter(pl.len().over("letter") >= 2)
 
-
 # %% [markdown]
 # <!-- tab-twins:begin df.filter(pl.len().over("letter") >= 2) -->
 # :::::{tab-set}
@@ -1337,7 +1279,6 @@ df.filter(pl.len().over("letter") >= 2)
 
 # %% tags=["remove-input", "remove-output"] id="p2-over-elections-code"
 elections.filter(pl.col("%").max().over("Year") < 45).head(9)
-
 
 # %% [markdown]
 # <!-- tab-twins:begin elections.filter(pl.col("%").max().over("Year") < 45).head(9) -->
@@ -1397,7 +1338,7 @@ elections.filter(pl.col("%").max().over("Year") < 45).head(9)
 # %% [markdown] id="p2-over-elections-explain"
 # The first nine rows cover two full elections. In 1860 the winner, Abraham Lincoln, took only 39.7% of the popular vote against three opponents; in 1912 five candidates split the vote behind Woodrow Wilson's 41.9%. Neither year contains a single row above 45%, so both survive in their entirety.
 #
-# This is a different question from the row-by-row filtering we have done before. `elections.filter(pl.col("%") < 45)` inspects each row on its own and would keep Lincoln while discarding the winners of every other year. The `.over` version asks its question of the whole group and then keeps or drops all of the group's rows together.
+# This is a different question from the row-by-row filtering we have done before. `elections.filter(pl.col("%") < 45)` inspects each row on its own, and it keeps 117 rows scattered across 44 different years. It does keep Lincoln — but it also keeps John Quincy Adams's 42.8% from 1824 while throwing away the row that gives that number its meaning, Andrew Jackson's 57.2% in the same election. A row-wise test cannot see the other rows of its year, and the other rows of its year are the whole question. The `.over` version asks its question of the whole group and then keeps or drops all of the group's rows together, which is why it returns 17 rows and only four elections.
 #
 # ### The `group_by` Puzzle
 #
@@ -1408,7 +1349,6 @@ elections.filter(pl.col("%").max().over("Year") < 45).head(9)
 # %% tags=["remove-input", "remove-output"] id="p2-puzzle-attempt1"
 # Sorting by Party gives us the same ten parties on every run
 elections.group_by("Party").max().sort("Party").head(10)
-
 
 # %% [markdown]
 # <!-- tab-twins:begin elections.group_by("Party").max().sort("Party").head(10) -->
@@ -1487,7 +1427,6 @@ elections.group_by("Party").max().sort("Party").head(10)
 elections_sorted_by_percent = elections.sort("%", descending=True)
 elections_sorted_by_percent.head(5)
 
-
 # %% [markdown]
 # <!-- tab-twins:begin elections_sorted_by_percent = elections.sort("%", descending=True) -->
 # :::::{tab-set}
@@ -1536,7 +1475,6 @@ elections_sorted_by_percent.head(5)
 # %% tags=["remove-input", "remove-output"] id="p2-puzzle-attempt2"
 best_per_party = elections_sorted_by_percent.group_by("Party", maintain_order=True).head(1)
 best_per_party.head(10)
-
 
 # %% [markdown]
 # <!-- tab-twins:begin best_per_party = elections_sorted_by_percent.group_by("Party", maintain_order=True).head(1) -->
@@ -1624,7 +1562,6 @@ best_positions = (
 )
 best_positions.head()
 
-
 # %% [markdown]
 # <!-- tab-twins:begin best_positions = ( -->
 # :::::{tab-set}
@@ -1684,7 +1621,6 @@ best_positions.head()
 # %% tags=["remove-input", "remove-output"] id="p2-puzzle-alt1c"
 elections[best_positions["position"]].sort("Party").head()
 
-
 # %% [markdown]
 # <!-- tab-twins:begin elections[best_positions["position"]].sort("Party").head() -->
 # :::::{tab-set}
@@ -1736,7 +1672,6 @@ elections[best_positions["position"]].sort("Party").head()
 # %% tags=["remove-input", "remove-output"] id="p2-puzzle-alt2"
 best_per_party2 = elections.sort("%").unique(subset=["Party"], keep="last", maintain_order=True)
 best_per_party2.sort("Party").head()
-
 
 # %% [markdown]
 # <!-- tab-twins:begin best_per_party2 = elections.sort("%").unique(subset=["Party"], keep="last", maintain_order=True) -->
@@ -1798,7 +1733,6 @@ best_per_party2.sort("Party").head()
 grouped_by_party = elections.group_by("Party")
 type(grouped_by_party)
 
-
 # %% [markdown]
 # <!-- tab-twins:begin type(grouped_by_party) -->
 # :::::{tab-set}
@@ -1822,7 +1756,7 @@ type(grouped_by_party)
 # ```
 #
 # ```text
-# <class 'pandas.core.groupby.generic.DataFrameGroupBy'>
+# pandas.core.groupby.generic.DataFrameGroupBy
 # ```
 # ::::
 # :::::
@@ -1836,7 +1770,6 @@ type(grouped_by_party)
 # %% tags=["remove-input", "remove-output"] id="p2-groupby-dict"
 groups = dict(grouped_by_party)
 sorted(groups.keys())[:6]
-
 
 # %% [markdown]
 # <!-- tab-twins:begin groups = dict(grouped_by_party) -->
@@ -1866,7 +1799,12 @@ sorted(groups.keys())[:6]
 # ```
 #
 # ```text
-# ['American', 'American Independent', 'Anti-Masonic', 'Anti-Monopoly', 'Citizens', 'Communist']
+# ['American',
+#  'American Independent',
+#  'Anti-Masonic',
+#  'Anti-Monopoly',
+#  'Citizens',
+#  'Communist']
 # ```
 # ::::
 # :::::
@@ -1877,7 +1815,6 @@ sorted(groups.keys())[:6]
 
 # %% tags=["remove-input", "remove-output"] id="p2-groupby-socialist"
 groups[("Socialist",)]
-
 
 # %% [markdown]
 # <!-- tab-twins:begin groups[("Socialist",)] -->
@@ -1945,7 +1882,6 @@ groups[("Socialist",)]
 
 # %% tags=["remove-input", "remove-output"] id="p2-groupby-multi"
 babynames.group_by(["Year", "Sex"]).agg(pl.col("Count").sum()).sort(["Year", "Sex"]).head(6)
-
 
 # %% [markdown]
 # <!-- tab-twins:begin babynames.group_by(["Year", "Sex"]).agg(pl.col("Count").sum()).sort(["Year", "Sex"]).head(6) -->
@@ -2016,7 +1952,6 @@ babynames.pivot(
     values="Count",           # what fills the cells
     aggregate_function="sum", # how to combine the rows that land in one cell
 ).head(5)
-
 
 # %% [markdown]
 # <!-- tab-twins:begin aggregate_function="sum", # how to combine the rows that land in one cell -->
@@ -2091,7 +2026,6 @@ babynames.pivot(
     values=["Count", "Name"],
     aggregate_function="max",
 ).head(6)
-
 
 # %% [markdown]
 # <!-- tab-twins:begin values=["Count", "Name"], -->
@@ -2168,7 +2102,6 @@ elections = elections.with_columns(
 )
 elections.head(5)
 
-
 # %% [markdown]
 # <!-- tab-twins:begin pl.col("Candidate").str.split(" ").list.get(0).alias("First Name") -->
 # :::::{tab-set}
@@ -2226,7 +2159,6 @@ elections.head(5)
 # Here, we'll only consider `babynames` data from 2022
 babynames_2022 = babynames.filter(pl.col("Year") == 2022)
 babynames_2022.head()
-
 
 # %% [markdown]
 # <!-- tab-twins:begin babynames_2022 = babynames.filter(pl.col("Year") == 2022) -->
@@ -2286,7 +2218,6 @@ merged = elections.join(
     maintain_order="left",
 )
 merged.head()
-
 
 # %% [markdown]
 # <!-- tab-twins:begin merged = elections.join( -->
@@ -2351,7 +2282,6 @@ merged.head()
 # The full column list, since the table above is too wide to show it
 merged.columns
 
-
 # %% [markdown]
 # <!-- tab-twins:begin merged.columns -->
 # :::::{tab-set}
@@ -2385,14 +2315,25 @@ merged.columns
 # ```
 #
 # ```text
-# ['Year_x', 'Candidate', 'Party', 'Popular vote', 'Result', '%', 'First Name', 'State', 'Sex', 'Year_y', 'Name', 'Count']
+# ['Year_x',
+#  'Candidate',
+#  'Party',
+#  'Popular vote',
+#  'Result',
+#  '%',
+#  'First Name',
+#  'State',
+#  'Sex',
+#  'Year_y',
+#  'Name',
+#  'Count']
 # ```
 # ::::
 # :::::
 # <!-- tab-twins:end -->
 
 # %% [markdown] id="p2-join-explain"
-# Each row of `merged` pairs a candidate with a 2022 baby-name record whose name matches theirs. We started with 187 rows in `elections` and ended with 156: forty candidates share their first name with no baby born in California that year and drop out, while nine match twice, because their name appears in the 2022 data under both sexes. Four details of the call are worth pulling apart:
+# Each row of `merged` pairs a candidate with a 2022 baby-name record whose name matches theirs. We started with 187 rows in `elections` and ended with 156: forty rows carry a first name that no baby born in California that year shares, and drop out, while nine match twice, because their name appears in the 2022 data under both sexes. Four details of the call are worth pulling apart:
 #
 # * `left_on` and `right_on` name the **key** column on each side. These are the values Polars compares to decide which rows belong together, and we need both forms because the two tables spell the same idea differently: `First Name` here, `Name` there.
 # * The key columns are **coalesced** into one. The result carries `First Name` and no `Name` at all — one key column, under the left table's name. This catches people out: a column that was in the right table is simply not in the output. If you need it, keep a copy under another name before joining, or pass `coalesce=False` to hold on to both.
@@ -2413,7 +2354,6 @@ merged.columns
 
 # %% tags=["remove-input", "remove-output"] id="p2-join-anti"
 elections.join(babynames_2022, left_on="First Name", right_on="Name", how="anti", maintain_order="left").head()
-
 
 # %% [markdown]
 # <!-- tab-twins:begin how="anti", maintain_order="left" -->

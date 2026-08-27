@@ -128,7 +128,7 @@ from sklearn.linear_model import LinearRegression
 # ```
 # ````
 
-# %% tags=["remove-input"] id="4fb8031e"
+# %% tags=["remove-input", "remove-output"] id="4fb8031e"
 import polars as pl
 import seaborn as sns
 import numpy as np
@@ -136,6 +136,68 @@ import numpy as np
 penguins = pl.from_pandas(sns.load_dataset("penguins"))
 penguins = penguins.filter(pl.col("species") == "Adelie").drop_nulls()
 penguins.head()
+
+# %% [markdown]
+# <!-- tab-twins:begin 4fb8031e -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# import polars as pl
+# import seaborn as sns
+# import numpy as np
+#
+# penguins = pl.from_pandas(sns.load_dataset("penguins"))
+# penguins = penguins.filter(pl.col("species") == "Adelie").drop_nulls()
+# penguins.head()
+# ```
+#
+# ```text
+# shape: (5, 7)
+# ┌─────────┬───────────┬────────────────┬───────────────┬───────────────────┬─────────────┬────────┐
+# │ species ┆ island    ┆ bill_length_mm ┆ bill_depth_mm ┆ flipper_length_mm ┆ body_mass_g ┆ sex    │
+# │ ---     ┆ ---       ┆ ---            ┆ ---           ┆ ---               ┆ ---         ┆ ---    │
+# │ str     ┆ str       ┆ f64            ┆ f64           ┆ f64               ┆ f64         ┆ str    │
+# ╞═════════╪═══════════╪════════════════╪═══════════════╪═══════════════════╪═════════════╪════════╡
+# │ Adelie  ┆ Torgersen ┆ 39.1           ┆ 18.7          ┆ 181.0             ┆ 3750.0      ┆ Male   │
+# │ Adelie  ┆ Torgersen ┆ 39.5           ┆ 17.4          ┆ 186.0             ┆ 3800.0      ┆ Female │
+# │ Adelie  ┆ Torgersen ┆ 40.3           ┆ 18.0          ┆ 195.0             ┆ 3250.0      ┆ Female │
+# │ Adelie  ┆ Torgersen ┆ 36.7           ┆ 19.3          ┆ 193.0             ┆ 3450.0      ┆ Female │
+# │ Adelie  ┆ Torgersen ┆ 39.3           ┆ 20.6          ┆ 190.0             ┆ 3650.0      ┆ Male   │
+# └─────────┴───────────┴────────────────┴───────────────┴───────────────────┴─────────────┴────────┘
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# import pandas as pd
+# import seaborn as sns
+# import numpy as np
+#
+# penguins = sns.load_dataset("penguins")
+# penguins = penguins[penguins["species"] == "Adelie"].dropna()
+# penguins.head()
+# ```
+#
+# ```text
+#   species     island  bill_length_mm  bill_depth_mm  flipper_length_mm  \
+# 0  Adelie  Torgersen            39.1           18.7              181.0
+# 1  Adelie  Torgersen            39.5           17.4              186.0
+# 2  Adelie  Torgersen            40.3           18.0              195.0
+# 4  Adelie  Torgersen            36.7           19.3              193.0
+# 5  Adelie  Torgersen            39.3           20.6              190.0
+#
+#    body_mass_g     sex
+# 0       3750.0    Male
+# 1       3800.0  Female
+# 2       3250.0  Female
+# 4       3450.0  Female
+# 5       3650.0    Male
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="61a44f41"
 # Our goal will be to predict the value of the `"bill_depth_mm"` for a particular penguin given its `"flipper_length_mm"` and `"body_mass_g"`. We'll also add a bias column of all ones to represent the intercept term of our models.
@@ -180,9 +242,54 @@ theta_hat
 #
 # $$\hat{\mathbb{Y}} = \mathbb{X}\theta$$
 
-# %% id="b53a37f9"
+# %% tags=["remove-input", "remove-output"] id="b53a37f9"
 Y_hat = X @ theta_hat
 pl.DataFrame(Y_hat).head()
+
+# %% [markdown]
+# <!-- tab-twins:begin b53a37f9 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# Y_hat = X @ theta_hat
+# pl.DataFrame(Y_hat).head()
+# ```
+#
+# ```text
+# shape: (5, 1)
+# ┌───────────┐
+# │ column_0  │
+# │ ---       │
+# │ f64       │
+# ╞═══════════╡
+# │ 18.322561 │
+# │ 18.445578 │
+# │ 17.721412 │
+# │ 17.997254 │
+# │ 18.263268 │
+# └───────────┘
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# Y_hat = X @ theta_hat
+# pd.DataFrame(Y_hat).head()
+# ```
+#
+# ```text
+#            0
+# 0  18.322561
+# 1  18.445578
+# 2  17.721412
+# 3  17.997254
+# 4  18.263268
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="8404a0b4"
 # ### The `sklearn` Workflow
@@ -319,9 +426,51 @@ print(f"The MSE of the model is {mean_squared_error(Y, Y_hat_two_features)}")
 # %% [markdown] id="9a152c6e"
 # We can also see that we obtain the same predictions using `sklearn` as we did when applying the ordinary least squares formula before!
 
-# %% id="716464e0"
+# %% tags=["remove-input", "remove-output"] id="716464e0"
 pl.DataFrame({"Y_hat from OLS":np.squeeze(Y_hat), "Y_hat from sklearn":Y_hat_two_features}).head()
 
+# %% [markdown]
+# <!-- tab-twins:begin 716464e0 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# pl.DataFrame({"Y_hat from OLS":np.squeeze(Y_hat), "Y_hat from sklearn":Y_hat_two_features}).head()
+# ```
+#
+# ```text
+# shape: (5, 2)
+# ┌────────────────┬────────────────────┐
+# │ Y_hat from OLS ┆ Y_hat from sklearn │
+# │ ---            ┆ ---                │
+# │ f64            ┆ f64                │
+# ╞════════════════╪════════════════════╡
+# │ 18.322561      ┆ 18.322561          │
+# │ 18.445578      ┆ 18.445578          │
+# │ 17.721412      ┆ 17.721412          │
+# │ 17.997254      ┆ 17.997254          │
+# │ 18.263268      ┆ 18.263268          │
+# └────────────────┴────────────────────┘
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# pd.DataFrame({"Y_hat from OLS":np.squeeze(Y_hat), "Y_hat from sklearn":Y_hat_two_features}).head()
+# ```
+#
+# ```text
+#    Y_hat from OLS  Y_hat from sklearn
+# 0       18.322561           18.322561
+# 1       18.445578           18.445578
+# 2       17.721412           17.721412
+# 3       17.997254           17.997254
+# 4       18.263268           18.263268
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="6cd5e4ea"
 # ## Gradient Descent 
@@ -612,10 +761,54 @@ fig.show()
 #
 # Let's apply our `gradient_descent` function from before to optimize our model on the `tips` dataset. We will try to select the best parameter $\theta_i$ to predict the `tip` $y$ from the `total_bill` $x$.
 
-# %% id="46a06ec5"
+# %% tags=["remove-input", "remove-output"] id="46a06ec5"
 df = pl.from_pandas(sns.load_dataset("tips"))
 df.head()
 
+# %% [markdown]
+# <!-- tab-twins:begin 46a06ec5 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# df = pl.from_pandas(sns.load_dataset("tips"))
+# df.head()
+# ```
+#
+# ```text
+# shape: (5, 7)
+# ┌────────────┬──────┬────────┬────────┬─────┬────────┬──────┐
+# │ total_bill ┆ tip  ┆ sex    ┆ smoker ┆ day ┆ time   ┆ size │
+# │ ---        ┆ ---  ┆ ---    ┆ ---    ┆ --- ┆ ---    ┆ ---  │
+# │ f64        ┆ f64  ┆ cat    ┆ cat    ┆ cat ┆ cat    ┆ i64  │
+# ╞════════════╪══════╪════════╪════════╪═════╪════════╪══════╡
+# │ 16.99      ┆ 1.01 ┆ Female ┆ No     ┆ Sun ┆ Dinner ┆ 2    │
+# │ 10.34      ┆ 1.66 ┆ Male   ┆ No     ┆ Sun ┆ Dinner ┆ 3    │
+# │ 21.01      ┆ 3.5  ┆ Male   ┆ No     ┆ Sun ┆ Dinner ┆ 3    │
+# │ 23.68      ┆ 3.31 ┆ Male   ┆ No     ┆ Sun ┆ Dinner ┆ 2    │
+# │ 24.59      ┆ 3.61 ┆ Female ┆ No     ┆ Sun ┆ Dinner ┆ 4    │
+# └────────────┴──────┴────────┴────────┴─────┴────────┴──────┘
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# df = sns.load_dataset("tips")
+# df.head()
+# ```
+#
+# ```text
+#    total_bill   tip     sex smoker  day    time  size
+# 0       16.99  1.01  Female     No  Sun  Dinner     2
+# 1       10.34  1.66    Male     No  Sun  Dinner     3
+# 2       21.01  3.50    Male     No  Sun  Dinner     3
+# 3       23.68  3.31    Male     No  Sun  Dinner     2
+# 4       24.59  3.61  Female     No  Sun  Dinner     4
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="8e6a9ecd"
 # We can visualize the value of the MSE on our dataset for different possible choices of $\theta_1$. To optimize our model, we want to select the value of $\theta_1$ that leads to the lowest MSE.
@@ -674,7 +867,7 @@ df.head()
 # ```
 # ````
 
-# %% tags=["remove-input"] id="cac7a125"
+# %% tags=["remove-input", "remove-output"] id="cac7a125"
 #| fig-alt: "A curve representing the loss is shown with different guesses converging to the global minimum. The plot is titled 'Final guess for theta_1: 0.14369554654231262'"
 def gradient_descent(df, initial_guess, alpha, n):
     """Performs n steps of gradient descent on df using learning rate alpha starting
@@ -713,3 +906,102 @@ plt.xlabel(r"$\theta_1$")
 plt.ylabel(r"$L(\theta_1)$");
 
 print(f"Final guess for theta_1: {trajectory[-1]}")
+
+# %% [markdown]
+# <!-- tab-twins:begin cac7a125 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# def gradient_descent(df, initial_guess, alpha, n):
+#     """Performs n steps of gradient descent on df using learning rate alpha starting
+#        from initial_guess. Returns a numpy array of all guesses over time."""
+#     guesses = [initial_guess]
+#     current_guess = initial_guess
+#     while len(guesses) < n:
+#         current_guess = current_guess - alpha * df(current_guess)
+#         guesses.append(current_guess)
+#
+#     return np.array(guesses)
+#
+# def mse_single_arg(theta_1):
+#     """Returns the MSE on our data for the given theta1"""
+#     x = df["total_bill"]
+#     y_obs = df["tip"]
+#     y_hat = theta_1 * x
+#     return ((y_hat - y_obs) ** 2).mean()
+#
+# def mse_loss_derivative_single_arg(theta_1):
+#     """Returns the derivative of the MSE on our data for the given theta1"""
+#     x = df["total_bill"]
+#     y_obs = df["tip"]
+#     y_hat = theta_1 * x
+#
+#     return (2 * (y_hat - y_obs) * x).mean()
+#
+# loss_df = pl.DataFrame({"theta_1":np.linspace(-1.5, 1), "MSE":[mse_single_arg(theta_1) for theta_1 in np.linspace(-1.5, 1)]})
+#
+# trajectory = gradient_descent(mse_loss_derivative_single_arg, -0.5, 0.0001, 100)
+#
+# plt.plot(loss_df["theta_1"].to_numpy(), loss_df["MSE"].to_numpy())
+# plt.scatter(trajectory, [mse_single_arg(guess) for guess in trajectory], c="white", edgecolor="firebrick")
+# plt.scatter(trajectory[-1], mse_single_arg(trajectory[-1]), c="firebrick")
+# plt.xlabel(r"$\theta_1$")
+# plt.ylabel(r"$L(\theta_1)$");
+#
+# print(f"Final guess for theta_1: {trajectory[-1]}")
+# ```
+#
+# ```text
+# Final guess for theta_1: 0.14369554654231262
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# def gradient_descent(df, initial_guess, alpha, n):
+#     """Performs n steps of gradient descent on df using learning rate alpha starting
+#        from initial_guess. Returns a numpy array of all guesses over time."""
+#     guesses = [initial_guess]
+#     current_guess = initial_guess
+#     while len(guesses) < n:
+#         current_guess = current_guess - alpha * df(current_guess)
+#         guesses.append(current_guess)
+#
+#     return np.array(guesses)
+#
+# def mse_single_arg(theta_1):
+#     """Returns the MSE on our data for the given theta1"""
+#     x = df["total_bill"]
+#     y_obs = df["tip"]
+#     y_hat = theta_1 * x
+#     return np.mean((y_hat - y_obs) ** 2)
+#
+# def mse_loss_derivative_single_arg(theta_1):
+#     """Returns the derivative of the MSE on our data for the given theta1"""
+#     x = df["total_bill"]
+#     y_obs = df["tip"]
+#     y_hat = theta_1 * x
+#
+#     return np.mean(2 * (y_hat - y_obs) * x)
+#
+# loss_df = pd.DataFrame({"theta_1":np.linspace(-1.5, 1), "MSE":[mse_single_arg(theta_1) for theta_1 in np.linspace(-1.5, 1)]})
+#
+# trajectory = gradient_descent(mse_loss_derivative_single_arg, -0.5, 0.0001, 100)
+#
+# plt.plot(loss_df["theta_1"], loss_df["MSE"])
+# plt.scatter(trajectory, [mse_single_arg(guess) for guess in trajectory], c="white", edgecolor="firebrick")
+# plt.scatter(trajectory[-1], mse_single_arg(trajectory[-1]), c="firebrick")
+# plt.xlabel(r"$\theta_1$")
+# plt.ylabel(r"$L(\theta_1)$");
+#
+# print(f"Final guess for theta_1: {trajectory[-1]}")
+# ```
+#
+# ```text
+# Final guess for theta_1: 0.14369554654231262
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->

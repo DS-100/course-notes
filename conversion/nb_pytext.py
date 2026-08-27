@@ -226,11 +226,35 @@ def splice_metadata(nb, original_path: Path) -> None:
             nb.metadata[key] = copy.deepcopy(value)
 
 
+def check_ids_survive(nb, original_path: Path) -> None:
+    """Refuse the rebuild if the `.py` carries too few of the original's cell ids.
+
+    The splice matches on id, and a `.py` written without them gets fresh ids from jupytext on
+    every read -- so nothing matches, every output is silently dropped, and the run reports
+    `1 preserved, 0 dropped` and exits 0. `polars_1.py` is in exactly that state: 80 code cells,
+    one id. A rebuild of it publishes a chapter of code with no results, and the only sign is a
+    number in a log line that looks like any other.
+
+    Chapters like that have to be re-executed rather than spliced. Say so instead of shipping.
+    """
+    prior = {c.get("id") for c in load_notebook(original_path).cells if c.get("id")}
+    if len(prior) < 5:
+        return
+    survived = prior & {c.get("id") for c in nb.cells if c.get("id")}
+    if len(survived) * 2 < len(prior):
+        raise SystemExit(
+            f"refusing to rebuild: only {len(survived)} of {len(prior)} cell ids from "
+            f"{original_path} survive the round trip, so the output splice would drop nearly "
+            f"everything. The .py is missing its ids -- re-execute the chapter instead."
+        )
+
+
 def py_to_ipynb(py_path: Path, ipynb_path: Path, outputs_from: Optional[Path] = None) -> None:
     """Convert a percent-format .py file back to a validated .ipynb."""
     nb = py_text_to_notebook(py_path.read_text())
     nb.metadata.pop("jupytext", None)
     if outputs_from is not None:
+        check_ids_survive(nb, outputs_from)
         preserved, dropped = splice_outputs(nb, outputs_from)
         splice_metadata(nb, outputs_from)
         logger.info(f"outputs: {preserved} preserved, {dropped} dropped as converted")

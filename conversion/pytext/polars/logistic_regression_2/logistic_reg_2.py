@@ -51,7 +51,7 @@
 # ```
 # ````
 
-# %% tags=["remove-input"] id="060a298c"
+# %% tags=["remove-input", "remove-output"] id="060a298c"
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -64,6 +64,68 @@ toy_df = pl.DataFrame({
         "y": [0, 0, 1, 0, 1, 1]})
 toy_df.head()
 
+# %% [markdown]
+# <!-- tab-twins:begin 060a298c -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# import warnings
+# warnings.filterwarnings("ignore")
+#
+# import polars as pl
+# import numpy as np
+# import matplotlib.pyplot as plt
+# np.seterr(divide='ignore')
+# toy_df = pl.DataFrame({
+#         "x": [-4.0, -2.0, -0.5, 1.0, 3.0, 5.0],
+#         "y": [0, 0, 1, 0, 1, 1]})
+# toy_df.head()
+# ```
+#
+# ```text
+# shape: (5, 2)
+# ┌──────┬─────┐
+# │ x    ┆ y   │
+# │ ---  ┆ --- │
+# │ f64  ┆ i64 │
+# ╞══════╪═════╡
+# │ -4.0 ┆ 0   │
+# │ -2.0 ┆ 0   │
+# │ -0.5 ┆ 1   │
+# │ 1.0  ┆ 0   │
+# │ 3.0  ┆ 1   │
+# └──────┴─────┘
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# import warnings
+# warnings.filterwarnings("ignore")
+#
+# import pandas as pd
+# import numpy as np
+# import matplotlib.pyplot as plt
+# np.seterr(divide='ignore')
+# toy_df = pd.DataFrame({
+#         "x": [-4, -2, -0.5, 1, 3, 5],
+#         "y": [0, 0, 1, 0, 1, 1]})
+# toy_df.head()
+# ```
+#
+# ```text
+#      x  y
+# 0 -4.0  0
+# 1 -2.0  0
+# 2 -0.5  1
+# 3  1.0  0
+# 4  3.0  1
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="4337b552"
 # We'll construct a basic logistic regression model with only one feature and no intercept term. Our predicted probabilities take the form:

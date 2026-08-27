@@ -324,10 +324,50 @@ def fence_profile(text: str) -> Tuple[int, int, int, int, int]:
 # ------------------------------------------------------------------ gates
 
 
+TWIN_MARK = re.compile(r"\A<!-- tab-twins:begin ([0-9a-zA-Z_-]+) -->")
+
+
+def twin_cells(base_nb, conv_nb) -> Tuple[set, list]:
+    """Ids of comparison-tab cells the converted notebook legitimately added.
+
+    A translated chapter must not gain cells -- an unexplained addition is how content appears on
+    a page nobody reviewed, which is the whole reason `structure` is a blocking gate. The
+    pandas/Polars comparison tabs are the one sanctioned exception, and the exemption is kept
+    narrow enough that nothing else fits through it. A cell qualifies only when all four hold:
+
+      * it is markdown,
+      * its source *begins* with the `tab-twins:begin <id>` marker,
+      * that `<id>` names a code cell present in **both** notebooks -- so a twin cannot be used to
+        stand in for a cell the conversion deleted, and
+      * it sits immediately after that code cell.
+
+    Anything else added still fails. Returns (exempt ids, complaints about near-misses).
+    """
+    base_ids = {c.get("id") for c in base_nb.cells if c.cell_type == "code"}
+    conv_code = {c.get("id") for c in conv_nb.cells if c.cell_type == "code"}
+    exempt, gripes = set(), []
+    for i, c in enumerate(conv_nb.cells):
+        m = TWIN_MARK.match(c.get("source", "") or "")
+        if not m:
+            continue
+        twinned = m.group(1)
+        prev = conv_nb.cells[i - 1] if i else None
+        if c.cell_type != "markdown":
+            gripes.append(f"{c.get('id')}: tab-twins marker on a {c.cell_type} cell")
+        elif twinned not in base_ids or twinned not in conv_code:
+            gripes.append(f"{c.get('id')}: twins {twinned}, which is not a code cell in both notebooks")
+        elif prev is None or prev.get("id") != twinned:
+            gripes.append(f"{c.get('id')}: twins {twinned} but does not follow it")
+        else:
+            exempt.add(c.get("id"))
+    return exempt, gripes
+
+
 def gate_structure(base_nb, conv_nb, res: Result) -> bool:
     base_seq = [(c.get("id"), c.cell_type) for c in base_nb.cells]
     conv_seq = [(c.get("id"), c.cell_type) for c in conv_nb.cells]
-    details = []
+    twins, details = twin_cells(base_nb, conv_nb)
+    conv_seq = [t for t in conv_seq if t[0] not in twins]
     if len(base_seq) != len(conv_seq):
         details.append(f"cell count changed: {len(base_seq)} -> {len(conv_seq)}")
     base_ids = {i for i, _ in base_seq}
@@ -340,7 +380,8 @@ def gate_structure(base_nb, conv_nb, res: Result) -> bool:
         details.append("cell order or type changed with no add/remove -- cells were reordered")
     ok = base_seq == conv_seq
     if ok:
-        details.append(f"{len(base_seq)} cells, id sequence identical")
+        note = f", {len(twins)} comparison-tab cell(s) added" if twins else ""
+        details.append(f"{len(base_seq)} cells, id sequence identical{note}")
     res.add("structure", ok, len(conv_seq), len(base_seq), details)
     return ok
 
@@ -593,7 +634,16 @@ def gate_error_outputs(chapter: ch.Chapter, base_nb, conv_nb, res: Result) -> No
 def gate_tags(chapter: ch.Chapter, base_nb, conv_nb, res: Result) -> None:
     allowed = allow(chapter.name, "tag_changes")
     conv_by_id = {c.get("id"): c for c in conv_nb.cells}
-    problems, checked = [], 0
+    # A cell that gained a comparison tab is hidden in favour of it: the tab reproduces the same
+    # source and the same output directly beneath, so leaving both visible prints every converted
+    # cell twice. `remove-cell` is inert in mystmd 1.6.6, so hiding one takes both tags. This is
+    # the layout use hard rule 5 permits -- the cell still executes, still carries its output, and
+    # `outputs-fresh` still gates it. Only the exact pair, and only on a cell an accepted twin
+    # names, is waived; any other tag change on any other cell still fails.
+    twinned = {m.group(1) for c in conv_nb.cells
+               for m in [TWIN_MARK.match(c.get("source", "") or "")] if m}
+    tab_hidden = {"remove-input", "remove-output"}
+    problems, checked, waived = [], 0, 0
     for c in base_nb.cells:
         target = conv_by_id.get(c.get("id"))
         if target is None:
@@ -603,6 +653,9 @@ def gate_tags(chapter: ch.Chapter, base_nb, conv_nb, res: Result) -> None:
         n = set(target.get("metadata", {}).get("tags", []) or [])
         if b == n or c.get("id") in allowed:
             continue
+        if c.get("id") in twinned and (n - b) <= tab_hidden and not b - n and tab_hidden <= n:
+            waived += 1
+            continue
         added, removed = sorted(n - b), sorted(b - n)
         note = []
         if added:
@@ -610,7 +663,12 @@ def gate_tags(chapter: ch.Chapter, base_nb, conv_nb, res: Result) -> None:
         if removed:
             note.append(f"removed {', '.join(removed)}")
         problems.append(f"{c.get('id')}: {'; '.join(note)}")
-    details = problems[:8] if problems else [f"{checked} cell(s), tag sets unchanged"]
+    # Say what was waived. Reporting "tag sets unchanged" while quietly allowing a change is how a
+    # gate stops being evidence -- the reader of the log has no way to tell a clean chapter from an
+    # exempted one.
+    clean = (f"{checked} cell(s), tag sets unchanged" if not waived else
+             f"{checked} cell(s); {waived} hidden in favour of a comparison tab, no other change")
+    details = problems[:8] if problems else [clean]
     res.add("tags", not problems, checked, len(base_nb.cells), details)
 
 

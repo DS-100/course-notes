@@ -110,7 +110,7 @@
 # ```
 # ````
 
-# %% tags=["remove-input"] id="b241cb77"
+# %% tags=["remove-input", "remove-output"] id="b241cb77"
 import numpy as np
 import polars as pl
 import plotly.express as px
@@ -124,6 +124,59 @@ print("Full Data Size:", len(mpg))
 mpg_sample = mpg.sample(sample_size)
 print("Sample Size:", len(mpg_sample))
 px.scatter(mpg_sample, x='weight', y='mpg', trendline='ols', width=800)
+
+# %% [markdown]
+# <!-- tab-twins:begin b241cb77 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# import numpy as np
+# import polars as pl
+# import plotly.express as px
+# import sklearn.linear_model as lm
+# import seaborn as sns
+#
+# pl.set_random_seed(42)
+# sample_size = 100
+# mpg = pl.from_pandas(sns.load_dataset('mpg'))
+# print("Full Data Size:", len(mpg))
+# mpg_sample = mpg.sample(sample_size)
+# print("Sample Size:", len(mpg_sample))
+# px.scatter(mpg_sample, x='weight', y='mpg', trendline='ols', width=800)
+# ```
+#
+# ```text
+# Full Data Size: 398
+# Sample Size: 100
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# import numpy as np
+# import pandas as pd
+# import plotly.express as px
+# import sklearn.linear_model as lm
+# import seaborn as sns
+#
+# np.random.seed(42)
+# sample_size = 100
+# mpg = sns.load_dataset('mpg')
+# print("Full Data Size:", len(mpg))
+# mpg_sample = mpg.sample(sample_size)
+# print("Sample Size:", len(mpg_sample))
+# px.scatter(mpg_sample, x='weight', y='mpg', trendline='ols', width=800)
+# ```
+#
+# ```text
+# Full Data Size: 398
+# Sample Size: 100
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="bfed5b5a"
 # Fitting a linear model, we get an estimate of the slope $\hat{\theta}_1$:
@@ -232,10 +285,41 @@ print(bootstrap_ci(bs_thetas))
 # ```
 # ````
 
-# %% tags=["remove-input"] id="68454791"
+# %% tags=["remove-input", "remove-output"] id="68454791"
 mpg_pop = pl.from_pandas(sns.load_dataset('mpg'))
 theta_est = [estimator(mpg_pop.sample(20)) for i in range(10000)]
 print(bootstrap_ci(theta_est))
+
+# %% [markdown]
+# <!-- tab-twins:begin 68454791 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# mpg_pop = pl.from_pandas(sns.load_dataset('mpg'))
+# theta_est = [estimator(mpg_pop.sample(20)) for i in range(10000)]
+# print(bootstrap_ci(theta_est))
+# ```
+#
+# ```text
+# [-0.01014361 -0.00571021]
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# mpg_pop = sns.load_dataset('mpg')
+# theta_est = [estimator(mpg_pop.sample(20)) for i in range(10000)]
+# print(bootstrap_ci(theta_est))
+# ```
+#
+# ```text
+# [-0.01019291 -0.00573015]
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="62b4872b"
 # Visualizing the two distributions:
@@ -527,10 +611,57 @@ px.histogram(thetas.unpivot(), x='value', facet_row='variable',
 #
 # Note that `Egg Length` and `Egg Breadth` (widest diameter) are measured in millimeters, and `Egg Weight` and `Bird Weight` are measured in grams. For reference, a standard paper clip weighs about one gram.
 
-# %% id="b6d91c04"
+# %% tags=["remove-input", "remove-output"] id="b6d91c04"
 import polars as pl
 eggs = pl.read_csv("data/snowy_plover.csv")
 eggs.head(5)
+
+# %% [markdown]
+# <!-- tab-twins:begin b6d91c04 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# import polars as pl
+# eggs = pl.read_csv("data/snowy_plover.csv")
+# eggs.head(5)
+# ```
+#
+# ```text
+# shape: (5, 4)
+# ┌────────────┬────────────┬─────────────┬─────────────┐
+# │ egg_weight ┆ egg_length ┆ egg_breadth ┆ bird_weight │
+# │ ---        ┆ ---        ┆ ---         ┆ ---         │
+# │ f64        ┆ f64        ┆ f64         ┆ f64         │
+# ╞════════════╪════════════╪═════════════╪═════════════╡
+# │ 7.4        ┆ 28.8       ┆ 21.84       ┆ 5.2         │
+# │ 7.7        ┆ 29.04      ┆ 22.45       ┆ 5.4         │
+# │ 7.9        ┆ 29.36      ┆ 22.48       ┆ 5.6         │
+# │ 7.5        ┆ 30.1       ┆ 21.71       ┆ 5.3         │
+# │ 8.3        ┆ 30.17      ┆ 22.75       ┆ 5.9         │
+# └────────────┴────────────┴─────────────┴─────────────┘
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# import pandas as pd
+# eggs = pd.read_csv("data/snowy_plover.csv")
+# eggs.head(5)
+# ```
+#
+# ```text
+#    egg_weight  egg_length  egg_breadth  bird_weight
+# 0         7.4       28.80        21.84          5.2
+# 1         7.7       29.04        22.45          5.4
+# 2         7.9       29.36        22.48          5.6
+# 3         7.5       30.10        21.71          5.3
+# 4         8.3       30.17        22.75          5.9
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="727209a2"
 # Our goal will be to predict the weight of a newborn plover chick, which we assume follows the true relationship $Y = f_{\theta}(x)$ below.
@@ -548,7 +679,7 @@ eggs.head(5)
 #
 # Next, we use our data to fit a model $\hat{Y} = f_{\hat{\theta}}(x)$ that approximates the relationship above. This gives us the **observed value** of $\hat{\theta}_1$ from our data.
 
-# %% id="add45dc7"
+# %% tags=["remove-input", "remove-output"] id="add45dc7"
 from sklearn.linear_model import LinearRegression
 import numpy as np
 
@@ -569,6 +700,84 @@ display(pl.DataFrame({
 
 print("RMSE", ((Y - model.predict(X)) ** 2).mean())
 
+# %% [markdown]
+# <!-- tab-twins:begin add45dc7 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# from sklearn.linear_model import LinearRegression
+# import numpy as np
+#
+# X = eggs[["egg_weight", "egg_length", "egg_breadth"]]
+# Y = eggs["bird_weight"]
+#
+# model = LinearRegression()
+# model.fit(X, Y)
+#
+# # This gives an array containing the fitted model parameter estimates
+# thetas = model.coef_
+#
+# # Put the parameter estimates in a nice table for viewing
+# display(pl.DataFrame({
+#   "parameter": ['intercept', 'egg_weight', 'egg_length', 'egg_breadth'],
+#   "theta_hat": [model.intercept_] + list(model.coef_),
+# }))
+#
+# print("RMSE", ((Y - model.predict(X)) ** 2).mean())
+# ```
+#
+# ```text
+# shape: (4, 2)
+# ┌─────────────┬───────────┐
+# │ parameter   ┆ theta_hat │
+# │ ---         ┆ ---       │
+# │ str         ┆ f64       │
+# ╞═════════════╪═══════════╡
+# │ intercept   ┆ -4.60567  │
+# │ egg_weight  ┆ 0.431229  │
+# │ egg_length  ┆ 0.06657   │
+# │ egg_breadth ┆ 0.215914  │
+# └─────────────┴───────────┘
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# from sklearn.linear_model import LinearRegression
+# import numpy as np
+#
+# X = eggs[["egg_weight", "egg_length", "egg_breadth"]]
+# Y = eggs["bird_weight"]
+#
+# model = LinearRegression()
+# model.fit(X, Y)
+#
+# # This gives an array containing the fitted model parameter estimates
+# thetas = model.coef_
+#
+# # Put the parameter estimates in a nice table for viewing
+# display(pd.DataFrame(
+#   [model.intercept_] + list(model.coef_),
+#   columns=['theta_hat'],
+#   index=['intercept', 'egg_weight', 'egg_length', 'egg_breadth']
+# ))
+#
+# print("RMSE", np.mean((Y - model.predict(X)) ** 2))
+# ```
+#
+# ```text
+#              theta_hat
+# intercept    -4.605670
+# egg_weight    0.431229
+# egg_length    0.066570
+# egg_breadth   0.215914
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
+
 # %% [markdown] id="fbf5b893"
 # Our single sample of data gives us the value of $\hat{\theta}_1=0.431$. To get a sense of how this estimate might vary if we were to draw different random samples, we will use [bootstrapping](https://inferentialthinking.com/chapters/13/2/Bootstrap.html?). As a refresher, to construct a bootstrap sample, we will draw a resample from the collected data that:
 #
@@ -577,7 +786,7 @@ print("RMSE", ((Y - model.predict(X)) ** 2).mean())
 #
 # We draw a bootstrap sample, use this sample to fit a model, and record the result for $\hat{\theta}_1$ on this bootstrapped sample. We then repeat this process many times to generate a **bootstrapped empirical distribution** of $\hat{\theta}_1$. This gives us an estimate of what the true distribution of $\hat{\theta}_1$ across all possible samples might look like.
 
-# %% id="fec55157"
+# %% tags=["remove-input", "remove-output"] id="fec55157"
 # Set a random seed so you generate the same random sample as staff
 # In the "real world", we wouldn't do this
 import numpy as np
@@ -611,12 +820,101 @@ upper = np.percentile(estimates, 97.5, axis=0)
 conf_interval = (lower, upper)
 conf_interval
 
+# %% [markdown]
+# <!-- tab-twins:begin fec55157 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# # Set a random seed so you generate the same random sample as staff
+# # In the "real world", we wouldn't do this
+# import numpy as np
+# pl.set_random_seed(1337)
+#
+# # Set the sample size of each bootstrap sample
+# n = len(eggs)
+#
+# # Create a list to store all the bootstrapped estimates
+# estimates = []
+#
+# # Generate a bootstrap resample from `eggs` and find an estimate for theta_1 using this sample.
+# # Repeat 10000 times.
+# for i in range(10000):
+#     # draw a bootstrap sample
+#     bootstrap_resample = eggs.sample(n, with_replacement=True)
+#     X_bootstrap = bootstrap_resample[["egg_weight", "egg_length", "egg_breadth"]]
+#     Y_bootstrap = bootstrap_resample["bird_weight"]
+#
+#     # use bootstrapped sample to fit a model
+#     bootstrap_model = LinearRegression()
+#     bootstrap_model.fit(X_bootstrap, Y_bootstrap)
+#     bootstrap_thetas = bootstrap_model.coef_
+#
+#     # record the result for theta_1
+#     estimates.append(bootstrap_thetas[0])
+#
+# # calculate the 95% confidence interval
+# lower = np.percentile(estimates, 2.5, axis=0)
+# upper = np.percentile(estimates, 97.5, axis=0)
+# conf_interval = (lower, upper)
+# conf_interval
+# ```
+#
+# ```text
+# (-0.26512011103620964, 1.1239590856397368)
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# # Set a random seed so you generate the same random sample as staff
+# # In the "real world", we wouldn't do this
+# import numpy as np
+# np.random.seed(1337)
+#
+# # Set the sample size of each bootstrap sample
+# n = len(eggs)
+#
+# # Create a list to store all the bootstrapped estimates
+# estimates = []
+#
+# # Generate a bootstrap resample from `eggs` and find an estimate for theta_1 using this sample.
+# # Repeat 10000 times.
+# for i in range(10000):
+#     # draw a bootstrap sample
+#     bootstrap_resample = eggs.sample(n, replace=True)
+#     X_bootstrap = bootstrap_resample[["egg_weight", "egg_length", "egg_breadth"]]
+#     Y_bootstrap = bootstrap_resample["bird_weight"]
+#
+#     # use bootstrapped sample to fit a model
+#     bootstrap_model = LinearRegression()
+#     bootstrap_model.fit(X_bootstrap, Y_bootstrap)
+#     bootstrap_thetas = bootstrap_model.coef_
+#
+#     # record the result for theta_1
+#     estimates.append(bootstrap_thetas[0])
+#
+# # calculate the 95% confidence interval
+# lower = np.percentile(estimates, 2.5, axis=0)
+# upper = np.percentile(estimates, 97.5, axis=0)
+# conf_interval = (lower, upper)
+# conf_interval
+# ```
+#
+# ```text
+# (-0.25864811956848743, 1.1034243854204049)
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
+
 # %% [markdown] id="5a2c062b"
 # Our bootstrapped 95% confidence interval for $\theta_1$ is $[-0.265, 1.124]$. Immediately, we can see that 0 *is* indeed contained in this interval – this means that we *cannot* conclude that $\theta_1$ is non-zero! More formally, we fail to reject the null hypothesis (that $\theta_1$ is 0) at a 5% cutoff. 
 #
 # We can repeat this process to construct 95% confidence intervals for the other parameters of the model.
 
-# %% id="2fda0b71"
+# %% tags=["remove-input", "remove-output"] id="2fda0b71"
 pl.set_random_seed(1337)
 
 theta_0_estimates = []
@@ -650,6 +948,108 @@ pl.DataFrame({"parameter":["theta_0", "theta_1", "theta_2", "theta_3"],
               "lower":[theta_0_lower, theta_1_lower, theta_2_lower, theta_3_lower],
               "upper":[theta_0_upper, theta_1_upper, theta_2_upper, theta_3_upper]})
 
+# %% [markdown]
+# <!-- tab-twins:begin 2fda0b71 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# pl.set_random_seed(1337)
+#
+# theta_0_estimates = []
+# theta_1_estimates = []
+# theta_2_estimates = []
+# theta_3_estimates = []
+#
+#
+# for i in range(10000):
+#     bootstrap_resample = eggs.sample(n, with_replacement=True)
+#     X_bootstrap = bootstrap_resample[["egg_weight", "egg_length", "egg_breadth"]]
+#     Y_bootstrap = bootstrap_resample["bird_weight"]
+#
+#     bootstrap_model = LinearRegression()
+#     bootstrap_model.fit(X_bootstrap, Y_bootstrap)
+#     bootstrap_theta_0 = bootstrap_model.intercept_
+#     bootstrap_theta_1, bootstrap_theta_2, bootstrap_theta_3 = bootstrap_model.coef_
+#
+#     theta_0_estimates.append(bootstrap_theta_0)
+#     theta_1_estimates.append(bootstrap_theta_1)
+#     theta_2_estimates.append(bootstrap_theta_2)
+#     theta_3_estimates.append(bootstrap_theta_3)
+#
+# theta_0_lower, theta_0_upper = np.percentile(theta_0_estimates, 2.5), np.percentile(theta_0_estimates, 97.5)
+# theta_1_lower, theta_1_upper = np.percentile(theta_1_estimates, 2.5), np.percentile(theta_1_estimates, 97.5)
+# theta_2_lower, theta_2_upper = np.percentile(theta_2_estimates, 2.5), np.percentile(theta_2_estimates, 97.5)
+# theta_3_lower, theta_3_upper = np.percentile(theta_3_estimates, 2.5), np.percentile(theta_3_estimates, 97.5)
+#
+# # Make a nice table to view results
+# pl.DataFrame({"parameter":["theta_0", "theta_1", "theta_2", "theta_3"],
+#               "lower":[theta_0_lower, theta_1_lower, theta_2_lower, theta_3_lower],
+#               "upper":[theta_0_upper, theta_1_upper, theta_2_upper, theta_3_upper]})
+# ```
+#
+# ```text
+# shape: (4, 3)
+# ┌───────────┬────────────┬──────────┐
+# │ parameter ┆ lower      ┆ upper    │
+# │ ---       ┆ ---        ┆ ---      │
+# │ str       ┆ f64        ┆ f64      │
+# ╞═══════════╪════════════╪══════════╡
+# │ theta_0   ┆ -15.419956 ┆ 5.454488 │
+# │ theta_1   ┆ -0.26512   ┆ 1.123959 │
+# │ theta_2   ┆ -0.10361   ┆ 0.213618 │
+# │ theta_3   ┆ -0.267844  ┆ 0.757189 │
+# └───────────┴────────────┴──────────┘
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# np.random.seed(1337)
+#
+# theta_0_estimates = []
+# theta_1_estimates = []
+# theta_2_estimates = []
+# theta_3_estimates = []
+#
+#
+# for i in range(10000):
+#     bootstrap_resample = eggs.sample(n, replace=True)
+#     X_bootstrap = bootstrap_resample[["egg_weight", "egg_length", "egg_breadth"]]
+#     Y_bootstrap = bootstrap_resample["bird_weight"]
+#
+#     bootstrap_model = LinearRegression()
+#     bootstrap_model.fit(X_bootstrap, Y_bootstrap)
+#     bootstrap_theta_0 = bootstrap_model.intercept_
+#     bootstrap_theta_1, bootstrap_theta_2, bootstrap_theta_3 = bootstrap_model.coef_
+#
+#     theta_0_estimates.append(bootstrap_theta_0)
+#     theta_1_estimates.append(bootstrap_theta_1)
+#     theta_2_estimates.append(bootstrap_theta_2)
+#     theta_3_estimates.append(bootstrap_theta_3)
+#
+# theta_0_lower, theta_0_upper = np.percentile(theta_0_estimates, 2.5), np.percentile(theta_0_estimates, 97.5)
+# theta_1_lower, theta_1_upper = np.percentile(theta_1_estimates, 2.5), np.percentile(theta_1_estimates, 97.5)
+# theta_2_lower, theta_2_upper = np.percentile(theta_2_estimates, 2.5), np.percentile(theta_2_estimates, 97.5)
+# theta_3_lower, theta_3_upper = np.percentile(theta_3_estimates, 2.5), np.percentile(theta_3_estimates, 97.5)
+#
+# # Make a nice table to view results
+# pd.DataFrame({"lower":[theta_0_lower, theta_1_lower, theta_2_lower, theta_3_lower], "upper":[theta_0_upper, \
+#                 theta_1_upper, theta_2_upper, theta_3_upper]}, index=["theta_0", "theta_1", "theta_2", "theta_3"])
+# ```
+#
+# ```text
+#              lower     upper
+# theta_0 -15.278542  5.161473
+# theta_1  -0.258648  1.103424
+# theta_2  -0.099138  0.208557
+# theta_3  -0.257141  0.758155
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
+
 # %% [markdown] id="286c83b3"
 # Something's off here. Notice that 0 is included in the 95% confidence interval for *every* parameter of the model. Using the interpretation we outlined above, this would suggest that we can't say for certain that *any* of the input variables impact the response variable! This makes it seem like our model can't make any predictions – and yet, each model we fit in our bootstrap experiment above could very much make predictions of $Y$. 
 #
@@ -679,7 +1079,7 @@ sns.pairplot(eggs[["egg_length", "egg_breadth", "egg_weight", 'bird_weight']].to
 #
 # $$f_\theta(x) = \theta_0 + \theta_1 \text{egg\_weight} + \epsilon$$
 
-# %% id="bcb9100f"
+# %% tags=["remove-input", "remove-output"] id="bcb9100f"
 from sklearn.linear_model import LinearRegression
 X_int = eggs[["egg_weight"]]
 Y_int = eggs["bird_weight"]
@@ -694,6 +1094,68 @@ thetas_int = model_int.coef_
 # Put the parameter estimates in a nice table for viewing
 pl.DataFrame({"parameter":["theta_0", "theta_1"],
               "theta_hat":[model_int.intercept_, thetas_int[0]]})
+
+# %% [markdown]
+# <!-- tab-twins:begin bcb9100f -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# from sklearn.linear_model import LinearRegression
+# X_int = eggs[["egg_weight"]]
+# Y_int = eggs["bird_weight"]
+#
+# model_int = LinearRegression()
+#
+# model_int.fit(X_int, Y_int)
+#
+# # This gives an array containing the fitted model parameter estimates
+# thetas_int = model_int.coef_
+#
+# # Put the parameter estimates in a nice table for viewing
+# pl.DataFrame({"parameter":["theta_0", "theta_1"],
+#               "theta_hat":[model_int.intercept_, thetas_int[0]]})
+# ```
+#
+# ```text
+# shape: (2, 2)
+# ┌───────────┬───────────┐
+# │ parameter ┆ theta_hat │
+# │ ---       ┆ ---       │
+# │ str       ┆ f64       │
+# ╞═══════════╪═══════════╡
+# │ theta_0   ┆ -0.058272 │
+# │ theta_1   ┆ 0.718515  │
+# └───────────┴───────────┘
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# from sklearn.linear_model import LinearRegression
+# X_int = eggs[["egg_weight"]]
+# Y_int = eggs["bird_weight"]
+#
+# model_int = LinearRegression()
+#
+# model_int.fit(X_int, Y_int)
+#
+# # This gives an array containing the fitted model parameter estimates
+# thetas_int = model_int.coef_
+#
+# # Put the parameter estimates in a nice table for viewing
+# pd.DataFrame({"theta_hat":[model_int.intercept_, thetas_int[0]]}, index=["theta_0", "theta_1"])
+# ```
+#
+# ```text
+#          theta_hat
+# theta_0  -0.058272
+# theta_1   0.718515
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% id="29205f75"
 #| fig-alt: "Histogram titled 'Bootstrapped estimates theta_1_hat under the interpretable model.' The data is roughly normal distributed between 0.5 and 0.9 centered just above 0.7"
