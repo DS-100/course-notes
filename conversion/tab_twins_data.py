@@ -90,6 +90,44 @@ BASELINE_SKIP = {
         # Publishing a false statement because it is old is still publishing it.
         "ef3fe041",
     },
+    # ---------------------------------------------------------------------------------------
+    # Twins whose pandas pane republishes an error the conversion fixed.
+    #
+    # The pandas half of a baseline-paired twin is the cell's *pre-conversion* source. When the
+    # conversion's only change to a cell was correcting a wrong comment, a mislabelled print, or an
+    # off-by-one, the tab ends up showing the corrected Polars code beside the uncorrected pandas
+    # code -- under a heading saying "pandas", as though the libraries differed. They do not: in
+    # several of these the cell contains no pandas at all (`scipy.optimize.minimize`,
+    # `sklearn.linear_model.Lasso`, `numpy.random.Generator.integers`), so the tab invents a
+    # library difference out of a bug fix. Worse, it keeps the false statement on the page, which
+    # is what fixing it was for.
+    #
+    # Same reasoning as `modeling_slr`'s `e83b8086` below, and the first four of these twins exist
+    # *only because* of those comment edits -- the conversion had changed nothing else in them.
+    "gradient_descent": {
+        # pandas pane: "returns ... the optimal input value of x which minimizes f" -- the cell
+        # prints 2.393, a local minimum, with the global at 5.326.
+        "ae89e84d",
+        # pandas pane docstring: "Performs n steps" for a loop that performs n-1 and returns n.
+        "cac7a125",
+    },
+    "cv_regularization": {
+        # pandas pane: "The alpha parameter represents our lambda term" -- Lasso's alpha is
+        # lambda/2, and alpha is sklearn's parameter, identical from either library.
+        "d4521d3e",
+        # pandas pane: "alpha represents the hyperparameter lambda" -- Ridge's alpha is n*lambda.
+        "469bfd8e",
+    },
+    "inference_causality": {
+        # pandas pane prints two MSEs under an "RMSE" label, which the conversion corrected.
+        "ce1d6713",
+    },
+    "sampling": {
+        # Both panes call `numpy.random.Generator.integers`, but the pandas half keeps the
+        # pre-existing `high=n_votes-1` (half-open, so it silently excludes the last row) against
+        # the corrected `high=n_votes`. A numpy call shown two ways under a pandas/Polars heading.
+        "04510ea5", "b37cf863",
+    },
     "modeling_slr": {
         # The pandas pane republishes a bug the conversion deliberately fixed, and frames it as a
         # library difference. The baseline cell printed `f"\theta_0: ..."` -- `\t` is Python's tab

@@ -326,7 +326,7 @@ votes['voted_dem'].sample(1000).mean()
 #
 # Note that this is *not* an SRS. `rng.integers` draws each number independently, so the same voter can come up twice — it is the uniform random sample **with** replacement from earlier in the chapter. With 1,000 draws from 44 million voters a repeat turns up in roughly one sample in ninety, which is why the two schemes give such similar answers here.
 
-# %% tags=["remove-input", "remove-output"] id="04510ea5"
+# %% id="04510ea5"
 # Construct a random number generator object.
 # No need to be familiar with using NumPy this way in Data 100!
 rng = np.random.default_rng()
@@ -338,109 +338,15 @@ idx = rng.integers(low=0, high=n_votes, size=1000)
 
 votes['voted_dem'].gather(idx).mean()
 
-# %% [markdown]
-# <!-- tab-twins:begin 04510ea5 -->
-# :::::{tab-set}
-# :::: {tab-item} Polars
-# :sync: pl
-# ```python
-# # Construct a random number generator object.
-# # No need to be familiar with using NumPy this way in Data 100!
-# rng = np.random.default_rng()
-#
-# n_votes = len(votes)
-#
-# # Generate 1000 random integers from 0 to (number of votes - 1)
-# idx = rng.integers(low=0, high=n_votes, size=1000)
-#
-# votes['voted_dem'].gather(idx).mean()
-# ```
-#
-# ```text
-# 0.615
-# ```
-# ::::
-#
-# :::: {tab-item} pandas
-# :sync: pd
-# ```python
-# # Construct a random number generator object.
-# # No need to be familiar with using NumPy this way in Data 100!
-# rng = np.random.default_rng()
-#
-# n_votes = len(votes)
-#
-# # Generate 1000 random integers from 0 to (number of votes - 1)
-# idx = rng.integers(low=0, high=n_votes-1, size=1000)
-#
-# votes['voted_dem'].iloc[idx].mean()
-# ```
-#
-# ```text
-# 0.627
-# ```
-# ::::
-# :::::
-# <!-- tab-twins:end -->
-
 # %% [markdown] id="0c8d6455"
 # Both of the estimates above are pretty close to 62.5%! They are much closer than the estimate from the Literary Digest poll, which predicted that 43% of votes would go to Roosevelt.
 #
 # This is no fluke! If we repeat this over and over, we tend to hover around 62.5%.
 
-# %% tags=["remove-input", "remove-output"] id="b37cf863"
+# %% id="b37cf863"
 for _ in range(10):
   idx = rng.integers(low=0, high=n_votes, size=1000)
   print(votes['voted_dem'].gather(idx).mean())
-
-# %% [markdown]
-# <!-- tab-twins:begin b37cf863 -->
-# :::::{tab-set}
-# :::: {tab-item} Polars
-# :sync: pl
-# ```python
-# for _ in range(10):
-#   idx = rng.integers(low=0, high=n_votes, size=1000)
-#   print(votes['voted_dem'].gather(idx).mean())
-# ```
-#
-# ```text
-# 0.604
-# 0.612
-# 0.623
-# 0.627
-# 0.649
-# 0.606
-# 0.622
-# 0.611
-# 0.617
-# 0.625
-# ```
-# ::::
-#
-# :::: {tab-item} pandas
-# :sync: pd
-# ```python
-# for _ in range(10):
-#   idx = rng.integers(low=0, high=n_votes-1, size=1000)
-#   print(votes['voted_dem'].iloc[idx].mean())
-# ```
-#
-# ```text
-# 0.637
-# 0.626
-# 0.602
-# 0.621
-# 0.65
-# 0.633
-# 0.621
-# 0.618
-# 0.627
-# 0.622
-# ```
-# ::::
-# :::::
-# <!-- tab-twins:end -->
 
 # %% [markdown] id="5577cbce"
 # Let's randomly generate 10,000 estimates:

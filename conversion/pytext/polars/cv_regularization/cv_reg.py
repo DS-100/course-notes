@@ -375,7 +375,7 @@ print(f"Test error: {test_error}")
 #
 # Unlike ordinary least squares, which can be solved via the closed-form solution $\hat{\theta}_{OLS} = (\mathbb{X}^{\top}\mathbb{X})^{-1}\mathbb{X}^{\top}\mathbb{Y}$, **there is no closed-form solution for the optimal parameter vector under L1 regularization**. Instead, we use the `Lasso` model class of `sklearn`.
 
-# %% tags=["remove-input", "remove-output"] id="d4521d3e"
+# %% id="d4521d3e"
 import sklearn.linear_model as lm
 
 # sklearn's alpha is not quite our lambda: Lasso minimizes
@@ -384,46 +384,6 @@ lasso_model = lm.Lasso(alpha=2)
 lasso_model.fit(X_train, Y_train)
 
 lasso_model.coef_
-
-# %% [markdown]
-# <!-- tab-twins:begin d4521d3e -->
-# :::::{tab-set}
-# :::: {tab-item} Polars
-# :sync: pl
-# ```python
-# import sklearn.linear_model as lm
-#
-# # sklearn's alpha is not quite our lambda: Lasso minimizes
-# # (1/(2n))||Y - X.theta||^2 + alpha*||theta||_1, so alpha = lambda/2
-# lasso_model = lm.Lasso(alpha=2)
-# lasso_model.fit(X_train, Y_train)
-#
-# lasso_model.coef_
-# ```
-#
-# ```text
-# array([-2.54932056e-01, -9.48597165e-04,  8.91976284e-06, -1.22872290e-08])
-# ```
-# ::::
-#
-# :::: {tab-item} pandas
-# :sync: pd
-# ```python
-# import sklearn.linear_model as lm
-#
-# # The alpha parameter represents our lambda term
-# lasso_model = lm.Lasso(alpha=2)
-# lasso_model.fit(X_train, Y_train)
-#
-# lasso_model.coef_
-# ```
-#
-# ```text
-# array([-2.54932056e-01, -9.48597165e-04,  8.91976284e-06, -1.22872290e-08])
-# ```
-# ::::
-# :::::
-# <!-- tab-twins:end -->
 
 # %% [markdown] id="c4b0ea5e"
 # An important characteristic of L1 regularization is that it drives model parameters to exactly 0, which is what makes it useful for feature selection. That is not what happened here: none of these four coefficients is zero, and the `hp` coefficient is *larger* than its unregularized value. The coefficients look small only because `hp^2` through `hp^4` are enormous — which is the problem the next section fixes. In other words, LASSO effectively **selects only a subset** of the features. The reason for this comes back to our loss surface and allowed "diamond" regions from earlier – we can often get closer to the lowest loss contour at a corner of the diamond than along an edge. 
@@ -533,48 +493,13 @@ pl.DataFrame({"Feature":X_train.columns, "Parameter":lasso_model.coef_})
 #
 # In `sklearn`, we perform L2 regularization using the `Ridge` class. Unlike LASSO, L2 has a closed-form solution, and `Ridge` uses it: with the default `solver="auto"` on a dense problem it performs a direct Cholesky solve rather than iterating. Notice that we do **not** scale the data here, which is what the next section is about — the four features span `hp` in the tens and `hp^4` in the tens of millions.
 
-# %% tags=["remove-input", "remove-output"] id="469bfd8e"
+# %% id="469bfd8e"
 # Ridge minimizes ||Y - X.theta||^2 + alpha*||theta||^2 with no 1/n,
 # so alpha = n*lambda -- alpha=1 here is lambda = 1/313
 ridge_model = lm.Ridge(alpha=1)
 ridge_model.fit(X_train, Y_train)
 
 ridge_model.coef_
-
-# %% [markdown]
-# <!-- tab-twins:begin 469bfd8e -->
-# :::::{tab-set}
-# :::: {tab-item} Polars
-# :sync: pl
-# ```python
-# # Ridge minimizes ||Y - X.theta||^2 + alpha*||theta||^2 with no 1/n,
-# # so alpha = n*lambda -- alpha=1 here is lambda = 1/313
-# ridge_model = lm.Ridge(alpha=1)
-# ridge_model.fit(X_train, Y_train)
-#
-# ridge_model.coef_
-# ```
-#
-# ```text
-# array([ 5.89130559e-02, -6.42445915e-03,  4.44468157e-05, -8.83981945e-08])
-# ```
-# ::::
-#
-# :::: {tab-item} pandas
-# :sync: pd
-# ```python
-# ridge_model = lm.Ridge(alpha=1) # alpha represents the hyperparameter lambda
-# ridge_model.fit(X_train, Y_train)
-#
-# ridge_model.coef_
-# ```
-#
-# ```text
-# array([ 5.89130560e-02, -6.42445916e-03,  4.44468157e-05, -8.83981945e-08])
-# ```
-# ::::
-# :::::
-# <!-- tab-twins:end -->
 
 # %% [markdown] id="915cc4e7"
 # ## Regression Summary

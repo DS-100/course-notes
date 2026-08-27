@@ -1194,52 +1194,13 @@ plt.title(r"Bootstrapped estimates $\hat{\theta}_1$ Under the Interpretable Mode
 # %% [markdown] id="b7e6c0dc"
 # Notice how the interpretable model performs almost as well as our other model:
 
-# %% tags=["remove-input", "remove-output"] id="ce1d6713"
+# %% id="ce1d6713"
 from sklearn.metrics import mean_squared_error
 
 mse = mean_squared_error(Y, model.predict(X))
 mse_int = mean_squared_error(Y_int, model_int.predict(X_int))
 print(f'MSE of Original Model: {mse}')
 print(f'MSE of Interpretable Model: {mse_int}')
-
-# %% [markdown]
-# <!-- tab-twins:begin ce1d6713 -->
-# :::::{tab-set}
-# :::: {tab-item} Polars
-# :sync: pl
-# ```python
-# from sklearn.metrics import mean_squared_error
-#
-# mse = mean_squared_error(Y, model.predict(X))
-# mse_int = mean_squared_error(Y_int, model_int.predict(X_int))
-# print(f'MSE of Original Model: {mse}')
-# print(f'MSE of Interpretable Model: {mse_int}')
-# ```
-#
-# ```text
-# MSE of Original Model: 0.04547085380275759
-# MSE of Interpretable Model: 0.046493941375556846
-# ```
-# ::::
-#
-# :::: {tab-item} pandas
-# :sync: pd
-# ```python
-# from sklearn.metrics import mean_squared_error
-#
-# rmse = mean_squared_error(Y, model.predict(X))
-# rmse_int = mean_squared_error(Y_int, model_int.predict(X_int))
-# print(f'RMSE of Original Model: {rmse}')
-# print(f'RMSE of Interpretable Model: {rmse_int}')
-# ```
-#
-# ```text
-# RMSE of Original Model: 0.04547085380275775
-# RMSE of Interpretable Model: 0.046493941375556846
-# ```
-# ::::
-# :::::
-# <!-- tab-twins:end -->
 
 # %% [markdown] id="dcf12c3b"
 # Yet, the confidence interval for the true parameter $\theta_{1}$ does not contain zero.

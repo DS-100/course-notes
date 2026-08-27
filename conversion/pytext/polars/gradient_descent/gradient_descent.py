@@ -566,67 +566,13 @@ fig.show()
 #
 # One way to minimize this mathematical function is to use the `scipy.optimize.minimize` function. It takes a function and a starting guess and tries to find the minimum.
 
-# %% tags=["remove-input", "remove-output"] id="ae89e84d"
+# %% id="ae89e84d"
 from scipy.optimize import minimize
 
 # takes a function f and a starting point x0 and returns a readout with an
 # input value of x where f is at a minimum -- note it walks downhill from x0,
 # so it finds the *local* minimum near 2.39, not the global one near 5.33
 minimize(arbitrary, x0 = 3.5)
-
-# %% [markdown]
-# <!-- tab-twins:begin ae89e84d -->
-# :::::{tab-set}
-# :::: {tab-item} Polars
-# :sync: pl
-# ```python
-# from scipy.optimize import minimize
-#
-# # takes a function f and a starting point x0 and returns a readout with an
-# # input value of x where f is at a minimum -- note it walks downhill from x0,
-# # so it finds the *local* minimum near 2.39, not the global one near 5.33
-# minimize(arbitrary, x0 = 3.5)
-# ```
-#
-# ```text
-#   message: Optimization terminated successfully.
-#   success: True
-#    status: 0
-#       fun: -0.13827491292966557
-#         x: [ 2.393e+00]
-#       nit: 3
-#       jac: [ 6.486e-06]
-#  hess_inv: [[ 7.385e-01]]
-#      nfev: 20
-#      njev: 10
-# ```
-# ::::
-#
-# :::: {tab-item} pandas
-# :sync: pd
-# ```python
-# from scipy.optimize import minimize
-#
-# # takes a function f and a starting point x0 and returns a readout
-# # with the optimal input value of x which minimizes f
-# minimize(arbitrary, x0 = 3.5)
-# ```
-#
-# ```text
-#   message: Optimization terminated successfully.
-#   success: True
-#    status: 0
-#       fun: -0.13827491292966557
-#         x: [ 2.393e+00]
-#       nit: 3
-#       jac: [ 6.486e-06]
-#  hess_inv: [[ 7.385e-01]]
-#      nfev: 20
-#      njev: 10
-# ```
-# ::::
-# :::::
-# <!-- tab-twins:end -->
 
 # %% [markdown] id="b6d90915"
 # `scipy.optimize.minimize` is great. It may also seem a bit magical. How could you write a function that can find the minimum of any mathematical function? There are a number of ways to do this, which we'll explore in today's lecture, eventually arriving at the important idea of **gradient descent**. `scipy.optimize.minimize` does not use gradient descent itself — with no gradient supplied it defaults to BFGS, a close relative that also walks downhill but sizes each step using an approximation of the curvature. Gradient descent is the simpler idea underneath it, and the one worth understanding first.
@@ -969,104 +915,3 @@ plt.xlabel(r"$\theta_1$")
 plt.ylabel(r"$L(\theta_1)$");
 
 print(f"Final guess for theta_1: {trajectory[-1]}")
-
-# %% [markdown]
-# <!-- tab-twins:begin cac7a125 -->
-# :::::{tab-set}
-# :::: {tab-item} Polars
-# :sync: pl
-# ```python
-# def gradient_descent(df, initial_guess, alpha, n):
-#     """Performs n-1 update steps of gradient descent, counting the starting guess on df using learning rate alpha starting
-#        from initial_guess. Returns a numpy array of all guesses over time."""
-#     guesses = [initial_guess]
-#     current_guess = initial_guess
-#     while len(guesses) < n:
-#         current_guess = current_guess - alpha * df(current_guess)
-#         guesses.append(current_guess)
-#
-#     return np.array(guesses)
-#
-# def mse_single_arg(theta_1):
-#     """Returns the MSE on our data for the given theta1"""
-#     x = df["total_bill"]
-#     y_obs = df["tip"]
-#     y_hat = theta_1 * x
-#     return ((y_hat - y_obs) ** 2).mean()
-#
-# def mse_loss_derivative_single_arg(theta_1):
-#     """Returns the derivative of the MSE on our data for the given theta1"""
-#     x = df["total_bill"]
-#     y_obs = df["tip"]
-#     y_hat = theta_1 * x
-#
-#     return (2 * (y_hat - y_obs) * x).mean()
-#
-# loss_df = pl.DataFrame({"theta_1":np.linspace(-1.5, 1), "MSE":[mse_single_arg(theta_1) for theta_1 in np.linspace(-1.5, 1)]})
-#
-# trajectory = gradient_descent(mse_loss_derivative_single_arg, -0.5, 0.0001, 100)
-#
-# plt.plot(loss_df["theta_1"], loss_df["MSE"])
-# plt.scatter(trajectory, [mse_single_arg(guess) for guess in trajectory], c="white", edgecolor="firebrick")
-# plt.scatter(trajectory[-1], mse_single_arg(trajectory[-1]), c="firebrick")
-# plt.xlabel(r"$\theta_1$")
-# plt.ylabel(r"$L(\theta_1)$");
-#
-# print(f"Final guess for theta_1: {trajectory[-1]}")
-# ```
-#
-# ```text
-# Final guess for theta_1: 0.14369554654231262
-# <Figure size 640x480 with 1 Axes>
-# ```
-# ::::
-#
-# :::: {tab-item} pandas
-# :sync: pd
-# ```python
-# def gradient_descent(df, initial_guess, alpha, n):
-#     """Performs n steps of gradient descent on df using learning rate alpha starting
-#        from initial_guess. Returns a numpy array of all guesses over time."""
-#     guesses = [initial_guess]
-#     current_guess = initial_guess
-#     while len(guesses) < n:
-#         current_guess = current_guess - alpha * df(current_guess)
-#         guesses.append(current_guess)
-#
-#     return np.array(guesses)
-#
-# def mse_single_arg(theta_1):
-#     """Returns the MSE on our data for the given theta1"""
-#     x = df["total_bill"]
-#     y_obs = df["tip"]
-#     y_hat = theta_1 * x
-#     return np.mean((y_hat - y_obs) ** 2)
-#
-# def mse_loss_derivative_single_arg(theta_1):
-#     """Returns the derivative of the MSE on our data for the given theta1"""
-#     x = df["total_bill"]
-#     y_obs = df["tip"]
-#     y_hat = theta_1 * x
-#
-#     return np.mean(2 * (y_hat - y_obs) * x)
-#
-# loss_df = pd.DataFrame({"theta_1":np.linspace(-1.5, 1), "MSE":[mse_single_arg(theta_1) for theta_1 in np.linspace(-1.5, 1)]})
-#
-# trajectory = gradient_descent(mse_loss_derivative_single_arg, -0.5, 0.0001, 100)
-#
-# plt.plot(loss_df["theta_1"], loss_df["MSE"])
-# plt.scatter(trajectory, [mse_single_arg(guess) for guess in trajectory], c="white", edgecolor="firebrick")
-# plt.scatter(trajectory[-1], mse_single_arg(trajectory[-1]), c="firebrick")
-# plt.xlabel(r"$\theta_1$")
-# plt.ylabel(r"$L(\theta_1)$");
-#
-# print(f"Final guess for theta_1: {trajectory[-1]}")
-# ```
-#
-# ```text
-# Final guess for theta_1: 0.14369554654231262
-# <Figure size 640x480 with 1 Axes>
-# ```
-# ::::
-# :::::
-# <!-- tab-twins:end -->

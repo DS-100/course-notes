@@ -606,7 +606,7 @@ np.mean(drinks), np.median(drinks)
 #
 # Notice that the MSE above is a **smooth** function – it is differentiable at all points, making it easy to minimize using numerical methods. The MAE, in contrast, is not differentiable at each of its "kinks." We'll explore how the smoothness of the cost function can impact our ability to apply numerical optimization in a few weeks.
 #
-# How do outliers affect each cost function? Imagine we replace the largest value in the dataset with 1000. The mean of the data increases substantially, while the median is nearly unaffected.
+# How do outliers affect each cost function? Imagine we add a sixth, wildly out-of-scale value of 1033 to the dataset. The mean of the data increases substantially — from 25 to 193 — while the median barely moves, from 22 to 25.5.
 
 # %% id="85da3718"
 drinks_with_outlier = np.append(drinks, 1033)
@@ -636,7 +636,7 @@ drinks_with_additional_observation
 #
 # ```{image} images/mae_loss_infinite.png
 # :width: 350 
-# :alt: MAE is shown with theta close to 5.
+# :alt: MAE plotted against theta-nought from 0 to 40. The curve falls steeply, flattens into a horizontal segment between about 22 and 29 at an MAE of roughly 5.7, then rises again. A dot marks a minimising theta of about 25.5 in the middle of that flat segment.
 # ```
 #
 # To summarize our example,
@@ -645,10 +645,10 @@ drinks_with_additional_observation
 # | ---------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------- |
 # | Loss Function                  | $\hat{R}(\theta) = \frac{1}{n}\sum^{n}_{i=1} (y_i - \theta_0)^2$                                            | $\hat{R}(\theta) = \frac{1}{n}\sum^{n}_{i=1} \lvert y_i - \theta_0 \rvert$                                               |
 # | Optimal $\hat{\theta_0}$                   | $\hat{\theta_0} = mean(y) = \bar{y}$                      | $\hat{\theta_0} = median(y)$                 |
-# | Loss Surface           | ![MSE is shown with theta=26.7](images/mse_loss_26.png)  | ![MAE is shown with theta close to 5.](images/mae_loss_infinite.png)    |
+# | Loss Surface           | ![MSE is shown with theta=26.7](images/mse_loss_26.png)  | ![MAE plotted against theta-nought, with a flat minimum between about 22 and 29 at an MAE of roughly 5.7.](images/mae_loss_infinite.png)    |
 # | Shape            | **Smooth** - easy to minimize using numerical methods (in a few weeks)  | **Piecewise** - at each of the “kinks,” it’s not differentiable. Harder to minimize. |
 # | Outliers                   | **Sensitive** to outliers (since they change mean substantially). Sensitivity also depends on the dataset size.                                                            | **More robust** to outliers.                                                                           |
-# | $\hat{\theta_0}$ Uniqueness | **Unique** $\hat{\theta_0}$                              | **Infinitely many** $\hat{\theta_0}$s                                    |
+# | $\hat{\theta_0}$ Uniqueness | **Unique** $\hat{\theta_0}$                              | **Not always unique** — a single $\hat{\theta_0}$ when $n$ is odd, an interval of them when $n$ is even                                    |
 #
 # ## Transformations of Linear Models
 #
