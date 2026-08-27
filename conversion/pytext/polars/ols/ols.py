@@ -53,7 +53,7 @@ nba.head(5)
 #
 # Suppose we want to fit a linear model by using some characteristics, or **features** of a player. Specifically, we'll focus on field goals, assists, and 3-point attempts.
 #
-# * `FG`, the average number of (2-point) field goals per game
+# * `FG`, the average number of field goals made per game — all of them, three-pointers included, so `FG` is `2P` plus `3P`
 # * `AST`, the average number of assists per game
 # * `3PA`, the average number of 3-point field goals attempted per game
 
@@ -230,7 +230,7 @@ nba.select(['FG', 'AST', '3PA', 'PTS']).head()
 # When working with vectors, this idea of "distance" or the vector's **size/length** is represented by the **norm**. More precisely, the distance between two vectors $\vec{a}$ and $\vec{b}$ can be expressed as:
 # $$||\vec{a} - \vec{b}||_2 = \sqrt{(a_1 - b_1)^2 + (a_2 - b_2)^2 + \ldots + (a_n - b_n)^2} = \sqrt{\sum_{i=1}^n (a_i - b_i)^2}$$
 #
-# The double bars are mathematical notation for the norm. The subscript 2 indicates that we are computing the L2, or squared norm.
+# The double bars are mathematical notation for the norm. The subscript 2 indicates that we are computing the L2, or Euclidean, norm.
 #
 # The two norms we need to know for Data 100 are the L1 and L2 norms (sound familiar?). In this note, we'll focus on L2 norm. We'll dive into L1 norm in future lectures. 
 #

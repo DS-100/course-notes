@@ -197,7 +197,9 @@ babies_by_year.head(5)
 # :::: {tab-item} pandas
 # :sync: pd
 # ```python
-# babynames_pd.groupby("Year")["Count"].sum().head(5)
+# # pandas sorted the group keys for us -- we never asked it to
+# babies_by_year_pd = babynames_pd.groupby("Year")["Count"].sum()
+# babies_by_year_pd.head(5)
 # ```
 #
 # ```text
@@ -1159,7 +1161,7 @@ fig
 # ```
 # ````
 
-# %% tags=["remove-input"] id="p2-load-elections"
+# %% tags=["remove-input", "remove-output"] id="p2-load-elections"
 elections = pl.read_csv("data/elections.csv")
 elections.head(5)
 

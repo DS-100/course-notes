@@ -90,7 +90,7 @@
 # \widehat{\text{mpg}} = \hat{\theta}_0 + \hat{\theta}_1 * \text{weight}
 # $$
 #
-# Suppose we collected a sample of 20 cars from a population. For the purposes of this demo, we will assume that the `seaborn`'s `mpg` dataset represents the entire population. The following is a visualization of our sample:
+# Suppose we collected a sample of 100 cars from a population. For the purposes of this demo, we will assume that the `seaborn`'s `mpg` dataset represents the entire population. The following is a visualization of our sample:
 #
 # ````{dropdown} Click to see the code
 # ```python
@@ -110,7 +110,7 @@
 # ```
 # ````
 
-# %% tags=["remove-input", "remove-output"] id="b241cb77"
+# %% tags=["remove-input"] id="b241cb77"
 import numpy as np
 import polars as pl
 import plotly.express as px
@@ -338,7 +338,7 @@ px.histogram(thetas.unpivot(), x='value', facet_row='variable',
              title='Distribution of the Slope', width=800)
 
 # %% [markdown] id="a30378ef"
-# Although our bootstrapped sample distribution does not exactly match the sampling distribution of the population, we can see that it is relatively close. This demonstrates the benefit of bootstrapping — without knowing the actual population distribution, we can still roughly approximate the true slope for the model by using only a single random sample of 20 cars.
+# Although our bootstrapped sample distribution does not exactly match the sampling distribution of the population, we can see that it is relatively close. Read the two carefully, though: the bootstrap resamples 100 cars, because that is the size of the sample we drew, while the population curve beside it is built from repeated draws of 20. Resample size has to match the original sample — that is the rule stated two sections above — so the narrower bootstrap spread is a consequence of the larger $n$, not evidence that bootstrapping understates the variability. This demonstrates the benefit of bootstrapping — without knowing the actual population distribution, we can still roughly approximate the true slope for the model by using only a single random sample of 100 cars.
 #
 #
 # <!-- #### PurpleAir (chose to skip this section because it's too complex for the amount of pedagogical value it adds)
@@ -698,7 +698,7 @@ display(pl.DataFrame({
   "theta_hat": [model.intercept_] + list(model.coef_),
 }))
 
-print("RMSE", ((Y - model.predict(X)) ** 2).mean())
+print("MSE", ((Y - model.predict(X)) ** 2).mean())
 
 # %% [markdown]
 # <!-- tab-twins:begin add45dc7 -->
@@ -724,7 +724,7 @@ print("RMSE", ((Y - model.predict(X)) ** 2).mean())
 #   "theta_hat": [model.intercept_] + list(model.coef_),
 # }))
 #
-# print("RMSE", ((Y - model.predict(X)) ** 2).mean())
+# print("MSE", ((Y - model.predict(X)) ** 2).mean())
 # ```
 #
 # ```text
@@ -739,6 +739,7 @@ print("RMSE", ((Y - model.predict(X)) ** 2).mean())
 # │ egg_length  ┆ 0.06657   │
 # │ egg_breadth ┆ 0.215914  │
 # └─────────────┴───────────┘
+# MSE 0.04547085380275759
 # ```
 # ::::
 #
@@ -773,6 +774,7 @@ print("RMSE", ((Y - model.predict(X)) ** 2).mean())
 # egg_weight    0.431229
 # egg_length    0.066570
 # egg_breadth   0.215914
+# RMSE 0.04547085380275775
 # ```
 # ::::
 # :::::
@@ -1192,13 +1194,52 @@ plt.title(r"Bootstrapped estimates $\hat{\theta}_1$ Under the Interpretable Mode
 # %% [markdown] id="b7e6c0dc"
 # Notice how the interpretable model performs almost as well as our other model:
 
-# %% id="ce1d6713"
+# %% tags=["remove-input", "remove-output"] id="ce1d6713"
 from sklearn.metrics import mean_squared_error
 
-rmse = mean_squared_error(Y, model.predict(X))
-rmse_int = mean_squared_error(Y_int, model_int.predict(X_int))
-print(f'RMSE of Original Model: {rmse}')
-print(f'RMSE of Interpretable Model: {rmse_int}')
+mse = mean_squared_error(Y, model.predict(X))
+mse_int = mean_squared_error(Y_int, model_int.predict(X_int))
+print(f'MSE of Original Model: {mse}')
+print(f'MSE of Interpretable Model: {mse_int}')
+
+# %% [markdown]
+# <!-- tab-twins:begin ce1d6713 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# from sklearn.metrics import mean_squared_error
+#
+# mse = mean_squared_error(Y, model.predict(X))
+# mse_int = mean_squared_error(Y_int, model_int.predict(X_int))
+# print(f'MSE of Original Model: {mse}')
+# print(f'MSE of Interpretable Model: {mse_int}')
+# ```
+#
+# ```text
+# MSE of Original Model: 0.04547085380275759
+# MSE of Interpretable Model: 0.046493941375556846
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# from sklearn.metrics import mean_squared_error
+#
+# rmse = mean_squared_error(Y, model.predict(X))
+# rmse_int = mean_squared_error(Y_int, model_int.predict(X_int))
+# print(f'RMSE of Original Model: {rmse}')
+# print(f'RMSE of Interpretable Model: {rmse_int}')
+# ```
+#
+# ```text
+# RMSE of Original Model: 0.04547085380275775
+# RMSE of Interpretable Model: 0.046493941375556846
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="dcf12c3b"
 # Yet, the confidence interval for the true parameter $\theta_{1}$ does not contain zero.

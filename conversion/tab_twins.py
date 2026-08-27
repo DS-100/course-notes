@@ -65,18 +65,26 @@ def committed_output(cell) -> str:
     `and`-instead-of-`&` demo the two libraries reject the same mistake in different words -- which
     is the most useful pair on the page. Rendering only `ename: evalue` keeps the traceback's file
     paths and line numbers, which move on every run, out of a frozen block.
+
+    **Every** output, in order, not the first one carrying text. A cell that prints and then returns
+    a value has two, and returning only the first silently truncated the pane: `inference_causality`
+    showed a tab whose code ended in `print("RMSE", ...)` above an output block with no printed line,
+    and because the live cell is hidden the tab was all the reader had to reconcile it against.
     """
+    parts = []
     for o in cell.get("outputs", []):
         if o.get("output_type") == "error":
-            return f"{o.get('ename', '?')}: {o.get('evalue', '')}".rstrip()
+            parts.append(f"{o.get('ename', '?')}: {o.get('evalue', '')}".rstrip())
+            continue
+        if o.get("output_type") == "stream":
+            t = o.get("text", "")
+            parts.append(("".join(t) if isinstance(t, list) else t).rstrip("\n"))
+            continue
         d = o.get("data", {})
         if "text/plain" in d:
             t = d["text/plain"]
-            return ("".join(t) if isinstance(t, list) else t).rstrip("\n")
-        if o.get("output_type") == "stream":
-            t = o.get("text", "")
-            return ("".join(t) if isinstance(t, list) else t).rstrip("\n")
-    return ""
+            parts.append(("".join(t) if isinstance(t, list) else t).rstrip("\n"))
+    return "\n".join(p for p in parts if p)
 
 
 def raises(cell) -> bool:
@@ -163,6 +171,32 @@ def chapter_files(chapter: str) -> tuple:
     nbs = sorted(Path(f"content/{chapter}").glob("*.ipynb"))
     pys = sorted(Path(f"conversion/pytext/polars/{chapter}").glob("*.py"))
     return (nbs[0] if nbs else None), (pys[0] if pys else None)
+
+
+PANE_MIMES = {"text/plain", "text/html"}
+
+
+def text_reproducible(cell) -> bool:
+    """Can a frozen ```text pane carry everything this cell puts on the page?
+
+    The panes are text. Hiding a cell whose output is a matplotlib PNG or a plotly figure does not
+    move that figure into the tab -- it deletes it from the chapter, and leaves the tab showing
+    whatever `print()` happened to run alongside. Six cells were in that state: four matplotlib,
+    two plotly whose only output *is* the figure (they carry no `text/plain` at all). The build
+    made it visible in an unrelated way -- a shown PNG is written out to `_build/html/build/<md>.png`
+    and a hidden one stays inline base64, so the page shipped 119 KB of image it never drew.
+
+    Streams are reproducible: `committed_output` already captures stdout. So is an error -- the
+    twin renders `ename: evalue`, dropping only the traceback frames, which is why `polars_1`'s
+    deliberate `TypeError` demo stays hidden and keeps its twin.
+    """
+    for o in cell.get("outputs", []):
+        if o.get("output_type") in ("stream", "error"):
+            continue
+        for mime in (o.get("data") or {}):
+            if mime not in PANE_MIMES:
+                return False
+    return True
 
 
 FIGURE_STUB = re.compile(r"\A<Figure size [^>]*>\Z")
@@ -284,23 +318,33 @@ def run(chapter: str, verify: bool, from_baseline: bool = False) -> int:
     nbp, _ = chapter_files(chapter)
     if nbp is None:
         print(f"  {chapter}: no notebook in content/{chapter}/ -- markdown-only chapter")
-        return 0, {}
+        return 0, {}, set()
     nb = nbformat.read(str(nbp), as_version=4)
     code_cells = [c for c in nb.cells if c.cell_type == "code"]
     blocks: dict[str, str] = {}
+    keep_output: set[str] = set()     # markers whose cell must keep rendering its own output
     identical = 0
 
     if from_baseline:
         items, problems = collect_from_baseline(chapter, code_cells)
+        # Keyed by cell id, not by `locator_for`. Two cells can share their longest line -- in
+        # `sampling`, `04510ea5` and `b37cf863` both have `idx = rng.integers(...)` -- and the
+        # second then overwrote the first in this dict. The twin vanished with no error, and the
+        # orphan check could not see it because the declared count fell by one too. Ids are unique
+        # by construction, and placement goes by id anyway.
         for _, cell, locator, pd_code, pd_out in items:
-            blocks[locator] = build_block(
-                cell.get("id"), polars_source(cell), committed_output(cell), pd_code, pd_out
+            key = cell.get("id")
+            assert key not in blocks, f"{chapter}: duplicate cell id {key}"
+            blocks[key] = build_block(
+                key, polars_source(cell), committed_output(cell), pd_code, pd_out
             )
+            if not text_reproducible(cell):
+                keep_output.add(blocks[key].splitlines()[0])
     else:
         spec = TWINS.get(chapter)
         if not spec or not spec["cells"]:
             print(f"  {chapter}: no twins declared yet")
-            return 0, {}
+            return 0, {}, set()
         items, problems = collect_handwritten(chapter, code_cells)
         env: dict = {}
         cwd = os.getcwd()
@@ -339,6 +383,8 @@ def run(chapter: str, verify: bool, from_baseline: bool = False) -> int:
                     identical += 1
                     continue
                 blocks[locator] = build_block(locator, pl_code, pl_out, pd_code, pd_out)
+                if not text_reproducible(cell):
+                    keep_output.add(blocks[locator].splitlines()[0])
         finally:
             os.chdir(cwd)
 
@@ -376,25 +422,76 @@ def run(chapter: str, verify: bool, from_baseline: bool = False) -> int:
         print(f"  {chapter}: {len(blocks)} block(s) generated{note}")
     for p_ in problems[:8]:
         print(f"    {p_}")
-    return (1 if problems else 0), blocks
+    return (1 if problems else 0), blocks, keep_output
 
 
-def apply_to_pytext(chapter: str, blocks: dict) -> int:
+def prune_orphans(chapter: str, text: str, declared: set) -> tuple:
+    """Remove tab blocks nobody declares any more, and unhide the cell each was hiding.
+
+    A twin can stop being declared -- the order-instability guard drops one, or a pair turns out
+    not to be the same operation and goes into `BASELINE_SKIP`. The block does not leave with it,
+    and the cell stays tagged, so the chapter publishes a comparison that is no longer generated
+    and, worse, keeps hiding a cell whose replacement is gone. This has now happened three times:
+    `polars_1`'s `value_counts`/`unique` twins, `polars_2`'s duplicated `read_csv` tab-set, and
+    `intro_lec`'s four Index mispairings.
+
+    Tags are restored from the pinned baseline rather than simply stripped, so a cell that carried
+    `remove-input` before any of this still carries it afterwards.
+    """
+    baseline_tags = {}
+    for cid, cell in (baseline_code_cells(chapter) or {}).items():
+        baseline_tags[cid] = list(cell.get("metadata", {}).get("tags", []) or [])
+    pruned = 0
+    while True:
+        m = re.search(r"\n# %% \[markdown\]\n# (<!-- tab-twins:begin .*? -->)(?:.|\n)*?"
+                      + re.escape("# " + MARK_END) + r"\n", text)
+        if m is None:
+            break
+        if m.group(1) in declared:
+            # Declared: leave it for the main loop to replace in place. Skip past it by looking
+            # only at what follows -- recursion on the remainder, not a rescan from zero.
+            head, tail = text[:m.end()], text[m.end():]
+            tail, n = prune_orphans(chapter, tail, declared)
+            return head + tail, pruned + n
+        # Orphan. Drop the block, then restore the twinned cell's baseline tags.
+        cid_m = re.match(r"<!-- tab-twins:begin (\S+) -->", m.group(1))
+        text = text[:m.start()] + text[m.end():]
+        pruned += 1
+        head = text.rfind("\n# %%", 0, m.start() + 1)
+        if head == -1:
+            continue
+        line_end = text.find("\n", head + 1)
+        header = text[head + 1:line_end]
+        want = baseline_tags.get(cid_m.group(1) if cid_m else None, [])
+        rendered = ("tags=[" + ", ".join('"%s"' % t for t in sorted(want)) + "] ") if want else ""
+        new_header = re.sub(r'tags=\[[^\]]*\] ?', rendered, header) if "tags=" in header else header
+        text = text[:head + 1] + new_header + text[line_end:]
+    return text, pruned
+
+
+def apply_to_pytext(chapter: str, blocks: dict, keep_output=frozenset()) -> int:
     """Write the tab blocks into the jupytext source, and hide the live cell they mirror.
 
     The live Polars cell keeps executing -- that is what proves the Polars code still runs and
-    what `outputs-fresh` checks -- but it is hidden, because the tab beneath it shows the same
-    code and the same output. Hiding takes both `remove-input` and `remove-output`: mystmd 1.6.6
-    records them on the code and output *children* of the block (the block itself stays
-    `visibility: "show"`), so a review that reads only the block's own visibility will conclude
-    the cell is still on the page. `remove-cell` sets the block's visibility instead, but it drops
-    the cell entirely -- including from `outputs-fresh`'s view -- which hard rule 5 forbids.
+    what `outputs-fresh` checks -- but its *code* is hidden, because the tab beneath it shows the
+    same code. Its output is hidden too, unless the tab cannot carry that output: see
+    `text_reproducible`. Hiding takes `remove-input` and `remove-output` rather than `remove-cell`,
+    which drops the cell entirely -- including from `outputs-fresh`'s view -- and so is forbidden
+    by hard rule 5. Note mystmd 1.6.6 records both on the code and output *children* of the block,
+    leaving the block itself `visibility: "show"`; a review that reads only the block's own
+    visibility will conclude nothing was hidden.
+
+    Tags are decided before the block is written, not after, and on every pass. They used to be set
+    only on the branch that *inserts* a new block, so a twin whose block already existed kept
+    whatever tags it happened to have -- which is how `polars_2`'s `p2-load-elections` came to
+    render its table and then repeat it in the tab immediately below.
     """
     _, path = chapter_files(chapter)
     if path is None:
         print(f"  {chapter}: no jupytext source in conversion/pytext/polars/{chapter}/")
         return 1
     text = path.read_text()
+    text, pruned = prune_orphans(chapter, text, {b.splitlines()[0] for b in blocks.values()})
     added = 0
     for key, block in blocks.items():
         # The dict key locates the cell in the `.py`; the marker names it in the page. They are
@@ -403,61 +500,35 @@ def apply_to_pytext(chapter: str, blocks: dict) -> int:
         # off the block rather than assuming it equals the key.
         marker = block.splitlines()[0]
         commented = "\n".join(("# " + l).rstrip() for l in block.splitlines())
-        existing = re.search(
-            re.escape("# " + marker) + r".*?" + re.escape("# " + MARK_END),
-            text, re.S,
-        )
-        if existing:
-            # Normalize the run of blank lines that opens this cell while replacing it. Percent
-            # format separates cells with exactly one, and any extra ends up inside the *previous*
-            # cell's source -- which changes that cell's source, which makes the output splice
-            # drop its output. Removing a block by hand is enough to leave a stray line behind, so
-            # repair it here rather than trusting whatever produced the file.
-            head_ = re.search(r"\n\n+# %% \[markdown\]\n\Z", text[:existing.start()])
-            start = head_.start() if head_ else existing.start()
-            text = text[:start] + "\n\n# %% [markdown]\n" + commented + text[existing.end():]
-            added += 1
-            continue
-        # Locate the live *code* cell containing the key.
+
+        # -- locate the live code cell -------------------------------------------------------
         #
-        # Not simply the first textual match. A `{dropdown}` repeats its cell's source verbatim and
-        # the chapter intros quote the loader, so the first match is often the prose copy. Walking
-        # back from one of those lands on a markdown header, and tagging it rewrites
-        # `# %% [markdown]` into `# %% tags=[...] [markdown]`, which jupytext stops reading as
-        # markdown -- that is exactly how the Polars II frontmatter cell became a code cell and the
-        # chapter lost its title.
-        #
-        # Refusing the markdown match was the first fix and it stopped the corruption, but it also
-        # meant 26 of the 87 baseline-paired twins had nowhere to go. So skip past prose matches and
-        # keep looking: the code cell is almost always further down.
         # Prefer the cell *id*. A baseline-paired marker names the cell it twins, and the `.py`
         # carries ids in its headers (`# %% id="fea17420"`), so the match is exact. Matching on
         # source text instead is only nearly right: a locator line can appear in more than one
         # code cell, and the block then lands under an earlier cell whose output it does not
-        # describe. That is not hypothetical -- five chapters placed a twin against the wrong
-        # cell this way, and the page showed a pandas pane next to unrelated Polars code.
-        head = nxt = -1
+        # describe. That is not hypothetical -- five chapters placed a twin against the wrong cell
+        # this way, and the page showed a pandas pane next to unrelated Polars code.
+        head = -1
         m = re.match(r"<!-- tab-twins:begin (\S+) -->", marker)
         if m:
             h = re.search(r'^# %%(?![^\n]*\[markdown\])[^\n]*\bid="%s"' % re.escape(m.group(1)),
                           text, re.M)
             if h and h.start() > 0:
-                head, nxt = h.start() - 1, text.find("\n# %%", h.end())
-
+                head = h.start() - 1
         if head == -1:
             # No id to go on (hand-written twins in the rewritten chapters). Fall back to source
             # text, skipping prose matches: a `{dropdown}` repeats its cell's source verbatim, and
             # walking back from one lands on a markdown header. Tagging that rewrites
             # `# %% [markdown]` into `# %% tags=[...] [markdown]`, which jupytext stops reading as
             # markdown -- exactly how Polars II lost its title.
-            search_from = 0
+            search_from, idx = 0, -1
             while True:
                 idx = text.find(key, search_from)
                 if idx == -1:
                     break
                 head = text.rfind("\n# %%", 0, idx)
-                nxt = text.find("\n# %%", idx)
-                if head == -1 or nxt == -1:
+                if head == -1:
                     search_from = idx + 1
                     continue
                 if "[markdown]" not in text[head + 1:text.find("\n", head + 1)]:
@@ -466,36 +537,53 @@ def apply_to_pytext(chapter: str, blocks: dict) -> int:
             if idx == -1:
                 print(f"    {key[:44]!r}: no live code cell carries this locator")
                 continue
-        if nxt == -1:
-            nxt = len(text)
-        header = text[head + 1:text.find("\n", head + 1)]
-        line_end = text.find("\n", head + 1)
+
+        # -- set the cell's tags -------------------------------------------------------------
+        #
         # Merge, do not skip. A cell that already carried `remove-input` -- the "hide the loader,
         # show the table" pattern that runs through this book -- used to be left alone, so its
         # output rendered above a tab-set repeating the same table. Thirty-five cells did that.
+        line_end = text.find("\n", head + 1)
+        header = text[head + 1:line_end]
         m_tags = re.search(r'tags=\[([^\]]*)\]', header)
         have = set(re.findall(r'"([^"]+)"', m_tags.group(1))) if m_tags else set()
-        want = have | {"remove-input", "remove-output"}
+        want = have | {"remove-input"}
+        if marker in keep_output:
+            # This cell shows something the pane cannot reproduce, so its output must render.
+            # Discarding a `remove-output` already there is safe: no chapter carried that tag
+            # before this tool, so any occurrence of it on a twinned cell was put there by it.
+            want -= {"remove-output"}
+        else:
+            want |= {"remove-output"}
         if want != have:
             rendered = "tags=[" + ", ".join('"%s"' % t for t in sorted(want)) + "]"
-            new_header = (header[:m_tags.start()] + rendered + header[m_tags.end():]) if m_tags \
+            header = (header[:m_tags.start()] + rendered + header[m_tags.end():]) if m_tags \
                 else header.replace("# %%", "# %% " + rendered, 1)
-            text = text[:head + 1] + new_header + text[line_end:]
-            # The insert shifted everything after `head`, so the cell's end moves with it. Recompute
-            # from this header, never from a fresh search for the key: the key is not unique and a
-            # search would find the first occurrence in the file rather than this cell.
-            nxt = text.find("\n# %%", head + 1 + len(new_header))
+            text = text[:head + 1] + header + text[line_end:]
+            line_end = head + 1 + len(header)
+
+        # -- replace the block if it is already there, otherwise insert it -------------------
+        existing = re.search(
+            re.escape("# " + marker) + r".*?" + re.escape("# " + MARK_END),
+            text, re.S,
+        )
+        # Exactly one blank line between the twinned cell and the block. Percent format separates
+        # cells with one, and an extra ends up inside the *previous* cell's source -- which changes
+        # that cell's source, which makes the output splice drop its output. Removing a block by
+        # hand is enough to leave a stray line behind, so repair it rather than trusting the file.
+        if existing:
+            head_ = re.search(r"\n\n+# %% \[markdown\]\n\Z", text[:existing.start()])
+            start = head_.start() if head_ else existing.start()
+            text = text[:start] + "\n\n# %% [markdown]\n" + commented + text[existing.end():]
+        else:
+            nxt = text.find("\n# %%", line_end)
             if nxt == -1:
                 nxt = len(text)
-        # Exactly one blank line between the twinned cell and the block. `nxt` lands on the newline
-        # that opens the next `# %%`, and a cell already separated by a blank line leaves a trailing
-        # newline in `text[:nxt]` -- adding two more gives jupytext a second blank line, which it
-        # reads back as part of the *previous cell's source*. That changes the source, so the output
-        # splice drops the cell's output and the chapter publishes a figure cell with no figure.
-        text = text[:nxt].rstrip("\n") + "\n\n# %% [markdown]\n" + commented + "\n" + text[nxt:]
+            text = text[:nxt].rstrip("\n") + "\n\n# %% [markdown]\n" + commented + "\n" + text[nxt:]
         added += 1
     path.write_text(text)
-    print(f"  {chapter}: applied {added} block(s) to {path}")
+    note = f", pruned {pruned} orphan(s)" if pruned else ""
+    print(f"  {chapter}: applied {added} block(s) to {path}{note}")
     return 0
 
 
@@ -522,10 +610,10 @@ def main() -> None:
         # deliberately never written to disk in between: the .py and the executed .ipynb are
         # already the two places this content lives, and a third copy on disk would be one more
         # thing that can go stale -- the exact failure `--verify` exists to catch.
-        code, blocks = run(ch, verify=a.verify, from_baseline=a.from_baseline)
+        code, blocks, keep_output = run(ch, verify=a.verify, from_baseline=a.from_baseline)
         rc |= code
         if a.apply:
-            rc |= apply_to_pytext(ch, blocks)
+            rc |= apply_to_pytext(ch, blocks, keep_output)
     sys.exit(rc)
 
 

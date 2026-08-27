@@ -210,7 +210,7 @@ plt.gca().invert_yaxis();
 # regression_model = lm.LinearRegression()
 # regression_model.fit(X, Y)
 #
-# plt.plot(X.to_series().to_numpy(), regression_model.predict(X), "k")
+# plt.plot(X.to_series(), regression_model.predict(X), "k")
 # sns.stripplot(data=games, x="GOAL_DIFF", y="WON", orient="h", hue='WON', alpha=0.7)
 # plt.gca().invert_yaxis();
 # ```
@@ -224,7 +224,7 @@ X, Y = games[["GOAL_DIFF"]], games["WON"]
 regression_model = lm.LinearRegression()
 regression_model.fit(X, Y)
 
-plt.plot(X.to_series().to_numpy(), regression_model.predict(X), "k")
+plt.plot(X.to_series(), regression_model.predict(X), "k")
 sns.stripplot(data=games, x="GOAL_DIFF", y="WON", orient="h", hue='WON', alpha=0.7)
 plt.gca().invert_yaxis();
 
@@ -256,7 +256,7 @@ win_rates_by_bin = games.group_by("bin").agg(pl.col("WON").mean()).sort("bin")
 
 # plot the graph of averages
 sns.stripplot(data=games, x="GOAL_DIFF", y="WON", orient="h", alpha=0.5, hue='WON') # alpha makes the points transparent
-plt.plot(win_rates_by_bin["bin"].to_numpy(), win_rates_by_bin["WON"].to_numpy(), c="tab:red")
+plt.plot(win_rates_by_bin["bin"], win_rates_by_bin["WON"], c="tab:red")
 plt.gca().invert_yaxis();
 
 # %% [markdown] id="f564ea88"
@@ -384,7 +384,7 @@ fig.show()
 #
 # sns.stripplot(data=games, x="GOAL_DIFF", y="WON", orient="h", alpha=0.5, hue="WON", legend=False)
 # plt.plot(xs, predicted_prob, c="k", lw=3, label="Logistic regression model")
-# plt.plot(win_rates_by_bin["bin"].to_numpy(), win_rates_by_bin["WON"].to_numpy(), lw=2, c="tab:red", label="Graph of averages")
+# plt.plot(win_rates_by_bin["bin"], win_rates_by_bin["WON"], lw=2, c="tab:red", label="Graph of averages")
 # plt.legend(loc="upper left")
 # plt.gca().invert_yaxis();
 # ```
@@ -401,7 +401,7 @@ predicted_prob = logistic_model.predict_proba(xs[:, np.newaxis])[:, 1]
 
 sns.stripplot(data=games, x="GOAL_DIFF", y="WON", orient="h", alpha=0.5, hue="WON", legend=False)
 plt.plot(xs, predicted_prob, c="k", lw=3, label="Logistic regression model")
-plt.plot(win_rates_by_bin["bin"].to_numpy(), win_rates_by_bin["WON"].to_numpy(), lw=2, c="tab:red", label="Graph of averages")
+plt.plot(win_rates_by_bin["bin"], win_rates_by_bin["WON"], lw=2, c="tab:red", label="Graph of averages")
 plt.legend(loc="upper left")
 plt.gca().invert_yaxis();
 

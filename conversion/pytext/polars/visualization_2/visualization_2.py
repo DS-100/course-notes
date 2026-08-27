@@ -48,7 +48,7 @@
 # import matplotlib.pyplot as plt
 # import seaborn as sns
 #
-# # The first column of the CSV is an unnamed row counter, so we drop it
+# # The file's first column is an unnamed row label, which we drop
 # wb = pl.read_csv("data/world_bank.csv").drop("")
 # wb = wb.rename({'Antiretroviral therapy coverage: % of people living with HIV: 2015':"HIV rate",
 #                 'Gross national income per capita, Atlas method: $: 2016':'gni'})
@@ -62,7 +62,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# The first column of the CSV is an unnamed row counter, so we drop it
+# The file's first column is an unnamed row label, which we drop
 wb = pl.read_csv("data/world_bank.csv").drop("")
 wb = wb.rename({'Antiretroviral therapy coverage: % of people living with HIV: 2015':"HIV rate",
                 'Gross national income per capita, Atlas method: $: 2016':'gni'})
@@ -79,7 +79,7 @@ wb.head()
 # import matplotlib.pyplot as plt
 # import seaborn as sns
 #
-# # The first column of the CSV is an unnamed row counter, so we drop it
+# # The file's first column is an unnamed row label, which we drop
 # wb = pl.read_csv("data/world_bank.csv").drop("")
 # wb = wb.rename({'Antiretroviral therapy coverage: % of people living with HIV: 2015':"HIV rate",
 #                 'Gross national income per capita, Atlas method: $: 2016':'gni'})
@@ -441,7 +441,7 @@ plt.title("Adult literacy rate against GNI per capita");
 #
 # To linearize a relationship, begin by asking yourself: what makes the data non-linear? It is helpful to repeat this question for each variable in your visualization.
 #
-# Let's start by considering the gross national income variable in our plot above. Looking at the y values in the scatter plot, we can see that many large y values are all clumped together, compressing the vertical axis. The scale of the horizontal axis is also being distorted by the few large outlying x values on the right. 
+# Let's start by considering the gross national income variable in our plot above. It sits on the *horizontal* axis, and looking along it we can see that most countries are crushed against the left edge while a handful of very large incomes stretch the axis out to the right. The scale of the horizontal axis is also being distorted by the few large outlying x values on the right. 
 #
 # ```{image} images/horizontal.png
 # :alt: The outliers with large x, y values are highlighted.
@@ -522,7 +522,7 @@ plt.subplots_adjust(top=0.9);
 # ```
 # ````
 
-# %% tags=["remove-input", "remove-output"] id="38ca2d00"
+# %% tags=["remove-input"] id="38ca2d00"
 #| fig-alt: The transformed data is plotted along with a linear regression line in red.
 # The code below fits a linear regression model. We'll discuss it at length in a future lecture
 from sklearn.linear_model import LinearRegression
@@ -568,6 +568,7 @@ plt.legend();
 # ```text
 # The slope, m, of the transformed data is: 336400693.43172693
 # The intercept, b, of the transformed data is: -1802204836.0479977
+# <Figure size 640x480 with 1 Axes>
 # ```
 # ::::
 #
@@ -595,6 +596,7 @@ plt.legend();
 # ```text
 # The slope, m, of the transformed data is: 336400693.43172705
 # The intercept, b, of the transformed data is: -1802204836.0479987
+# <Figure size 640x480 with 1 Axes>
 # ```
 # ::::
 # :::::

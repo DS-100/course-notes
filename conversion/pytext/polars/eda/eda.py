@@ -815,53 +815,8 @@ calls["EVENTDT"].dt.month().head()
 # %% [markdown] id="4e135f62"
 # Which day of the week the date is on. `dt.weekday()` numbers the days Monday = 1 through Sunday = 7:
 
-# %% tags=["remove-input", "remove-output"] id="b432c276"
+# %% id="b432c276"
 calls["EVENTDT"].dt.weekday().head()
-
-# %% [markdown]
-# <!-- tab-twins:begin b432c276 -->
-# :::::{tab-set}
-# :::: {tab-item} Polars
-# :sync: pl
-# ```python
-# calls["EVENTDT"].dt.weekday().head()
-# ```
-#
-# ```text
-# shape: (10,)
-# Series: 'EVENTDT' [i8]
-# [
-# 	4
-# 	4
-# 	1
-# 	6
-# 	1
-# 	6
-# 	1
-# 	7
-# 	3
-# 	3
-# ]
-# ```
-# ::::
-#
-# :::: {tab-item} pandas
-# :sync: pd
-# ```python
-# calls["EVENTDT"].dt.dayofweek.head()
-# ```
-#
-# ```text
-# 0    3
-# 1    3
-# 2    0
-# 3    5
-# 4    0
-# Name: EVENTDT, dtype: int32
-# ```
-# ::::
-# :::::
-# <!-- tab-twins:end -->
 
 # %% [markdown] id="e599bfcc"
 # Check the minimum values to see if there are any suspicious-looking, 70s dates:
@@ -1302,17 +1257,17 @@ ili.sample(3)
 # │     ┆     ┆     ┆     ┆ f64 ┆ f64 ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆ --- ┆ i64 ┆        │
 # │     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆ i64 ┆     ┆        │
 # ╞═════╪═════╪═════╪═════╪═════╪═════╪═════╪═════╪═════╪═════╪═════╪═════╪═════╪═════╪═════╪════════╡
-# │ HHS ┆ Reg ┆ 202 ┆ 36  ┆ 1.1 ┆ 1.1 ┆ 185 ┆ 292 ┆ nul ┆ 322 ┆ 108 ┆ 169 ┆ 107 ┆ 200 ┆ 971 ┆ 2023-0 │
-# │ Reg ┆ ion ┆ 3   ┆     ┆ 6   ┆ 1   ┆     ┆     ┆ l   ┆     ┆     ┆     ┆ 6   ┆     ┆ 59  ┆ 9-10   │
-# │ ion ┆ 10  ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆        │
+# │ HHS ┆ Reg ┆ 201 ┆ 3   ┆ 2.7 ┆ 3.0 ┆ 392 ┆ 360 ┆ nul ┆ 628 ┆ 222 ┆ 157 ┆ 175 ┆ 141 ┆ 574 ┆ 2018-0 │
+# │ Reg ┆ ion ┆ 8   ┆     ┆ 7   ┆ 6   ┆     ┆     ┆ l   ┆     ┆     ┆     ┆ 9   ┆     ┆ 49  ┆ 1-21   │
+# │ ion ┆ 8   ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆        │
 # │ s   ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆        │
-# │ HHS ┆ Reg ┆ 202 ┆ 11  ┆ 2.2 ┆ 1.7 ┆ 102 ┆ 368 ┆ nul ┆ 115 ┆ 117 ┆ 157 ┆ 282 ┆ 194 ┆ 157 ┆ 2022-0 │
-# │ Reg ┆ ion ┆ 2   ┆     ┆ 4   ┆ 9   ┆ 0   ┆     ┆ l   ┆ 8   ┆     ┆     ┆ 0   ┆     ┆ 152 ┆ 3-20   │
-# │ ion ┆ 2   ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆        │
+# │ HHS ┆ Reg ┆ 202 ┆ 49  ┆ 7.3 ┆ 7.2 ┆ 179 ┆ 140 ┆ nul ┆ 287 ┆ 563 ┆ 558 ┆ 719 ┆ 233 ┆ 994 ┆ 2022-1 │
+# │ Reg ┆ ion ┆ 2   ┆     ┆ 1   ┆ 4   ┆ 6   ┆ 9   ┆ l   ┆ 3   ┆     ┆     ┆ 9   ┆     ┆ 62  ┆ 2-11   │
+# │ ion ┆ 8   ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆        │
 # │ s   ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆        │
-# │ HHS ┆ Reg ┆ 202 ┆ 40  ┆ 0.8 ┆ 0.8 ┆ 74  ┆ 188 ┆ nul ┆ 176 ┆ 123 ┆ 114 ┆ 675 ┆ 187 ┆ 802 ┆ 2020-1 │
-# │ Reg ┆ ion ┆ 0   ┆     ┆ 6   ┆ 4   ┆     ┆     ┆ l   ┆     ┆     ┆     ┆     ┆     ┆ 25  ┆ 0-11   │
-# │ ion ┆ 9   ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆        │
+# │ HHS ┆ Reg ┆ 202 ┆ 1   ┆ 5.7 ┆ 5.1 ┆ 554 ┆ 110 ┆ nul ┆ 964 ┆ 487 ┆ 593 ┆ 371 ┆ 954 ┆ 720 ┆ 2026-0 │
+# │ Reg ┆ ion ┆ 6   ┆     ┆ 2   ┆ 5   ┆ 7   ┆ 95  ┆ l   ┆ 8   ┆ 5   ┆ 7   ┆ 02  ┆     ┆ 870 ┆ 1-11   │
+# │ ion ┆ 4   ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆        │
 # │ s   ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆     ┆        │
 # └─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴────────┘
 # ```
@@ -1522,7 +1477,7 @@ display(ili.tail(2))
 display(vax.tail(2))
 
 # %% [markdown] id="0db8ac21"
-# This is a natural point to pause and consider how weekly timestamps should be aggregated in order to match the monthly granularity of the vaccination data. In this example, we choose to associate each week with the month in which its start date falls. This isn't the only way we could do this, and it also isn't perfect: there may be weeks that are split across two months where the numbers won't match up exactly.
+# This is a natural point to pause and consider how weekly timestamps should be aggregated in order to match the monthly granularity of the vaccination data. In this example, we choose to associate each week with the month in which its closing Sunday falls. This isn't the only way we could do this, and it also isn't perfect: there may be weeks that are split across two months where the numbers won't match up exactly.
 
 # %% id="ac97d064"
 ili = ili.with_columns(pl.col("week_start").dt.truncate("1mo").alias("month"))
@@ -1703,57 +1658,9 @@ co2_file = "data/co2_mm_mlo.txt"
 #
 # We can use `pl.read_csv` to read the data into a `polars` `DataFrame`. We provide arguments to specify that there is no header (**we will set our own column names**) and to skip the first 72 rows of the file. There is not a single comma in the data, so every record arrives whole, in one column:
 
-# %% tags=["remove-input", "remove-output"] id="719dc1a4"
+# %% id="719dc1a4"
 co2 = pl.read_csv(co2_file, has_header = False, skip_rows = 72)
 co2.head()
-
-# %% [markdown]
-# <!-- tab-twins:begin 719dc1a4 -->
-# :::::{tab-set}
-# :::: {tab-item} Polars
-# :sync: pl
-# ```python
-# co2 = pl.read_csv(co2_file, has_header = False, skip_rows = 72)
-# co2.head()
-# ```
-#
-# ```text
-# shape: (5, 1)
-# ┌─────────────────────────────────┐
-# │ column_1                        │
-# │ ---                             │
-# │ str                             │
-# ╞═════════════════════════════════╡
-# │ 1958   3    1958.208      315.… │
-# │ 1958   4    1958.292      317.… │
-# │ 1958   5    1958.375      317.… │
-# │ 1958   6    1958.458      -99.… │
-# │ 1958   7    1958.542      315.… │
-# └─────────────────────────────────┘
-# ```
-# ::::
-#
-# :::: {tab-item} pandas
-# :sync: pd
-# ```python
-# co2 = pd.read_csv(
-#     co2_file, header = None, skiprows = 72,
-#     sep = r'\s+'       #delimiter for continuous whitespace (stay tuned for regex next lecture))
-# )
-# co2.head()
-# ```
-#
-# ```text
-#       0  1       2      3      4      5  6
-# 0  1958  3 1958.21 315.71 315.71 314.62 -1
-# 1  1958  4 1958.29 317.45 317.45 315.29 -1
-# 2  1958  5 1958.38 317.50 317.50 314.71 -1
-# 3  1958  6 1958.46 -99.99 317.10 314.85 -1
-# 4  1958  7 1958.54 315.86 315.86 314.98 -1
-# ```
-# ::::
-# :::::
-# <!-- tab-twins:end -->
 
 # %% [markdown] id="96d6fda6"
 # Congratulations! You've wrangled the data!
@@ -1845,7 +1752,7 @@ co2.head()
 # Scientific studies tend to have very clean data, right...? Let's jump right in and make a time series plot of CO<sub>2</sub> monthly averages.
 
 # %% id="f3c66483"
-#| fig-alt: A lineplot of the monthly averages from the 1960s to the 1980s. The data mostly has a repeating wave pattern and is larger as time goes on. However, there are a number of large dips to -100.
+#| fig-alt: A lineplot of the monthly averages from 1958 to 2019. The data mostly has a repeating wave pattern and is larger as time goes on. However, there are a number of large dips to -100.
 sns.lineplot(x='DecDate', y='Avg', data=co2);
 
 # %% [markdown] id="e8c74e2d"
@@ -1889,7 +1796,7 @@ co2.shape
 #
 # Let's start with **months**, `Mo`.
 #
-# Are we missing any records? The number of months should have 62 or 61 instances (March 1957-August 2019). `value_counts` returns a two-column table of each value beside how often it appears, which we sort by month:
+# Are we missing any records? The number of months should have 62 or 61 instances (March 1958-August 2019). `value_counts` returns a two-column table of each value beside how often it appears, which we sort by month:
 
 # %% tags=["remove-input", "remove-output"] id="fb3fcc66"
 co2["Mo"].value_counts().sort("Mo")
@@ -2009,14 +1916,14 @@ plt.title("Day field by Year"); # the ; suppresses output
 # ````{dropdown} Click to see the code
 # :open: false
 # ```
-# #| fig-alt: Histogram of average CO2 measurements. Most of the data is near 400, though there is a bin with data with AVG less than 0.
+# #| fig-alt: Histogram of average CO2 measurements. Almost all of the data falls between about 310 and 415 ppm, with the tallest bars in the low 320s. A single isolated bin sits below zero, holding the seven -99.99 missing-value records.
 # # Histograms of average CO2 measurements
 # sns.displot(co2, x='Avg');
 # ```
 # ````
 
 # %% tags=["remove-input"] id="20adcbbe"
-#| fig-alt: Histogram of average CO2 measurements. Most of the data is near 400, though there is a bin with data with AVG less than 0.
+#| fig-alt: Histogram of average CO2 measurements. Almost all of the data falls between about 310 and 415 ppm, with the tallest bars in the low 320s. A single isolated bin sits below zero, holding the seven -99.99 missing-value records.
 # Histograms of average CO2 measurements
 sns.displot(co2, x='Avg');
 
@@ -2091,14 +1998,14 @@ co2.filter(pl.col("Avg") < 0)
 # ````{dropdown} Click to see the code
 # :open: false
 # ```
-# #| fig-alt: A lineplot of the monthly averages from the 1960s to the 1980s. The data mostly has a repeating wave pattern and is larger as time goes on. However, there are a number of large dips to -100.
+# #| fig-alt: A lineplot of the monthly averages from 1958 to 2019. The data mostly has a repeating wave pattern and is larger as time goes on. However, there are a number of large dips to -100.
 # sns.lineplot(x='DecDate', y='Avg', data=co2)
 # plt.title("CO2 Average By Month");
 # ```
 # ````
 
 # %% tags=["remove-input"] id="11056cc5"
-#| fig-alt: A lineplot of the monthly averages from the 1960s to the 1980s. The data mostly has a repeating wave pattern and is larger as time goes on. However, there are a number of large dips to -100.
+#| fig-alt: A lineplot of the monthly averages from 1958 to 2019. The data mostly has a repeating wave pattern and is larger as time goes on. However, there are a number of large dips to -100.
 sns.lineplot(x='DecDate', y='Avg', data=co2)
 plt.title("CO2 Average By Month");
 
@@ -2166,57 +2073,10 @@ co2_drop.head()
 # :::::
 # <!-- tab-twins:end -->
 
-# %% tags=["remove-input", "remove-output"] id="ef3fe041"
+# %% id="ef3fe041"
 # 2. Replace -99.99 with null
 co2_null = co2.with_columns(pl.col(pl.Float64).replace(-99.99, None))
 co2_null.head()
-
-# %% [markdown]
-# <!-- tab-twins:begin ef3fe041 -->
-# :::::{tab-set}
-# :::: {tab-item} Polars
-# :sync: pl
-# ```python
-# # 2. Replace -99.99 with null
-# co2_null = co2.with_columns(pl.col(pl.Float64).replace(-99.99, None))
-# co2_null.head()
-# ```
-#
-# ```text
-# shape: (5, 7)
-# ┌──────┬─────┬─────────┬────────┬────────┬────────┬──────┐
-# │ Yr   ┆ Mo  ┆ DecDate ┆ Avg    ┆ Int    ┆ Trend  ┆ Days │
-# │ ---  ┆ --- ┆ ---     ┆ ---    ┆ ---    ┆ ---    ┆ ---  │
-# │ i64  ┆ i64 ┆ f64     ┆ f64    ┆ f64    ┆ f64    ┆ i64  │
-# ╞══════╪═════╪═════════╪════════╪════════╪════════╪══════╡
-# │ 1958 ┆ 3   ┆ 1958.21 ┆ 315.71 ┆ 315.71 ┆ 314.62 ┆ -1   │
-# │ 1958 ┆ 4   ┆ 1958.29 ┆ 317.45 ┆ 317.45 ┆ 315.29 ┆ -1   │
-# │ 1958 ┆ 5   ┆ 1958.38 ┆ 317.50 ┆ 317.50 ┆ 314.71 ┆ -1   │
-# │ 1958 ┆ 6   ┆ 1958.46 ┆ null   ┆ 317.10 ┆ 314.85 ┆ -1   │
-# │ 1958 ┆ 7   ┆ 1958.54 ┆ 315.86 ┆ 315.86 ┆ 314.98 ┆ -1   │
-# └──────┴─────┴─────────┴────────┴────────┴────────┴──────┘
-# ```
-# ::::
-#
-# :::: {tab-item} pandas
-# :sync: pd
-# ```python
-# # 2. Replace NaN with -99.99
-# co2_NA = co2.replace(-99.99, np.nan)
-# co2_NA.head()
-# ```
-#
-# ```text
-#      Yr  Mo  DecDate    Avg    Int  Trend  Days
-# 0  1958   3  1958.21 315.71 315.71 314.62    -1
-# 1  1958   4  1958.29 317.45 317.45 315.29    -1
-# 2  1958   5  1958.38 317.50 317.50 314.71    -1
-# 3  1958   6  1958.46    NaN 317.10 314.85    -1
-# 4  1958   7  1958.54 315.86 315.86 314.98    -1
-# ```
-# ::::
-# :::::
-# <!-- tab-twins:end -->
 
 # %% [markdown] id="4be11b22"
 # We'll also use a third version of the data.

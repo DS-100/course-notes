@@ -1892,6 +1892,88 @@ it is what a guard working correctly looks like from the inside.
     re-execute instead; `polars_1.py` was regenerated from its notebook and carries all 224 ids, so
     it round-trips (79 preserved, 0 dropped).
 
+13. **Six figures left the book, and the only visible trace was 119 KB of image the page never
+    drew.** Hiding a twinned cell takes `remove-input` and `remove-output`. `remove-output` hides
+    *every* output the cell has, and a comparison tab's panes are frozen text — so for a cell that
+    printed a line *and* drew a plot, the printed line moved into the tab and the plot simply
+    stopped existing. Four were matplotlib (`feature_engineering` `edc98ac8`/`21180eea`,
+    `gradient_descent` `cac7a125`, `visualization_2` `38ca2d00`); two were plotly
+    (`inference_causality` `b241cb77`, `pca` `3ec83d53`) and are the worse case, because their only
+    output *is* the figure — they carry no `text/plain` at all, so the tab showed a `print()` line
+    and nothing else.
+
+    The figure-stub guard did not fire: it asks whether the output *is* `<Figure size …>`, and these
+    cells had real text beside the image. The rule is now about MIME type rather than text shape —
+    a cell whose output carries anything a text pane cannot reproduce keeps `remove-input` alone and
+    goes on rendering its own output. Three of the four matplotlib cells even carried `#| fig-alt:`
+    in their source, so the alt text sat in the built page describing a figure that was not there;
+    an accessibility check has nothing to complain about when the image is simply absent.
+
+    Two independent measurements, and the second is the one worth keeping. The build **externalizes
+    a shown PNG** to `_build/html/build/<md5>.png` and leaves a **hidden one as inline base64**. So
+    "how many figures is this book hiding" has an exact answer that needs no notebook at all: count
+    inline-base64 `image/png` entries under `_build/html/`. There were four, every one under
+    `visibility: "remove"`. There are now zero, and the externalized count rose from 69 to 73.
+
+    A seventh cell had the inverse fault. `polars_2`'s `p2-load-elections` rendered its table and
+    then repeated it in the tab directly below, because `apply_to_pytext` set tags **only on the
+    branch that inserts a new block** — a twin whose block already existed kept whatever tags it
+    happened to have. Tags are now decided before the block is written and on every pass, which is
+    also what makes the tool idempotent: re-running it repairs the file instead of depending on
+    whether someone restored it first.
+
+    `polars_1`'s `ccf796ec` stays hidden deliberately. It is one of the two error demos hard rule 6
+    protects, the notebook still carries the error, and its twin hand-writes the `TypeError:`
+    message — only the traceback frames are dropped.
+
+14. **The review that found the most was the one aimed at the tabs themselves.** Fifteen reviewers
+    over eighteen built pages, twenty-one chapters and five claim sweeps returned eight blocking
+    findings that were ours, on top of the six lost figures. Four were defects in the tool, and all
+    four were silent:
+
+    **The pane carried one output when the cell had two.** `committed_output` returned on the first
+    output that had text. A cell that prints *and* returns a value has two, so `pca`'s pivot pane
+    showed `(441, 42)` and dropped the table beneath it, `inference_causality`'s ended in
+    `print("RMSE", ...)` above an output block with no printed line, and `regex`'s showed one of the
+    two frames a `display(); display()` cell renders. In every case the live cell was hidden, so the
+    tab was the reader's only copy. Two reviewers found this independently and one named the
+    function.
+
+    **Two cells shared a locator, so one twin vanished.** `locator_for` returns a cell's longest
+    line; in `sampling`, `04510ea5` and `b37cf863` both have `idx = rng.integers(...)`, so the
+    second overwrote the first in `blocks`. The lost twin was the chapter's *only* `.iloc` →
+    `.gather` comparison, and the orphan check could not see it because the declared count fell by
+    one at the same moment. Baseline twins are now keyed by cell id, which is unique by
+    construction, with an assertion behind it.
+
+    **Blocks outlived their declaration, for the third time.** Dropping a twin left its block on the
+    page and its cell tagged, so the chapter kept hiding a cell whose replacement was gone.
+    `apply_to_pytext` now prunes any block nobody declares and restores the cell's *baseline* tags
+    rather than stripping them, so a cell that carried `remove-input` before all this still does.
+
+    **Tags were set only when a block was newly inserted.** A twin whose block already existed kept
+    whatever tags it had, which is how `polars_2`'s `p2-load-elections` came to render its table and
+    then repeat it in the tab below. Tags are decided before the block is written now, on every
+    pass — which is also what finally made the tool idempotent.
+
+    The other four were content, and they share one shape: **pairing on cell id assumes the
+    conversion changed how a cell is spelled, not what it does.** `intro_lec` lost five twins to it
+    (the pandas original taught the `Series` Index, which Polars does not have, so `.cast()` was
+    paired with `s.index = [...]`, `s.dtype` with `s.index`, and `.to_list()` with `.values` under a
+    comment asserting they were the same call). `eda` lost two: `dt.weekday()` (Monday = 1) beside
+    pandas `dt.dayofweek` (Monday = 0) under prose announcing "Monday = 1", and a raw one-column
+    read beside a parsed seven-column one under prose saying "we need to do more EDA". `pca` lost
+    two where the frozen pandas pane recorded a *null-space* singular vector — the two libraries
+    return bit-identical arrays (`np.array_equal(U, U_pandas)` is `True`), so the tab invited a
+    reader to conclude they disagree about an SVD. And `modeling_slr` lost its only twin, where the
+    pandas pane republished the `\theta` tab-escape bug the conversion had deliberately fixed,
+    framing it as a library difference.
+
+    The corpus is 181 twins, down from 190. Every removal is recorded with its reason in
+    `conversion/tab_twins_data.py`, and one of those notes is a correction of an earlier note in the
+    same file: I kept `intro_lec`'s `12449aec` on the grounds that it "carries per-tab comments that
+    disclose the contrast", and a reviewer checked and found it does not.
+
 The general rule the first three incidents support: **a detector that reports zero is only good news if it
 found something on the baseline** — and a detector that reports a hit is only bad news if it cannot
 also fire on the correct answer. Every removal gate here is paired with the first check; the third
@@ -2032,4 +2114,180 @@ incident is what added the second.
     now skipped with a written reason. The general question stands for the other 85: the only layer
     that can catch this is `notes-claim-verifier`, which found this one, and it has so far swept
     `polars_1`, `polars_2`, `regex` and `feature_engineering`.
+
+13. **Pre-existing content errors the review surfaced — RESOLVED.** Every one was checked against
+    the pinned baseline and is byte-identical there, so none was this branch's doing; each was
+    then re-verified by execution or by opening the image before being changed. Course staff
+    should know these were corrected rather than inherited, since they predate the migration.
+
+    **Empty alt text, five figures.** `gradient_descent`: `ols_matrices_new.png` (`:alt:""`, no
+    space after the colon), `grad_descent_1.png` and `grad_descent_2.png` (`:alt: ""`).
+    `logistic_regression_2`: `linear_separability_1D.png` and the *second* use of
+    `roc_curve_worst_predictor.png` (its first use has real alt text), plus a stray trailing quote
+    on `mean_cross_entropy_loss_plot.png`. The alt-text gate is deliberately one-sided — it fails
+    only when the conversion *empties* an alt — so it passes these, correctly. axe-core passes them
+    too: `alt=""` is valid HTML for a decorative image, which is exactly what these are not.
+
+    **`inference_causality` says "a sample of 20 cars" twice; the code samples 100.** `sample_size =
+    100` on `main` as well. It matters more than a typo: the section then compares a bootstrap of
+    that 100-row sample against a sampling distribution built from draws of 20, and calls them
+    "relatively close". Measured, the bootstrap distribution is **2.4× narrower** (CI width 0.0018
+    against 0.0043) and is close to the *n=100* population curve instead. Setting `sample_size = 20`
+    would make all three sentences true at once.
+
+    **Two MSEs printed as RMSE**, same chapter: cell `add45dc7` prints `((Y - ŷ)**2).mean()` under
+    the label `RMSE`, and `ce1d6713` prints `mean_squared_error(...)` the same way — the pinned
+    sklearn has no `squared=` parameter, so that function returns MSE unconditionally. The values
+    are 0.0455 where the RMSE is 0.2132.
+
+    **`sampling`** refers to a frame called `polls` twice; it is bound as `poll`. And the comment
+    "Generate 1000 random integers from 0 to (number of votes - 1)" sits above
+    `rng.integers(low=0, high=n_votes-1)`, which is half-open, so it names exactly the one index the
+    call excludes. Both on `main`.
+
+    **`eda`**: "March 1957–August 2019" where the data starts March 1958 (fixed here — it is one
+    character and the chapter states the right range fifteen lines earlier). A pandas tab whose
+    comment reads `# 2. Replace NaN with -99.99` above code that does the reverse; the Polars side
+    was corrected during conversion, so the two tabs now describe opposite operations. And two
+    `fig-alt` strings that describe the wrong data: a 62-year CO₂ series called "from the 1960s to
+    the 1980s", and a histogram whose mass is at the low end called "most of the data is near 400".
+
+    **`pca`**: the orthonormality admonition and the `$UU^T = I_n$` line that depends on it are false
+    for the chapter's own `U`, which is 100×4 under `full_matrices=False` — $U^TU = I_4$ holds,
+    $UU^T$ is a rank-4 projector whose diagonal runs 0.83, 0.14, 0.01, … The component-score proof
+    drops a square (`VSV^T` for `VS²V^T`) on three consecutive lines. The biplot prose says "we plot
+    the direction itself" while the code plots `sqrt(s)*vt`, which scales the two axes by different
+    constants and turns each arrow by up to 19°. And `dataset4.png`'s alt text says "three columns"
+    and then lists four.
+
+    **`regex`**: the reference table lists `5005005` under "Doesn't Match" for `5.*?5`; it matches,
+    because backtracking lets the lazy quantifier expand to satisfy an anchor-free full match. And
+    the mapping table pairs `'_' in s` with `ser.str.contains(_)` without noting that `contains` is
+    regex-by-default, the same trap the chapter warns about for `replace_all`.
+
+14. **Three tab-set observations that are decisions, not defects.** Recorded so they are chosen
+    rather than inherited.
+
+    **The library picker exists on one page.** `polars_1` carries a page-top "Pick a library" tab-set
+    above its 69 comparisons; the other sixteen chapters have none. MyST's `:sync:` keys are
+    page-scoped, so clicking any tab already switches every tab on that page everywhere — what the
+    other pages lack is the discoverable control, which matters most on `polars_2` (36 tab-sets) and
+    `eda` (21).
+
+    **Seventeen twins sit directly beneath a `{dropdown} Click to see the code`** that already
+    repeats the same source, so the code appears twice within a few lines. The dropdowns are
+    collapsed by default. Hard rule 3 is about exactly this pairing and the tab tool never consulted
+    it.
+
+    **`Series.head()` defaults to 10 in Polars and 5 in pandas**, so several `eda` tabs show ten
+    values beside five with nothing saying why. `polars_1` already solved this by passing `5`
+    explicitly.
+
+### What was fixed, and how each was confirmed
+
+| Chapter | Error | Confirmation |
+|---|---|---|
+| `gradient_descent` | 3 figures with `:alt: ""` (one written `:alt:""`, no space) | opened each PNG; wrote descriptions of what they show |
+| `logistic_regression_2` | 2 figures with `:alt: ''`, 1 with a stray trailing quote | opened each PNG |
+| `pca` | "If $Q$ has orthonormal columns, $QQ^T = I_m$" | `U` is 100×4; `U^TU == I_4` True, `UU^T == I_100` False, diagonal 0.83, 0.14, 0.01, … |
+| `pca` | `$UU^T = I_n$` restated for `U` | same; corrected to name the full-SVD case explicitly |
+| `pca` | component-score proof wrote $VSV^T$ for $VS^2V^T$ on three lines | on the **centered** SVD, `X^TX/n == V(S²/n)V^T` True, `V(S/n)V^T` False. The chapter already derives $VS^2V^T$ correctly at two other points |
+| `pca` | biplot prose said "we plot the direction itself" | the cell plots `sqrt(s[0])*vt[0]`, `sqrt(s[1])*vt[1]` — anisotropic, turning arrows by up to 19° |
+| `pca` | `dataset4.png` alt: "Dataset 3 has three columns" then lists four | opened the image: four columns, and its own caption reads "Dataset 4". Surrounding prose renamed too |
+| `inference_causality` | "a sample of 20 cars", twice | all four `sample_size` assignments are `100` |
+| `inference_causality` | bootstrap called "relatively close" to a population curve built at a different $n$ | added the missing sentence rather than changing the demo — resample size 100 vs draws of 20 is the reason the spread differs |
+| `inference_causality` | two MSEs printed under an `RMSE` label | pinned sklearn's `mean_squared_error` signature has no `squared=`, so it returns MSE unconditionally |
+| `sampling` | prose referred to a frame `polls`; it is `poll` | two backticked references; the other two uses of the word are ordinary English |
+| `sampling` | `rng.integers(low=0, high=n_votes-1)` under a comment claiming "0 to (number of votes - 1)" | `integers` is half-open — `integers(0,5)` maxes at 4. The sibling cell already used `high=n_votes`; the code was widened to match |
+| `eda` | "March 1957–August 2019" | the file starts 1958-03 |
+| `eda` | fig-alt "from the 1960s to the 1980s" on an unfiltered lineplot | `DecDate` runs 1958.208 → 2019.625 |
+| `eda` | fig-alt "most of the data is near 400" | binned the column the figure actually plots: mass spans 310–415, mode in the low 320s, one isolated bin below zero |
+| `eda` | pandas pane commented `# Replace NaN with -99.99` above code doing the reverse | twin dropped: the Polars comment had been corrected, so the tab showed two comments describing opposite operations |
+| `regex` | `5005005` listed under "Doesn't Match" for `5.*?5` | `re.fullmatch` returns a match; replaced with `500` and `005`, both verified non-matching |
+| `regex` | `str.contains` mapping omitted that it is regex-by-default | `pl.Series(["cowscom"]).str.contains("cow.com")` is `True`; `literal=True` gives `False` |
+
+**Confirmed on the built site: zero images with empty or quote-only alt text, across every page.**
+
+Left alone deliberately, as wording rather than error: `sampling`'s "off by almost 10 percentage points" (the gap is 8.24), `pca`'s "our matrix is linearly independent" where the argument wants *dependent* (the statement is true as written — the matrix has full column rank), and `pca`'s "most of the data is explained by the first two or three dimensions" (46.7% at two, 52.8% at three). Also unchanged: `eda`'s `data_year(data, year)` ignores its `year` parameter and hardcodes 1958, inherited from the pandas original — it is called only with 1958, so the figure is right today.
+
+15. **The nine unswept chapters, swept — RESOLVED.** Claim verification had covered 9 of 18 notebook
+    chapters; the base rate in those nine said the other half held roughly the same density of
+    error. It did. **Nine chapters, 34 more contradictions, and the conversion introduced exactly
+    one of them.**
+
+    | chapter | claims | contradicted | provenance |
+    |---|---|---|---|
+    | `gradient_descent` | 63 | 7 | all pre-existing |
+    | `constant_model_loss_transformations` | 51 | 6 | all pre-existing |
+    | `cv_regularization` | 22 | 6 | all pre-existing |
+    | `logistic_regression_2` | 103 | 7 | all pre-existing |
+    | `visualization_1` | 51 | 2 | pre-existing |
+    | `visualization_2` | 33 | 2 | 1 pre-existing, **1 ours** |
+    | `modeling_slr` | 35 | 2 | all pre-existing |
+    | `ols` | 36 | 2 | all pre-existing |
+    | `logistic_regression_1` | 23 | **0** | — clean |
+
+    Three chapters recorded the conversion *repairing* pre-existing errors along the way:
+    `gradient_descent`'s "the `.T` attribute of a NumPy array **or DataFrame**", `modeling_slr`'s
+    `f"\theta_0"` tab-escape, and `ols`'s `.iloc`/`.loc` sentence rewritten to `df[:, i]` — which is
+    accurate under Polars 1.43.1 where the original was not.
+
+    **The one the conversion introduced** was a comment: `visualization_2` called the CSV's first
+    column "an unnamed row counter". It is not a counter — 166 rows carrying labels up to 192 with 27
+    gaps, i.e. a preserved pandas index from an already-filtered frame. `visualization_1` describes
+    the same column of the same file correctly as "an unnamed row label"; the two chapters now agree.
+
+    **The largest finding is conceptual, and it is in the chapter named after it.** `gradient_descent`
+    asserted four times that things which do not use gradient descent use gradient descent:
+    `LinearRegression.fit` calls `scipy.linalg.lstsq` — a one-shot SVD solve with no learning rate,
+    no `max_iter` and no `n_iter_` on the class — and `scipy.optimize.minimize` with no gradient
+    supplied defaults to BFGS (its result carries `hess_inv`). The load-bearing one read *"under the
+    hood, the `fit` method for `LinearRegression` models uses gradient descent"*, in the chapter
+    whose whole purpose is to motivate gradient descent. The honest version motivates it better and
+    is what the section now says: OLS has a closed form, which is exactly why gradient descent
+    matters for the models that do not. Its `minimize` cell also promised "the optimal input value of
+    x which minimizes f" while printing **2.393**, a local minimum, with the global at 5.326 named in
+    the prose two cells earlier.
+
+    **`cv_regularization`'s six were the most actionable.** `Lasso(alpha=)` is $\lambda/2$ and
+    `Ridge(alpha=)` is $n\lambda$ — both docstrings say so — meaning `Ridge(alpha=1)` in that chapter
+    is $\lambda = 1/313$, not 1. "It runs gradient descent to minimize the L2 objective" — `solver_`
+    resolves to `cholesky`, `n_iter_` is `None`. And **"Notice that we scale the data before
+    regularizing"** sat above a chapter that scales nothing (`grep` for any scaler: zero hits),
+    immediately before the section that explains why you would want to. The sixth refuted itself on
+    the page: "many model parameters are set to 0" above a printout where none of four is zero and
+    the `hp` coefficient has *grown*.
+
+    **`logistic_regression_2`'s seven** included two that reverse a definition. Its MSE surface was
+    said to have "both a global minimum and a (barely perceptible) local minimum" — scanned, there is
+    one local minimum (the global one at $\theta_1 \approx 0.54$) and one local **maximum** at
+    $\approx -2.1$; past it the surface flattens toward $2/3$ and never turns, so descent from the
+    left stalls on a plateau rather than converging anywhere. And the precision-recall section gave
+    the worst-case AUC as 0.5, which is the *ROC* baseline: a random classifier's PR-AUC equals the
+    positive-class rate (measured 0.50 / 0.20 / 0.05 at those prevalences), so on the chapter's own
+    5%-spam example the floor is 0.05. That is wrong exactly where it matters, since the section
+    exists to handle imbalance. Also fixed: `= 1 * log(0)` under a sentence claiming infinite loss
+    (it is $-\infty$), a dropped $\theta$ in the bonus cross-entropy identity, a misplaced bracket
+    in the bonus gradient, a point the prose put at $(-0.5, 1)$ that the figure labels $(-1, 1)$, and
+    nine `:width:800` options missing the space MyST needs to parse them at all.
+
+    **The rest.** `ols` described `FG` as "(2-point) field goals" — `FG = 2P + 3P` identically, and
+    the points identity reconstructs `PTS` with mean error 0.05 under the total reading against 1.77
+    under the 2-point one; it is load-bearing, because the fitted coefficient is 2.517 rather than 2
+    for exactly that reason. It also called the L2 norm "the squared norm", which would make the MSE
+    formula a fourth power. `modeling_slr` said Anscombe's four datasets have "identical" statistics
+    above a printout reading 0.816, 0.816, 0.816, **0.817**, and joined four conditions with "or"
+    where only their conjunction licenses the simplified correlation formula. `constant_model_loss_
+    transformations` said "replace the largest value with 1000" above code appending **1033** — which
+    changes the next clause, since under the prose the median is exactly unchanged and under the code
+    it moves 22 → 25.5 — plus an alt text naming the MAE *value* as $\theta$, a table claiming MAE has
+    "infinitely many" minimisers when it is unique for odd $n$, an unclosed `$\hat{\theta}#`, and
+    absolute-value bars outside math mode inside a table cell, where a bare `|` is a column separator.
+    `visualization_1` had a fig-alt reading "long right tail" on the left-skew figure (skew −1.425)
+    and a definition placing box-plot whiskers *at* the fences; measured, they draw at −3.1 and 8.5,
+    the most extreme data inside fences of −3.125 and 9.075.
+
+    Every fix above was re-verified independently before it was made — by execution, or by opening
+    the figure. Two reported errors did not survive that check in the form reported, and are recorded
+    under note 13.
 

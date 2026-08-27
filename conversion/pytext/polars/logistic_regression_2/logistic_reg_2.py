@@ -171,10 +171,10 @@ plt.ylabel('MSE');
 # %% [markdown] id="46f17b24"
 # This looks nothing like the parabola we found when plotting the MSE of a linear regression model! In particular, we can identify two flaws with using the MSE for logistic regression:
 #
-# 1. The MSE loss surface is *non-convex*. There is both a global minimum and a (barely perceptible) local minimum in the loss surface above. This means that there is the risk of gradient descent converging on the local minimum of the loss surface, missing the true optimum parameter $\theta_1$.
+# 1. The MSE loss surface is *non-convex*. It has one global minimum, at $\theta_1 \approx 0.54$, and the barely perceptible bump to its left is a local *maximum* at $\theta_1 \approx -2.1$. Past that bump the surface simply flattens out, falling towards $2/3$ as $\theta_1 \to -\infty$ without ever reaching a minimum. So gradient descent started far enough to the left does not converge on a second minimum — it stalls on a plateau where the gradient is nearly zero, and never reaches the true optimum $\theta_1$.
 #
 # ```{image} images/global_local_min.png
-# :alt: MSE on toy classification data showing two possible minima
+# :alt: MSE on toy classification data, plotted against theta-one. The curve has a single dip near theta-one = 0.5, a small hump to its left, and then a long flat plateau extending to the left at a height of about two thirds.
 # :width: 400
 # ```
 #
@@ -182,7 +182,7 @@ plt.ylabel('MSE');
 #
 # ```{image} images/squared_loss.png
 # :alt: Graph of squared loss for one individual showing a downward sloping curve
-# :width:400
+# :width: 400
 # ```
 #
 # ### Motivating Cross-Entropy Loss
@@ -340,8 +340,11 @@ plt.xlabel(r'$\theta$');
 # Linear separability in 1D can be found with a rugplot of a single feature where a point perfectly separates the classes (Remember that in 1D, our decision boundary is just a point). For example, notice how the plot on the bottom left is linearly separable along the vertical line $x=0$. However, no such line perfectly separates the two classes on the bottom right.
 #
 # ```{image} images/linear_separability_1D.png
-# :alt:'' 
-# :width:800
+# :alt: Two one-dimensional scatter plots of y against x. On the left, labelled "separable",
+#   every orange point with y=1 lies left of x=0 and every blue point with y=0 lies right of
+#   it, and a black bar at x=0 divides them. On the right, labelled "not separable", the
+#   orange and blue points overlap along x, so no single dividing point exists.
+# :width: 800
 # ```
 #
 # This same definition holds in higher dimensions. If there are two features, the separating hyperplane must exist in two dimensions (any line of the form $y=mx+b$). We can visualize this using a scatter plot.
@@ -371,22 +374,22 @@ plt.xlabel(r'$\theta$');
 # Let's also visualize the mean cross entropy loss along with the direction of the gradient (how this loss surface is calculated is out of scope).
 #
 # ```{image} images/mean_cross_entropy_loss_plot.png
-# :alt: Mean cross entropy plot. The direction of the gradient is down and to the right.' 
+# :alt: Mean cross entropy plot. The direction of the gradient is down and to the right.
 # :width: 450
 # ```
 #
 # It's nearly impossible to see, but the plateau to the right is slightly tilted. Because gradient descent follows the tilted loss surface downwards, it never converges. Loss keeps approaching 0 as $\theta$ increases.
 #
-# The diverging weights cause the model to be **overconfident**. Say we add a new point $(x, y) = (-0.5, 1)$. Following the behavior above, our model will incorrectly predict $p=0$, and thus, $\hat y = 0$.
+# The diverging weights cause the model to be **overconfident**. Say we add a new point $(x, y) = (-1, 1)$, sitting directly above the existing $y=0$ point at $x=-1$. Following the behavior above, our model will incorrectly predict $p=0$, and thus, $\hat y = 0$.
 #
 # ```{image} images/toy_linear_separable_dataset_2.png
 # :alt: A third datapoint has been added to the toy dataset that is incorrectly classified.
-# :width:450
+# :width: 450
 # ```
 #
 # The loss incurred by this misclassified point is infinite.
 #
-# $$-(y\text{ log}(p) + (1-y)\text{ log}(1-p))=1 * \text{log}(0)$$
+# $$-(y\text{ log}(p) + (1-y)\text{ log}(1-p))=-1 * \text{log}(0)$$
 #
 # Thus, diverging weights ($|\theta| \rightarrow \infty$) occur with **linearly separable** data. "Overconfidence", as shown here, is a particularly dangerous version of overfitting.
 #
@@ -402,12 +405,12 @@ plt.xlabel(r'$\theta$');
 #
 # ```{image} images/unreg_loss_infinite_argmin.png
 # :alt: Mean cross entropy plot. The direction of the gradient is down and to the right, and there is an infinite argmin
-# :width:450
+# :width: 450
 # ```
 #
 # ```{image} images/reg_loss_finite_argmin.png
 # :alt: Mean loss + L2 regularization (lambda = 0.1) which shows a finite argmin
-# :width:450
+# :width: 450
 # ```
 #
 # As we can see, $L2$ regularization helps us prevent diverging weights and deters against "overconfidence."
@@ -593,7 +596,7 @@ plt.xlabel(r'$\theta$');
 #
 # ```{image}  images/varying_threshold.png
 # :alt: Three plots showing how classification changes from T=0.25, T=0.5, and T=0.75
-# :width:700
+# :width: 700
 # ```
 #
 # As you may notice, the choice of threshold $T$ impacts our classifier's performance.
@@ -626,17 +629,17 @@ plt.xlabel(r'$\theta$');
 #
 # ```{image} images/pr_curve_thresholds.png
 # :alt: The precision recall curve
-# :width:600
+# :width: 600
 # ```
 #
 # Once again, the perfect classifier will resemble the orange curve, this time, facing the opposite direction.
 #
 # ```{image} images/pr_curve_perfect.png
 # :alt: The actual precision recall curve is shown along with a perfect predictor where prevcsion and recall are both 1.
-# :width:600
+# :width: 600
 # ```
 #
-# We want our PR curve to be as close to the “top right” of this graph as possible. We can use the **area under curve (or AUC)** to determine "closeness", with the perfect classifier exhibiting an AUC = 1 (and the worst with an AUC = 0.5).
+# We want our PR curve to be as close to the “top right” of this graph as possible. We can use the **area under curve (or AUC)** to determine "closeness", with the perfect classifier exhibiting an AUC = 1. Note that the *worst* case here is not 0.5, as it is for the ROC curve below: a random classifier's PR-AUC equals the proportion of the data that is actually positive. On the 5%-spam example above that baseline is 0.05, not 0.5 — which is precisely why this curve is the one to reach for when the classes are imbalanced.
 #
 # ### F1 Score
 # Another way to **<u>balance</u> precision and recall** is to maximize the **$F_1$ Score**:
@@ -823,22 +826,22 @@ plt.ylabel("Likelihood");
 # Now, we can simplify the cross-entropy loss
 # $$\begin{align}
 # y_i \log(p_i) + (1 - y_i) \log(1 - p_i) &= y_i \log(\frac{p_i}{1 - p_i}) + \log(1 - p_i) \\
-# &= y_i \phi(x_i)^T + \log(\sigma(-\phi(x_i)^T \theta))
+# &= y_i \phi(x_i)^T \theta + \log(\sigma(-\phi(x_i)^T \theta))
 # \end{align}
 # $$
 #
 # Hence, the optimal $\hat{\theta}$ is 
-# $$\text{argmin}_{\theta} - \frac{1}{n} \sum_{i=1}^n (y_i \phi(x_i)^T + \log(\sigma(-\phi(x_i)^T \theta)))$$ 
+# $$\text{argmin}_{\theta} - \frac{1}{n} \sum_{i=1}^n (y_i \phi(x_i)^T \theta + \log(\sigma(-\phi(x_i)^T \theta)))$$ 
 #
-# We want to minimize $$L(\theta) = - \frac{1}{n} \sum_{i=1}^n (y_i \phi(x_i)^T + \log(\sigma(-\phi(x_i)^T \theta)))$$
+# We want to minimize $$L(\theta) = - \frac{1}{n} \sum_{i=1}^n (y_i \phi(x_i)^T \theta + \log(\sigma(-\phi(x_i)^T \theta)))$$
 #
 # So we take the derivative 
 # $$\begin{align}
-# \triangledown_{\theta} L(\theta) &= - \frac{1}{n} \sum_{i=1}^n \triangledown_{\theta} y_i \phi(x_i)^T + \triangledown_{\theta} \log(\sigma(-\phi(x_i)^T \theta)) \\
+# \triangledown_{\theta} L(\theta) &= - \frac{1}{n} \sum_{i=1}^n \triangledown_{\theta} y_i \phi(x_i)^T \theta + \triangledown_{\theta} \log(\sigma(-\phi(x_i)^T \theta)) \\
 # &= - \frac{1}{n} \sum_{i=1}^n y_i \phi(x_i) + \triangledown_{\theta} \log(\sigma(-\phi(x_i)^T \theta)) \\
 # &= - \frac{1}{n} \sum_{i=1}^n y_i \phi(x_i) + \frac{1}{\sigma(-\phi(x_i)^T \theta)} \triangledown_{\theta} \sigma(-\phi(x_i)^T \theta) \\
 # &= - \frac{1}{n} \sum_{i=1}^n y_i \phi(x_i) + \frac{\sigma(-\phi(x_i)^T \theta)}{\sigma(-\phi(x_i)^T \theta)} \sigma(\phi(x_i)^T \theta)\triangledown_{\theta} \sigma(-\phi(x_i)^T \theta) \\
-# &= - \frac{1}{n} \sum_{i=1}^n (y_i - \sigma(\phi(x_i)^T \theta)\phi(x_i))
+# &= - \frac{1}{n} \sum_{i=1}^n (y_i - \sigma(\phi(x_i)^T \theta))\phi(x_i)
 # \end{align}
 # $$
 #
@@ -861,8 +864,10 @@ plt.ylabel("Likelihood");
 # Recall that the best possible AUC = 1. On the other hand, a terrible model will have an AUC closer to 0.5. A **random predictor** randomly predicts $P(Y = 1 | x)$ to be uniformly between 0 and 1. This indicates the classifier is not able to distinguish between positive and negative classes, and thus, randomly predicts one of the two. 
 #
 # ```{image} images/roc_curve_worst_predictor.png
-# :alt: '' 
-# :width:700
+# :alt: The same ROC diagram as above, repeated for the bonus derivation: a diagonal line from
+#   (0,0) to (1,1) labelled "Random Predictor. AUC = 0.5", an arrow pointing to the triangle
+#   beneath it, and the orange right-angled path of the perfect predictor with AUC = 1.0.
+# :width: 700
 # ```
 # We can illustrate this by comparing different thresholds and seeing their points on the ROC curve.
 #

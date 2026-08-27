@@ -745,13 +745,13 @@ pl.DataFrame({"Feature":data_w_ohe.columns, "Model Coefficient":ohe_model.coef_}
 # import matplotlib.pyplot as plt
 #
 # sns.scatterplot(data=vehicles, x="hp", y="mpg")
-# plt.plot(vehicles["hp"].to_numpy(), hp_model_predictions, c="tab:red");
+# plt.plot(vehicles["hp"], hp_model_predictions, c="tab:red");
 #
 # print(f"MSE of model with (hp) feature: {((Y - hp_model_predictions)**2).mean()}")
 # ```
 # ````
 
-# %% tags=["remove-input", "remove-output"] id="edc98ac8"
+# %% tags=["remove-input"] id="edc98ac8"
 #| fig-alt: "MSE of model with (hp) feature: 23.943662938603108"
 vehicles = pl.from_pandas(sns.load_dataset("mpg")).drop_nulls().rename({"horsepower": "hp"}).sort("hp")
 
@@ -765,7 +765,7 @@ hp_model_predictions = hp_model.predict(X)
 import matplotlib.pyplot as plt
 
 sns.scatterplot(data=vehicles, x="hp", y="mpg")
-plt.plot(vehicles["hp"].to_numpy(), hp_model_predictions, c="tab:red");
+plt.plot(vehicles["hp"], hp_model_predictions, c="tab:red");
 
 print(f"MSE of model with (hp) feature: {((Y - hp_model_predictions)**2).mean()}")
 
@@ -787,13 +787,14 @@ print(f"MSE of model with (hp) feature: {((Y - hp_model_predictions)**2).mean()}
 # import matplotlib.pyplot as plt
 #
 # sns.scatterplot(data=vehicles, x="hp", y="mpg")
-# plt.plot(vehicles["hp"].to_numpy(), hp_model_predictions, c="tab:red");
+# plt.plot(vehicles["hp"], hp_model_predictions, c="tab:red");
 #
 # print(f"MSE of model with (hp) feature: {((Y - hp_model_predictions)**2).mean()}")
 # ```
 #
 # ```text
 # MSE of model with (hp) feature: 23.943662938603108
+# <Figure size 640x480 with 1 Axes>
 # ```
 # ::::
 #
@@ -820,6 +821,7 @@ print(f"MSE of model with (hp) feature: {((Y - hp_model_predictions)**2).mean()}
 #
 # ```text
 # MSE of model with (hp) feature: 23.943662938603104
+# <Figure size 640x480 with 1 Axes>
 # ```
 # ::::
 # :::::
@@ -833,7 +835,7 @@ print(f"MSE of model with (hp) feature: {((Y - hp_model_predictions)**2).mean()}
 #
 # How can we fit a model with non-linear features? We can use the exact same techniques as before: ordinary least squares, gradient descent, or `sklearn`. This is because our new model is still a **linear model**. Although it contains non-linear *features*, it is linear with respect to the model *parameters*. All of our previous work on fitting models was done under the assumption that we were working with linear models. Because our new model is still linear, we can apply our existing methods to determine the optimal parameters.
 
-# %% tags=["remove-input", "remove-output"] id="21180eea"
+# %% tags=["remove-input"] id="21180eea"
 #| fig-alt: "Untransformed data. MSE of model with (hp^2) feature: 18.984768907617216"
 # Add a hp^2 feature to the design matrix
 X = vehicles[["hp"]].with_columns((pl.col("hp") ** 2).alias("hp^2"))
@@ -844,7 +846,7 @@ hp2_model.fit(X, Y)
 hp2_model_predictions = hp2_model.predict(X)
 
 sns.scatterplot(data=vehicles, x="hp", y="mpg")
-plt.plot(vehicles["hp"].to_numpy(), hp2_model_predictions, c="tab:red");
+plt.plot(vehicles["hp"], hp2_model_predictions, c="tab:red");
 
 print(f"MSE of model with (hp^2) feature: {((Y - hp2_model_predictions)**2).mean()}")
 
@@ -863,13 +865,14 @@ print(f"MSE of model with (hp^2) feature: {((Y - hp2_model_predictions)**2).mean
 # hp2_model_predictions = hp2_model.predict(X)
 #
 # sns.scatterplot(data=vehicles, x="hp", y="mpg")
-# plt.plot(vehicles["hp"].to_numpy(), hp2_model_predictions, c="tab:red");
+# plt.plot(vehicles["hp"], hp2_model_predictions, c="tab:red");
 #
 # print(f"MSE of model with (hp^2) feature: {((Y - hp2_model_predictions)**2).mean()}")
 # ```
 #
 # ```text
 # MSE of model with (hp^2) feature: 18.984768907617216
+# <Figure size 640x480 with 1 Axes>
 # ```
 # ::::
 #
@@ -893,6 +896,7 @@ print(f"MSE of model with (hp^2) feature: {((Y - hp2_model_predictions)**2).mean
 #
 # ```text
 # MSE of model with (hp^2) feature: 18.98476890761722
+# <Figure size 640x480 with 1 Axes>
 # ```
 # ::::
 # :::::

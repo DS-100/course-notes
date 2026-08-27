@@ -44,6 +44,71 @@ OUTPUT_CHURNS = {
 # equivalence that is false -- which no gate can see, because both halves are real, executed output
 # of real code.
 BASELINE_SKIP = {
+    "intro_lec": {
+        # The pandas original taught the `Series` *Index*; the Polars rewrite dropped it, because
+        # Polars has no such thing. Pairing on cell id then pairs unrelated operations under one
+        # heading, in the first chapter a student reads:
+        #
+        #   fba44498  `pl.Series("ratings", [...])` (names a Series)  vs  `pd.Series([...],
+        #             index=[...])` (labels its rows). The prose above says "a name can be passed
+        #             as the first argument" -- which, followed literally on the pandas tab, gives
+        #             `pd.Series("ratings", [-1, 10, 2])`: the string becomes the *values* and the
+        #             list becomes the index. Nothing raises.
+        #   cb6cff88  `.cast(pl.Float64)`  vs  `s.index = [...]`. The prose says the call returns a
+        #             new Series and changes the data type; the pandas half mutates in place and
+        #             changes no dtype -- its own committed output still reads `dtype: int64`.
+        #   53a863ee  `s.dtype`  vs  `s.index`. One reads a data type, the other reads row labels.
+        #   3117fc63  `.to_list()` (a `list`)  vs  `.values` (an `ndarray`), under a shared comment
+        #             asserting they are the same operation. This is the *first* pandas/Polars pair
+        #             in the book, so `.values == .to_list()` is the mapping a reader carries out
+        #             of it. The honest twin is `.tolist()`.
+        #
+        #   12449aec  a bare `s.index` printing `Index(['a', 'b', 'c'])` -- labels that came from
+        #             `fba44498`'s pandas half, which is no longer on the page. I originally kept
+        #             this one on the grounds that it "carries per-tab comments that disclose the
+        #             contrast". It does not; `9371d026` does. That claim was wrong and this entry
+        #             is the correction.
+        #
+        # `9371d026` makes the same Index contrast on purpose and keeps its twin: both its panes
+        # carry comments naming what each one is reading.
+        "fba44498", "cb6cff88", "53a863ee", "3117fc63", "12449aec",
+    },
+    "eda": {
+        # `dt.weekday()` numbers Monday=1..Sunday=7; pandas `dt.dayofweek` numbers Monday=0..Sunday=6.
+        # The prose above *both* tabs announces "Monday = 1", so the pandas pane prints an output
+        # that contradicts the sentence introducing it. The honest twin is `dt.dayofweek + 1`.
+        "b432c276",
+        # Polars reads the file raw -- `(738, 1)`, one string column, no commas anywhere -- and the
+        # prose below says "each record is still one long string... We need to do more EDA." The
+        # pandas half passes `sep=r'\s+'` and arrives already split and typed at `(738, 7)`, so the
+        # two-step narrative the section is built on is finished before it starts on that tab.
+        "719dc1a4",
+        # The pandas pane's own comment reads `# 2. Replace NaN with -99.99` above code that does
+        # the reverse (`co2.replace(-99.99, np.nan)`). It is the pandas original's error, inherited
+        # verbatim, and the conversion corrected the Polars side to `# 2. Replace -99.99 with null`
+        # -- so the tab now shows two comments describing opposite operations under one heading.
+        # Publishing a false statement because it is old is still publishing it.
+        "ef3fe041",
+    },
+    "modeling_slr": {
+        # The pandas pane republishes a bug the conversion deliberately fixed, and frames it as a
+        # library difference. The baseline cell printed `f"\theta_0: ..."` -- `\t` is Python's tab
+        # escape, so the label rendered as a TAB followed by `heta_0`. The conversion repaired the
+        # f-string; pairing on cell id then puts the *fixed* Polars run beside the *unfixed* pandas
+        # transcript, so the only visible difference under a heading saying "pandas" is four lines
+        # of mangled text. pandas does not do that. (This was the chapter's only twinnable cell, so
+        # `modeling_slr` now carries none -- see CONVERSIONS.md on cell `ce691b4e`.)
+        "e83b8086",
+    },
+    "pca": {
+        # `rectangle` has rank 3, so the fourth singular value is ~1e-14 and its singular vector
+        # spans the null space -- LAPACK picks it arbitrarily. Verified that the two libraries agree
+        # exactly (`np.array_equal(U, U_pandas)` is True); what differs is the run, not the library.
+        # Frozen side by side the tab shows 0.967868 against 0.894121 under one heading and invites
+        # the reader to conclude Polars and pandas disagree about an SVD. Same reasoning as the
+        # order-unstable guard: a value that is not reproducible does not belong in a frozen pane.
+        "a4377823", "f5849357",
+    },
     "regex": {
         # Polars: `extract_groups` -> each group's FIRST match, non-matching rows kept as null.
         # pandas baseline: `extractall` -> EVERY match, non-matching rows dropped, MultiIndex.
@@ -474,7 +539,9 @@ elections_pd['First Name'] = elections_pd['Candidate'].str.split().str[0]
             # is deliberately nondeterministic, and a frozen block cannot mirror a cell whose
             # output legitimately changes on every run.
             'babies_by_year = babynames.group_by("Year").agg(pl.col("Count").sum()).sort("Year")':
-                'babynames_pd.groupby("Year")["Count"].sum().head(5)',
+                '# pandas sorted the group keys for us -- we never asked it to\n'
+                'babies_by_year_pd = babynames_pd.groupby("Year")["Count"].sum()\n'
+                'babies_by_year_pd.head(5)',
             # Counting rows per group: `size()` vs `len()`, and pandas returns a Series.
             'df.group_by("letter", maintain_order=True).len()':
                 'df_pd.groupby("letter", sort=False).size()',

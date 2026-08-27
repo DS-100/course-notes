@@ -206,6 +206,13 @@ python conversion/site_gate.py
 durable accessibility check, which matters more here than usual because several chapters carry alt
 text that quotes computed values.
 
-**If ongoing protection is ever wanted, the one check worth lifting out is `site_gate.py`'s
-"0 pandas reprs reach the reader".** That claim is absolute rather than relative to a baseline, so
-unlike the rest of the battery it would keep its meaning after the merge.
+**If ongoing protection is ever wanted, the two checks worth lifting out are `site_gate.py`'s
+"0 pandas reprs reach the reader" and "0 inline-base64 images under `_build/html/`".** Both claims
+are absolute rather than relative to a baseline, so unlike the rest of the battery they keep their
+meaning after the merge.
+
+The second is worth explaining, because it is cheap and it caught six missing figures. The build
+**externalizes a figure it is going to show** to `_build/html/build/<md5>.png` and leaves a figure it
+has been told to hide as **inline base64** in the page JSON. So an image still encoded inline is, by
+construction, an image the reader never sees — and counting them answers "is this book hiding a
+figure?" without opening a single notebook.

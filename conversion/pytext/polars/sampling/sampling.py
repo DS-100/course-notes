@@ -322,9 +322,11 @@ votes['voted_dem'].mean()
 votes['voted_dem'].sample(1000).mean()
 
 # %% [markdown] id="b7e78842"
-# We can also take a sample by choosing the row positions ourselves. `NumPy` draws 1,000 random row numbers, and `.gather` pulls out the values sitting at those positions. This is the form we'll reuse below when we repeat the sample thousands of times.
+# We can also pick the row positions ourselves. `NumPy` draws 1,000 random row numbers and `.gather` pulls out the values sitting at those positions. This is the form we'll reuse below when we repeat the sample thousands of times.
+#
+# Note that this is *not* an SRS. `rng.integers` draws each number independently, so the same voter can come up twice — it is the uniform random sample **with** replacement from earlier in the chapter. With 1,000 draws from 44 million voters a repeat turns up in roughly one sample in ninety, which is why the two schemes give such similar answers here.
 
-# %% id="04510ea5"
+# %% tags=["remove-input", "remove-output"] id="04510ea5"
 # Construct a random number generator object.
 # No need to be familiar with using NumPy this way in Data 100!
 rng = np.random.default_rng()
@@ -332,9 +334,54 @@ rng = np.random.default_rng()
 n_votes = len(votes)
 
 # Generate 1000 random integers from 0 to (number of votes - 1)
-idx = rng.integers(low=0, high=n_votes-1, size=1000)
+idx = rng.integers(low=0, high=n_votes, size=1000)
 
 votes['voted_dem'].gather(idx).mean()
+
+# %% [markdown]
+# <!-- tab-twins:begin 04510ea5 -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# # Construct a random number generator object.
+# # No need to be familiar with using NumPy this way in Data 100!
+# rng = np.random.default_rng()
+#
+# n_votes = len(votes)
+#
+# # Generate 1000 random integers from 0 to (number of votes - 1)
+# idx = rng.integers(low=0, high=n_votes, size=1000)
+#
+# votes['voted_dem'].gather(idx).mean()
+# ```
+#
+# ```text
+# 0.615
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# # Construct a random number generator object.
+# # No need to be familiar with using NumPy this way in Data 100!
+# rng = np.random.default_rng()
+#
+# n_votes = len(votes)
+#
+# # Generate 1000 random integers from 0 to (number of votes - 1)
+# idx = rng.integers(low=0, high=n_votes-1, size=1000)
+#
+# votes['voted_dem'].iloc[idx].mean()
+# ```
+#
+# ```text
+# 0.627
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="0c8d6455"
 # Both of the estimates above are pretty close to 62.5%! They are much closer than the estimate from the Literary Digest poll, which predicted that 43% of votes would go to Roosevelt.
@@ -343,7 +390,7 @@ votes['voted_dem'].gather(idx).mean()
 
 # %% tags=["remove-input", "remove-output"] id="b37cf863"
 for _ in range(10):
-  idx = rng.integers(low=0, high=n_votes-1, size=1000)
+  idx = rng.integers(low=0, high=n_votes, size=1000)
   print(votes['voted_dem'].gather(idx).mean())
 
 # %% [markdown]
@@ -353,21 +400,21 @@ for _ in range(10):
 # :sync: pl
 # ```python
 # for _ in range(10):
-#   idx = rng.integers(low=0, high=n_votes-1, size=1000)
+#   idx = rng.integers(low=0, high=n_votes, size=1000)
 #   print(votes['voted_dem'].gather(idx).mean())
 # ```
 #
 # ```text
-# 0.599
-# 0.622
-# 0.614
-# 0.582
-# 0.634
-# 0.618
+# 0.604
+# 0.612
 # 0.623
-# 0.634
-# 0.632
-# 0.641
+# 0.627
+# 0.649
+# 0.606
+# 0.622
+# 0.611
+# 0.617
+# 0.625
 # ```
 # ::::
 #
@@ -429,7 +476,7 @@ results[:10]
 # ```
 #
 # ```text
-# [0.602, 0.624, 0.633, 0.629, 0.624, 0.639, 0.62, 0.621, 0.626, 0.602]
+# [0.631, 0.627, 0.63, 0.62, 0.651, 0.622, 0.617, 0.604, 0.604, 0.601]
 # ```
 # ::::
 #
@@ -602,9 +649,9 @@ poll['ld_dem_1936'].sum() / (poll['ld_dem_1936'].sum() + poll['ld_rep_1936'].sum
 #
 # > Note: Alaska and Hawaii were not U.S. states until after 1936.
 #
-# The population cells are already in `polls`: `actual_dem_1932` and `actual_rep_1932` provide the actual vote counts for each party and state in 1932.
+# The population cells are already in `poll`: `actual_dem_1932` and `actual_rep_1932` provide the actual vote counts for each party and state in 1932.
 #
-# The sample cells are also in `polls`: `ld_dem_1932` and `ld_rep_1932` provide the number of responses to the 1932 Literary Digest poll, among 1936 poll respondents, for each party.
+# The sample cells are also in `poll`: `ld_dem_1932` and `ld_rep_1932` provide the number of responses to the 1932 Literary Digest poll, among 1936 poll respondents, for each party.
 #
 # Let's make the **big** assumption that respondents in `ld_dem_1932` are representative of all voters in `actual_dem_1932` for each state, and the same for `ld_rep_1932` and `actual_rep_1932`.
 #

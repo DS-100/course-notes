@@ -483,7 +483,7 @@ plt.title('Distribution with a long right tail');
 # - A distribution with a long left tail is **skewed left**  (has **negative skew**) (such as `Access to an improved water source`). In a left-skewed distribution, the few small outliers "pull" the **mean** to the **left** of the **median**.
 
 # %% id="2f083783"
-#| fig-alt: Distribution with a long right tail. The highest bars are on the very right of the graph and as you progress to the left side of the graph, the bars are short.
+#| fig-alt: Distribution with a long left tail. The highest bars are on the very right of the graph and as you progress to the left side of the graph, the bars are short.
 sns.histplot(data = wb, x = 'Access to an improved water source: % of population: 2015', stat = 'density');
 plt.title('Distribution with a long left tail');
 
@@ -599,7 +599,7 @@ sns.rugplot([q1, q2, q3], c="firebrick", lw=6, height=0.1);
 sns.boxplot(data=wb, y='Gross domestic product: % growth : 2016');
 
 # %% [markdown] id="6b0b09b5"
-# The **whiskers** of a box-plot are the two points that lie at the \[$1^{st}$ Quartile $-$ ($1.5\times$ IQR)\], and the \[$3^{rd}$ Quartile $+$ ($1.5\times$ IQR)\]. They are the lower and upper ranges of "normal" data (the points excluding outliers). 
+# The \[$1^{st}$ Quartile $-$ ($1.5\times$ IQR)\] and \[$3^{rd}$ Quartile $+$ ($1.5\times$ IQR)\] are the **fences**. The **whiskers** are drawn to the most extreme data point that still falls inside them, so they land *on observed values* rather than on the fences themselves — for the plot above, at $-3.1$ and $8.5$ rather than at $-3.125$ and $9.075$. They are the lower and upper ranges of "normal" data (the points excluding outliers). 
 #
 # The different forms of information contained in a box plot can be summarized as follows:
 #

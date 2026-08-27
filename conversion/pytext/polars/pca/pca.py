@@ -189,9 +189,9 @@ fig.update_layout(coloraxis_showscale=False)
 #
 # ![Dataset 1 consists of two columns: height (in) and weight (lbs). Dataset 2 consists of three columns: height (in), weight (lbs), and age.](images/dataset_dims.png)
 #
-# What about Dataset 3 below? 
+# What about Dataset 4 below? 
 #
-# ![Dataset 3 has three columns: height (in), weight (kg), weight (lbs), and age](images/dataset4.png)
+# ![Dataset 4 has four columns: height (in), weight (kg), weight (lbs), and age.](images/dataset4.png)
 #
 # It may be tempting to say that it has 4 dimensions, but the `Weight (lbs)` column is actually just a linear transformation of the `Weight (kg)` column. Thus, no new information is captured, and the matrix of our dataset has a (column) rank of 3! Therefore, despite having 4 columns, we still say that this data is 3-dimensional. 
 #
@@ -471,7 +471,10 @@ fig.update_layout(coloraxis_showscale=False)
 #
 # Orthonormal matrices have a few important properties:
 #
-# - **Orthonormal inverse**: If an $m \times n$ matrix $Q$ has orthonormal columns, $QQ^T= Iₘ$ and $Q^TQ=Iₙ$.
+# - **Orthonormal inverse**: If an $m \times n$ matrix $Q$ has orthonormal columns, then
+#   $Q^TQ=Iₙ$ always. $QQ^T= Iₘ$ holds only when $Q$ is square — with $m > n$ the columns of $Q$
+#   span an $n$-dimensional subspace of $\mathbb{R}^m$, and $QQ^T$ is the projection onto it
+#   rather than the identity.
 # - **Rotation of coordinates**: The linear transformation represented by an orthonormal matrix is often a rotation (and less often a reflection). We can imagine columns of the matrix as where the unit vectors of the original space will land.
 # :::
 #
@@ -496,7 +499,9 @@ fig.update_layout(coloraxis_showscale=False)
 #   - $\vec{u_i}^T\vec{u_j} = 0$ for all pairs $i, j$.
 #   - All vectors $\vec{u_i}$ are unit vectors where $|| \vec{u_i} || = 1$ .
 # - Columns of $U$ are called the **left singular vectors** and are **eigenvectors** of $XX^T$.
-# - $UU^T = I_n$ and $U^TU = I_d$.
+# - $U^TU = I_d$. ($UU^T = I_n$ only for the *full* SVD, where $U$ is $n \times n$; the
+#   `full_matrices=False` form used below gives an $n \times d$ matrix, for which $UU^T$ is a
+#   projection of rank $d$.)
 # - We can think of $U$ as a rotation.
 #
 # ![A matrix with n rows where the columns are divided in two: the first r columns and then the remaining d minus r columns.](images/u.png)
@@ -676,51 +681,8 @@ U.shape
 # %% [markdown] id="0f3ec1be"
 # The first 5 rows of `U` are shown below.
 
-# %% tags=["remove-input", "remove-output"] id="a4377823"
+# %% id="a4377823"
 pl.DataFrame(U).head(5)
-
-# %% [markdown]
-# <!-- tab-twins:begin a4377823 -->
-# :::::{tab-set}
-# :::: {tab-item} Polars
-# :sync: pl
-# ```python
-# pl.DataFrame(U).head(5)
-# ```
-#
-# ```text
-# shape: (5, 4)
-# ┌───────────┬───────────┬───────────┬───────────┐
-# │ column_0  ┆ column_1  ┆ column_2  ┆ column_3  │
-# │ ---       ┆ ---       ┆ ---       ┆ ---       │
-# │ f64       ┆ f64       ┆ f64       ┆ f64       │
-# ╞═══════════╪═══════════╪═══════════╪═══════════╡
-# │ -0.155151 ┆ 0.06483   ┆ -0.029935 ┆ 0.894121  │
-# │ -0.03837  ┆ -0.089155 ┆ 0.062019  ┆ -0.353004 │
-# │ -0.020357 ┆ -0.081138 ┆ 0.058997  ┆ 0.013634  │
-# │ -0.101519 ┆ -0.076203 ┆ -0.14816  ┆ 0.048877  │
-# │ -0.218973 ┆ 0.206423  ┆ 0.007274  ┆ -0.035264 │
-# └───────────┴───────────┴───────────┴───────────┘
-# ```
-# ::::
-#
-# :::: {tab-item} pandas
-# :sync: pd
-# ```python
-# pd.DataFrame(U).head(5)
-# ```
-#
-# ```text
-#           0         1         2         3
-# 0 -0.155151  0.064830 -0.029935  0.967868
-# 1 -0.038370 -0.089155  0.062019 -0.151231
-# 2 -0.020357 -0.081138  0.058997  0.003355
-# 3 -0.101519 -0.076203 -0.148160  0.006977
-# 4 -0.218973  0.206423  0.007274 -0.042254
-# ```
-# ::::
-# :::::
-# <!-- tab-twins:end -->
 
 # %% [markdown] id="def45b95"
 # $S$ is a little different in `NumPy`. Since the only useful values in the diagonal matrix $S$ are the singular values on the diagonal axis, only those values are returned and they are stored in an array.
@@ -749,49 +711,8 @@ Sm
 # %% id="de755df9"
 Vt.shape
 
-# %% tags=["remove-input", "remove-output"] id="f5849357"
+# %% id="f5849357"
 pl.DataFrame(Vt)
-
-# %% [markdown]
-# <!-- tab-twins:begin f5849357 -->
-# :::::{tab-set}
-# :::: {tab-item} Polars
-# :sync: pl
-# ```python
-# pl.DataFrame(Vt)
-# ```
-#
-# ```text
-# shape: (4, 4)
-# ┌───────────┬───────────┬─────────────┬───────────┐
-# │ column_0  ┆ column_1  ┆ column_2    ┆ column_3  │
-# │ ---       ┆ ---       ┆ ---         ┆ ---       │
-# │ f64       ┆ f64       ┆ f64         ┆ f64       │
-# ╞═══════════╪═══════════╪═════════════╪═══════════╡
-# │ -0.146436 ┆ -0.129942 ┆ -0.81002    ┆ -0.552756 │
-# │ -0.192736 ┆ -0.189128 ┆ 0.586348    ┆ -0.763727 │
-# │ -0.704957 ┆ 0.709155  ┆ 0.007952    ┆ 0.008396  │
-# │ -0.666667 ┆ -0.666667 ┆ -5.2721e-17 ┆ 0.333333  │
-# └───────────┴───────────┴─────────────┴───────────┘
-# ```
-# ::::
-#
-# :::: {tab-item} pandas
-# :sync: pd
-# ```python
-# pd.DataFrame(Vt)
-# ```
-#
-# ```text
-#           0         1             2         3
-# 0 -0.146436 -0.129942 -8.100201e-01 -0.552756
-# 1 -0.192736 -0.189128  5.863482e-01 -0.763727
-# 2 -0.704957  0.709155  7.951614e-03  0.008396
-# 3 -0.666667 -0.666667 -8.701245e-17  0.333333
-# ```
-# ::::
-# :::::
-# <!-- tab-twins:end -->
 
 # %% [markdown] id="ef97bd07"
 # To check that this SVD is a valid decomposition, we can reverse it and see if it matches our original table (it does, yay!).
@@ -1099,7 +1020,7 @@ pl.DataFrame(two_PCs).head()
 #
 # ### Biplots
 #
-# Biplots superimpose the **directions** onto the plot of PC1 vs. PC2, where vector $j$ corresponds to the direction for feature $j$ (e.g., $v_{1j}, v_{2j}$). There are several ways to scale biplot vectors — in this course, we plot the direction itself. For other scalings, which can lead to more interpretable directions/loadings, see [SAS biplots](https://blogs.sas.com/content/iml/2019/11/06/what-are-biplots.html).
+# Biplots superimpose the **directions** onto the plot of PC1 vs. PC2, where vector $j$ corresponds to the direction for feature $j$ (e.g., $v_{1j}, v_{2j}$). There are several ways to scale biplot vectors; the cell below scales each axis by the square root of its singular value, plotting $(\sqrt{s_1}\,v_{1j}, \sqrt{s_2}\,v_{2j})$. Because the two axes are scaled by different amounts, an arrow's *length* becomes readable against the spread of the points, at the cost of turning it slightly away from the raw direction. For other scalings, which can lead to more interpretable directions/loadings, see [SAS biplots](https://blogs.sas.com/content/iml/2019/11/06/what-are-biplots.html).
 #
 # Through biplots, we can interpret how features correlate with the principal components shown: positively, negatively, or not much at all.
 #
@@ -1275,6 +1196,18 @@ vote_pivot.head()
 #
 # ```text
 # (441, 42)
+# shape: (5, 42)
+# ┌─────────┬─────┬─────┬─────┬───┬─────┬─────┬─────┬─────┐
+# │ member  ┆ 515 ┆ 516 ┆ 517 ┆ … ┆ 552 ┆ 553 ┆ 554 ┆ 555 │
+# │ ---     ┆ --- ┆ --- ┆ --- ┆   ┆ --- ┆ --- ┆ --- ┆ --- │
+# │ str     ┆ i64 ┆ i64 ┆ i64 ┆   ┆ i64 ┆ i64 ┆ i64 ┆ i64 │
+# ╞═════════╪═════╪═════╪═════╪═══╪═════╪═════╪═════╪═════╡
+# │ A000055 ┆ 1   ┆ 0   ┆ 0   ┆ … ┆ 0   ┆ 0   ┆ 1   ┆ 0   │
+# │ A000367 ┆ 0   ┆ 0   ┆ 0   ┆ … ┆ 1   ┆ 1   ┆ 0   ┆ 1   │
+# │ A000369 ┆ 1   ┆ 1   ┆ 0   ┆ … ┆ 0   ┆ 0   ┆ 1   ┆ 0   │
+# │ A000370 ┆ 1   ┆ 1   ┆ 1   ┆ … ┆ 1   ┆ 1   ┆ 1   ┆ 1   │
+# │ A000371 ┆ 1   ┆ 1   ┆ 1   ┆ … ┆ 1   ┆ 1   ┆ 1   ┆ 1   │
+# └─────────┴─────┴─────┴─────┴───┴─────┴─────┴─────┴─────┘
 # ```
 # ::::
 #
@@ -1294,12 +1227,34 @@ vote_pivot.head()
 #
 # ```text
 # (441, 41)
+# roll call  515  516  517  518  519  520  521  522  523  524  ...  546  547  \
+# member                                                       ...
+# A000055      1    0    0    0    1    1    0    1    1    1  ...    0    0
+# A000367      0    0    0    0    0    0    0    0    0    0  ...    0    1
+# A000369      1    1    0    0    1    1    0    1    1    1  ...    0    0
+# A000370      1    1    1    1    1    0    1    0    0    0  ...    1    1
+# A000371      1    1    1    1    1    0    1    0    0    0  ...    1    1
+#
+# roll call  548  549  550  551  552  553  554  555
+# member
+# A000055      1    0    0    1    0    0    1    0
+# A000367      1    1    1    0    1    1    0    1
+# A000369      1    0    0    1    0    0    1    0
+# A000370      1    1    1    0    1    1    1    1
+# A000371      1    1    1    0    1    1    1    1
+#
+# [5 rows x 41 columns]
 # ```
 # ::::
 # :::::
 # <!-- tab-twins:end -->
 
 # %% [markdown] id="497a2b04"
+# The two shapes differ by one, and the difference is bookkeeping rather than data. Polars leaves
+# `member` as an ordinary column, so the frame is 41 roll calls *plus* the labels; pandas moves
+# `member` into the index, where it stops being counted. Both tables hold the same 441 legislators
+# and the same 41 votes.
+#
 # **Do legislators' roll call votes show a relationship with their political party?**
 #
 # ### PCA with SVD
@@ -2174,7 +2129,7 @@ fig.show()
 # %% [markdown] id="fbf462ba"
 # Let's break this down further and look at it by class, or the category of clothing:
 
-# %% tags=["remove-input", "remove-output"] id="3ec83d53"
+# %% tags=["remove-input"] id="3ec83d53"
 print(class_dict)
 
 # keep two rows drawn at random from each class
@@ -2377,9 +2332,9 @@ fig.update_traces(marker=dict(size=5))
 # \tilde{X}^T \tilde{X} &= (U S V^T )^T (U S V^T) \\
 # &= V S U^T U S V^T  & (S^T = S) \\
 # &= V S^2 V^T & (U^T U = I) \\
-# \frac{1}{n} \tilde{X}^T \tilde{X} &= \frac{1}{n} V S V^T =V \left( \frac{1}{n} S \right) V^T \\
-# \frac{1}{n} \tilde{X}^T \tilde{X} V &= V \left( \frac{1}{n} S \right) V^T V = V \left( \frac{1}{n} S \right) & \text{(right multiply by }V \rightarrow V^T V = I \text{)} \\
-# V^T \frac{1}{n} \tilde{X}^T \tilde{X} V &= V^T V \left( \frac{1}{n} S \right) = \frac{1}{n} S & \text{(left multiply by }V^T \rightarrow V^T V = I \text{)} \\
+# \frac{1}{n} \tilde{X}^T \tilde{X} &= \frac{1}{n} V S^2 V^T =V \left( \frac{1}{n} S^2 \right) V^T \\
+# \frac{1}{n} \tilde{X}^T \tilde{X} V &= V \left( \frac{1}{n} S^2 \right) V^T V = V \left( \frac{1}{n} S^2 \right) & \text{(right multiply by }V \rightarrow V^T V = I \text{)} \\
+# V^T \frac{1}{n} \tilde{X}^T \tilde{X} V &= V^T V \left( \frac{1}{n} S^2 \right) = \frac{1}{n} S^2 & \text{(left multiply by }V^T \rightarrow V^T V = I \text{)} \\
 # \left( \frac{1}{n} \tilde{X}^T \tilde{X} \right)_{jj} &= \frac{1}{n}S_j^2  & \text{(Define }S_j\text{ as the} j\text{-th singular value)} \\
 # \frac{1}{n} S_j^2 &= \frac{1}{n} \sum_{i=i}^n (x_{ij} - \bar{x_j})^2
 # \end{aligned}

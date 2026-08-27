@@ -46,7 +46,7 @@
 # | Replacement + Deletion | `s.replace(_)` | `ser.str.replace_all(_)` |
 # | Split | `s.split(_)` | `ser.str.split(_)` |
 # | Substring | `s[1:4]` | `ser.str.slice(1, 3)` |
-# | Membership | `'_' in s` | `ser.str.contains(_)` |
+# | Membership | `'_' in s` | `ser.str.contains(_)` (regex by default — pass `literal=True` for a plain substring) |
 # | Length | `len(s)` | `ser.str.len_chars()` |
 #
 # Two of these deserve a second look. `ser.str.slice` takes a **start and a length**, not a start
@@ -177,6 +177,17 @@ display(county_and_pop), display(county_and_state);
 # │ Lewis & Clark        ┆ 55716      ┆ lewisandclark       │
 # │ St. John the Baptist ┆ 43044      ┆ stjohnthebaptist    │
 # └──────────────────────┴────────────┴─────────────────────┘
+# shape: (4, 3)
+# ┌────────────────────────────┬───────┬─────────────────────┐
+# │ County                     ┆ State ┆ clean_county_polars │
+# │ ---                        ┆ ---   ┆ ---                 │
+# │ str                        ┆ str   ┆ str                 │
+# ╞════════════════════════════╪═══════╪═════════════════════╡
+# │ De Witt County             ┆ IL    ┆ dewitt              │
+# │ Lac qui Parle County       ┆ MN    ┆ lacquiparle         │
+# │ Lewis and Clark County     ┆ MT    ┆ lewisandclark       │
+# │ St John the Baptist Parish ┆ LS    ┆ stjohnthebaptist    │
+# └────────────────────────────┴───────┴─────────────────────┘
 # ```
 # ::::
 #
@@ -205,6 +216,11 @@ display(county_and_pop), display(county_and_state);
 # 1         Lac Qui Parle        8067         lacquiparle
 # 2         Lewis & Clark       55716       lewisandclark
 # 3  St. John the Baptist       43044    stjohnthebaptist
+#                        County State clean_county_pandas
+# 0              De Witt County    IL              dewitt
+# 1        Lac qui Parle County    MN         lacquiparle
+# 2      Lewis and Clark County    MT       lewisandclark
+# 3  St John the Baptist Parish    LS    stjohnthebaptist
 # ```
 # ::::
 # :::::
@@ -364,7 +380,7 @@ r"[0-9]{3}-[0-9]{2}-[0-9]{4}" # Regular Expression Syntax
 # | `escape character`: `\` <br /> (match the literal next character) | `cow\.com` | `cow.com` | `cowscom` |
 # | `beginning of line`: `^` | `^ark` | `ark two`<br />`ark o ark` | `dark` |
 # | `end of line`: `$` | `ark$` | `dark`<br />`ark o ark` | `ark two` |
-# | `lazy version of zero or more`: `*?` | `5.*?5` | `5005`<br />`55` | `5005005` |
+# | `lazy version of zero or more`: `*?` | `5.*?5` | `5005`<br />`55` | `500`<br />`005` |
 #
 # ### Greediness
 #

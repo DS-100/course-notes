@@ -52,6 +52,8 @@ import polars as pl
 
 
 # %% [markdown] id="9db5657e"
+
+# %% [markdown]
 # <!-- tab-twins:begin import polars as pl -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -94,6 +96,8 @@ elections
 
 
 # %% [markdown] id="d331d68b"
+
+# %% [markdown]
 # <!-- tab-twins:begin elections = pl.read_csv("data/elections.csv") -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -165,6 +169,8 @@ pl.read_csv("data/elections.csv", columns=["Candidate", "Year", "%"])
 
 
 # %% [markdown] id="2107958a"
+
+# %% [markdown]
 # <!-- tab-twins:begin pl.read_csv("data/elections.csv", columns=["Candidate", "Year", "%"]) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -228,6 +234,8 @@ pl.read_csv("data/elections.csv", n_rows=5)
 
 
 # %% [markdown] id="4795d09b"
+
+# %% [markdown]
 # <!-- tab-twins:begin pl.read_csv("data/elections.csv", n_rows=5) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -290,6 +298,8 @@ df_list_1
 
 
 # %% [markdown] id="67979e35"
+
+# %% [markdown]
 # <!-- tab-twins:begin df_list_1 = pl.DataFrame( -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -348,6 +358,8 @@ df_list_2
 
 
 # %% [markdown] id="45d489c4"
+
+# %% [markdown]
 # <!-- tab-twins:begin df_list_2 = pl.DataFrame( -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -406,6 +418,8 @@ df_dict
 
 
 # %% [markdown] id="ed033769"
+
+# %% [markdown]
 # <!-- tab-twins:begin df_dict = pl.DataFrame( -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -462,6 +476,8 @@ ser_a
 
 
 # %% [markdown] id="94141424"
+
+# %% [markdown]
 # <!-- tab-twins:begin ser_a = pl.Series("ser_a", ["a1", "a2", "a3"]) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -511,6 +527,8 @@ pl.DataFrame(
 
 
 # %% [markdown] id="eb647b8f"
+
+# %% [markdown]
 # <!-- tab-twins:begin {"ColumnA": ser_a, "ColumnB": ser_b} -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -561,6 +579,8 @@ pl.DataFrame(ser_a)
 
 
 # %% [markdown] id="599b3601"
+
+# %% [markdown]
 # <!-- tab-twins:begin pl.DataFrame(ser_a) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -604,6 +624,8 @@ ser_a.to_frame()
 
 
 # %% [markdown] id="caf20aa4"
+
+# %% [markdown]
 # <!-- tab-twins:begin ser_a.to_frame() -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -654,6 +676,8 @@ elections.columns
 
 
 # %% [markdown] id="dc5641a8"
+
+# %% [markdown]
 # <!-- tab-twins:begin elections.columns -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -688,6 +712,8 @@ elections.dtypes
 
 
 # %% [markdown] id="2067bab2"
+
+# %% [markdown]
 # <!-- tab-twins:begin elections.dtypes -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -728,6 +754,8 @@ elections.schema
 
 
 # %% [markdown] id="72454ae1"
+
+# %% [markdown]
 # <!-- tab-twins:begin elections.schema -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -803,6 +831,8 @@ elections.head()
 
 
 # %% [markdown] id="46a72c89"
+
+# %% [markdown]
 # <!-- tab-twins:begin elections.head() -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -857,6 +887,8 @@ elections.tail(5)
 
 
 # %% [markdown] id="17b531c5"
+
+# %% [markdown]
 # <!-- tab-twins:begin elections.tail(5) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -918,6 +950,8 @@ elections[0, "Candidate"]
 
 
 # %% [markdown] id="95ae9af9"
+
+# %% [markdown]
 # <!-- tab-twins:begin elections[0, "Candidate"] -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -954,6 +988,8 @@ elections[[87, 25, 179], ["Year", "Party", "%"]]
 
 
 # %% [markdown] id="8b99844c"
+
+# %% [markdown]
 # <!-- tab-twins:begin elections[[87, 25, 179], ["Year", "Party", "%"]] -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1000,6 +1036,8 @@ elections[[87, 25, 179], "Popular vote":"%"]
 
 
 # %% [markdown] id="2adfccb2"
+
+# %% [markdown]
 # <!-- tab-twins:begin elections[[87, 25, 179], "Popular vote":"%"] -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1046,6 +1084,8 @@ elections[:, ["Year", "Candidate", "Result"]]
 
 
 # %% [markdown] id="25d0aa20"
+
+# %% [markdown]
 # <!-- tab-twins:begin elections[:, ["Year", "Candidate", "Result"]] -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1110,6 +1150,8 @@ elections[[87, 25, 179], :]
 
 
 # %% [markdown] id="ed13481b"
+
+# %% [markdown]
 # <!-- tab-twins:begin elections[[87, 25, 179], :] -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1158,6 +1200,8 @@ elections[[87, 25, 179], "Popular vote"]
 
 
 # %% [markdown] id="8bad130a"
+
+# %% [markdown]
 # <!-- tab-twins:begin elections[[87, 25, 179], "Popular vote"] -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1201,6 +1245,8 @@ elections[[87, 25, 179], ["Popular vote"]]
 
 
 # %% [markdown] id="a9883a51"
+
+# %% [markdown]
 # <!-- tab-twins:begin elections[[87, 25, 179], ["Popular vote"]] -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1247,6 +1293,8 @@ elections[[180, 181]]
 
 
 # %% [markdown] id="fdd177b8"
+
+# %% [markdown]
 # <!-- tab-twins:begin elections[[180, 181]] -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1291,6 +1339,8 @@ elections["Candidate"]
 
 
 # %% [markdown] id="a0f3a1ba"
+
+# %% [markdown]
 # <!-- tab-twins:begin elections["Candidate"] -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1356,6 +1406,8 @@ elections[0, 1]
 
 
 # %% [markdown] id="7177a19f"
+
+# %% [markdown]
 # <!-- tab-twins:begin elections[0, 1] -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1391,6 +1443,8 @@ elections[[1, 2, 3], 1]
 
 
 # %% [markdown] id="bff4e353"
+
+# %% [markdown]
 # <!-- tab-twins:begin elections[[1, 2, 3], 1] -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1435,6 +1489,8 @@ elections[[1, 2, 3], [0, 1, 2]]
 
 
 # %% [markdown] id="ff57f9b0"
+
+# %% [markdown]
 # <!-- tab-twins:begin elections[[1, 2, 3], [0, 1, 2]] -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1482,6 +1538,8 @@ elections[[1, 2, 3], 0:3]
 
 
 # %% [markdown] id="4bce6905"
+
+# %% [markdown]
 # <!-- tab-twins:begin elections[[1, 2, 3], 0:3] -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1528,6 +1586,8 @@ elections[138:144]
 
 
 # %% [markdown] id="c7703675"
+
+# %% [markdown]
 # <!-- tab-twins:begin elections[138:144] -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1581,6 +1641,8 @@ elections.row(0)
 
 
 # %% [markdown] id="9a3954e3"
+
+# %% [markdown]
 # <!-- tab-twins:begin elections.row(0) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1620,6 +1682,8 @@ elections.row(0, named=True)
 
 
 # %% [markdown] id="efdbe2d8"
+
+# %% [markdown]
 # <!-- tab-twins:begin elections.row(0, named=True) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1673,6 +1737,8 @@ elections.select(["Year", "Candidate", "Result"])
 
 
 # %% [markdown] id="252a988a"
+
+# %% [markdown]
 # <!-- tab-twins:begin elections.select(["Year", "Candidate", "Result"]) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1737,6 +1803,8 @@ elections.select((pl.col("Popular vote") / 1_000_000).alias("Popular vote (milli
 
 
 # %% [markdown] id="825bbdcd"
+
+# %% [markdown]
 # <!-- tab-twins:begin elections.select((pl.col("Popular vote") / 1_000_000) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1802,6 +1870,8 @@ elections.filter(pl.col("Popular vote") > 60000000)
 
 
 # %% [markdown] id="ebafccc8"
+
+# %% [markdown]
 # <!-- tab-twins:begin elections.filter(pl.col("Popular vote") > 60000000) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1857,6 +1927,8 @@ elections.filter(pl.col("Year") == 2008).select(["Year", "Candidate"])
 
 
 # %% [markdown] id="aa6ebbef"
+
+# %% [markdown]
 # <!-- tab-twins:begin elections.filter(pl.col("Year") == 2008).select(["Year", "Candidate"]) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1923,6 +1995,8 @@ elections.filter((pl.col("Year") == 2008) | (pl.col("%") >= 60))
 
 
 # %% [markdown] id="9b73bf67"
+
+# %% [markdown]
 # <!-- tab-twins:begin elections.filter((pl.col("Year") == 2008) | (pl.col("%") >= 60)) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -1987,6 +2061,8 @@ elections.filter((pl.col("Year") > 2000) & (pl.col("Result") == "win"))
 
 
 # %% [markdown] id="73581125"
+
+# %% [markdown]
 # <!-- tab-twins:begin elections.filter((pl.col("Year") > 2000) & (pl.col("Result") == "win")) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -2041,6 +2117,8 @@ elections.filter((pl.col("Year") == 2008) and (pl.col("%") >= 60))
 
 
 # %% [markdown] id="6a7d0a41"
+
+# %% [markdown]
 # <!-- tab-twins:begin elections.filter((pl.col("Year") == 2008) and (pl.col("%") >= 60)) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -2089,6 +2167,8 @@ elections.filter(
 
 
 # %% [markdown] id="daa99ead"
+
+# %% [markdown]
 # <!-- tab-twins:begin (pl.col("Year") < 2000) & -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -2155,6 +2235,8 @@ elections.with_row_index("original_position").sort("%", descending=True).head()
 
 
 # %% [markdown] id="3ebc58dd"
+
+# %% [markdown]
 # <!-- tab-twins:begin elections.with_row_index("original_position").sort("%", descending=True).head() -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -2210,6 +2292,8 @@ elections.head(3)
 
 
 # %% [markdown] id="11f86309"
+
+# %% [markdown]
 # <!-- tab-twins:begin elections.head(3) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -2258,6 +2342,8 @@ elections.sort("%", descending=True).with_row_index().head()
 
 
 # %% [markdown] id="9c1b434e"
+
+# %% [markdown]
 # <!-- tab-twins:begin elections.sort("%", descending=True).with_row_index().head() -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -2377,6 +2463,8 @@ babynames.head()
 
 
 # %% [markdown] id="7c067316"
+
+# %% [markdown]
 # <!-- tab-twins:begin babynames.filter((pl.col("Name") == "Bella") | -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -2457,6 +2545,8 @@ babynames.filter(pl.col("Name").is_in(names))
 
 
 # %% [markdown] id="4f8a4c1d"
+
+# %% [markdown]
 # <!-- tab-twins:begin babynames.filter(pl.col("Name").is_in(names)) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -2524,6 +2614,8 @@ babynames.filter(pl.col("Name").str.starts_with("N"))
 
 
 # %% [markdown] id="5abad0f9"
+
+# %% [markdown]
 # <!-- tab-twins:begin babynames.filter(pl.col("Name").str.starts_with("N")) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -2608,6 +2700,8 @@ yash_counts
 
 
 # %% [markdown] id="9c418693"
+
+# %% [markdown]
 # <!-- tab-twins:begin yash_counts = babynames.filter(pl.col("Name") == "Yash")["Count"] -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -2713,6 +2807,8 @@ babynames.height * babynames.width
 
 
 # %% [markdown] id="07eb4fb8"
+
+# %% [markdown]
 # <!-- tab-twins:begin babynames.height * babynames.width -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -2757,6 +2853,8 @@ babynames.describe()
 
 
 # %% [markdown] id="7e4b4d80"
+
+# %% [markdown]
 # <!-- tab-twins:begin babynames.describe() -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -2817,6 +2915,8 @@ babynames["Sex"].describe()
 
 
 # %% [markdown] id="999f2d33"
+
+# %% [markdown]
 # <!-- tab-twins:begin babynames["Sex"].describe() -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -2908,6 +3008,8 @@ babynames["Name"].value_counts(sort=True).head()
 
 
 # %% [markdown] id="37462ab0"
+
+# %% [markdown]
 # <!-- tab-twins:begin babynames["Name"].value_counts(sort=True).head() -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -2970,6 +3072,8 @@ babynames["Name"].n_unique()
 
 
 # %% [markdown] id="c4c11597"
+
+# %% [markdown]
 # <!-- tab-twins:begin babynames["Name"].n_unique() -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -3003,6 +3107,8 @@ babynames["Name"].unique(maintain_order=True).head(5)
 
 
 # %% [markdown] id="75ee87f0"
+
+# %% [markdown]
 # <!-- tab-twins:begin babynames["Name"].unique(maintain_order=True).head(5) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -3053,6 +3159,8 @@ babynames = babynames.with_columns(name_lengths=babyname_lengths)
 babynames.head()
 
 # %% [markdown] id="3bd987a7"
+
+# %% [markdown]
 # <!-- tab-twins:begin babynames = babynames.with_columns(name_lengths=babyname_lengths) babynames.head() -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -3118,6 +3226,8 @@ babynames.head()
 
 
 # %% [markdown] id="be6fdd2d"
+
+# %% [markdown]
 # <!-- tab-twins:begin babynames = babynames.with_columns(name_lengths=pl.col("name_lengths") - 1) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -3174,6 +3284,8 @@ babynames.head()
 
 
 # %% [markdown] id="b2d58a6b"
+
+# %% [markdown]
 # <!-- tab-twins:begin babynames = babynames.rename({"name_lengths": "Length"}) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -3230,6 +3342,8 @@ babynames.head()
 
 
 # %% [markdown] id="6a6e637b"
+
+# %% [markdown]
 # <!-- tab-twins:begin babynames = babynames.drop("Length") -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -3291,6 +3405,8 @@ babynames.head()
 
 
 # %% [markdown] id="39c1f83d"
+
+# %% [markdown]
 # <!-- tab-twins:begin babynames.drop("Name") -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -3354,6 +3470,8 @@ babynames.sort("Count").head()
 
 
 # %% [markdown] id="0c00ef04"
+
+# %% [markdown]
 # <!-- tab-twins:begin babynames.sort("Count").head() -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -3402,6 +3520,8 @@ babynames.sort("Count", descending=True).head()
 
 
 # %% [markdown] id="31182353"
+
+# %% [markdown]
 # <!-- tab-twins:begin babynames.sort("Count", descending=True).head() -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -3455,6 +3575,8 @@ babynames["Name"].sort().head(5)
 
 
 # %% [markdown] id="af753b10"
+
+# %% [markdown]
 # <!-- tab-twins:begin babynames["Name"].sort().head(5) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -3508,6 +3630,8 @@ demo.sort("Count", descending=True)
 
 
 # %% [markdown] id="f8ad6158"
+
+# %% [markdown]
 # <!-- tab-twins:begin demo = pl.DataFrame( -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -3550,13 +3674,19 @@ demo.sort("Count", descending=True)
 # <!-- tab-twins:end -->
 
 # %% [markdown] id="9384cac3"
-# Sorting from highest to lowest put the missing count at the top. `nulls_last=True` sends it to the bottom, where it stays out of the way of a `.head()`.
+# Sorting from highest to lowest put the missing count at the top — *in Polars*. Switch to the
+# pandas tab above and the same sort leaves `NaN` at the bottom, which is the whole point of the
+# warning: the two libraries disagree about where missing values belong. `nulls_last=True` sends
+# Polars' null to the bottom too, where it stays out of the way of a `.head()` — so the pandas
+# tab on the next cell looks unchanged, because pandas was already doing this.
 
 # %% tags=["remove-input", "remove-output"] id="82a35df6"
 demo.sort("Count", descending=True, nulls_last=True)
 
 
 # %% [markdown] id="05ce993a"
+
+# %% [markdown]
 # <!-- tab-twins:begin demo.sort("Count", descending=True, nulls_last=True) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -3614,6 +3744,8 @@ babynames.head(5)
 
 
 # %% [markdown] id="b5abf721"
+
+# %% [markdown]
 # <!-- tab-twins:begin babynames = babynames.with_columns(name_lengths=babyname_lengths) babynames.head(5) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -3676,6 +3808,8 @@ babynames.head(5)
 
 
 # %% [markdown] id="20fb2d16"
+
+# %% [markdown]
 # <!-- tab-twins:begin babynames = babynames.sort(by="name_lengths", descending=True) -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -3732,6 +3866,8 @@ babynames.head(5)
 
 
 # %% [markdown] id="49af424f"
+
+# %% [markdown]
 # <!-- tab-twins:begin babynames = babynames.drop("name_lengths") -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -3788,6 +3924,8 @@ babynames.sort(pl.col("Name").str.len_chars(), descending=True).head()
 
 
 # %% [markdown] id="0604482f"
+
+# %% [markdown]
 # <!-- tab-twins:begin babynames.sort(pl.col("Name").str.len_chars(), descending=True).head() -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -3856,6 +3994,8 @@ babynames.head()
 
 
 # %% [markdown] id="7e59d5ac"
+
+# %% [markdown]
 # <!-- tab-twins:begin def dr_ea_count(string): -->
 # :::::{tab-set}
 # :::: {tab-item} Polars
@@ -3932,6 +4072,8 @@ babynames.head(5)
 
 
 # %% [markdown] id="3b353c48"
+
+# %% [markdown]
 # <!-- tab-twins:begin babynames = babynames.drop("dr_ea_count") -->
 # :::::{tab-set}
 # :::: {tab-item} Polars

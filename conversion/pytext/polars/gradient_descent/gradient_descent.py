@@ -51,7 +51,9 @@ from sklearn.linear_model import LinearRegression
 # $$\hat{y} =\theta_{1}x_{1} + \theta_{2}x_{2} + ... + \theta_{p}x_{p}$$
 #
 # ```{image} images/ols_matrices_new.png
-# :alt:"" 
+# :alt: Two diagrams. On the left, "The Data": an n-by-p covariate matrix X of features beside
+#   an n-by-1 response vector Y. On the right, the equation Y-hat = X-theta, drawn as an n-by-1
+#   vector Y-hat equal to the n-by-p matrix X times a p-by-1 parameter vector theta.
 # :width: 600
 # ```
 #
@@ -350,7 +352,7 @@ my_model = LinearRegression()
 # %% [markdown] id="9038940b"
 # **2. Train the model using `.fit`**
 #
-# Before the model can make predictions, we will need to fit it to our training data. When we fit the model, `sklearn` will run gradient descent behind the scenes to determine the optimal model parameters. It will then save these model parameters to our model instance for future use. 
+# Before the model can make predictions, we will need to fit it to our training data. When we fit the model, `sklearn` solves for the optimal model parameters directly: for `LinearRegression` it hands the problem to a least-squares solver, `scipy.linalg.lstsq`, which computes the answer in one shot rather than searching for it. It will then save these model parameters to our model instance for future use. 
 #
 # All `sklearn` model classes include a `.fit` method, which is used to fit the model. It takes in two inputs: the design matrix, `X`, and the target variable, `Y`. 
 #
@@ -366,7 +368,7 @@ my_model.fit(X, Y)
 # %% [markdown] id="c12c59e2"
 # Notice that we use **double brackets** to extract this column. Why double brackets instead of just single brackets? The `.fit` method, by default, expects to receive **2-dimensional** data – some kind of data that includes both rows and columns. Writing `penguins["flipper_length_mm"]` would return a 1D `Series`, causing `sklearn` to error. We avoid this by writing `penguins[["flipper_length_mm"]]` to produce a 2D `DataFrame`. 
 #
-# And in just three lines of code, our model has run gradient descent to determine the optimal model parameters! Our single-feature model takes the form:
+# And in just three lines of code, our model has found the optimal model parameters! Our single-feature model takes the form:
 #
 # $$\text{bill depth} = \theta_0 + \theta_1 \text{flipper length}$$
 #
@@ -522,7 +524,7 @@ guesses = [5.3, 5.31, 5.32, 5.33, 5.34, 5.35]
 simple_minimize(arbitrary, guesses)
 
 # %% [markdown] id="4e59b89b"
-# This process is essentially the same as before where we made a graphical plot, it's just that we're only looking at 20 selected points.
+# This process is essentially the same as before where we made a graphical plot, it's just that we're only looking at five selected points.
 #
 # ````{dropdown} Click to see the code
 # ```python
@@ -564,17 +566,72 @@ fig.show()
 #
 # One way to minimize this mathematical function is to use the `scipy.optimize.minimize` function. It takes a function and a starting guess and tries to find the minimum.
 
-# %% id="ae89e84d"
+# %% tags=["remove-input", "remove-output"] id="ae89e84d"
 from scipy.optimize import minimize
 
-# takes a function f and a starting point x0 and returns a readout 
-# with the optimal input value of x which minimizes f
+# takes a function f and a starting point x0 and returns a readout with an
+# input value of x where f is at a minimum -- note it walks downhill from x0,
+# so it finds the *local* minimum near 2.39, not the global one near 5.33
 minimize(arbitrary, x0 = 3.5)
 
-# %% [markdown] id="b6d90915"
-# `scipy.optimize.minimize` is great. It may also seem a bit magical. How could you write a function that can find the minimum of any mathematical function? There are a number of ways to do this, which we'll explore in today's lecture, eventually arriving at the important idea of **gradient descent**, which is the principle that `scipy.optimize.minimize` uses.
+# %% [markdown]
+# <!-- tab-twins:begin ae89e84d -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# from scipy.optimize import minimize
 #
-# It turns out that under the hood, the `fit` method for `LinearRegression` models uses gradient descent. Gradient descent is also how much of machine learning works, including even advanced neural network models. 
+# # takes a function f and a starting point x0 and returns a readout with an
+# # input value of x where f is at a minimum -- note it walks downhill from x0,
+# # so it finds the *local* minimum near 2.39, not the global one near 5.33
+# minimize(arbitrary, x0 = 3.5)
+# ```
+#
+# ```text
+#   message: Optimization terminated successfully.
+#   success: True
+#    status: 0
+#       fun: -0.13827491292966557
+#         x: [ 2.393e+00]
+#       nit: 3
+#       jac: [ 6.486e-06]
+#  hess_inv: [[ 7.385e-01]]
+#      nfev: 20
+#      njev: 10
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# from scipy.optimize import minimize
+#
+# # takes a function f and a starting point x0 and returns a readout
+# # with the optimal input value of x which minimizes f
+# minimize(arbitrary, x0 = 3.5)
+# ```
+#
+# ```text
+#   message: Optimization terminated successfully.
+#   success: True
+#    status: 0
+#       fun: -0.13827491292966557
+#         x: [ 2.393e+00]
+#       nit: 3
+#       jac: [ 6.486e-06]
+#  hess_inv: [[ 7.385e-01]]
+#      nfev: 20
+#      njev: 10
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
+
+# %% [markdown] id="b6d90915"
+# `scipy.optimize.minimize` is great. It may also seem a bit magical. How could you write a function that can find the minimum of any mathematical function? There are a number of ways to do this, which we'll explore in today's lecture, eventually arriving at the important idea of **gradient descent**. `scipy.optimize.minimize` does not use gradient descent itself — with no gradient supplied it defaults to BFGS, a close relative that also walks downhill but sizes each step using an approximation of the curvature. Gradient descent is the simpler idea underneath it, and the one worth understanding first.
+#
+# `LinearRegression` does not actually need gradient descent: ordinary least squares has a closed-form solution, so `fit` can call a least-squares solver and be done. That is exactly why gradient descent matters — most models have no such formula, and then searching for the minimum is the only option available. It is how much of machine learning works, including even advanced neural network models. 
 #
 # In Data 100, the gradient descent process will usually be invisible to us, hidden beneath an abstraction layer. However, to be good data scientists, it's important that we know the underlying principles that optimization functions harness to find optimal parameters.
 #
@@ -676,13 +733,19 @@ fig.show()
 # A few steps are shown below, where the old step is shown as a transparent point, and the next step taken is the green-filled dot.
 #
 # ```{image} images/grad_descent_1.png
-# :alt: ""
+# :alt: Three panels labelled Step 1, Step 2 and Step 3. Each shows the same loss curve, which
+#   has a shallow local dip near x=3 and a deeper global minimum near x=5. A filled green dot
+#   marks the current guess and a hollow one the previous guess; across the three steps the
+#   guess moves right, from about 4.3 to 5.1 to 5.6, descending into the global minimum.
 # ```
 #
 # Looking pretty good! We do have a problem though – once we arrive close to the minimum value of the function, our guesses "bounce" back and forth past the minimum without ever reaching it.
 #
 # ```{image} images/grad_descent_2.png
-# :alt: ""
+# :alt: Two further panels, Step 4 and Step 5. The guess has reached the bottom of the global
+#   minimum and now overshoots it: at Step 4 the filled dot sits just left of the previous
+#   guess, at Step 5 just right of it. The guesses bounce back and forth across the minimum
+#   instead of settling on it.
 # ```
 #
 # In other words, each step we take when updating our guess moves us too far. We can address this by decreasing the size of each step. 
@@ -828,7 +891,7 @@ df.head()
 # ```python
 # #| fig-alt: "A curve representing the loss is shown with different guesses converging to the global minimum. The plot is titled 'Final guess for theta_1: 0.14369554654231262'"
 # def gradient_descent(df, initial_guess, alpha, n):
-#     """Performs n steps of gradient descent on df using learning rate alpha starting
+#     """Performs n-1 update steps of gradient descent, counting the starting guess on df using learning rate alpha starting
 #        from initial_guess. Returns a numpy array of all guesses over time."""
 #     guesses = [initial_guess]
 #     current_guess = initial_guess
@@ -857,7 +920,7 @@ df.head()
 #
 # trajectory = gradient_descent(mse_loss_derivative_single_arg, -0.5, 0.0001, 100)
 #
-# plt.plot(loss_df["theta_1"].to_numpy(), loss_df["MSE"].to_numpy())
+# plt.plot(loss_df["theta_1"], loss_df["MSE"])
 # plt.scatter(trajectory, [mse_single_arg(guess) for guess in trajectory], c="white", edgecolor="firebrick")
 # plt.scatter(trajectory[-1], mse_single_arg(trajectory[-1]), c="firebrick")
 # plt.xlabel(r"$\theta_1$")
@@ -867,10 +930,10 @@ df.head()
 # ```
 # ````
 
-# %% tags=["remove-input", "remove-output"] id="cac7a125"
+# %% tags=["remove-input"] id="cac7a125"
 #| fig-alt: "A curve representing the loss is shown with different guesses converging to the global minimum. The plot is titled 'Final guess for theta_1: 0.14369554654231262'"
 def gradient_descent(df, initial_guess, alpha, n):
-    """Performs n steps of gradient descent on df using learning rate alpha starting
+    """Performs n-1 update steps of gradient descent, counting the starting guess on df using learning rate alpha starting
        from initial_guess. Returns a numpy array of all guesses over time."""
     guesses = [initial_guess]
     current_guess = initial_guess
@@ -899,7 +962,7 @@ loss_df = pl.DataFrame({"theta_1":np.linspace(-1.5, 1), "MSE":[mse_single_arg(th
 
 trajectory = gradient_descent(mse_loss_derivative_single_arg, -0.5, 0.0001, 100)
 
-plt.plot(loss_df["theta_1"].to_numpy(), loss_df["MSE"].to_numpy())
+plt.plot(loss_df["theta_1"], loss_df["MSE"])
 plt.scatter(trajectory, [mse_single_arg(guess) for guess in trajectory], c="white", edgecolor="firebrick")
 plt.scatter(trajectory[-1], mse_single_arg(trajectory[-1]), c="firebrick")
 plt.xlabel(r"$\theta_1$")
@@ -914,7 +977,7 @@ print(f"Final guess for theta_1: {trajectory[-1]}")
 # :sync: pl
 # ```python
 # def gradient_descent(df, initial_guess, alpha, n):
-#     """Performs n steps of gradient descent on df using learning rate alpha starting
+#     """Performs n-1 update steps of gradient descent, counting the starting guess on df using learning rate alpha starting
 #        from initial_guess. Returns a numpy array of all guesses over time."""
 #     guesses = [initial_guess]
 #     current_guess = initial_guess
@@ -943,7 +1006,7 @@ print(f"Final guess for theta_1: {trajectory[-1]}")
 #
 # trajectory = gradient_descent(mse_loss_derivative_single_arg, -0.5, 0.0001, 100)
 #
-# plt.plot(loss_df["theta_1"].to_numpy(), loss_df["MSE"].to_numpy())
+# plt.plot(loss_df["theta_1"], loss_df["MSE"])
 # plt.scatter(trajectory, [mse_single_arg(guess) for guess in trajectory], c="white", edgecolor="firebrick")
 # plt.scatter(trajectory[-1], mse_single_arg(trajectory[-1]), c="firebrick")
 # plt.xlabel(r"$\theta_1$")
@@ -954,6 +1017,7 @@ print(f"Final guess for theta_1: {trajectory[-1]}")
 #
 # ```text
 # Final guess for theta_1: 0.14369554654231262
+# <Figure size 640x480 with 1 Axes>
 # ```
 # ::::
 #
@@ -1001,6 +1065,7 @@ print(f"Final guess for theta_1: {trajectory[-1]}")
 #
 # ```text
 # Final guess for theta_1: 0.14369554654231262
+# <Figure size 640x480 with 1 Axes>
 # ```
 # ::::
 # :::::

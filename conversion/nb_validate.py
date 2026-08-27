@@ -653,7 +653,11 @@ def gate_tags(chapter: ch.Chapter, base_nb, conv_nb, res: Result) -> None:
         n = set(target.get("metadata", {}).get("tags", []) or [])
         if b == n or c.get("id") in allowed:
             continue
-        if c.get("id") in twinned and (n - b) <= tab_hidden and not b - n and tab_hidden <= n:
+        # A twinned cell always hides its input -- the tab shows the code. It hides its output
+        # too, unless the tab cannot carry it: a matplotlib or plotly figure has to keep rendering
+        # from the cell itself, so those keep `remove-input` alone. Hiding an input never silences
+        # anything, so the narrower set is the safe one to waive.
+        if c.get("id") in twinned and (n - b) <= tab_hidden and not b - n and "remove-input" in n:
             waived += 1
             continue
         added, removed = sorted(n - b), sorted(b - n)

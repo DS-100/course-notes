@@ -198,7 +198,9 @@
 # - Arrange data in a tabular format.
 # - Extract useful information filtered by specific conditions.
 # - Operate on data to gain new insights.
-# - Apply `NumPy` functions to our data (our friends from Data 8).
+# - Apply most `NumPy` functions to our data (our friends from Data 8) — though not the
+#   reductions. `np.mean(s)` raises where `s.mean()` works, because NumPy hands a reduction an
+#   `axis` argument that Polars does not take. `np.log`, `np.median` and `np.sort` are fine.
 # - Perform vectorized computations to speed up our analysis (Lab 1).
 #
 # To begin our work in `polars`, we must first import the library into our Python environment. This will allow us to use `polars` data structures and methods in our code.
@@ -277,38 +279,9 @@ s
 # :::::
 # <!-- tab-twins:end -->
 
-# %% tags=["remove-input", "remove-output"] id="3117fc63"
+# %% id="3117fc63"
 # Accessing data values within the Series
 s.to_list()
-
-# %% [markdown]
-# <!-- tab-twins:begin 3117fc63 -->
-# :::::{tab-set}
-# :::: {tab-item} Polars
-# :sync: pl
-# ```python
-# # Accessing data values within the Series
-# s.to_list()
-# ```
-#
-# ```text
-# ['welcome', 'to', 'data 100']
-# ```
-# ::::
-#
-# :::: {tab-item} pandas
-# :sync: pd
-# ```python
-# # Accessing data values within the Series
-# s.values
-# ```
-#
-# ```text
-# array(['welcome', 'to', 'data 100'], dtype=object)
-# ```
-# ::::
-# :::::
-# <!-- tab-twins:end -->
 
 # %% tags=["remove-input", "remove-output"] id="9371d026"
 # Accessing the name and data type of the Series
@@ -346,152 +319,22 @@ s.name, s.dtype
 # %% [markdown] id="863eba40"
 # By default, a `Series` built from a list of values is unnamed, and its data type is inferred from the values it holds. Optionally, a name can be passed as the first argument to the constructor.
 
-# %% tags=["remove-input", "remove-output"] id="fba44498"
+# %% id="fba44498"
 s = pl.Series("ratings", [-1, 10, 2])
 s
 
-# %% [markdown]
-# <!-- tab-twins:begin fba44498 -->
-# :::::{tab-set}
-# :::: {tab-item} Polars
-# :sync: pl
-# ```python
-# s = pl.Series("ratings", [-1, 10, 2])
-# s
-# ```
-#
-# ```text
-# shape: (3,)
-# Series: 'ratings' [i64]
-# [
-# 	-1
-# 	10
-# 	2
-# ]
-# ```
-# ::::
-#
-# :::: {tab-item} pandas
-# :sync: pd
-# ```python
-# s = pd.Series([-1, 10, 2], index = ["a", "b", "c"])
-# s
-# ```
-#
-# ```text
-# a    -1
-# b    10
-# c     2
-# dtype: int64
-# ```
-# ::::
-# :::::
-# <!-- tab-twins:end -->
-
-# %% tags=["remove-input", "remove-output"] id="12449aec"
+# %% id="12449aec"
 s.name
-
-# %% [markdown]
-# <!-- tab-twins:begin 12449aec -->
-# :::::{tab-set}
-# :::: {tab-item} Polars
-# :sync: pl
-# ```python
-# s.name
-# ```
-#
-# ```text
-# 'ratings'
-# ```
-# ::::
-#
-# :::: {tab-item} pandas
-# :sync: pd
-# ```python
-# s.index
-# ```
-#
-# ```text
-# Index(['a', 'b', 'c'], dtype='object')
-# ```
-# ::::
-# :::::
-# <!-- tab-twins:end -->
 
 # %% [markdown] id="2b2664ca"
 # The data type can also be changed after initialization. `.cast()` returns a new `Series`, so we assign the result back to `s`.
 
-# %% tags=["remove-input", "remove-output"] id="cb6cff88"
+# %% id="cb6cff88"
 s = s.cast(pl.Float64)
 s
 
-# %% [markdown]
-# <!-- tab-twins:begin cb6cff88 -->
-# :::::{tab-set}
-# :::: {tab-item} Polars
-# :sync: pl
-# ```python
-# s = s.cast(pl.Float64)
-# s
-# ```
-#
-# ```text
-# shape: (3,)
-# Series: 'ratings' [f64]
-# [
-# 	-1.0
-# 	10.0
-# 	2.0
-# ]
-# ```
-# ::::
-#
-# :::: {tab-item} pandas
-# :sync: pd
-# ```python
-# s.index = ["first", "second", "third"]
-# s
-# ```
-#
-# ```text
-# first     -1
-# second    10
-# third      2
-# dtype: int64
-# ```
-# ::::
-# :::::
-# <!-- tab-twins:end -->
-
-# %% tags=["remove-input", "remove-output"] id="53a863ee"
+# %% id="53a863ee"
 s.dtype
-
-# %% [markdown]
-# <!-- tab-twins:begin 53a863ee -->
-# :::::{tab-set}
-# :::: {tab-item} Polars
-# :sync: pl
-# ```python
-# s.dtype
-# ```
-#
-# ```text
-# Float64
-# ```
-# ::::
-#
-# :::: {tab-item} pandas
-# :sync: pd
-# ```python
-# s.index
-# ```
-#
-# ```text
-# Index(['first', 'second', 'third'], dtype='object')
-# ```
-# ::::
-# :::::
-# <!-- tab-twins:end -->
 
 # %% [markdown] id="80abf10b"
 # #### Selection in `Series`

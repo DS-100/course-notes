@@ -237,7 +237,7 @@ print(f"Test error: {test_error}")
 #
 # When both issues are present, as in time series data, shuffling is not appropriate because it breaks the natural order and dependencies. Instead, a sequential approach should be used: train the model on earlier data and validate it on later data. This process can be repeated by moving forward through time, which better reflects real-world usage.
 #
-# While this may sound complicated to implement? Fortunately, libraries such as `scikit-learn` provide built-in tools to handle these scenarios. An example of this can be found in the [`TimeSeriesSplit`](https://scikit-learn.org/stable/modules/cross_validation.html#time-series-split) function.
+# This may sound complicated to implement. Fortunately, libraries such as `scikit-learn` provide built-in tools to handle these scenarios. An example of this can be found in the [`TimeSeriesSplit`](https://scikit-learn.org/stable/modules/cross_validation.html#time-series-split) cross-validator.
 #
 # ## Regularization
 #
@@ -375,17 +375,58 @@ print(f"Test error: {test_error}")
 #
 # Unlike ordinary least squares, which can be solved via the closed-form solution $\hat{\theta}_{OLS} = (\mathbb{X}^{\top}\mathbb{X})^{-1}\mathbb{X}^{\top}\mathbb{Y}$, **there is no closed-form solution for the optimal parameter vector under L1 regularization**. Instead, we use the `Lasso` model class of `sklearn`.
 
-# %% id="d4521d3e"
+# %% tags=["remove-input", "remove-output"] id="d4521d3e"
 import sklearn.linear_model as lm
 
-# The alpha parameter represents our lambda term
+# sklearn's alpha is not quite our lambda: Lasso minimizes
+# (1/(2n))||Y - X.theta||^2 + alpha*||theta||_1, so alpha = lambda/2
 lasso_model = lm.Lasso(alpha=2)
 lasso_model.fit(X_train, Y_train)
 
 lasso_model.coef_
 
+# %% [markdown]
+# <!-- tab-twins:begin d4521d3e -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# import sklearn.linear_model as lm
+#
+# # sklearn's alpha is not quite our lambda: Lasso minimizes
+# # (1/(2n))||Y - X.theta||^2 + alpha*||theta||_1, so alpha = lambda/2
+# lasso_model = lm.Lasso(alpha=2)
+# lasso_model.fit(X_train, Y_train)
+#
+# lasso_model.coef_
+# ```
+#
+# ```text
+# array([-2.54932056e-01, -9.48597165e-04,  8.91976284e-06, -1.22872290e-08])
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# import sklearn.linear_model as lm
+#
+# # The alpha parameter represents our lambda term
+# lasso_model = lm.Lasso(alpha=2)
+# lasso_model.fit(X_train, Y_train)
+#
+# lasso_model.coef_
+# ```
+#
+# ```text
+# array([-2.54932056e-01, -9.48597165e-04,  8.91976284e-06, -1.22872290e-08])
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
+
 # %% [markdown] id="c4b0ea5e"
-# Notice that all model coefficients are very small in magnitude. In fact, some of them are so small that they are essentially 0. An important characteristic of L1 regularization is that many model parameters are set to 0. In other words, LASSO effectively **selects only a subset** of the features. The reason for this comes back to our loss surface and allowed "diamond" regions from earlier – we can often get closer to the lowest loss contour at a corner of the diamond than along an edge. 
+# An important characteristic of L1 regularization is that it drives model parameters to exactly 0, which is what makes it useful for feature selection. That is not what happened here: none of these four coefficients is zero, and the `hp` coefficient is *larger* than its unregularized value. The coefficients look small only because `hp^2` through `hp^4` are enormous — which is the problem the next section fixes. In other words, LASSO effectively **selects only a subset** of the features. The reason for this comes back to our loss surface and allowed "diamond" regions from earlier – we can often get closer to the lowest loss contour at a corner of the diamond than along an edge. 
 #
 # When a model parameter is set to 0 or close to 0, its corresponding feature is essentially removed from the model. We say that L1 regularization performs **feature selection** because, by setting the parameters of unimportant features to 0, LASSO "selects" which features are more useful for modeling. L1 regularization indicates that the features with non-zero parameters are more informative for modeling than those with parameters set to zero. 
 #
@@ -490,13 +531,50 @@ pl.DataFrame({"Feature":X_train.columns, "Parameter":lasso_model.coef_})
 #
 # This solution exists **even if $\mathbb{X}$ is not full column rank**. This is a major reason why L2 regularization is often used – it can produce a solution even when there is collinearity in the features. We will discuss the concept of collinearity in a future lecture, but we will not derive this result in Data 100, as it involves a fair bit of matrix calculus.
 #
-# In `sklearn`, we perform L2 regularization using the `Ridge` class. It runs gradient descent to minimize the L2 objective function. Notice that we scale the data before regularizing.
+# In `sklearn`, we perform L2 regularization using the `Ridge` class. Unlike LASSO, L2 has a closed-form solution, and `Ridge` uses it: with the default `solver="auto"` on a dense problem it performs a direct Cholesky solve rather than iterating. Notice that we do **not** scale the data here, which is what the next section is about — the four features span `hp` in the tens and `hp^4` in the tens of millions.
 
-# %% id="469bfd8e"
-ridge_model = lm.Ridge(alpha=1) # alpha represents the hyperparameter lambda
+# %% tags=["remove-input", "remove-output"] id="469bfd8e"
+# Ridge minimizes ||Y - X.theta||^2 + alpha*||theta||^2 with no 1/n,
+# so alpha = n*lambda -- alpha=1 here is lambda = 1/313
+ridge_model = lm.Ridge(alpha=1)
 ridge_model.fit(X_train, Y_train)
 
 ridge_model.coef_
+
+# %% [markdown]
+# <!-- tab-twins:begin 469bfd8e -->
+# :::::{tab-set}
+# :::: {tab-item} Polars
+# :sync: pl
+# ```python
+# # Ridge minimizes ||Y - X.theta||^2 + alpha*||theta||^2 with no 1/n,
+# # so alpha = n*lambda -- alpha=1 here is lambda = 1/313
+# ridge_model = lm.Ridge(alpha=1)
+# ridge_model.fit(X_train, Y_train)
+#
+# ridge_model.coef_
+# ```
+#
+# ```text
+# array([ 5.89130559e-02, -6.42445915e-03,  4.44468157e-05, -8.83981945e-08])
+# ```
+# ::::
+#
+# :::: {tab-item} pandas
+# :sync: pd
+# ```python
+# ridge_model = lm.Ridge(alpha=1) # alpha represents the hyperparameter lambda
+# ridge_model.fit(X_train, Y_train)
+#
+# ridge_model.coef_
+# ```
+#
+# ```text
+# array([ 5.89130560e-02, -6.42445916e-03,  4.44468157e-05, -8.83981945e-08])
+# ```
+# ::::
+# :::::
+# <!-- tab-twins:end -->
 
 # %% [markdown] id="915cc4e7"
 # ## Regression Summary
