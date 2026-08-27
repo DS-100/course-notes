@@ -1,6 +1,6 @@
 ---
 name: pandas-to-polars
-description: Execution-verified pandas to Polars conversion reference for the Data 100 course notes — mapping tables for I/O, group_by, pivot, strings, datetimes, apply/map, display config and the library interop ladder, plus the output-equivalence policy and the rename-vs-reshape routing rule. Load before converting or reviewing any pandas code in this repo.
+description: Execution-verified pandas to Polars conversion reference for the Data 100 course notes — mapping tables for I/O, group_by, pivot, strings, datetimes, apply/map, display config, and the interop ladder with the NumPy dispatch rule that decides every `.to_numpy()` boundary, plus the output-equivalence policy and the rename-vs-reshape routing rule. Load before converting or reviewing any pandas code in this repo.
 ---
 
 # Data C100/C200 — Pandas → Polars Reference Sheet
@@ -340,17 +340,24 @@ Corpus uses: `.map(dict)`, `.map(lambda)`, `.apply(lambda)` (rare). In order of 
 
 **Decision (course-wide): keep seaborn / matplotlib / plotly. No hvPlot, no Altair.**
 Notes usage: 227 `np.`, 191 `plt.`, 73 `sns.`, 46 plotly, 30 sklearn touchpoints. Apply the interop
-ladder above — direct first, `.to_numpy()` second, `.to_pandas()` only with a recorded reason.
+ladder above — direct first, `.to_numpy()` only where NumPy dispatch refuses, `.to_pandas()` only
+with a recorded reason.
 
 - **seaborn** — the one library that may need rung 3. Try Polars Series for `x=`/`y=` first; fall
-  back to `data=df.to_pandas()` and allowlist it. Individual columns can go in as
-  `df["col"].to_numpy()` when there is no `data=`.
+  back to `data=df.to_pandas()` and allowlist it. Pass the **Series**, not a bare array: with `data=`
+  present, an ndarray has no name for seaborn to reconcile against the frame's columns, so
+  `.to_numpy()` there is actively worse than leaving it.
   - `sns.distplot` (appears 2× in corpus) is **removed in modern seaborn** — replace with
     `sns.histplot(..., kde=True)` or `sns.displot` while converting, independent of Polars.
-- **matplotlib** — pass `.to_numpy()` on Series (`plt.plot(df["x"].to_numpy(), ...)`). Many calls
-  work with the Series directly, but `.to_numpy()` is the uniform safe pattern.
+- **matplotlib — pass the Series directly**: `plt.plot(df["x"], df["y"])`. `plot`, `scatter`, `bar`
+  and `hist` all accept Polars Series. This corrects earlier guidance in this file that called
+  `.to_numpy()` "the uniform safe pattern": a corpus-wide cleanup in the sister repo deleted ~100
+  such conversions with every gate staying green. Add it only when the *result* is used as an
+  ndarray.
 - **plotly.express** — accepts Polars DataFrames natively (`px.line(df, x=, y=)`). No conversion.
-- **scipy / statsmodels** — `.to_numpy()` at the boundary.
+- **scipy / statsmodels** — `scipy.stats.pearsonr`, `cdist`, and anything else coercing via
+  `np.asarray` take a Series directly. Only the NumPy reduction family refuses; see the dispatch
+  rule under The interop ladder.
 - **scikit-learn** — accepts Polars frames for `fit`/`predict` directly;
   `set_output(transform="polars")` keeps transformer output in Polars.
 
@@ -385,14 +392,52 @@ Two differences change what a reader sees on the page:
 Polars goes to the plotting and modeling libraries **directly** wherever that works. Reach for a
 conversion only when it does not, and take the cheapest one that does:
 
-1. **Pass the Polars object.** plotly express, scikit-learn (`fit`/`predict`/`train_test_split`), and
-   `confusion_matrix` all accept Polars frames and Series as-is.
-2. **`.to_numpy()`** at a numeric boundary: matplotlib (`plt.hist`, `plt.barh`, `plt.plot`), scipy,
-   statsmodels, and anywhere a NumPy reduction with `axis=` is involved.
+1. **Pass the Polars object.** This is where nearly everything belongs. plotly express,
+   scikit-learn (`fit`/`predict`/`train_test_split`), `confusion_matrix`, **matplotlib**
+   (`plt.plot`, `scatter`, `bar`, `hist`), `scipy.stats.pearsonr`, `cdist` and statsmodels all take
+   Polars frames and Series as-is.
+2. **`.to_numpy()`** only when NumPy dispatch actually refuses, or when the *result* is then used as
+   an ndarray (a chained `.round()`, `[..., np.newaxis]`). See the dispatch rule below — it decides
+   this, and it is a shorter list than it looks.
 3. **`.to_pandas()` — last resort, and it needs a written reason.** Every surviving call is
    allowlisted in `conversion/conversion_allowlist.yml` with an entry saying why Polars could not go
    in directly. The gate blocks on unallowlisted ones. This is deliberate friction: `.to_pandas()`
    applied by reflex leaves a chapter that teaches Polars and runs on pandas.
+
+### The dispatch rule that decides every `.to_numpy()` boundary
+
+NumPy routes `min`/`max`/`sum`/`mean`/`std`/`var`/`all` through `_wrapreduction`, which calls the
+object's own method with `axis=`/`out=`. Polars signatures reject those kwargs, so **those raise on a
+Series**. Everything routed through `asarray`/`asanyarray` instead — `np.median`, `np.corrcoef`,
+`np.isclose`, `np.allclose`, `np.percentile`/`np.quantile`, ufuncs like `np.log`, scipy's `cdist`,
+sklearn, geopandas — **takes a Series directly**.
+
+Prefer the native reduction over routing through NumPy at all: `s.mean()` or `pl.col("x").mean()`
+inside an expression reads better and keeps the work in Polars.
+
+**Verified equivalent, so swap freely:** `mean`, `sum`, `min`, `max`, `median`.
+
+**Verified NOT equivalent — these need a keyword, not a NumPy detour:**
+
+| native | NumPy | fix |
+|---|---|---|
+| `s.var()` / `s.std()` — `ddof=1` | `np.var` / `np.std` — `ddof=0` | `s.var(ddof=0)` |
+| `s.quantile(q)` — `nearest` | `np.percentile` — `linear` | `s.quantile(q, interpolation="linear")` |
+
+Neither raises. They just move the number — and variance ratios are how every $R^2$ is computed, so
+a quiet `ddof` flip shifts printed values and anything derived from them.
+
+**Accepting is not the same as equivalent.** `np.percentile(s, q)` runs happily and gives NumPy's
+linear interpolation where `s.quantile(q)` defaults to `nearest`; swapping silently reassigns rows to
+different quartiles. Those keeps are about semantics, not errors.
+
+**The one genuinely unavoidable conversion:** comparing an sklearn prediction against Polars labels.
+`lr.predict(X) == y` and `y == lr.predict(X)` both raise, in both directions, so one side has to
+become an ndarray.
+
+**Judge the receiver as executed, not as defined.** A method that looks safe where it is written can
+be reached with a different type at run time — the sister repo had 17 `.to_numpy()` removals pass a
+definition-level probe and then get reverted by the execution gate.
 
 The known rung-3 case is **seaborn with `data=`**. Seaborn 0.13 nominally accepts Polars through the
 interchange protocol, but `hue` ordering, `lmplot`, and dtype introspection are flaky through that
@@ -424,8 +469,9 @@ unchanged because they are properties of the libraries, not of the assignments.
   (it accepts a Polars Series directly and returns the pandas values) or pass
   `interpolation="linear"` explicitly. Expect this in any EDA or stats lecture that labels quartiles.
 - **Except `np.var` / `np.std`, where the native swap silently changes the number.** Polars defaults
-  to `ddof=1`, NumPy to `ddof=0`: for `[1,2,3,4,5]`, `s.var()` is 2.5 and `np.var(arr)` is 2.0. Use
-  `np.var(s.to_numpy())`, or `s.var(ddof=0)` if you want it native. This one does not raise — it just
+  to `ddof=1`, NumPy to `ddof=0`: for `[1,2,3,4,5]`, `s.var()` is 2.5 and `np.var(arr)` is 2.0. Prefer
+  `s.var(ddof=0)` over `np.var(s.to_numpy())`: same number, stays in Polars, and the parameter is
+  visible instead of implied by which library you routed through. This one does not raise — it just
   shifts every result. Variance ratios are how every $R^2$ in the modeling labs is computed, so a
   quiet `ddof` flip moves printed values and any constant derived from them.
 - **`pl.DataFrame` has no `.T`, and no frame-to-frame `@`.** The normal equation `X.T @ X` — not rare

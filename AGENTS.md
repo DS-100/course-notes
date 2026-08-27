@@ -33,9 +33,10 @@ The site build needs node on the PATH too:
    pedagogical equivalence, not identical output.
 3. **The dropdown and the code cell are one edit.** 82 markdown blocks repeat the next code cell
    verbatim inside `` ```{dropdown} Click to see the code ``. Convert both or neither.
-4. **`.to_pandas()` is a last resort and needs a written reason.** Polars goes to plotly and sklearn
-   directly, and to matplotlib through `.to_numpy()`. Every surviving call is allowlisted in
-   `conversion/conversion_allowlist.yml`.
+4. **`.to_pandas()` is a last resort and needs a written reason.** Polars goes to plotly, sklearn,
+   scipy **and matplotlib** directly — `.to_numpy()` is needed only where NumPy's reduction dispatch
+   refuses it, which the `pandas-to-polars` skill spells out. Every surviving `.to_pandas()` is
+   allowlisted in `conversion/conversion_allowlist.yml`.
 5. **Never silence a cell.** `remove-input` and `remove-cell` are layout. Using either to hide a cell
    that misbehaves is a hard failure, and so is deleting an output to make a gate pass.
 6. **A cell that raises on purpose must keep raising.** Two exist: `eda` cell `a3fde967` and
@@ -96,6 +97,22 @@ string escaped inside MyST's page JSON.
 | `.claude/agents/` | the writer and reviewer contracts |
 | `conversion/` | the toolchain, the gates, the allowlist, and `state.json` |
 | `README.md` | the site build, for course staff who are not converting anything |
+
+## Which prose skill to reach for
+
+Three overlap and are not interchangeable:
+
+- **`data100-textbook-voice`** — does this read like *this book*? Chapter skeleton, admonitions, the
+  dropdown pattern. Load before writing any student-facing text.
+- **`no-ai-slop`** — does this read like a person wrote it? An editor persona with a pass/fail
+  `eval.md`. Load when a draft feels generic, or to check whether writing reads as AI.
+- **`humanizer`** — a pattern catalogue from Wikipedia's "Signs of AI writing". Use to *name* a
+  specific tell; `no-ai-slop` is the one that edits.
+
+`pandas-to-polars` carries the **NumPy dispatch rule**, which decides every `.to_numpy()` boundary.
+It was reconciled against the sister repo's corpus-wide cleanup: matplotlib, plotly, scipy and
+sklearn take Polars directly, and the conversions that added `.to_numpy()` there were churn.
+
 
 ## The gates are migration-time only
 

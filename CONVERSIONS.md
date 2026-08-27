@@ -1617,6 +1617,56 @@ No prose reviewer — tier B. No a11y reviewer — the chapter has no figures.
   this harness can catch it.** Whoever converts `eda` must update this link in `regex` in the same
   pass. Recorded as open question 8 below.
 
+### The pandas comparison tabs
+
+`polars_1` and `polars_2` carry **104 pandas↔Polars comparison tabs** (69 + 35), generated and
+checked by `conversion/tab_twins.py`. Every tab shows the Polars code with its committed output and
+the pandas equivalent with *its* output, and `:sync:` switches every comparison on a page at once —
+a master tab-set at the top of `polars_1` acts as the page switch.
+
+**Nothing in a tab is hand-written onto the page.** The Polars half is read from the live cell, the
+pandas half is executed in the pinned environment, and `--verify` regenerates both and diffs them
+against what is published. Frozen output that no longer has to come from the code above it is the
+exact defect this conversion existed to remove, so the check is the point.
+
+Four rules the tool enforces, each learned by hitting it:
+
+- **Twins execute in page order, sharing one namespace.** The pandas column reads as a continuous
+  session, so a twin that uses a frame an earlier twin built must run after it. Declaration order is
+  not page order — it was wrong in both chapters — and iterating the declarations directly would run
+  a later-page twin first and either raise or silently read a stale frame.
+- **Order-unstable cells are refused.** Measured: `value_counts()` gave 2 distinct row orders in 6
+  runs, `unique()` gave 6 distinct results in 6. A frozen tab cannot mirror those, so it would report
+  STALE at random and train people to ignore `--verify`. `sort=True` counts as fixing the order
+  (verified stable over 8 runs); a cell ending in `type(...)` is judged on what it displays.
+- **Identical pairs are skipped and counted** — 5 in `polars_1`. Where the operation and the output
+  match once the `_pd` suffix is normalized away, the tab would show two panes that read the same.
+- **A twin whose output churns by design can be declared.** `order_unstable()` refuses unstable
+  cells by default, and that default is right. But `polars_2`'s unsorted `group_by("Year")` exists
+  *because* the order is arbitrary, and the pandas twin is the chapter's warning made visible:
+  pandas sorts group keys and returns 1910-1914 every time, Polars returns whichever five finished
+  first. Listing it in `OUTPUT_CHURNS` lets the tab exist; `--verify` then checks the marker and both
+  code panes verbatim, and reports `checked code-only (output churns by design)` rather than
+  pretending to check five year labels that carry no meaning.
+- **A cell that raises is twinned too.** `committed_output` reads error outputs as `ename: evalue`,
+  and a pandas twin is *expected* to raise wherever the Polars cell does — failing to raise is
+  reported, because the tab would otherwise claim both libraries accept something neither does.
+
+The best of these is the `and`-instead-of-`&` cell: both libraries reject it, pandas with
+`ValueError: The truth value of a Series is ambiguous`, Polars with
+`TypeError: the truth value of an Expr is ambiguous` followed by a list of the right spellings.
+
+**86 more twins are ready for the translated chapters with no authoring at all.** `--from-baseline`
+pairs a converted cell against the pre-conversion baseline by cell id — G1 guarantees those ids are
+identical — so the pandas half is the *published* pandas code and its published output.
+
+### A content defect fixed while widening the tabs
+
+`polars_1` claimed `columns` keeps columns "in the order we name them", and the cell's own committed
+output disproved it: the code names `Candidate, Year, %` and the table printed `Year, Candidate, %`.
+Verified — `pl.read_csv(columns=…)` and `pd.read_csv(usecols=…)` both return **file order**, while
+`.select([...])` honours the order named. The comment now says what happens.
+
 # Harness build notes
 
 The first three were vacuous-pass bugs caught by building the negative control first, and all three
@@ -1736,6 +1786,31 @@ it is what a guard working correctly looks like from the inside.
    NumPy-looking code is gratuitous.** In `pca` both rewrites were improvements anyway — passing the
    3D array straight to `pl.DataFrame` types the column as a real `Array(f64, (28,28))`, which is
    what let `images["images"].to_numpy()` replace `np.array(….to_list())` at two later sites.
+
+9. **The tab tool broke a chapter's title, and the gate that guards titles could not see it.**
+   `apply_to_pytext` tags the live cell it is placing a block beside, so the cell keeps executing but
+   stops rendering. It locates that cell by searching the jupytext `.py` for a snippet of Polars
+   code — and a locator can match inside **prose**: a `{dropdown}` repeats its cell's source
+   verbatim, and both chapter intros quote the data loader. Walking back from such a match lands on
+   a *markdown* header, and tagging it rewrites
+
+   ```
+   # %% [markdown] id="p2-intro"      ->   # %% tags=[...] [markdown] id="p2-intro"
+   ```
+
+   which jupytext no longer reads as a markdown marker. The frontmatter cell became a **code** cell,
+   so Polars II lost its title and published its own YAML as commented-out source. Polars I took the
+   same damage on a different cell.
+
+   **G11 `frontmatter` reported PASS throughout.** It compares the title block between baseline and
+   converted, and the block was still there, still correct, still first — it had simply stopped being
+   markdown. The gate checks the content of the frontmatter, not that the cell carrying it is still a
+   markdown cell, and no gate reads a chapter's *rendered* title. Course staff spotted it by looking
+   at the page.
+
+   Fixed twice over: the two headers repaired, and `apply_to_pytext` now refuses to tag any cell
+   whose header contains `[markdown]`, reporting the locator instead. The two twins that caused it
+   were dropped as redundant — the dropdown above each already shows that code.
 
 The general rule the first three incidents support: **a detector that reports zero is only good news if it
 found something on the baseline** — and a detector that reports a hit is only bad news if it cannot

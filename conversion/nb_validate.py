@@ -368,13 +368,50 @@ def gate_no_pandas_code(chapter: ch.Chapter, conv_nb, base_nb, res: Result) -> N
     res.add("no-pandas-code", not hits, len(cells), len(code_cells(base_nb)), details)
 
 
+TWIN_REGION_RE = re.compile(
+    r"<!-- tab-twins:begin .*?-->(.*?)<!-- tab-twins:end -->", re.S
+)
+PANDAS_TAB_RE = re.compile(
+    r"::::\s*\{tab-item\}\s*pandas\b(.*?)(?=\n::::(?!:)|\Z)", re.S | re.I
+)
+
+
+def strip_pandas_tabs(md: str) -> Tuple[str, int]:
+    """Blank out the pandas half of each comparison tab, and count how many were blanked.
+
+    Course staff added Pandas/Polars comparison tabs, so pandas now appears in fenced blocks on
+    purpose. The exemption is deliberately narrow: only inside an explicit
+    `tab-twins:begin/end` region, and only within the `{tab-item} pandas` half of it. The Polars
+    half of the same tab is still scanned -- pandas leaking into a tab labelled Polars is a real
+    defect, and blanketing the whole region would hide it.
+    """
+    n = 0
+
+    def blank_region(m: re.Match) -> str:
+        nonlocal n
+        body = m.group(1)
+
+        def blank_tab(t: re.Match) -> str:
+            nonlocal n
+            n += 1
+            return "\n".join("" for _ in t.group(0).splitlines())
+
+        return PANDAS_TAB_RE.sub(blank_tab, body)
+
+    return TWIN_REGION_RE.sub(blank_region, md), n
+
+
 def gate_prose_code_blocks(chapter: ch.Chapter, conv_path: Path, base_path: Path, res: Result) -> None:
     conv_md = markdown_text(conv_path)
     base_md = markdown_text(base_path)
+    scanned, n_exempt = strip_pandas_tabs(conv_md)
     n_base = len(ch.markdown_code_blocks(base_md))
-    n_conv = len(ch.markdown_code_blocks(conv_md))
-    hits = ch.markdown_pandas_sites(conv_md)
-    details = hits[:8] if hits else [f"{n_conv} fenced block(s) in markdown, none carrying pandas"]
+    n_conv = len(ch.markdown_code_blocks(scanned))
+    hits = ch.markdown_pandas_sites(scanned)
+    note = f"; {n_exempt} pandas comparison tab(s) exempt" if n_exempt else ""
+    details = hits[:8] if hits else [
+        f"{n_conv} fenced block(s) in markdown, none carrying pandas{note}"
+    ]
     res.add("prose-code-blocks", not hits, n_conv, n_base, details)
 
 
