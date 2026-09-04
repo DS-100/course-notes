@@ -2,6 +2,10 @@
 title: Case Study in Human Contexts and Ethics
 ---
 
+::: {note} Under Construction
+This section is a work in progress!
+:::
+
 :::{attention}
 Given the nuanced nature of some of the arguments made in the lecture, it is highly recommended that you view the lecture recording given by Professor Ari Edmundson to fully engage and understand the material. The course notes will have the same broader structure but are by no means comprehensive.
 :::

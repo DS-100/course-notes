@@ -2,6 +2,10 @@
 title: Clustering
 ---
 
+::: {note} Under Construction
+This section is a work in progress!
+:::
+
 ::: {note} Learning Outcomes
 * Introduction to clustering
 * Assessing the taxonomy of clustering approaches

@@ -2,6 +2,10 @@
 title: Estimators, Bias, and Variance
 ---
 
+::: {note} Under Construction
+This section is a work in progress!
+:::
+
 ::: {note} Learning Outcomes
 * Understand why a sample statistic is an estimator of the true population parameter
 * Understand the impact of model complexity on the tradeoff between bias and variance

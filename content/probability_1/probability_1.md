@@ -2,6 +2,10 @@
 title: Random Variables
 ---
 
+::: {note} Under Construction
+This section is a work in progress!
+:::
+
 ::: {note} Learning Outcomes
 * Define a random variable in terms of its distribution
 * Compute the expectation and variance of a random variable
