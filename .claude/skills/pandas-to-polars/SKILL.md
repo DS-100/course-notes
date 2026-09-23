@@ -35,6 +35,10 @@ Adding `import polars as pl` silently rebinds it, and the failure surfaces cells
 confusing `AttributeError` on the wrong object. Rename the local (`pipe`), never the import,
 and check every later reference to it.
 
+**Authoring a new chapter rather than converting one?** Read `fa26-course-conventions.md` in this
+directory too. It records which Polars spelling the Fa26 lectures and assignments actually use, where the
+book deliberately departs from them, and the slide bugs not to copy.
+
 ---
 
 ## Output equivalence policy — "most equivalent", not identical

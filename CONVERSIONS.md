@@ -142,6 +142,7 @@ published book with all 15 gates green.
 
 ### Notes on the table
 
+- **`new_eda_1` … `new_eda_5` are not in this table.** They are authored chapters with no pandas baseline, so these columns don't apply. Their record is under *Newly authored chapters — Fa26 EDA I–V*.
 - **`sql_II` and `_case_study_climate` have zero pandas in code and still land in tier B.** Their
   pandas lives entirely inside fenced code blocks in markdown, where no code-cell scanner looks.
   Between them and the other 12 affected chapters, 88 pandas sites repo-wide are prose-only.
@@ -1667,6 +1668,77 @@ output disproved it: the code names `Candidate, Year, %` and the table printed `
 Verified — `pl.read_csv(columns=…)` and `pd.read_csv(usecols=…)` both return **file order**, while
 `.select([...])` honours the order named. The comment now says what happens.
 
+# Newly authored chapters — Fa26 EDA I–V
+
+Five chapters written from Fa26 lectures 2–6, not converted from pandas: `new_eda_1` … `new_eda_5`.
+They sit in the TOC right after `intro_lec`. `polars_1`, `polars_2` and `eda` stay in the TOC
+unchanged, at staff's instruction. Students did not read `polars_1`/`polars_2`, so each chapter
+introduces every Polars verb where it is first used. `conversion/eda_outlines.md` records which
+chapter introduces which verb, and each chapter's outline, approved 2026-09-22.
+
+**How they were built.**
+- **Sources:**
+  - the decks in `lectures/` (untracked), read with `conversion/lecture_extract.py`;
+  - `fa26-dev/lec/lec04`–`lec06`. The `lec02`/`lec03` notebooks there are stale Sp26 uploads and
+    were not used.
+  - `main`'s draft `new_eda_1`, which EDA I revises rather than replaces.
+- **Orchestration:** `.claude/workflows/eda-chapters.js`. The outline pass ran one image-ID agent
+  per deck, one outline agent per chapter and an overlap critic. The build pass runs, per chapter:
+  1. `lecture-chapter-author`;
+  2. serial `nb_execute`;
+  3. `conversion/authored_validate.py` (A1–A11);
+  4. four reviewers (claims, a11y, prose, `notes-lecture-fidelity-reviewer`);
+  5. one refuter per blocking finding;
+  6. the site gate, then the render review.
+- **Gate:** `nb_validate.py` cannot pass a chapter with no pandas baseline, so these chapters are
+  gated by `authored_validate.py` instead. Its `--self-test` runs `main`'s unrevised draft as the
+  negative control, `polars_2` as the false-alarm control, and a planted unparseable `fig-alt`.
+- **Conventions:** `.claude/skills/pandas-to-polars/fa26-course-conventions.md`, taken from what
+  the lectures and hw00–hw03 actually write. `len(df.group_by(...))` appears nowhere in them. Rows
+  per group are `group_by(k).len()`, and distinct values are `n_unique()`.
+
+| Chapter | Lecture | Cells (code) | Figures / images / SQL blocks | Review rounds | State |
+|---|---|---|---|---|---|
+| `new_eda_1` EDA I | L02 | 108 (27) | 8 / 7 / 10 | 3 + 2 fix passes | `REVIEWED`, awaiting human sign-off |
+| `new_eda_2` EDA II | L03 | 40 (15) | 6 / 2 / 6 | 3 + 2 fix passes | `REVIEWED`, awaiting human sign-off |
+| `new_eda_3` EDA III | L04 + lec04 | 63 (30) | 3 / 0 / 12 | 1 + 1 fix pass | `REVIEWED`, awaiting human sign-off |
+| `new_eda_4` EDA IV | L05 S4–19 + lec05 | 47 (23) | 6 / 0 / 10 | 2 + 2 fix passes | `REVIEWED`, awaiting human sign-off |
+| `new_eda_5` EDA V | L05 S20–60 + L06 S39–51 | 124 (54) | 0 / 5 / 34 | 3 + 1 fix pass | `REVIEWED`, awaiting human sign-off |
+
+Each chapter was executed under polars 1.43.1 (`d100`), and every `authored_validate` gate passes.
+Every SQL block was checked against its Polars output in DuckDB 1.3.0. The render review passed on
+all five pages. The final fix pass changed prose only, and every edited sentence was confirmed in
+the built page JSON. After the build pass, a cross-check re-read EDA III–V against the finished
+EDA I and II, and one critic read all five together. It raised four blocking findings, all four
+survived refutation, and all four are fixed:
+- EDA I called `pct_free_reduced` the share who *receive* meals, which is the wording EDA II
+  teaches as an error.
+- EDA III's `NTILE` query used a subquery that no chapter explains.
+- EDA IV indexed a Series with `cutoffs[0]`, which no chapter teaches.
+- EDA IV said the admission rates were never checked, though EDA III bounded them.
+
+**Decisions made while authoring**, beyond the outlines:
+- **EDA I** revises `main`'s draft and extends it through L02 S60, where the draft stopped at S45.
+  - Corrected: the whisker definition (they end at the most extreme point inside 1.5·IQR, not at
+    the fence), 1,200 → 1,229 schools, 200 → 201 applicants, and the histogram peak
+    (0.060–0.085, not 0.05).
+  - Removed: the ten markdown blocks that printed the Polars code a second time, and the
+    `hide-input` tag.
+- **EDA II:** Polars `.cast(int)` truncates while DuckDB's `CAST … AS INTEGER` rounds, so the SQL
+  pairs it with `TRUNC`. Without that, the two disagree on 581 of 1,229 rows. The derived
+  `num_frl_12th` is described as an estimate of students who *qualify*.
+- **EDA III** owns seed 7342 and the random-imputation draw, and EDA IV copies that cell verbatim,
+  so their numbers agree (0.123 / 0.129 / 0.152 / 0.149). The top-2-per-county example sorts on
+  `school` as a tie-breaker, because 11 counties tie.
+- **EDA IV** follows the slide's `grade_12 >= 100` pool rule. The lecture code's
+  `tot_enrolled >= 100` keeps 1,226 of 1,229 schools. `sns.relplot` replaces
+  `FacetGrid.map_dataframe`, which scaled point sizes separately in each panel.
+- **EDA V** corrects L05 S36's Unix times. It uses lec06's `"NA"`-encoded admissions file as the
+  faithfulness demo (`null_values="NA"`) and `lec06`'s `example_duck.db`, not `sql_I`'s different
+  copy.
+
+Staff questions are open question 16. The harness bugs found along the way are harness note 15.
+
 # Harness build notes
 
 The first three were vacuous-pass bugs caught by building the negative control first, and all three
@@ -1973,6 +2045,30 @@ it is what a guard working correctly looks like from the inside.
     `conversion/tab_twins_data.py`, and one of those notes is a correction of an earlier note in the
     same file: I kept `intro_lec`'s `12449aec` on the grounds that it "carries per-tab comments that
     disclose the contrast", and a reviewer checked and found it does not.
+
+15. **The site gate's warning scanner had never matched anything, and it was hiding two defects.**
+    G15's "no new warnings" check found MyST diagnostics with `\b(warn|warning|error)\b`. MyST marks
+    its own diagnostics with a glyph and usually no keyword: `⛔️ content/new_eda_2/new_eda_2.ipynb
+    Invalid code cell metadata`, `⚠️ …/gradient_descent.ipynb:20 unexpected body provided for directive:
+    image`. The pattern also had a capturing group, so `findall` returned the keyword instead of the
+    line. `baseline_warnings.txt` was captured empty, and every run reported "0 warning(s), none new".
+    Nothing flagged the gate, because an empty baseline makes zero look like the right answer. It is
+    rule 2's failure at the repo level. The scanner now also matches lines that begin with ⚠️ or ⛔️,
+    and the group is non-capturing. The first run after the fix found:
+
+    - **`new_eda_2` `e2-four`:** its `#| fig-alt` contained "look nearly identical: large points". MyST
+      loads the `#|` block as YAML, the unquoted `: ` fails to parse, and MyST then **drops every
+      option on the cell**. The figure would have shipped with no alt text while its source showed
+      one. Fixed by rewording. `authored_validate.py` A5 now parses the `#|` block the way myst-cli's
+      `metadataFromCode` does, and its self-test plants this exact line and requires a FAIL.
+    - **Five `{image}` alts truncated at their first line**, three in `gradient_descent`
+      (`ols_matrices_new.png`, `grad_descent_1.png`, `grad_descent_2.png`) and two in
+      `logistic_regression_2` (lines 72 and 113). MyST reads a multi-line `:alt:`'s continuation
+      lines as a directive body, so the rendered alt stops mid-sentence: "…an n-by-p covariate matrix
+      X of features beside". The baseline had one-line alts here, and `c95b904b` introduced the
+      wrapping. **Not fixed.** These chapters were outside the EDA-only scope, so G15 fails on these
+      five until each alt is joined onto one line. This failure is correct and should not be
+      allowlisted.
 
 The general rule the first three incidents support: **a detector that reports zero is only good news if it
 found something on the baseline** — and a detector that reports a hit is only bad news if it cannot
@@ -2291,3 +2387,38 @@ Left alone deliberately, as wording rather than error: `sampling`'s "off by almo
     the figure. Two reported errors did not survive that check in the form reported, and are recorded
     under note 13.
 
+
+16. **Fa26 EDA I–V: what the new chapters need from course staff.** None of these blocks the build.
+    Each chapter's full list is in `conversion/eda_outlines.md`. These are the ones that need a staff
+    answer, not an author's call.
+
+    - **Sources the slides assert but never cite.**
+      - EDA I: Sweeney's re-identification paper (*Simple Demographics Often Identify People
+        Uniquely*, 2000) and the "in the news recently" item. Tukey's "1 was too small, 2 too big"
+        anecdote.
+      - EDA I and EDA II: the LLM over-reliance claim on L02 S19 and L03 S28, possibly Kosmyna et
+        al. (2025), *Your Brain on ChatGPT*.
+      - EDA III: the PCS framework credited to Bin Yu (for example, Yu & Kumbier 2020, PNAS).
+      - EDA I: the California population-density map, which carries no credit.
+    - **Content that repeats later in the TOC.** `polars_1`, `polars_2`, `eda` and `sql_I` come after
+      `new_eda_5`, and between them they re-teach file formats, variable types, granularity, joins and
+      the `Dragon` database. Staff kept all three pandas-era chapters in the TOC. Trimming them is a
+      separate decision.
+    - **Deck corrections.** L05 S36's Unix times (`1738674000`, `-628167600`) are 5:00 **am** PST, not
+      5:00 pm. EDA V prints the corrected values. L05 S24's variable-types answer key came out of the
+      extract scrambled, so EDA V uses a reconstructed key that needs checking against the rendered
+      slide. The slide bugs listed in `fa26-course-conventions.md` (`pd.read_csv` on L02 S31,
+      `sort("sum_cost")` on L04 S16, `.sum,` on L04 S37, the `LIMIT 2` "top 2 per county" query on
+      L04 S18) are live in the decks.
+    - **The reference sheet** (`fa26-dev/reference/build_polars_section.py`) has no `pl.len()`,
+      `group_by().len()`, `qcut`, `rank`, `.dt`, `pl.Config` or plotly entry, though the lectures and
+      these chapters use all of them. It still says seaborn needs `data=df.to_pandas()`, while the
+      slides, `lec04`/`lec05` and these chapters pass Polars directly.
+    - **SQL dialect.** Every SQL block was checked in DuckDB. `QUALIFY` (EDA III §4, §6), `SUMMARIZE`,
+      `read_csv`/`read_json`, `UNNEST`, `strptime`/`epoch` and `GROUP BY ALL` are DuckDB-specific. Each
+      chapter names DuckDB at the first use of each one (checked per construct). `sql_I` also uses SQLite, which truncates integer division.
+    - **Six unreferenced images** in `content/new_eda_1/images/` (`uc_site.png`, `ca_doe.png`,
+      `csv_view.png`, `polars.png`, `left_skew.png`, `right_skew.png`) come from `main`'s draft. They
+      were superseded or replaced by regenerated plots and left in place. Delete them or keep them.
+    - **Homework cross-references.** EDA I says "a later homework asks you to diagnose it" rather
+      than naming Homework 2, so the text survives a change of term.

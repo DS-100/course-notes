@@ -52,7 +52,14 @@ NEEDS_REASON = ["myst.yml", "requirements.txt"]
 
 SHRINK_TOLERANCE = 0.5
 PANDAS_DOCS = "pandas.pydata.org"
-WARNING_RE = re.compile(r"^.*?\b(warn|warning|error)\b.*$", re.I | re.M)
+# Non-capturing: with a capturing group, findall returns the matched keyword, not the line.
+WARNING_RE = re.compile(r"^.*?\b(?:warn|warning|error)\b.*$", re.I | re.M)
+# MyST marks its own diagnostics with a glyph and often no keyword at all -- "⛔️ <file> Invalid code
+# cell metadata", "⚠️ <file>:20 unexpected body provided for directive: image". The keyword pattern
+# alone matched none of them, so this gate reported "0 warning(s)" over a build that had printed six,
+# and baseline_warnings.txt was captured empty. Both of those hid real defects: a fig-alt MyST dropped
+# whole, and five {image} alts truncated at their first line.
+MYST_GLYPH_RE = re.compile(r"^\s*(?:⚠️|⛔️).*$", re.M)
 
 # Two traps stacked on top of each other here, both found by building the negative control.
 #
@@ -185,7 +192,7 @@ def build_site(capture: bool = False) -> Tuple[bool, str, List[str]]:
     warnings = sorted(
         set(
             re.sub(r"^\s*", "", line).strip()
-            for line in WARNING_RE.findall(log)
+            for line in WARNING_RE.findall(log) + MYST_GLYPH_RE.findall(log)
             if line.strip()
         )
     )
