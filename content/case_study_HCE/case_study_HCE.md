@@ -42,10 +42,10 @@ The image above shows two standard metrics to estimate the fairness of assessmen
 :align: center
 ```
 
-This prompted journalists to investigate if the CCAO's model itself was producing fair tax rates. When accounting for the homeowner's income, they found that the model actually produced a **regressive** tax rate (see figure above). A tax rate is **regressive** if the percentage tax rate is higher for individuals with lower net income; it is **progressive** if the percentage tax rate is higher for individuals with higher net income. The figure below shows a simple representation of progressive and regressive tax rate.
+This prompted journalists to investigate if the CCAO's model itself was producing fair tax rates. When accounting for the homeowner's income, they found that the model actually produced a **regressive** tax rate (see figure above). A tax rate is **regressive** if the percentage tax rate is higher for individuals with lower net income; it is **progressive** if the percentage tax rate is higher for individuals with higher net income. The figure below shows a simple representation of progressive and regressive tax rates.
 
 ```{image} images/regressive_tax.png
-:alt: Income is on the x-axis. Tax rate is on the y-axis. A horizontal line in the center of the y-axis is labeled 'proportional.' A line where both income and tax rate increases is labeled progressive. Another line where both income and tax rate decreases is labeled regressive
+:alt: Income is on the x-axis. Tax rate is on the y-axis. A horizontal line in the center of the y-axis is labeled 'proportional.' A line where both income and tax rate increase is labeled progressive. Another line where both income and tax rate decreases is labeled regressive
 :width: 300px
 :align: center
 ```
@@ -75,7 +75,7 @@ What was the cause of such a major issue? It might be easy to simply blame "bias
 We can borrow lessons from [Critical Race Theory](https://www.britannica.com/topic/critical-race-theory) —— on the surface, everyone has the legal right to try and appeal the value of their home. However, not everyone has an *equal ability* to do so. Those who have the money to hire tax lawyers to appeal for them have a drastically higher chance of trying and succeeding in their appeal (see above figure). Many homeowners who appealed were generally under-assessed compared to homeowners who did not (see figure below). Clearly, the model is part of a deeper institutional pattern rife with potential corruption. 
 
 ```{image} images/vis_5.png
-:alt: On the left, we see that the highest percentage of homeowners who appealed was towards the right hand side of the geographic area represented. But on the right, we see that the greatest number of years that homes were overvalues is on the left hand side of the geographic region.
+:alt: On the left, we see that the highest percentage of homeowners who appealed was towards the right hand side of the geographic area represented. But on the right, we see that the greatest number of years that homes were overvalued is on the left hand side of the geographic region.
 :width: 600px
 :align: center
 ```
@@ -92,7 +92,7 @@ In fact, Chicago boasts a large and thriving tax attorney industry dedicated pre
 
 What happened as a result of this corrupt system? As the *Chicago Tribune* reported, many African American and Latino homeowners purchased homes only to find their houses were later appraised at levels far higher than what they paid. As a result, homeowners were now responsible for paying significantly more in taxes every year than initially budgeted, putting them at risk of not being able to afford their homes and losing them. 
 
-The impact of the housing model extends beyond the realm of home ownership and taxation — the issues of justice go much deeper. This model perpetrated much older patterns of racially discriminatory practices in Chicago and across the United States. Unfortunately, it is no accident that this happened in Chicago, one of the most segregated cities in the United States ([source](https://fivethirtyeight.com/features/the-most-diverse-cities-are-often-the-most-segregated/)). These factors are central to informing us, as data scientists, about what is at stake.
+The impact of the housing model extends beyond the realm of home ownership and taxation — the issues of justice go much deeper. This model perpetuaated much older patterns of racially discriminatory practices in Chicago and across the United States. Unfortunately, it is no accident that this happened in Chicago, one of the most segregated cities in the United States ([source](https://fivethirtyeight.com/features/the-most-diverse-cities-are-often-the-most-segregated/)). These factors are central to informing us, as data scientists, about what is at stake.
 
 ## The Response: Cook County Open Data Initiative
 
@@ -129,7 +129,7 @@ Let's frame this problem through the lens of the data science lifecycle.
 
 The old system was unfair because it was systemically inaccurate; it made one kind of error for one group, and another kind of error for another. Its goal was to “create a robust pipeline that accurately assesses property values at scale and is fair”, and in turn, they defined fairness as accuracy: “the ability of our pipeline to accurately assess all residential property values, accounting for disparities in geography, information, etc.” Thus, the plan — make the system more fair — was already framed in terms of a task appropriate to a data scientist: make the assessments more accurate (or more precisely, minimize errors in a particular way). 
 
-The idea here is that if the model is more accurate it will also (perhaps necessarily) become more fair, which is a big assumption. There are, in a sense, two different problems — make accurate assessments, and make a fair system. Treating these two problems as one makes it a more straightforward issue that can be solved technically (with a good model) but does raise the question of if fairness and accuracy are one and the same.
+The idea here is that if the model is more accurate, it will also (perhaps necessarily) become more fair, which is a big assumption. There are, in a sense, two different problems — make accurate assessments, and make a fair system. Treating these two problems as one makes it a more straightforward issue that can be solved technically (with a good model) but does raise the question of whether fairness and accuracy are one and the same.
 
 For now, let’s just talk about the technical part of this — accuracy. For you, the data scientist, this part might feel more comfortable. We can determine some metrics of success and frame a social problem as a data science problem. 
 
@@ -238,13 +238,13 @@ Broad metrics of error like RMSE can be limiting when evaluating the "fairness" 
 
 Even with a low RMSE, we can't guarantee a fair model. The error we see (no matter how small) may be a result of our model overvaluing less expensive homes and undervaluing more expensive homes. 
 
-Regarding accuracy, it's important to ask what makes a batch of assessments better or more accurate than another batch of assessments. The value of a home that a model predicts is relational. It's a product of the interaction of social and technical elements so property assessment involves social trust.
+Regarding accuracy, it's important to ask what makes a batch of assessments better or more accurate than another batch of assessments. The value of a home that a model predicts is relational. It's a product of the interaction of social and technical elements, so property assessment involves social trust.
 
 Why should any particular individual believe that the model is accurate for their property? Why should any individual trust the model?
 
 To foster public trust, the CCAO focuses on “transparency”, putting data, models, and the pipeline onto GitLab. By doing so, they can better equate the production of “accurate assessments” with “fairness”.
 
-Another aspect to consider when translating fairness into accuracy is how fairness and accuracy is experienced. The experience of being over-assessed and under-assessed is different depending on who you are. For example, a wealthy home-owner being over-assesed is more likely an inconvenience, as opposed to a lower income home-owner where being over-assessed might mean losing a home. Numbers alone can't tell you that. 
+Another aspect to consider when translating fairness into accuracy is how fairness and accuracy are experienced. The experience of being over-assessed and under-assessed is different depending on who you are. For example, being over-assessed is more likely an inconvenience for a wealthy homeowner. For a lower income homeowner, on the other hand, being over-assessed might mean losing a home. Numbers alone can't tell you that. 
 
 Simply trying to optimize for metrics of accuracy isn't enough. We must also consider the real-life social impacts and harms from the perspectives of those who encounter them. In this sense a system that errs on the side of overvaluing high value homes and errs on the side of undervaluing lower value homes might be deemed as more fair, even if this means reducing the overall accuracy of the model. 
 
@@ -283,7 +283,7 @@ Accuracy is not one, simple thing. Fairness is not one, simple thing.
 
 When evaluating the accuracy and fairness of your model:
 
-- Think about the model as part of a larger **system**.
+- Think about the model as part of a larger **sociotechnical system**.
 - Pay attention to the underlying distribution of social power.
 - Consider the concrete impacts the system has on different **identities**, and on people differently **positioned** in society.
     - The same mathematical error doesn't have the same impact on everyone!
