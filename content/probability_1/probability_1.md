@@ -284,7 +284,7 @@ $$\text{Var}(X) = \frac{91}{6} - (\frac{7}{2})^2 = \frac{35}{12}$$
 
 We can summarize our discussion so far in the following diagram. Below are different ways to describe a random variable.
 
-```{image} images/exp_var_new.png
+```{image} images/exp_var_new2.png
 :alt: A variable can be summarized by descriptions like a probability distribution or a histogram of sampled samples. It can also be summarized by properities like expectation, variance, skewness, kurtosis, and more.
 :width: 800
 ```
