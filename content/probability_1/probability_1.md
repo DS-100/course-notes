@@ -23,7 +23,7 @@ Here, the **Loss** term ensures that the model **fits the data** and the **Regul
 - $L_2$ (squared) penalty $\rightarrow$ **Ridge Regression**
     - Allows for **robustness** where the weight is spread out over more features
 
-The goal is to find a balance between **bias (underfitting)** and **variance (overfitting)**. So far, our analysis has been mostly qualitative. We've acknowledged that our choice of model complexity needs to strike a balance between the two, but we haven't yet discussed *why* exactly this tradeoff exists.
+The goal is to find a balance between **bias** (leads to underfitting when too high) and **variance** (leads to overfitting when too high). So far, our analysis has been mostly qualitative. We've acknowledged that our choice of model complexity needs to strike a balance between the two, but we haven't yet discussed *why* exactly this tradeoff exists.
 
 To better understand the origin of this tradeoff, we will need to dive into **random variables**. The next two course notes on probability will be a brief digression from our work on modeling so we can build up the concepts needed to understand this so-called **bias-variance tradeoff**. In specific, we will cover:
 
@@ -55,7 +55,7 @@ In Data 100, we want to understand the broader relationship between the followin
 
 Suppose we generate a set of random data, like a random sample from some population. A **random variable** is a *function* from the outcome of a random event to a number.
  
-It is *random* since our sample was drawn at random; it is *variable* because its exact value depends on how this random sample came out. As such, the domain or input of our random variable is all possible outcomes for some random event in a *sample space*, and its range or output is the real number line. We typically denote random variables with uppercase letters, such as $X$ or $Y$. In contrast, note that regular variables tend to be denoted using lowercase letters. Sometimes we also use uppercase letters to refer to matrices (such as your design matrix $\mathbb{X}$), but we will do our best to be clear with the notation.
+It is *random* since our sample was drawn at random; it is *variable* because its exact value depends on how this random sample came out. As such, the domain (or input) of our random variable is all possible outcomes for some random event in a *sample space*, and its range (or output) is the real number line. We typically denote random variables with uppercase letters, such as $X$ or $Y$. In contrast, note that regular variables tend to be denoted using lowercase letters. Sometimes we also use uppercase letters to refer to matrices (such as your design matrix $\mathbb{X}$), but we will do our best to be clear with the notation.
 
 To motivate what this (rather abstract) definition means, let's consider the following examples:
 
@@ -66,7 +66,7 @@ $$X = \begin{cases}
       0, \text{if the coin lands tails} 
    \end{cases}$$
 
-$X$ is a function with a domain, or input, of $\{H, T\}$ and a range, or output, of $\{1, 0\}$. In practice, while we don't use the following function notation, you could write the above as 
+$X$ is a function with a domain (or input) of $\{H, T\}$ and a range (or output) of $\{1, 0\}$. In practice, while we don't use the following function notation, you could write the above as 
 $$X = \begin{cases}  X(H) = 1 \\ X(T) = 0 \end{cases}$$
 
 ### Example: Sampling Data 100 Students
@@ -113,6 +113,8 @@ We can often display this using a **probability distribution table**. In the coi
 | --- | -------- |
 | 0 | $\frac{1}{2}$ | 
 | 1 | $\frac{1}{2}$ |
+
+If $X$ is continuous, individual outcomes have probability 0. It then makes sense to think about ranges of outcomes for continuous random variables instead of single events -- this is where the type of distributions become important.
 
 The distribution of a random variable $X$ fully defines an RV (i.e. describes how the total probability of 100% is split across all the possible values of $X$). With the distribution of a RV, you can:
 
