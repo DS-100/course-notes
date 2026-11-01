@@ -2,10 +2,6 @@
 title: Random Variables
 ---
 
-::: {note} Under Construction
-This section is a work in progress!
-:::
-
 ::: {note} Learning Outcomes
 * Define a random variable in terms of its distribution
 * Compute the expectation and variance of a random variable
@@ -114,7 +110,7 @@ We can often display this using a **probability distribution table**. In the coi
 | 0 | $\frac{1}{2}$ | 
 | 1 | $\frac{1}{2}$ |
 
-If $X$ is continuous, individual outcomes have probability 0. It then makes sense to think about ranges of outcomes for continuous random variables instead of single events -- this is where the type of distributions become important.
+If $X$ is continuous, individual outcomes have probability 0. It then makes sense to think about ranges of outcomes for continuous random variables instead of single events -- this is where the type of distributions becomes important.
 
 The distribution of a random variable $X$ fully defines an RV (i.e. describes how the total probability of 100% is split across all the possible values of $X$). With the distribution of a RV, you can:
 
@@ -147,7 +143,7 @@ $$X = \begin{cases}
       0, \text{if the coin lands tails} 
    \end{cases}$$
 
-The Bernoulli distribution is **parameterized by p** the probability P(X=1), and the outcomes can be seen in the **probability table** below. Note that we use the notation **X ~ Bernoulli(p)** to denote that the **random variable X** has a Bernoulli distribution with parameter p.
+The Bernoulli distribution is **parameterized by p**, the probability P(X=1), and the outcomes can be seen in the **probability table** below. Note that we use the notation **X ~ Bernoulli(p)** to denote that the **random variable X** has a Bernoulli distribution with parameter p.
 
 | Outcome | Probability |
 | ------- | ----------- |
@@ -213,7 +209,7 @@ Consider the random variable $X$:
 | 6 | 0.4 | 
 | 8 | 0.3 |
 
-To calculate it's expectation, 
+To calculate its expectation, 
 $$\begin{align}
  \mathbb{E}[X] &= \sum_{x} x P(X=x) \\
  &= 3 * 0.1 + 4 * 0.2 + 6 * 0.4 + 8 * 0.3 \\
@@ -316,7 +312,7 @@ $$\mathbb{E}[aX+b] = aE[\mathbb{X}] + b$$
 \begin{align}
         \mathbb{E}[aX+b] &= \sum_{x} (ax + b) P(X=x) \\
         &= \sum_{x} (ax P(X=x) + bP(X=x)) \\
-        &= a\sum_{x}P(X=x) + b\sum_{x}P(X=x)\\
+        &= a\sum_{x}xP(X=x) + b\sum_{x}P(X=x)\\
         &= a\mathbb{E}(X) + b * 1
 \end{align}
 
@@ -482,7 +478,7 @@ $$
 Therefore, if $Y$ is a binomial random variable with parameters $n$ and $p$, then its expectation is $np$ and its variance is $np(1-p)$.
 
 ### Covariance and Correlation
-We define the **covariance** of two random variables as the expected product of deviations from expectation. Put more simply, covariance is a generalization of variance to variance: 
+We define the **covariance** of two random variables as the expected product of deviations from expectation. Put more simply, covariance is a generalization of variance to two variables: 
 
 $$\text{Cov}(X, X) = \mathbb{E}[(X - \mathbb{E}[X])^2] = \text{Var}(X)$$
 
@@ -511,7 +507,7 @@ Suppose that we have two random variables $X$ and $Y$:
 
 Note that in Data 100, you'll never be expected to prove that random variables are i.i.d.
 
-Now let's walk through an example. Say $X_1$ and $X_2$ be numbers on rolls of two fair die. $X_1$ and $X_2$ are i.i.d, so  $X_1$ and $X_2$ have the same distribution. However, the sums $Y = X_1 + X_1 = 2X_1$ and $Z=X_1+X_2$ have different distributions but the same expectation (7).
+Now let's walk through an example. Say $X_1$ and $X_2$ be numbers on rolls of two fair dice. $X_1$ and $X_2$ are i.i.d, so  $X_1$ and $X_2$ have the same distribution. However, the sums $Y = X_1 + X_1 = 2X_1$ and $Z=X_1+X_2$ have different distributions but the same expectation (7).
 
 ```{image} images/yz_distribution.png
 :alt: Distributions of Y and Z.
