@@ -21,7 +21,7 @@ In this lecture, we will delve more deeply into the idea of fitting a model to a
     * $\mathbb{E}[X] = \sum_{x} x P(X=x)$
     * $\text{Var}(X) = \mathbb{E}[(X-\mathbb{E}[X])^2] = \mathbb{E}[X^2] - (\mathbb{E}[X])^2$
 * Let $a$ and $b$ be scalar values. 
-    * $\mathbb{E}[aX+b] = aE[\mathbb{X}] + b$
+    * $\mathbb{E}[aX+b] = a\mathbb{E}[X] + b$
     * $\text{Var}(aX+b) = a^2 \text{Var}(X)$
 * Let $Y$ be another random variable. 
     * $\mathbb{E}[X+Y] = \mathbb{E}[X] + \mathbb{E}[Y]$
@@ -34,10 +34,10 @@ $$ \mathbb{E}[XY] = \mathbb{E}[X]\mathbb{E}[Y] $$
 
 ::: {tip} Proof
 $$\begin{align}
-   \mathbb{E}[XY] &= \sum_x\sum_y xy\ \textbf{P}(X=x, Y=y) &\text{Definition} \\
-   &= \sum_x\sum_y xy\ \textbf{P}(X=x)\textbf{P}(Y=y) &\text{Independence}\\
-   &= \sum_x x\textbf{P}(X=x) \sum_y y \textbf{P}(Y=y) &\text{Algebra}\\
-   &= \left(\sum_x x\textbf{P}(X=x)\right) \left(\sum_y y \textbf{P}(Y=y)\right) &\text{Algebra}\\
+   \mathbb{E}[XY] &= \sum_x\sum_y xy\ P(X=x, Y=y) &\text{Definition} \\
+   &= \sum_x\sum_y xy\ P(X=x)P(Y=y) &\text{Independence}\\
+   &= \sum_x xP(X=x) \sum_y y P(Y=y) &\text{Algebra}\\
+   &= \left(\sum_x xP(X=x)\right) \left(\sum_y y P(Y=y)\right) &\text{Algebra}\\
    &= \mathbb{E}[X]\mathbb{E}[Y] &\text{Definition}
 \end{align}$$
 :::
@@ -51,10 +51,10 @@ Note that:
 * The distribution of a *population* describes how a random variable behaves across *all* individuals of interest. 
 * The distribution of a *sample* describes how a random variable behaves in a *specific sample* from the population. 
 
-In Data Science, however, we often do not have access to the whole population, so we don’t know its distribution. As such, we need to collect a sample and use its distribution to estimate or infer properties of the population. In cases like these, we can take several samples of size $n$ from the population (an easy way to do this is using `df.sample(n, replace=True)`), and compute the mean of each *sample*. When sampling, we make the (big) assumption that we sample uniformly at random *with replacement* from the population; each observation in our sample is a random variable drawn i.i.d from our population distribution. Remember that our sample mean is a random variable since it depends on our randomly drawn sample! On the other hand, our population mean is simply a number (a fixed value).
+In Data Science, however, we often do not have access to the whole population, so we don’t know its distribution. As such, we need to collect a sample and use its distribution to estimate or infer properties of the population. In cases like these, we can take several samples of size $n$ from the population (an easy way to do this is using `df.sample(n, replace=True)`), and compute the mean of each *sample*. When sampling, we make the (big) assumption that we sample uniformly at random *with replacement* from the population; each observation in our sample is a random variable drawn i.i.d. from our population distribution. Remember that our sample mean is a random variable since it depends on our randomly drawn sample! On the other hand, our population mean is simply a number (a fixed value).
 
 ### Sample Mean Properties
-Consider an i.i.d. sample $X_1, X_2, ..., X_n$ drawn from a population with mean 𝜇 and SD 𝜎.
+Consider an i.i.d. sample $X_1, X_2, ..., X_n$ drawn from a population with mean $\mu$ and SD $\sigma$.
 We define the **sample mean** as $$\bar{X}_n = \frac{1}{n} \sum_{i=1}^n X_i$$
 
 The expectation of the sample mean is given by: 
@@ -78,14 +78,14 @@ $\bar{X}_n$ is **normally distributed** (in the limit) by the **Central Limit Th
 
 ### Central Limit Theorem
 In [Data 8](https://inferentialthinking.com/chapters/14/4/Central_Limit_Theorem.html?) and in the previous lecture, you encountered the **Central Limit Theorem (CLT)**. 
-This is a powerful theorem for estimating the distribution of a population with mean $\mu$ and standard deviation $\sigma$ from a collection of smaller samples. The CLT tells us that if an i.i.d sample of size $n$ is large, then the probability distribution of the **sample mean** is **roughly normal** with mean $\mu$ and SD of $\frac{\sigma}{\sqrt{n}}$. More generally, any theorem that provides the rough distribution of a statistic and **doesn't need the distribution of the population** is valuable to data scientists! This is because we rarely know a lot about the population. 
+This is a powerful theorem for estimating the distribution of a population with mean $\mu$ and standard deviation $\sigma$ from a collection of smaller samples. The CLT tells us that if an i.i.d. sample of size $n$ is large, then the probability distribution of the **sample mean** is **roughly normal** with mean $\mu$ and SD of $\frac{\sigma}{\sqrt{n}}$. More generally, any theorem that provides the rough distribution of a statistic and **doesn't need the distribution of the population** is valuable to data scientists! This is because we rarely know a lot about the population. 
 
 ```{image} images/clt.png
 :alt: Illustration of the central limit theorem
 :width: 400
 ```
 
-Importantly, the CLT assumes that each observation in our samples is drawn i.i.d from the distribution of the population. In addition, the CLT is accurate only when $n$ is "large", but what counts as a "large" sample size depends on the specific distribution. If a population is highly symmetric and unimodal, we could need as few as $n=20$; if a population is very skewed, we need a larger $n$. If in doubt, you can bootstrap the sample mean and see if the bootstrapped distribution is bell-shaped. Classes like Data 140 investigate this idea in great detail.
+Importantly, the CLT assumes that each observation in our samples is drawn i.i.d. from the distribution of the population. In addition, the CLT is accurate only when $n$ is "large", but what counts as a "large" sample size depends on the specific distribution. If a population is highly symmetric and unimodal, we could need as few as $n=20$; if a population is very skewed, we need a larger $n$. If in doubt, you can bootstrap the sample mean and see if the bootstrapped distribution is bell-shaped. Classes like Data 140 investigate this idea in great detail.
 
 For a more in-depth demo, check out [onlinestatbook](https://onlinestatbook.com/stat_sim/sampling_dist/). 
 
@@ -106,7 +106,7 @@ To address our inference question, we aim to construct estimators that closely e
 * How variable is the answer? **(Variance)**
   $$Var(\hat{\theta}) = E[(\hat{\theta} - E[\hat{\theta}])^2] $$
 
-If the Bias of an estimator $\hat{theta}$ is **zero**, then it is said to be an **unbiased estimator**. For example, sample mean is unbiased for the population mean.
+If the Bias of an estimator $\hat{\theta}$ is **zero**, then it is said to be an **unbiased estimator**. For example, sample mean is unbiased for the population mean.
 
 This relationship between bias and variance can be illustrated with an archery analogy. Imagine that the center of the target is the $\theta$ and each arrow corresponds to a separate parameter estimate $\hat{\theta}$
 
@@ -115,35 +115,35 @@ This relationship between bias and variance can be illustrated with an archery a
 :alt: Graphic showing four different targets with high/low bias and high/low variance.
 ```
 
-Ideally, we want our estimator to have low bias and low variance, but how can we mathematically quantify that? See [](#sec-bias-variance-tradeoff) for more detail.
+Ideally, we want our estimator to have low bias and low variance, but how can we mathematically quantify that? See [Bias-Variance Tradeoff](#sec-bias-variance-tradeoff) for more detail.
 
 ### Prediction as a Data-Generating Process
 
 Now that we've established the idea of an estimator, let's see how we can apply this learning to the modeling process. To do so, we'll take a moment to formalize our data collection and models in the language of random variables.
 
-Say we are working with an input variable, $x$, and a response variable, $Y$. We assume that $Y$ and $x$ are linked by some relationship $g$; in other words, $Y = g(x)$ where $g$ represents some "universal truth" or "law of nature" that defines the **true underlying relationship** between $x$ and $Y$. In the image below, $g$ is denoted by the red line.
+Say we are working with an input variable, $x$, and a response variable, $Y$. We assume that $Y$ and $x$ are linked by some relationship $f$; in other words, $Y = f(x)$ where $f$ represents some "universal truth" or "law of nature" that defines the **true underlying relationship** between $x$ and $Y$. In the image below, $f$ is denoted by the red line.
 
-As data scientists, however, we have no way of directly "seeing" the underlying relationship $g$. The best we can do is collect observed data out in the real world to try to understand this relationship. Unfortunately, the data collection process will always have some inherent error (think of the randomness you might encounter when taking measurements in a scientific experiment). We say that each observation comes with some **random error or noise** term, $\epsilon$ (read: "epsilon"). This error is assumed to be a random variable with expectation $\mathbb{E}(\epsilon)=0$, variance $\text{Var}(\epsilon) = \sigma^2$, and be i.i.d. across each observation. The existence of this random noise means that our observations, $Y(x)$, are *random variables*, where $Y = g(x) + \epsilon$ is the data-generating process. This can be seen on our graph because the points do not line perfectly with the true underlying relationship, and the residual is the noise $\epsilon$.
+As data scientists, however, we have no way of directly "seeing" the underlying relationship $f$. The best we can do is collect observed data out in the real world to try to understand this relationship. Unfortunately, the data collection process will always have some inherent error (think of the randomness you might encounter when taking measurements in a scientific experiment). We say that each observation comes with some **random error or noise** term, $\epsilon$ (read: "epsilon"). This error is assumed to be a random variable with expectation $\mathbb{E}(\epsilon)=0$, variance $\text{Var}(\epsilon) = \sigma^2$, and be i.i.d. across observations. The existence of this random noise means that our observations, $Y(x)$, are *random variables*, where $Y = f(x) + \epsilon$ is the data-generating process. This can be seen on our graph because the points do not line perfectly with the true underlying relationship, and the residual is the noise $\epsilon$.
 
 ```{image} images/data.png
 :alt: Two graphs are shown. On the left is the underlying data generation process with g shown in addition to the datapoints. On the right is what we see with only the datapoints shown.
 :width: 700
 ```
 
-We can only observe our **IID random sample of data**, represented by the blue points above. From this sample, we want to estimate the true relationship $g$. We do this by **training** a model on the data to obtain our optimal $\hat{\theta}$,
+We can only observe our **IID random sample of data**, represented by the blue points above. From this sample, we want to estimate the true relationship $f$. We do this by **training** a model on the data to obtain our optimal $\hat{\theta}$,
 $$ {\hat{\theta}} = \text{arg}\underset{\theta}{\text{min}}\  \left(\frac{1}{n} \sum_{i=1}^n \textbf{Loss}(Y_i, f_{\theta}(X_i))\right) + \lambda\ \textbf{Regularizer}(\theta)$$
 
 and **predicting** the value of $Y$ at a given $x$ location,
 $$ \hat{Y}(x) = \hat{f}(x)$$
 
-where the model $\hat{Y}(x)$ can be used to estimate $g$. The error in our prediction is:
+where the model $\hat{Y}(x)$ can be used to estimate $f$. The error in our prediction is:
 $$ (Y-\hat{Y}(x))^2$$
 
 Here, $X_i$, $Y_i$, $\hat{\theta}$, and $\hat{Y}(x)$ are random variables. An example prediction model $\hat{Y}(x)$ is shown below.
 
-$$\text{True relationship: } g(x)$$
+$$\text{True relationship: } f(x)$$
 
-$$\text{Observed relationship: }Y = g(x) + \epsilon$$
+$$\text{Observed relationship: }Y = f(x) + \epsilon$$
 
 $$\text{Prediction: }\hat{Y}(x) = \hat{f}(x)$$
 
@@ -159,15 +159,15 @@ When building models, it is also important to note that our choice of features w
 :width: 400
 ```
 
-Overall, we fit (train) a model based on our **sample of (x,y) pairs**, and our model **estimates** the true relationship $Y=g(x)+\epsilon$, where at every $x$, our **prediction** for $Y$ is $\hat{Y}(x) = \hat{f}(x)$.
+Overall, we fit (train) a model based on our **sample of (x,y) pairs**, and our model **estimates** the true relationship $Y=f(x)+\epsilon$, where at every $x$, our **prediction** for $Y$ is $\hat{Y}(x) = \hat{f}(x)$.
 
 <!-- #### Estimating a Linear Relationship
-If we assume that the true relationship $g$ is linear, we can express the response as $Y = f_{\theta}(x)$, where our true relationship is modeled by 
-$$Y = g(x) + \epsilon$$
+If we assume that the true relationship $f$ is linear, we can express the response as $Y = f_{\theta}(x)$, where our true relationship is modeled by 
+$$Y = f(x) + \epsilon$$
 $$ f_{\theta}(x) = Y = \theta_0 + \sum_{j=1}^p \theta_j x_j + \epsilon$$
 
 ::: {warning} Which expressions are random? 
-In our two equations above, the true relationship $g(x) = \theta_0 + \sum_{j=1}^p \theta_j x_j$ is not random, but $\epsilon$ is random. Hence, $Y = f_{\theta}(x)$ is also random. 
+In our two equations above, the true relationship $f(x) = \theta_0 + \sum_{j=1}^p \theta_j x_j$ is not random, but $\epsilon$ is random. Hence, $Y = f_{\theta}(x)$ is also random. 
 :::
 
 This true relationship has true, unobservable parameters $\theta$, and it has random noise $\epsilon$, so we can never observe the true relationship. Instead, the next best thing we can do is obtain a sample $\Bbb{X}$, $\Bbb{Y}$ of $n$ observed relationships, $(x, Y)$ and use it to train a model and obtain an estimate of $\hat{\theta}$
@@ -177,7 +177,7 @@ $$\hat{Y}(x) = \hat{f}(x) = \hat{\theta_0} + \sum_{j=1}^p \hat{\theta_j} x_j$$
 In our estimating equation above, our sample $\Bbb{X}$, $\Bbb{Y}$ are random (often due to human error). Hence, the estimates we calculate from our samples $\hat{\theta}$ are also random, so our predictor $\hat{Y}(x)$ is also random. 
 :::
 
-Now taking a look at our original equations, we can see that they both have differing sources of randomness. For our observed relationship, $Y = g(x) + \epsilon$, $\epsilon$ represents errors which occur during or after the observation or measurement process. For the estimation model, the data we have is a random sample collected from the population, which was constructed from decisions made before the measurement process. -->
+Now taking a look at our original equations, we can see that they both have differing sources of randomness. For our observed relationship, $Y = f(x) + \epsilon$, $\epsilon$ represents errors which occur during or after the observation or measurement process. For the estimation model, the data we have is a random sample collected from the population, which was constructed from decisions made before the measurement process. -->
 
 ### Model Complexity
 
@@ -204,24 +204,24 @@ The bias and variance of a model (covered in detail in the next section) is larg
 
 Recall the model and the data we generated from that model in the last section:
 
-$$\text{True relationship: } g(x)$$
+$$\text{True relationship: } f(x)$$
 
-$$\text{Observed relationship: }Y = g(x) + \epsilon$$
+$$\text{Observed relationship: }Y = f(x) + \epsilon$$
 
 $$\text{Prediction: }\hat{Y}(x) = \hat{f}(x)$$
 
 Just like an estimator, we can evaluate a **model's quality** by considering its behavior across different training datasetes (i.e., parallel sampling universes):
 
-* **Model bias**: How close is our fitted model to $g$, on average?
+* **Model bias**: How close is our fitted model to $f$, on average?
 
 \begin{align*}
-\text{Bias}(f(x)) = \mathbb{E}[f(x)] - g(x)
+\text{Bias}(\hat{f}(x)) = \mathbb{E}[\hat{f}(x)] - f(x)
 \end{align*}
 
 * **Model variance**: How much does our fitted model vary across random samples?
 
 \begin{align*}
-\text{Var}(f(x)) = \mathbb{E}[f(x)- \mathbb{E}[f(x)]^2]
+\text{Var}(\hat{f}(x)) = \mathbb{E}[(\hat{f}(x)- \mathbb{E}[\hat{f}(x)])^2]
 \end{align*}
 
 * **Model risk (MSE)**: What's the typical squared error between our model's predictions and the actual outcomes?
@@ -242,10 +242,10 @@ Just like an estimator, we can evaluate a **model's quality** by considering its
 ::: {note} Simplifying $\text{Var}(Y - \hat{Y})$
 
 \begin{align*}
-\text{Var}(Y - \hat{Y}) & = \text{Var} \left( g(\vec{X}) + \epsilon - f(\vec{X}) \right) \\
-& = \text{Var} \left(\epsilon - f(\vec{X}) \right) \\
-& = \text{Var} (\epsilon) + \text{Var} \left(f(\vec{X}) \right) \\
-& = \sigma^2 + \text{Var} \left(f(\vec{X}) \right)
+\text{Var}(Y - \hat{Y}) & = \text{Var} \left( f(\vec{X}) + \epsilon - \hat{f}(\vec{X}) \right) \\
+& = \text{Var} \left(\epsilon - \hat{f}(\vec{X}) \right) \\
+& = \text{Var} (\epsilon) + \text{Var} \left(\hat{f}(\vec{X}) \right) \\
+& = \sigma^2 + \text{Var} \left(\hat{f}(\vec{X}) \right)
 \end{align*}
 
 :::
@@ -254,10 +254,10 @@ Just like an estimator, we can evaluate a **model's quality** by considering its
 
 \begin{align*}
 (\mathbb{E}[Y - \hat{Y}])^2 &= (\mathbb{E}[Y] - \mathbb{E}[\hat{Y}])^2\\
-&= (\mathbb{E}[g(\vec{X}) + \epsilon] - \mathbb{E}[f(\vec{X})])^2\\
-&= (\mathbb{E}[g(\vec{X})] + \mathbb{E}[\epsilon] - \mathbb{E}[f(\vec{X})])^2\\
-&= (g(X) + 0 - \mathbb{E}[f(\vec{X})])^2\\
-&= \text{Bias}(f(\vec{X}))^2
+&= (\mathbb{E}[f(\vec{X}) + \epsilon] - \mathbb{E}[\hat{f}(\vec{X})])^2\\
+&= (\mathbb{E}[f(\vec{X})] + \mathbb{E}[\epsilon] - \mathbb{E}[\hat{f}(\vec{X})])^2\\
+&= (f(X) + 0 - \mathbb{E}[\hat{f}(\vec{X})])^2\\
+&= \text{Bias}(\hat{f}(\vec{X}))^2
 \end{align*}
 
 :::
@@ -265,7 +265,7 @@ Just like an estimator, we can evaluate a **model's quality** by considering its
 Therefore, we get:
 
 \begin{align*}
-\mathbb{E}[(Y - \hat{Y})^2] &= \sigma ^ 2 + \text{Var}(f(\vec{X})) + \text{Bias}(f(\vec{X}))^2
+\mathbb{E}[(Y - \hat{Y})^2] &= \sigma ^ 2 + \text{Var}(\hat{f}(\vec{X})) + \text{Bias}(\hat{f}(\vec{X}))^2
 \end{align*}
 
 ### The Bias-Variance Decomposition
@@ -273,7 +273,7 @@ Therefore, we get:
 In the previous section we derived the following:
 
 \begin{align*}
-\mathbb{E}[(Y - \hat{Y})^2] &= \sigma ^ 2 + \text{Var}(f(\vec{X})) + \text{Bias}(f(\vec{X}))^2
+\mathbb{E}[(Y - \hat{Y})^2] &= \sigma ^ 2 + \text{Var}(\hat{f}(\vec{X})) + \text{Bias}(\hat{f}(\vec{X}))^2
 \end{align*}
 
 The above equation can be interpreted as:
