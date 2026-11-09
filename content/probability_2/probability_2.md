@@ -2,14 +2,10 @@
 title: Estimators, Bias, and Variance
 ---
 
-::: {note} Under Construction
-This section is a work in progress!
-:::
-
 ::: {note} Learning Outcomes
 * Understand why a sample statistic is an estimator of the true population parameter
 * Understand the impact of model complexity on the tradeoff between bias and variance
-* Derive the bias-variance decomposition and differentiate model risk, observation bias, model variance, and model bias
+* Derive the bias-variance decomposition and differentiate model risk, observation variance (noise), model variance, and model bias
 :::
 
 Last time, we introduced the idea of random variables: numerical functions of a sample. Most of our work in the last lecture was done to build a background in probability and statistics. Now that we've established some key ideas, we're in a good place to apply what we've learned to our original goal -- understanding how the randomness of a sample impacts the model design process. 
@@ -108,7 +104,7 @@ To address our inference question, we aim to construct estimators that closely e
 
 If the Bias of an estimator $\hat{\theta}$ is **zero**, then it is said to be an **unbiased estimator**. For example, sample mean is unbiased for the population mean.
 
-This relationship between bias and variance can be illustrated with an archery analogy. Imagine that the center of the target is the $\theta$ and each arrow corresponds to a separate parameter estimate $\hat{\theta}$
+This relationship between bias and variance can be illustrated with an archery analogy. Imagine that the center of the target is the $\theta$ and each arrow corresponds to a separate parameter estimate $\hat{\theta}$.
 
 ```{image} images/bias_v_variance.png
 :width: 600
@@ -123,7 +119,7 @@ Now that we've established the idea of an estimator, let's see how we can apply 
 
 Say we are working with an input variable, $x$, and a response variable, $Y$. We assume that $Y$ and $x$ are linked by some relationship $f$; in other words, $Y = f(x)$ where $f$ represents some "universal truth" or "law of nature" that defines the **true underlying relationship** between $x$ and $Y$. In the image below, $f$ is denoted by the red line.
 
-As data scientists, however, we have no way of directly "seeing" the underlying relationship $f$. The best we can do is collect observed data out in the real world to try to understand this relationship. Unfortunately, the data collection process will always have some inherent error (think of the randomness you might encounter when taking measurements in a scientific experiment). We say that each observation comes with some **random error or noise** term, $\epsilon$ (read: "epsilon"). This error is assumed to be a random variable with expectation $\mathbb{E}(\epsilon)=0$, variance $\text{Var}(\epsilon) = \sigma^2$, and be i.i.d. across observations. The existence of this random noise means that our observations, $Y(x)$, are *random variables*, where $Y = f(x) + \epsilon$ is the data-generating process. This can be seen on our graph because the points do not line perfectly with the true underlying relationship, and the residual is the noise $\epsilon$.
+As data scientists, however, we have no way of directly "seeing" the underlying relationship $f$. The best we can do is collect observed data out in the real world to try to understand this relationship. Unfortunately, the data collection process will always have some inherent error (think of the randomness you might encounter when taking measurements in a scientific experiment). We say that each observation comes with some **random error or noise** term, $\epsilon$ (read: "epsilon"). This error is assumed to be a random variable with expectation $\mathbb{E}(\epsilon)=0$, variance $\text{Var}(\epsilon) = \sigma^2$, and be i.i.d. across observations. The existence of this random noise means that our observations, $Y(x)$, are *random variables*, where $Y = f(x) + \epsilon$ is the data-generating process. This can be seen on our graph because the points do not align perfectly with the true underlying relationship, and the residual is the noise $\epsilon$.
 
 ```{image} images/data.png
 :alt: Two graphs are shown. On the left is the underlying data generation process with g shown in addition to the datapoints. On the right is what we see with only the datapoints shown.
@@ -210,7 +206,7 @@ $$\text{Observed relationship: }Y = f(x) + \epsilon$$
 
 $$\text{Prediction: }\hat{Y}(x) = \hat{f}(x)$$
 
-Just like an estimator, we can evaluate a **model's quality** by considering its behavior across different training datasetes (i.e., parallel sampling universes):
+Just like an estimator, we can evaluate a **model's quality** by considering its behavior across different training datasets (i.e., parallel sampling universes):
 
 * **Model bias**: How close is our fitted model to $f$, on average?
 
