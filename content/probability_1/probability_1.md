@@ -158,7 +158,7 @@ These common distributions are listed below:
 
 1. **Bernoulli**($p$): If $X$ ~ Bernoulli($p$), then $X$ takes on a value 1 with probability $p$, and 0 with probability $1 - p$. Bernoulli random variables are also termed the **"indicator" random variables**.
 2. **Binomial**($n$, $p$): If $X$ ~ Binomial($n$, $p$), then $X$ counts the number of 1s in $n$ independent Bernoulli($p$) trials.
-3. **Categorical**($p_1, ..., p_k$) of values: The probability of each value is 1 / (number of possible values).
+3. **Categorical**($p_1, ..., p_k$): $k$ categories where each category $i$ has the probability $p_{i}$.
 
 **Continuous:**
 
