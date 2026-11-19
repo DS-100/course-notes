@@ -93,7 +93,8 @@ The most popular clustering approach is K-Means. The algorithm itself entails th
 1. Pick an arbitrary $k$, and randomly place $k$ "centers", each a different color.
 2. Repeat until convergence:
 
-    a. Color points according to the closest center (also called **centroids**).
+    a. Color points according to the closest center (also called **centroids**). 
+    
     b. Move the center for each color to the center of points with that color.
     
 Consider the following data with an arbitrary $k = 2$ and **randomly** placed "centers" denoted by the different colors (blue, orange):
@@ -145,8 +146,8 @@ The two common loss functions are:
 
 In the example above: 
 
-* Calculated inertia: $0.47^2 + 0.19^2 + 0.34^2 + 0.25^2 + 0.58^2 + 0.36^2 + 0.44^2$
-* Calculated distortion: $\frac{0.47^2 + 0.19^2 + 0.34^2}{3} + \frac{0.25^2 + 0.58^2 + 0.36^2 + 0.44^2}{4}$
+* Calculated inertia: $0.47^2 + 0.19^2 + 0.34^2 + 0.25^2 + 0.58^2 + 0.36^2 + 0.44^2 \approx 1.095$ 
+* Calculated distortion: $\frac{0.47^2 + 0.19^2 + 0.34^2}{3} + \frac{0.25^2 + 0.58^2 + 0.36^2 + 0.44^2}{4} \approx 0.305$
 
 Switching back to the four-cluster example at the beginning of this section, `random.seed(25)` had an inertia of `44.88`, `random.seed(29)` had an inertia of `45.87`, and `random.seed(40)` had an inertia of `54.27`. It seems that the best clustering output was `random.seed(25)` with an inertia of `44.88`!
 
@@ -288,7 +289,7 @@ In this example, the horizontal line crosses four vertical lines, so the optimal
 ### Silhouette Scores
 
 To evaluate how “well-clustered” a specific data point is, we can use the **silhouette score**, also termed the **silhouette width**.
-A high silhouette score indicates that a point is near the other points in its cluster and far from points not in its cluster; a low score means that it's far from the other points in its cluster and near points in other clusters.
+A high silhouette score indicates that a point is *near* the other points in its cluster and *far* from points not in its cluster; a low score means that it's *far* from the other points in its cluster and *near* points in other clusters.
 
 ![The samme clustering scatterplot is shown again with a high score point and a low score point annotated.](images/high_low.png) 
 
