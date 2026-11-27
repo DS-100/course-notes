@@ -164,7 +164,7 @@ Notice then that choosing k = n will always minimize inertia, but a clustering w
 
 ### Hardness of K-Means
 
-It turns out that the function K-Means is trying to minimize is **inertia**, but often fails to find global optimum. Why does this happen? We can think of K-means as a pair of optimizers that take turns. The first optimizer holds *center positions* constant and optimizes *data colors*. The second optimizer holds *data colors* constant and optimizes *center positions*. Neither optimizer gets full control!
+It turns out that the function K-Means is trying to minimize is **inertia**, but often fails to find a global optimum. Why does this happen? We can think of K-means as a pair of optimizers that take turns. The first optimizer holds *center positions* constant and optimizes *data colors*. The second optimizer holds *data colors* constant and optimizes *center positions*. Neither optimizer gets full control!
 
 This is a hard problem: give an algorithm that optimizes inertia FOR A GIVEN $K$; $K$ is picked in advance. Your algorithm should return the EXACT best centers and colors, but you don't need to worry about runtime.
 
